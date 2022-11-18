@@ -42,6 +42,44 @@ class TestAnalysisMethods(unittest.TestCase):
         #print(np.array_equal(ground_truth, min_subtracted_array))
         self.assertEqual(np.array_equal(ground_truth, min_subtracted_array), True)
 
+    def test_normalize_median_log(self):
+
+        #Marker for first region
+        #Medians of log2 (1+x)  = 2, 5
+        df1 = pd.DataFrame({
+            'marker1': [1, 3, 7],
+            'marker2': [15, 31, 63],
+            'region': "reg1"
+
+        })
+
+        #Median of log2 (1+x) = 5, 8
+        df2 = pd.DataFrame({
+            'marker1': [15, 31, 63],
+            'marker2': [127, 255, 511],
+            'region': "reg2"
+        })
+
+        #Global medians of log2 (1+x) = 3.5, 6.5
+
+        adata1 = ingest_cells(df1, "marker*", region = "region")
+        adata2 = ingest_cells(df2, "marker*", region = "region")
+
+        all_adata = concatinate_regions([adata1, adata2])
+
+        median_normalized_layer = "median_normalization"
+        normalize(all_adata, median_normalized_layer, "median", log=True)
+
+        ground_truth = np.array([[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], \
+            [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]).transpose()
+
+        normalized_array = all_adata.to_df(layer=median_normalized_layer).to_numpy()
+        #print(normalized_array)
+        #print(ground_truth)
+        self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
+
+
+
 
     def test_normalize_median(self):
 
