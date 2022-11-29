@@ -79,8 +79,6 @@ class TestAnalysisMethods(unittest.TestCase):
         self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
 
 
-
-
     def test_normalize_median(self):
 
         #Marker for first region

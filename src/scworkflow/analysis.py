@@ -7,30 +7,36 @@ from scworkflow.normalization import subtract_min_quantile
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
     """
-    Read the csv file into an anndata object. Intializes intensities and spatial coordiantes
-    
-    @param dataframe <pandas.DataFrame>
+    Read the csv file into an anndata object. 
+
+    The function will also intialize intensities and spatial coordiantes. 
+   
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame
         The data frame that contains cells as rows, and cells informations as columns
         
-    @param regex_str <str>
-        A python regular expression for the intensities columns in the data frame
+    regex_str : str
+        A string representing python regular expression for the intensities columns in the data frame
         
-    @param x_col <str>
+    x_col : str
         The column name for the x coordinate of the cell
         
-    @param y_col <str>
+    y_col : str
         The column name for the y coordinate of the cell
         
-    @param region <str>
+    region : str
         The column name for the region that the cells
-        
-    @return adata <AnnData>
+       
+    Returns
+    -------
+    anndata.AnnData
         The generated AnnData object
     """
-    
     intensities_regex = re.compile(regex_str)
     all_intensities = list(filter(intensities_regex.match, list(dataframe.columns))) 
    
@@ -50,43 +56,51 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
 
 def concatinate_regions(regions):
     """
-    Concatinate data from multiple regions and create new indexes 
+    Concatinate data from multiple regions and create new indexes.
 
-    @param regions list<anndata>
-        list of multiple anndata objects
+    Parameters
+    ----------
+    regions : list of anndata.AnnData 
+        AnnData objects to be concatinated.
 
-    returns:
-        anndata with that includes all regions
+    Returns
+    -------
+    anndata.AnnData  
+        New AnddData object with the concatinated values in AnnData.X 
+
     """
-   
     all_adata = ad.concat(regions)
     all_adata.obs_names_make_unique()
     return all_adata
 
 def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
     """
-    Clip intensities outside the minimum and maximum quantile and rescale them between 0 and 1
-    
-    @param intensities dataframe
-        The dataframe of intensities
+    Clip and rescale intensities outside the minimum and maximum quantile. 
+
+    The rescaled intensities will be between 0 and 1.
+   
+    Parameters
+    ----------
+    intensities : pandas.Dataframe
+        The DataRrame of intensities.
         
     
-    min_quantile: float
-        The minimum quantile to be consider zero
+    min_quantile : float
+        The minimum quantile to be consider zero.
     
-    max_qunatile: float
-        The maximum quantile to be considerd 1
+    max_quantile: float
+        The maximum quantile to be considerd 1.
         
-    returns: 
-        dataframe with normalized intensities
+    Returns 
+    -------
+    pandas.DataFrame    
+        The created DataFrame with normalized intensities.
     """
-    
     markers_max_quantile = intensities.quantile(max_quantile)
     markers_min_quantile = intensities.quantile(min_quantile)
     
     intensities_clipped = intensities.clip(markers_min_quantile, markers_max_quantile, axis=1)
     
-    from sklearn.preprocessing import MinMaxScaler
     
     scaler = MinMaxScaler()
     np_intensities_scaled = scaler.fit_transform(intensities_clipped.to_numpy())
@@ -95,18 +109,23 @@ def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
 
 def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     """
-    Clips and rescales the intensities matrix and add the results into a new layer in the AnnData object
-    @param adata <AnnData>
-         The AnnData object
+    Clip and rescale the intensities matrix. 
+
+    The results will be added into a new layer in the AnnData object.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+         The AnnData object.
     
-    @param min_quantile <float>
-        The minimum quantile to rescale to zero
+    min_quantile : float
+        The minimum quantile to rescale to zero.
         
-    @param max_quantime <float>
-        The maximum quantile to rescale to one
+    max_quantile : float
+        The maximum quantile to rescale to one.
         
-    @param layer <str>
-        The name of the new layer to add to the anndata object
+    layer : str
+        The name of the new layer to add to the anndata object.
     """
     
     original = adata.to_df()
@@ -116,18 +135,32 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
 
 def pheongraph_clustering(adata, features, layer, k=30):
     """
-    Calculates automatic phenotypes using phenograph
-    @param adata <AnnData>
-       The AnnData object
+    Calculate automatic phenotypes using phenograph.
+
+    The function will add these two attributes to `adata`:
+    `.obs["phenograph"]`
+        The assigned int64 class by phenograph 
+
+    `.uns["phenograph_features"]`
+        The features used to calculate the phenograph clusters
+
+
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+       The AnnData object.
     
-    @param features <list[str]>
-        The variables that would be included in creating the phenograph clusters
+    features : list of str 
+        The variables that would be included in creating the phenograph
+        clusters.
         
-    @param layer <str>
-        The layer to be used in calculating the phengraph clusters
+    layer : str
+        The layer to be used in calculating the phengraph clusters.
     
-    @param k <int>
+    k : int
         The number of nearest neighbor to be used in creating the graph.
+
     """
     phenograph_df = adata.to_df(layer=layer)[features]
     phenograph_out = sce.tl.phenograph(phenograph_df, clustering_algo="louvain", k=k)
@@ -136,16 +169,18 @@ def pheongraph_clustering(adata, features, layer, k=30):
 
 def tsne(adata, layer=None):
     """
-    Calculate t-SNE from a specific layer information
-    @param adata <AnnData>
-       The AnnData object
-  
-    @param layer <str>
-        The layer to be used in calculating the phengraph clusters
-    """
+    Plot t-SNE from a specific layer information.
 
-    #As scanpy.tl.tsne works on either X, obsm, or PCA, then I will copy the layer data to an obsm if
-    #it is not the default X
+    Parameters
+    ----------
+    adata : anndatra.AnnData
+       The AnnData object.
+  
+    layer : str
+        The layer to be used in calculating the phengraph clusters.
+    """
+    #As scanpy.tl.tsne works on either X, obsm, or PCA, then I will copy the
+    #layer data to an obsm if it is not the default X
     if layer != None:
         X_tsne = adata.to_df(layer=layer)
         tsne_obsm_name = layer + "_tsne" 
@@ -158,18 +193,19 @@ def tsne(adata, layer=None):
 
 def subtract_min_per_region(adata, layer, min_quantile=0.01):
     """
-    Substract the minimum quantile of every marker per region
+    Substract the minimum quantile of every marker per region.
 
-    @param adata <AnnData>
-         The AnnData object
+    Parameters
+    ----------
+    adata : anndata.AnnData
+         The AnnData object.
     
-    @param min_quantile <float>
-        The minimum quantile to rescale to zero
+    min_quantile : float
+        The minimum quantile to rescale to zero.
         
-    @param layer <str>
-        The name of the new layer to add to the anndata object
+    layer : str
+        The name of the new layer to add to the AnnData object.
     """
-
     regions = adata.obs['region'].unique().tolist()
     original = adata.to_df()
 
@@ -187,23 +223,28 @@ def subtract_min_per_region(adata, layer, min_quantile=0.01):
 
 def normalize(adata, layer, method="median", log=False):
     """
-    Adjust the intensity of every marker using some normalization method defined here:
-    https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
-
-    @param adata <AnnData>
-         The AnnData object
+    Adjust the intensity of every marker using a normalization method. 
     
-    @param layer <str>
-        The name of the new layer to add to the anndata object
+    The normalization methods are summarized here: 
+    https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
+    Adds the normalized values in
+    `.layers[`layer`]`
 
-    @param method <str> 
-        The normlalization method to use: "median", "Q50", "Q75" 
+    Parameters
+    ----------
+    adata : anndata.AnnData
+         The AnnData object.
+    
+    layer : str
+        The name of the new layer to add to the anndata object.
 
-    @param log <bool> 
-        Either to take the log2 of intensities before normalization or not. Default False
+    method : {"median", "Q50", "Q75}
+        The normlalization method to use.
+
+    log : bool, default False  
+        If True, take the log2 of intensities before normalization. 
 
     """
-
     allowed_methods = ["median", "Q50", "Q75"]
     regions = adata.obs['region'].unique().tolist()
     original = adata.to_df()
@@ -246,26 +287,33 @@ def normalize(adata, layer, method="median", log=False):
 
 def histogram(adata, column, group_by=None, together=False, **kwargs):
     """
-    Plot the histogram of cells based specific column 
-    @param adata <AnnData>
-         The AnnData object
+    Plot the histogram of cells based specific column.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+         The AnnData object.
     
-    @param column <str> 
+    column : str 
         Name of member of adata.obs to plot the histogram.
 
-    @param group_by <str>
-        Choose either to group the histogram by another column 
+    group_by : str, default None
+        Choose either to group the histogram by another column.
 
-    @param density <bool> 
-        If True, divide every histogram by the number of elements  
-
-    @param together <bool> 
+    together : bool, default False
         If True, and if group_by !=None  create one plot for all groups.
-        Otherwise, divide every histogram by the number of elements. Default: False
+        Otherwise, divide every histogram by the number of elements. 
 
-    returns:
-        ax, fig The axis and the figure that got created 
+    **kwargs
+        Parameters passed to matplotlib hist function.
 
+    Returns
+    -------
+    ax : matplotlib.axes.Axes 
+        The axes of the histogram plot. 
+
+    fig : matplotlib.figure.Figure  
+        The created figure for the plot.
 
     """
     n_bins = len(adata.obs[column].unique()) - 1
