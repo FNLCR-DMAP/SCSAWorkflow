@@ -11,7 +11,8 @@ from sklearn.preprocessing import MinMaxScaler
 import seaborn
 
 
-def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
+def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
+
     """
     Read the csv file into an anndata object.
 
@@ -25,16 +26,17 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
 
     regex_str : str
         A string representing python regular expression for the intensities
-        columns in the data frame
-
+        columns in the data frame. 
     x_col : str
         The column name for the x coordinate of the cell
 
     y_col : str
         The column name for the y coordinate of the cell
 
-    region : str
-        The column name for the region that the cells
+    obs : str or list of str
+        The column name for the re gion that the cells. If a list is passed,
+        multiple observations will be created in the returned AnnData object.
+
 
     Returns
     -------
@@ -50,10 +52,17 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
         intensities_df,
         dtype=intensities_df[all_intensities[0]].dtype)
 
-    if region is not None:
-        # As selecting one column of the dataframe returns a series which
-        # AnnData converts to NaN, then I convert it to list before assignment
-        adata.obs["region"] = dataframe[region].tolist()
+    if obs is not None:
+        if isinstance(obs, str):
+            list_of_obs = [obs]
+        else:
+            list_of_obs = obs 
+
+        for observation in list_of_obs:
+
+            # As selecting one column of the dataframe returns a series which
+            # AnnData converts to NaN, then I convert it to list before assignment
+            adata.obs[observation] = dataframe[observation].tolist()
 
     if x_col is not None and y_col is not None:
         numpy_array = dataframe[[x_col, y_col]].to_numpy().astype('float32')
@@ -211,7 +220,7 @@ def tsne(adata, layer=None):
     sc.tl.tsne(adata, use_rep=tsne_obsm_name, random_state=7)
 
 
-def subtract_min_per_region(adata, layer, min_quantile=0.01):
+def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     """
     Substract the minimum quantile of every marker per region.
 
@@ -220,18 +229,21 @@ def subtract_min_per_region(adata, layer, min_quantile=0.01):
     adata : anndata.AnnData
          The AnnData object.
 
+    obs: str
+        The name of the observation in `adata` to define batches.
+
     min_quantile : float
         The minimum quantile to rescale to zero.
 
     layer : str
         The name of the new layer to add to the AnnData object.
     """
-    regions = adata.obs['region'].unique().tolist()
+    regions = adata.obs[obs].unique().tolist()
     original = adata.to_df()
 
     new_df_list = []
     for region in regions:
-        region_cells = original[adata.obs['region'] == region]
+        region_cells = original[adata.obs[obs] == region]
         new_intensities = subtract_min_quantile(region_cells, min_quantile)
         new_df_list.append(new_intensities)
 
@@ -239,7 +251,7 @@ def subtract_min_per_region(adata, layer, min_quantile=0.01):
     adata.layers[layer] = new_df
 
 
-def normalize(adata, layer, method="median", log=False):
+def normalize(adata, obs, layer, method="median", log=False):
     """
     Adjust the intensity of every marker using a normalization method.
 
@@ -253,6 +265,9 @@ def normalize(adata, layer, method="median", log=False):
     adata : anndata.AnnData
          The AnnData object.
 
+    obs: str
+        The name of the observation in `adata` to define batches.
+
     layer : str
         The name of the new layer to add to the anndata object.
 
@@ -264,7 +279,7 @@ def normalize(adata, layer, method="median", log=False):
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
-    regions = adata.obs['region'].unique().tolist()
+    regions = adata.obs[obs].unique().tolist()
     original = adata.to_df()
 
     if log:
@@ -282,7 +297,7 @@ def normalize(adata, layer, method="median", log=False):
     # Place holder for normalized dataframes per region
     new_df_list = []
     for region in regions:
-        region_cells = original[adata.obs['region'] == region]
+        region_cells = original[adata.obs[obs] == region]
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
