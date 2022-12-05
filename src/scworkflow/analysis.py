@@ -8,6 +8,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
+import seaborn
 
 
 def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, region=None):
@@ -358,7 +359,7 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
 
         if together:
             fig, ax = plt.subplots()
-            ax.hist(arrays, n_bins, label=labels,  **kwargs)
+            ax.hist(arrays, n_bins, label=labels, **kwargs)
             ax.legend(
                 prop={'size': 10},
                 bbox_to_anchor=(1.05, 1),
@@ -385,3 +386,60 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
         plt.hist(array, n_bins, label=column, **kwargs)
         ax.set_title(column)
         return ax, fig
+
+
+def heatmap(adata, column, layer=None, **kwargs):
+    """
+    Plot the heatmap of the mean intensity of cells that belong to a `column`.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+         The AnnData object.
+
+    column : str
+        Name of member of adata.obs to plot the histogram.
+
+    layer : str, default None
+        The name of the `adata` layer to use to calculate the mean intensity.
+
+    **kwargs:
+        Parameters passed to seaborn heatmap function.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A dataframe tha has the labels as indexes the mean intensity for every
+        marker.
+
+    matplotlib.figure.Figure
+        The figure of the heatmap.
+
+    matplotlib.axes._subplots.AxesSubplot
+        The AsxesSubplot of the heatmap.
+
+    """
+    intensities = adata.to_df(layer=layer)
+    labels = adata.obs[column]
+    grouped = pd.concat([intensities, labels], axis=1).groupby(column)
+    mean_intensity = grouped.mean()
+
+    n_rows = len(mean_intensity)
+    n_cols = len(mean_intensity.columns)
+    fig, ax = plt.subplots(figsize=(n_cols * 1.5, n_rows * 1.5))
+    seaborn.heatmap(
+        mean_intensity,
+        annot=True,
+        cmap="Blues",
+        square=True,
+        ax=ax,
+        fmt=".1f",
+        cbar_kws=dict(use_gridspec=False, location="top"),
+        linewidth=.5,
+        annot_kws={"fontsize": 20},
+        **kwargs)
+
+    ax.tick_params(axis='both', labelsize=25)
+    ax.set_ylabel(column, size=25)
+
+    return mean_intensity, fig, ax
