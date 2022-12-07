@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "scworkflow"
+version = "0.1.0"
+description = "A package for various single cell MxIF/CODEX analysis steps. "
+authors = ["George Zaki"]
+license = "BSD 3-Clause"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.7.13"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+sphinx-autoapi = "^2.0.0"
+sphinx-rtd-theme = "^1.1.1"
+myst-nb = {version = "^0.17.1", python = "~3.7.13"}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
