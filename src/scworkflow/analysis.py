@@ -22,16 +22,15 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     ----------
     dataframe : pandas.DataFrame
         The data frame that contains cells as rows, and cells informations as
-        columns
+        columns. 
 
-    regex_str : str
-        A string representing python regular expression for the intensities
-        columns in the data frame. 
-    x_col : str
-        The column name for the x coordinate of the cell
+    regex_str : str or list of str
+        A string or a list of strings representing python regular expression
+        for the intensities columns in the data frame.  x_col : str The column
+        name for the x coordinate of the cell.
 
     y_col : str
-        The column name for the y coordinate of the cell
+        The column name for the y coordinate of the cell.
 
     obs : str or list of str
         The column name for the re gion that the cells. If a list is passed,
@@ -43,9 +42,19 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     anndata.AnnData
         The generated AnnData object
     """
-    intensities_regex = re.compile(regex_str)
-    all_intensities = list(
-        filter(intensities_regex.match, list(dataframe.columns)))
+
+    if not isinstance(regex_str, list):
+        regex_list = [regex_str]
+    else:
+        regex_list = regex_str
+
+    all_intensities = []
+    all_columns = list(dataframe.columns)
+    for regex in regex_list:
+        intensities_regex = re.compile(regex)
+        intensities = list(
+            filter(intensities_regex.match, all_columns))
+        all_intensities.extend(intensities)
 
     intensities_df = dataframe[all_intensities]
     adata = ad.AnnData(
@@ -61,7 +70,8 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
         for observation in list_of_obs:
 
             # As selecting one column of the dataframe returns a series which
-            # AnnData converts to NaN, then I convert it to list before assignment
+            # AnnData converts to NaN, then I convert it to a list before
+            # assignment.
             adata.obs[observation] = dataframe[observation].tolist()
 
     if x_col is not None and y_col is not None:
@@ -157,7 +167,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     adata.layers[layer] = rescaled
 
 
-def pheongraph_clustering(adata, features, layer, k=30):
+def phenograph_clustering(adata, features, layer, k=30):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -451,7 +461,7 @@ def heatmap(adata, column, layer=None, **kwargs):
         fmt=".1f",
         cbar_kws=dict(use_gridspec=False, location="top"),
         linewidth=.5,
-        annot_kws={"fontsize": 20},
+        annot_kws={"fontsize": 10},
         **kwargs)
 
     ax.tick_params(axis='both', labelsize=25)
