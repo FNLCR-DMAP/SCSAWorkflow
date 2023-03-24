@@ -157,7 +157,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     adata.layers[layer] = rescaled
 
 
-def pheongraph_clustering(adata, features, layer, k=30):
+def phenograph_clustering(adata, features, layer, k=30):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -167,7 +167,6 @@ def pheongraph_clustering(adata, features, layer, k=30):
 
     `.uns["phenograph_features"]`
         The features used to calculate the phenograph clusters
-
 
 
     Parameters
@@ -192,7 +191,7 @@ def pheongraph_clustering(adata, features, layer, k=30):
         clustering_algo="louvain",
         k=k)
 
-    adata.obs["phenograph"] = phenograph_out[0].astype(np.int64)
+    adata.obs["phenograph"] = pd.Series(phenograph_out[0]).astype('category')
     adata.uns["phenograph_features"] = features
 
 
