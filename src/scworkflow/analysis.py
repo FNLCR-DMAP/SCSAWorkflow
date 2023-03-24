@@ -201,7 +201,7 @@ def phenograph_clustering(adata, features, layer, k=30):
         clustering_algo="louvain",
         k=k)
 
-    adata.obs["phenograph"] = pd.Series(phenograph_out[0]).astype('category')
+    adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
