@@ -65,6 +65,6 @@ def hierarchical_heatmap(adata, column, layer=None, dendrogram=True, standard_sc
 # An example to call this function:
 mean_intensity, matrixplot = hierarchical_heatmap(all_data, "phenograph", layer=None, standard_scale='var')
 
-# To display the figure, you can use the following line
+# Display the figure
 #matrixplot.show()
 """
