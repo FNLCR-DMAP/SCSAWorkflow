@@ -23,7 +23,7 @@ def hierarchical_heatmap(adata, column, layer=None, dendrogram=True, standard_sc
 
     Returns
     ----------
-    mean_intensity, matrixplot
+    mean_intensity, matrixplot, ax_dendrogram
     
     """
 
@@ -54,17 +54,26 @@ def hierarchical_heatmap(adata, column, layer=None, dendrogram=True, standard_sc
     # Create the matrix plot
     matrixplot = sc.pl.matrixplot(mean_intensity_adata,
                                   var_names=mean_intensity_adata.var_names,
-                                  groupby=column, use_raw=False,
-                                  dendrogram=dendrogram,
+                                  groupby=column, use_raw=False, dendrogram=dendrogram,
                                   standard_scale=standard_scale, cmap="viridis", return_fig=True, **kwargs)
 
-    return mean_intensity, matrixplot
+
+
+    # Create the dendrogram plot
+    fig, ax_dendrogram = plt.subplots()
+    sc.pl.dendrogram(mean_intensity_adata, groupby=column, ax=ax_dendrogram, show=None)
+
+    return mean_intensity, matrixplot, ax_dendrogram
 
 
 """
 # An example to call this function:
-mean_intensity, matrixplot = hierarchical_heatmap(all_data, "phenograph", layer=None, standard_scale='var')
+mean_intensity, matrixplot, ax_dendrogram = hierarchical_heatmap(all_data, "phenograph", layer=None, standard_scale='var')
 
-# Display the figure
-#matrixplot.show()
+# Display the matrix plot
+matrixplot.show()
+
+# Display the dendrogram
+ax_dendrogram.figure.show()
 """
+
