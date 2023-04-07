@@ -55,6 +55,7 @@ def hierarchical_heatmap(adata, column, layer=None, dendrogram=True, standard_sc
     matrixplot = sc.pl.matrixplot(mean_intensity_adata,
                                   var_names=mean_intensity_adata.var_names,
                                   groupby=column, use_raw=False,
+                                  dendrogram=dendrogram,
                                   standard_scale=standard_scale, cmap="viridis", return_fig=True, **kwargs)
 
     return mean_intensity, matrixplot
