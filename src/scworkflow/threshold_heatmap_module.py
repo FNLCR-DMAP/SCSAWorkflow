@@ -27,9 +27,10 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
 
     Returns
     -------
-    matplotlib.figure.Figure
-        A figure object representing the heatmap with discretized intensity values
-        (0, 1, or 2) for each marker, grouped by the specified phenotype.
+    Dictionary of :class:`~matplotlib.axes.Axes`
+        A dictionary contains the axes of figures generated in the scanpy heatmap function.
+        Consistent Key: 'heatmap_ax'
+        Potential Keys includes: 'groupby_ax', 'dendrogram_ax', and 'gene_groups_ax'.
         
     """
 
@@ -63,15 +64,16 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
     cmap = ListedColormap(colors)
 
     # Plot the heatmap using scanpy.pl.heatmap
-    sc.pl.heatmap(adata,
+    heatmap_plot = sc.pl.heatmap(adata,
                   var_names=intensity_df.columns,
                   groupby=phenotype,
                   use_raw=False,
                   layer='intensity',
                   cmap=cmap,
-                  swap_axes=True)
+                  swap_axes=True, 
+                  show=False)
 
-    return plt.gcf()
+    return heatmap_plot
 
 
 """
