@@ -14,25 +14,33 @@ import matplotlib.colors as mcolors
 from matplotlib.colors import ListedColormap
 import scanpy as sc
 import unittest
+from unittest.mock import MagicMock
 
 class TestThresholdHeatmap(unittest.TestCase):
 
     def setUp(self):
-        # Create a mock anndata object
-        self.adata = MagicMock()
-        self.adata.obs_names = ['cell1', 'cell2', 'cell3']
-        self.adata.obs = pd.DataFrame({'phenotype': ['A', 'B', 'A']}, index=self.adata.obs_names)
-        self.adata[:, 'marker1'].X = np.array([[0.1], [0.5], [1.0]])
-        self.adata[:, 'marker2'].X = np.array([[0.3], [0.7], [1.5]])
+        
+        self.obs_names = ['cell1', 'cell2', 'cell3']
+        self.obs = pd.DataFrame({'phenotype': ['A', 'B', 'A']}, index=self.obs_names)
+        self.X = np.array([[0.1, 0.3], [0.5, 0.7], [1.0, 1.5]])
+        self.var_names = ['marker1', 'marker2']
+        self.var = pd.DataFrame(index=self.var_names)
+
+        self.adata = anndata.AnnData(X=self.X, obs=self.obs, var=self.var)
+        self.adata.obs_names = self.obs_names
+        self.adata.var_names = self.var_names
+
         
         self.marker_cutoffs = {
             'marker1': (0.2, 0.8),
             'marker2': (0.4, 1.0),
         }
 
+
         self.phenotype = 'phenotype'
 
     def test_threshold_heatmap(self):
+        
         fig = threshold_heatmap(self.adata, self.marker_cutoffs, self.phenotype)
         
         # Check if the figure object is returned
