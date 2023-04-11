@@ -41,8 +41,16 @@ class TestThresholdHeatmap(unittest.TestCase):
 
     def test_threshold_heatmap(self):
         
-        fig = threshold_heatmap(self.adata, self.marker_cutoffs, self.phenotype)
+        ax_dict = threshold_heatmap(self.adata, self.marker_cutoffs, self.phenotype)
         
+        key_list = list(ax_dict.keys())
+
+        figure_list = []
+        for item in key_list:
+            figure_list.append(ax_dict[item])
+        
+        fig = figure_list[0].get_figure()
+
         # Check if the figure object is returned
         self.assertIsInstance(fig, plt.Figure)
 

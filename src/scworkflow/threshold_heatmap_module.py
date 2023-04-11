@@ -63,15 +63,16 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
     cmap = ListedColormap(colors)
 
     # Plot the heatmap using scanpy.pl.heatmap
-    sc.pl.heatmap(adata,
+    heatmap_plot = sc.pl.heatmap(adata,
                   var_names=intensity_df.columns,
                   groupby=phenotype,
                   use_raw=False,
                   layer='intensity',
                   cmap=cmap,
-                  swap_axes=True)
+                  swap_axes=True, 
+                  show=False)
 
-    return plt.gcf()
+    return heatmap_plot
 
 
 """
