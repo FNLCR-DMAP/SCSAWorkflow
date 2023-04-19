@@ -179,7 +179,6 @@ def phenograph_clustering(adata, features, layer, k=30):
         The features used to calculate the phenograph clusters
 
 
-
     Parameters
     ----------
     adata : anndata.AnnData
@@ -202,7 +201,7 @@ def phenograph_clustering(adata, features, layer, k=30):
         clustering_algo="louvain",
         k=k)
 
-    adata.obs["phenograph"] = phenograph_out[0].astype(np.int64)
+    adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
