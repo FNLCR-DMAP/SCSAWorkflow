@@ -15,6 +15,7 @@ python = "~3.7.13"
 sphinx-autoapi = "^2.0.0"
 sphinx-rtd-theme = "^1.1.1"
 myst-nb = {version = "^0.17.1", python = "~3.7.13"}
+pytest = "^7.2.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

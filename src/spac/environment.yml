@@ -4,12 +4,14 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.7
+  - python=3.7.13
+  - pip
   - mamba
   - matplotlib
   - squidpy
   - pandas
   - jupyter
+  - cookiecutter
   - pip:
     - phenograph==1.5.7
-prefix: /Users/zakigf/miniconda3/envs/scsaworkflow
+    - poetry
