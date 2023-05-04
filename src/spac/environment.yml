@@ -1,4 +1,4 @@
-name: scworkflow
+name: scsaworkflow
 channels:
   - ohsu-comp-bio
   - conda-forge

@@ -2,8 +2,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
-from scworkflow.analysis import subtract_min_per_region, ingest_cells, concatinate_regions, \
-    normalize
+from spac.data_utils import subtract_min_per_region, ingest_cells, concatinate_regions
+from spac.transformations import batch_normalize    
 import unittest
 import pandas as pd 
 import numpy as np
@@ -114,7 +114,7 @@ class TestAnalysisMethods(unittest.TestCase):
         #print(np.array_equal(ground_truth, min_subtracted_array))
         self.assertEqual(np.array_equal(ground_truth, min_subtracted_array), True)
 
-    def test_normalize_median_log(self):
+    def test_nbatch_normalize_median_log(self):
 
         batch = "region"
         #Marker for first region
@@ -141,7 +141,7 @@ class TestAnalysisMethods(unittest.TestCase):
         all_adata = concatinate_regions([adata1, adata2])
 
         median_normalized_layer = "median_normalization"
-        normalize(all_adata, batch, median_normalized_layer, "median", log=True)
+        batch_normalize(all_adata, batch, median_normalized_layer, "median", log=True)
 
         ground_truth = np.array([[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], \
             [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]).transpose()
@@ -152,7 +152,7 @@ class TestAnalysisMethods(unittest.TestCase):
         self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
 
 
-    def test_normalize_median(self):
+    def test_batch_normalize_median(self):
 
         batch = "region" 
         #Marker for first region
@@ -179,7 +179,7 @@ class TestAnalysisMethods(unittest.TestCase):
         all_adata = concatinate_regions([adata1, adata2])
 
         median_normalized_layer = "median_normalization"
-        normalize(all_adata, batch, median_normalized_layer, "median")
+        batch_normalize(all_adata, batch, median_normalized_layer, "median")
 
         ground_truth = np.array([[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], \
             [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]).transpose()
@@ -189,7 +189,7 @@ class TestAnalysisMethods(unittest.TestCase):
         #print(ground_truth)
         self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
 
-    def test_normalize_q50(self):
+    def test_batch_normalize_q50(self):
 
         batch = "region"
         #Marker for first region
@@ -216,7 +216,7 @@ class TestAnalysisMethods(unittest.TestCase):
         all_adata = concatinate_regions([adata1, adata2])
 
         median_normalized_layer = "q50_normalization"
-        normalize(all_adata, batch, median_normalized_layer, "Q50")
+        batch_normalize(all_adata, batch, median_normalized_layer, "Q50")
 
         ground_truth = np.array([[1.75, 3.5, 5.25, 2.8, 3.5, 4.2], \
             [5.2, 6.5, 7.8, 5.6875, 6.5, 7.3125]]).transpose()
@@ -227,7 +227,7 @@ class TestAnalysisMethods(unittest.TestCase):
         self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
 
 
-    def test_normalize_q75(self):
+    def test_batch_normalize_q75(self):
 
         batch = "region" 
         #Marker for first region
@@ -254,7 +254,7 @@ class TestAnalysisMethods(unittest.TestCase):
         all_adata = concatinate_regions([adata1, adata2])
 
         normalized_layer = "q75_normalization"
-        normalize(all_adata, batch, normalized_layer, "Q75")
+        batch_normalize(all_adata, batch, normalized_layer, "Q75")
 
         ground_truth = np.array([[1.857142, 3.714285, 2.6, 3.466666], \
             [4.2, 5.6, 4.565217, 5.47826]]).transpose()
