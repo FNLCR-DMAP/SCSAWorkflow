@@ -2,8 +2,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
-from scsaworkflow.data_utils import subtract_min_per_region, ingest_cells, concatinate_regions
-from scsaworkflow.transformations import batch_normalize    
+from spac.data_utils import subtract_min_per_region, ingest_cells, concatinate_regions
+from spac.transformations import batch_normalize    
 import unittest
 import pandas as pd 
 import numpy as np
