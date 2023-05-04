@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
-from scworkflow.rename_clustering import rename_clustering
+from scsaworkflow.transformations import rename_clustering
 import anndata
 import pandas as pd
 import numpy as np

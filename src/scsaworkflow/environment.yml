@@ -1,4 +1,4 @@
-name: scworkflow
+name: scsaworkflow
 channels:
   - ohsu-comp-bio
   - conda-forge
@@ -12,4 +12,4 @@ dependencies:
   - jupyter
   - pip:
     - phenograph==1.5.7
-prefix: /Users/zakigf/miniconda3/envs/scworkflow
+prefix: /Users/zakigf/miniconda3/envs/scsaworkflow

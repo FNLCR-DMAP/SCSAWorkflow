@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
-from scworkflow.threshold_heatmap_module import threshold_heatmap
+from scsaworkflow.visualization import threshold_heatmap
 import pandas as pd
 import numpy as np
 import anndata
