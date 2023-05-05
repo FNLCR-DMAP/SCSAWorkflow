@@ -12,5 +12,4 @@ on:
 jobs:
   Activating_Parser:
     uses: fnlcr-bids-sdsi/gitflow-R/.github/workflows/parser.yml@single-cell-analysis
-    with:
-      image_to_use: "ghcr.io/ruiheesi/pyscworkflow:latest"
+
