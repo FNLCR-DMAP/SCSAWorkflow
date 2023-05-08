@@ -222,8 +222,9 @@ def subtract_min_quantile(intensities, min_quantile=.01):
 
     return subtracted_min
 
-def combine_csvs(file_names, observations, nidap = False, nidap_filesystem = None):
 
+def load_csv_files(file_names):
+    
     """
     Read the csv file into an anndata object.
 
@@ -231,20 +232,106 @@ def combine_csvs(file_names, observations, nidap = False, nidap_filesystem = Non
 
     Parameters
     ----------
-    file_names : list
-        A list of the path of the csvs files to be combined
+    file_names : str or list
+        A list of csv file paths dataframe to be combined into single dataframe output
+
+    Returns
+    -------
+    list
+        A list of pandas data frame of all the csv files.
+    """
+
+    meta_schema=[]
+    dataframe_list = []
+
+    if not isinstance(file_names, list):
+        if not isinstance(file_names, str):
+            file_name_type = type(file_names)
+            error_message = "file_names should be list or string" + \
+                            ", but got " + str(file_name_type) + "."
+            raise TypeError(error_message)
+        else:
+            file_names = [file_names]
+
+    for file_name in file_names:
+
+        # Check if the file exists
+        if not os.path.exists(file_name):
+            error_message = f"The file '{file_name}' does not exist."
+            raise FileNotFoundError(error_message)
+
+        # Try to load the csv into pandas DataFrame.
+        # Check if the file exists
+        if not os.path.exists(file_name):
+            error_message = f"The file '{file_name}' does not exist."
+            raise FileNotFoundError(error_message)
+
+        # Check if the file is readable
+        if not os.access(file_name, os.R_OK):
+            error_message = "The file " + file_name + \
+                    " cannot be read due to insufficient permissions."
+            raise PermissionError(error_message)
+
+        try:
+            current_df = pd.read_csv(file_name)
+        except pd.errors.EmptyDataError:
+            error_message = "The file is empty or does not contain any data."
+            raise TypeError(error_message)
+        except pd.errors.ParserError:
+            error_message = "The file could not be parsed. " + \
+                            "Please check that the file is a valid CSV."
+            raise TypeError(error_message)
+
+        current_schema = current_df.columns.to_list()
+
+        if len(meta_schema) == 0:
+            meta_schema = current_schema
+            print("Meta schema acquired. Columns are:")
+            for column_name in meta_schema:
+                print(column_name)
+        
+        if len(meta_schema) == len(current_schema):
+            if set(meta_schema) != set(current_schema):
+                error_message = "Column in current file does not match " + \
+                        f"the meta_schema, got:\n {current_schema}. "
+                raise ValueError(error_message)
+        else:
+            error_message = "Column in current file does not match " + \
+                        f"the meta_schema, got:\n {current_schema}. "
+            raise ValueError(error_message)
+        
+
+
+        dataframe_list.append([file_name, current_df])
+       
+    print("CSVs are converted into dataframes and combined into a list!")
+    print("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
+    for each_file in dataframe_list:
+        print("File name: ", each_file[0])
+        print("Info: ")
+        print(each_file[1].info())
+        print("Description: ")
+        print(each_file[1].describe())
+        print()
+
+    return(dataframe_list)
+
+def combine_dfs(dataframes, observations):
+
+    """
+    Read the csv file into single pandas dataframe.
+
+    The function will also intialize intensities and spatial coordiantes.
+
+    Parameters
+    ----------
+    dataframes : list
+        A list containing [file name, pandas dataframe] to be combined 
+        into single dataframe output
 
     observations : pandas.DataFrame
         A pandas data frame where the index is the file name, and 
         the columns are various observations to add to all items in a given css. 
-
-    nidap : boolean
-        A boolean variable for using this function on NIH Integrated 
-        Data Analysis Platform (NIDAP)
-    
-    nidap_filesystem : transforms.api._transform.FileSystem
-        The filesystem object to acquire NIDAP specific information 
-        when using this function on NIDAP.
 
     Returns
     -------
@@ -254,70 +341,19 @@ def combine_csvs(file_names, observations, nidap = False, nidap_filesystem = Non
 
     meta_schema=[]
     combined_dataframe = pd.DataFrame()
-
-    if not isinstance(file_names, list):
-        if not isinstance(file_names, str):
-            if isinstance(file_names, str):
-                file_names = [file_names]
-            else:
-                file_name_type = type(file_names)
-                error_message = "file_names should be list or string" + \
-                                ", but got " + file_name_type+ "."
-                raise TypeError(error_message)
     
     if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
         observations_type = type(observations)
-        error_message = "observations should bea pandas dataframe, " + \
-                                "but got " + observations_type+ "."
+        error_message = "observations should be a pandas dataframe, " + \
+                                "but got " + observations_type + "."
         raise TypeError(error_message)
 
-    for file_name in file_names:
+    for current_df_list in dataframes:
 
-
-        # Check if the file exists
-        if not os.path.exists(file_name):
-            error_message = f"The file '{file_name}' does not exist."
-            raise FileNotFoundError(error_message)
-
-        # Try to load the csv into pandas DataFrame.
-        if not nidap:
-            # Not on NIDAP:
-            # Check if the file exists
-            if not os.path.exists(file_name):
-                error_message = f"The file '{file_name}' does not exist."
-                raise FileNotFoundError(error_message)
-
-            # Check if the file is readable
-            if not os.access(file_name, os.R_OK):
-                error_message = "The file " + file_name + \
-                        " cannot be read due to insufficient permissions."
-                raise PermissionError(error_message)
-
-            try:
-                current_df = pd.read_csv(file_name)
-            except pd.errors.EmptyDataError:
-                print("The file is empty or does not contain any data.")
-            except pd.errors.ParserError:
-                error_message = "The file could not be parsed. " + \
-                                "Please check that the file is a valid CSV."
-                print(error_message)
-
-        else:
-            # On NIDAP, check for nidap object:
-            nidap_type = "<class 'transforms.api._transform.FileSystem'>"
-            if str(type(nidap_filesystem)) == nidap_type: 
-                with nidap_filesystem.open(file_name) as input_file:
-                    current_df = pd.read_csv(input_file)
-            else:
-                error_message = "The nidap_filesystem is not " + \
-                            "a filesystem object, please pass:\n" + \
-                            "<NIDAP Dataset>.filesystem()\n" + \
-                            "into the function."
-                raise PermissionError(error_message)
-
-
-
-        # Check is schema of each file matches.
+        file_name = current_df_list[0]
+        current_df = current_df_list[1]
+        
+        # Check is schema of each data_frame matches.
         # Check for length first, then check if columns match
         # The overall schema is based on the first file read.
         current_schema = current_df.columns.to_list()
