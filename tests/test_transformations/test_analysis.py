@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 
 from spac.data_utils import subtract_min_per_region, ingest_cells, concatinate_regions
 from spac.transformations import batch_normalize    
