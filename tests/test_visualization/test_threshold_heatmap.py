@@ -2,7 +2,7 @@
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 
 from spac.visualization import threshold_heatmap
 import pandas as pd

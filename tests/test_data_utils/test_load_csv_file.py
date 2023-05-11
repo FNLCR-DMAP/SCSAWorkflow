@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 from unittest.mock import patch
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 
 from spac.data_utils import load_csv_files
 
