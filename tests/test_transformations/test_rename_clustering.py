@@ -1,15 +1,12 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
-
-from spac.transformations import rename_clustering
 import anndata
-import pandas as pd
-import numpy as np
 import unittest
+import numpy as np
+import pandas as pd
+from spac.transformations import rename_clustering
+
 
 class TestRenameClustering(unittest.TestCase):
-    
+
     def create_test_anndata(self, n_cells=100, n_genes=10):
         X = np.random.rand(n_cells, n_genes)
         obs = pd.DataFrame(index=np.arange(n_cells))
@@ -28,14 +25,22 @@ class TestRenameClustering(unittest.TestCase):
         }
 
         # Apply the rename_clustering function
-        adata = rename_clustering(test_adata, "phenograph", new_phenotypes, "renamed_clusters")
+        adata = rename_clustering(
+            test_adata,
+            "phenograph",
+            new_phenotypes,
+            "renamed_clusters")
 
         # Check if the new_column_name exists in adata.obs
         self.assertIn("renamed_clusters", adata.obs.columns)
 
         # Check if the new cluster names have been assigned correctly
         expected_cluster_names = ["group_1", "group_2", "group_3"]
-        self.assertTrue(set(adata.obs["renamed_clusters"]).issubset(set(expected_cluster_names)))
+        self.assertTrue(
+            set(
+                adata.obs["renamed_clusters"]
+                ).issubset(set(expected_cluster_names))
+            )
 
         # Test with non-existent keys in new_phenotypes
         new_phenotypes = {
@@ -45,8 +50,13 @@ class TestRenameClustering(unittest.TestCase):
         }
 
         with self.assertRaises(ValueError):
-            adata = rename_clustering(test_adata, "phenograph", new_phenotypes, "renamed_clusters")
+            adata = rename_clustering(
+                test_adata,
+                "phenograph",
+                new_phenotypes,
+                "renamed_clusters"
+                )
+
 
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored'], exit=False)
-

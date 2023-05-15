@@ -1,9 +1,6 @@
+import os
 import unittest
 import pandas as pd
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
-
 from spac.data_utils import combine_dfs
 
 
@@ -16,7 +13,10 @@ class TestCombineDFs(unittest.TestCase):
         cls.df2 = pd.DataFrame({"A": [5, 6], "B": [7, 8]})
 
         # Create observations dataframe
-        cls.observations = pd.DataFrame({"obs1": [10, 20]}, index=["file1.csv", "file2.csv"])
+        cls.observations = pd.DataFrame(
+            {"obs1": [10, 20]},
+            index=["file1.csv", "file2.csv"]
+            )
 
         # Save sample dataframes to temporary CSV files
         cls.file1_path = "file1.csv"
@@ -31,7 +31,11 @@ class TestCombineDFs(unittest.TestCase):
 
     def test_combine_dfs(self):
         combined_df = combine_dfs(self.dataframes, self.observations)
-        expected_df = pd.DataFrame({"A": [1, 2, 5, 6], "B": [3, 4, 7, 8], "obs1": [10, 10, 20, 20]})
+        expected_df = pd.DataFrame(
+            {"A": [1, 2, 5, 6],
+             "B": [3, 4, 7, 8],
+             "obs1": [10, 10, 20, 20]}
+             )
         pd.testing.assert_frame_equal(combined_df, expected_df)
 
     def test_combine_dfs_wrong_observations_type(self):
@@ -48,6 +52,7 @@ class TestCombineDFs(unittest.TestCase):
         # Remove temporary CSV files
         os.remove(cls.file1_path)
         os.remove(cls.file2_path)
+
 
 if __name__ == "__main__":
     unittest.main()
