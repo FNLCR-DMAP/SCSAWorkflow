@@ -4,6 +4,7 @@ import pandas as pd
 from unittest.mock import patch
 from spac.data_utils import load_csv_files
 
+
 class TestLoadCSVFiles(unittest.TestCase):
 
     @classmethod
