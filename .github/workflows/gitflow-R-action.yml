@@ -7,7 +7,7 @@ on:
     
   pull_request:
     types: ['opened', 'closed']
-    branches: ['main', 'release*', 'master']
+    branches: ['main', 'release*', 'master', 'dev']
 
 jobs:
   Activating_Parser:
