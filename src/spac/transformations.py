@@ -198,7 +198,7 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
         type(unique_values[0])(key): value
         for key, value in mappings.items()
     }
-   
+
     # Check if all keys in mappings match the unique values in the
     # source observation
     if not all(key in unique_values for key in mappings.keys()):

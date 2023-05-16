@@ -132,7 +132,6 @@ class TestRenameObservations(unittest.TestCase):
             renamed_clusters_set.issubset(expected_clusters_set)
         )
 
-
         new_phenotypes = {
             "0": "group_1",
             "1": "group_2",
@@ -159,7 +158,10 @@ class TestRenameObservations(unittest.TestCase):
         )
 
         renamed_clusters = adata.obs["renamed_clusters"]
-        self.assertTrue(all(renamed_clusters == ["group_0", "group_0", "group_0"]))
+        self.assertTrue(
+            all(renamed_clusters == ["group_0", "group_0", "group_0"])
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
