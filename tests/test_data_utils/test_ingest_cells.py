@@ -2,6 +2,7 @@ import unittest
 import pandas as pd
 from spac.data_utils import ingest_cells
 
+
 class TestAnalysisMethods(unittest.TestCase):
 
     def test_ingest_marker_regex(self):
