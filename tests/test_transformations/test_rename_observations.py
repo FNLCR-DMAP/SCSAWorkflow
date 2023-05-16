@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
-
 from spac.transformations import rename_observations
 
 
@@ -39,19 +38,21 @@ class TestRenameObservations(unittest.TestCase):
         """Test rename_observations with a missing source observation."""
         with self.assertRaises(ValueError):
             rename_observations(
-                self.adata, 
-                "missing_src", 
-                "new_dest", 
+                self.adata,
+                "missing_src",
+                "new_dest",
                 {"0": "group_8"}
             )
 
     def test_existing_dest_observation(self):
-        """Test rename_observations with an existing destination observation."""
+        """
+        Test rename_observations with an existing destination observation.
+        """
         with self.assertRaises(ValueError):
             rename_observations(
-                self.adata, 
-                "phenograph", 
-                "phenograph", 
+                self.adata,
+                "phenograph",
+                "phenograph",
                 {"0": "group_8"}
             )
 
@@ -59,9 +60,9 @@ class TestRenameObservations(unittest.TestCase):
         """Test rename_observations with invalid mappings."""
         with self.assertRaises(ValueError):
             rename_observations(
-                self.adata, 
-                "phenograph", 
-                "new_dest", 
+                self.adata,
+                "phenograph",
+                "new_dest",
                 {"5": "group_8"}
             )
 
@@ -94,7 +95,10 @@ class TestRenameObservations(unittest.TestCase):
             adata, "original_phenotype", "renamed_clusters", new_phenotypes
         )
         self.assertTrue(
-            all(adata.obs["renamed_clusters"] == ["group_0", "group_1", "group_0"])
+            all(
+                adata.obs["renamed_clusters"] ==
+                ["group_0", "group_1", "group_0"]
+            )
         )
 
     def create_test_anndata(self, n_cells=100, n_genes=10):
@@ -122,9 +126,12 @@ class TestRenameObservations(unittest.TestCase):
         self.assertIn("renamed_clusters", adata.obs.columns)
 
         expected_cluster_names = ["group_1", "group_2", "group_3"]
+        renamed_clusters_set = set(adata.obs["renamed_clusters"])
+        expected_clusters_set = set(expected_cluster_names)
         self.assertTrue(
-            set(adata.obs["renamed_clusters"]).issubset(set(expected_cluster_names))
+            renamed_clusters_set.issubset(expected_clusters_set)
         )
+
 
         new_phenotypes = {
             "0": "group_1",
@@ -151,11 +158,8 @@ class TestRenameObservations(unittest.TestCase):
             adata, "original_phenotype", "renamed_clusters", new_phenotypes
         )
 
-        self.assertTrue(
-            all(adata.obs["renamed_clusters"] == ["group_0", "group_0", "group_0"])
-        )
-
+        renamed_clusters = adata.obs["renamed_clusters"]
+        self.assertTrue(all(renamed_clusters == ["group_0", "group_0", "group_0"]))
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -145,7 +145,6 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
 def rename_observations(adata, src_observation, dest_observation, mappings):
     """
     Rename observations in an AnnData object based on a provided dictionary.
-    
     This function creates a new observation column.
 
     Parameters
@@ -180,7 +179,8 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     ...     "37": "group_5",
     ... }
     >>> dest_observation = "renamed_observations"
-    >>> adata = rename_observations(adata, src_observation, dest_observation, mappings)
+    >>> adata = rename_observations(
+    ...     adata, src_observation, dest_observation, mappings)
     """
 
     # Check if the source observation exists in the AnnData object
@@ -198,8 +198,9 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
         type(unique_values[0])(key): value
         for key, value in mappings.items()
     }
-    
-    # Check if all keys in mappings match the unique values in the source observation
+   
+    # Check if all keys in mappings match the unique values in the
+    # source observation
     if not all(key in unique_values for key in mappings.keys()):
         raise ValueError(
             "All keys in the mappings dictionary should match the unique "
@@ -222,4 +223,3 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     )
 
     return adata
-
