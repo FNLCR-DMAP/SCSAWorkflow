@@ -1,13 +1,9 @@
 import re
 import os
 import numpy as np
-import scanpy as sc
 import pandas as pd
 import anndata as ad
-import scanpy.external as sce
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-
 
 
 def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
@@ -21,7 +17,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     ----------
     dataframe : pandas.DataFrame
         The data frame that contains cells as rows, and cells informations as
-        columns. 
+        columns.
 
     regex_str : str or list of str
         A string or a list of strings representing python regular expression
@@ -64,7 +60,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
         if isinstance(obs, str):
             list_of_obs = [obs]
         else:
-            list_of_obs = obs 
+            list_of_obs = obs
 
         for observation in list_of_obs:
 
@@ -165,6 +161,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     rescaled = rescale_intensities(original, min_quantile, max_quantile)
     adata.layers[layer] = rescaled
 
+
 def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     """
     Substract the minimum quantile of every marker per region.
@@ -195,6 +192,7 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
+
 def subtract_min_quantile(intensities, min_quantile=.01):
     """
     Subtract the intensity defined by the minimum quantile from all columns.
@@ -224,7 +222,7 @@ def subtract_min_quantile(intensities, min_quantile=.01):
 
 
 def load_csv_files(file_names):
-    
+
     """
     Read the csv file into an anndata object.
 
@@ -233,7 +231,8 @@ def load_csv_files(file_names):
     Parameters
     ----------
     file_names : str or list
-        A list of csv file paths dataframe to be combined into single dataframe output
+        A list of csv file paths dataframe to be combined
+        into single dataframe output
 
     Returns
     -------
@@ -241,7 +240,7 @@ def load_csv_files(file_names):
         A list of pandas data frame of all the csv files.
     """
 
-    meta_schema=[]
+    meta_schema = []
     dataframe_list = []
 
     if not isinstance(file_names, list):
@@ -289,7 +288,7 @@ def load_csv_files(file_names):
             print("Meta schema acquired. Columns are:")
             for column_name in meta_schema:
                 print(column_name)
-        
+
         if len(meta_schema) == len(current_schema):
             if set(meta_schema) != set(current_schema):
                 error_message = "Column in current file does not match " + \
@@ -299,11 +298,9 @@ def load_csv_files(file_names):
             error_message = "Column in current file does not match " + \
                         f"the meta_schema, got:\n {current_schema}. "
             raise ValueError(error_message)
-        
-
 
         dataframe_list.append([file_name, current_df])
-       
+
     print("CSVs are converted into dataframes and combined into a list!")
     print("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
     for each_file in dataframe_list:
@@ -314,7 +311,8 @@ def load_csv_files(file_names):
         print(each_file[1].describe())
         print()
 
-    return(dataframe_list)
+    return dataframe_list
+
 
 def combine_dfs(dataframes, observations):
 
@@ -326,33 +324,34 @@ def combine_dfs(dataframes, observations):
     Parameters
     ----------
     dataframes : list
-        A list containing [file name, pandas dataframe] to be combined 
+        A list containing [file name, pandas dataframe] to be combined
         into single dataframe output
 
     observations : pandas.DataFrame
-        A pandas data frame where the index is the file name, and 
-        the columns are various observations to add to all items in a given css. 
+        A pandas data frame where the index is the file name, and the columns
+        are various observations to add to all items in a given css.
 
-    Returns
+        Returns
     -------
     pandas.DataFrame
-        A pandas data frame of all the cells where each cell has a unique index.
+        A pandas data frame of all the cells where each cell
+        has a unique index.
     """
 
-    meta_schema=[]
+    meta_schema = []
     combined_dataframe = pd.DataFrame()
-    
+
     if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
         observations_type = type(observations)
         error_message = "observations should be a pandas dataframe, " + \
-                                "but got " + observations_type + "."
+                        "but got " + observations_type + "."
         raise TypeError(error_message)
 
     for current_df_list in dataframes:
 
         file_name = current_df_list[0]
         current_df = current_df_list[1]
-        
+
         # Check is schema of each data_frame matches.
         # Check for length first, then check if columns match
         # The overall schema is based on the first file read.
@@ -363,7 +362,6 @@ def combine_dfs(dataframes, observations):
             print("Meta schema acquired. Columns are:")
             for column_name in meta_schema:
                 print(column_name)
-        
         if len(meta_schema) == len(current_schema):
             if set(meta_schema) != set(current_schema):
                 error_message = "Column in current file does not match " + \
@@ -373,13 +371,14 @@ def combine_dfs(dataframes, observations):
             error_message = "Column in current file does not match " + \
                         "the meta_schema, got:\n {current_schema}. "
             raise ValueError(error_message)
-        
+
         # Check if the observations DataFrame has the required index
         if file_name not in observations.index:
-            error_message = f"Missing data in the observations DataFrame for the file '{file_name}'."
+            error_message = (f"Missing data in the observations DataFrame for "
+                             f"the file '{file_name}'.")
             raise ValueError(error_message)
 
-        # Add observations in to the dataframe        
+        # Add observations in to the dataframe
         file_observations = observations.loc[file_name]
 
         for file_obs_name, file_obs_value in file_observations.iteritems():
@@ -390,15 +389,140 @@ def combine_dfs(dataframes, observations):
         else:
             # Concatenate the DataFrames, with error handling
             try:
-                combined_dataframe = pd.concat([combined_dataframe, current_df])
+                combined_dataframe = pd.concat([
+                    combined_dataframe,
+                    current_df
+                ])
             except (ValueError, TypeError) as e:
                 print('Error concatenating DataFrames:', e)
-    
+
     # Reset index of the combined_dataframe
     combined_dataframe.reset_index(drop=True, inplace=True)
-    
+
     print("CSVs are combined into single dataframe!")
     print(combined_dataframe.info())
-        
+
     return combined_dataframe
 
+
+def select_values(data, observation_name, values=None):
+    """
+    Selects rows from input dataframe matching specified values in a column.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The input dataframe.
+    observation_name : str
+        The column name to be used for selection.
+    values : list, optional
+        List of values for observation_name to include.
+        If None, return all values.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Dataframe containing only the selected rows.
+
+    Raises
+    ------
+    ValueError
+        If observation_name does not exist or one or more values passed
+        do not exist in the specified column.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...     'column1': ['A', 'B', 'A', 'B', 'A'],
+    ...     'column2': [1, 2, 3, 4, 5]
+    ... })
+    >>> select_values(df, 'column1', ['A'])
+      column1  column2
+    0       A        1
+    2       A        3
+    4       A        5
+    """
+    # Check if the DataFrame is empty
+    if not data.empty:
+        # If DataFrame is not empty, check if observation_name exists
+        if observation_name not in data.columns:
+            raise ValueError(
+                f"Column {observation_name} does not exist in the dataframe"
+            )
+
+        # If values exist in observation_name column, filter data
+        if values is not None:
+            data = data[data[observation_name].isin(values)]
+
+    return data
+
+
+def downsample_cells(data, observation_name, n_samples=None,
+                     stratify=False, rand=False):
+    """
+    Reduces the number of cells in the data by either selecting n_samples from
+    every possible value of observation_name, or returning n_samples
+    stratified by the frequency of values in observation_name.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The input data frame.
+    observation_name : str
+        The column name to downsample on.
+    n_samples : int, default=None
+        The max number of samples to return for each group if stratify is
+        False, or in total if stratify is True. If None, all samples returned.
+    stratify : bool, default=False
+        If true, stratify the returned values based on their input frequency.
+    rand : bool, default=False
+        If true and stratify is True, randomly select the returned cells.
+        Otherwise, choose the first n cells.
+
+    Returns
+    -------
+    data : pd.DataFrame
+        The downsampled data frame.
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...    'observation': ['a', 'a', 'a', 'b', 'b', 'c'],
+    ...    'value': [1, 2, 3, 4, 5, 6]
+    ... })
+    >>> print(downsample_cells(df, 'observation', n_samples=2))
+    """
+    # Check if the column to downsample on exists
+    if observation_name not in data.columns:
+        raise ValueError(
+            f"Column {observation_name} does not exist in the dataframe"
+        )
+
+    if n_samples is not None:
+        # Stratify selection
+        if stratify:
+            # Determine frequencies of each group
+            freqs = data[observation_name].value_counts(normalize=True)
+            n_samples_per_group = (freqs * n_samples).astype(int)
+            samples = []
+            # Group by observation_name and sample from each group
+            for group, group_data in data.groupby(observation_name):
+                n_group_samples = n_samples_per_group.get(group, 0)
+                if rand:
+                    # Randomly select the returned cells
+                    samples.append(group_data.sample(min(n_group_samples,
+                                                         len(group_data))))
+                else:
+                    # Choose the first n cells
+                    samples.append(group_data.head(min(n_group_samples,
+                                                       len(group_data))))
+            # Concatenate all samples
+            data = pd.concat(samples)
+        else:
+            # Non-stratified selection
+            # Select the first n cells from each group
+            data = data.groupby(observation_name).apply(
+                lambda x: x.head(n=min(n_samples, len(x)))
+            ).reset_index(drop=True)
+
+    return data
