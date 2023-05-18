@@ -3,9 +3,8 @@ import sys
 import unittest
 import pandas as pd
 import numpy as np
-from spac.data_utils import test_downsample_cells
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
-
+from spac.data_utils import downsample_cells
 
 class TestDownsampleCells(unittest.TestCase):
 
