@@ -1,11 +1,8 @@
 import re
 import os
 import numpy as np
-import scanpy as sc
 import pandas as pd
 import anndata as ad
-import scanpy.external as sce
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -20,7 +17,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     ----------
     dataframe : pandas.DataFrame
         The data frame that contains cells as rows, and cells informations as
-        columns. 
+        columns.
 
     regex_str : str or list of str
         A string or a list of strings representing python regular expression
@@ -63,7 +60,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
         if isinstance(obs, str):
             list_of_obs = [obs]
         else:
-            list_of_obs = obs 
+            list_of_obs = obs
 
         for observation in list_of_obs:
 
@@ -164,6 +161,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     rescaled = rescale_intensities(original, min_quantile, max_quantile)
     adata.layers[layer] = rescaled
 
+
 def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     """
     Substract the minimum quantile of every marker per region.
@@ -194,6 +192,7 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
+
 def subtract_min_quantile(intensities, min_quantile=.01):
     """
     Subtract the intensity defined by the minimum quantile from all columns.
@@ -223,7 +222,7 @@ def subtract_min_quantile(intensities, min_quantile=.01):
 
 
 def load_csv_files(file_names):
-    
+
     """
     Read the csv file into an anndata object.
 
@@ -232,7 +231,8 @@ def load_csv_files(file_names):
     Parameters
     ----------
     file_names : str or list
-        A list of csv file paths dataframe to be combined into single dataframe output
+        A list of csv file paths dataframe to be combined
+        into single dataframe output
 
     Returns
     -------
@@ -240,7 +240,7 @@ def load_csv_files(file_names):
         A list of pandas data frame of all the csv files.
     """
 
-    meta_schema=[]
+    meta_schema = []
     dataframe_list = []
 
     if not isinstance(file_names, list):
@@ -288,7 +288,7 @@ def load_csv_files(file_names):
             print("Meta schema acquired. Columns are:")
             for column_name in meta_schema:
                 print(column_name)
-        
+
         if len(meta_schema) == len(current_schema):
             if set(meta_schema) != set(current_schema):
                 error_message = "Column in current file does not match " + \
@@ -298,11 +298,9 @@ def load_csv_files(file_names):
             error_message = "Column in current file does not match " + \
                         f"the meta_schema, got:\n {current_schema}. "
             raise ValueError(error_message)
-        
-
 
         dataframe_list.append([file_name, current_df])
-       
+
     print("CSVs are converted into dataframes and combined into a list!")
     print("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
     for each_file in dataframe_list:
@@ -313,7 +311,8 @@ def load_csv_files(file_names):
         print(each_file[1].describe())
         print()
 
-    return(dataframe_list)
+    return dataframe_list
+
 
 def combine_dfs(dataframes, observations):
 
@@ -325,33 +324,34 @@ def combine_dfs(dataframes, observations):
     Parameters
     ----------
     dataframes : list
-        A list containing [file name, pandas dataframe] to be combined 
+        A list containing [file name, pandas dataframe] to be combined
         into single dataframe output
 
     observations : pandas.DataFrame
-        A pandas data frame where the index is the file name, and 
-        the columns are various observations to add to all items in a given css. 
+        A pandas data frame where the index is the file name, and the columns
+        are various observations to add to all items in a given css.
 
-    Returns
+        Returns
     -------
     pandas.DataFrame
-        A pandas data frame of all the cells where each cell has a unique index.
+        A pandas data frame of all the cells where each cell
+        has a unique index.
     """
 
-    meta_schema=[]
+    meta_schema = []
     combined_dataframe = pd.DataFrame()
-    
+
     if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
         observations_type = type(observations)
         error_message = "observations should be a pandas dataframe, " + \
-                                "but got " + observations_type + "."
+                        "but got " + observations_type + "."
         raise TypeError(error_message)
 
     for current_df_list in dataframes:
 
         file_name = current_df_list[0]
         current_df = current_df_list[1]
-        
+
         # Check is schema of each data_frame matches.
         # Check for length first, then check if columns match
         # The overall schema is based on the first file read.
@@ -362,7 +362,6 @@ def combine_dfs(dataframes, observations):
             print("Meta schema acquired. Columns are:")
             for column_name in meta_schema:
                 print(column_name)
-        
         if len(meta_schema) == len(current_schema):
             if set(meta_schema) != set(current_schema):
                 error_message = "Column in current file does not match " + \
@@ -372,13 +371,14 @@ def combine_dfs(dataframes, observations):
             error_message = "Column in current file does not match " + \
                         "the meta_schema, got:\n {current_schema}. "
             raise ValueError(error_message)
-        
+
         # Check if the observations DataFrame has the required index
         if file_name not in observations.index:
-            error_message = f"Missing data in the observations DataFrame for the file '{file_name}'."
+            error_message = (f"Missing data in the observations DataFrame for "
+                             f"the file '{file_name}'.")
             raise ValueError(error_message)
 
-        # Add observations in to the dataframe        
+        # Add observations in to the dataframe
         file_observations = observations.loc[file_name]
 
         for file_obs_name, file_obs_value in file_observations.iteritems():
@@ -389,16 +389,19 @@ def combine_dfs(dataframes, observations):
         else:
             # Concatenate the DataFrames, with error handling
             try:
-                combined_dataframe = pd.concat([combined_dataframe, current_df])
+                combined_dataframe = pd.concat([
+                    combined_dataframe,
+                    current_df
+                ])
             except (ValueError, TypeError) as e:
                 print('Error concatenating DataFrames:', e)
-    
+
     # Reset index of the combined_dataframe
     combined_dataframe.reset_index(drop=True, inplace=True)
-    
+
     print("CSVs are combined into single dataframe!")
     print(combined_dataframe.info())
-        
+
     return combined_dataframe
 
 
