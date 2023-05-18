@@ -141,65 +141,85 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
-def rename_clustering(adata, column, new_phenotypes, new_column_name="renamed_clusters"):
+
+def rename_observations(adata, src_observation, dest_observation, mappings):
     """
-    Rename and group clusters in an AnnData object based on the provided
-    dictionary, keeping the original observation column.
+    Rename observations in an AnnData object based on a provided dictionary.
+    This function creates a new observation column.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    column : str
-        Name of the column in adata.obs containing the original cluster labels.
-    new_phenotypes : dict
-        A dictionary mapping the original cluster names to the new phenotype names.
-    new_column_name : str, optional, default: "renamed_clusters"
+    src_observation : str
+        Name of the column in adata.obs containing the original
+        observation labels.
+    dest_observation : str
         The name of the new column to be created in the AnnData object
-        containing the renamed cluster labels.
+        containing the renamed observation labels.
+    mappings : dict
+        A dictionary mapping the original observation labels to
+        the new labels.
 
     Returns
     -------
     adata : anndata.AnnData
-        The updated Anndata object with the new column containing the renamed
-        cluster labels.
+        The updated Anndata object with the new column containing the
+        renamed observation labels.
+
+    Examples
+    --------
+    >>> adata = your_anndata_object
+    >>> src_observation = "phenograph"
+    >>> mappings = {
+    ...     "0": "group_8",
+    ...     "1": "group_2",
+    ...     "2": "group_6",
+    ...     # ...
+    ...     "37": "group_5",
+    ... }
+    >>> dest_observation = "renamed_observations"
+    >>> adata = rename_observations(
+    ...     adata, src_observation, dest_observation, mappings)
     """
-    
-    """
-    # An example to call the function:
-    adata = your_anndata_object
-    column = "phenograph"
-    new_phenotypes = {
-        "0": "group_8",
-        "1": "group_2",
-        "2": "group_6",
-        # ...
-        "37": "group_5",
-    }
-    new_column_name = "renamed_clusters"
 
-    adata = rename_clustering(adata, column, new_phenotypes, new_column_name)
-    """
-
-    # Get the unique values of the observation column
-    unique_values = adata.obs[column].unique()
-
-    # Convert the keys in new_phenotypes to the same data type as the unique
-    # values in the observation column
-    new_phenotypes = {
-        type(unique_values[0])(key): value for key, value in new_phenotypes.items()
-    }
-
-    # Check if all keys in new_phenotypes are present in the unique values of
-    # the observation column
-    if not all(key in unique_values for key in new_phenotypes.keys()):
+    # Check if the source observation exists in the AnnData object
+    if src_observation not in adata.obs.columns:
         raise ValueError(
-            "All keys in the new_phenotypes dictionary should match the unique "
-            "values in the observation column."
+            f"Source observation '{src_observation}' not found in the "
+            "AnnData object."
         )
-    
-    # Create a new column in adata.obs with the updated cluster names
-    adata.obs[new_column_name] = adata.obs[column].map(new_phenotypes)\
-        .fillna(adata.obs[column]).astype("category")
+
+    # Get the unique values of the source observation
+    unique_values = adata.obs[src_observation].unique()
+
+    # Convert the keys in mappings to the same data type as the unique values
+    mappings = {
+        type(unique_values[0])(key): value
+        for key, value in mappings.items()
+    }
+
+    # Check if all keys in mappings match the unique values in the
+    # source observation
+    if not all(key in unique_values for key in mappings.keys()):
+        raise ValueError(
+            "All keys in the mappings dictionary should match the unique "
+            "values in the source observation."
+        )
+
+    # Check if the destination observation already exists in the AnnData object
+    if dest_observation in adata.obs.columns:
+        raise ValueError(
+            f"Destination observation '{dest_observation}' already exists "
+            "in the AnnData object."
+        )
+
+    # Create a new column in adata.obs with the updated observation labels
+    adata.obs[dest_observation] = (
+        adata.obs[src_observation]
+        .map(mappings)
+        .fillna(adata.obs[src_observation])
+        .astype("category")
+    )
 
     return adata
