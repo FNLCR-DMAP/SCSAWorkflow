@@ -6,6 +6,7 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 from spac.data_utils import downsample_cells
 
+
 class TestDownsampleCells(unittest.TestCase):
 
     def setUp(self):
