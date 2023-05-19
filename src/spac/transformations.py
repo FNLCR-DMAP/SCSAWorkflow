@@ -218,5 +218,3 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     )
 
     return adata
-
-
