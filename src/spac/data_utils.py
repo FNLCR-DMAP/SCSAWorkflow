@@ -405,7 +405,7 @@ def combine_dfs(dataframes, observations):
     return combined_dataframe
 
 
-def select_values(data, observation_name, values=None):
+def select_values(data, observation, values=None):
     """
     Selects rows from input dataframe matching specified values in a column.
 
@@ -413,10 +413,10 @@ def select_values(data, observation_name, values=None):
     ----------
     data : pandas.DataFrame
         The input dataframe.
-    observation_name : str
+    observation : str
         The column name to be used for selection.
     values : list, optional
-        List of values for observation_name to include.
+        List of values for observation to include.
         If None, return all values.
 
     Returns
@@ -427,7 +427,7 @@ def select_values(data, observation_name, values=None):
     Raises
     ------
     ValueError
-        If observation_name does not exist or one or more values passed
+        If observation does not exist or one or more values passed
         do not exist in the specified column.
 
     Examples
@@ -444,31 +444,31 @@ def select_values(data, observation_name, values=None):
     """
     # Check if the DataFrame is empty
     if not data.empty:
-        # If DataFrame is not empty, check if observation_name exists
-        if observation_name not in data.columns:
+        # If DataFrame is not empty, check if observation exists
+        if observation not in data.columns:
             raise ValueError(
-                f"Column {observation_name} does not exist in the dataframe"
+                f"Column {observation} does not exist in the dataframe"
             )
 
-        # If values exist in observation_name column, filter data
+        # If values exist in observation, filter data
         if values is not None:
-            data = data[data[observation_name].isin(values)]
+            data = data[data[observation].isin(values)]
 
     return data
 
 
-def downsample_cells(data, observation_name, n_samples=None,
+def downsample_cells(data, observation, n_samples=None,
                      stratify=False, rand=False):
     """
     Reduces the number of cells in the data by either selecting n_samples from
-    every possible value of observation_name, or returning n_samples
-    stratified by the frequency of values in observation_name.
+    every possible value of observation, or returning n_samples
+    stratified by the frequency of values in observation.
 
     Parameters
     ----------
     data : pd.DataFrame
         The input data frame.
-    observation_name : str
+    observation : str
         The column name to downsample on.
     n_samples : int, default=None
         The max number of samples to return for each group if stratify is
@@ -493,20 +493,20 @@ def downsample_cells(data, observation_name, n_samples=None,
     >>> print(downsample_cells(df, 'observation', n_samples=2))
     """
     # Check if the column to downsample on exists
-    if observation_name not in data.columns:
+    if observation not in data.columns:
         raise ValueError(
-            f"Column {observation_name} does not exist in the dataframe"
+            f"Column {observation} does not exist in the dataframe"
         )
 
     if n_samples is not None:
         # Stratify selection
         if stratify:
             # Determine frequencies of each group
-            freqs = data[observation_name].value_counts(normalize=True)
+            freqs = data[observation].value_counts(normalize=True)
             n_samples_per_group = (freqs * n_samples).astype(int)
             samples = []
-            # Group by observation_name and sample from each group
-            for group, group_data in data.groupby(observation_name):
+            # Group by observation and sample from each group
+            for group, group_data in data.groupby(observation):
                 n_group_samples = n_samples_per_group.get(group, 0)
                 if rand:
                     # Randomly select the returned cells
@@ -521,8 +521,11 @@ def downsample_cells(data, observation_name, n_samples=None,
         else:
             # Non-stratified selection
             # Select the first n cells from each group
-            data = data.groupby(observation_name).apply(
+            data = data.groupby(observation).apply(
                 lambda x: x.head(n=min(n_samples, len(x)))
             ).reset_index(drop=True)
-
+            
+    # Print the number of rows in the resulting data
+    print(f"Number of rows in the returned data: {len(data)}")
+    
     return data
