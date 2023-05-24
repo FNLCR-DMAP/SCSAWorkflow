@@ -44,6 +44,7 @@ class TestLoadCSVFiles(unittest.TestCase):
 
     def test_load_single_csv_file(self):
         result = load_csv_files(self.valid_file)
+        self.assertIsInstance(result, list)
         self.assertEqual(len(result), 1)
         self.assertIsInstance(result[0][1], pd.DataFrame)
 

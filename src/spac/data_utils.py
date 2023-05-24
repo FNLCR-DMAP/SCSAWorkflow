@@ -223,20 +223,18 @@ def subtract_min_quantile(intensities, min_quantile=.01):
 def load_csv_files(file_names):
 
     """
-    Read the csv file into an anndata object.
-
-    The function will also intialize intensities and spatial coordiantes.
+    Read the csv file(s) into a pandas dataframe.
 
     Parameters
     ----------
     file_names : str or list
-        A list of csv file paths dataframe to be
-        combined into single dataframe output
+        A list of csv file paths to be
+        combined into single list of dataframe output
 
     Returns
     -------
     list
-        A list of pandas data frame of all the csv files.
+        A list of pandas dataframe of all the csv files.
     """
 
     meta_schema = []
@@ -316,22 +314,20 @@ def load_csv_files(file_names):
 def combine_dfs(dataframes, observations):
 
     """
-    Read the csv file into single pandas dataframe.
-
-    The function will also intialize intensities and spatial coordiantes.
+    Combine a list of pandas dataframe into single pandas dataframe.
 
     Parameters
     ----------
-    dataframes : list
-        A list containing [file name, pandas dataframe] to be combined
+    dataframes : list of tuple
+        A list containing (file name, pandas dataframe) to be combined
         into single dataframe output
 
     observations : pandas.DataFrame
         A pandas data frame where the index is the file name, and
         the columns are various observations to
-        add to all items in a given css.
+        add to all cells in a given dataframe.
 
-        Returns
+    Returns
     -------
     pandas.DataFrame
         A pandas data frame of all the cells
@@ -340,9 +336,8 @@ def combine_dfs(dataframes, observations):
 
     meta_schema = []
     combined_dataframe = pd.DataFrame()
-
     if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
-        observations_type = type(observations)
+        observations_type = str(type(observations))
         error_message = "observations should be a pandas dataframe, " + \
             "but got " + observations_type + "."
         raise TypeError(error_message)
