@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import anndata as ad
+import warnings
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -452,7 +453,10 @@ def select_values(data, observation, values=None):
 
         # If values exist in observation, filter data
         if values is not None:
-            data = data[data[observation].isin(values)]
+            filtered_data = data[data[observation].isin(values)]
+            if filtered_data.empty:
+                warnings.warn("No matching values found in the data.")
+            return filtered_data
 
     return data
 
@@ -524,8 +528,8 @@ def downsample_cells(data, observation, n_samples=None,
             data = data.groupby(observation).apply(
                 lambda x: x.head(n=min(n_samples, len(x)))
             ).reset_index(drop=True)
-            
+
     # Print the number of rows in the resulting data
     print(f"Number of rows in the returned data: {len(data)}")
-    
+
     return data
