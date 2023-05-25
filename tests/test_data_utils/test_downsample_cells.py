@@ -61,35 +61,6 @@ class TestDownsampleCells(unittest.TestCase):
         df_downsampled = downsample_cells(self.df, self.observation)
         pd.testing.assert_frame_equal(self.df, df_downsampled)
 
-    def test_stratified_downsampling(self):
-        """
-        Test stratified downsampling with n_samples = 10 by ensuring the
-        number of samples in each 'observation' matches the expected output.
-        """
-        n_samples = 10
-
-        # Downsampling with stratifying
-        df_downsampled_stratified = downsample_cells(
-            self.df, self.observation,
-            n_samples=n_samples, stratify=True, rand=True
-        )
-
-        # Assert the number of samples in each observation
-        obs = 'observation'
-        obs_value_counts = df_downsampled_stratified[obs].value_counts()
-        self.assertEqual(
-            obs_value_counts['obs1'], 5,
-            'Number of samples in obs1 does not match expected count'
-        )
-        self.assertEqual(
-            obs_value_counts['obs2'], 3,
-            'Number of samples in obs2 does not match expected count'
-        )
-        self.assertEqual(
-            obs_value_counts['obs3'], 2,
-            'Number of samples in obs3 does not match expected count'
-        )
-
     def test_stratification_frequency(self):
         """Test the frequency of stratification"""
         n_samples = 10
