@@ -2,8 +2,9 @@ import os
 import sys
 import unittest
 import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 from spac.data_utils import select_values
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
 
 class TestSelectValues(unittest.TestCase):
@@ -20,6 +21,8 @@ class TestSelectValues(unittest.TestCase):
         """
         result = select_values(self.data, 'column1', ['A', 'B'])
         self.assertEqual(len(result), 5)
+        # Assert that 'C' is not in the result
+        self.assertFalse((result['column1'] == 'C').any())
 
     def test_select_values_all_values(self):
         """
@@ -29,12 +32,13 @@ class TestSelectValues(unittest.TestCase):
         result = select_values(self.data, 'column1')
         self.assertEqual(len(result), 6)
 
-    def test_select_values_no_matching_values(self):
+    def test_select_values_no_matching_values_with_warning(self):
         """
         Test function handling of case where no values in the
-        column match the specified values.
+        column match the specified values and a warning is issued.
         """
-        result = select_values(self.data, 'column1', ['D'])
+        with self.assertWarns(UserWarning):
+            result = select_values(self.data, 'column1', ['D'])
         self.assertEqual(len(result), 0)
 
     def test_select_values_invalid_column(self):
