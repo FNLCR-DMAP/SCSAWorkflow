@@ -151,9 +151,10 @@ def heatmap(adata, column, layer=None, **kwargs):
 def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
                          standard_scale=None, ax=None, **kwargs):
     """
-    Plot a hierarchical clustering heatmap of the mean intensity of cells
-    that belong to an `observation` using scanpy.tl.dendrogram and
-    sc.pl.matrixplot.
+    Generates a hierarchical clustering heatmap.
+    Cells are stratified by `observation`,
+    then mean intensities are calculated for each feature across all cells
+    to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
 
     Parameters
     ----------
@@ -203,6 +204,10 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     # matrixplot.show()
     """
 
+    # Raise an error if there are any NaN values in the observation column
+    if adata.obs[observation].isna().any():
+        raise ValueError("NaN values found in observation column.")
+
     # Calculate mean intensity
     intensities = adata.to_df(layer=layer)
     labels = adata.obs[observation]
@@ -218,7 +223,8 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
         obs=pd.DataFrame(
             index=mean_intensity.index,
             data={
-                observation: mean_intensity.iloc[:, 0].astype('category').values
+                observation: mean_intensity.iloc[:, 0]
+                .astype('category').values
             }
         ),
         var=pd.DataFrame(index=mean_intensity.columns[1:])
@@ -248,8 +254,8 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
 
 def threshold_heatmap(adata, marker_cutoffs, phenotype):
     """
-    Creates a heatmap for each marker, categorizing intensities into low, medium, and
-    high based on provided cutoffs.
+    Creates a heatmap for each marker, categorizing intensities into
+    low, medium, and high based on provided cutoffs.
 
     Parameters
     ----------
