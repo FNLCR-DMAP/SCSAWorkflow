@@ -1,12 +1,7 @@
-import re
-import seaborn
 import numpy as np
 import scanpy as sc
 import pandas as pd
-import anndata as ad
 import scanpy.external as sce
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
 
 
 def phenograph_clustering(adata, features, layer, k=30):
