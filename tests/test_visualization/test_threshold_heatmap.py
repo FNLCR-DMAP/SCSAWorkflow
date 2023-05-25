@@ -55,11 +55,11 @@ class TestThresholdHeatmap(unittest.TestCase):
             self.marker_cutoffs
             )
 
-        # Check if the intensity data is saved in the AnnData object as a layer
-        expected_intensity_data = np.array([[0, 0], [1, 1], [2, 2]])
+        # Check if the feature data is saved in the AnnData object as a layer
+        expected_feature_data = np.array([[0, 0], [1, 1], [2, 2]])
         np.testing.assert_array_equal(
-            self.adata.layers["intensity"],
-            expected_intensity_data
+            self.adata.layers["feature"],
+            expected_feature_data
             )
 
         # Check if the phenotype column is converted to categorical

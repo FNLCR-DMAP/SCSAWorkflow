@@ -68,7 +68,7 @@ def tsne(adata, layer=None):
 
 def batch_normalize(adata, obs, layer, method="median", log=False):
     """
-    Adjust the intensity of every marker using a normalization method.
+    Adjust the features of every marker using a normalization method.
 
     The normalization methods are summarized here:
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
@@ -90,7 +90,7 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
         The normlalization method to use.
 
     log : bool, default False
-        If True, take the log2 of intensities before normalization.
+        If True, take the log2 of features before normalization.
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
@@ -116,22 +116,22 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = region_cells + \
+            new_features = region_cells + \
                 (all_regions_quantile - region_median)
 
         if method == "Q50":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_median)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_median)
 
         if method == "Q75":
             region_75quantile = region_cells.quantile(q=0.75)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_75quantile)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_75quantile)
 
-        new_df_list.append(new_intensities)
+        new_df_list.append(new_features)
 
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
