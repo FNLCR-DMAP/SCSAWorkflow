@@ -1,4 +1,4 @@
-name: Gitflow Action for R Package Development
+name: Gitflow Action for Python Package Development
 run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
