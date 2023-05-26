@@ -11,7 +11,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     """
     Read the csv file into an anndata object.
 
-    The function will also intialize intensities and spatial coordiantes.
+    The function will also intialize features and spatial coordiantes.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
 
     regex_str : str or list of str
         A string or a list of strings representing python regular expression
-        for the intensities columns in the data frame.  x_col : str The column
+        for the features columns in the data frame.  x_col : str The column
         name for the x coordinate of the cell.
 
     y_col : str
@@ -43,18 +43,18 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     else:
         regex_list = regex_str
 
-    all_intensities = []
+    all_features = []
     all_columns = list(dataframe.columns)
     for regex in regex_list:
-        intensities_regex = re.compile(regex)
-        intensities = list(
-            filter(intensities_regex.match, all_columns))
-        all_intensities.extend(intensities)
+        features_regex = re.compile(regex)
+        features = list(
+            filter(features_regex.match, all_columns))
+        all_features.extend(features)
 
-    intensities_df = dataframe[all_intensities]
+    features_df = dataframe[all_features]
     adata = ad.AnnData(
-        intensities_df,
-        dtype=intensities_df[all_intensities[0]].dtype)
+        features_df,
+        dtype=features_df[all_features[0]].dtype)
 
     if obs is not None:
         if isinstance(obs, str):
@@ -95,16 +95,16 @@ def concatinate_regions(regions):
     return all_adata
 
 
-def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
+def rescale_features(features, min_quantile=0.01, max_quantile=0.99):
     """
-    Clip and rescale intensities outside the minimum and maximum quantile.
+    Clip and rescale features outside the minimum and maximum quantile.
 
-    The rescaled intensities will be between 0 and 1.
+    The rescaled features will be between 0 and 1.
 
     Parameters
     ----------
-    intensities : pandas.Dataframe
-        The DataRrame of intensities.
+    features : pandas.Dataframe
+        The DataRrame of features.
 
     min_quantile : float
         The minimum quantile to be consider zero.
@@ -115,30 +115,30 @@ def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
     Returns
     -------
     pandas.DataFrame
-        The created DataFrame with normalized intensities.
+        The created DataFrame with normalized features.
     """
-    markers_max_quantile = intensities.quantile(max_quantile)
-    markers_min_quantile = intensities.quantile(min_quantile)
+    markers_max_quantile = features.quantile(max_quantile)
+    markers_min_quantile = features.quantile(min_quantile)
 
-    intensities_clipped = intensities.clip(
+    features_clipped = features.clip(
         markers_min_quantile,
         markers_max_quantile,
         axis=1)
 
     scaler = MinMaxScaler()
-    np_intensities_scaled = scaler.fit_transform(
-        intensities_clipped.to_numpy())
+    np_features_scaled = scaler.fit_transform(
+        features_clipped.to_numpy())
 
-    intensities_scaled = pd.DataFrame(
-        np_intensities_scaled,
-        columns=intensities_clipped.columns)
+    features_scaled = pd.DataFrame(
+        np_features_scaled,
+        columns=features_clipped.columns)
 
-    return intensities_scaled
+    return features_scaled
 
 
-def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
+def add_rescaled_features(adata, min_quantile, max_quantile, layer):
     """
-    Clip and rescale the intensities matrix.
+    Clip and rescale the features matrix.
 
     The results will be added into a new layer in the AnnData object.
 
@@ -158,7 +158,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     """
 
     original = adata.to_df()
-    rescaled = rescale_intensities(original, min_quantile, max_quantile)
+    rescaled = rescale_features(original, min_quantile, max_quantile)
     adata.layers[layer] = rescaled
 
 
@@ -186,22 +186,22 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     new_df_list = []
     for region in regions:
         region_cells = original[adata.obs[obs] == region]
-        new_intensities = subtract_min_quantile(region_cells, min_quantile)
-        new_df_list.append(new_intensities)
+        new_features = subtract_min_quantile(region_cells, min_quantile)
+        new_df_list.append(new_features)
 
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
 
-def subtract_min_quantile(intensities, min_quantile=.01):
+def subtract_min_quantile(features, min_quantile=.01):
     """
-    Subtract the intensity defined by the minimum quantile from all columns.
+    Subtract the features defined by the minimum quantile from all columns.
 
     Parameters
     ----------
 
-    intensities : pandas.DataFrame
-        The dataframe of intensities.
+    features : pandas.DataFrame
+        The dataframe of features.
 
     min_quantile: float
         The minimum quantile to be consider zero.
@@ -209,11 +209,11 @@ def subtract_min_quantile(intensities, min_quantile=.01):
     Returns
     -------
     pandas.DataFrame
-        dataframe with rescaled intensities.
+        dataframe with rescaled features.
     """
-    columns_min_quantile = intensities.quantile(min_quantile)
+    columns_min_quantile = features.quantile(min_quantile)
 
-    subtracted_min = intensities - columns_min_quantile
+    subtracted_min = features - columns_min_quantile
 
     # Clip negative values to zero
     subtracted_min.clip(lower=0, axis=1, inplace=True)

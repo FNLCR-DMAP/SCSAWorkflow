@@ -88,7 +88,7 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
-    Plot the heatmap of the mean intensity of cells that belong to a `column`.
+    Plot the heatmap of the mean feature of cells that belong to a `column`.
 
     Parameters
     ----------
@@ -99,7 +99,7 @@ def heatmap(adata, column, layer=None, **kwargs):
         Name of member of adata.obs to plot the histogram.
 
     layer : str, default None
-        The name of the `adata` layer to use to calculate the mean intensity.
+        The name of the `adata` layer to use to calculate the mean feature.
 
     **kwargs:
         Parameters passed to seaborn heatmap function.
@@ -107,7 +107,7 @@ def heatmap(adata, column, layer=None, **kwargs):
     Returns
     -------
     pandas.DataFrame
-        A dataframe tha has the labels as indexes the mean intensity for every
+        A dataframe tha has the labels as indexes the mean feature for every
         marker.
 
     matplotlib.figure.Figure
@@ -117,16 +117,16 @@ def heatmap(adata, column, layer=None, **kwargs):
         The AsxesSubplot of the heatmap.
 
     """
-    intensities = adata.to_df(layer=layer)
+    features = adata.to_df(layer=layer)
     labels = adata.obs[column]
-    grouped = pd.concat([intensities, labels], axis=1).groupby(column)
-    mean_intensity = grouped.mean()
+    grouped = pd.concat([features, labels], axis=1).groupby(column)
+    mean_feature = grouped.mean()
 
-    n_rows = len(mean_intensity)
-    n_cols = len(mean_intensity.columns)
+    n_rows = len(mean_feature)
+    n_cols = len(mean_feature.columns)
     fig, ax = plt.subplots(figsize=(n_cols * 1.5, n_rows * 1.5))
     seaborn.heatmap(
-        mean_intensity,
+        mean_feature,
         annot=True,
         cmap="Blues",
         square=True,
@@ -140,7 +140,7 @@ def heatmap(adata, column, layer=None, **kwargs):
     ax.tick_params(axis='both', labelsize=25)
     ax.set_ylabel(column, size=25)
 
-    return mean_intensity, fig, ax
+    return mean_feature, fig, ax
 
 
 def hierarchical_heatmap(
@@ -152,7 +152,7 @@ def hierarchical_heatmap(
         **kwargs):
     """
     Plot a hierarchical clustering heatmap of the mean
-    intensity of cells that belong to a `column' using
+    feature of cells that belong to a `column' using
     scanpy.tl.dendrogram and sc.pl.matrixplot.
 
     Parameters
@@ -161,9 +161,9 @@ def hierarchical_heatmap(
         The AnnData object.
     column : str
         Name of the column in adata.obs to group by and
-        calculate mean intensity.
+        calculate mean feature.
     layer : str, optional, default: None
-        The name of the `adata` layer to use to calculate the mean intensity.
+        The name of the `adata` layer to use to calculate the mean feature.
     dendrogram : bool, optional, default: True
         If True, a dendrogram based on the hierarchical clustering between
         the `column` categories is computed and plotted.
@@ -172,49 +172,49 @@ def hierarchical_heatmap(
 
     Returns
     ----------
-    mean_intensity, matrixplot
+    feature, matrixplot
 
     """
 
     """
     # An example to call this function:
-    mean_intensity, matrixplot = hierarchical_heatmap(all_data,
+    mean_feature, matrixplot = hierarchical_heatmap(all_data,
     "phenograph", layer=None, standard_scale='var')
 
     # Display the figure
     #matrixplot.show()
     """
 
-    # Calculate mean intensity
-    intensities = adata.to_df(layer=layer)
+    # Calculate mean feature
+    features = adata.to_df(layer=layer)
     labels = adata.obs[column]
-    grouped = pd.concat([intensities, labels], axis=1).groupby(column)
-    mean_intensity = grouped.mean()
+    grouped = pd.concat([features, labels], axis=1).groupby(column)
+    mean_feature = grouped.mean()
 
-    # Reset the index of mean_intensity
-    mean_intensity = mean_intensity.reset_index()
+    # Reset the index of mean_feature
+    mean_feature = mean_feature.reset_index()
 
-    # Convert mean_intensity to AnnData
-    mean_intensity_adata = sc.AnnData(
-        X=mean_intensity.iloc[:, 1:].values,
+    # Convert mean_feature to AnnData
+    mean_feature_adata = sc.AnnData(
+        X=mean_feature.iloc[:, 1:].values,
         obs=pd.DataFrame(
-            index=mean_intensity.index,
-            data={column: mean_intensity.iloc[:, 0].astype('category').values}
+            index=mean_feature.index,
+            data={column: mean_feature.iloc[:, 0].astype('category').values}
         ),
-        var=pd.DataFrame(index=mean_intensity.columns[1:]))
+        var=pd.DataFrame(index=mean_feature.columns[1:]))
 
     # Compute dendrogram if needed
     if dendrogram:
         sc.tl.dendrogram(
-            mean_intensity_adata,
+            mean_feature_adata,
             groupby=column,
-            var_names=mean_intensity_adata.var_names,
+            var_names=mean_feature_adata.var_names,
             n_pcs=None)
 
     # Create the matrix plot
     matrixplot = sc.pl.matrixplot(
-        mean_intensity_adata,
-        var_names=mean_intensity_adata.var_names,
+        mean_feature_adata,
+        var_names=mean_feature_adata.var_names,
         groupby=column,
         use_raw=False,
         dendrogram=dendrogram,
@@ -223,22 +223,22 @@ def hierarchical_heatmap(
         return_fig=True,
         **kwargs)
 
-    return mean_intensity, matrixplot
+    return mean_feature, matrixplot
 
 
 def threshold_heatmap(adata, marker_cutoffs, phenotype):
     """
-    Creates a heatmap for each marker, categorizing intensities into
+    Creates a heatmap for each marker, categorizing features into
     low, medium, and high based on provided cutoffs.
 
     Parameters
     ----------
     adata : anndata.AnnData
-        AnnData object containing the marker intensities in .X attribute.
+        AnnData object containing the marker features in .X attribute.
 
     marker_cutoffs : dict
         Dictionary with marker names as keys and tuples with two
-        intensity cutoffs
+        features cutoffs
         as values.
 
     phenotype : str
@@ -267,23 +267,23 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
     # Save marker_cutoffs in the AnnData object
     adata.uns['marker_cutoffs'] = marker_cutoffs
 
-    intensity_df = pd.DataFrame(
+    feature_df = pd.DataFrame(
         index=adata.obs_names,
         columns=marker_cutoffs.keys())
 
     for marker, cutoffs in marker_cutoffs.items():
         low_cutoff, high_cutoff = cutoffs
         marker_values = adata[:, marker].X.flatten()
-        intensity_df.loc[marker_values <= low_cutoff, marker] = 0
-        intensity_df.loc[
+        feature_df.loc[marker_values <= low_cutoff, marker] = 0
+        feature_df.loc[
             (marker_values > low_cutoff) & (marker_values <= high_cutoff),
             marker] = 1
-        intensity_df.loc[marker_values > high_cutoff, marker] = 2
+        feature_df.loc[marker_values > high_cutoff, marker] = 2
 
-    intensity_df = intensity_df.astype(int)
+    feature_df = feature_df.astype(int)
 
-    # Add the intensity_df to adata as an AnnData layer
-    adata.layers["intensity"] = intensity_df.to_numpy()
+    # Add the feature_df to adata as an AnnData layer
+    adata.layers["feature"] = feature_df.to_numpy()
 
     # Convert the phenotype column to categorical
     adata.obs[phenotype] = adata.obs[phenotype].astype('category')
@@ -300,10 +300,10 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
     # Plot the heatmap using scanpy.pl.heatmap
     heatmap_plot = sc.pl.heatmap(
         adata,
-        var_names=intensity_df.columns,
+        var_names=feature_df.columns,
         groupby=phenotype,
         use_raw=False,
-        layer='intensity',
+        layer='feature',
         cmap=cmap,
         swap_axes=True,
         show=False)

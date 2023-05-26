@@ -1,12 +1,7 @@
-import os
-import sys
 import unittest
-
 import anndata
 import pandas as pd
 import numpy as np
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 from spac.transformations import rename_observations
 
 
