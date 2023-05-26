@@ -1,5 +1,5 @@
 name: Gitflow Action for R Package Development
-run-name: ${{ github.actor }} now ${{ github.event_name }} to ${{ github.ref_name }}
+run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor }}
 
 on:
   push:
@@ -10,5 +10,5 @@ on:
     branches: ['main', 'release*', 'dev', 'master']
 jobs:
   Activating_Parser:
-    uses: fnlcr-bids-sdsi/gitflow-R/.github/workflows/parser.yml@single-cell-analysis
+    uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
 
