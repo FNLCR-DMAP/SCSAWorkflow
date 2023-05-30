@@ -243,6 +243,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
         standard_scale=standard_scale, cmap="viridis",
         return_fig=True, ax=ax, show=False, **kwargs
     )
+    return mean_intensity, matrixplot
 
 
 def threshold_heatmap(adata, marker_cutoffs, phenotype):
