@@ -40,10 +40,10 @@ If you are proposing a feature:
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up `scworkflow` for local development.
+Ready to contribute? Here's how to set up `spac` for local development.
 
-1. Download a copy of `scworkflow` locally.
-2. Install `scworkflow` using `poetry`:
+1. Download a copy of `spac` locally.
+2. Install `spac` using `poetry`:
 
     ```console
     $ poetry install
@@ -69,5 +69,5 @@ Before you submit a pull request, check that it meets these guidelines:
 
 ## Code of Conduct
 
-Please note that the `scworkflow` project is released with a
+Please note that the `spac` project is released with a
 Code of Conduct. By contributing to this project you agree to abide by its terms.

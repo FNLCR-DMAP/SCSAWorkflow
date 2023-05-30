@@ -1,8 +1,8 @@
 import re
 import os
-import numpy as np
 import pandas as pd
 import anndata as ad
+import warnings
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -11,7 +11,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     """
     Read the csv file into an anndata object.
 
-    The function will also intialize intensities and spatial coordiantes.
+    The function will also intialize features and spatial coordiantes.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
 
     regex_str : str or list of str
         A string or a list of strings representing python regular expression
-        for the intensities columns in the data frame.  x_col : str The column
+        for the features columns in the data frame.  x_col : str The column
         name for the x coordinate of the cell.
 
     y_col : str
@@ -43,18 +43,18 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     else:
         regex_list = regex_str
 
-    all_intensities = []
+    all_features = []
     all_columns = list(dataframe.columns)
     for regex in regex_list:
-        intensities_regex = re.compile(regex)
-        intensities = list(
-            filter(intensities_regex.match, all_columns))
-        all_intensities.extend(intensities)
+        features_regex = re.compile(regex)
+        features = list(
+            filter(features_regex.match, all_columns))
+        all_features.extend(features)
 
-    intensities_df = dataframe[all_intensities]
+    features_df = dataframe[all_features]
     adata = ad.AnnData(
-        intensities_df,
-        dtype=intensities_df[all_intensities[0]].dtype)
+        features_df,
+        dtype=features_df[all_features[0]].dtype)
 
     if obs is not None:
         if isinstance(obs, str):
@@ -95,16 +95,16 @@ def concatinate_regions(regions):
     return all_adata
 
 
-def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
+def rescale_features(features, min_quantile=0.01, max_quantile=0.99):
     """
-    Clip and rescale intensities outside the minimum and maximum quantile.
+    Clip and rescale features outside the minimum and maximum quantile.
 
-    The rescaled intensities will be between 0 and 1.
+    The rescaled features will be between 0 and 1.
 
     Parameters
     ----------
-    intensities : pandas.Dataframe
-        The DataRrame of intensities.
+    features : pandas.Dataframe
+        The DataRrame of features.
 
     min_quantile : float
         The minimum quantile to be consider zero.
@@ -115,30 +115,30 @@ def rescale_intensities(intensities, min_quantile=0.01, max_quantile=0.99):
     Returns
     -------
     pandas.DataFrame
-        The created DataFrame with normalized intensities.
+        The created DataFrame with normalized features.
     """
-    markers_max_quantile = intensities.quantile(max_quantile)
-    markers_min_quantile = intensities.quantile(min_quantile)
+    markers_max_quantile = features.quantile(max_quantile)
+    markers_min_quantile = features.quantile(min_quantile)
 
-    intensities_clipped = intensities.clip(
+    features_clipped = features.clip(
         markers_min_quantile,
         markers_max_quantile,
         axis=1)
 
     scaler = MinMaxScaler()
-    np_intensities_scaled = scaler.fit_transform(
-        intensities_clipped.to_numpy())
+    np_features_scaled = scaler.fit_transform(
+        features_clipped.to_numpy())
 
-    intensities_scaled = pd.DataFrame(
-        np_intensities_scaled,
-        columns=intensities_clipped.columns)
+    features_scaled = pd.DataFrame(
+        np_features_scaled,
+        columns=features_clipped.columns)
 
-    return intensities_scaled
+    return features_scaled
 
 
-def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
+def add_rescaled_features(adata, min_quantile, max_quantile, layer):
     """
-    Clip and rescale the intensities matrix.
+    Clip and rescale the features matrix.
 
     The results will be added into a new layer in the AnnData object.
 
@@ -158,7 +158,7 @@ def add_rescaled_intensity(adata, min_quantile, max_quantile, layer):
     """
 
     original = adata.to_df()
-    rescaled = rescale_intensities(original, min_quantile, max_quantile)
+    rescaled = rescale_features(original, min_quantile, max_quantile)
     adata.layers[layer] = rescaled
 
 
@@ -186,22 +186,22 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     new_df_list = []
     for region in regions:
         region_cells = original[adata.obs[obs] == region]
-        new_intensities = subtract_min_quantile(region_cells, min_quantile)
-        new_df_list.append(new_intensities)
+        new_features = subtract_min_quantile(region_cells, min_quantile)
+        new_df_list.append(new_features)
 
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
 
-def subtract_min_quantile(intensities, min_quantile=.01):
+def subtract_min_quantile(features, min_quantile=.01):
     """
-    Subtract the intensity defined by the minimum quantile from all columns.
+    Subtract the features defined by the minimum quantile from all columns.
 
     Parameters
     ----------
 
-    intensities : pandas.DataFrame
-        The dataframe of intensities.
+    features : pandas.DataFrame
+        The dataframe of features.
 
     min_quantile: float
         The minimum quantile to be consider zero.
@@ -209,11 +209,11 @@ def subtract_min_quantile(intensities, min_quantile=.01):
     Returns
     -------
     pandas.DataFrame
-        dataframe with rescaled intensities.
+        dataframe with rescaled features.
     """
-    columns_min_quantile = intensities.quantile(min_quantile)
+    columns_min_quantile = features.quantile(min_quantile)
 
-    subtracted_min = intensities - columns_min_quantile
+    subtracted_min = features - columns_min_quantile
 
     # Clip negative values to zero
     subtracted_min.clip(lower=0, axis=1, inplace=True)
@@ -224,20 +224,18 @@ def subtract_min_quantile(intensities, min_quantile=.01):
 def load_csv_files(file_names):
 
     """
-    Read the csv file into an anndata object.
-
-    The function will also intialize intensities and spatial coordiantes.
+    Read the csv file(s) into a pandas dataframe.
 
     Parameters
     ----------
     file_names : str or list
-        A list of csv file paths dataframe to be combined
-        into single dataframe output
+        A list of csv file paths to be
+        combined into single list of dataframe output
 
     Returns
     -------
     list
-        A list of pandas data frame of all the csv files.
+        A list of pandas dataframe of all the csv files.
     """
 
     meta_schema = []
@@ -317,34 +315,32 @@ def load_csv_files(file_names):
 def combine_dfs(dataframes, observations):
 
     """
-    Read the csv file into single pandas dataframe.
-
-    The function will also intialize intensities and spatial coordiantes.
+    Combine a list of pandas dataframe into single pandas dataframe.
 
     Parameters
     ----------
-    dataframes : list
-        A list containing [file name, pandas dataframe] to be combined
+    dataframes : list of tuple
+        A list containing (file name, pandas dataframe) to be combined
         into single dataframe output
 
     observations : pandas.DataFrame
-        A pandas data frame where the index is the file name, and the columns
-        are various observations to add to all items in a given css.
+        A pandas data frame where the index is the file name, and
+        the columns are various observations to
+        add to all cells in a given dataframe.
 
-        Returns
+    Returns
     -------
     pandas.DataFrame
-        A pandas data frame of all the cells where each cell
-        has a unique index.
+        A pandas data frame of all the cells
+        where each cell has a unique index.
     """
 
     meta_schema = []
     combined_dataframe = pd.DataFrame()
-
     if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
-        observations_type = type(observations)
+        observations_type = str(type(observations))
         error_message = "observations should be a pandas dataframe, " + \
-                        "but got " + observations_type + "."
+            "but got " + observations_type + "."
         raise TypeError(error_message)
 
     for current_df_list in dataframes:
@@ -362,6 +358,7 @@ def combine_dfs(dataframes, observations):
             print("Meta schema acquired. Columns are:")
             for column_name in meta_schema:
                 print(column_name)
+
         if len(meta_schema) == len(current_schema):
             if set(meta_schema) != set(current_schema):
                 error_message = "Column in current file does not match " + \
@@ -374,8 +371,8 @@ def combine_dfs(dataframes, observations):
 
         # Check if the observations DataFrame has the required index
         if file_name not in observations.index:
-            error_message = (f"Missing data in the observations DataFrame for "
-                             f"the file '{file_name}'.")
+            error_message = "Missing data in the observations DataFrame" + \
+                f"for the file '{file_name}'."
             raise ValueError(error_message)
 
         # Add observations in to the dataframe
@@ -389,10 +386,9 @@ def combine_dfs(dataframes, observations):
         else:
             # Concatenate the DataFrames, with error handling
             try:
-                combined_dataframe = pd.concat([
-                    combined_dataframe,
-                    current_df
-                ])
+                combined_dataframe = pd.concat(
+                    [combined_dataframe, current_df]
+                    )
             except (ValueError, TypeError) as e:
                 print('Error concatenating DataFrames:', e)
 
@@ -405,7 +401,7 @@ def combine_dfs(dataframes, observations):
     return combined_dataframe
 
 
-def select_values(data, observation_name, values=None):
+def select_values(data, observation, values=None):
     """
     Selects rows from input dataframe matching specified values in a column.
 
@@ -413,10 +409,10 @@ def select_values(data, observation_name, values=None):
     ----------
     data : pandas.DataFrame
         The input dataframe.
-    observation_name : str
+    observation : str
         The column name to be used for selection.
     values : list, optional
-        List of values for observation_name to include.
+        List of values for observation to include.
         If None, return all values.
 
     Returns
@@ -427,7 +423,7 @@ def select_values(data, observation_name, values=None):
     Raises
     ------
     ValueError
-        If observation_name does not exist or one or more values passed
+        If observation does not exist or one or more values passed
         do not exist in the specified column.
 
     Examples
@@ -444,31 +440,34 @@ def select_values(data, observation_name, values=None):
     """
     # Check if the DataFrame is empty
     if not data.empty:
-        # If DataFrame is not empty, check if observation_name exists
-        if observation_name not in data.columns:
+        # If DataFrame is not empty, check if observation exists
+        if observation not in data.columns:
             raise ValueError(
-                f"Column {observation_name} does not exist in the dataframe"
+                f"Column {observation} does not exist in the dataframe"
             )
 
-        # If values exist in observation_name column, filter data
+        # If values exist in observation, filter data
         if values is not None:
-            data = data[data[observation_name].isin(values)]
+            filtered_data = data[data[observation].isin(values)]
+            if filtered_data.empty:
+                warnings.warn("No matching values found in the data.")
+            return filtered_data
 
     return data
 
 
-def downsample_cells(data, observation_name, n_samples=None,
+def downsample_cells(data, observation, n_samples=None,
                      stratify=False, rand=False):
     """
     Reduces the number of cells in the data by either selecting n_samples from
-    every possible value of observation_name, or returning n_samples
-    stratified by the frequency of values in observation_name.
+    every possible value of observation, or returning n_samples
+    stratified by the frequency of values in observation.
 
     Parameters
     ----------
     data : pd.DataFrame
         The input data frame.
-    observation_name : str
+    observation : str
         The column name to downsample on.
     n_samples : int, default=None
         The max number of samples to return for each group if stratify is
@@ -493,20 +492,20 @@ def downsample_cells(data, observation_name, n_samples=None,
     >>> print(downsample_cells(df, 'observation', n_samples=2))
     """
     # Check if the column to downsample on exists
-    if observation_name not in data.columns:
+    if observation not in data.columns:
         raise ValueError(
-            f"Column {observation_name} does not exist in the dataframe"
+            f"Column {observation} does not exist in the dataframe"
         )
 
     if n_samples is not None:
         # Stratify selection
         if stratify:
             # Determine frequencies of each group
-            freqs = data[observation_name].value_counts(normalize=True)
+            freqs = data[observation].value_counts(normalize=True)
             n_samples_per_group = (freqs * n_samples).astype(int)
             samples = []
-            # Group by observation_name and sample from each group
-            for group, group_data in data.groupby(observation_name):
+            # Group by observation and sample from each group
+            for group, group_data in data.groupby(observation):
                 n_group_samples = n_samples_per_group.get(group, 0)
                 if rand:
                     # Randomly select the returned cells
@@ -521,8 +520,11 @@ def downsample_cells(data, observation_name, n_samples=None,
         else:
             # Non-stratified selection
             # Select the first n cells from each group
-            data = data.groupby(observation_name).apply(
+            data = data.groupby(observation).apply(
                 lambda x: x.head(n=min(n_samples, len(x)))
             ).reset_index(drop=True)
+
+    # Print the number of rows in the resulting data
+    print(f"Number of rows in the returned data: {len(data)}")
 
     return data

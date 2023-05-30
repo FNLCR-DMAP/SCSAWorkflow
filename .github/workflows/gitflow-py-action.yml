@@ -1,0 +1,14 @@
+name: Gitflow Action for Python Package Development
+run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor }}
+
+on:
+  push:
+    branches: ['*', '!dev', '!main']
+    
+  pull_request:
+    types: ['opened', 'closed']
+    branches: ['main', 'release*', 'dev', 'master']
+jobs:
+  Activating_Parser:
+    uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
+
