@@ -210,7 +210,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     mean_intensity = grouped.mean()
 
     # Reset the index of mean_feature
-    mean_feature = mean_feature.reset_index()
+    mean_intensity = mean_intensity.reset_index()
 
     # Convert mean_intensity to AnnData
     mean_intensity_adata = sc.AnnData(
