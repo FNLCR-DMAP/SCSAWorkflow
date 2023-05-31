@@ -32,7 +32,22 @@ def phenograph_clustering(adata, features, layer, k=30):
         The number of nearest neighbor to be used in creating the graph.
 
     """
-    phenograph_df = adata.to_df(layer=layer)[features]
+    
+    if not isinstance(adata, sc.AnnData):
+        raise TypeError("`adata` must be of type anndata.AnnData")
+
+    if not isinstance(features, list) or not all(isinstance(feature, str) for feature in features):
+        raise TypeError("`features` must be a list of strings")
+
+    if layer not in adata.layers.keys():
+        raise ValueError(f"`layer` not found in `adata.layers`. Available layers are {list(adata.layers.keys())}")
+
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("`k` must be a positive integer")
+
+    if not all(feature in adata.var_names for feature in features):
+        raise ValueError("One or more of the `features` are not in `adata.var_names`")
+
     phenograph_out = sce.tl.phenograph(
         phenograph_df,
         clustering_algo="louvain",
