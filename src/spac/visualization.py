@@ -239,7 +239,8 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
         AnnData object containing the feature intensities in .X attribute.
     feature_cutoffs : dict
         Dictionary with feature names as keys and tuples with two intensity
-        cutoffs as values.  observation : str Column name in .obs DataFrame
+        cutoffs as values.
+    observation : str Column name in .obs DataFrame
         that contains the observation used for grouping.
 
     Returns
@@ -252,6 +253,17 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
         'gene_groups_ax'.
 
     """
+
+    # Assert observation is a string
+    if not isinstance(observation, str):
+        err_type = type(observation).__name__
+        err_msg = (f'Observation should be string. Got {err_type}.')
+        raise TypeError(err_msg)
+
+    # Assert observation is a column in adata.obs DataFrame
+    if observation not in adata.obs.columns:
+        err_msg = f"'{observation}' not found in adata.obs DataFrame."
+        raise ValueError(err_msg)
 
     assert isinstance(feature_cutoffs, dict),\
         "feature_cutoffs should be a dictionary."

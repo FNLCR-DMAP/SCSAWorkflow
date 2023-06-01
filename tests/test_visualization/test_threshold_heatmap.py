@@ -27,6 +27,22 @@ class TestThresholdHeatmap(unittest.TestCase):
 
         self.phenotype = 'phenotype'
 
+    def test_invalid_observation_type(self):
+        with self.assertRaises(TypeError):
+            threshold_heatmap(
+                self.adata,
+                self.marker_cutoffs,
+                123
+            )
+
+    def test_invalid_observation_value(self):
+        with self.assertRaises(ValueError):
+            threshold_heatmap(
+                self.adata,
+                self.marker_cutoffs,
+                'non_existent_column'
+            )
+
     def test_invalid_feature_cutoffs_type(self):
         with self.assertRaises(AssertionError):
             threshold_heatmap(self.adata, [], self.phenotype)
