@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 from spac.visualization import threshold_heatmap
 
 
@@ -51,6 +52,25 @@ class TestThresholdHeatmap(unittest.TestCase):
         feature_cutoffs = {'marker1': (1,)}  # Tuple with one element
         with self.assertRaises(AssertionError):
             threshold_heatmap(self.adata, feature_cutoffs, self.phenotype)
+
+    def test_feature_cutoffs_values_are_floats(self):
+        for feature, cutoffs in self.marker_cutoffs.items():
+            self.assertIsInstance(
+                cutoffs[0], float,
+                f"Low cutoff for {feature} should be float."
+            )
+            self.assertIsInstance(
+                cutoffs[1], float,
+                f"High cutoff for {feature} should be float."
+            )
+            self.assertFalse(
+                math.isnan(cutoffs[0]),
+                f"Low cutoff for {feature} should not be NaN."
+            )
+            self.assertFalse(
+                math.isnan(cutoffs[1]),
+                f"High cutoff for {feature} should not be NaN."
+            )
 
     def test_threshold_heatmap(self):
         ax_dict = threshold_heatmap(
