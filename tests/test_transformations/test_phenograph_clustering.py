@@ -19,6 +19,25 @@ class TestPhenographClustering(unittest.TestCase):
         self.features = ['gene1', 'gene2']
         self.layer = 'counts'
 
+        self.syn_data = AnnData(
+            [
+                np.concatenate(
+                        (
+                            np.random.normal(100, 1, 500),
+                            np.random.normal(10, 1, 500)
+                        )
+                    ),
+                np.concatenate(
+                        (
+                            np.random.normal(10, 1, 500),
+                            np.random.normal(100, 1, 500)
+                        )
+                    ),
+            ],
+            var=pd.DataFrame(index=['gene1',
+                                    'gene2'])
+                                    )
+
     @patch('scanpy.external.tl.phenograph',
            return_value=(np.random.randint(0, 3, 100), {}))
     def test_typical_case(self, mock_phenograph):
