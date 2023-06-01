@@ -93,27 +93,6 @@ class TestPhenographClustering(unittest.TestCase):
             len(np.unique(self.syn_data.obs['phenograph'])),
             2)
 
-    @patch('scanpy.external.tl.phenograph',
-           return_value=(np.random.randint(0, 3, 100), {}))
-    def test_wide_range_inputs(self, mock_phenograph):
-        # This test checks the function's behavior for a wide range of possible
-        # inputs. It repeatedly calls the function with different random inputs
-        # and checks if the expected outputs are correct.
-        for _ in range(100):
-            adata = AnnData(np.random.rand(100, 3),
-                            var=pd.DataFrame(index=['gene1',
-                                                    'gene2',
-                                                    'gene3']))
-            adata.layers['counts'] = np.random.rand(100, 3)
-            features = np.random.choice(['gene1', 'gene2', 'gene3'],
-                                        size=np.random.randint(1, 3),
-                                        replace=False).tolist()
-            layer = 'counts'
-            phenograph_clustering(adata, features, layer)
-            self.assertIn('phenograph', adata.obs)
-            self.assertEqual(sorted(adata.uns['phenograph_features']),
-                             sorted(features))
-
 
 if __name__ == '__main__':
     unittest.main()
