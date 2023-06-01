@@ -19,24 +19,27 @@ class TestPhenographClustering(unittest.TestCase):
         self.features = ['gene1', 'gene2']
         self.layer = 'counts'
 
+        self.syn_dataset = np.array([
+                    np.concatenate(
+                            (
+                                np.random.normal(100, 1, 500),
+                                np.random.normal(10, 1, 500)
+                            )
+                        ),
+                    np.concatenate(
+                            (
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(100, 1, 500)
+                            )
+                        ),
+                ]).reshape(-1, 2)
+
         self.syn_data = AnnData(
-            [
-                np.concatenate(
-                        (
-                            np.random.normal(100, 1, 500),
-                            np.random.normal(10, 1, 500)
-                        )
-                    ),
-                np.concatenate(
-                        (
-                            np.random.normal(10, 1, 500),
-                            np.random.normal(100, 1, 500)
-                        )
-                    ),
-            ],
-            var=pd.DataFrame(index=['gene1',
-                                    'gene2'])
-                                    )
+                self.syn_dataset,
+                var=pd.DataFrame(index=['gene1',
+                                        'gene2'])
+                )
+        self.syn_data.layers['counts'] = self.syn_dataset
 
     @patch('scanpy.external.tl.phenograph',
            return_value=(np.random.randint(0, 3, 100), {}))
@@ -79,6 +82,16 @@ class TestPhenographClustering(unittest.TestCase):
         # more of the features are not found in the AnnData object's var_names.
         with self.assertRaises(ValueError):
             phenograph_clustering(self.adata, ['invalid'], self.layer)
+
+    def test_clustering_accuracy(self):
+        phenograph_clustering(self.syn_data,
+                              self.features,
+                              'counts',
+                              500)
+        self.assertIn('phenograph', self.syn_data.obs)
+        self.assertEqual(
+            len(np.unique(self.syn_data.obs['phenograph'])),
+            2)
 
     @patch('scanpy.external.tl.phenograph',
            return_value=(np.random.randint(0, 3, 100), {}))
