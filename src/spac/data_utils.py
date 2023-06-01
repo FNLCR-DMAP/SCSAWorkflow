@@ -2,6 +2,7 @@ import re
 import os
 import pandas as pd
 import anndata as ad
+import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 
@@ -594,3 +595,95 @@ def calculate_centroid(
     data[new_y] = (data[y_min] + data[y_max]) / 2
 
     return data
+
+
+def bin2cat(data, one_hot_observations, new_observation):
+    """
+    Combine a set of columns representing
+    a binary one hot encoding of categories
+    into a new categorical column.
+
+    Parameters:
+    -----------
+        data : pandas.DataFrame
+            The pandas dataframe containing the one hot encoded observations.
+
+        one_hot_observations : str or list of str
+            A string or a list of strings representing
+            python regular expression of the one hot encoded observations
+            columns in the data frame.
+
+        new_observation: str
+            The column name for new categorical observation to be created.
+
+    Returns:
+    --------
+        pandas.DataFrame
+            DataFrame with new categorical column added.
+
+    Example:
+    --------
+    >>> data = pd.DataFrame({
+    ...    'A': [1, 1, 0, 0],
+    ...     'B': [0, 0, 1, 0]
+    ... })
+    >>> one_hot_observations = ['A', 'B']
+    >>> new_observation = 'new_category'
+    >>> result = bin2cat(data, one_hot_observations, new_observation)
+    >>> print(result[new_observation])
+    0      A
+    1      A
+    2      B
+    3    NaN
+    Name: new_category, dtype: object
+    """
+
+    if isinstance(one_hot_observations, str):
+        one_hot_observations = [one_hot_observations]
+    elif not isinstance(one_hot_observations, list):
+        error_string = "one_hot_observations should " + \
+                         "be a string or a list of strings."
+        raise ValueError(error_string)
+
+    if new_observation in data.columns:
+        raise ValueError("Column name for new observation already exists.")
+
+    if len(one_hot_observations) > 0:
+        # Add regrex to find cell labels
+        all_cell_labels = []
+
+        all_columns = list(data.columns)
+        for regex in one_hot_observations:
+            cell_labels_regex = re.compile(regex)
+            cell_labels_str = list(
+                filter(
+                    cell_labels_regex.match,
+                    all_columns
+                    )
+                )
+            all_cell_labels.extend(cell_labels_str)
+
+        all_cell_labels = list(all_cell_labels)
+
+        if len(all_cell_labels) > 0:
+            cell_labels_df = data.loc[:, all_cell_labels]
+
+            def get_columns_with_1(row):
+                column_names = cell_labels_df.columns[row == 1]
+                if len(column_names) > 1:
+                    raise ValueError(f"Multiple instance found:{column_names}")
+                elif len(column_names) == 1:
+                    return column_names[0]
+                else:
+                    return np.nan
+
+            column_names_with_1 = cell_labels_df.apply(
+                get_columns_with_1,
+                axis=1)
+            column_names_with_1 = column_names_with_1.tolist()
+            data[new_observation] = column_names_with_1
+            return data
+        else:
+            error_string = "No column was found in the dataframe " + \
+                "with current regrex pattern(s)."
+            raise ValueError(error_string)
