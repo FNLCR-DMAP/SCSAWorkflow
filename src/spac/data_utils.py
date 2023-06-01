@@ -528,3 +528,69 @@ def downsample_cells(data, observation, n_samples=None,
     print(f"Number of rows in the returned data: {len(data)}")
 
     return data
+
+
+def calculate_centroid(
+    data,
+    x_min,
+    x_max,
+    y_min,
+    y_max,
+    new_x,
+    new_y
+):
+    """
+    Calculate the spatial coordinates of the cell centroid as the average of
+    min and max coordinates.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The input data frame. The dataframe should contain four columns for
+        x_min, x_max, y_min, and y_max for centroid calculation.
+    x_min : str
+        column name with minimum x value
+    x_max : str
+        column name with maximum x value
+    y_min : str
+        column name with minimum y value
+    y_max : str
+        column name with maximum y value
+    new_x : str
+        the new column name of the x dimension of the centroid,
+        allowing characters are alphabetic, digits and underscore
+    new_y : str
+        the new column name of the y dimension of the centroid,
+        allowing characters are alphabetic, digits and underscore
+
+    Returns
+    -------
+    data : pd.DataFrame
+        dataframe with two new columns names
+
+    """
+
+    # Check for valid column names
+    invalid_chars = r'[^a-zA-Z0-9_]'
+
+    for name in [new_x, new_y]:
+        if re.search(invalid_chars, name):
+            error_string = "Column name " + str(name) + \
+                " contains invalid characters. " + \
+                "Use only alphanumeric characters and underscores."
+
+            raise ValueError(error_string)
+
+    # check if the columns exist in the dataframe
+    for col in [x_min,
+                x_max,
+                y_min,
+                y_max]:
+        if col not in data.columns:
+            raise ValueError(f"Column {col} does not exist in the dataframe.")
+
+    # calculate the centroids
+    data[new_x] = (data[x_min] + data[x_max]) / 2
+    data[new_y] = (data[y_min] + data[y_max]) / 2
+
+    return data
