@@ -3,7 +3,7 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-from spac.phenograph_clustering import phenograph_clustering
+from spac.transformations import phenograph_clustering
 
 
 class TestPhenographClustering(unittest.TestCase):

@@ -29,8 +29,8 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     k : int
         The number of nearest neighbor to be used in creating the graph.
-
     """
+
     if not isinstance(adata, sc.AnnData):
         raise TypeError("`adata` must be of type anndata.AnnData")
 
