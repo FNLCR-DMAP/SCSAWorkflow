@@ -3,6 +3,7 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 import anndata
+import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
@@ -265,11 +266,19 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
         err_msg = f"'{observation}' not found in adata.obs DataFrame."
         raise ValueError(err_msg)
 
-    assert isinstance(feature_cutoffs, dict),\
-        "feature_cutoffs should be a dictionary."
+    if not isinstance(feature_cutoffs, dict):
+        raise TypeError("feature_cutoffs should be a dictionary.")
+
     for key, value in feature_cutoffs.items():
-        assert isinstance(value, tuple) and len(value) == 2,\
-            "Each value in feature_cutoffs should be a tuple of two elements."
+        if not (isinstance(value, tuple) and len(value) == 2):
+            raise ValueError(
+                "Each value in feature_cutoffs should be a "
+                "tuple of two elements."
+            )
+        if math.isnan(value[0]):
+            raise ValueError(f"Low cutoff for {key} should not be NaN.")
+        if math.isnan(value[1]):
+            raise ValueError(f"High cutoff for {key} should not be NaN.")
 
     adata.uns['feature_cutoffs'] = feature_cutoffs
 

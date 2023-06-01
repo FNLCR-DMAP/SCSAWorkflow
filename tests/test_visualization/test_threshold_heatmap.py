@@ -45,32 +45,30 @@ class TestThresholdHeatmap(unittest.TestCase):
             )
 
     def test_invalid_feature_cutoffs_type(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             threshold_heatmap(self.adata, [], self.phenotype)
 
     def test_invalid_feature_cutoffs_value(self):
         feature_cutoffs = {'marker1': (1,)}  # Tuple with one element
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             threshold_heatmap(self.adata, feature_cutoffs, self.phenotype)
 
-    def test_feature_cutoffs_values_are_floats(self):
-        for feature, cutoffs in self.marker_cutoffs.items():
-            self.assertIsInstance(
-                cutoffs[0], float,
-                f"Low cutoff for {feature} should be float."
-            )
-            self.assertIsInstance(
-                cutoffs[1], float,
-                f"High cutoff for {feature} should be float."
-            )
-            self.assertFalse(
-                math.isnan(cutoffs[0]),
-                f"Low cutoff for {feature} should not be NaN."
-            )
-            self.assertFalse(
-                math.isnan(cutoffs[1]),
-                f"High cutoff for {feature} should not be NaN."
-            )
+    def test_feature_cutoffs_values_are_nan(self):
+        # Test low cutoff is NaN
+        feature_cutoffs_nan_low = {
+            'marker1': (float('nan'), 0.8),
+            'marker2': (0.4, 1.0),
+        }
+        with self.assertRaises(ValueError):
+            threshold_heatmap(self.adata, feature_cutoffs_nan_low, self.phenotype)
+
+        # Test high cutoff is NaN
+        feature_cutoffs_nan_high = {
+            'marker1': (0.2, float('nan')),
+            'marker2': (0.4, 1.0),
+        }
+        with self.assertRaises(ValueError):
+            threshold_heatmap(self.adata, feature_cutoffs_nan_high, self.phenotype)
 
     def test_threshold_heatmap(self):
         ax_dict = threshold_heatmap(
