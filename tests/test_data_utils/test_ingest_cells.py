@@ -16,7 +16,7 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         adata = ingest_cells(df1,
-                             "marker*",
+                             "^marker.*",
                              obs=batch)
 
         self.assertCountEqual(
@@ -35,7 +35,8 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         adata = ingest_cells(df1,
-                             ["marker1", "marker2"],
+                             ["^marker1$",
+                              "^marker2$"],
                              obs=batch)
 
         self.assertCountEqual(
@@ -53,7 +54,7 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         adata = ingest_cells(df1,
-                             "marker1",
+                             "^marker1$",
                              obs=batch)
         self.assertCountEqual(
             list(adata.var_names),
@@ -70,8 +71,9 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         adata = ingest_cells(df1,
-                             "marker1",
-                             obs=["region1", "region2"])
+                             "^marker1$",
+                             obs=["region1",
+                                  "region2"])
         self.assertCountEqual(
             list(adata.obs_keys()),
             ["region1", "region2"])

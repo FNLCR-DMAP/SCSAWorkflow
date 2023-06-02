@@ -23,8 +23,8 @@ class TestAnalysisMethods(unittest.TestCase):
             batch: "reg2"
         })
 
-        adata1 = ingest_cells(df1, "marker*", obs=batch)
-        adata2 = ingest_cells(df2, "marker*", obs=batch)
+        adata1 = ingest_cells(df1, "^marker.*", obs=batch)
+        adata2 = ingest_cells(df2, "^marker.*", obs=batch)
 
         all_adata = concatinate_regions([adata1, adata2])
 
