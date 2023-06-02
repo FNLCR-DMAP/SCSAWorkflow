@@ -1,8 +1,11 @@
 import seaborn
 import scanpy as sc
 import pandas as pd
+import numpy as np
+import anndata
+import math
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
 
@@ -246,83 +249,94 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     return mean_intensity, matrixplot
 
 
-def threshold_heatmap(adata, marker_cutoffs, phenotype):
+def threshold_heatmap(adata, feature_cutoffs, observation):
     """
-    Creates a heatmap for each marker, categorizing features into
-    low, medium, and high based on provided cutoffs.
+    Creates a heatmap for each feature, categorizing intensities into low,
+    medium, and high based on provided cutoffs.
 
     Parameters
     ----------
     adata : anndata.AnnData
-        AnnData object containing the marker features in .X attribute.
-
-    marker_cutoffs : dict
-        Dictionary with marker names as keys 
-        and tuples with two intensity cutoffs as values.
-
-    phenotype : str
-        Column name in .obs DataFrame that contains the 
-        phenotype used for grouping.
+        AnnData object containing the feature intensities in .X attribute.
+    feature_cutoffs : dict
+        Dictionary with feature names as keys and tuples with two intensity
+        cutoffs as values.
+    observation : str Column name in .obs DataFrame
+        that contains the observation used for grouping.
 
     Returns
     -------
     Dictionary of :class:`~matplotlib.axes.Axes`
-        A dictionary contains the axes of figures generated in the
-        scanpy heatmap function.
+        A dictionary contains the axes of figures generated in the scanpy
+        heatmap function.
         Consistent Key: 'heatmap_ax'
-        Potential Keys includes: 'groupby_ax', 'dendrogram_ax',
-        and 'gene_groups_ax'.
-    """
+        Potential Keys includes: 'groupby_ax', 'dendrogram_ax', and
+        'gene_groups_ax'.
 
     """
-    # Current function returns a Matplotlib figure object.
-    # Use the code below to display the heatmap when the function is called:
 
-    heatmap_figure = threshold_heatmap(adata, marker_cutoffs, phenotype)
-    plt.show()
+    # Assert observation is a string
+    if not isinstance(observation, str):
+        err_type = type(observation).__name__
+        err_msg = (f'Observation should be string. Got {err_type}.')
+        raise TypeError(err_msg)
 
-    """
-    # Save marker_cutoffs in the AnnData object
-    adata.uns['marker_cutoffs'] = marker_cutoffs
-    feature_df = pd.DataFrame(
-        index=adata.obs_names,
-        columns=marker_cutoffs.keys())
+    # Assert observation is a column in adata.obs DataFrame
+    if observation not in adata.obs.columns:
+        err_msg = f"'{observation}' not found in adata.obs DataFrame."
+        raise ValueError(err_msg)
 
-    for marker, cutoffs in marker_cutoffs.items():
+    if not isinstance(feature_cutoffs, dict):
+        raise TypeError("feature_cutoffs should be a dictionary.")
+
+    for key, value in feature_cutoffs.items():
+        if not (isinstance(value, tuple) and len(value) == 2):
+            raise ValueError(
+                "Each value in feature_cutoffs should be a "
+                "tuple of two elements."
+            )
+        if math.isnan(value[0]):
+            raise ValueError(f"Low cutoff for {key} should not be NaN.")
+        if math.isnan(value[1]):
+            raise ValueError(f"High cutoff for {key} should not be NaN.")
+
+    adata.uns['feature_cutoffs'] = feature_cutoffs
+
+    intensity_df = pd.DataFrame(index=adata.obs_names,
+                                columns=feature_cutoffs.keys())
+
+    for feature, cutoffs in feature_cutoffs.items():
         low_cutoff, high_cutoff = cutoffs
-        marker_values = adata[:, marker].X.flatten()
-        feature_df.loc[marker_values <= low_cutoff, marker] = 0
-        feature_df.loc[
-            (marker_values > low_cutoff) & (marker_values <= high_cutoff),
-            marker] = 1
-        feature_df.loc[marker_values > high_cutoff, marker] = 2
+        feature_values = adata[:, feature].X.flatten()
+        intensity_df.loc[feature_values <= low_cutoff, feature] = 0
+        intensity_df.loc[(feature_values > low_cutoff) &
+                         (feature_values <= high_cutoff), feature] = 1
+        intensity_df.loc[feature_values > high_cutoff, feature] = 2
 
-    feature_df = feature_df.astype(int)
+    intensity_df = intensity_df.astype(int)
+    adata.layers["intensity"] = intensity_df.to_numpy()
+    adata.obs[observation] = adata.obs[observation].astype('category')
 
-    # Add the feature_df to adata as an AnnData layer
-    adata.layers["feature"] = feature_df.to_numpy()
-
-    # Convert the phenotype column to categorical
-    adata.obs[phenotype] = adata.obs[phenotype].astype('category')
-
-    # Create a custom color map for the heatmap
-    color_map = {
-        0: (0/255, 0/255, 139/255),
-        1: 'green',
-        2: 'yellow',
-    }
+    color_map = {0: (0/255, 0/255, 139/255), 1: 'green', 2: 'yellow'}
     colors = [color_map[i] for i in range(3)]
     cmap = ListedColormap(colors)
 
-    # Plot the heatmap using scanpy.pl.heatmap
+    norm = BoundaryNorm([-0.5, 0.5, 1.5, 2.5], cmap.N)
+
     heatmap_plot = sc.pl.heatmap(
         adata,
-        var_names=feature_df.columns,
-        groupby=phenotype,
+        var_names=intensity_df.columns,
+        groupby=observation,
         use_raw=False,
-        layer='feature',
+        layer='intensity',
         cmap=cmap,
+        norm=norm,
         swap_axes=True,
-        show=False)
+        show=False
+    )
+
+    colorbar = plt.gcf().axes[-1]
+    colorbar.set_yticks([0, 1, 2])
+    colorbar.set_yticklabels(['low', 'medium', 'high'])
 
     return heatmap_plot
