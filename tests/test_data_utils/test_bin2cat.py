@@ -13,7 +13,7 @@ class TestBin2Cat(unittest.TestCase):
             'B_0': [0, 0, 1, 0, 0],
             'B_1': [0, 0, 0, 1, 0]
         })
-        one_hot_observations = ['A', 'B']
+        one_hot_observations = ['A.*', 'B.*']
         new_observation = 'new_category'
 
         # Expected output data
@@ -37,7 +37,7 @@ class TestBin2Cat(unittest.TestCase):
             'A_0': [1, 0, 0],
             'A_1': [0, 1, 0],
         })
-        one_hot_observations = ['A']
+        one_hot_observations = ['A.*']
         new_observation = 'A_0'  # Duplicate name
 
         # Call the function and check for ValueError
@@ -52,7 +52,7 @@ class TestBin2Cat(unittest.TestCase):
             'B_0': [0, 0, 1],
             'B_1': [1, 0, 1],
         })
-        one_hot_observations = ['A', 'B']
+        one_hot_observations = ['A.*', 'B.*']
         new_observation = 'new_category'
 
         # Call the function and check for ValueError
@@ -72,7 +72,7 @@ class TestBin2Cat(unittest.TestCase):
             'A_0': [1, 0, 0],
             'A_1': [0, 1, 0],
         })
-        one_hot_observations = ['B']  # Non-existent column
+        one_hot_observations = ['B.*']  # Non-existent column
         new_observation = 'new_category'
 
         # Call the function and check for ValueError

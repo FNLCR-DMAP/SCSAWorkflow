@@ -5,6 +5,7 @@ import anndata as ad
 import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
+from spac.utils import regex_search_list
 
 
 def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
@@ -44,13 +45,11 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     else:
         regex_list = regex_str
 
-    all_features = []
     all_columns = list(dataframe.columns)
-    for regex in regex_list:
-        features_regex = re.compile(regex)
-        features = list(
-            filter(features_regex.match, all_columns))
-        all_features.extend(features)
+    all_features = regex_search_list(
+        regex_list,
+        all_columns
+    )
 
     features_df = dataframe[all_features]
     adata = ad.AnnData(
@@ -650,20 +649,12 @@ def bin2cat(data, one_hot_observations, new_observation):
 
     if len(one_hot_observations) > 0:
         # Add regrex to find cell labels
-        all_cell_labels = []
 
         all_columns = list(data.columns)
-        for regex in one_hot_observations:
-            cell_labels_regex = re.compile(regex)
-            cell_labels_str = list(
-                filter(
-                    cell_labels_regex.match,
-                    all_columns
-                    )
-                )
-            all_cell_labels.extend(cell_labels_str)
-
-        all_cell_labels = list(all_cell_labels)
+        all_cell_labels = regex_search_list(
+                one_hot_observations,
+                all_columns
+            )
 
         if len(all_cell_labels) > 0:
             cell_labels_df = data.loc[:, all_cell_labels]
