@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
+
 def histogram(adata, column, group_by=None, together=False, **kwargs):
     """
     Plot the histogram of cells based specific column.
@@ -146,87 +147,106 @@ def heatmap(adata, column, layer=None, **kwargs):
     return mean_feature, fig, ax
 
 
-def hierarchical_heatmap(
-        adata,
-        column,
-        layer=None,
-        dendrogram=True,
-        standard_scale=None,
-        **kwargs):
+def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
+                         standard_scale=None, ax=None, **kwargs):
     """
-    Plot a hierarchical clustering heatmap of the mean
-    feature of cells that belong to a `column' using
-    scanpy.tl.dendrogram and sc.pl.matrixplot.
+    Generates a hierarchical clustering heatmap.
+    Cells are stratified by `observation`,
+    then mean intensities are calculated for each feature across all cells
+    to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    column : str
-        Name of the column in adata.obs to group by and
-        calculate mean feature.
-    layer : str, optional, default: None
-        The name of the `adata` layer to use to calculate the mean feature.
-    dendrogram : bool, optional, default: True
+    observation : str
+        Name of the observation in adata.obs to group by and calculate mean
+        intensity.
+    layer : str, optional
+        The name of the `adata` layer to use to calculate the mean intensity.
+        Default is None.
+    dendrogram : bool, optional
         If True, a dendrogram based on the hierarchical clustering between
-        the `column` categories is computed and plotted.
+        the `observation` categories is computed and plotted. Default is True.
+    ax : matplotlib.axes.Axes, optional
+        A matplotlib axes object. If not provided, a new figure and axes
+        object will be created. Default is None.
     **kwargs:
         Additional parameters passed to sc.pl.matrixplot function.
 
     Returns
     ----------
-    feature, matrixplot
+    mean_intensity : pandas.DataFrame
+        A DataFrame containing the mean intensity of cells for each
+        observation.
+    matrixplot : scanpy.pl.matrixplot
+        A Scanpy matrixplot object.
 
-    """
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from spac.visualization import hierarchical_heatmap
+    >>> import anndata
 
-    """
-    # An example to call this function:
-    mean_feature, matrixplot = hierarchical_heatmap(all_data,
-    "phenograph", layer=None, standard_scale='var')
+    >>> X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
+    >>> obs = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
+    >>> all_data = anndata.AnnData(X=X, obs=obs)
 
+    >>> fig, ax = plt.subplots()  # Create a new figure and axes object
+    >>> mean_intensity, matrixplot = hierarchical_heatmap(all_data,
+    ...                                                   "cell_type",
+    ...                                                   layer=None,
+    ...                                                   standard_scale='var',
+    ...                                                   ax=None)
     # Display the figure
-    #matrixplot.show()
+    # matrixplot.show()
     """
 
-    # Calculate mean feature
-    features = adata.to_df(layer=layer)
-    labels = adata.obs[column]
-    grouped = pd.concat([features, labels], axis=1).groupby(column)
-    mean_feature = grouped.mean()
+    # Raise an error if there are any NaN values in the observation column
+    if adata.obs[observation].isna().any():
+        raise ValueError("NaN values found in observation column.")
+
+    # Calculate mean intensity
+    intensities = adata.to_df(layer=layer)
+    labels = adata.obs[observation]
+    grouped = pd.concat([intensities, labels], axis=1).groupby(observation)
+    mean_intensity = grouped.mean()
 
     # Reset the index of mean_feature
-    mean_feature = mean_feature.reset_index()
+    mean_intensity = mean_intensity.reset_index()
 
-    # Convert mean_feature to AnnData
-    mean_feature_adata = sc.AnnData(
-        X=mean_feature.iloc[:, 1:].values,
+    # Convert mean_intensity to AnnData
+    mean_intensity_adata = sc.AnnData(
+        X=mean_intensity.iloc[:, 1:].values,
         obs=pd.DataFrame(
-            index=mean_feature.index,
-            data={column: mean_feature.iloc[:, 0].astype('category').values}
+            index=mean_intensity.index,
+            data={
+                observation: mean_intensity.iloc[:, 0]
+                .astype('category').values
+            }
         ),
-        var=pd.DataFrame(index=mean_feature.columns[1:]))
+        var=pd.DataFrame(index=mean_intensity.columns[1:])
+    )
 
     # Compute dendrogram if needed
     if dendrogram:
         sc.tl.dendrogram(
-            mean_feature_adata,
-            groupby=column,
-            var_names=mean_feature_adata.var_names,
-            n_pcs=None)
+            mean_intensity_adata,
+            groupby=observation,
+            var_names=mean_intensity_adata.var_names,
+            n_pcs=None
+        )
 
     # Create the matrix plot
     matrixplot = sc.pl.matrixplot(
-        mean_feature_adata,
-        var_names=mean_feature_adata.var_names,
-        groupby=column,
-        use_raw=False,
+        mean_intensity_adata,
+        var_names=mean_intensity_adata.var_names,
+        groupby=observation, use_raw=False,
         dendrogram=dendrogram,
-        standard_scale=standard_scale,
-        cmap="viridis",
-        return_fig=True,
-        **kwargs)
-
-    return mean_feature, matrixplot
+        standard_scale=standard_scale, cmap="viridis",
+        return_fig=True, ax=ax, show=False, **kwargs
+    )
+    return mean_intensity, matrixplot
 
 
 def threshold_heatmap(adata, feature_cutoffs, observation):

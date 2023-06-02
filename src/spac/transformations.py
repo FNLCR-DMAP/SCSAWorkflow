@@ -15,7 +15,6 @@ def phenograph_clustering(adata, features, layer, k=30):
     `.uns["phenograph_features"]`
         The features used to calculate the phenograph clusters
 
-
     Parameters
     ----------
     adata : anndata.AnnData
@@ -30,13 +29,30 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     k : int
         The number of nearest neighbor to be used in creating the graph.
-
     """
+
+    if not isinstance(adata, sc.AnnData):
+        raise TypeError("`adata` must be of type anndata.AnnData")
+
+    if (not isinstance(features, list) or
+            not all(isinstance(feature, str) for feature in features)):
+        raise TypeError("`features` must be a list of strings")
+
+    if layer not in adata.layers.keys():
+        raise ValueError(f"`layer` not found in `adata.layers`. "
+                         f"Available layers are {list(adata.layers.keys())}")
+
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("`k` must be a positive integer")
+
+    if not all(feature in adata.var_names for feature in features):
+        raise ValueError("One or more of the `features` are not in "
+                         "`adata.var_names`")
+
     phenograph_df = adata.to_df(layer=layer)[features]
-    phenograph_out = sce.tl.phenograph(
-        phenograph_df,
-        clustering_algo="louvain",
-        k=k)
+    phenograph_out = sce.tl.phenograph(phenograph_df,
+                                       clustering_algo="louvain",
+                                       k=k)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
