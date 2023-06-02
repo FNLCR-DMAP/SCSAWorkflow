@@ -1,12 +1,9 @@
 import os
-import sys
 import unittest
 import pandas as pd
 from unittest.mock import patch
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
-
 from spac.data_utils import load_csv_files
+
 
 class TestLoadCSVFiles(unittest.TestCase):
 
@@ -47,6 +44,7 @@ class TestLoadCSVFiles(unittest.TestCase):
 
     def test_load_single_csv_file(self):
         result = load_csv_files(self.valid_file)
+        self.assertIsInstance(result, list)
         self.assertEqual(len(result), 1)
         self.assertIsInstance(result[0][1], pd.DataFrame)
 

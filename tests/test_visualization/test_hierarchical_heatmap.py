@@ -5,10 +5,12 @@ from scanpy.plotting._matrixplot import MatrixPlot
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
+
 from spac.visualization import hierarchical_heatmap
 
 
 class TestHierarchicalHeatmap(unittest.TestCase):
+
     def setUp(self):
         """Set up testing environment."""
         X = pd.DataFrame({

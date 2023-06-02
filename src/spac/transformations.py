@@ -1,12 +1,7 @@
-import re
-import seaborn
 import numpy as np
 import scanpy as sc
 import pandas as pd
-import anndata as ad
 import scanpy.external as sce
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
 
 
 def phenograph_clustering(adata, features, layer, k=30):
@@ -19,7 +14,6 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     `.uns["phenograph_features"]`
         The features used to calculate the phenograph clusters
-
 
     Parameters
     ----------
@@ -35,13 +29,30 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     k : int
         The number of nearest neighbor to be used in creating the graph.
-
     """
+
+    if not isinstance(adata, sc.AnnData):
+        raise TypeError("`adata` must be of type anndata.AnnData")
+
+    if (not isinstance(features, list) or
+            not all(isinstance(feature, str) for feature in features)):
+        raise TypeError("`features` must be a list of strings")
+
+    if layer not in adata.layers.keys():
+        raise ValueError(f"`layer` not found in `adata.layers`. "
+                         f"Available layers are {list(adata.layers.keys())}")
+
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("`k` must be a positive integer")
+
+    if not all(feature in adata.var_names for feature in features):
+        raise ValueError("One or more of the `features` are not in "
+                         "`adata.var_names`")
+
     phenograph_df = adata.to_df(layer=layer)[features]
-    phenograph_out = sce.tl.phenograph(
-        phenograph_df,
-        clustering_algo="louvain",
-        k=k)
+    phenograph_out = sce.tl.phenograph(phenograph_df,
+                                       clustering_algo="louvain",
+                                       k=k)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
@@ -73,7 +84,7 @@ def tsne(adata, layer=None):
 
 def batch_normalize(adata, obs, layer, method="median", log=False):
     """
-    Adjust the intensity of every marker using a normalization method.
+    Adjust the features of every marker using a normalization method.
 
     The normalization methods are summarized here:
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
@@ -95,7 +106,7 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
         The normlalization method to use.
 
     log : bool, default False
-        If True, take the log2 of intensities before normalization.
+        If True, take the log2 of features before normalization.
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
@@ -121,22 +132,22 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = region_cells + \
+            new_features = region_cells + \
                 (all_regions_quantile - region_median)
 
         if method == "Q50":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_median)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_median)
 
         if method == "Q75":
             region_75quantile = region_cells.quantile(q=0.75)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_75quantile)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_75quantile)
 
-        new_df_list.append(new_intensities)
+        new_df_list.append(new_features)
 
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
