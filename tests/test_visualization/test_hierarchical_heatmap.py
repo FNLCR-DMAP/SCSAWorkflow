@@ -38,7 +38,10 @@ class TestHierarchicalHeatmap(unittest.TestCase):
 
     def test_invalid_observation_raises_error(self):
         """Test if invalid observation raises error."""
-        with self.assertRaises(KeyError):
+        err_msg = (r"The observation 'invalid_observation' does not exist "
+                   r"in the provided AnnData object. Available observations "
+                   r"are: \['phenotype'\]")
+        with self.assertRaisesRegex(KeyError, err_msg):
             hierarchical_heatmap(self.adata, 'invalid_observation')
 
     def test_nan_observation_raises_error(self):
@@ -54,7 +57,9 @@ class TestHierarchicalHeatmap(unittest.TestCase):
 
     def test_invalid_layer_raises_error(self):
         """Test if invalid layer raises error."""
-        with self.assertRaises(KeyError):
+        err_msg = ("The layer 'invalid_layer' does not exist in the "
+                   "provided AnnData object")
+        with self.assertRaisesRegex(KeyError, err_msg):
             hierarchical_heatmap(
                 self.adata,
                 'phenotype',

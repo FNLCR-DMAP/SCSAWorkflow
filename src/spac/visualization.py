@@ -204,6 +204,20 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     # matrixplot.show()
     """
 
+    # Check if observation exists in adata
+    if observation not in adata.obs.columns:
+        msg = (f"The observation '{observation}' does not exist in the "
+               f"provided AnnData object. Available observations are: "
+               f"{list(adata.obs.columns)}")
+        raise KeyError(msg)
+
+    # Check if the layer exists in adata
+    if layer and layer not in adata.layers.keys():
+        msg = (f"The layer '{layer}' does not exist in the "
+               f"provided AnnData object. Available layers are: "
+               f"{list(adata.layers.keys())}")
+        raise KeyError(msg)
+
     # Raise an error if there are any NaN values in the observation column
     if adata.obs[observation].isna().any():
         raise ValueError("NaN values found in observation column.")
@@ -278,7 +292,7 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
         Consistent Key: 'heatmap_ax'
         "Potential Keys includes: 'groupby_ax', 'dendrogram_ax', "
         "and 'gene_groups_ax'."
-  
+
     """
 
     """
@@ -290,7 +304,7 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
 
     """
     # Save marker_cutoffs in the AnnData object
-    adata.uns['marker_cutoffs'] = marker_cutoffs  
+    adata.uns['marker_cutoffs'] = marker_cutoffs
 
     intensity_df = pd.DataFrame(
         index=adata.obs_names,
@@ -324,13 +338,15 @@ def threshold_heatmap(adata, marker_cutoffs, phenotype):
     cmap = ListedColormap(colors)
 
     # Plot the heatmap using scanpy.pl.heatmap
-    heatmap_plot = sc.pl.heatmap(adata,
-                  var_names=intensity_df.columns,
-                  groupby=phenotype,
-                  use_raw=False,
-                  layer='intensity',
-                  cmap=cmap,
-                  swap_axes=True, 
-                  show=False)
+    heatmap_plot = sc.pl.heatmap(
+        adata,
+        var_names=intensity_df.columns,
+        groupby=phenotype,
+        use_raw=False,
+        layer='intensity',
+        cmap=cmap,
+        swap_axes=True,
+        show=False
+    )
 
     return heatmap_plot
