@@ -14,13 +14,13 @@ class TestSpatialInteraction(unittest.TestCase):
                         "cell3", "cell4",
                         "cell5", "cell6",
                         "cell7", "cell8"],
-            "feature": [1, 2, 1, 2, 1, 2, 1, 2],
-            "cluster": ["A", "B", "A", "B",
-                        "A", "B", "A", "B"],
-            "x": [0, 1, 0, 1, 0, 1, 0, 1],
-            "y": [0, 0, 1, 1, 0, 1, 0, 1]
+            "cluster_num": [1, 2, 1, 2, 1, 2, 1, 2],
+            "cluster_str": [
+                "A", "B", "A", "B",
+                "A", "B", "A", "B"
+                ]
         })
-        X = np.array(
+        features = np.array(
             [
                 [0.1, 0.2, 0.3],
                 [0.4, 0.5, 0.6],
@@ -44,7 +44,7 @@ class TestSpatialInteraction(unittest.TestCase):
                 [1.5, 1.6]
             ]
         )
-        self.adata = anndata.AnnData(X=X, obs=obs)
+        self.adata = anndata.AnnData(X=features, obs=obs)
         self.adata.obsm['spatial'] = spatial_coords
 
     def tearDown(self):
@@ -53,13 +53,13 @@ class TestSpatialInteraction(unittest.TestCase):
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
         invalid_data = "not an AnnData object"
-        feature = "valid_feature"
+        observation = "valid_observation"
         analysis_method = "Neighborhood Enrichment"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 invalid_data,
-                feature,
+                observation,
                 analysis_method
             )
 
@@ -69,21 +69,23 @@ class TestSpatialInteraction(unittest.TestCase):
                 "Input data is not an AnnData object. Got <class 'str'>"
                 )
 
-    def test_spatial_interaction_feature_not_found(self):
+    def test_spatial_interaction_observation_not_found(self):
         # Feature not found test
-        adata = anndata.AnnData(pd.DataFrame({"existing_feature": [1, 2, 3]}))
-        feature = "nonexistent_feature"
+        adata = anndata.AnnData(
+            pd.DataFrame({"existing_observation": [1, 2, 3]}))
+        observation = "nonexistent_observation"
         analysis_method = "Cluster Interaction Matrix"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 adata,
-                feature,
+                observation,
                 analysis_method
             )
 
-            expect_string = "Feature nonexistent_feature not " + \
-                "found in the dataset. Existing columns are: existing_feature"
+            expect_string = "Feature nonexistent_observation not " + \
+                "found in the dataset. Existing observations " + \
+                "are: existing_observation"
             self.assertIsInstance(cm.exception, ValueError)
             self.assertEqual(
                 str(cm.exception),
@@ -92,14 +94,15 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_analysis_method(self):
         # Invalid analysis method test
-        adata = anndata.AnnData(pd.DataFrame({"valid_feature": [1, 2, 3]}))
-        feature = "valid_feature"
+        adata = anndata.AnnData(
+            pd.DataFrame({"valid_observation": [1, 2, 3]}))
+        observation = "valid_observation"
         invalid_analysis_method = "Invalid Method"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 adata,
-                feature,
+                observation,
                 invalid_analysis_method
             )
 
@@ -114,15 +117,16 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_ax_type(self):
         # Invalid ax type test
-        adata = anndata.AnnData(pd.DataFrame({"valid_feature": [1, 2, 3]}))
-        feature = "valid_feature"
+        adata = anndata.AnnData(
+            pd.DataFrame({"valid_observation": [1, 2, 3]}))
+        observation = "valid_observation"
         analysis_method = "Neighborhood Enrichment"
         invalid_ax = "not an Axes object"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 adata,
-                feature,
+                observation,
                 analysis_method,
                 ax=invalid_ax
             )
@@ -136,45 +140,18 @@ class TestSpatialInteraction(unittest.TestCase):
                 error_str
             )
 
-    def test_invalid_input(self):
-        # Test case: Invalid input data type
-        invalid_data = anndata.AnnData()
-        with self.assertRaises(ValueError):
-            spatial_interaction(invalid_data,
-                                'feature1',
-                                'Neighborhood Enrichment')
-
-        # Test case: Invalid feature not present in dataset
-        with self.assertRaises(ValueError):
-            spatial_interaction(self.adata,
-                                'feature3',
-                                'Neighborhood Enrichment')
-
-        # Test case: Invalid analysis method
-        with self.assertRaises(ValueError):
-            spatial_interaction(self.adata,
-                                'feature1',
-                                'Invalid Method')
-
-        # Test case: Invalid 'ax' argument type
-        with self.assertRaises(ValueError):
-            spatial_interaction(self.adata,
-                                'feature1',
-                                'Neighborhood Enrichment',
-                                ax='invalid_ax')
-
     def test_neighborhood_enrichment_analysis(self):
         # Test Neighborhood Enrichment analysis
         ax = plt.gca()
         spatial_interaction(
             self.adata,
-            "feature",
+            "cluster_num",
             "Neighborhood Enrichment",
             ax=ax)
 
         # Verify that Neighborhood Enrichment analysis is performed and plotted
         # Assertion 1: Check if Neighborhood Enrichment analysis is performed
-        self.assertTrue("feature_plot" in self.adata.obs)
+        self.assertTrue("cluster_num_plot" in self.adata.obs)
 
         # Assertion 2: Check if the resulting plot is displayed
         self.assertTrue(plt.gcf().get_axes())
@@ -184,7 +161,7 @@ class TestSpatialInteraction(unittest.TestCase):
         ax = plt.gca()
         spatial_interaction(
             self.adata,
-            "cluster",
+            "cluster_str",
             "Cluster Interaction Matrix",
             ax=ax)
 
@@ -192,32 +169,10 @@ class TestSpatialInteraction(unittest.TestCase):
         # analysis is performed and plotted
         # Assertion 1: Check if Cluster Interaction
         # Matrix analysis is performed
-        self.assertTrue("cluster_plot" in self.adata.obs)
+        self.assertTrue("cluster_str_plot" in self.adata.obs)
 
         # Assertion 2: Check if the resulting plot is displayed
         self.assertTrue(plt.gcf().get_axes())
-
-    def test_invalid_anndata_object(self):
-        # Test invalid AnnData object
-        invalid_adata = pd.DataFrame({"feature": [1, 2, 3]})
-        with self.assertRaises(ValueError):
-            spatial_interaction(
-                invalid_adata,
-                "feature",
-                "Neighborhood Enrichment")
-
-    def test_feature_not_found(self):
-        # Test feature not found in the dataset
-        with self.assertRaises(ValueError):
-            spatial_interaction(
-                self.adata,
-                "invalid_feature",
-                "Neighborhood Enrichment")
-
-    def test_invalid_analysis_method(self):
-        # Test invalid analysis method
-        with self.assertRaises(ValueError):
-            spatial_interaction(self.adata, "feature", "Invalid Method")
 
     def test_custom_axes_provided(self):
         # Test custom matplotlib Axes provided
@@ -227,7 +182,7 @@ class TestSpatialInteraction(unittest.TestCase):
         ax.set_ylim(-0.5, 0.5)
         spatial_interaction(
             self.adata,
-            "feature",
+            "cluster_str",
             "Neighborhood Enrichment",
             ax=ax)
         # Verify that the provided Axes is used for plotting
@@ -241,7 +196,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # Test no matplotlib Axes provided
         spatial_interaction(
             self.adata,
-            "feature",
+            "cluster_str",
             "Neighborhood Enrichment")
         # Verify that a new Axes is created and used for plotting
         self.assertTrue(plt.gcf().get_axes())
@@ -251,7 +206,7 @@ class TestSpatialInteraction(unittest.TestCase):
         kwargs = {"color": "red"}
         spatial_interaction(
             self.adata,
-            "feature",
+            "cluster_str",
             "Neighborhood Enrichment",
             **kwargs)
         # Verify that the additional keyword arguments are
@@ -261,6 +216,103 @@ class TestSpatialInteraction(unittest.TestCase):
     def test_anndata_x_attribute(self):
         # Test presence of the X attribute in AnnData object
         self.assertTrue(hasattr(self.adata, "X"))
+
+    def test_returned_ax_has_right_titles(self):
+        observation = "cluster_str"
+        analysis_method = "Neighborhood Enrichment"
+
+        # Create a blank figure
+        fig = plt.figure()
+
+        # Get the ax object associated with the figure
+        ax = fig.add_subplot(111)
+
+        # Call the function
+        returned_ax = spatial_interaction(
+            self.adata,
+            observation,
+            analysis_method,
+            ax=ax
+        )
+
+        # Assert that the returned ax object is not None
+        self.assertIsNotNone(returned_ax)
+
+        # Assert that the returned ax object is the same
+        # as the input ax object
+        self.assertEqual(id(returned_ax), id(ax))
+
+        figure = returned_ax.figure
+        axes_list = figure.axes
+
+        current_values = [
+            axes_list[2].get_title(),
+            axes_list[1].get_ylabel(),
+            axes_list[1].get_yticklabels()[1].get_text(),
+            axes_list[1].get_yticklabels()[0].get_text()
+        ]
+
+        expect_values = [
+            'Neighborhood enrichment',
+            observation + "_plot",
+            'A',
+            'B'
+        ]
+        for i in range(len(current_values)):
+            error_msg = f"Value at index {i} " + \
+                f"is different. Got '{current_values[i]}', " + \
+                f"expected '{expect_values[i]}'"
+
+            self.assertEqual(
+                current_values[i],
+                expect_values[i],
+                error_msg
+            )
+
+    def test_new_ax_has_right_titles(self):
+        observation = "cluster_num"
+        analysis_method = "Neighborhood Enrichment"
+
+        # Call the function
+        returned_ax = spatial_interaction(
+            self.adata,
+            observation,
+            analysis_method
+        )
+
+        # Assert that the returned ax object is not None
+        self.assertIsNotNone(returned_ax)
+
+        # Assert that the returned ax object is the same
+        # as the input ax object
+        self.assertIsInstance(returned_ax, plt.Axes)
+
+        figure = returned_ax.figure
+        axes_list = figure.axes
+
+        current_values = [
+            axes_list[2].get_title(),
+            axes_list[1].get_ylabel(),
+            axes_list[1].get_yticklabels()[1].get_text(),
+            axes_list[1].get_yticklabels()[0].get_text()
+        ]
+
+        expect_values = [
+            'Neighborhood enrichment',
+            observation + "_plot",
+            '1',
+            '2'
+        ]
+        for i in range(len(current_values)):
+            error_msg = f"Value at index {i} " + \
+                f"is different. Got '{current_values[i]}', " + \
+                f"expected '{expect_values[i]}'"
+
+            self.assertEqual(
+                current_values[i],
+                expect_values[i],
+                error_msg
+            )
 
 
 if __name__ == '__main__':
