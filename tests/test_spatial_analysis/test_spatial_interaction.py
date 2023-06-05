@@ -245,6 +245,8 @@ class TestSpatialInteraction(unittest.TestCase):
         figure = returned_ax.figure
         axes_list = figure.axes
 
+        print(axes_list)
+
         current_values = [
             axes_list[2].get_title(),
             axes_list[1].get_ylabel(),
@@ -289,6 +291,8 @@ class TestSpatialInteraction(unittest.TestCase):
 
         figure = returned_ax.figure
         axes_list = figure.axes
+
+        print(axes_list)
 
         current_values = [
             axes_list[2].get_title(),
