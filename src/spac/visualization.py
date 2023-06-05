@@ -1,5 +1,6 @@
-import seaborn
+import seaborn as sns
 import scanpy as sc
+import seaborn
 import pandas as pd
 import numpy as np
 import anndata
@@ -8,17 +9,19 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
-
-def histogram(adata, column, group_by=None, together=False, **kwargs):
+def histogram(
+    adata, observation, group_by=None,
+    together=False, ax=None, **kwargs
+):
     """
-    Plot the histogram of cells based specific column.
+    Plot histogram of cells based on specific observation using seaborn.
 
     Parameters
     ----------
     adata : anndata.AnnData
          The AnnData object.
 
-    column : str
+    observation : str
         Name of member of adata.obs to plot the histogram.
 
     group_by : str, default None
@@ -28,8 +31,11 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
         If True, and if group_by !=None  create one plot for all groups.
         Otherwise, divide every histogram by the number of elements.
 
+    ax : matplotlib.axes.Axes, optional
+        An existing Axes object to draw the plot onto, optional.
+
     **kwargs
-        Parameters passed to matplotlib hist function.
+        Parameters passed to seaborn histplot function.
 
     Returns
     -------
@@ -40,53 +46,103 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
         The created figure for the plot.
 
     """
-    n_bins = len(adata.obs[column].unique()) - 1
-    print("nbins=", n_bins)
+    # Validate inputs
+    if not isinstance(adata, anndata.AnnData):
+        raise TypeError(
+            f"adata must be an instance of anndata.AnnData,"
+            f" not {type(adata)}."
+        )
 
-    arrays = []
-    labels = []
+    if observation not in adata.obs.columns:
+        raise ValueError(
+            f"observation '{observation}'"
+            " not found in adata.obs."
+        )
+
+    if not pd.api.types.is_numeric_dtype(adata.obs[observation]):
+        raise TypeError(
+            f"observation '{observation}'"
+            " must be a numeric data type."
+        )
+
+    if pd.isnull(adata.obs[observation]).any():
+        raise ValueError(
+            f"observation '{observation}' contains NaN values."
+        )
 
     if group_by is not None:
-        groups = adata.obs[group_by].unique().tolist()
-        observations = pd.concat(
-            [adata.obs[column], adata.obs[group_by]],
-            axis=1)
+        if group_by not in adata.obs.columns:
+            raise ValueError(
+                f"group_by '{group_by}'"
+                " not found in adata.obs."
+            )
 
-        for group in groups:
-            group_cells = (observations[observations[group_by] ==
-                           group][column].to_numpy())
+        if not pd.api.types.is_categorical_dtype(
+                adata.obs[group_by]) and not pd.api.types.is_object_dtype(
+                adata.obs[group_by]):
+            raise TypeError(
+                f"group_by '{group_by}' must be a categorical"
+                " or object data type."
+            )
 
-            arrays.append(group_cells)
-            labels.append(group)
+        if adata.obs[group_by].isna().any():
+            raise ValueError(
+                f"group_by '{group_by}' contains None values."
+            )
+
+    if ax is not None and not isinstance(ax, plt.Axes):
+        raise TypeError(
+            f"ax must be an instance of matplotlib.axes.Axes,"
+            f" not {type(ax)}."
+        )
+
+    if ax is not None:
+        fig = ax.get_figure()  # Get the figure associated with the Axes
+    else:
+        fig, ax = plt.subplots()
+
+    df = adata.obs.copy()
+
+    if group_by is not None and pd.api.types.is_categorical_dtype(
+            adata.obs[group_by]):
+        df[group_by] = df[group_by].astype('string')
+
+    if group_by is not None:
+        groups = df[group_by].unique().tolist()
 
         if together:
-            fig, ax = plt.subplots()
-            ax.hist(arrays, n_bins, label=labels, **kwargs)
-            ax.legend(
-                prop={'size': 10},
-                bbox_to_anchor=(1.05, 1),
-                loc='upper left',
-                borderaxespad=0.)
-            ax.set_title(column)
+            if ax is None:
+                fig, ax = plt.subplots()
+            sns.histplot(
+                data=df, x=observation, hue=group_by,
+                multiple="stack", ax=ax, **kwargs
+            )
+            ax.set_title(observation)
             return ax, fig
 
         else:
             n_groups = len(groups)
-            fig, ax = plt.subplots(n_groups)
+            if ax is None:
+                fig, axs = plt.subplots(n_groups, 1)
+            else:
+                fig, axs = plt.subplots(n_groups, 1, num=fig.number)
             fig.tight_layout(pad=1)
             fig.set_figwidth(5)
             fig.set_figheight(5*n_groups)
 
-            for group, ax_id in zip(groups, range(n_groups)):
-                ax[ax_id].hist(arrays[ax_id], n_bins, **kwargs)
-                ax[ax_id].set_title(group)
-            return ax, fig
+            for i, ax in enumerate(axs):
+                sns.histplot(
+                    data=df[df[group_by] == groups[i]],
+                    x=observation, ax=ax, **kwargs
+                )
+                ax.set_title(groups[i])
+            return axs, fig
 
     else:
-        fig, ax = plt.subplots()
-        array = adata.obs[column].to_numpy()
-        plt.hist(array, n_bins, label=column, **kwargs)
-        ax.set_title(column)
+        if ax is None:
+            fig, ax = plt.subplots()
+        sns.histplot(data=df, x=observation, ax=ax, **kwargs)
+        ax.set_title(observation)
         return ax, fig
 
 
@@ -201,6 +257,20 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     # Display the figure
     # matrixplot.show()
     """
+
+    # Check if observation exists in adata
+    if observation not in adata.obs.columns:
+        msg = (f"The observation '{observation}' does not exist in the "
+               f"provided AnnData object. Available observations are: "
+               f"{list(adata.obs.columns)}")
+        raise KeyError(msg)
+
+    # Check if the layer exists in adata
+    if layer and layer not in adata.layers.keys():
+        msg = (f"The layer '{layer}' does not exist in the "
+               f"provided AnnData object. Available layers are: "
+               f"{list(adata.layers.keys())}")
+        raise KeyError(msg)
 
     # Raise an error if there are any NaN values in the observation column
     if adata.obs[observation].isna().any():
