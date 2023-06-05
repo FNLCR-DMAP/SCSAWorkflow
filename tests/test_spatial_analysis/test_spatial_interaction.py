@@ -47,9 +47,6 @@ class TestSpatialInteraction(unittest.TestCase):
         self.adata = anndata.AnnData(X=features, obs=obs)
         self.adata.obsm['spatial'] = spatial_coords
 
-    def tearDown(self):
-        del self.adata
-
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
         invalid_data = "not an AnnData object"
@@ -180,7 +177,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # Set the desired x-axis limits
         ax.set_xlim(-0.5, 1.5)
         ax.set_ylim(-0.5, 0.5)
-        spatial_interaction(
+        ax = spatial_interaction(
             self.adata,
             "cluster_str",
             "Neighborhood Enrichment",
@@ -245,6 +242,7 @@ class TestSpatialInteraction(unittest.TestCase):
         figure = returned_ax.figure
         axes_list = figure.axes
 
+        print(returned_ax)
         print(axes_list)
 
         current_values = [
@@ -292,6 +290,7 @@ class TestSpatialInteraction(unittest.TestCase):
         figure = returned_ax.figure
         axes_list = figure.axes
 
+        print(returned_ax)
         print(axes_list)
 
         current_values = [
@@ -317,6 +316,9 @@ class TestSpatialInteraction(unittest.TestCase):
                 expect_values[i],
                 error_msg
             )
+
+    def tearDown(self):
+        del self.adata
 
 
 if __name__ == '__main__':
