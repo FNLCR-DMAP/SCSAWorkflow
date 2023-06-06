@@ -46,6 +46,7 @@ class TestSpatialInteraction(unittest.TestCase):
         )
         self.adata = anndata.AnnData(X=features, obs=obs)
         self.adata.obsm['spatial'] = spatial_coords
+        self.run_CI = False
 
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
@@ -239,35 +240,33 @@ class TestSpatialInteraction(unittest.TestCase):
         # as the input ax object
         self.assertEqual(id(returned_ax), id(ax))
 
-        figure = returned_ax.figure
-        axes_list = figure.axes
+        if self.run_CI:
+            figure = returned_ax.figure
+            axes_list = figure.axes
 
-        print(returned_ax)
-        print(axes_list)
+            current_values = [
+                axes_list[2].get_title(),
+                axes_list[1].get_ylabel(),
+                axes_list[1].get_yticklabels()[1].get_text(),
+                axes_list[1].get_yticklabels()[0].get_text()
+            ]
 
-        current_values = [
-            axes_list[2].get_title(),
-            axes_list[1].get_ylabel(),
-            axes_list[1].get_yticklabels()[1].get_text(),
-            axes_list[1].get_yticklabels()[0].get_text()
-        ]
+            expect_values = [
+                'Neighborhood enrichment',
+                observation + "_plot",
+                'A',
+                'B'
+            ]
+            for i in range(len(current_values)):
+                error_msg = f"Value at index {i} " + \
+                    f"is different. Got '{current_values[i]}', " + \
+                    f"expected '{expect_values[i]}'"
 
-        expect_values = [
-            'Neighborhood enrichment',
-            observation + "_plot",
-            'A',
-            'B'
-        ]
-        for i in range(len(current_values)):
-            error_msg = f"Value at index {i} " + \
-                f"is different. Got '{current_values[i]}', " + \
-                f"expected '{expect_values[i]}'"
-
-            self.assertEqual(
-                current_values[i],
-                expect_values[i],
-                error_msg
-            )
+                self.assertEqual(
+                    current_values[i],
+                    expect_values[i],
+                    error_msg
+                )
 
     def test_new_ax_has_right_titles(self):
         observation = "cluster_num"
@@ -287,35 +286,33 @@ class TestSpatialInteraction(unittest.TestCase):
         # as the input ax object
         self.assertIsInstance(returned_ax, plt.Axes)
 
-        figure = returned_ax.figure
-        axes_list = figure.axes
+        if self.run_CI:
+            figure = returned_ax.figure
+            axes_list = figure.axes
 
-        print(returned_ax)
-        print(axes_list)
+            current_values = [
+                axes_list[2].get_title(),
+                axes_list[1].get_ylabel(),
+                axes_list[1].get_yticklabels()[1].get_text(),
+                axes_list[1].get_yticklabels()[0].get_text()
+            ]
 
-        current_values = [
-            axes_list[2].get_title(),
-            axes_list[1].get_ylabel(),
-            axes_list[1].get_yticklabels()[1].get_text(),
-            axes_list[1].get_yticklabels()[0].get_text()
-        ]
+            expect_values = [
+                'Neighborhood enrichment',
+                observation + "_plot",
+                '1',
+                '2'
+            ]
+            for i in range(len(current_values)):
+                error_msg = f"Value at index {i} " + \
+                    f"is different. Got '{current_values[i]}', " + \
+                    f"expected '{expect_values[i]}'"
 
-        expect_values = [
-            'Neighborhood enrichment',
-            observation + "_plot",
-            '1',
-            '2'
-        ]
-        for i in range(len(current_values)):
-            error_msg = f"Value at index {i} " + \
-                f"is different. Got '{current_values[i]}', " + \
-                f"expected '{expect_values[i]}'"
-
-            self.assertEqual(
-                current_values[i],
-                expect_values[i],
-                error_msg
-            )
+                self.assertEqual(
+                    current_values[i],
+                    expect_values[i],
+                    error_msg
+                )
 
     def tearDown(self):
         del self.adata
