@@ -87,8 +87,8 @@ def spatial_interaction(
         return ax
 
     if not isinstance(adata, anndata.AnnData):
-        error_text = "Input data is not an Anndata object." + \
-            f"Got {str(type(ax))}"
+        error_text = "Input data is not an AnnData object. " + \
+            f"Got {str(type(adata))}"
         raise ValueError(error_text)
 
     # Extract column name
@@ -96,8 +96,8 @@ def spatial_interaction(
     column_names_str = ",".join(column_names)
 
     if observation not in column_names:
-        error_text = f"Feature {observation} not found in the dataset." + \
-            f"existing observations are: {column_names_str}"
+        error_text = f"Observation {observation} not found in the " + \
+            f"dataset. Existing observations are: {column_names_str}"
         raise ValueError(error_text)
 
     if not isinstance(analysis_method, str):
@@ -106,14 +106,14 @@ def spatial_interaction(
     else:
         if analysis_method not in available_methods:
             error_text = f"Method {analysis_method}" + \
-                " is not supported currently." + \
+                " is not supported currently. " + \
                 f"Available methods are: {available_methods_str}"
             raise ValueError(error_text)
 
     if ax is not None:
         if not isinstance(ax, plt.Axes):
             error_text = "Invalid 'ax' argument. " + \
-                "Expected an instance of matplotlib.axes.Axes." + \
+                "Expected an instance of matplotlib.axes.Axes. " + \
                 f"Got {str(type(ax))}"
             raise ValueError(error_text)
     else:
