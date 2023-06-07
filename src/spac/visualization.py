@@ -1,16 +1,58 @@
 import seaborn as sns
-import scanpy as sc
 import seaborn
 import pandas as pd
 import numpy as np
 import anndata
+import scanpy as sc
 import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
-def histogram(adata, feature_name=None, observation_name=None, layer=None,
-              group_by=None, together=False, ax=None, **kwargs):
+def tsne_plot(adata, ax=None, **kwargs):
+    """
+    Visualize scatter plot in tSNE basis.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object with t-SNE coordinates precomputed by the 'tsne'
+        function and stored in 'adata.obsm["X_tsne"]'.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    **kwargs
+        Parameters passed to scanpy.pl.tsne function.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the tsne plot.
+    """
+    if not isinstance(adata, anndata.AnnData):
+        raise ValueError("adata must be an AnnData object.")
+
+    if 'X_tsne' not in adata.obsm:
+        err_msg = ("adata.obsm does not contain 'X_tsne', "
+                   "perform t-SNE transformation first.")
+        raise ValueError(err_msg)
+
+    # Create a new figure and axes if not provided
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # Plot the t-SNE
+    sc.pl.tsne(adata, ax=ax, **kwargs)
+
+    return fig, ax
+
+
+def histogram(
+    adata, observation, group_by=None,
+    together=False, ax=None, **kwargs
+):
     """
     Plot the histogram of cells based on a specific feature from adata.X
     or observation from adata.obs.

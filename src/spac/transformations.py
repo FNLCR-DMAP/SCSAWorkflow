@@ -1,6 +1,7 @@
 import numpy as np
 import scanpy as sc
 import pandas as pd
+import anndata
 import scanpy.external as sce
 
 
@@ -58,28 +59,43 @@ def phenograph_clustering(adata, features, layer, k=30):
     adata.uns["phenograph_features"] = features
 
 
-def tsne(adata, layer=None):
+def tsne(adata, layer=None, **kwargs):
     """
-    Plot t-SNE from a specific layer information.
+    Perform t-SNE transformation on specific layer information.
 
     Parameters
     ----------
-    adata : anndatra.AnnData
+    adata : anndata.AnnData
        The AnnData object.
-
     layer : str
-        The layer to be used in calculating the phengraph clusters.
+        Layer for phenograph cluster calculation.
+    **kwargs
+        Parameters for scanpy.tl.tsne function.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with t-SNE coordinates.
     """
-    # As scanpy.tl.tsne works on either X, obsm, or PCA, then I will copy the
-    # layer data to an obsm if it is not the default X
+    # If a layer is provided, it's transferred to 'obsm' for t-SNE computation
+    # in scanpy.tl.tsne, which defaults to using the 'X' data matrix if not.
+
+    if not isinstance(adata, anndata.AnnData):
+        raise ValueError("adata must be an AnnData object.")
+
     if layer is not None:
-        X_tsne = adata.to_df(layer=layer)
+        if layer not in adata.layers:
+            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
+
         tsne_obsm_name = layer + "_tsne"
+        X_tsne = adata.to_df(layer=layer)
         adata.obsm[tsne_obsm_name] = X_tsne
     else:
         tsne_obsm_name = None
 
     sc.tl.tsne(adata, use_rep=tsne_obsm_name, random_state=7)
+
+    return adata
 
 
 def batch_normalize(adata, obs, layer, method="median", log=False):
