@@ -9,26 +9,28 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
-def histogram(
-    adata, observation, group_by=None,
-    together=False, ax=None, **kwargs
-):
+def histogram(adata, feature_name=None, observation_name=None, layer=None,
+              group_by=None, together=False, ax=None, **kwargs):
     """
-    Plot histogram of cells based on specific observation using seaborn.
+    Plot the histogram of cells based on a specific feature from adata.X
+    or observation from adata.obs.
 
     Parameters
     ----------
     adata : anndata.AnnData
-         The AnnData object.
+        The AnnData object.
 
-    observation : str
-        Name of member of adata.obs to plot the histogram.
+    feature_name : str, optional
+        Name of continuous feature from adata.X to plot its histogram.
+
+    observation_name : str, optional
+        Name of the observation from adata.obs to plot its histogram.
 
     group_by : str, default None
         Choose either to group the histogram by another column.
 
     together : bool, default False
-        If True, and if group_by !=None  create one plot for all groups.
+        If True, and if group_by !=None create one plot for all groups.
         Otherwise, divide every histogram by the number of elements.
 
     ax : matplotlib.axes.Axes, optional
@@ -47,103 +49,58 @@ def histogram(
 
     """
     # Validate inputs
+    err = "adata must be an instance of anndata.AnnData, not {type(adata)}."
     if not isinstance(adata, anndata.AnnData):
-        raise TypeError(
-            f"adata must be an instance of anndata.AnnData,"
-            f" not {type(adata)}."
-        )
+        raise TypeError(err)
 
-    if observation not in adata.obs.columns:
-        raise ValueError(
-            f"observation '{observation}'"
-            " not found in adata.obs."
-        )
+    df = adata.to_df()
+    df = pd.concat([df, adata.obs], axis=1)
 
-    if not pd.api.types.is_numeric_dtype(adata.obs[observation]):
-        raise TypeError(
-            f"observation '{observation}'"
-            " must be a numeric data type."
-        )
+    if feature_name and observation_name:
+        raise ValueError("Cannot pass both feature_name and observation_name,"
+                         " choose one.")
 
-    if pd.isnull(adata.obs[observation]).any():
-        raise ValueError(
-            f"observation '{observation}' contains NaN values."
-        )
+    if feature_name:
+        if feature_name not in df.columns:
+            raise ValueError("feature_name not found in adata.")
+        x = feature_name
 
-    if group_by is not None:
-        if group_by not in adata.obs.columns:
-            raise ValueError(
-                f"group_by '{group_by}'"
-                " not found in adata.obs."
-            )
+    if observation_name:
+        if observation_name not in df.columns:
+            raise ValueError("observation_name not found in adata.")
+        x = observation_name
 
-        if not pd.api.types.is_categorical_dtype(
-                adata.obs[group_by]) and not pd.api.types.is_object_dtype(
-                adata.obs[group_by]):
-            raise TypeError(
-                f"group_by '{group_by}' must be a categorical"
-                " or object data type."
-            )
-
-        if adata.obs[group_by].isna().any():
-            raise ValueError(
-                f"group_by '{group_by}' contains None values."
-            )
-
-    if ax is not None and not isinstance(ax, plt.Axes):
-        raise TypeError(
-            f"ax must be an instance of matplotlib.axes.Axes,"
-            f" not {type(ax)}."
-        )
+    if group_by and group_by not in df.columns:
+        raise ValueError("group_by not found in adata.")
 
     if ax is not None:
-        fig = ax.get_figure()  # Get the figure associated with the Axes
+        fig = ax.get_figure()
     else:
         fig, ax = plt.subplots()
 
-    df = adata.obs.copy()
-
-    if group_by is not None and pd.api.types.is_categorical_dtype(
-            adata.obs[group_by]):
-        df[group_by] = df[group_by].astype('string')
-
-    if group_by is not None:
-        groups = df[group_by].unique().tolist()
-
+    if group_by:
+        groups = df[group_by].dropna().unique().tolist()
+        n_groups = len(groups)
+        if n_groups == 0:
+            raise ValueError("There must be at least one group to create a"
+                             " histogram.")
         if together:
-            if ax is None:
-                fig, ax = plt.subplots()
-            sns.histplot(
-                data=df, x=observation, hue=group_by,
-                multiple="stack", ax=ax, **kwargs
-            )
-            ax.set_title(observation)
-            return ax, fig
-
+            colors = sns.color_palette("hsv", n_groups)
+            sns.histplot(data=df.dropna(), x=x, hue=group_by, multiple="stack",
+                         palette=colors, ax=ax, **kwargs)
+            return fig, ax
         else:
-            n_groups = len(groups)
-            if ax is None:
-                fig, axs = plt.subplots(n_groups, 1)
-            else:
-                fig, axs = plt.subplots(n_groups, 1, num=fig.number)
-            fig.tight_layout(pad=1)
-            fig.set_figwidth(5)
-            fig.set_figheight(5*n_groups)
-
+            fig, axs = plt.subplots(n_groups, 1, figsize=(5, 5*n_groups))
+            if n_groups == 1:
+                axs = [axs]
             for i, ax in enumerate(axs):
-                sns.histplot(
-                    data=df[df[group_by] == groups[i]],
-                    x=observation, ax=ax, **kwargs
-                )
+                sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
+                             x=x, ax=ax, **kwargs)
                 ax.set_title(groups[i])
-            return axs, fig
+            return fig, axs
 
-    else:
-        if ax is None:
-            fig, ax = plt.subplots()
-        sns.histplot(data=df, x=observation, ax=ax, **kwargs)
-        ax.set_title(observation)
-        return ax, fig
+    sns.histplot(data=df, x=x, ax=ax, **kwargs)
+    return fig, ax
 
 
 def heatmap(adata, column, layer=None, **kwargs):

@@ -1,86 +1,88 @@
 import unittest
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import anndata
-import numpy as np
-import matplotlib.pyplot as plt
 from spac.visualization import histogram
 
 
 class TestHistogram(unittest.TestCase):
-
     def setUp(self):
+        np.random.seed(42)
+        X = np.random.rand(100, 3)
+        obs_values = ['A', 'B']
+        obs_types = ['cell_type_1', 'cell_type_2']
+        cell_range = [f'cell_{i}' for i in range(1, 101)]
         obs = pd.DataFrame({
-            'obs1': np.random.normal(size=100),
-            'obs2': np.random.choice(['group1', 'group2'], size=100)
-        })
-        self.adata = anndata.AnnData(np.random.normal(size=(100, 10)), obs=obs)
+            'obs1': np.random.choice(obs_values, size=100),
+            'obs2': np.random.choice(obs_types, size=100),
+        }, index=cell_range)
+        var = pd.DataFrame(index=['marker1', 'marker2', 'marker3'])
+        self.adata = anndata.AnnData(X, obs=obs, var=var)
 
-    def test_histogram_without_groupby(self):
-        ax, fig = histogram(self.adata, 'obs1')
-        self.assertIsInstance(ax, plt.Axes)
-        self.assertIsInstance(fig, plt.Figure)
+    def test_histogram_feature_name(self):
+        fig, ax = histogram(self.adata, feature_name='marker1')
+        self.assertIsInstance(fig, mpl.figure.Figure)
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
-    def test_histogram_with_groupby_with_together(self):
-        ax, fig = histogram(self.adata, 'obs1', 'obs2', True)
-        self.assertIsInstance(ax, plt.Axes)
-        self.assertIsInstance(fig, plt.Figure)
+    def test_histogram_observation_name(self):
+        fig, ax = histogram(self.adata, observation_name='obs1')
+        total_obs = len(self.adata.obs['obs1'])
+        self.assertEqual(sum(p.get_height() for p in ax.patches), total_obs)
 
-    def test_histogram_with_groupby_without_together(self):
-        axs, fig = histogram(self.adata, 'obs1', 'obs2', False)
-        self.assertTrue(all(isinstance(ax, plt.Axes) for ax in axs))
-        self.assertIsInstance(fig, plt.Figure)
+    def test_histogram_feature_group_by(self):
+        fig, axs = histogram(
+            self.adata,
+            feature_name='marker1',
+            group_by='obs2',
+            together=False
+        )
+        self.assertEqual(len(axs), 2)
 
-    def test_invalid_inputs(self):
-        with self.assertRaises(TypeError):
-            histogram(None, 'obs1')
-        with self.assertRaises(ValueError):
-            histogram(self.adata, 'invalid_obs')
+    def test_both_feature_and_observation(self):
+        err_msg = ("Cannot pass both feature_name and "
+                   "observation_name, choose one")
+        with self.assertRaisesRegex(ValueError, err_msg):
+            histogram(
+                self.adata,
+                feature_name='marker1',
+                observation_name='obs1'
+            )
 
-        self.adata.obs['obs1_nan'] = self.adata.obs['obs1'].copy()
-        self.adata.obs['obs1_nan'].iloc[0] = np.nan
-        with self.assertRaises(ValueError):
-            histogram(self.adata, 'obs1_nan')
+    def test_invalid_feature_name(self):
+        err_msg = "feature_name not found in adata"
+        with self.assertRaisesRegex(ValueError, err_msg):
+            histogram(self.adata, feature_name='invalid_marker')
 
-        with self.assertRaises(ValueError):
-            histogram(self.adata, 'obs1', 'invalid_group')
+    def test_invalid_observation_name(self):
+        err_msg = "observation_name not found in adata"
+        with self.assertRaisesRegex(ValueError, err_msg):
+            histogram(self.adata, observation_name='invalid_observation')
 
-        self.adata.obs['obs2_nan'] = self.adata.obs['obs2'].copy()
-        self.adata.obs['obs2_nan'].iloc[0] = np.nan
-        with self.assertRaises(ValueError):
-            histogram(self.adata, 'obs1', 'obs2_nan')
-
-        with self.assertRaises(TypeError):
-            histogram(self.adata, 'obs1', ax='invalid_ax')
-
-    def test_functional_example_with_without_group(self):
-        """
-        Test that total histogram count equals the number of observations.
-        """
-        observations = np.random.rand(10)
-        adata = anndata.AnnData(
-            obs=pd.DataFrame({'observation1': observations}))
-        ax, fig = histogram(adata, 'observation1')
-        self.assertEqual(sum(patch.get_height() for patch in ax.patches),
-                         len(observations))
-
-    def test_functional_example_with_group(self):
-        adata = anndata.AnnData(
-            obs=pd.DataFrame({
-                'observation1': np.random.rand(10),
-                'group_by1': ['A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'C', 'C']
-            }))
-        axs, fig = histogram(adata, 'observation1', group_by='group_by1',
-                             together=False)
-        self.assertEqual(len(axs), 3)
+    def test_invalid_group_by(self):
+        err_msg = "group_by not found in adata"
+        with self.assertRaisesRegex(ValueError, err_msg):
+            histogram(
+                self.adata,
+                observation_name='obs1',
+                group_by='invalid_group_by'
+            )
 
     def test_ax_passed_as_argument(self):
         """
-        Test if function uses passed Axes and retrieves its Figure.
+        Test case to check if the function uses the passed Axes object
+        instead of creating a new one. It also checks if the function
+        correctly retrieves the Figure that the Axes belongs to.
         """
         fig, ax = plt.subplots()
-        returned_ax, returned_fig = histogram(self.adata, 'obs1', ax=ax)
-        self.assertEqual(ax, returned_ax)
-        self.assertEqual(fig, returned_fig)
+        returned_fig, returned_ax = histogram(
+            self.adata,
+            feature_name='marker1',
+            ax=ax
+        )
+        self.assertIs(ax, returned_ax)
+        self.assertIs(fig, returned_fig)
 
 
 if __name__ == '__main__':
