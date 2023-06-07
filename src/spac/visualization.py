@@ -407,3 +407,184 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
     colorbar.set_yticklabels(['low', 'medium', 'high'])
 
     return heatmap_plot
+
+
+def spatial_plot(
+        adata,
+        spot_size,
+        alpha,
+        vmin=-999,
+        vmax=-999,
+        observation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        **kwargs
+):
+    """
+    Generate the spatial plot of selected features
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing target feature and spatial coordinates.
+
+    spot_size : int
+        The size of spot on the spatial plot.
+    alpha : float
+        The transparency of spots, range from 0 (invisible) to 1 (solid)
+    vmin : float or int
+        The lower limit of the feature value for visualization
+    vmax : float or int
+        The upper limit of the feature value for visualization
+    feature : str
+        The feature to visualize on the spatial plot.
+        Default None.
+    observation : str
+        The observation to visualize in the spatial plot.
+        Can't be set with feature, default None.
+    layer : str
+        Name of the AnnData object layer that wants to be plotted.
+        By default adata.raw.X is plotted.
+    ax : matplotlib.axes.Axes
+        The matplotlib Axes containing the analysis plots.
+        The returned ax is the passed ax or new ax created.
+        Only works if plotting a single component.
+    **kwargs
+        Arguments to pass to matplotlib.pyplot.scatter()
+    Returns
+    -------
+        Single or a list of class:`~matplotlib.axes.Axes`.
+    """
+
+    err_msg_layer = "The 'layer' parameter must be a string, " + \
+        f"got {str(type(layer))}"
+    err_msg_feature = "The 'feature' parameter must be a string, " + \
+        f"got {str(type(feature))}"
+    err_msg_observation = "The 'observation' parameter must be a string, " + \
+        f"got {str(type(observation))}"
+    err_msg_feat_obs_coe = "Both observation and feature are passed, " + \
+        "please provide sinle input."
+    err_msg_feat_obs_non = "Both observation and feature are None, " + \
+        "please provide single input."
+    err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
+        f"got {str(type(spot_size))}"
+    err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
+        f"got {str(type(alpha))}"
+    err_msg_alpha_value = "The 'alpha' parameter must be between " + \
+        f"0 and 1 (inclusive), got {str(alpha)}"
+    err_msg_vmin = "The 'vmin' parameter must be a float or an int, " + \
+        f"got {str(type(vmin))}"
+    err_msg_vmax = "The 'vmax' parameter must be a float or an int, " + \
+        f"got {str(type(vmax))}"
+    err_msg_ax = "The 'ax' parameter must be an instance " + \
+        f"of matplotlib.axes.Axes, got {str(type(ax))}"
+
+    if adata is None:
+        raise ValueError("The input dataset must not be None.")
+
+    if not isinstance(adata, anndata.AnnData):
+        err_msg_adata = "The 'adata' parameter must be an " + \
+            f"instance of anndata.AnnData, got {str(type(adata))}."
+        raise ValueError(err_msg_adata)
+
+    if layer is not None and not isinstance(layer, str):
+        raise ValueError(err_msg_layer)
+
+    if layer is not None and layer not in adata.layers.keys():
+        err_msg_layer_exist = f"Layer {layer} does not exists, " + \
+            f"available layers are {str(adata.layers.keys())}"
+        raise ValueError(err_msg_layer_exist)
+
+    if feature is not None and not isinstance(feature, str):
+        raise ValueError(err_msg_feature)
+
+    if observation is not None and not isinstance(observation, str):
+        raise ValueError(err_msg_observation)
+
+    if observation is not None and feature is not None:
+        raise ValueError(err_msg_feat_obs_coe)
+
+    if observation is None and feature is None:
+        raise ValueError(err_msg_feat_obs_non)
+
+    if 'spatial' not in adata.obsm_keys():
+        err_msg = "Spatial coordinates not found in the 'obsm' attribute."
+        raise ValueError(err_msg)
+
+    # Extract obs name
+    obs_names = adata.obs.columns.tolist()
+    obs_names_str = ", ".join(obs_names)
+
+    if observation is not None and observation not in obs_names:
+        error_text = f"Observation {observation} not found in the dataset." + \
+            f" Existing observations are: {obs_names_str}"
+        raise ValueError(error_text)
+
+    # Extract feature name
+    if layer is None:
+        layer = adata.X
+    else:
+        layer = adata.layers[layer]
+
+    feature_names = adata.var_names.tolist()
+
+    if feature is not None and feature not in feature_names:
+        error_text = f"Feature {feature} not found," + \
+            " please check the sample metadata."
+        raise ValueError(error_text)
+
+    if not isinstance(spot_size, int):
+        raise ValueError(err_msg_spot_size)
+
+    if not isinstance(alpha, float):
+        raise ValueError(err_msg_alpha_type)
+
+    if not (0 <= alpha <= 1):
+        raise ValueError(err_msg_alpha_value)
+
+    if vmin != -999 and not (
+        isinstance(vmin, float) or isinstance(vmin, int)
+    ):
+        raise ValueError(err_msg_vmin)
+
+    if vmax != -999 and not (
+        isinstance(vmax, float) or isinstance(vmax, int)
+    ):
+        raise ValueError(err_msg_vmax)
+
+    if ax is not None and not isinstance(ax, plt.Axes):
+        raise ValueError(err_msg_ax)
+
+    if feature is not None:
+        
+        feature_index = feature_names.index(feature)
+        feature_obs = feature + "spatial_plot"
+        if vmin == -999:
+            vmin = np.min(layer[:, feature_index])
+        if vmax == -999:
+            vmax = np.max(layer[:, feature_index])
+        adata.obs[feature_obs] = layer[:, feature_index]
+        color_region = feature_obs
+    else:
+        color_region = observation
+        vmin = None
+        vmax = None
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+
+    print(feature)
+    ax = sc.pl.spatial(
+        adata=adata,
+        layer=layer,
+        color=color_region,
+        spot_size=spot_size,
+        alpha=alpha,
+        vmin=vmin,
+        vmax=vmax,
+        ax=ax,
+        show=False,
+        **kwargs)
+
+    return ax
