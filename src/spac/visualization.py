@@ -1,35 +1,83 @@
-import re
+import seaborn as sns
 import seaborn
-import numpy as np
-import scanpy as sc
 import pandas as pd
-import anndata as ad
+import numpy as np
+import anndata
+import scanpy as sc
+import math
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from matplotlib.colors import ListedColormap
-from sklearn.preprocessing import MinMaxScaler
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
-def histogram(adata, column, group_by=None, together=False, **kwargs):
+
+def tsne_plot(adata, ax=None, **kwargs):
     """
-    Plot the histogram of cells based specific column.
+    Visualize scatter plot in tSNE basis.
 
     Parameters
     ----------
     adata : anndata.AnnData
-         The AnnData object.
+        The AnnData object with t-SNE coordinates precomputed by the 'tsne'
+        function and stored in 'adata.obsm["X_tsne"]'.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    **kwargs
+        Parameters passed to scanpy.pl.tsne function.
 
-    column : str
-        Name of member of adata.obs to plot the histogram.
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the tsne plot.
+    """
+    if not isinstance(adata, anndata.AnnData):
+        raise ValueError("adata must be an AnnData object.")
+
+    if 'X_tsne' not in adata.obsm:
+        err_msg = ("adata.obsm does not contain 'X_tsne', "
+                   "perform t-SNE transformation first.")
+        raise ValueError(err_msg)
+
+    # Create a new figure and axes if not provided
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # Plot the t-SNE
+    sc.pl.tsne(adata, ax=ax, **kwargs)
+
+    return fig, ax
+
+
+def histogram(adata, feature_name=None, observation_name=None, layer=None,
+              group_by=None, together=False, ax=None, **kwargs):
+    """
+    Plot the histogram of cells based on a specific feature from adata.X
+    or observation from adata.obs.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+
+    feature_name : str, optional
+        Name of continuous feature from adata.X to plot its histogram.
+
+    observation_name : str, optional
+        Name of the observation from adata.obs to plot its histogram.
 
     group_by : str, default None
         Choose either to group the histogram by another column.
 
     together : bool, default False
-        If True, and if group_by !=None  create one plot for all groups.
+        If True, and if group_by !=None create one plot for all groups.
         Otherwise, divide every histogram by the number of elements.
 
+    ax : matplotlib.axes.Axes, optional
+        An existing Axes object to draw the plot onto, optional.
+
     **kwargs
-        Parameters passed to matplotlib hist function.
+        Parameters passed to seaborn histplot function.
 
     Returns
     -------
@@ -40,59 +88,64 @@ def histogram(adata, column, group_by=None, together=False, **kwargs):
         The created figure for the plot.
 
     """
-    n_bins = len(adata.obs[column].unique()) - 1
-    print("nbins=", n_bins)
+    # Validate inputs
+    err = "adata must be an instance of anndata.AnnData, not {type(adata)}."
+    if not isinstance(adata, anndata.AnnData):
+        raise TypeError(err)
 
-    arrays = []
-    labels = []
+    df = adata.to_df()
+    df = pd.concat([df, adata.obs], axis=1)
 
-    if group_by is not None:
-        groups = adata.obs[group_by].unique().tolist()
-        observations = pd.concat(
-            [adata.obs[column], adata.obs[group_by]],
-            axis=1)
+    if feature_name and observation_name:
+        raise ValueError("Cannot pass both feature_name and observation_name,"
+                         " choose one.")
 
-        for group in groups:
-            group_cells = (observations[observations[group_by] ==
-                           group][column].to_numpy())
+    if feature_name:
+        if feature_name not in df.columns:
+            raise ValueError("feature_name not found in adata.")
+        x = feature_name
 
-            arrays.append(group_cells)
-            labels.append(group)
+    if observation_name:
+        if observation_name not in df.columns:
+            raise ValueError("observation_name not found in adata.")
+        x = observation_name
 
-        if together:
-            fig, ax = plt.subplots()
-            ax.hist(arrays, n_bins, label=labels, **kwargs)
-            ax.legend(
-                prop={'size': 10},
-                bbox_to_anchor=(1.05, 1),
-                loc='upper left',
-                borderaxespad=0.)
-            ax.set_title(column)
-            return ax, fig
+    if group_by and group_by not in df.columns:
+        raise ValueError("group_by not found in adata.")
 
-        else:
-            n_groups = len(groups)
-            fig, ax = plt.subplots(n_groups)
-            fig.tight_layout(pad=1)
-            fig.set_figwidth(5)
-            fig.set_figheight(5*n_groups)
-
-            for group, ax_id in zip(groups, range(n_groups)):
-                ax[ax_id].hist(arrays[ax_id], n_bins, **kwargs)
-                ax[ax_id].set_title(group)
-            return ax, fig
-
+    if ax is not None:
+        fig = ax.get_figure()
     else:
         fig, ax = plt.subplots()
-        array = adata.obs[column].to_numpy()
-        plt.hist(array, n_bins, label=column, **kwargs)
-        ax.set_title(column)
-        return ax, fig
+
+    if group_by:
+        groups = df[group_by].dropna().unique().tolist()
+        n_groups = len(groups)
+        if n_groups == 0:
+            raise ValueError("There must be at least one group to create a"
+                             " histogram.")
+        if together:
+            colors = sns.color_palette("hsv", n_groups)
+            sns.histplot(data=df.dropna(), x=x, hue=group_by, multiple="stack",
+                         palette=colors, ax=ax, **kwargs)
+            return fig, ax
+        else:
+            fig, axs = plt.subplots(n_groups, 1, figsize=(5, 5*n_groups))
+            if n_groups == 1:
+                axs = [axs]
+            for i, ax in enumerate(axs):
+                sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
+                             x=x, ax=ax, **kwargs)
+                ax.set_title(groups[i])
+            return fig, axs
+
+    sns.histplot(data=df, x=x, ax=ax, **kwargs)
+    return fig, ax
 
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
-    Plot the heatmap of the mean intensity of cells that belong to a `column`.
+    Plot the heatmap of the mean feature of cells that belong to a `column`.
 
     Parameters
     ----------
@@ -103,7 +156,7 @@ def heatmap(adata, column, layer=None, **kwargs):
         Name of member of adata.obs to plot the histogram.
 
     layer : str, default None
-        The name of the `adata` layer to use to calculate the mean intensity.
+        The name of the `adata` layer to use to calculate the mean feature.
 
     **kwargs:
         Parameters passed to seaborn heatmap function.
@@ -111,7 +164,7 @@ def heatmap(adata, column, layer=None, **kwargs):
     Returns
     -------
     pandas.DataFrame
-        A dataframe tha has the labels as indexes the mean intensity for every
+        A dataframe tha has the labels as indexes the mean feature for every
         marker.
 
     matplotlib.figure.Figure
@@ -121,16 +174,16 @@ def heatmap(adata, column, layer=None, **kwargs):
         The AsxesSubplot of the heatmap.
 
     """
-    intensities = adata.to_df(layer=layer)
+    features = adata.to_df(layer=layer)
     labels = adata.obs[column]
-    grouped = pd.concat([intensities, labels], axis=1).groupby(column)
-    mean_intensity = grouped.mean()
+    grouped = pd.concat([features, labels], axis=1).groupby(column)
+    mean_feature = grouped.mean()
 
-    n_rows = len(mean_intensity)
-    n_cols = len(mean_intensity.columns)
+    n_rows = len(mean_feature)
+    n_cols = len(mean_feature.columns)
     fig, ax = plt.subplots(figsize=(n_cols * 1.5, n_rows * 1.5))
     seaborn.heatmap(
-        mean_intensity,
+        mean_feature,
         annot=True,
         cmap="Blues",
         square=True,
@@ -144,142 +197,394 @@ def heatmap(adata, column, layer=None, **kwargs):
     ax.tick_params(axis='both', labelsize=25)
     ax.set_ylabel(column, size=25)
 
-    return mean_intensity, fig, ax
+    return mean_feature, fig, ax
 
-def hierarchical_heatmap(adata, column, layer=None, dendrogram=True, standard_scale=None, **kwargs):
+
+def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
+                         standard_scale=None, ax=None, **kwargs):
     """
-    Plot a hierarchical clustering heatmap of the mean intensity of cells that belong to a `column' using scanpy.tl.dendrogram and sc.pl.matrixplot.
+    Generates a hierarchical clustering heatmap.
+    Cells are stratified by `observation`,
+    then mean intensities are calculated for each feature across all cells
+    to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    column : str
-        Name of the column in adata.obs to group by and calculate mean intensity.
-    layer : str, optional, default: None
+    observation : str
+        Name of the observation in adata.obs to group by and calculate mean
+        intensity.
+    layer : str, optional
         The name of the `adata` layer to use to calculate the mean intensity.
-    dendrogram : bool, optional, default: True
-        If True, a dendrogram based on the hierarchical clustering between the `column` categories is computed and plotted.
+        Default is None.
+    dendrogram : bool, optional
+        If True, a dendrogram based on the hierarchical clustering between
+        the `observation` categories is computed and plotted. Default is True.
+    ax : matplotlib.axes.Axes, optional
+        A matplotlib axes object. If not provided, a new figure and axes
+        object will be created. Default is None.
     **kwargs:
         Additional parameters passed to sc.pl.matrixplot function.
 
     Returns
     ----------
-    mean_intensity, matrixplot
-    
-    """
+    mean_intensity : pandas.DataFrame
+        A DataFrame containing the mean intensity of cells for each
+        observation.
+    matrixplot : scanpy.pl.matrixplot
+        A Scanpy matrixplot object.
 
-    """
-    # An example to call this function:
-    mean_intensity, matrixplot = hierarchical_heatmap(all_data, "phenograph", layer=None, standard_scale='var')
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> from spac.visualization import hierarchical_heatmap
+    >>> import anndata
 
+    >>> X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
+    >>> obs = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
+    >>> all_data = anndata.AnnData(X=X, obs=obs)
+
+    >>> fig, ax = plt.subplots()  # Create a new figure and axes object
+    >>> mean_intensity, matrixplot = hierarchical_heatmap(all_data,
+    ...                                                   "cell_type",
+    ...                                                   layer=None,
+    ...                                                   standard_scale='var',
+    ...                                                   ax=None)
     # Display the figure
-    #matrixplot.show()
+    # matrixplot.show()
     """
+
+    # Check if observation exists in adata
+    if observation not in adata.obs.columns:
+        msg = (f"The observation '{observation}' does not exist in the "
+               f"provided AnnData object. Available observations are: "
+               f"{list(adata.obs.columns)}")
+        raise KeyError(msg)
+
+    # Check if the layer exists in adata
+    if layer and layer not in adata.layers.keys():
+        msg = (f"The layer '{layer}' does not exist in the "
+               f"provided AnnData object. Available layers are: "
+               f"{list(adata.layers.keys())}")
+        raise KeyError(msg)
+
+    # Raise an error if there are any NaN values in the observation column
+    if adata.obs[observation].isna().any():
+        raise ValueError("NaN values found in observation column.")
 
     # Calculate mean intensity
     intensities = adata.to_df(layer=layer)
-    labels = adata.obs[column]
-    grouped = pd.concat([intensities, labels], axis=1).groupby(column)
+    labels = adata.obs[observation]
+    grouped = pd.concat([intensities, labels], axis=1).groupby(observation)
     mean_intensity = grouped.mean()
 
-    # Reset the index of mean_intensity
+    # Reset the index of mean_feature
     mean_intensity = mean_intensity.reset_index()
 
     # Convert mean_intensity to AnnData
-    mean_intensity_adata = sc.AnnData(X=mean_intensity.iloc[:, 1:].values, 
-                                      obs=pd.DataFrame(index=mean_intensity.index,
-                                      data={column: mean_intensity.iloc[:, 0].astype('category').values}), 
-                                      var=pd.DataFrame(index=mean_intensity.columns[1:]))
+    mean_intensity_adata = sc.AnnData(
+        X=mean_intensity.iloc[:, 1:].values,
+        obs=pd.DataFrame(
+            index=mean_intensity.index,
+            data={
+                observation: mean_intensity.iloc[:, 0]
+                .astype('category').values
+            }
+        ),
+        var=pd.DataFrame(index=mean_intensity.columns[1:])
+    )
 
     # Compute dendrogram if needed
     if dendrogram:
-        sc.tl.dendrogram(mean_intensity_adata,
-                         groupby=column,
-                         var_names=mean_intensity_adata.var_names,
-                         n_pcs=None)
+        sc.tl.dendrogram(
+            mean_intensity_adata,
+            groupby=observation,
+            var_names=mean_intensity_adata.var_names,
+            n_pcs=None
+        )
 
-    
     # Create the matrix plot
-    matrixplot = sc.pl.matrixplot(mean_intensity_adata,
-                                  var_names=mean_intensity_adata.var_names,
-                                  groupby=column, use_raw=False,
-                                  dendrogram=dendrogram,
-                                  standard_scale=standard_scale, cmap="viridis", return_fig=True, **kwargs)
-
+    matrixplot = sc.pl.matrixplot(
+        mean_intensity_adata,
+        var_names=mean_intensity_adata.var_names,
+        groupby=observation, use_raw=False,
+        dendrogram=dendrogram,
+        standard_scale=standard_scale, cmap="viridis",
+        return_fig=True, ax=ax, show=False, **kwargs
+    )
     return mean_intensity, matrixplot
 
-def threshold_heatmap(adata, marker_cutoffs, phenotype):
+
+def threshold_heatmap(adata, feature_cutoffs, observation):
     """
-    Creates a heatmap for each marker, categorizing intensities into low, medium, and
-    high based on provided cutoffs.
+    Creates a heatmap for each feature, categorizing intensities into low,
+    medium, and high based on provided cutoffs.
 
     Parameters
     ----------
     adata : anndata.AnnData
-        AnnData object containing the marker intensities in .X attribute.
-
-    marker_cutoffs : dict
-        Dictionary with marker names as keys and tuples with two intensity cutoffs
-        as values.
-
-    phenotype : str
-        Column name in .obs DataFrame that contains the phenotype used for grouping.
+        AnnData object containing the feature intensities in .X attribute.
+    feature_cutoffs : dict
+        Dictionary with feature names as keys and tuples with two intensity
+        cutoffs as values.
+    observation : str Column name in .obs DataFrame
+        that contains the observation used for grouping.
 
     Returns
     -------
     Dictionary of :class:`~matplotlib.axes.Axes`
-        A dictionary contains the axes of figures generated in the scanpy heatmap function.
+        A dictionary contains the axes of figures generated in the scanpy
+        heatmap function.
         Consistent Key: 'heatmap_ax'
-        Potential Keys includes: 'groupby_ax', 'dendrogram_ax', and 'gene_groups_ax'.
-        
-    """
+        Potential Keys includes: 'groupby_ax', 'dendrogram_ax', and
+        'gene_groups_ax'.
 
     """
-    # Current function returns a Matplotlib figure object.
-    # Use the code below to display the heatmap when the function is called:
 
-    heatmap_figure = threshold_heatmap(adata, marker_cutoffs, phenotype)
-    plt.show()
+    # Assert observation is a string
+    if not isinstance(observation, str):
+        err_type = type(observation).__name__
+        err_msg = (f'Observation should be string. Got {err_type}.')
+        raise TypeError(err_msg)
 
-    """
-    # Save marker_cutoffs in the AnnData object
-    adata.uns['marker_cutoffs'] = marker_cutoffs  
+    # Assert observation is a column in adata.obs DataFrame
+    if observation not in adata.obs.columns:
+        err_msg = f"'{observation}' not found in adata.obs DataFrame."
+        raise ValueError(err_msg)
 
-    intensity_df = pd.DataFrame(index=adata.obs_names, columns=marker_cutoffs.keys())
+    if not isinstance(feature_cutoffs, dict):
+        raise TypeError("feature_cutoffs should be a dictionary.")
 
-    for marker, cutoffs in marker_cutoffs.items():
+    for key, value in feature_cutoffs.items():
+        if not (isinstance(value, tuple) and len(value) == 2):
+            raise ValueError(
+                "Each value in feature_cutoffs should be a "
+                "tuple of two elements."
+            )
+        if math.isnan(value[0]):
+            raise ValueError(f"Low cutoff for {key} should not be NaN.")
+        if math.isnan(value[1]):
+            raise ValueError(f"High cutoff for {key} should not be NaN.")
+
+    adata.uns['feature_cutoffs'] = feature_cutoffs
+
+    intensity_df = pd.DataFrame(index=adata.obs_names,
+                                columns=feature_cutoffs.keys())
+
+    for feature, cutoffs in feature_cutoffs.items():
         low_cutoff, high_cutoff = cutoffs
-        marker_values = adata[:, marker].X.flatten()
-        intensity_df.loc[marker_values <= low_cutoff, marker] = 0
-        intensity_df.loc[(marker_values > low_cutoff) & (marker_values <= high_cutoff), marker] = 1
-        intensity_df.loc[marker_values > high_cutoff, marker] = 2
+        feature_values = adata[:, feature].X.flatten()
+        intensity_df.loc[feature_values <= low_cutoff, feature] = 0
+        intensity_df.loc[(feature_values > low_cutoff) &
+                         (feature_values <= high_cutoff), feature] = 1
+        intensity_df.loc[feature_values > high_cutoff, feature] = 2
 
     intensity_df = intensity_df.astype(int)
-
-    # Add the intensity_df to adata as an AnnData layer
     adata.layers["intensity"] = intensity_df.to_numpy()
+    adata.obs[observation] = adata.obs[observation].astype('category')
 
-    # Convert the phenotype column to categorical
-    adata.obs[phenotype] = adata.obs[phenotype].astype('category')
-
-    # Create a custom color map for the heatmap
-    color_map = {
-        0: (0/255, 0/255, 139/255),
-        1: 'green',
-        2: 'yellow',
-    }
+    color_map = {0: (0/255, 0/255, 139/255), 1: 'green', 2: 'yellow'}
     colors = [color_map[i] for i in range(3)]
     cmap = ListedColormap(colors)
 
-    # Plot the heatmap using scanpy.pl.heatmap
-    heatmap_plot = sc.pl.heatmap(adata,
-                  var_names=intensity_df.columns,
-                  groupby=phenotype,
-                  use_raw=False,
-                  layer='intensity',
-                  cmap=cmap,
-                  swap_axes=True, 
-                  show=False)
+    norm = BoundaryNorm([-0.5, 0.5, 1.5, 2.5], cmap.N)
+
+    heatmap_plot = sc.pl.heatmap(
+        adata,
+        var_names=intensity_df.columns,
+        groupby=observation,
+        use_raw=False,
+        layer='intensity',
+        cmap=cmap,
+        norm=norm,
+        swap_axes=True,
+        show=False
+    )
+
+    colorbar = plt.gcf().axes[-1]
+    colorbar.set_yticks([0, 1, 2])
+    colorbar.set_yticklabels(['low', 'medium', 'high'])
 
     return heatmap_plot
+
+
+def spatial_plot(
+        adata,
+        spot_size,
+        alpha,
+        vmin=-999,
+        vmax=-999,
+        observation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        **kwargs
+):
+    """
+    Generate the spatial plot of selected features
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing target feature and spatial coordinates.
+
+    spot_size : int
+        The size of spot on the spatial plot.
+    alpha : float
+        The transparency of spots, range from 0 (invisible) to 1 (solid)
+    vmin : float or int
+        The lower limit of the feature value for visualization
+    vmax : float or int
+        The upper limit of the feature value for visualization
+    feature : str
+        The feature to visualize on the spatial plot.
+        Default None.
+    observation : str
+        The observation to visualize in the spatial plot.
+        Can't be set with feature, default None.
+    layer : str
+        Name of the AnnData object layer that wants to be plotted.
+        By default adata.raw.X is plotted.
+    ax : matplotlib.axes.Axes
+        The matplotlib Axes containing the analysis plots.
+        The returned ax is the passed ax or new ax created.
+        Only works if plotting a single component.
+    **kwargs
+        Arguments to pass to matplotlib.pyplot.scatter()
+    Returns
+    -------
+        Single or a list of class:`~matplotlib.axes.Axes`.
+    """
+
+    err_msg_layer = "The 'layer' parameter must be a string, " + \
+        f"got {str(type(layer))}"
+    err_msg_feature = "The 'feature' parameter must be a string, " + \
+        f"got {str(type(feature))}"
+    err_msg_observation = "The 'observation' parameter must be a string, " + \
+        f"got {str(type(observation))}"
+    err_msg_feat_obs_coe = "Both observation and feature are passed, " + \
+        "please provide sinle input."
+    err_msg_feat_obs_non = "Both observation and feature are None, " + \
+        "please provide single input."
+    err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
+        f"got {str(type(spot_size))}"
+    err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
+        f"got {str(type(alpha))}"
+    err_msg_alpha_value = "The 'alpha' parameter must be between " + \
+        f"0 and 1 (inclusive), got {str(alpha)}"
+    err_msg_vmin = "The 'vmin' parameter must be a float or an int, " + \
+        f"got {str(type(vmin))}"
+    err_msg_vmax = "The 'vmax' parameter must be a float or an int, " + \
+        f"got {str(type(vmax))}"
+    err_msg_ax = "The 'ax' parameter must be an instance " + \
+        f"of matplotlib.axes.Axes, got {str(type(ax))}"
+
+    if adata is None:
+        raise ValueError("The input dataset must not be None.")
+
+    if not isinstance(adata, anndata.AnnData):
+        err_msg_adata = "The 'adata' parameter must be an " + \
+            f"instance of anndata.AnnData, got {str(type(adata))}."
+        raise ValueError(err_msg_adata)
+
+    if layer is not None and not isinstance(layer, str):
+        raise ValueError(err_msg_layer)
+
+    if layer is not None and layer not in adata.layers.keys():
+        err_msg_layer_exist = f"Layer {layer} does not exists, " + \
+            f"available layers are {str(adata.layers.keys())}"
+        raise ValueError(err_msg_layer_exist)
+
+    if feature is not None and not isinstance(feature, str):
+        raise ValueError(err_msg_feature)
+
+    if observation is not None and not isinstance(observation, str):
+        raise ValueError(err_msg_observation)
+
+    if observation is not None and feature is not None:
+        raise ValueError(err_msg_feat_obs_coe)
+
+    if observation is None and feature is None:
+        raise ValueError(err_msg_feat_obs_non)
+
+    if 'spatial' not in adata.obsm_keys():
+        err_msg = "Spatial coordinates not found in the 'obsm' attribute."
+        raise ValueError(err_msg)
+
+    # Extract obs name
+    obs_names = adata.obs.columns.tolist()
+    obs_names_str = ", ".join(obs_names)
+
+    if observation is not None and observation not in obs_names:
+        error_text = f"Observation {observation} not found in the dataset." + \
+            f" Existing observations are: {obs_names_str}"
+        raise ValueError(error_text)
+
+    # Extract feature name
+    if layer is None:
+        layer = adata.X
+    else:
+        layer = adata.layers[layer]
+
+    feature_names = adata.var_names.tolist()
+
+    if feature is not None and feature not in feature_names:
+        error_text = f"Feature {feature} not found," + \
+            " please check the sample metadata."
+        raise ValueError(error_text)
+
+    if not isinstance(spot_size, int):
+        raise ValueError(err_msg_spot_size)
+
+    if not isinstance(alpha, float):
+        raise ValueError(err_msg_alpha_type)
+
+    if not (0 <= alpha <= 1):
+        raise ValueError(err_msg_alpha_value)
+
+    if vmin != -999 and not (
+        isinstance(vmin, float) or isinstance(vmin, int)
+    ):
+        raise ValueError(err_msg_vmin)
+
+    if vmax != -999 and not (
+        isinstance(vmax, float) or isinstance(vmax, int)
+    ):
+        raise ValueError(err_msg_vmax)
+
+    if ax is not None and not isinstance(ax, plt.Axes):
+        raise ValueError(err_msg_ax)
+
+    if feature is not None:
+        
+        feature_index = feature_names.index(feature)
+        feature_obs = feature + "spatial_plot"
+        if vmin == -999:
+            vmin = np.min(layer[:, feature_index])
+        if vmax == -999:
+            vmax = np.max(layer[:, feature_index])
+        adata.obs[feature_obs] = layer[:, feature_index]
+        color_region = feature_obs
+    else:
+        color_region = observation
+        vmin = None
+        vmax = None
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+
+    print(feature)
+    ax = sc.pl.spatial(
+        adata=adata,
+        layer=layer,
+        color=color_region,
+        spot_size=spot_size,
+        alpha=alpha,
+        vmin=vmin,
+        vmax=vmax,
+        ax=ax,
+        show=False,
+        **kwargs)
+
+    return ax

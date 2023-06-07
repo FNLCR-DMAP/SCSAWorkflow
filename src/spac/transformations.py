@@ -1,12 +1,8 @@
-import re
-import seaborn
 import numpy as np
 import scanpy as sc
 import pandas as pd
-import anndata as ad
+import anndata
 import scanpy.external as sce
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
 
 
 def phenograph_clustering(adata, features, layer, k=30):
@@ -19,7 +15,6 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     `.uns["phenograph_features"]`
         The features used to calculate the phenograph clusters
-
 
     Parameters
     ----------
@@ -35,45 +30,77 @@ def phenograph_clustering(adata, features, layer, k=30):
 
     k : int
         The number of nearest neighbor to be used in creating the graph.
-
     """
+
+    if not isinstance(adata, sc.AnnData):
+        raise TypeError("`adata` must be of type anndata.AnnData")
+
+    if (not isinstance(features, list) or
+            not all(isinstance(feature, str) for feature in features)):
+        raise TypeError("`features` must be a list of strings")
+
+    if layer not in adata.layers.keys():
+        raise ValueError(f"`layer` not found in `adata.layers`. "
+                         f"Available layers are {list(adata.layers.keys())}")
+
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("`k` must be a positive integer")
+
+    if not all(feature in adata.var_names for feature in features):
+        raise ValueError("One or more of the `features` are not in "
+                         "`adata.var_names`")
+
     phenograph_df = adata.to_df(layer=layer)[features]
-    phenograph_out = sce.tl.phenograph(
-        phenograph_df,
-        clustering_algo="louvain",
-        k=k)
+    phenograph_out = sce.tl.phenograph(phenograph_df,
+                                       clustering_algo="louvain",
+                                       k=k)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
-def tsne(adata, layer=None):
+def tsne(adata, layer=None, **kwargs):
     """
-    Plot t-SNE from a specific layer information.
+    Perform t-SNE transformation on specific layer information.
 
     Parameters
     ----------
-    adata : anndatra.AnnData
+    adata : anndata.AnnData
        The AnnData object.
-
     layer : str
-        The layer to be used in calculating the phengraph clusters.
+        Layer for phenograph cluster calculation.
+    **kwargs
+        Parameters for scanpy.tl.tsne function.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with t-SNE coordinates.
     """
-    # As scanpy.tl.tsne works on either X, obsm, or PCA, then I will copy the
-    # layer data to an obsm if it is not the default X
+    # If a layer is provided, it's transferred to 'obsm' for t-SNE computation
+    # in scanpy.tl.tsne, which defaults to using the 'X' data matrix if not.
+
+    if not isinstance(adata, anndata.AnnData):
+        raise ValueError("adata must be an AnnData object.")
+
     if layer is not None:
-        X_tsne = adata.to_df(layer=layer)
+        if layer not in adata.layers:
+            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
+
         tsne_obsm_name = layer + "_tsne"
+        X_tsne = adata.to_df(layer=layer)
         adata.obsm[tsne_obsm_name] = X_tsne
     else:
         tsne_obsm_name = None
 
     sc.tl.tsne(adata, use_rep=tsne_obsm_name, random_state=7)
 
+    return adata
+
 
 def batch_normalize(adata, obs, layer, method="median", log=False):
     """
-    Adjust the intensity of every marker using a normalization method.
+    Adjust the features of every marker using a normalization method.
 
     The normalization methods are summarized here:
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
@@ -95,7 +122,7 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
         The normlalization method to use.
 
     log : bool, default False
-        If True, take the log2 of intensities before normalization.
+        If True, take the log2 of features before normalization.
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
@@ -121,85 +148,105 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = region_cells + \
+            new_features = region_cells + \
                 (all_regions_quantile - region_median)
 
         if method == "Q50":
             region_median = region_cells.quantile(q=0.5)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_median)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_median)
 
         if method == "Q75":
             region_75quantile = region_cells.quantile(q=0.75)
-            new_intensities = (region_cells
-                               * all_regions_quantile
-                               / region_75quantile)
+            new_features = (region_cells
+                            * all_regions_quantile
+                            / region_75quantile)
 
-        new_df_list.append(new_intensities)
+        new_df_list.append(new_features)
 
     new_df = pd.concat(new_df_list)
     adata.layers[layer] = new_df
 
-def rename_clustering(adata, column, new_phenotypes, new_column_name="renamed_clusters"):
+
+def rename_observations(adata, src_observation, dest_observation, mappings):
     """
-    Rename and group clusters in an AnnData object based on the provided
-    dictionary, keeping the original observation column.
+    Rename observations in an AnnData object based on a provided dictionary.
+    This function creates a new observation column.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    column : str
-        Name of the column in adata.obs containing the original cluster labels.
-    new_phenotypes : dict
-        A dictionary mapping the original cluster names to the new phenotype names.
-    new_column_name : str, optional, default: "renamed_clusters"
+    src_observation : str
+        Name of the column in adata.obs containing the original
+        observation labels.
+    dest_observation : str
         The name of the new column to be created in the AnnData object
-        containing the renamed cluster labels.
+        containing the renamed observation labels.
+    mappings : dict
+        A dictionary mapping the original observation labels to
+        the new labels.
 
     Returns
     -------
     adata : anndata.AnnData
-        The updated Anndata object with the new column containing the renamed
-        cluster labels.
+        The updated Anndata object with the new column containing the
+        renamed observation labels.
+
+    Examples
+    --------
+    >>> adata = your_anndata_object
+    >>> src_observation = "phenograph"
+    >>> mappings = {
+    ...     "0": "group_8",
+    ...     "1": "group_2",
+    ...     "2": "group_6",
+    ...     # ...
+    ...     "37": "group_5",
+    ... }
+    >>> dest_observation = "renamed_observations"
+    >>> adata = rename_observations(
+    ...     adata, src_observation, dest_observation, mappings)
     """
-    
-    """
-    # An example to call the function:
-    adata = your_anndata_object
-    column = "phenograph"
-    new_phenotypes = {
-        "0": "group_8",
-        "1": "group_2",
-        "2": "group_6",
-        # ...
-        "37": "group_5",
-    }
-    new_column_name = "renamed_clusters"
 
-    adata = rename_clustering(adata, column, new_phenotypes, new_column_name)
-    """
-
-    # Get the unique values of the observation column
-    unique_values = adata.obs[column].unique()
-
-    # Convert the keys in new_phenotypes to the same data type as the unique
-    # values in the observation column
-    new_phenotypes = {
-        type(unique_values[0])(key): value for key, value in new_phenotypes.items()
-    }
-
-    # Check if all keys in new_phenotypes are present in the unique values of
-    # the observation column
-    if not all(key in unique_values for key in new_phenotypes.keys()):
+    # Check if the source observation exists in the AnnData object
+    if src_observation not in adata.obs.columns:
         raise ValueError(
-            "All keys in the new_phenotypes dictionary should match the unique "
-            "values in the observation column."
+            f"Source observation '{src_observation}' not found in the "
+            "AnnData object."
         )
-    
-    # Create a new column in adata.obs with the updated cluster names
-    adata.obs[new_column_name] = adata.obs[column].map(new_phenotypes)\
-        .fillna(adata.obs[column]).astype("category")
+
+    # Get the unique values of the source observation
+    unique_values = adata.obs[src_observation].unique()
+
+    # Convert the keys in mappings to the same data type as the unique values
+    mappings = {
+        type(unique_values[0])(key): value
+        for key, value in mappings.items()
+    }
+
+    # Check if all keys in mappings match the unique values in the
+    # source observation
+    if not all(key in unique_values for key in mappings.keys()):
+        raise ValueError(
+            "All keys in the mappings dictionary should match the unique "
+            "values in the source observation."
+        )
+
+    # Check if the destination observation already exists in the AnnData object
+    if dest_observation in adata.obs.columns:
+        raise ValueError(
+            f"Destination observation '{dest_observation}' already exists "
+            "in the AnnData object."
+        )
+
+    # Create a new column in adata.obs with the updated observation labels
+    adata.obs[dest_observation] = (
+        adata.obs[src_observation]
+        .map(mappings)
+        .fillna(adata.obs[src_observation])
+        .astype("category")
+    )
 
     return adata
