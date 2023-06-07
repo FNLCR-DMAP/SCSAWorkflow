@@ -420,7 +420,7 @@ def spatial_plot(
         vmax=-999,
         observation=None,
         feature=None,
-        table=None,
+        layer=None,
         ax=None,
         **kwargs
 ):
@@ -445,7 +445,7 @@ def spatial_plot(
     observation : str
         The observation to visualize in the spatial plot.
         Can't be set with feature, default None.
-    table : str
+    layer : str
         Name of the AnnData object layer that wants to be plotted.
         By default adata.raw.X is plotted.
     ax : matplotlib.axes.Axes
@@ -459,8 +459,8 @@ def spatial_plot(
         Single or a list of class:`~matplotlib.axes.Axes`.
     """
 
-    err_msg_table = "The 'table' parameter must be a string, " + \
-        f"got {str(type(table))}"
+    err_msg_layer = "The 'layer' parameter must be a string, " + \
+        f"got {str(type(layer))}"
     err_msg_feature = "The 'feature' parameter must be a string, " + \
         f"got {str(type(feature))}"
     err_msg_observation = "The 'observation' parameter must be a string, " + \
@@ -468,8 +468,8 @@ def spatial_plot(
     err_msg_feat_obs_coe = "Both observation and feature are passed, " + \
         "please provide sinle input."
     err_msg_feat_obs_non = "Both observation and feature are None, " + \
-        "please provide sinle input."
-    err_msg_spot_size = "The 'spot_size' parameter must be an integerm, " + \
+        "please provide single input."
+    err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
         f"got {str(type(spot_size))}"
     err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
         f"got {str(type(alpha))}"
@@ -490,13 +490,13 @@ def spatial_plot(
             f"instance of anndata.AnnData, got {str(type(adata))}."
         raise ValueError(err_msg_adata)
 
-    if table is not None and not isinstance(table, str):
-        raise ValueError(err_msg_table)
+    if layer is not None and not isinstance(layer, str):
+        raise ValueError(err_msg_layer)
 
-    if table is not None and table not in adata.layers.keys():
-        err_msg_table_exist = f"Table {table} does not exists, " + \
-            f"available tables are {str(adata.layers.keys())}"
-        raise ValueError(err_msg_table_exist)
+    if layer is not None and layer not in adata.layers.keys():
+        err_msg_layer_exist = f"Layer {layer} does not exists, " + \
+            f"available layers are {str(adata.layers.keys())}"
+        raise ValueError(err_msg_layer_exist)
 
     if feature is not None and not isinstance(feature, str):
         raise ValueError(err_msg_feature)
@@ -516,25 +516,24 @@ def spatial_plot(
 
     # Extract obs name
     obs_names = adata.obs.columns.tolist()
-    obs_names_str = ",".join(obs_names)
+    obs_names_str = ", ".join(obs_names)
 
     if observation is not None and observation not in obs_names:
         error_text = f"Observation {observation} not found in the dataset." + \
-            f"existing observations are: {obs_names_str}"
+            f" Existing observations are: {obs_names_str}"
         raise ValueError(error_text)
 
     # Extract feature name
-    if table is None:
+    if layer is None:
         layer = adata.X
     else:
-        layer = adata.layers[table]
+        layer = adata.layers[layer]
 
     feature_names = adata.var_names.tolist()
-    feature_names_str = ",".join(feature_names)
 
     if feature is not None and feature not in feature_names:
         error_text = f"Feature {feature} not found," + \
-            f"existing features are: {feature_names_str}"
+            " please check the sample metadata."
         raise ValueError(error_text)
 
     if not isinstance(spot_size, int):
@@ -560,12 +559,15 @@ def spatial_plot(
         raise ValueError(err_msg_ax)
 
     if feature is not None:
-        color_region = feature
+        
         feature_index = feature_names.index(feature)
+        feature_obs = feature + "spatial_plot"
         if vmin == -999:
             vmin = np.min(layer[:, feature_index])
         if vmax == -999:
             vmax = np.max(layer[:, feature_index])
+        adata.obs[feature_obs] = layer[:, feature_index]
+        color_region = feature_obs
     else:
         color_region = observation
         vmin = None
@@ -575,9 +577,10 @@ def spatial_plot(
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
 
+    print(feature)
     ax = sc.pl.spatial(
-        adata,
-        layer=table,
+        adata=adata,
+        layer=layer,
         color=color_region,
         spot_size=spot_size,
         alpha=alpha,
