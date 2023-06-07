@@ -14,6 +14,7 @@ class SpatialPlotTestCase(unittest.TestCase):
 
         # Generate data matrix
         features = np.random.randint(0, 100, size=(num_rows, num_cols))
+        feature_names = [f'Intensity_{i}' for i in range(num_cols)]
 
         # Generate observation metadata
         obs_data = {
@@ -22,27 +23,20 @@ class SpatialPlotTestCase(unittest.TestCase):
             'obs3': np.random.uniform(0, 1, size=num_rows)
         }
 
-        col_index = {
-            "col_index": [f'Intensity_{i}' for i in range(num_cols)],
-            "var_features": np.random.randint(500, 5000, size=num_cols)
-            }
-
         # Create the AnnData object
         self.adata = anndata.AnnData(
             X=features,
-            obs=obs_data,
-            var=col_index
+            obs=obs_data
         )
 
         numpy_array = np.random.uniform(0, 100, size=(num_rows, 2))
         self.adata.obsm["spatial"] = numpy_array
-        feature_names = [f'Intensity_{i}' for i in range(num_cols)]
         self.adata.var_names = feature_names
 
         # Generate layer data
         layer_data = np.random.randint(0, 100, size=(num_rows, num_cols))
-        self.adata.layers['Normalized'] = features
-        self.adata.layers['Standardized'] = features
+        self.adata.layers['Normalized'] = layer_data
+        self.adata.layers['Standardized'] = layer_data
 
         self.spot_size = 10
         self.alpha = 0.5
