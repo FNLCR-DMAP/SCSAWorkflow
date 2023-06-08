@@ -1,11 +1,28 @@
-# Changelog
+### Feature
+* **spatial_plot:** Function and tests ([`5869c50`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5869c5098dd87f585d8eaf63536e69ae8454ddc2))
+* **spatial_interaction:** Funtion and Unittests ([`da40190`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/da4019085bae43471040713f5740aa17f3385fe8))
+* **regex_search_list:** New feasture and tests ([`b10d5c8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b10d5c86bd009dbbeddd6634f7f8a9f0306e16bb))
+* **bin2cat:** Add function and unit test ([`1f0c118`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1f0c11868c53040e2110263bc69783627e4287f9))
+* **phenograph_clustering:** Add test for clustering ([`e0f745f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e0f745fc0e07f15a0cf3a6af98eefa140394f395))
+* **phenograph:** Added synthetic data in test ([`f459ebc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f459ebce12ea0b5e3f460af48f8ac07797a70c37))
+* **calculate_centroid:** New feature and unittest ([`b3adc0a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3adc0aea20de99170ea646bc866d0003f0cddc9))
+* Add two functions select_values and downsample_cells and corresponding tests ([`cf7dde1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf7dde1d0b55290cbaaa8ad58efee6090bb12295))
+* Select_values_downsample and tests ([`d356ff1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d356ff143fcde53b31dd5cd17fabd278084e5f2c))
+* Modifed rename_observations tests ([`f186ee7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f186ee780a5cc74ededcd2169ad466b8dbb262fa))
+* Add hierarchical_heatmap and tests ([`e062507`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e062507fe86b77ec024a74ec80d818d181bfb671))
+* Final test_downsample_cells ([`fbf6a06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fbf6a069ebfda3cc87f466403625a50e770d6569))
+* Modified test_downsample_cells ([`c7688e0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7688e0a103ecc8e95406ca84225445513ae0c82))
+* Add select_values and downsample_cells and tests ([`dc5101c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dc5101cbba6f4355376a1d6ce7b9edc9bc59e020))
+* Add select_values and downsample_cells and tests ([`e350fcb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e350fcb5eddfbaa5a8af12bd5ca78cb9d74714fb))
+* Final rename_observations and tests ([`9b97e0c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b97e0cf6d4729bd49de96dd44fa0caf40b8bff8))
+* Add rename_observations and tests ([`5f18cd8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f18cd8d1ec2780a5a37990df2b39aa4480f61d7))
+* **combine_dfs:** Separated combine csvs ([`7144385`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71443856aa8ebcb3d12de9a5b0a97df4a1bfa9a3))
+* **combine_csvs:** Add combine_csvs function and unittests to combine multiple csvs into single pandas dataframe. ([`634e0ff`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/634e0ffd2dcdf34ab8bc8a0bbffc1ab298c3de73))
+* Added new features to ingest multiple observations and intensities regex ([`6489dca`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6489dca50d43731cbf10739efa08ca9086cbd0fa))
+* Ingest multiple observations per cell. ([`aef8ed8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aef8ed8e2d6bea9b64e51000cbf56dc38fde2feb))
+* Added a new function to plot heatmaps of average intensities ([`09c8765`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/09c8765c2838e328ac884c67c5b96aa3a3247a89))
 
-<!--next-version-placeholder-->
-
-## v0.1.0 (5/4/2023)
-
-- Renamed the workflow to `spac` and reorganized the directory.
-
-## v0.1.0 (29/11/2022)
-
-- First release of `scworkflow`!
+### Documentation
+* **package:** Change pkg name in documentation ([`df0fb7e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/df0fb7e91438333ab2f6210ebe6133b1f4e5d4ca))
+* Added README, LICENSE, poetry, etc. ([`ec8d78b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ec8d78b25dcba2349b88afe1eeb84606abd75c35))
+* Fixed documentation to follow numpydoc style ([`bee5205`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bee5205650f93d1c2b5a1ec424d138b8eb90f67c))
