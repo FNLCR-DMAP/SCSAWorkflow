@@ -11,5 +11,3 @@ on:
 jobs:
   Activating_Parser:
     uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
-    secrets: inherit
-
