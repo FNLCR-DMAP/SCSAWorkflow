@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "spac"
 version = "0.2.0"
-description = "A package for various single cell MxIF/CODEX analysis steps. "
+description = "Spac is a scalable, automated pipeline, under under the Single Cell Spatial Analysis Workflow (SCSAWorkflow) project aiming at analyzing single-cell spatial protein data of multiplexed whole-slide tissue images generated from technologies such as MxIF Codex and Imaging Mass Cytometry (IMC). This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. Spac offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc."
 authors = ["George Zaki", "Rui He", "Fang Liu"]
 license = "BSD 3-Clause"
 readme = "README.md"

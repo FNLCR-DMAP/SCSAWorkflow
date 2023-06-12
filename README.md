@@ -1,16 +1,13 @@
-# scworkflow
+# SPatial Analysis for single Cell (Spac)
 
-A package for various single cell MxIF/CODEX analysis steps. 
+Spac is a scalable, automated pipeline, under under the Single Cell Spatial Analysis Workflow (SCSAWorkflow) project aiming at analyzing single-cell spatial protein data of multiplexed whole-slide tissue images generated from technologies such as MxIF Codex and Imaging Mass Cytometry (IMC).
+This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. Spac offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc.
 
 ## Installation
 
 ```bash
 $ pip install spac
 ```
-
-## Usage
-
-- TODO
 
 ## Contributing
 
