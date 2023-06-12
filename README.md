@@ -10,7 +10,7 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## License
 
-`spac` was created by George Zaki. It is licensed under the terms of the BSD 3-Clause license.
+`spac` was created by Fang Liu, Rui He, and George Zaki. It is licensed under the terms of the BSD 3-Clause license.
 
 ## Credits
 
