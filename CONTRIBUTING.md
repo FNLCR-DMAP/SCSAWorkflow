@@ -67,7 +67,4 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated.
 3. The pull request should work for all currently supported operating systems and versions of Python.
 
-## Code of Conduct
 
-Please note that the `spac` project is released with a
-Code of Conduct. By contributing to this project you agree to abide by its terms.
