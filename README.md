@@ -4,10 +4,6 @@ SPAC is a scalable, automated pipeline, under under the Single Cell Spatial Anal
 This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. Spac offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc.
 
 
-## Contributing
-
-Interested in contributing? Check out the contributing guidelines. Please note that this project is released with a Code of Conduct. By contributing to this project, you agree to abide by its terms.
-
 ## License
 
 `spac` was created by Fang Liu, Rui He, and George Zaki. It is licensed under the terms of the BSD 3-Clause license.
