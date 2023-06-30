@@ -133,10 +133,10 @@ def histogram(adata, feature_name=None, observation_name=None, layer=None,
             fig, axs = plt.subplots(n_groups, 1, figsize=(5, 5*n_groups))
             if n_groups == 1:
                 axs = [axs]
-            for i, ax in enumerate(axs):
+            for i, ax_i in enumerate(axs):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
-                             x=x, ax=ax, **kwargs)
-                ax.set_title(groups[i])
+                             x=x, ax=ax_i, **kwargs)
+                ax_i.set_title(groups[i])
             return fig, axs
 
     sns.histplot(data=df, x=x, ax=ax, **kwargs)
@@ -556,7 +556,7 @@ def spatial_plot(
         raise ValueError(err_msg_ax)
 
     if feature is not None:
-        
+
         feature_index = feature_names.index(feature)
         feature_obs = feature + "spatial_plot"
         if vmin == -999:
