@@ -249,8 +249,15 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     adata.obs[dest_observation] = (
         adata.obs[src_observation]
         .map(mappings)
-        .fillna(adata.obs[src_observation])
         .astype("category")
     )
+
+    # Ensure that all categories are covered
+    if adata.obs[dest_observation].isna().any():
+        raise ValueError(
+            "Not all unique values in the source observation are "
+            "covered by the mappings. "
+            "Please ensure that the mappings cover all unique values."
+        )
 
     return adata
