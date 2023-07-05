@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
-def tsne_plot(adata, ax=None, **kwargs):
+def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     """
     Visualize scatter plot in tSNE basis.
 
@@ -18,6 +18,8 @@ def tsne_plot(adata, ax=None, **kwargs):
     adata : anndata.AnnData
         The AnnData object with t-SNE coordinates precomputed by the 'tsne'
         function and stored in 'adata.obsm["X_tsne"]'.
+    color_column : str, optional
+        The name of the column to use for coloring the scatter plot points.
     ax : matplotlib.axes.Axes, optional (default: None)
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
@@ -42,6 +44,17 @@ def tsne_plot(adata, ax=None, **kwargs):
     # Create a new figure and axes if not provided
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.get_figure()
+
+    if color_column and (color_column not in adata.obs.columns and
+                         color_column not in adata.var.columns):
+        err_msg = f"'{color_column}' not found in adata.obs or adata.var."
+        raise KeyError(err_msg)
+
+    # Add color column to the kwargs for the scanpy plot
+    if color_column:
+        kwargs['color'] = color_column
 
     # Plot the t-SNE
     sc.pl.tsne(adata, ax=ax, **kwargs)
