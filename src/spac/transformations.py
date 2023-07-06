@@ -5,7 +5,7 @@ import anndata
 import scanpy.external as sce
 
 
-def phenograph_clustering(adata, features, layer, k=30):
+def phenograph_clustering(adata, features, layer=None, k=30):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -39,8 +39,8 @@ def phenograph_clustering(adata, features, layer, k=30):
             not all(isinstance(feature, str) for feature in features)):
         raise TypeError("`features` must be a list of strings")
 
-    if layer not in adata.layers.keys():
-        raise ValueError(f"`layer` not found in `adata.layers`. "
+    if layer is not None and layer not in adata.layers.keys():
+        raise ValueError(f"`{layer}` not found in `adata.layers`. "
                          f"Available layers are {list(adata.layers.keys())}")
 
     if not isinstance(k, int) or k <= 0:
@@ -50,7 +50,11 @@ def phenograph_clustering(adata, features, layer, k=30):
         raise ValueError("One or more of the `features` are not in "
                          "`adata.var_names`")
 
-    phenograph_df = adata.to_df(layer=layer)[features]
+    if layer is not None:
+        phenograph_df = adata.to_df(layer=layer)[features]
+    else:
+        phenograph_df = adata.to_df()[features]
+
     phenograph_out = sce.tl.phenograph(phenograph_df,
                                        clustering_algo="louvain",
                                        k=k)
@@ -245,8 +249,15 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     adata.obs[dest_observation] = (
         adata.obs[src_observation]
         .map(mappings)
-        .fillna(adata.obs[src_observation])
         .astype("category")
     )
+
+    # Ensure that all categories are covered
+    if adata.obs[dest_observation].isna().any():
+        raise ValueError(
+            "Not all unique values in the source observation are "
+            "covered by the mappings. "
+            "Please ensure that the mappings cover all unique values."
+        )
 
     return adata

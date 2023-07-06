@@ -52,6 +52,15 @@ class TestPhenographClustering(unittest.TestCase):
         self.assertEqual(self.adata.uns['phenograph_features'],
                          self.features)
 
+    @patch('scanpy.external.tl.phenograph',
+           return_value=(np.random.randint(0, 3, 100), {}))
+    def test_layer_none_case(self, mock_phenograph):
+        # This test checks if the function works correctly when layer is None.
+        phenograph_clustering(self.adata, self.features, None)
+        self.assertIn('phenograph', self.adata.obs)
+        self.assertEqual(self.adata.uns['phenograph_features'],
+                         self.features)
+
     def test_invalid_adata(self):
         # This test checks if the function raises a TypeError when the
         # adata argument is not an AnnData object.

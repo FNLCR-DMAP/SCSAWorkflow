@@ -32,13 +32,23 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(sum(p.get_height() for p in ax.patches), total_obs)
 
     def test_histogram_feature_group_by(self):
+        # Call the function with a feature_name and group_by argument,
+        # setting together=False to create separate plots for each group.
         fig, axs = histogram(
             self.adata,
             feature_name='marker1',
             group_by='obs2',
             together=False
         )
+
+        # Check that the function returned a list of Axes objects,
+        # one for each group. In this case,
+        # we expect there to be 2 groups, as obs2 has 2 unique values.
         self.assertEqual(len(axs), 2)
+
+        # Check that each object in axs is indeed an Axes object.
+        self.assertIsInstance(axs[0], mpl.axes.Axes)
+        self.assertIsInstance(axs[1], mpl.axes.Axes)
 
     def test_both_feature_and_observation(self):
         err_msg = ("Cannot pass both feature_name and "

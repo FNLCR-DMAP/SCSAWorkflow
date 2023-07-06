@@ -61,21 +61,6 @@ class TestRenameObservations(unittest.TestCase):
                 {"5": "group_8"}
             )
 
-    def test_partial_mappings(self):
-        """Test rename_observations with partial mappings."""
-        mappings = {"0": "group_8", "1": "group_2"}
-        dest_observation = "renamed_observations"
-        result = rename_observations(
-            self.adata, "phenograph", dest_observation, mappings
-        )
-        expected = pd.Series(
-            ["group_8", "group_2", "group_8", "2", "group_2", "2"],
-            index=self.adata.obs.index,
-            name=dest_observation,
-            dtype="category"
-        )
-        pd.testing.assert_series_equal(result.obs[dest_observation], expected)
-
     def test_rename_observations_basic(self):
         """Test basic functionality of rename_observations."""
         data_matrix = np.random.rand(3, 4)
@@ -155,6 +140,26 @@ class TestRenameObservations(unittest.TestCase):
         renamed_clusters = adata.obs["renamed_clusters"]
         self.assertTrue(
             all(renamed_clusters == ["group_0", "group_0", "group_0"])
+        )
+
+    def test_not_all_categories_covered(self):
+        """
+        Test rename_observations with mappings that do not cover
+        all unique values in the source observation.
+        """
+        mappings = {"0": "group_8", "1": "group_2"}
+        with self.assertRaises(ValueError) as cm:
+            rename_observations(
+                self.adata,
+                "phenograph",
+                "incomplete_dest",
+                mappings
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "Not all unique values in the source observation are "
+            "covered by the mappings. "
+            "Please ensure that the mappings cover all unique values."
         )
 
 
