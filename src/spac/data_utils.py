@@ -530,6 +530,81 @@ def downsample_cells(data, observation, n_samples=None,
     return data
 
 
+def downsample_multi_obs(data, observations, n_samples=None,
+                         stratify=False, rand=False):
+    """
+    Reduces the number of cells in the data by either selecting n_samples from
+    every possible value of observations, or returning n_samples
+    stratified by the frequency of values in observations.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The input data frame.
+    observations : list of str
+        The list of column names to downsample on.
+    n_samples : int, default=None
+        The max number of samples to return for each group if stratify is
+        False, or in total if stratify is True. If None, all samples returned.
+    stratify : bool, default=False
+        If true, stratify the returned values based on their input frequency.
+    rand : bool, default=False
+        If true and stratify is True, randomly select the returned cells.
+        Otherwise, choose the first n cells.
+
+    Returns
+    -------
+    data : pd.DataFrame
+        The downsampled data frame.
+    """
+    # Check if the columns to downsample on exists
+    for obs in observations:
+        if obs not in data.columns:
+            raise ValueError(f"Column {obs} does not exist in the dataframe")
+
+    if n_samples is not None:
+        # Combine observations into a single column
+        data['combined'] = data[observations].apply(
+            lambda row: '_'.join(row.values.astype(str)), axis=1)
+
+        if stratify:
+            # Determine frequencies of each group
+            freqs = data['combined'].value_counts(normalize=True)
+            n_samples_per_group = (freqs * n_samples).astype(int)
+
+            # Increase the number of samples for groups with 0 calculated samples
+            n_samples_per_group = n_samples_per_group.apply(lambda x: max(x, 1))
+
+            samples = []
+            # Group by combined observation and sample from each group
+            for group, group_data in data.groupby('combined'):
+                n_group_samples = n_samples_per_group.get(group, 0)
+                if rand:
+                    # Randomly select the returned cells
+                    samples.append(
+                        group_data.sample(
+                            min(n_group_samples, len(group_data))
+                        )
+                    )
+                else:
+                    # Choose the first n cells
+                    samples.append(
+                        group_data.head(min(n_group_samples, len(group_data)))
+                    )
+            # Concatenate all samples
+            data = pd.concat(samples)
+        else:
+            raise NotImplementedError(
+                "Non-stratified selection is not supported for "
+                "multiple observations."
+            )
+        # Remove the combined column
+        data = data.drop(columns='combined')
+    # Print the number of rows in the resulting data
+    print(f"Number of rows in the returned data: {len(data)}")
+
+    return data
+
 def calculate_centroid(
     data,
     x_min,
