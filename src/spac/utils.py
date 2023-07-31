@@ -1,4 +1,5 @@
 import re
+import anndata as ad
 
 
 def regex_search_list(
@@ -70,3 +71,86 @@ def regex_search_list(
     all_results = list(all_results)
 
     return all_results
+
+
+def anndata_checks(
+        adata,
+        layers=None,
+        obs=None,
+        features=None):
+    """
+    Perform common error checks for anndata related objects.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object to be checked.
+
+    layers : str or list of str, optional
+        The layer(s) to check for existence in adata.layers.keys().
+
+    obs : str or list of str, optional
+        The observation(s) to check for existence in adata.obs.
+
+    features : str or list of str, optional
+        The feature(s) to check for existence in adata.var_names.
+
+    Raises
+    ------
+    TypeError
+        If adata is not an instance of anndata.AnnData.
+
+    ValueError
+        If any of the specified layers, observations, or features do not exist.
+
+    Example
+    -------
+    >>> import anndata as ad
+    >>> adata = ad.AnnData(...)
+    >>> anndata_checks(
+        adata,
+        layers=['layer1', 'layer2'],
+        obs=['obs1', 'obs2'],
+        features=['feature1', 'feature2'])
+    """
+
+    # Check if adata is an instance of anndata.AnnData
+    if not isinstance(adata, ad.AnnData):
+        raise TypeError("Input 'adata' should be \
+                        an instance of anndata.AnnData.")
+
+    # Check for specified layers existence
+    if layers is not None:
+        if isinstance(layers, str):
+            layers = [layers]
+        elif not isinstance(layers, list):
+            raise ValueError("The 'layers' parameter should be \
+                             a string or a list of strings.")
+        for layer in layers:
+            if layer not in adata.layers.keys():
+                raise ValueError(f"The table '{layer}' does not exist \
+                                 in the provided dataset.")
+
+    # Check for specified observations existence
+    if obs is not None:
+        if isinstance(obs, str):
+            obs = [obs]
+        elif not isinstance(obs, list):
+            raise ValueError("The 'obs' parameter should be \
+                             a string or a list of strings.")
+        for observation in obs:
+            if observation not in adata.obs:
+                raise ValueError(f"The observation '{observation}' \
+                                 does not exist in the provided dataset.")
+
+    # Check for specified features existence
+    if features is not None:
+        if isinstance(features, str):
+            features = [features]
+        elif not isinstance(features, list):
+            raise ValueError("The 'features' parameter should be a \
+                             string or a list of strings.")
+        for feature in features:
+            if feature not in adata.var_names:
+                raise ValueError(f"The feature '{feature}' does not exist \
+                                 in the provided dataset.")
