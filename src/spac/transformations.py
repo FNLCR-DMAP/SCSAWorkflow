@@ -3,6 +3,7 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import scanpy.external as sce
+from spac.utils import anndata_checks
 
 
 def phenograph_clustering(adata, features, layer=None, k=30):
@@ -261,3 +262,101 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
         )
 
     return adata
+
+
+def normalize_features(
+    adata: anndata,
+    low_quantile: float = 2,
+    high_quantile: float = 2,
+    target_layer: str = None,
+    new_layer_name: str = "normalized_feature"
+):
+
+    """
+    Normalized the features of a dataset stored in an AnnData object.
+    Any entry lower than the value corresponding to low_quantile of the column
+    will be assigned a value of 0, and entry that are greater than
+    high_quantile value will be assigned as 1. Other entries will be normalized
+    with (values - quantile min)/(quantile max - quantile min).
+    Resulting column will have value ranged between [0, 1].
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        An AnnData object containing the data to be normalized.
+
+    low_quantile : float, optional (default: 2)
+        The lower quantile to use for normalization. Determines the
+        minimum value after normalization. Must be a positive float.
+
+    high_quantile : float, optional (default: 2)
+        The higher quantile to use for normalization. Determines the
+        maximum value after normalization. Must be a positive float.
+
+    target_layer : str, optional (default: None)
+        The name of the layer in the AnnData object to be normalized.
+        If None, the function will use the raw data layer.
+
+    new_layer_name : str, optional (default: "normalized_feature")
+        The name of the new layer where the normalized features
+        will be stored in the AnnData object.
+
+    Returns
+    -------
+    None
+        This function directly modifies the input AnnData object in-place
+        by adding the new scaled layer.
+    """
+
+    # Perform error checks for anndata object:
+    anndata_checks(
+        adata,
+        )
+
+
+    dataframe = adata.to_df(layer=target_layer)
+
+    # Calculate 0.02 and 0.98 quantiles
+    quantiles = dataframe.quantile([low_quantile, 1-quantile])
+    quantile_high = 1 - quantile
+    new_row_names = {quantile_high: 'quantile_high', quantile: 'quantile_low'}
+    quantiles.index = quantiles.index.map(new_row_names)
+
+    pre_info = dataframe.describe()
+    
+    pre_info = pd.concat([pre_info, quantiles])
+    
+    pre_info = pre_info.reset_index()
+    pre_info['index'] = 'Pre-Norm: ' + pre_info['index'].astype(str)
+
+    for column in dataframe.columns:
+        # 0.02 quantile value
+        qmin = quantiles.loc['quantile_low', column]
+
+        # 0.98 quantile value
+        qmax = quantiles.loc['quantile_high', column]
+        
+        # Scale column values
+        if qmax != 0:
+            dataframe[column] = dataframe[column].apply(
+                lambda x: 0 if x < qmin else (1 if x > qmax else (x - qmin) / (qmax - qmin))
+            )
+    
+    adata.layers[layer_name] = dataframe
+    
+    post_dataframe = dataframe.describe()
+    post_info = dataframe.describe()
+    post_info = post_info.reset_index()
+    post_info['index'] = 'Post-Norm: ' + post_info['index'].astype(str)
+
+    normalization_info = pd.concat([pre_info, post_info]).transpose()
+    normalization_info.columns = normalization_info.iloc[0]
+    normalization_info = normalization_info.drop(normalization_info.index[0])
+    normalization_info = normalization_info.astype(float)
+    normalization_info = normalization_info.round(3)
+    normalization_info = normalization_info.astype(str)
+
+    layer_name_uns = layer_name + "_info"
+    adata.uns[layer_name_uns] = normalization_info
+
+    return adata, normalization_info
