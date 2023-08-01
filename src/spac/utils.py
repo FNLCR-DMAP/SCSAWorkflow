@@ -116,8 +116,11 @@ def anndata_checks(
 
     # Check if adata is an instance of anndata.AnnData
     if not isinstance(adata, ad.AnnData):
-        raise TypeError("Input 'adata' should be \
-                        an instance of anndata.AnnData.")
+        raise TypeError(
+            "Input dataset should be "
+            "an instance of anndata.AnnData, "
+            "please check the input dataset source."
+            )
 
     # Check for specified layers existence
     if layers is not None:
@@ -126,10 +129,16 @@ def anndata_checks(
         elif not isinstance(layers, list):
             raise ValueError("The 'layers' parameter should be \
                              a string or a list of strings.")
+        layer_list = list(adata.layers.keys())
         for layer in layers:
-            if layer not in adata.layers.keys():
-                raise ValueError(f"The table '{layer}' does not exist \
-                                 in the provided dataset.")
+            if layer not in layer_list:
+                existing_layer_str = "\n".join(layer_list)
+                raise ValueError(
+                    f"The table '{layer}' "
+                    "does not exist in the provided dataset.\n"
+                    "Existing tables are:\n"
+                    f"{existing_layer_str}"
+                )
 
     # Check for specified observations existence
     if obs is not None:
@@ -138,10 +147,16 @@ def anndata_checks(
         elif not isinstance(obs, list):
             raise ValueError("The 'obs' parameter should be \
                              a string or a list of strings.")
+        existing_obs = adata.obs.columns.to_list()
         for observation in obs:
-            if observation not in adata.obs:
-                raise ValueError(f"The observation '{observation}' \
-                                 does not exist in the provided dataset.")
+            if observation not in existing_obs:
+                existing_obs_str = "\n".join(existing_obs)
+                raise ValueError(
+                    f"The observation '{observation}' "
+                    "does not exist in the provided dataset.\n"
+                    "Existing observations are:\n"
+                    f"{existing_obs_str}"
+                )
 
     # Check for specified features existence
     if features is not None:
@@ -150,7 +165,13 @@ def anndata_checks(
         elif not isinstance(features, list):
             raise ValueError("The 'features' parameter should be a \
                              string or a list of strings.")
+        var_name_list = adata.var_names.to_list()
         for feature in features:
-            if feature not in adata.var_names:
-                raise ValueError(f"The feature '{feature}' does not exist \
-                                 in the provided dataset.")
+            if feature not in var_name_list:
+                existing_var_str = "\n".join(var_name_list)
+                raise ValueError(
+                    f"The feature '{feature}' "
+                    "does not exist in the provided dataset.\n"
+                    "Existing features are:\n"
+                    f"{existing_var_str}"
+                )

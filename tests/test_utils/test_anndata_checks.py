@@ -82,6 +82,84 @@ class TestAnndataChecks(unittest.TestCase):
                                          obs=["obs1"],
                                          features=["feature1"]))
 
+    def test_wrong_adata_type(self):
+        with self.assertRaises(TypeError) as context:
+            anndata_checks("not an AnnData object")
+        self.assertEqual(
+            str(context.exception),
+            "Input dataset should be an instance of anndata.AnnData, "
+            "please check the input dataset source."
+        )
+
+    def test_missing_layers(self):
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           layers=["missing_layer1",
+                                   "missing_layer2"])
+        self.assertEqual(
+            "The table 'missing_layer1' "
+            "does not exist in the provided dataset.\n"
+            "Existing tables are:\nlayer1\nlayer2",
+            str(context.exception)
+        )
+
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           layers=["missing_layer2",
+                                   "missing_layer1"])
+        self.assertEqual(
+            "The table 'missing_layer2' "
+            "does not exist in the provided dataset.\n"
+            "Existing tables are:\nlayer1\nlayer2",
+            str(context.exception)
+        )
+
+    def test_missing_observations(self):
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           obs=["missing_obs1",
+                                "missing_obs2"])
+        self.assertEqual(
+            "The observation 'missing_obs1' does not "
+            "exist in the provided dataset.\n"
+            "Existing observations are:\nobs1\nobs2",
+            str(context.exception)
+        )
+
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           obs=["missing_obs2",
+                                "missing_obs1"])
+        self.assertEqual(
+            "The observation 'missing_obs2' does not "
+            "exist in the provided dataset.\n"
+            "Existing observations are:\nobs1\nobs2",
+            str(context.exception)
+        )
+
+    def test_missing_features(self):
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           features=["missing_feature1",
+                                     "missing_feature2"])
+        self.assertEqual(
+            "The feature 'missing_feature1' does not "
+            "exist in the provided dataset.\n"
+            "Existing features are:\nfeature1\nfeature2",
+            str(context.exception)
+        )
+
+        with self.assertRaises(ValueError) as context:
+            anndata_checks(self.adata,
+                           features=["missing_feature2",
+                                     "missing_feature1"])
+        self.assertEqual(
+            "The feature 'missing_feature2' does not "
+            "exist in the provided dataset.\n"
+            "Existing features are:\nfeature1\nfeature2",
+            str(context.exception)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
