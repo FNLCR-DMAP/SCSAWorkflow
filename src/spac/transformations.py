@@ -3,7 +3,7 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import scanpy.external as sce
-from spac.utils import anndata_checks
+from spac.utils import check_table
 
 
 def phenograph_clustering(adata, features, layer=None, k=30):
@@ -269,7 +269,8 @@ def normalize_features(
     low_quantile: float = 2,
     high_quantile: float = 2,
     target_layer: str = None,
-    new_layer_name: str = "normalized_feature"
+    new_layer_name: str = "normalized_feature",
+    overwrite: bool = True
 ):
 
     """
@@ -301,6 +302,11 @@ def normalize_features(
         The name of the new layer where the normalized features
         will be stored in the AnnData object.
 
+    overwrite: bool, optional (default: True)
+        If the new layer name exists in the anndata object,
+        the function will defaultly overwrite the existing table unless
+        'overwrite' is False
+
     Returns
     -------
     None
@@ -309,42 +315,71 @@ def normalize_features(
     """
 
     # Perform error checks for anndata object:
-    anndata_checks(
-        adata,
-        )
+    check_table(adata, target_layer, should_exist=True)
 
+    if not overwrite:
+        check_table(adata, new_layer_name, should_exist=False)
+
+    if not isinstance(high_quantile, (int, float)):
+        raise TypeError("The high quantile should a numeric values, "
+                        f"currently get {str(type(high_quantile))}")
+
+    if not isinstance(low_quantile, (int, float)):
+        raise TypeError("The low quantile should a numeric values, "
+                        f"currently get {str(type(low_quantile))}")
+
+    if low_quantile < high_quantile:
+        if high_quantile <= 0 or high_quantile > 1:
+            raise ValueError("The high quantile value should be within"
+                             f"(0, 1], current value: {high_quantile}")
+        if low_quantile < 0 or low_quantile >= 1:
+            raise ValueError("The low quantile value should be within"
+                             f"[0, 1), current value: {low_quantile}")
+    else:
+        raise ValueError("The low quantile shoud be smaller than"
+                         "the high quantile, currently value is:\n"
+                         f"low quantile: {low_quantile}\n"
+                         f"high quantile: {high_quantile}")
 
     dataframe = adata.to_df(layer=target_layer)
 
-    # Calculate 0.02 and 0.98 quantiles
-    quantiles = dataframe.quantile([low_quantile, 1-quantile])
-    quantile_high = 1 - quantile
-    new_row_names = {quantile_high: 'quantile_high', quantile: 'quantile_low'}
+    # Calculate low and high quantiles
+    quantiles = dataframe.quantile([low_quantile, high_quantile])
+
+    new_row_names = {
+        high_quantile: 'quantile_high',
+        low_quantile: 'quantile_low'
+    }
+
+    # reassign the row names for downstream process
+
     quantiles.index = quantiles.index.map(new_row_names)
 
     pre_info = dataframe.describe()
-    
+
     pre_info = pd.concat([pre_info, quantiles])
-    
+
     pre_info = pre_info.reset_index()
     pre_info['index'] = 'Pre-Norm: ' + pre_info['index'].astype(str)
 
     for column in dataframe.columns:
-        # 0.02 quantile value
+        # low quantile value
         qmin = quantiles.loc['quantile_low', column]
 
-        # 0.98 quantile value
+        # high quantile value
         qmax = quantiles.loc['quantile_high', column]
-        
+
         # Scale column values
         if qmax != 0:
             dataframe[column] = dataframe[column].apply(
-                lambda x: 0 if x < qmin else (1 if x > qmax else (x - qmin) / (qmax - qmin))
+                lambda x: 0 if x < qmin else (
+                    1 if x > qmax else (x - qmin) / (qmax - qmin)
+                )
             )
-    
-    adata.layers[layer_name] = dataframe
-    
-    post_dataframe = dataframe.describe()
+
+    # Append normalized feature to the anndata object
+    adata.layers[new_layer_name] = dataframe
+
     post_info = dataframe.describe()
     post_info = post_info.reset_index()
     post_info['index'] = 'Post-Norm: ' + post_info['index'].astype(str)
@@ -356,7 +391,7 @@ def normalize_features(
     normalization_info = normalization_info.round(3)
     normalization_info = normalization_info.astype(str)
 
-    layer_name_uns = layer_name + "_info"
+    layer_name_uns = new_layer_name + "_info"
     adata.uns[layer_name_uns] = normalization_info
 
-    return adata, normalization_info
+    return None
