@@ -148,16 +148,14 @@ def check_list_in_list(
                     )
 
 
-def anndata_checks(
+def check_table(
         adata,
         tables=None,
-        obs=None,
-        features=None,
-        new_tables=None,
-        new_obs=None,
-        new_features=None):
+        should_exist=True):
+
     """
-    Perform common error checks for anndata related objects.
+    Perform common error checks for table (layers) in
+    anndata related objects.
 
     Parameters
     ----------
@@ -168,20 +166,9 @@ def anndata_checks(
         The term "table" is equivalent to layer in anndata structure.
         The layer(s) to check for existence in adata.layers.keys().
 
-    obs : str or list of str, optional
-        The observation(s) to check for existence in adata.obs.
-
-    features : str or list of str, optional
-        The feature(s) to check for existence in adata.var_names.
-
-    new_tables : str or lust of str, optional
-        The layer name to check if exists in adata.layers.keys().
-
-    new_obs : str or list of str, optional
-        The observation name to check if exists in adata.obs.
-
-    new_features : str or list of str, optional
-        The feature(s) to check if exists in adata.layers.keys().
+    should_exist : bool, optional (default=True)
+        Determines whether to check if elements exist in the
+        target list (True), or if they should not exist (False).
 
     Raises
     ------
@@ -191,15 +178,6 @@ def anndata_checks(
     ValueError
         If any of the specified layers, observations, or features do not exist.
 
-    Example
-    -------
-    >>> import anndata as ad
-    >>> adata = ad.AnnData(...)
-    >>> anndata_checks(
-        adata,
-        layers=['layer1', 'layer2'],
-        obs=['obs1', 'obs2'],
-        features=['feature1', 'feature2'])
     """
 
     # Check if adata is an instance of anndata.AnnData
@@ -217,49 +195,105 @@ def anndata_checks(
             input_name="tables",
             input_type="table",
             target_list=existing_tables,
-            need_exist=True
+            need_exist=should_exist
         )
 
-    check_list_in_list(
-            input=new_tables,
-            input_name="new_tables",
-            input_type="new table",
-            target_list=existing_tables,
-            need_exist=False
-        )
 
-    # Check for observations
+def check_obs(
+        adata,
+        observations=None,
+        should_exist=True):
+
+    """
+    Perform common error checks for observations in
+    anndata related objects.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object to be checked.
+
+    observations :  str or list of str, optional
+        The observation(s) to check for existence in adata.obs.
+
+    should_exist : bool, optional (default=True)
+        Determines whether to check if elements exist in the
+        target list (True), or if they should not exist (False).
+
+    Raises
+    ------
+    TypeError
+        If adata is not an instance of anndata.AnnData.
+
+    ValueError
+        If any of the specified layers, observations, or features do not exist.
+
+    """
+
+    # Check if adata is an instance of anndata.AnnData
+    if not isinstance(adata, ad.AnnData):
+        raise TypeError(
+            "Input dataset should be "
+            "an instance of anndata.AnnData, "
+            "please check the input dataset source."
+            )
+
+    # Check for tables
     existing_obs = adata.obs.columns.to_list()
     check_list_in_list(
-            input=obs,
-            input_name="obs",
+            input=observations,
+            input_name="observations",
             input_type="observation",
             target_list=existing_obs,
-            need_exist=True
+            need_exist=should_exist
         )
 
-    check_list_in_list(
-            input=new_obs,
-            input_name="new_obs",
-            input_type="new observation",
-            target_list=existing_obs,
-            need_exist=False
-        )
 
-    # Check for features
+def check_feature(
+        adata,
+        features=None,
+        should_exist=True):
+
+    """
+    Perform common error checks for features in
+    anndata related objects.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object to be checked.
+
+    features : str or list of str, optional
+        The feature(s) to check for existence in adata.var_names.
+
+    should_exist : bool, optional (default=True)
+        Determines whether to check if elements exist in the
+        target list (True), or if they should not exist (False).
+
+    Raises
+    ------
+    TypeError
+        If adata is not an instance of anndata.AnnData.
+
+    ValueError
+        If any of the specified layers, observations, or features do not exist.
+
+    """
+
+    # Check if adata is an instance of anndata.AnnData
+    if not isinstance(adata, ad.AnnData):
+        raise TypeError(
+            "Input dataset should be "
+            "an instance of anndata.AnnData, "
+            "please check the input dataset source."
+            )
+
+    # Check for tables
     existing_features = adata.var_names.to_list()
     check_list_in_list(
             input=features,
             input_name="features",
             input_type="feature",
             target_list=existing_features,
-            need_exist=True
-        )
-
-    check_list_in_list(
-            input=new_features,
-            input_name="new_features",
-            input_type="new feature",
-            target_list=existing_features,
-            need_exist=False
+            need_exist=should_exist
         )
