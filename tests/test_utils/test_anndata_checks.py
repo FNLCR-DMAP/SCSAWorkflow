@@ -15,8 +15,8 @@ class TestAnndataChecks(unittest.TestCase):
         }
         self.adata = ad.AnnData(
             X=pd.DataFrame(data),
-            layers={"layer1": np.array([[5, 6], [7, 8]]),
-                    "layer2": np.array([[9, 10], [11, 12]])},
+            layers={"table1": np.array([[5, 6], [7, 8]]),
+                    "table2": np.array([[9, 10], [11, 12]])},
             obs={"obs1": [1, 2],
                  "obs2": [3, 4]}
         )
@@ -31,12 +31,12 @@ class TestAnndataChecks(unittest.TestCase):
         with self.assertRaises(TypeError):
             anndata_checks("not_an_anndata_object")
 
-    def test_invalid_layers(self):
-        # Test with invalid layers
+    def test_invalid_tables(self):
+        # Test with invalid tables
         with self.assertRaises(ValueError):
-            anndata_checks(self.adata, layers="invalid_layer")
+            anndata_checks(self.adata, tables="invalid_table")
         with self.assertRaises(ValueError):
-            anndata_checks(self.adata, layers=["layer1", "invalid_layer"])
+            anndata_checks(self.adata, tables=["table1", "invalid_table"])
 
     def test_invalid_obs(self):
         # Test with invalid obs
@@ -56,44 +56,44 @@ class TestAnndataChecks(unittest.TestCase):
     def test_none_input(self):
         # Test with None for all optional parameters
         self.assertIsNone(anndata_checks(self.adata,
-                                         layers=None,
+                                         tables=None,
                                          obs=None,
                                          features=None))
 
     def test_valid_list_input(self):
-        # Test with list input for layers, obs, and features
+        # Test with list input for tables, obs, and features
         self.assertIsNone(anndata_checks(self.adata,
-                                         layers=["layer1"],
+                                         tables=["table1"],
                                          obs=["obs1"],
                                          features=["feature1"]))
 
     def test_valid_single_string_input(self):
-        # Test with single string input for layers, obs, and features
+        # Test with single string input for tables, obs, and features
         self.assertIsNone(anndata_checks(self.adata,
-                                         layers="layer1",
+                                         tables="table1",
                                          obs="obs1",
                                          features="feature1"))
 
     def test_valid_string_and_list_input(self):
         # Test with mix of single string and
-        # list input for layers, obs, and features
+        # list input for tables, obs, and features
         self.assertIsNone(anndata_checks(self.adata,
-                                         layers="layer1",
+                                         tables="table1",
                                          obs=["obs1"],
                                          features=["feature1"]))
 
-    def test_valid_new_layers(self):
-        # Test with valid new layers
+    def test_valid_new_tables(self):
+        # Test with valid new tables
         self.assertIsNone(anndata_checks(self.adata,
-                                         layers="layer1",
+                                         tables="table1",
                                          obs=["obs1"],
-                                         new_layers=["new_layer1",
-                                                     "new_layer2"]))
+                                         new_tables=["new_table1",
+                                                     "new_table2"]))
 
-    def test_invalid_new_layers(self):
+    def test_invalid_new_tables(self):
         with self.assertRaises(ValueError):
-            anndata_checks(self.adata, new_layers=["new_layer1",
-                                                   "layer2"])
+            anndata_checks(self.adata, new_tables=["new_table1",
+                                                   "table2"])
 
     def test_valid_new_obs(self):
         # Test with valid new observations
@@ -119,7 +119,7 @@ class TestAnndataChecks(unittest.TestCase):
     def test_none_new_input(self):
         # Test with None for all new optional parameters
         self.assertIsNone(anndata_checks(self.adata,
-                                         new_layers=None,
+                                         new_tables=None,
                                          new_obs=None,
                                          new_features=None))
 
@@ -132,26 +132,26 @@ class TestAnndataChecks(unittest.TestCase):
             "please check the input dataset source."
         )
 
-    def test_missing_layers(self):
+    def test_missing_tables(self):
         with self.assertRaises(ValueError) as context:
             anndata_checks(self.adata,
-                           layers=["layer1",
-                                   "missing_layer2"])
+                           tables=["table1",
+                                   "missing_table2"])
         self.assertEqual(
-            "The table 'missing_layer2' "
+            "The table 'missing_table2' "
             "does not exist in the provided dataset.\n"
-            "Existing tables are:\nlayer1\nlayer2",
+            "Existing tables are:\ntable1\ntable2",
             str(context.exception)
         )
 
         with self.assertRaises(ValueError) as context:
             anndata_checks(self.adata,
-                           layers=["missing_layer1",
-                                   "layer2"])
+                           tables=["missing_table1",
+                                   "table2"])
         self.assertEqual(
-            "The table 'missing_layer1' "
+            "The table 'missing_table1' "
             "does not exist in the provided dataset.\n"
-            "Existing tables are:\nlayer1\nlayer2",
+            "Existing tables are:\ntable1\ntable2",
             str(context.exception)
         )
 
