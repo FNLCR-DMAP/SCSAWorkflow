@@ -268,13 +268,13 @@ def normalize_features(
     adata: anndata,
     low_quantile: float = 0.02,
     high_quantile: float = 0.02,
-    target_layer: str = None,
+    input_layer: str = None,
     new_layer_name: str = "normalized_feature",
     overwrite: bool = True
 ):
 
     """
-    Normalized the features of a dataset stored in an AnnData object.
+    Normalize the features stored in an AnnData object.
     Any entry lower than the value corresponding to low_quantile of the column
     will be assigned a value of 0, and entry that are greater than
     high_quantile value will be assigned as 1. Other entries will be normalized
@@ -288,15 +288,17 @@ def normalize_features(
 
     low_quantile : float, optional (default: 0.02)
         The lower quantile to use for normalization. Determines the
-        minimum value after normalization. Must be a positive float.
+        minimum value after normalization.
+        Must be a positive float between [0,1).
 
     high_quantile : float, optional (default: 0.02)
         The higher quantile to use for normalization. Determines the
-        maximum value after normalization. Must be a positive float.
+        maximum value after normalization.
+        Must be a positive float between (0,1].
 
-    target_layer : str, optional (default: None)
+    input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
-        If None, the function will use the raw data layer.
+        If None, the function will use the default data layer.
 
     new_layer_name : str, optional (default: "normalized_feature")
         The name of the new layer where the normalized features
@@ -311,12 +313,12 @@ def normalize_features(
     -------
     None
         This function directly modifies the input AnnData object in-place
-        by adding the new scaled layer, and stores related information in
-        anndata.uns.
+        by adding the new scaled layer, and stores the df.describe() results
+        pre and post normalization as as a pandas dataframe in anndata.uns.
     """
 
     # Perform error checks for anndata object:
-    check_table(adata, target_layer, should_exist=True)
+    check_table(adata, input_layer, should_exist=True)
 
     if not overwrite:
         check_table(adata, new_layer_name, should_exist=False)
@@ -342,7 +344,7 @@ def normalize_features(
                          f"low quantile: {low_quantile}\n"
                          f"high quantile: {high_quantile}")
 
-    dataframe = adata.to_df(layer=target_layer)
+    dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
     quantiles = dataframe.quantile([low_quantile, high_quantile])
