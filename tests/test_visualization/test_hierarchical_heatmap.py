@@ -2,11 +2,9 @@ import unittest
 import pandas as pd
 import anndata
 from scanpy.plotting._matrixplot import MatrixPlot
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
-
+import matplotlib
 from spac.visualization import hierarchical_heatmap
+matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
 class TestHierarchicalHeatmap(unittest.TestCase):

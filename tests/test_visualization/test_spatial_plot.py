@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from spac.visualization import spatial_plot
 import itertools
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
 class SpatialPlotTestCase(unittest.TestCase):

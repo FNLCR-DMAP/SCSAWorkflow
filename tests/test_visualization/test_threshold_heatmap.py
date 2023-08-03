@@ -3,8 +3,9 @@ import unittest
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import math
 from spac.visualization import threshold_heatmap
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
 class TestThresholdHeatmap(unittest.TestCase):
@@ -60,7 +61,11 @@ class TestThresholdHeatmap(unittest.TestCase):
             'marker2': (0.4, 1.0),
         }
         with self.assertRaises(ValueError):
-            threshold_heatmap(self.adata, feature_cutoffs_nan_low, self.phenotype)
+            threshold_heatmap(
+                self.adata,
+                feature_cutoffs_nan_low,
+                self.phenotype
+            )
 
         # Test high cutoff is NaN
         feature_cutoffs_nan_high = {
@@ -68,7 +73,11 @@ class TestThresholdHeatmap(unittest.TestCase):
             'marker2': (0.4, 1.0),
         }
         with self.assertRaises(ValueError):
-            threshold_heatmap(self.adata, feature_cutoffs_nan_high, self.phenotype)
+            threshold_heatmap(
+                self.adata,
+                feature_cutoffs_nan_high,
+                self.phenotype
+            )
 
     def test_threshold_heatmap(self):
         ax_dict = threshold_heatmap(
