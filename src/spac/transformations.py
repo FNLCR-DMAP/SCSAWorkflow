@@ -266,8 +266,8 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
 
 def normalize_features(
     adata: anndata,
-    low_quantile: float = 2,
-    high_quantile: float = 2,
+    low_quantile: float = 0.02,
+    high_quantile: float = 0.02,
     target_layer: str = None,
     new_layer_name: str = "normalized_feature",
     overwrite: bool = True
@@ -286,11 +286,11 @@ def normalize_features(
     adata : anndata.AnnData
         An AnnData object containing the data to be normalized.
 
-    low_quantile : float, optional (default: 2)
+    low_quantile : float, optional (default: 0.02)
         The lower quantile to use for normalization. Determines the
         minimum value after normalization. Must be a positive float.
 
-    high_quantile : float, optional (default: 2)
+    high_quantile : float, optional (default: 0.02)
         The higher quantile to use for normalization. Determines the
         maximum value after normalization. Must be a positive float.
 
@@ -311,7 +311,8 @@ def normalize_features(
     -------
     None
         This function directly modifies the input AnnData object in-place
-        by adding the new scaled layer.
+        by adding the new scaled layer, and stores related information in
+        anndata.uns.
     """
 
     # Perform error checks for anndata object:
