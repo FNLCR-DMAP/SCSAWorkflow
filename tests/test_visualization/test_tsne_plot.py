@@ -3,6 +3,8 @@ import anndata
 import numpy as np
 import matplotlib.pyplot as plt
 from spac.visualization import tsne_plot
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
 class TestTsnePlot(unittest.TestCase):

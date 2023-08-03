@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import anndata
 from spac.visualization import histogram
+mpl.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
 class TestHistogram(unittest.TestCase):
