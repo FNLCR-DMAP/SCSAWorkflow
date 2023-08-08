@@ -311,10 +311,9 @@ def normalize_features(
 
     Returns
     -------
-    None
-        This function directly modifies the input AnnData object in-place
-        by adding the new scaled layer, and stores the df.describe() results
-        pre and post normalization as as a pandas dataframe in anndata.uns.
+    quantiles : pandas.DataFrame
+        A DataFrame containing the quantile values calculated for every feature.
+        The DataFrame has columns representing the features and rows representing the quantile values.
     """
 
     # Perform error checks for anndata object:
@@ -347,30 +346,15 @@ def normalize_features(
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
-    quantiles = dataframe.quantile([low_quantile, high_quantile])
-
-    new_row_names = {
-        high_quantile: 'quantile_high',
-        low_quantile: 'quantile_low'
-    }
-
-    # reassign the row names for downstream process
-
-    quantiles.index = quantiles.index.map(new_row_names)
-
-    pre_info = dataframe.describe()
-
-    pre_info = pd.concat([pre_info, quantiles])
-
-    pre_info = pre_info.reset_index()
-    pre_info['index'] = 'Pre-Norm: ' + pre_info['index'].astype(str)
+    quantiles = dataframe.quantile([low_quantile, high_quantile],
+                                   interpolation='nearest')
 
     for column in dataframe.columns:
         # low quantile value
-        qmin = quantiles.loc['quantile_low', column]
+        qmin = quantiles.loc[low_quantile, column]
 
         # high quantile value
-        qmax = quantiles.loc['quantile_high', column]
+        qmax = quantiles.loc[high_quantile, column]
 
         # Scale column values
         if qmax != 0:
@@ -383,18 +367,4 @@ def normalize_features(
     # Append normalized feature to the anndata object
     adata.layers[new_layer_name] = dataframe
 
-    post_info = dataframe.describe()
-    post_info = post_info.reset_index()
-    post_info['index'] = 'Post-Norm: ' + post_info['index'].astype(str)
-
-    normalization_info = pd.concat([pre_info, post_info]).transpose()
-    normalization_info.columns = normalization_info.iloc[0]
-    normalization_info = normalization_info.drop(normalization_info.index[0])
-    normalization_info = normalization_info.astype(float)
-    normalization_info = normalization_info.round(3)
-    normalization_info = normalization_info.astype(str)
-
-    layer_name_uns = new_layer_name + "_info"
-    adata.uns[layer_name_uns] = normalization_info
-
-    return None
+    return quantiles 
