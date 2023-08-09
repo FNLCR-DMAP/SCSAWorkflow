@@ -63,6 +63,26 @@ class TestNormalizeFeatures(unittest.TestCase):
                 high_quantile=0.7
             )
 
+    def test_low_quantile_equal_to_high_quantile(self):
+        # Test with low_quantile equal to high_quantile
+        with self.assertRaises(ValueError):
+            normalize_features(
+                self.adata,
+                low_quantile=0.5,
+                high_quantile=0.5
+            )
+
+    def test_invalid_interpolation(self):
+        # Test with invalid interpolation
+        with self.assertRaises(ValueError):
+            normalize_features(
+                self.adata,
+                low_quantile=0.5,
+                high_quantile=0.8,
+                interpolation='invalid'
+            )
+
+
     def validate_correct_values(self, 
                                 adata, 
                                 low_quantile, 
@@ -73,12 +93,11 @@ class TestNormalizeFeatures(unittest.TestCase):
         new_layer_name = "normalized_feature"
         overwrite = True
         normalize_features(
-            adata,
-            low_quantile,
-            high_quantile,
-            target_layer,
-            new_layer_name,
-            overwrite)
+            adata=adata,
+            low_quantile=low_quantile,
+            high_quantile=high_quantile,
+            new_layer_name=new_layer_name,
+            overwrite=overwrite)
 
         normalized_df = adata.layers[new_layer_name]
         normalized_df = pd.DataFrame(

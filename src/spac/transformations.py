@@ -267,7 +267,8 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
 def normalize_features(
     adata: anndata,
     low_quantile: float = 0.02,
-    high_quantile: float = 0.02,
+    high_quantile: float = 0.98,
+    interpolation: str = "nearest",
     input_layer: str = None,
     new_layer_name: str = "normalized_feature",
     overwrite: bool = True
@@ -295,6 +296,10 @@ def normalize_features(
         The higher quantile to use for normalization. Determines the
         maximum value after normalization.
         Must be a positive float between (0,1].
+
+    interpolation : str, optional (default: "nearest")
+        The interpolation method to use when selecting the value for 
+        low and high quantile. Values can be "nearest" or "linear" 
 
     input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
@@ -343,11 +348,16 @@ def normalize_features(
                          f"low quantile: {low_quantile}\n"
                          f"high quantile: {high_quantile}")
 
+    
+    if interpolation not in ["nearest", "linear"]:
+        raise ValueError("interpolation must be either 'nearest' or 'linear'"
+                         f"passed value is:{interpolation}")
+    
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
     quantiles = dataframe.quantile([low_quantile, high_quantile],
-                                   interpolation='nearest')
+                                   interpolation=interpolation)
 
     for column in dataframe.columns:
         # low quantile value
