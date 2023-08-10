@@ -267,7 +267,8 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
 def normalize_features(
     adata: anndata,
     low_quantile: float = 0.02,
-    high_quantile: float = 0.02,
+    high_quantile: float = 0.98,
+    interpolation: str = "nearest",
     input_layer: str = None,
     new_layer_name: str = "normalized_feature",
     overwrite: bool = True
@@ -296,6 +297,10 @@ def normalize_features(
         maximum value after normalization.
         Must be a positive float between (0,1].
 
+    interpolation : str, optional (default: "nearest")
+        The interpolation method to use when selecting the value for 
+        low and high quantile. Values can be "nearest" or "linear" 
+
     input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
         If None, the function will use the default data layer.
@@ -311,10 +316,9 @@ def normalize_features(
 
     Returns
     -------
-    None
-        This function directly modifies the input AnnData object in-place
-        by adding the new scaled layer, and stores the df.describe() results
-        pre and post normalization as as a pandas dataframe in anndata.uns.
+    quantiles : pandas.DataFrame
+        A DataFrame containing the quantile values calculated for every feature.
+        The DataFrame has columns representing the features and rows representing the quantile values.
     """
 
     # Perform error checks for anndata object:
@@ -344,33 +348,23 @@ def normalize_features(
                          f"low quantile: {low_quantile}\n"
                          f"high quantile: {high_quantile}")
 
+    
+    if interpolation not in ["nearest", "linear"]:
+        raise ValueError("interpolation must be either 'nearest' or 'linear'"
+                         f"passed value is:{interpolation}")
+    
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
-    quantiles = dataframe.quantile([low_quantile, high_quantile])
-
-    new_row_names = {
-        high_quantile: 'quantile_high',
-        low_quantile: 'quantile_low'
-    }
-
-    # reassign the row names for downstream process
-
-    quantiles.index = quantiles.index.map(new_row_names)
-
-    pre_info = dataframe.describe()
-
-    pre_info = pd.concat([pre_info, quantiles])
-
-    pre_info = pre_info.reset_index()
-    pre_info['index'] = 'Pre-Norm: ' + pre_info['index'].astype(str)
+    quantiles = dataframe.quantile([low_quantile, high_quantile],
+                                   interpolation=interpolation)
 
     for column in dataframe.columns:
         # low quantile value
-        qmin = quantiles.loc['quantile_low', column]
+        qmin = quantiles.loc[low_quantile, column]
 
         # high quantile value
-        qmax = quantiles.loc['quantile_high', column]
+        qmax = quantiles.loc[high_quantile, column]
 
         # Scale column values
         if qmax != 0:
@@ -383,18 +377,4 @@ def normalize_features(
     # Append normalized feature to the anndata object
     adata.layers[new_layer_name] = dataframe
 
-    post_info = dataframe.describe()
-    post_info = post_info.reset_index()
-    post_info['index'] = 'Post-Norm: ' + post_info['index'].astype(str)
-
-    normalization_info = pd.concat([pre_info, post_info]).transpose()
-    normalization_info.columns = normalization_info.iloc[0]
-    normalization_info = normalization_info.drop(normalization_info.index[0])
-    normalization_info = normalization_info.astype(float)
-    normalization_info = normalization_info.round(3)
-    normalization_info = normalization_info.astype(str)
-
-    layer_name_uns = new_layer_name + "_info"
-    adata.uns[layer_name_uns] = normalization_info
-
-    return None
+    return quantiles 
