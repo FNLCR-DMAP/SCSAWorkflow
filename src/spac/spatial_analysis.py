@@ -6,12 +6,12 @@ import anndata
 
 def spatial_interaction(
         adata,
-        observation,
+        annotation,
         analysis_method,
         ax=None,
         **kwargs):
     """
-    Perform spatial analysis on the selected observation in the dataset.
+    Perform spatial analysis on the selected annotation in the dataset.
     Current analysis methods are provided in squidpy:
         Neighborhood Enrichment,
         Cluster Interaction Matrix
@@ -20,8 +20,8 @@ def spatial_interaction(
         adata : anndata.AnnData
             The AnnData object.
 
-        observation : str
-            The column name of the observation to analysis in the dataset.
+        annotation : str
+            The column name of the annotation to analysis in the dataset.
 
         analysis_method : str
             The analysis method to use, currently available:
@@ -50,18 +50,18 @@ def spatial_interaction(
     # centralized control and improve flexibility
     def Neighborhood_Enrichment_Analysis(
                 adata,
-                new_observation_name,
+                new_annotation_name,
                 ax):
 
         # Calculate Neighborhood_Enrichment
         sq.gr.nhood_enrichment(
                     adata,
-                    cluster_key=new_observation_name)
+                    cluster_key=new_annotation_name)
 
         # Plot Neighborhood_Enrichment
         sq.pl.nhood_enrichment(
                     adata,
-                    cluster_key=new_observation_name,
+                    cluster_key=new_annotation_name,
                     ax=ax,
                     **kwargs)
 
@@ -69,18 +69,18 @@ def spatial_interaction(
 
     def Cluster_Interaction_Matrix_Analysis(
                 adata,
-                new_observation_name,
+                new_annotation_name,
                 ax):
 
         # Calculate Cluster_Interaction_Matrix
         sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_observation_name)
+                    cluster_key=new_annotation_name)
 
         # Plot Cluster_Interaction_Matrix
         sq.pl.interaction_matrix(
                     adata,
-                    cluster_key=new_observation_name,
+                    cluster_key=new_annotation_name,
                     ax=ax,
                     **kwargs)
 
@@ -95,9 +95,9 @@ def spatial_interaction(
     column_names = adata.obs.columns.tolist()
     column_names_str = ",".join(column_names)
 
-    if observation not in column_names:
-        error_text = f"Observation {observation} not found in the " + \
-            f"dataset. Existing observations are: {column_names_str}"
+    if annotation not in column_names:
+        error_text = f"Annotation {annotation} not found in the " + \
+            f"dataset. Existing annotations are: {column_names_str}"
         raise ValueError(error_text)
 
     if not isinstance(analysis_method, str):
@@ -121,10 +121,10 @@ def spatial_interaction(
         ax = fig.add_subplot(1, 1, 1)
 
     # Create a categorical column data for plotting
-    new_observation_name = observation + "_plot"
+    new_annotation_name = annotation + "_plot"
 
-    adata.obs[new_observation_name] = pd.Categorical(
-        adata.obs[observation])
+    adata.obs[new_annotation_name] = pd.Categorical(
+        adata.obs[annotation])
 
     # Compute a connectivity matrix from spatial coordinates
     sq.gr.spatial_neighbors(adata)
@@ -132,13 +132,13 @@ def spatial_interaction(
     if analysis_method == "Neighborhood Enrichment":
         ax = Neighborhood_Enrichment_Analysis(
                 adata,
-                new_observation_name,
+                new_annotation_name,
                 ax)
 
     elif analysis_method == "Cluster Interaction Matrix":
         ax = Cluster_Interaction_Matrix_Analysis(
                 adata,
-                new_observation_name,
+                new_annotation_name,
                 ax)
 
     return ax

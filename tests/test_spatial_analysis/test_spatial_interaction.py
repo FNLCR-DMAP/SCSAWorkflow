@@ -9,7 +9,7 @@ from spac.spatial_analysis import spatial_interaction
 class TestSpatialInteraction(unittest.TestCase):
     def setUp(self):
         # Create a mock AnnData object for testing
-        obs = pd.DataFrame({
+        annotation = pd.DataFrame({
             "cluster_num": [1, 2, 1, 2, 1, 2, 1, 2],
             "cluster_str": [
                 "A", "B", "A", "B",
@@ -40,20 +40,20 @@ class TestSpatialInteraction(unittest.TestCase):
                 [1.5, 1.6]
             ]
         )
-        self.adata = anndata.AnnData(X=features, obs=obs)
+        self.adata = anndata.AnnData(X=features, obs=annotation)
         self.adata.obsm['spatial'] = spatial_coords
         self.run_CI = False
 
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
         invalid_data = "not an AnnData object"
-        observation = "valid_observation"
+        annotation = "valid_annotation"
         analysis_method = "Neighborhood Enrichment"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 adata=invalid_data,
-                observation=observation,
+                annotation=annotation,
                 analysis_method=analysis_method
             )
 
@@ -63,20 +63,20 @@ class TestSpatialInteraction(unittest.TestCase):
             "Input data is not an AnnData object. Got <class 'str'>"
             )
 
-    def test_spatial_interaction_observation_not_found(self):
+    def test_spatial_interaction_annotation_not_found(self):
         # Feature not found test
-        observation = "nonexistent_observation"
+        annotation = "nonexistent_annotation"
         analysis_method = "Cluster Interaction Matrix"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 self.adata,
-                observation,
+                annotation,
                 analysis_method
             )
 
-        expect_string = "Observation nonexistent_observation not " + \
-            "found in the dataset. Existing observations " + \
+        expect_string = "Annotation nonexistent_annotation not " + \
+            "found in the dataset. Existing annotations " + \
             "are: cluster_num,cluster_str"
         self.assertIsInstance(cm.exception, ValueError)
         print(str(cm.exception))
@@ -87,13 +87,13 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_analysis_method(self):
         # Invalid analysis method test
-        observation = "cluster_str"
+        annotation = "cluster_str"
         invalid_analysis_method = "Invalid Method"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 self.adata,
-                observation,
+                annotation,
                 invalid_analysis_method
             )
 
@@ -109,14 +109,14 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_ax_type(self):
         # Invalid ax type test
-        observation = "cluster_str"
+        annotation = "cluster_str"
         analysis_method = "Neighborhood Enrichment"
         invalid_ax = "not an Axes object"
 
         with self.assertRaises(ValueError) as cm:
             spatial_interaction(
                 self.adata,
-                observation,
+                annotation,
                 analysis_method,
                 ax=invalid_ax
             )
@@ -191,7 +191,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # Assertion goes here
 
     def test_returned_ax_has_right_titles(self):
-        observation = "cluster_str"
+        annotation = "cluster_str"
         analysis_method = "Neighborhood Enrichment"
 
         # Create a blank figure
@@ -203,7 +203,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # Call the function
         returned_ax = spatial_interaction(
             self.adata,
-            observation,
+            annotation,
             analysis_method,
             ax=ax
         )
@@ -224,7 +224,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
             expect_values = [
                 'Neighborhood enrichment',
-                observation + "_plot",
+                annotation + "_plot",
                 'A',
                 'B'
             ]
@@ -240,13 +240,13 @@ class TestSpatialInteraction(unittest.TestCase):
                 )
 
     def test_new_ax_has_right_titles(self):
-        observation = "cluster_num"
+        annotation = "cluster_num"
         analysis_method = "Neighborhood Enrichment"
 
         # Call the function
         returned_ax = spatial_interaction(
             self.adata,
-            observation,
+            annotation,
             analysis_method
         )
 
@@ -270,7 +270,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
             expect_values = [
                 'Neighborhood enrichment',
-                observation + "_plot",
+                annotation + "_plot",
                 '1',
                 '2'
             ]

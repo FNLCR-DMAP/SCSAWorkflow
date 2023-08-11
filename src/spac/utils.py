@@ -176,7 +176,7 @@ def check_table(
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, observations, or features do not exist.
+        If any of the specified layers, annotations, or features do not exist.
 
     """
 
@@ -199,13 +199,13 @@ def check_table(
         )
 
 
-def check_obs(
+def check_annotation(
         adata,
-        observations=None,
+        annotations=None,
         should_exist=True):
 
     """
-    Perform common error checks for observations in
+    Perform common error checks for annotations in
     anndata related objects.
 
     Parameters
@@ -213,8 +213,8 @@ def check_obs(
     adata : anndata.AnnData
         The AnnData object to be checked.
 
-    observations :  str or list of str, optional
-        The observation(s) to check for existence in adata.obs.
+    annotations :  str or list of str, optional
+        The annotation(s) to check for existence in adata.obs.
 
     should_exist : bool, optional (default=True)
         Determines whether to check if elements exist in the
@@ -226,7 +226,7 @@ def check_obs(
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, observations, or features do not exist.
+        If any of the specified layers, annotations, or features do not exist.
 
     """
 
@@ -239,12 +239,12 @@ def check_obs(
             )
 
     # Check for tables
-    existing_obs = adata.obs.columns.to_list()
+    existing_annotation = adata.obs.columns.to_list()
     check_list_in_list(
-            input=observations,
-            input_name="observations",
-            input_type="observation",
-            target_list=existing_obs,
+            input=annotations,
+            input_name="annotations",
+            input_type="annotation",
+            target_list=existing_annotation,
             need_exist=should_exist
         )
 
@@ -276,7 +276,7 @@ def check_feature(
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, observations, or features do not exist.
+        If any of the specified layers, annotations, or features do not exist.
 
     """
 

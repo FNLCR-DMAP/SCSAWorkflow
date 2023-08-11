@@ -103,7 +103,7 @@ def tsne(adata, layer=None, **kwargs):
     return adata
 
 
-def batch_normalize(adata, obs, layer, method="median", log=False):
+def batch_normalize(adata, annotation, layer, method="median", log=False):
     """
     Adjust the features of every marker using a normalization method.
 
@@ -117,8 +117,8 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
     adata : anndata.AnnData
          The AnnData object.
 
-    obs: str
-        The name of the observation in `adata` to define batches.
+    annotation: str
+        The name of the annotation in `adata` to define batches.
 
     layer : str
         The name of the new layer to add to the anndata object.
@@ -131,7 +131,7 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
-    regions = adata.obs[obs].unique().tolist()
+    regions = adata.obs[annotation].unique().tolist()
     original = adata.to_df()
 
     if log:
@@ -149,7 +149,7 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
     # Place holder for normalized dataframes per region
     new_df_list = []
     for region in regions:
-        region_cells = original[adata.obs[obs] == region]
+        region_cells = original[adata.obs[annotation] == region]
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
@@ -174,35 +174,35 @@ def batch_normalize(adata, obs, layer, method="median", log=False):
     adata.layers[layer] = new_df
 
 
-def rename_observations(adata, src_observation, dest_observation, mappings):
+def rename_labels(adata, src_annotation, dest_annotation, mappings):
     """
-    Rename observations in an AnnData object based on a provided dictionary.
-    This function creates a new observation column.
+    Rename labels in a given annotation in an AnnData object based on a 
+    provided dictionary. This function creates a new annotation column.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    src_observation : str
+    src_annotation : str
         Name of the column in adata.obs containing the original
-        observation labels.
-    dest_observation : str
+        labels of the source annotation.
+    dest_annotation : str
         The name of the new column to be created in the AnnData object
-        containing the renamed observation labels.
+        containing the renamed labels.
     mappings : dict
-        A dictionary mapping the original observation labels to
+        A dictionary mapping the original annotation labels to
         the new labels.
 
     Returns
     -------
     adata : anndata.AnnData
         The updated Anndata object with the new column containing the
-        renamed observation labels.
+        renamed labels.
 
     Examples
     --------
     >>> adata = your_anndata_object
-    >>> src_observation = "phenograph"
+    >>> src_annotation = "phenograph"
     >>> mappings = {
     ...     "0": "group_8",
     ...     "1": "group_2",
@@ -210,20 +210,20 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     ...     # ...
     ...     "37": "group_5",
     ... }
-    >>> dest_observation = "renamed_observations"
-    >>> adata = rename_observations(
-    ...     adata, src_observation, dest_observation, mappings)
+    >>> dest_annotation = "renamed_annotations"
+    >>> adata = rename_annotations(
+    ...     adata, src_annotation, dest_annotation, mappings)
     """
 
-    # Check if the source observation exists in the AnnData object
-    if src_observation not in adata.obs.columns:
+    # Check if the source annotation exists in the AnnData object
+    if src_annotation not in adata.obs.columns:
         raise ValueError(
-            f"Source observation '{src_observation}' not found in the "
+            f"Source annotation '{src_annotation}' not found in the "
             "AnnData object."
         )
 
-    # Get the unique values of the source observation
-    unique_values = adata.obs[src_observation].unique()
+    # Get the unique values of the source annotation
+    unique_values = adata.obs[src_annotation].unique()
 
     # Convert the keys in mappings to the same data type as the unique values
     mappings = {
@@ -232,31 +232,31 @@ def rename_observations(adata, src_observation, dest_observation, mappings):
     }
 
     # Check if all keys in mappings match the unique values in the
-    # source observation
+    # source annotation
     if not all(key in unique_values for key in mappings.keys()):
         raise ValueError(
             "All keys in the mappings dictionary should match the unique "
-            "values in the source observation."
+            "values in the source annotation."
         )
 
-    # Check if the destination observation already exists in the AnnData object
-    if dest_observation in adata.obs.columns:
+    # Check if the destination annotation already exists in the AnnData object
+    if dest_annotation in adata.obs.columns:
         raise ValueError(
-            f"Destination observation '{dest_observation}' already exists "
+            f"Destination annotation '{dest_annotation}' already exists "
             "in the AnnData object."
         )
 
-    # Create a new column in adata.obs with the updated observation labels
-    adata.obs[dest_observation] = (
-        adata.obs[src_observation]
+    # Create a new column in adata.obs with the updated annotation labels
+    adata.obs[dest_annotation] = (
+        adata.obs[src_annotation]
         .map(mappings)
         .astype("category")
     )
 
     # Ensure that all categories are covered
-    if adata.obs[dest_observation].isna().any():
+    if adata.obs[dest_annotation].isna().any():
         raise ValueError(
-            "Not all unique values in the source observation are "
+            "Not all unique values in the source annotation are "
             "covered by the mappings. "
             "Please ensure that the mappings cover all unique values."
         )
@@ -317,9 +317,10 @@ def normalize_features(
     Returns
     -------
     quantiles : pandas.DataFrame
-        A DataFrame containing the quantile values calculated for every feature.
-        The DataFrame has columns representing the features and rows representing the quantile values.
-    """
+        A DataFrame containing the quantile values calculated for every
+        feature. The DataFrame has columns representing the features and rows
+        representing the quantile values.
+ """
 
     # Perform error checks for anndata object:
     check_table(adata, input_layer, should_exist=True)
@@ -348,7 +349,6 @@ def normalize_features(
                          f"low quantile: {low_quantile}\n"
                          f"high quantile: {high_quantile}")
 
-    
     if interpolation not in ["nearest", "linear"]:
         raise ValueError("interpolation must be either 'nearest' or 'linear'"
                          f"passed value is:{interpolation}")

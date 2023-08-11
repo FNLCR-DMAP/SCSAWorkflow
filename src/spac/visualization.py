@@ -62,11 +62,11 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     return fig, ax
 
 
-def histogram(adata, feature_name=None, observation_name=None, layer=None,
+def histogram(adata, feature_name=None, annotation_name=None, layer=None,
               group_by=None, together=False, ax=None, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
-    or observation from adata.obs.
+    or annotation from adata.obs.
 
     Parameters
     ----------
@@ -76,8 +76,8 @@ def histogram(adata, feature_name=None, observation_name=None, layer=None,
     feature_name : str, optional
         Name of continuous feature from adata.X to plot its histogram.
 
-    observation_name : str, optional
-        Name of the observation from adata.obs to plot its histogram.
+    annotation_name : str, optional
+        Name of the annotation from adata.obs to plot its histogram.
 
     group_by : str, default None
         Choose either to group the histogram by another column.
@@ -109,8 +109,8 @@ def histogram(adata, feature_name=None, observation_name=None, layer=None,
     df = adata.to_df()
     df = pd.concat([df, adata.obs], axis=1)
 
-    if feature_name and observation_name:
-        raise ValueError("Cannot pass both feature_name and observation_name,"
+    if feature_name and annotation_name:
+        raise ValueError("Cannot pass both feature_name and annotation_name,"
                          " choose one.")
 
     if feature_name:
@@ -118,10 +118,10 @@ def histogram(adata, feature_name=None, observation_name=None, layer=None,
             raise ValueError("feature_name not found in adata.")
         x = feature_name
 
-    if observation_name:
-        if observation_name not in df.columns:
-            raise ValueError("observation_name not found in adata.")
-        x = observation_name
+    if annotation_name:
+        if annotation_name not in df.columns:
+            raise ValueError("annotation_name not found in adata.")
+        x = annotation_name
 
     if group_by and group_by not in df.columns:
         raise ValueError("group_by not found in adata.")
@@ -213,11 +213,11 @@ def heatmap(adata, column, layer=None, **kwargs):
     return mean_feature, fig, ax
 
 
-def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
+def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
                          standard_scale=None, ax=None, **kwargs):
     """
     Generates a hierarchical clustering heatmap.
-    Cells are stratified by `observation`,
+    Cells are stratified by `annotation`,
     then mean intensities are calculated for each feature across all cells
     to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
 
@@ -225,15 +225,15 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    observation : str
-        Name of the observation in adata.obs to group by and calculate mean
+    annotation : str
+        Name of the annotation in adata.obs to group by and calculate mean
         intensity.
     layer : str, optional
         The name of the `adata` layer to use to calculate the mean intensity.
         Default is None.
     dendrogram : bool, optional
         If True, a dendrogram based on the hierarchical clustering between
-        the `observation` categories is computed and plotted. Default is True.
+        the `annotation` categories is computed and plotted. Default is True.
     ax : matplotlib.axes.Axes, optional
         A matplotlib axes object. If not provided, a new figure and axes
         object will be created. Default is None.
@@ -244,7 +244,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     ----------
     mean_intensity : pandas.DataFrame
         A DataFrame containing the mean intensity of cells for each
-        observation.
+        annotation.
     matrixplot : scanpy.pl.matrixplot
         A Scanpy matrixplot object.
 
@@ -255,8 +255,8 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     >>> import anndata
 
     >>> X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
-    >>> obs = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
-    >>> all_data = anndata.AnnData(X=X, obs=obs)
+    >>> annotation = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
+    >>> all_data = anndata.AnnData(X=X, obs=annotation)
 
     >>> fig, ax = plt.subplots()  # Create a new figure and axes object
     >>> mean_intensity, matrixplot = hierarchical_heatmap(all_data,
@@ -268,10 +268,10 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     # matrixplot.show()
     """
 
-    # Check if observation exists in adata
-    if observation not in adata.obs.columns:
-        msg = (f"The observation '{observation}' does not exist in the "
-               f"provided AnnData object. Available observations are: "
+    # Check if annotation exists in adata
+    if annotation not in adata.obs.columns:
+        msg = (f"The annotation '{annotation}' does not exist in the "
+               f"provided AnnData object. Available annotations are: "
                f"{list(adata.obs.columns)}")
         raise KeyError(msg)
 
@@ -282,14 +282,14 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
                f"{list(adata.layers.keys())}")
         raise KeyError(msg)
 
-    # Raise an error if there are any NaN values in the observation column
-    if adata.obs[observation].isna().any():
-        raise ValueError("NaN values found in observation column.")
+    # Raise an error if there are any NaN values in the annotation column
+    if adata.obs[annotation].isna().any():
+        raise ValueError("NaN values found in annotation column.")
 
     # Calculate mean intensity
     intensities = adata.to_df(layer=layer)
-    labels = adata.obs[observation]
-    grouped = pd.concat([intensities, labels], axis=1).groupby(observation)
+    labels = adata.obs[annotation]
+    grouped = pd.concat([intensities, labels], axis=1).groupby(annotation)
     mean_intensity = grouped.mean()
 
     # Reset the index of mean_feature
@@ -301,7 +301,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
         obs=pd.DataFrame(
             index=mean_intensity.index,
             data={
-                observation: mean_intensity.iloc[:, 0]
+                annotation: mean_intensity.iloc[:, 0]
                 .astype('category').values
             }
         ),
@@ -312,7 +312,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     if dendrogram:
         sc.tl.dendrogram(
             mean_intensity_adata,
-            groupby=observation,
+            groupby=annotation,
             var_names=mean_intensity_adata.var_names,
             n_pcs=None
         )
@@ -321,7 +321,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     matrixplot = sc.pl.matrixplot(
         mean_intensity_adata,
         var_names=mean_intensity_adata.var_names,
-        groupby=observation, use_raw=False,
+        groupby=annotation, use_raw=False,
         dendrogram=dendrogram,
         standard_scale=standard_scale, cmap="viridis",
         return_fig=True, ax=ax, show=False, **kwargs
@@ -329,7 +329,7 @@ def hierarchical_heatmap(adata, observation, layer=None, dendrogram=True,
     return mean_intensity, matrixplot
 
 
-def threshold_heatmap(adata, feature_cutoffs, observation):
+def threshold_heatmap(adata, feature_cutoffs, annotation):
     """
     Creates a heatmap for each feature, categorizing intensities into low,
     medium, and high based on provided cutoffs.
@@ -341,8 +341,8 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
     feature_cutoffs : dict
         Dictionary with feature names as keys and tuples with two intensity
         cutoffs as values.
-    observation : str Column name in .obs DataFrame
-        that contains the observation used for grouping.
+    annotation : str Column name in .obs DataFrame
+        that contains the annotation used for grouping.
 
     Returns
     -------
@@ -355,15 +355,15 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
 
     """
 
-    # Assert observation is a string
-    if not isinstance(observation, str):
-        err_type = type(observation).__name__
-        err_msg = (f'Observation should be string. Got {err_type}.')
+    # Assert annotation is a string
+    if not isinstance(annotation, str):
+        err_type = type(annotation).__name__
+        err_msg = (f'Annotation should be string. Got {err_type}.')
         raise TypeError(err_msg)
 
-    # Assert observation is a column in adata.obs DataFrame
-    if observation not in adata.obs.columns:
-        err_msg = f"'{observation}' not found in adata.obs DataFrame."
+    # Assert annotation is a column in adata.obs DataFrame
+    if annotation not in adata.obs.columns:
+        err_msg = f"'{annotation}' not found in adata.obs DataFrame."
         raise ValueError(err_msg)
 
     if not isinstance(feature_cutoffs, dict):
@@ -395,7 +395,7 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
 
     intensity_df = intensity_df.astype(int)
     adata.layers["intensity"] = intensity_df.to_numpy()
-    adata.obs[observation] = adata.obs[observation].astype('category')
+    adata.obs[annotation] = adata.obs[annotation].astype('category')
 
     color_map = {0: (0/255, 0/255, 139/255), 1: 'green', 2: 'yellow'}
     colors = [color_map[i] for i in range(3)]
@@ -406,7 +406,7 @@ def threshold_heatmap(adata, feature_cutoffs, observation):
     heatmap_plot = sc.pl.heatmap(
         adata,
         var_names=intensity_df.columns,
-        groupby=observation,
+        groupby=annotation,
         use_raw=False,
         layer='intensity',
         cmap=cmap,
@@ -428,7 +428,7 @@ def spatial_plot(
         alpha,
         vmin=-999,
         vmax=-999,
-        observation=None,
+        annotation=None,
         feature=None,
         layer=None,
         ax=None,
@@ -452,8 +452,8 @@ def spatial_plot(
     feature : str
         The feature to visualize on the spatial plot.
         Default None.
-    observation : str
-        The observation to visualize in the spatial plot.
+    annotation : str
+        The annotation to visualize in the spatial plot.
         Can't be set with feature, default None.
     layer : str
         Name of the AnnData object layer that wants to be plotted.
@@ -473,11 +473,11 @@ def spatial_plot(
         f"got {str(type(layer))}"
     err_msg_feature = "The 'feature' parameter must be a string, " + \
         f"got {str(type(feature))}"
-    err_msg_observation = "The 'observation' parameter must be a string, " + \
-        f"got {str(type(observation))}"
-    err_msg_feat_obs_coe = "Both observation and feature are passed, " + \
+    err_msg_annotation = "The 'annotation' parameter must be a string, " + \
+        f"got {str(type(annotation))}"
+    err_msg_feat_annotation_coe = "Both annotation and feature are passed, " +\
         "please provide sinle input."
-    err_msg_feat_obs_non = "Both observation and feature are None, " + \
+    err_msg_feat_annotation_non = "Both annotation and feature are None, " + \
         "please provide single input."
     err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
         f"got {str(type(spot_size))}"
@@ -511,26 +511,27 @@ def spatial_plot(
     if feature is not None and not isinstance(feature, str):
         raise ValueError(err_msg_feature)
 
-    if observation is not None and not isinstance(observation, str):
-        raise ValueError(err_msg_observation)
+    if annotation is not None and not isinstance(annotation, str):
+        raise ValueError(err_msg_annotation)
 
-    if observation is not None and feature is not None:
-        raise ValueError(err_msg_feat_obs_coe)
+    if annotation is not None and feature is not None:
+        raise ValueError(err_msg_feat_annotation_coe)
 
-    if observation is None and feature is None:
-        raise ValueError(err_msg_feat_obs_non)
+    if annotation is None and feature is None:
+        raise ValueError(err_msg_feat_annotation_non)
 
     if 'spatial' not in adata.obsm_keys():
         err_msg = "Spatial coordinates not found in the 'obsm' attribute."
         raise ValueError(err_msg)
 
-    # Extract obs name
-    obs_names = adata.obs.columns.tolist()
-    obs_names_str = ", ".join(obs_names)
+    # Extract annotation name
+    annotation_names = adata.obs.columns.tolist()
+    annotation_names_str = ", ".join(annotation_names)
 
-    if observation is not None and observation not in obs_names:
-        error_text = f"Observation {observation} not found in the dataset." + \
-            f" Existing observations are: {obs_names_str}"
+    if annotation is not None and annotation not in annotation_names:
+        error_text = f'The annotation "{annotation}"' + \
+            'not found in the dataset.' + \
+            f" Existing annotations are: {annotation_names_str}"
         raise ValueError(error_text)
 
     # Extract feature name
@@ -571,15 +572,15 @@ def spatial_plot(
     if feature is not None:
 
         feature_index = feature_names.index(feature)
-        feature_obs = feature + "spatial_plot"
+        feature_annotation = feature + "spatial_plot"
         if vmin == -999:
             vmin = np.min(layer[:, feature_index])
         if vmax == -999:
             vmax = np.max(layer[:, feature_index])
-        adata.obs[feature_obs] = layer[:, feature_index]
-        color_region = feature_obs
+        adata.obs[feature_annotation] = layer[:, feature_index]
+        color_region = feature_annotation
     else:
-        color_region = observation
+        color_region = annotation
         vmin = None
         vmax = None
 

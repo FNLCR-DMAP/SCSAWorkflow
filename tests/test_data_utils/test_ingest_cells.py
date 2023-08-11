@@ -17,7 +17,7 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker.*",
-                             obs=batch)
+                             annotation=batch)
 
         self.assertCountEqual(
             list(adata.var_names),
@@ -37,7 +37,7 @@ class TestAnalysisMethods(unittest.TestCase):
         adata = ingest_cells(df1,
                              ["^marker1$",
                               "^marker2$"],
-                             obs=batch)
+                             annotation=batch)
 
         self.assertCountEqual(
             list(adata.var_names),
@@ -55,7 +55,7 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker1$",
-                             obs=batch)
+                             annotation=batch)
         self.assertCountEqual(
             list(adata.var_names),
             ["marker1"])
@@ -72,7 +72,7 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker1$",
-                             obs=["region1",
+                             annotation=["region1",
                                   "region2"])
         self.assertCountEqual(
             list(adata.obs_keys()),

@@ -9,12 +9,14 @@ class TestDownsampleCells(unittest.TestCase):
     def setUp(self):
         """Create a sample dataframe for testing."""
         self.df = pd.DataFrame({
-            'observation': ['obs1'] * 50 + ['obs2'] * 30 + ['obs3'] * 20,
+            'annotation': ['annotation1'] * 50 +
+                          ['annotation2'] * 30 +
+                          ['annotation3'] * 20,
             'value': np.random.rand(100)
         })
-        self.observation = 'observation'
+        self.annotation = 'annotation'
 
-    def test_observation_existence(self):
+    def test_annotation_existence(self):
         """
         Check if the function raises a ValueError
         when a nonexistent column is passed.
@@ -26,12 +28,12 @@ class TestDownsampleCells(unittest.TestCase):
         """Downsample without stratify"""
         n_samples = 20
         df_downsampled = downsample_cells(
-            self.df, self.observation,
+            self.df, self.annotation,
             n_samples=n_samples, stratify=False
         )
         self.assertTrue(
             all(df_downsampled.groupby(
-                self.observation
+                self.annotation
             ).size().values <= n_samples)
         )
 
@@ -39,7 +41,7 @@ class TestDownsampleCells(unittest.TestCase):
         """Downsample with stratify without random"""
         n_samples = 20
         df_downsampled = downsample_cells(
-            self.df, self.observation,
+            self.df, self.annotation,
             n_samples=n_samples, stratify=True
         )
         self.assertEqual(df_downsampled.shape[0], n_samples)
@@ -48,14 +50,14 @@ class TestDownsampleCells(unittest.TestCase):
         """Downsample with stratify with random"""
         n_samples = 20
         df_downsampled = downsample_cells(
-            self.df, self.observation,
+            self.df, self.annotation,
             n_samples=n_samples, stratify=True, rand=True
         )
         self.assertEqual(df_downsampled.shape[0], n_samples)
 
     def test_downsample_no_n_samples(self):
         """Downsample without n_samples should return the original dataframe"""
-        df_downsampled = downsample_cells(self.df, self.observation)
+        df_downsampled = downsample_cells(self.df, self.annotation)
         pd.testing.assert_frame_equal(self.df, df_downsampled)
 
     def test_stratification_frequency(self):
@@ -64,7 +66,7 @@ class TestDownsampleCells(unittest.TestCase):
 
         # Downsampling with stratifying
         df_downsampled_stratified = downsample_cells(
-            self.df, self.observation,
+            self.df, self.annotation,
             n_samples=n_samples, stratify=True, rand=True
         )
 
@@ -76,20 +78,21 @@ class TestDownsampleCells(unittest.TestCase):
             'n_samples'
         )
 
-        # Assert the number of samples in each observation
-        obs = 'observation'
-        obs_value_counts = df_downsampled_stratified[obs].value_counts()
+        # Assert the number of samples in each annotation
+        annotation = 'annotation'
+        annotation_value_counts = \
+            df_downsampled_stratified[annotation].value_counts()
         self.assertEqual(
-            obs_value_counts['obs1'], 5,
-            'Number of samples in obs1 does not match expected count'
+            annotation_value_counts['annotation1'], 5,
+            'Number of samples in annotation1 does not match expected count'
         )
         self.assertEqual(
-            obs_value_counts['obs2'], 3,
-            'Number of samples in obs2 does not match expected count'
+            annotation_value_counts['annotation2'], 3,
+            'Number of samples in annotation2 does not match expected count'
         )
         self.assertEqual(
-            obs_value_counts['obs3'], 2,
-            'Number of samples in obs3 does not match expected count'
+            annotation_value_counts['annotation3'], 2,
+            'Number of samples in annotation3 does not match expected count'
         )
 
 
