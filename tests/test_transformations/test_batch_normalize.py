@@ -27,8 +27,8 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Global medians of log2 (1+x) = 3.5, 6.5
 
-        adata1 = ingest_cells(df1, "^marker.*", obs=batch)
-        adata2 = ingest_cells(df2, "^marker.*", obs=batch)
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
 
         all_adata = concatinate_regions([adata1, adata2])
 
@@ -71,8 +71,8 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Global medians = 3.5, 6.5
 
-        adata1 = ingest_cells(df1, "^marker.*", obs=batch)
-        adata2 = ingest_cells(df2, "^marker.*", obs=batch)
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
 
         all_adata = concatinate_regions([adata1, adata2])
 
@@ -114,8 +114,8 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Global medians = 3.5, 6.5
 
-        adata1 = ingest_cells(df1, "^marker.*", obs=batch)
-        adata2 = ingest_cells(df2, "^marker.*", obs=batch)
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
 
         all_adata = concatinate_regions([adata1, adata2])
 
@@ -156,8 +156,8 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Global q75 = 3.25, 5.25
 
-        adata1 = ingest_cells(df1, "^marker.*", obs=batch)
-        adata2 = ingest_cells(df2, "^marker.*", obs=batch)
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
 
         all_adata = concatinate_regions([adata1, adata2])
 

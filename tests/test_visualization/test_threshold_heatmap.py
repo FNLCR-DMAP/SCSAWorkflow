@@ -10,16 +10,16 @@ matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 class TestThresholdHeatmap(unittest.TestCase):
     def setUp(self):
-        self.obs_names = ['cell1', 'cell2', 'cell3']
-        self.obs = pd.DataFrame({'phenotype': ['A', 'B', 'A']},
-                                index=self.obs_names)
+        self.annotation_names = ['cell1', 'cell2', 'cell3']
+        self.annotation = pd.DataFrame({'phenotype': ['A', 'B', 'A']},
+                                       index=self.annotation_names)
         self.X = np.array([[0.1, 0.3], [0.5, 0.7], [1.0, 1.5]])
         self.var_names = ['marker1', 'marker2']
         self.var = pd.DataFrame(index=self.var_names)
 
         self.adata = anndata.AnnData(
-            X=self.X, obs=self.obs, var=self.var, dtype=self.X.dtype)
-        self.adata.obs_names = self.obs_names
+            X=self.X, obs=self.annotation, var=self.var, dtype=self.X.dtype)
+        self.adata.obs_names = self.annotation_names
         self.adata.var_names = self.var_names
 
         self.marker_cutoffs = {
@@ -29,7 +29,7 @@ class TestThresholdHeatmap(unittest.TestCase):
 
         self.phenotype = 'phenotype'
 
-    def test_invalid_observation_type(self):
+    def test_invalid_annotation_type(self):
         with self.assertRaises(TypeError):
             threshold_heatmap(
                 self.adata,
@@ -37,7 +37,7 @@ class TestThresholdHeatmap(unittest.TestCase):
                 123
             )
 
-    def test_invalid_observation_value(self):
+    def test_invalid_annotation_value(self):
         with self.assertRaises(ValueError):
             threshold_heatmap(
                 self.adata,

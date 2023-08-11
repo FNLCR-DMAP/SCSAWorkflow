@@ -18,17 +18,17 @@ class SpatialPlotTestCase(unittest.TestCase):
         features = np.random.randint(0, 100, size=(num_rows, num_cols))
         feature_names = [f'Intensity_{i}' for i in range(num_cols)]
 
-        # Generate observation metadata
-        obs_data = {
-            'obs1': np.random.choice(['A', 'B', 'C'], size=num_rows),
-            'obs2': np.random.normal(0, 1, size=num_rows),
-            'obs3': np.random.uniform(0, 1, size=num_rows)
+        # Generate annotation metadata
+        annotation_data = {
+            'annotation1': np.random.choice(['A', 'B', 'C'], size=num_rows),
+            'annotation2': np.random.normal(0, 1, size=num_rows),
+            'annotation3': np.random.uniform(0, 1, size=num_rows)
         }
 
         # Create the AnnData object
         self.adata = anndata.AnnData(
             X=features,
-            obs=obs_data
+            obs=annotation_data
         )
 
         numpy_array = np.random.uniform(0, 100, size=(num_rows, 2))
@@ -58,14 +58,14 @@ class SpatialPlotTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             spatial_plot(self.adata, self.spot_size, self.alpha, feature=123)
 
-    def test_invalid_observation(self):
-        # Test when observation is not a string
+    def test_invalid_annotation(self):
+        # Test when annotation is not a string
         with self.assertRaises(ValueError):
             spatial_plot(
                 self.adata,
                 self.spot_size,
                 self.alpha,
-                observation=123)
+                annotation=123)
 
     def test_invalid_spot_size(self):
         # Test when spot_size is not an integer
@@ -82,27 +82,29 @@ class SpatialPlotTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             spatial_plot(self.adata, self.spot_size, -0.5)
 
-    def test_missing_observation(self):
-        # Test when observation is None and feature is None
+    def test_missing_annotation(self):
+        # Test when annotation is None and feature is None
         with self.assertRaises(ValueError) as cm:
             spatial_plot(self.adata, self.spot_size, self.alpha)
         error_msg = str(cm.exception)
-        err_msg_exp = "Both observation and feature are None, " + \
+        err_msg_exp = "Both annotation and feature are None, " + \
             "please provide single input."
         self.assertEqual(error_msg, err_msg_exp)
 
-    def test_invalid_observation_name(self):
-        # Test when observation name is not found in the dataset
+    def test_invalid_annotation_name(self):
+        # Test when annotation name is not found in the dataset
         with self.assertRaises(ValueError) as cm:
             spatial_plot(
                 self.adata,
                 self.spot_size,
                 self.alpha,
-                observation='obs4'
+                annotation='annotation4'
             )
         error_msg = str(cm.exception)
-        err_msg_exp = "Observation obs4 not found in the dataset. " + \
-            "Existing observations are: obs1, obs2, obs3"
+        err_msg_exp = 'The annotation "annotation4"' +\
+                      'not found in the dataset.' +\
+                      ' Existing annotations are: annotation1,' +\
+                      ' annotation2, annotation3'
         self.assertEqual(error_msg, err_msg_exp)
 
     def test_invalid_feature_name(self):
@@ -119,11 +121,11 @@ class SpatialPlotTestCase(unittest.TestCase):
             " please check the sample metadata."
         self.assertEqual(error_msg, err_msg_exp)
 
-    def test_spatial_plot_obs(self):
+    def test_spatial_plot_annotation(self):
         # This test verifies that the spatial_plot function
         # correctly interacts with the spatial function,
         # and returns the expected Axes object when
-        # the observation parameter is used.
+        # the annotation parameter is used.
 
         # Mock the spatial function
         # This mock the spatial function to replace the
@@ -136,7 +138,7 @@ class SpatialPlotTestCase(unittest.TestCase):
         def mock_spatial(
                 adata,
                 layer,
-                observation,
+                annotation,
                 spot_size,
                 alpha,
                 vmin,
@@ -146,7 +148,7 @@ class SpatialPlotTestCase(unittest.TestCase):
                 **kwargs):
             # Assert that the inputs match the expected values
             self.assertEqual(layer, None)
-            self.assertEqual(observation, 'obs1')
+            self.assertEqual(annotation, 'annotation1')
             self.assertEqual(spot_size, self.spot_size)
             self.assertEqual(alpha, self.alpha)
             self.assertEqual(vmin, None)
@@ -171,7 +173,7 @@ class SpatialPlotTestCase(unittest.TestCase):
             adata=self.adata,
             spot_size=self.spot_size,
             alpha=self.alpha,
-            observation='obs1',
+            annotation='annotation1',
             ax=ax
         )
 
@@ -251,7 +253,7 @@ class SpatialPlotTestCase(unittest.TestCase):
         layers = [None, 'Standardized']
 
         # Generate all combinations of parameters
-        # excluding both None values for features and observations
+        # excluding both None values for features and annotations
 
         parameter_combinations = list(itertools.product(
             spot_sizes, alphas, vmins, vmaxs, features, layers
@@ -282,20 +284,20 @@ class SpatialPlotTestCase(unittest.TestCase):
             # Check if ax has data plotted
             self.assertTrue(ax[0].has_data())
 
-    def test_spatial_plot_combos_observation(self):
+    def test_spatial_plot_combos_annotation(self):
         # Define the parameter combinations to test
         spot_sizes = [10, 20]
         alphas = [0.5, 0.8]
         vmins = [-999, 0, 5]
         vmaxs = [-999, 10, 20]
-        observation = ['obs1', 'obs2']
+        annotation = ['annotation1', 'annotation2']
         layers = [None, 'Normalized']
 
         # Generate all combinations of parameters
-        # excluding both None values for features and observations
+        # excluding both None values for features and annotations
 
         parameter_combinations = list(itertools.product(
-            spot_sizes, alphas, vmins, vmaxs, observation, layers
+            spot_sizes, alphas, vmins, vmaxs, annotation, layers
         ))
 
         parameter_combinations = [
@@ -305,7 +307,7 @@ class SpatialPlotTestCase(unittest.TestCase):
         ]
 
         for params in parameter_combinations:
-            spot_size, alpha, vmin, vmax, observation, layer = params
+            spot_size, alpha, vmin, vmax, annotation, layer = params
             # Test the spatial_plot function with the
             # given parameter combination
 
@@ -318,7 +320,7 @@ class SpatialPlotTestCase(unittest.TestCase):
                 alpha,
                 vmin=vmin,
                 vmax=vmax,
-                observation=observation,
+                annotation=annotation,
                 layer=layer,
                 ax=ax
             )

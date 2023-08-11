@@ -12,9 +12,9 @@ class TestCombineDFs(unittest.TestCase):
         cls.df1 = pd.DataFrame({"A": [1, 2], "B": [3, 4]})
         cls.df2 = pd.DataFrame({"A": [5, 6], "B": [7, 8]})
 
-        # Create observations dataframe
-        cls.observations = pd.DataFrame(
-            {"obs1": [10, 20]},
+        # Create annotations dataframe
+        cls.annotations = pd.DataFrame(
+            {"annotation1": [10, 20]},
             index=["file1.csv", "file2.csv"]
             )
 
@@ -30,22 +30,22 @@ class TestCombineDFs(unittest.TestCase):
         ]
 
     def test_combine_dfs(self):
-        combined_df = combine_dfs(self.dataframes, self.observations)
+        combined_df = combine_dfs(self.dataframes, self.annotations)
         expected_df = pd.DataFrame(
             {"A": [1, 2, 5, 6],
              "B": [3, 4, 7, 8],
-             "obs1": [10, 10, 20, 20]}
+             "annotation1": [10, 10, 20, 20]}
              )
         pd.testing.assert_frame_equal(combined_df, expected_df)
 
-    def test_combine_dfs_wrong_observations_type(self):
+    def test_combine_dfs_wrong_annotations_type(self):
         with self.assertRaises(TypeError):
             combine_dfs(self.dataframes, "wrong_type")
 
-    def test_combine_dfs_missing_observation(self):
-        observations_missing_data = self.observations.drop("file1.csv")
+    def test_combine_dfs_missing_annotation(self):
+        annotations_missing_data = self.annotations.drop("file1.csv")
         with self.assertRaises(ValueError):
-            combine_dfs(self.dataframes, observations_missing_data)
+            combine_dfs(self.dataframes, annotations_missing_data)
 
     @classmethod
     def tearDownClass(cls):

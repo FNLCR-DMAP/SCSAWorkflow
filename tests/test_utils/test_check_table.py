@@ -17,8 +17,8 @@ class TestCheckTable(unittest.TestCase):
             X=pd.DataFrame(data),
             layers={"table1": np.array([[5, 6], [7, 8]]),
                     "table2": np.array([[9, 10], [11, 12]])},
-            obs={"obs1": [1, 2],
-                 "obs2": [3, 4]}
+            obs={"annotation1": [1, 2],
+                 "annotation2": [3, 4]}
         )
 
     def test_wrong_adata_type(self):

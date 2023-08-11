@@ -11,22 +11,20 @@ class TestNormalizeFeatures(unittest.TestCase):
         # Create a sample AnnData object with a test dataframe
         if data is None: 
             data = {
-                'feature1': [i for i in range(0,11)],
+                'feature1': [i for i in range(0, 11)],
                 'feature2': [i for i in range(0, 101, 10)]
             }
 
-        df_data  = pd.DataFrame(data) 
+        df_data = pd.DataFrame(data)
 
         adata = AnnData(pd.DataFrame(df_data))
         adata.var_names = df_data.columns
 
         return adata
 
-
     def setUp(self):
-        #setup an anndata object 
+        #setup an anndata object
         self.adata = self.create_dataset()
-
 
     def test_invalid_high_quantile(self):
         # Test with an invalid high_quantile (not numeric)
@@ -82,14 +80,12 @@ class TestNormalizeFeatures(unittest.TestCase):
                 interpolation='invalid'
             )
 
-
-    def validate_correct_values(self, 
-                                adata, 
-                                low_quantile, 
-                                high_quantile, 
+    def validate_correct_values(self,
+                                adata,
+                                low_quantile,
+                                high_quantile,
                                 expected_result):
 
-        target_layer = None
         new_layer_name = "normalized_feature"
         overwrite = True
         normalize_features(
@@ -121,7 +117,7 @@ class TestNormalizeFeatures(unittest.TestCase):
     def test_correct_scale(self):
         # Test scaling the features betwen 0-1 wih no clipping 
         data = {
-            'feature1': [i for i in range(0,11)],
+            'feature1': [i for i in range(0, 11)],
             'feature2': [i for i in range(0, 101, 10)]
         }
         adata = self.create_dataset(data)
@@ -172,24 +168,26 @@ class TestNormalizeFeatures(unittest.TestCase):
         low_quantile = 0.2
         high_quantile = 0.8 
 
-        expected_result = {
-            'feature1': [0, 0, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1, 1]
-        }
-
         # Call the function
         quantiles = normalize_features(adata, low_quantile, high_quantile)
         print(quantiles)
 
+        expected_msg = "Quantiles not returned as a pandas DataFrame"
         # Check the return value type
-        self.assertIsInstance(quantiles, pd.DataFrame, msg="Quantiles not returned as a pandas DataFrame")
+        self.assertIsInstance(quantiles, pd.DataFrame,
+                              msg=expected_msg)
 
         # Check if the quantiles DataFrame has the expected structure
         expected_columns = ['feature1']
-        self.assertListEqual(list(quantiles.columns), expected_columns, msg="Quantiles DataFrame columns mismatch")
+        self.assertListEqual(list(quantiles.columns),
+                             expected_columns,
+                             msg="Quantiles DataFrame columns mismatch")
 
         # Check if the quantiles DataFrame has the expected indices
         expected_indices = [low_quantile, high_quantile]
-        self.assertListEqual(list(quantiles.index), expected_indices, msg="Quantiles DataFrame indices mismatch")
+        self.assertListEqual(list(quantiles.index),
+                             expected_indices,
+                             msg="Quantiles DataFrame indices mismatch")
 
 
 if __name__ == '__main__':

@@ -8,7 +8,11 @@ from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
 
 
-def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
+def ingest_cells(dataframe,
+                 regex_str,
+                 x_col=None,
+                 y_col=None,
+                 annotation=None):
 
     """
     Read the csv file into an anndata object.
@@ -29,9 +33,9 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
     y_col : str
         The column name for the y coordinate of the cell.
 
-    obs : str or list of str
-        The column name for the re gion that the cells. If a list is passed,
-        multiple observations will be created in the returned AnnData object.
+    annotation : str or list of str
+        The column name for the region that the cells. If a list is passed,
+        multiple annotations will be created in the returned AnnData object.
 
 
     Returns
@@ -56,18 +60,18 @@ def ingest_cells(dataframe, regex_str, x_col=None, y_col=None, obs=None):
         features_df,
         dtype=features_df[all_features[0]].dtype)
 
-    if obs is not None:
-        if isinstance(obs, str):
-            list_of_obs = [obs]
+    if annotation is not None:
+        if isinstance(annotation, str):
+            list_of_annotation = [annotation]
         else:
-            list_of_obs = obs
+            list_of_annotation = annotation
 
-        for observation in list_of_obs:
+        for annotation in list_of_annotation:
 
             # As selecting one column of the dataframe returns a series which
             # AnnData converts to NaN, then I convert it to a list before
             # assignment.
-            adata.obs[observation] = dataframe[observation].tolist()
+            adata.obs[annotation] = dataframe[annotation].tolist()
 
     if x_col is not None and y_col is not None:
         numpy_array = dataframe[[x_col, y_col]].to_numpy().astype('float32')
@@ -162,7 +166,7 @@ def add_rescaled_features(adata, min_quantile, max_quantile, layer):
     adata.layers[layer] = rescaled
 
 
-def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
+def subtract_min_per_region(adata, annotation, layer, min_quantile=0.01):
     """
     Substract the minimum quantile of every marker per region.
 
@@ -171,8 +175,8 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     adata : anndata.AnnData
          The AnnData object.
 
-    obs: str
-        The name of the observation in `adata` to define batches.
+    annotation: str
+        The name of the annotation in `adata` to define batches.
 
     min_quantile : float
         The minimum quantile to rescale to zero.
@@ -180,12 +184,12 @@ def subtract_min_per_region(adata, obs, layer, min_quantile=0.01):
     layer : str
         The name of the new layer to add to the AnnData object.
     """
-    regions = adata.obs[obs].unique().tolist()
+    regions = adata.obs[annotation].unique().tolist()
     original = adata.to_df()
 
     new_df_list = []
     for region in regions:
-        region_cells = original[adata.obs[obs] == region]
+        region_cells = original[adata.obs[annotation] == region]
         new_features = subtract_min_quantile(region_cells, min_quantile)
         new_df_list.append(new_features)
 
@@ -312,7 +316,7 @@ def load_csv_files(file_names):
     return dataframe_list
 
 
-def combine_dfs(dataframes, observations):
+def combine_dfs(dataframes, annotations):
 
     """
     Combine a list of pandas dataframe into single pandas dataframe.
@@ -323,9 +327,9 @@ def combine_dfs(dataframes, observations):
         A list containing (file name, pandas dataframe) to be combined
         into single dataframe output
 
-    observations : pandas.DataFrame
+    annotations : pandas.DataFrame
         A pandas data frame where the index is the file name, and
-        the columns are various observations to
+        the columns are various annotations to
         add to all cells in a given dataframe.
 
     Returns
@@ -337,10 +341,10 @@ def combine_dfs(dataframes, observations):
 
     meta_schema = []
     combined_dataframe = pd.DataFrame()
-    if not str(type(observations)) == "<class 'pandas.core.frame.DataFrame'>":
-        observations_type = str(type(observations))
-        error_message = "observations should be a pandas dataframe, " + \
-            "but got " + observations_type + "."
+    if not str(type(annotations)) == "<class 'pandas.core.frame.DataFrame'>":
+        annotations_type = str(type(annotations))
+        error_message = "annotations should be a pandas dataframe, " + \
+            "but got " + annotations_type + "."
         raise TypeError(error_message)
 
     for current_df_list in dataframes:
@@ -369,17 +373,18 @@ def combine_dfs(dataframes, observations):
                         "the meta_schema, got:\n {current_schema}. "
             raise ValueError(error_message)
 
-        # Check if the observations DataFrame has the required index
-        if file_name not in observations.index:
-            error_message = "Missing data in the observations DataFrame" + \
+        # Check if the annotations DataFrame has the required index
+        if file_name not in annotations.index:
+            error_message = "Missing data in the annotations DataFrame" + \
                 f"for the file '{file_name}'."
             raise ValueError(error_message)
 
-        # Add observations in to the dataframe
-        file_observations = observations.loc[file_name]
+        # Add annotations in to the dataframe
+        file_annotations = annotations.loc[file_name]
 
-        for file_obs_name, file_obs_value in file_observations.iteritems():
-            current_df[file_obs_name] = file_obs_value
+        for file_annotation_name, file_annotation_value in \
+                file_annotations.iteritems():
+            current_df[file_annotation_name] = file_annotation_value
 
         if combined_dataframe.empty:
             combined_dataframe = current_df.copy()
@@ -401,7 +406,7 @@ def combine_dfs(dataframes, observations):
     return combined_dataframe
 
 
-def select_values(data, observation, values=None):
+def select_values(data, annotation, values=None):
     """
     Selects rows from input dataframe matching specified values in a column.
 
@@ -409,10 +414,10 @@ def select_values(data, observation, values=None):
     ----------
     data : pandas.DataFrame
         The input dataframe.
-    observation : str
+    annotation : str
         The column name to be used for selection.
     values : list, optional
-        List of values for observation to include.
+        List of values for annotation to include.
         If None, return all values.
 
     Returns
@@ -423,7 +428,7 @@ def select_values(data, observation, values=None):
     Raises
     ------
     ValueError
-        If observation does not exist or one or more values passed
+        If annotation does not exist or one or more values passed
         do not exist in the specified column.
 
     Examples
@@ -440,15 +445,15 @@ def select_values(data, observation, values=None):
     """
     # Check if the DataFrame is empty
     if not data.empty:
-        # If DataFrame is not empty, check if observation exists
-        if observation not in data.columns:
+        # If DataFrame is not empty, check if annotation exists
+        if annotation not in data.columns:
             raise ValueError(
-                f"Column {observation} does not exist in the dataframe"
+                f"Column {annotation} does not exist in the dataframe"
             )
 
-        # If values exist in observation, filter data
+        # If values exist in annotation, filter data
         if values is not None:
-            filtered_data = data[data[observation].isin(values)]
+            filtered_data = data[data[annotation].isin(values)]
             if filtered_data.empty:
                 warnings.warn("No matching values found in the data.")
             return filtered_data
@@ -456,18 +461,18 @@ def select_values(data, observation, values=None):
     return data
 
 
-def downsample_cells(data, observation, n_samples=None,
+def downsample_cells(data, annotation, n_samples=None,
                      stratify=False, rand=False):
     """
     Reduces the number of cells in the data by either selecting n_samples from
-    every possible value of observation, or returning n_samples
-    stratified by the frequency of values in observation.
+    every possible value of annotation, or returning n_samples
+    stratified by the frequency of values in annotation.
 
     Parameters
     ----------
     data : pd.DataFrame
         The input data frame.
-    observation : str
+    annotation : str
         The column name to downsample on.
     n_samples : int, default=None
         The max number of samples to return for each group if stratify is
@@ -486,26 +491,26 @@ def downsample_cells(data, observation, n_samples=None,
     Examples
     --------
     >>> df = pd.DataFrame({
-    ...    'observation': ['a', 'a', 'a', 'b', 'b', 'c'],
+    ...    'annotation': ['a', 'a', 'a', 'b', 'b', 'c'],
     ...    'value': [1, 2, 3, 4, 5, 6]
     ... })
-    >>> print(downsample_cells(df, 'observation', n_samples=2))
+    >>> print(downsample_cells(df, 'annotation', n_samples=2))
     """
     # Check if the column to downsample on exists
-    if observation not in data.columns:
+    if annotation not in data.columns:
         raise ValueError(
-            f"Column {observation} does not exist in the dataframe"
+            f"Column {annotation} does not exist in the dataframe"
         )
 
     if n_samples is not None:
         # Stratify selection
         if stratify:
             # Determine frequencies of each group
-            freqs = data[observation].value_counts(normalize=True)
+            freqs = data[annotation].value_counts(normalize=True)
             n_samples_per_group = (freqs * n_samples).astype(int)
             samples = []
-            # Group by observation and sample from each group
-            for group, group_data in data.groupby(observation):
+            # Group by annotation and sample from each group
+            for group, group_data in data.groupby(annotation):
                 n_group_samples = n_samples_per_group.get(group, 0)
                 if rand:
                     # Randomly select the returned cells
@@ -520,7 +525,7 @@ def downsample_cells(data, observation, n_samples=None,
         else:
             # Non-stratified selection
             # Select the first n cells from each group
-            data = data.groupby(observation).apply(
+            data = data.groupby(annotation).apply(
                 lambda x: x.head(n=min(n_samples, len(x)))
             ).reset_index(drop=True)
 
@@ -596,7 +601,7 @@ def calculate_centroid(
     return data
 
 
-def bin2cat(data, one_hot_observations, new_observation):
+def bin2cat(data, one_hot_annotations, new_annotation):
     """
     Combine a set of columns representing
     a binary one hot encoding of categories
@@ -605,15 +610,15 @@ def bin2cat(data, one_hot_observations, new_observation):
     Parameters:
     -----------
         data : pandas.DataFrame
-            The pandas dataframe containing the one hot encoded observations.
+            The pandas dataframe containing the one hot encoded annotations.
 
-        one_hot_observations : str or list of str
+        one_hot_annotations : str or list of str
             A string or a list of strings representing
-            python regular expression of the one hot encoded observations
+            python regular expression of the one hot encoded annotations
             columns in the data frame.
 
-        new_observation: str
-            The column name for new categorical observation to be created.
+        new_annotation: str
+            The column name for new categorical annotation to be created.
 
     Returns:
     --------
@@ -626,10 +631,10 @@ def bin2cat(data, one_hot_observations, new_observation):
     ...    'A': [1, 1, 0, 0],
     ...     'B': [0, 0, 1, 0]
     ... })
-    >>> one_hot_observations = ['A', 'B']
-    >>> new_observation = 'new_category'
-    >>> result = bin2cat(data, one_hot_observations, new_observation)
-    >>> print(result[new_observation])
+    >>> one_hot_annotations = ['A', 'B']
+    >>> new_annotation = 'new_category'
+    >>> result = bin2cat(data, one_hot_annotations, new_annotation)
+    >>> print(result[new_annotation])
     0      A
     1      A
     2      B
@@ -637,22 +642,22 @@ def bin2cat(data, one_hot_observations, new_observation):
     Name: new_category, dtype: object
     """
 
-    if isinstance(one_hot_observations, str):
-        one_hot_observations = [one_hot_observations]
-    elif not isinstance(one_hot_observations, list):
-        error_string = "one_hot_observations should " + \
+    if isinstance(one_hot_annotations, str):
+        one_hot_annotations = [one_hot_annotations]
+    elif not isinstance(one_hot_annotations, list):
+        error_string = "one_hot_annotations should " + \
                          "be a string or a list of strings."
         raise ValueError(error_string)
 
-    if new_observation in data.columns:
-        raise ValueError("Column name for new observation already exists.")
+    if new_annotation in data.columns:
+        raise ValueError("Column name for new annotation already exists.")
 
-    if len(one_hot_observations) > 0:
+    if len(one_hot_annotations) > 0:
         # Add regrex to find cell labels
 
         all_columns = list(data.columns)
         all_cell_labels = regex_search_list(
-                one_hot_observations,
+                one_hot_annotations,
                 all_columns
             )
 
@@ -672,7 +677,7 @@ def bin2cat(data, one_hot_observations, new_observation):
                 get_columns_with_1,
                 axis=1)
             column_names_with_1 = column_names_with_1.tolist()
-            data[new_observation] = column_names_with_1
+            data[new_annotation] = column_names_with_1
             return data
         else:
             error_string = "No column was found in the dataframe " + \

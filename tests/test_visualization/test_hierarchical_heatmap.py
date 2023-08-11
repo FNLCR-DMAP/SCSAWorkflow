@@ -16,7 +16,7 @@ class TestHierarchicalHeatmap(unittest.TestCase):
             'feature2': [2, 4, 6, 8],
         })
 
-        obs = pd.DataFrame({
+        annotation = pd.DataFrame({
             'phenotype': [
                 'phenotype1',
                 'phenotype1',
@@ -25,7 +25,7 @@ class TestHierarchicalHeatmap(unittest.TestCase):
             ]
         })
 
-        self.adata = anndata.AnnData(X=X, obs=obs)
+        self.adata = anndata.AnnData(X=X, obs=annotation)
 
     def test_returns_correct_types(self):
         """Test if correct types are returned."""
@@ -36,16 +36,16 @@ class TestHierarchicalHeatmap(unittest.TestCase):
         self.assertIsInstance(mean_intensity, pd.DataFrame)
         self.assertIsInstance(matrixplot, MatrixPlot)
 
-    def test_invalid_observation_raises_error(self):
-        """Test if invalid observation raises error."""
-        err_msg = (r"The observation 'invalid_observation' does not exist "
-                   r"in the provided AnnData object. Available observations "
+    def test_invalid_annotation_raises_error(self):
+        """Test if invalid annotation raises error."""
+        err_msg = (r"The annotation 'invalid_annotation' does not exist "
+                   r"in the provided AnnData object. Available annotations "
                    r"are: \['phenotype'\]")
         with self.assertRaisesRegex(KeyError, err_msg):
-            hierarchical_heatmap(self.adata, 'invalid_observation')
+            hierarchical_heatmap(self.adata, 'invalid_annotation')
 
-    def test_nan_observation_raises_error(self):
-        """Test if NaN observation raises error."""
+    def test_nan_annotation_raises_error(self):
+        """Test if NaN annotation raises error."""
         self.adata.obs['phenotype'] = [
             None,
             'phenotype1',
