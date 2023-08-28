@@ -9,6 +9,104 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
+def boxplot(adata, annotation=None, layer=None, ax=None,
+            features=None, **kwargs):
+    """
+    Plot boxplots for all features available in the passed adata object or
+    a subset if features are provided.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+
+    annotation : str, optional
+        Annotation to determine if separate plots are needed for every label.
+
+    layer : str, optional
+        The name of the matrix layer to use. If not provided,
+        uses the main data matrix adata.X.
+
+    ax : matplotlib.axes.Axes, optional
+        An existing Axes object to draw the plot onto, optional.
+
+    features : list, optional
+        List of feature names to be plotted.
+        If not provided, all features will be plotted.
+
+    **kwargs
+        Additional arguments to pass to seaborn.boxplot.
+
+    Returns
+    -------
+    fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+        The created figure and axes for the plot.
+    """
+
+    # Validate inputs
+    if not isinstance(adata, anndata.AnnData):
+        raise TypeError("Input 'adata' must be an instance "
+              "of anndata.AnnData.")
+
+    if ax and not isinstance(ax, plt.Axes):
+        raise TypeError("Input 'ax' must be a matplotlib.axes.Axes object.")
+
+    if annotation and annotation not in adata.obs.columns:
+        raise ValueError(f"Specified annotation '{annotation}' not found in "
+                         "the provided AnnData object's .obs.")
+
+    if layer and layer not in adata.layers:
+        raise ValueError(f"Specified layer '{layer}' not found in the "
+                         "provided AnnData object.")
+
+    # Use the specified layer if provided
+    if layer:
+        data_matrix = adata.layers[layer]
+    else:
+        data_matrix = adata.X
+
+    # Create a DataFrame from the data matrix with features as columns
+    df = pd.DataFrame(data_matrix, columns=adata.var_names)
+
+    # If annotation is provided, add it to the DataFrame
+    if annotation:
+        df[annotation] = adata.obs[annotation].values
+
+    # Filter the DataFrame based on provided features
+    if features:
+        if not all(feature in df.columns for feature in features):
+            raise ValueError("One or more provided features are not "
+                             "found in the data.")
+        df = df[features + ([annotation] if annotation else [])]
+
+    # If ax is provided, get the associated figure
+    if ax:
+        fig = ax.get_figure()
+    else:
+        fig, ax = plt.subplots(figsize=(10, 5))  # Adjust the figsize as needed
+
+    # If annotation is provided, loop through unique labels and plot separately
+    if annotation:
+        unique_labels = df[annotation].unique()
+        for label in unique_labels:
+            data_subset = df[df[annotation] == label]
+            melted_data = data_subset.melt(id_vars=annotation)
+            sns.boxplot(data=melted_data, x="variable", y="value", ax=ax,
+                        **kwargs)
+            ax.set_title(f"Features for Annotation: {label}")
+            plt.xticks(rotation=90)
+            plt.tight_layout()
+            plt.show()
+    else:
+        melted_data = df.melt()
+        sns.boxplot(data=melted_data, x="variable", y="value", ax=ax, **kwargs)
+        ax.set_title("Features Boxplot")
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+    return fig, ax
+
 def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     """
     Visualize scatter plot in tSNE basis.
