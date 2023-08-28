@@ -9,6 +9,91 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
+def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
+                                  layer=None, ax=None, **kwargs):
+    """
+    Visualize scatter plot in t-SNE or UMAP basis.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
+        function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
+    method : str
+        Dimensionality reduction method to visualize.
+        Choose from {'tsne', 'umap'}.
+    annotation : str, optional
+        The name of the column in `adata.obs` to use for coloring
+        the scatter plot points based on cell annotations.
+    feature : str, optional
+        The name of the gene or feature in `adata.var_names` to use
+        for coloring the scatter plot points based on feature expression.
+    layer : str, optional
+        The name of the data layer in `adata.layers` to use for visualization.
+        If None, the main data matrix `adata.X` is used.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    **kwargs
+        Parameters passed to scanpy.pl.tsne or scanpy.pl.umap function.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    if not isinstance(adata, anndata.AnnData):
+        raise ValueError("adata must be an AnnData object.")
+    # Check method validity
+    if method not in ['tsne', 'umap']:
+        raise ValueError("Method should be one of {'tsne', 'umap'}.")
+
+    # Determine coloring scheme
+    if annotation and feature:
+        err_msg = ("Please specify either an annotation or a feature"
+                   " for coloring, not both.")
+        raise ValueError(err_msg)
+
+    elif annotation:
+        if annotation not in adata.obs:
+            err_msg = f"Annotation '{annotation}' not found in adata.obs."
+            raise ValueError(err_msg)
+        color = annotation
+
+    elif feature:
+        if feature not in adata.var_names:
+            err_msg = f"Feature '{feature}' not found in adata.var_names."
+            raise ValueError(err_msg)
+        color = feature
+    else:
+        color = None
+
+    # If a layer is provided, use it for visualization
+    if layer:
+        if layer not in adata.layers:
+            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
+        # Use the specified layer's data for visualization.
+        adata.X = adata.layers[layer]
+
+    # Add color column to the kwargs for the scanpy plot`
+    kwargs['color'] = color
+
+    # Plot the chosen method
+    if method == 'tsne':
+        sc.pl.tsne(adata, ax=ax, **kwargs)
+    else:
+        sc.pl.umap(adata, ax=ax, **kwargs)
+
+    fig = plt.gcf()  # Get the current figure
+    if ax is None:  # If no ax was provided, get the current ax
+        ax = plt.gca()
+
+    return fig, ax
+
+
 def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     """
     Visualize scatter plot in tSNE basis.
