@@ -6,7 +6,7 @@ import scanpy.external as sce
 from spac.utils import check_table
 
 
-def phenograph_clustering(adata, features, layer=None, k=30):
+def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -31,6 +31,9 @@ def phenograph_clustering(adata, features, layer=None, k=30):
 
     k : int
         The number of nearest neighbor to be used in creating the graph.
+
+    seed : int, optional
+        Random seed for reproducibility.
     """
 
     if not isinstance(adata, sc.AnnData):
@@ -51,17 +54,88 @@ def phenograph_clustering(adata, features, layer=None, k=30):
         raise ValueError("One or more of the `features` are not in "
                          "`adata.var_names`")
 
+    if seed is not None:
+        np.random.seed(seed)
+
     if layer is not None:
         phenograph_df = adata.to_df(layer=layer)[features]
     else:
         phenograph_df = adata.to_df()[features]
 
     phenograph_out = sce.tl.phenograph(phenograph_df,
-                                       clustering_algo="louvain",
+                                       clustering_algo="leiden",
                                        k=k)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
+
+
+def get_cluster_info(adata, annotation="phenograph", features=None):
+    """
+    Retrieve information about clusters based on specific annotation.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+    annotation : str, optional
+        Annotation/column in adata.obs for cluster info.
+    features : list of str, optional
+        Features (e.g., genes) for cluster metrics.
+        Defaults to all features in adata.var_names.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with metrics for each cluster.
+    """
+
+    if annotation not in adata.obs.columns:
+        raise ValueError(
+            f"`{annotation}` not in `adata.obs`. Available: "
+            f"{list(adata.obs.columns)}"
+        )
+
+    if features is None:
+        features = list(adata.var_names)
+
+    if not all(f in adata.var_names for f in features):
+        raise ValueError("Some features not in `adata.var_names`")
+
+    # Count cells in each cluster
+    cluster_counts = adata.obs[annotation].value_counts().reset_index()
+    cluster_counts.columns = ["Cluster", "Number of Cells"]
+
+    # Initialize DataFrame for cluster metrics
+    cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
+
+    # Convert adata.X to DataFrame
+    adata_df = pd.DataFrame(adata.X, columns=adata.var_names)
+
+    # Add cluster annotation
+    adata_df[annotation] = adata.obs[annotation].values
+
+    # Calculate statistics for each feature in each cluster
+    for feature in features:
+        grouped = adata_df.groupby(annotation)[feature].agg(
+            ["mean", "std", "median",
+             lambda x: x.quantile(0),
+             lambda x: x.quantile(0.995)
+             ]).reset_index()
+        grouped.columns = [
+            f"{col}_{feature}" if col != annotation else "Cluster"
+            for col in grouped.columns
+        ]
+        cluster_metrics = cluster_metrics.merge(
+            grouped, on="Cluster", how="left"
+            )
+
+    # Merge cluster counts
+    cluster_metrics = pd.merge(
+        cluster_metrics, cluster_counts, on="Cluster", how="left"
+    )
+
+    return cluster_metrics
 
 
 def tsne(adata, layer=None, **kwargs):
@@ -176,7 +250,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
 def rename_labels(adata, src_annotation, dest_annotation, mappings):
     """
-    Rename labels in a given annotation in an AnnData object based on a 
+    Rename labels in a given annotation in an AnnData object based on a
     provided dictionary. This function creates a new annotation column.
 
     Parameters
@@ -298,8 +372,8 @@ def normalize_features(
         Must be a positive float between (0,1].
 
     interpolation : str, optional (default: "nearest")
-        The interpolation method to use when selecting the value for 
-        low and high quantile. Values can be "nearest" or "linear" 
+        The interpolation method to use when selecting the value for
+        low and high quantile. Values can be "nearest" or "linear"
 
     input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
@@ -352,7 +426,7 @@ def normalize_features(
     if interpolation not in ["nearest", "linear"]:
         raise ValueError("interpolation must be either 'nearest' or 'linear'"
                          f"passed value is:{interpolation}")
-    
+
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
@@ -377,4 +451,4 @@ def normalize_features(
     # Append normalized feature to the anndata object
     adata.layers[new_layer_name] = dataframe
 
-    return quantiles 
+    return quantiles
