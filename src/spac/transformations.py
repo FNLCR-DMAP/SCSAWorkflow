@@ -3,19 +3,15 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import scanpy.external as sce
-from spac.utils import check_table
+from spac.utils import check_table, check_feature
 
 
-def phenograph_clustering(adata, features, layer=None, k=30):
+def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     """
-    Calculate automatic phenotypes using phenograph.
-
-    The function will add these two attributes to `adata`:
-    `.obs["phenograph"]`
-        The assigned int64 class by phenograph
-
-    `.uns["phenograph_features"]`
-        The features used to calculate the phenograph clusters
+    Calculate automatic phenotypes using phenograph
+    and annotate the adata object.
+    The expectation is that the adata object will have a new annotation
+    called 'phenograph'. This will happen in place of the adata object.
 
     Parameters
     ----------
@@ -26,30 +22,25 @@ def phenograph_clustering(adata, features, layer=None, k=30):
         The variables that would be included in creating the phenograph
         clusters.
 
-    layer : str
+    layer : str, optional
         The layer to be used in calculating the phengraph clusters.
 
-    k : int
+    k : int, optional
         The number of nearest neighbor to be used in creating the graph.
+
+    seed : int, optional
+        Random seed for reproducibility.
     """
 
-    if not isinstance(adata, sc.AnnData):
-        raise TypeError("`adata` must be of type anndata.AnnData")
-
-    if (not isinstance(features, list) or
-            not all(isinstance(feature, str) for feature in features)):
-        raise TypeError("`features` must be a list of strings")
-
-    if layer is not None and layer not in adata.layers.keys():
-        raise ValueError(f"`{layer}` not found in `adata.layers`. "
-                         f"Available layers are {list(adata.layers.keys())}")
+    # Use utility functions for input validation
+    check_table(adata, tables=layer)
+    check_feature(adata, features=features)
 
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
 
-    if not all(feature in adata.var_names for feature in features):
-        raise ValueError("One or more of the `features` are not in "
-                         "`adata.var_names`")
+    if seed is not None:
+        np.random.seed(seed)
 
     if layer is not None:
         phenograph_df = adata.to_df(layer=layer)[features]
@@ -57,7 +48,7 @@ def phenograph_clustering(adata, features, layer=None, k=30):
         phenograph_df = adata.to_df()[features]
 
     phenograph_out = sce.tl.phenograph(phenograph_df,
-                                       clustering_algo="louvain",
+                                       clustering_algo="leiden",
                                        k=k)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
@@ -176,7 +167,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
 def rename_labels(adata, src_annotation, dest_annotation, mappings):
     """
-    Rename labels in a given annotation in an AnnData object based on a 
+    Rename labels in a given annotation in an AnnData object based on a
     provided dictionary. This function creates a new annotation column.
 
     Parameters
@@ -298,8 +289,8 @@ def normalize_features(
         Must be a positive float between (0,1].
 
     interpolation : str, optional (default: "nearest")
-        The interpolation method to use when selecting the value for 
-        low and high quantile. Values can be "nearest" or "linear" 
+        The interpolation method to use when selecting the value for
+        low and high quantile. Values can be "nearest" or "linear"
 
     input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
@@ -352,7 +343,7 @@ def normalize_features(
     if interpolation not in ["nearest", "linear"]:
         raise ValueError("interpolation must be either 'nearest' or 'linear'"
                          f"passed value is:{interpolation}")
-    
+
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
@@ -377,4 +368,4 @@ def normalize_features(
     # Append normalized feature to the anndata object
     adata.layers[new_layer_name] = dataframe
 
-    return quantiles 
+    return quantiles
