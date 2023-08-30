@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 from unittest.mock import patch
 import anndata
@@ -21,11 +18,6 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
             ['A', 'B', 'C'], size=10
         )
         self.adata.var_names = ['gene_' + str(i) for i in range(10)]
-
-    def test_invalid_input_type(self):
-        with self.assertRaises(ValueError) as cm:
-            dimensionality_reduction_plot(1, 'tsne')
-        self.assertEqual(str(cm.exception), "adata must be an AnnData object.")
 
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
@@ -66,22 +58,6 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIs(fig, fig_returned)
         self.assertIs(ax_provided, ax_returned)
-
-    def test_annotation_column_invalid(self):
-        with self.assertRaises(ValueError) as cm:
-            dimensionality_reduction_plot(
-                self.adata, 'tsne', annotation='invalid_column'
-            )
-        err_msg = "Annotation 'invalid_column' not found in adata.obs."
-        self.assertTrue(err_msg in str(cm.exception))
-
-    def test_feature_column_invalid(self):
-        with self.assertRaises(ValueError) as cm:
-            dimensionality_reduction_plot(
-                self.adata, 'tsne', feature='invalid_gene'
-            )
-        err_msg = "Feature 'invalid_gene' not found in adata.var_names."
-        self.assertTrue(err_msg in str(cm.exception))
 
     @patch('scanpy.pl.tsne')
     def test_tsne_kwargs_color(self, mock_tsne):

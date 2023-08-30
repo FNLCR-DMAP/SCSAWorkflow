@@ -7,6 +7,7 @@ import scanpy as sc
 import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from spac.utils import check_table, check_annotation, check_feature
 
 
 def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
@@ -45,37 +46,31 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         The axes of the plot.
     """
 
-    if not isinstance(adata, anndata.AnnData):
-        raise ValueError("adata must be an AnnData object.")
+    # Determine coloring scheme first to raise the expected error
+    if annotation and feature:
+        raise ValueError("Please specify either an annotation or a feature "
+                         "for coloring, not both.")
+
+    # Use utility functions for input validation
+    check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=[feature])
+
     # Check method validity
     if method not in ['tsne', 'umap']:
         raise ValueError("Method should be one of {'tsne', 'umap'}.")
 
-    # Determine coloring scheme
-    if annotation and feature:
-        err_msg = ("Please specify either an annotation or a feature"
-                   " for coloring, not both.")
-        raise ValueError(err_msg)
-
-    elif annotation:
-        if annotation not in adata.obs:
-            err_msg = f"Annotation '{annotation}' not found in adata.obs."
-            raise ValueError(err_msg)
+    # Assign color value based on annotation or feature
+    color = None
+    if annotation:
         color = annotation
-
     elif feature:
-        if feature not in adata.var_names:
-            err_msg = f"Feature '{feature}' not found in adata.var_names."
-            raise ValueError(err_msg)
         color = feature
-    else:
-        color = None
 
     # If a layer is provided, use it for visualization
     if layer:
-        if layer not in adata.layers:
-            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
-        # Use the specified layer's data for visualization.
         adata.X = adata.layers[layer]
 
     # Add color column to the kwargs for the scanpy plot`
