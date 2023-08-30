@@ -105,13 +105,13 @@ def tsne(adata, layer=None, **kwargs):
 
 def UMAP(
         adata,
-        n_neighbors: int = 15,
-        n_pcs: int = 30,
-        min_dist: float = 0.1,
-        spread: float = 1.0,
-        n_components: int = 2,
-        random_state: int = 42,
-        layer: str = None):
+        n_neighbors=15,
+        n_pcs=30,
+        min_dist=0.1,
+        spread=1.0,
+        n_components=2,
+        random_state=42,
+        layer=None):
     """
     Perform UMAP analysis on specific layer information.
 
@@ -140,9 +140,8 @@ def UMAP(
         Updated AnnData object with UMAP coordinates.
     """
 
-    # Check if adata is of type AnnData
-    if not isinstance(adata, anndata.AnnData):
-        raise ValueError("adata must be an AnnData object.")
+    # Use utility function to check if the layer exists in adata.layers
+    check_table(adata, tables=layer)
 
     if layer is not None:
         if layer not in adata.layers:

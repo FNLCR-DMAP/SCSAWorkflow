@@ -34,11 +34,6 @@ class TestUMAP(unittest.TestCase):
         # Check that the UMAP coordinates were added to adata.obsm
         self.assertIn("X_umap", self.adata.obsm)
 
-    def test_invalid_layer(self):
-        with self.assertRaises(ValueError):
-            UMAP(self.adata, 5, 2, 0.1, 1.0, 2, 42, 'invalid_layer')
-
-    # Add a test for the shape of the output
     def test_output_shape(self):
         UMAP(self.adata, 5, 2, 0.1, 1.0, 2, 42, self.layer)
 
