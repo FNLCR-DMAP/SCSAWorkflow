@@ -8,10 +8,14 @@ from spac.utils import check_table, check_feature
 
 def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     """
-    Calculate automatic phenotypes using phenograph
-    and annotate the adata object.
-    The expectation is that the adata object will have a new annotation
-    called 'phenograph'. This will happen in place of the adata object.
+    Calculate automatic phenotypes using phenograph.
+
+    The function will add these two attributes to `adata`:
+    `.obs["phenograph"]`
+        The assigned int64 class by phenograph
+
+    `.uns["phenograph_features"]`
+        The features used to calculate the phenograph clusters
 
     Parameters
     ----------
@@ -49,7 +53,8 @@ def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
 
     phenograph_out = sce.tl.phenograph(phenograph_df,
                                        clustering_algo="leiden",
-                                       k=k)
+                                       k=k,
+                                       seed=seed)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features

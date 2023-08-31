@@ -1,17 +1,8 @@
 import unittest
-from unittest.mock import patch
 import numpy as np
 import pandas as pd
 from anndata import AnnData
 from spac.transformations import phenograph_clustering
-
-
-# Customized mock function
-def mock_phenograph(*args, **kwargs):
-    seed = kwargs.get('seed', None)
-    if seed is not None:
-        np.random.seed(seed)
-    return (np.random.randint(0, 3, 100), {})
 
 
 class TestPhenographClustering(unittest.TestCase):
@@ -49,8 +40,7 @@ class TestPhenographClustering(unittest.TestCase):
                 )
         self.syn_data.layers['counts'] = self.syn_dataset
 
-    @patch('scanpy.external.tl.phenograph', side_effect=mock_phenograph)
-    def test_same_cluster_assignments_with_same_seed(self, mock_phenograph):
+    def test_same_cluster_assignments_with_same_seed(self):
         # Run phenograph_clustering with a specific seed
         # and store the cluster assignments
         phenograph_clustering(self.adata, self.features, self.layer, seed=42)
@@ -65,9 +55,7 @@ class TestPhenographClustering(unittest.TestCase):
             (first_run_clusters == self.adata.obs['phenograph']).all()
         )
 
-    @patch('scanpy.external.tl.phenograph', side_effect=mock_phenograph)
-    def test_different_cluster_assignments_with_different_seeds(
-            self, mock_phenograph):
+    def test_different_cluster_assignments_with_different_seeds(self):
         # Run phenograph_clustering with a specific seed
         # and store the cluster assignments
         phenograph_clustering(self.adata, self.features, self.layer, seed=42)
