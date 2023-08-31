@@ -103,6 +103,72 @@ def tsne(adata, layer=None, **kwargs):
     return adata
 
 
+def UMAP(
+        adata,
+        n_neighbors=15,
+        n_pcs=30,
+        min_dist=0.1,
+        spread=1.0,
+        n_components=2,
+        random_state=42,
+        layer=None):
+    """
+    Perform UMAP analysis on specific layer information.
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix.
+    n_neighbors : int, default=15
+        Number of neighbors for neighborhood graph.
+    n_pcs : int, default=30
+        Number of principal components.
+    min_dist : float, default=0.1
+        Minimum distance between points in UMAP.
+    spread : float, default=1.0
+        Spread of UMAP embedding.
+    n_components : int, default=2
+        Number of components in UMAP embedding.
+    random_state : int, default=42
+        Seed for random number generation.
+    layer : str, optional
+        Layer of the AnnData object to perform UMAP on.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with UMAP coordinates.
+    """
+
+    # Use utility function to check if the layer exists in adata.layers
+    check_table(adata, tables=layer)
+
+    if layer is not None:
+        use_rep = layer + "_umap"
+        X_umap = adata.layers[layer]
+        adata.obsm[use_rep] = X_umap
+    else:
+        use_rep = 'X'
+
+    sc.pp.neighbors(
+        adata,
+        n_neighbors=n_neighbors,
+        n_pcs=n_pcs,
+        use_rep=use_rep,
+        random_state=random_state
+    )
+
+    sc.tl.umap(
+        adata,
+        min_dist=min_dist,
+        spread=spread,
+        n_components=n_components,
+        random_state=random_state
+    )
+
+    return adata
+
+
 def batch_normalize(adata, annotation, layer, method="median", log=False):
     """
     Adjust the features of every marker using a normalization method.
@@ -176,7 +242,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
 def rename_labels(adata, src_annotation, dest_annotation, mappings):
     """
-    Rename labels in a given annotation in an AnnData object based on a 
+    Rename labels in a given annotation in an AnnData object based on a
     provided dictionary. This function creates a new annotation column.
 
     Parameters
@@ -298,8 +364,8 @@ def normalize_features(
         Must be a positive float between (0,1].
 
     interpolation : str, optional (default: "nearest")
-        The interpolation method to use when selecting the value for 
-        low and high quantile. Values can be "nearest" or "linear" 
+        The interpolation method to use when selecting the value for
+        low and high quantile. Values can be "nearest" or "linear"
 
     input_layer : str, optional (default: None)
         The name of the layer in the AnnData object to be normalized.
@@ -352,7 +418,7 @@ def normalize_features(
     if interpolation not in ["nearest", "linear"]:
         raise ValueError("interpolation must be either 'nearest' or 'linear'"
                          f"passed value is:{interpolation}")
-    
+
     dataframe = adata.to_df(layer=input_layer)
 
     # Calculate low and high quantiles
@@ -377,4 +443,4 @@ def normalize_features(
     # Append normalized feature to the anndata object
     adata.layers[new_layer_name] = dataframe
 
-    return quantiles 
+    return quantiles
