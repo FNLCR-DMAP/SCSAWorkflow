@@ -58,7 +58,8 @@ def boxplot(adata, annotation=None, second_annotation=None,
 
     # Use utility functions to check inputs
     check_table(adata, tables=layer)
-    check_annotation(adata, annotations=annotation)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
     if second_annotation:
         check_annotation(adata, annotations=second_annotation)
     check_feature(adata, features=features)
