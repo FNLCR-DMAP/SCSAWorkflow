@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import patch
 import anndata
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
 from spac.visualization import dimensionality_reduction_plot
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
@@ -19,10 +18,24 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.adata.var_names = ['gene_' + str(i) for i in range(10)]
 
-    def test_invalid_method(self):
+    def test_missing_umap_coordinates(self):
+        del self.adata.obsm['X_umap']
         with self.assertRaises(ValueError) as cm:
-            dimensionality_reduction_plot(self.adata, 'invalid_method')
-        expected_msg = "Method should be one of {'tsne', 'umap'}."
+            dimensionality_reduction_plot(self.adata, 'umap')
+        expected_msg = (
+            "X_umap coordinates not found in adata.obsm."
+            "Please run UMAP before calling this function."
+        )
+        self.assertEqual(str(cm.exception), expected_msg)
+
+    def test_missing_tsne_coordinates(self):
+        del self.adata.obsm['X_tsne']
+        with self.assertRaises(ValueError) as cm:
+            dimensionality_reduction_plot(self.adata, 'tsne')
+        expected_msg = (
+            "X_tsne coordinates not found in adata.obsm."
+            "Please run TSNE before calling this function."
+        )
         self.assertEqual(str(cm.exception), expected_msg)
 
     def test_annotation_and_feature(self):
@@ -32,9 +45,10 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
                 annotation='annotation_column',
                 feature='feature_column'
             )
-
-        expected_msg = ("Please specify either an annotation or a feature "
-                        "for coloring, not both.")
+        expected_msg = (
+            "Please specify either an annotation or a feature for coloring, "
+            "not both."
+        )
         self.assertEqual(str(cm.exception), expected_msg)
 
     def test_annotation_column(self):
@@ -59,21 +73,25 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIs(fig, fig_returned)
         self.assertIs(ax_provided, ax_returned)
 
-    @patch('scanpy.pl.tsne')
-    def test_tsne_kwargs_color(self, mock_tsne):
-        dimensionality_reduction_plot(
+    def test_real_tsne_plot(self):
+        fig, ax = dimensionality_reduction_plot(
             self.adata, 'tsne', annotation='annotation_column'
         )
-        mock_tsne.assert_called_once()
-        args, kwargs = mock_tsne.call_args
-        self.assertEqual(kwargs['color'], 'annotation_column')
+        self.assertIsInstance(fig, plt.Figure)
+        self.assertIsInstance(ax, plt.Axes)
 
-    @patch('scanpy.pl.umap')
-    def test_umap_kwargs_color(self, mock_umap):
-        dimensionality_reduction_plot(self.adata, 'umap', feature='gene_1')
-        mock_umap.assert_called_once()
-        args, kwargs = mock_umap.call_args
-        self.assertEqual(kwargs['color'], 'gene_1')
+    def test_real_umap_plot(self):
+        fig, ax = dimensionality_reduction_plot(
+            self.adata, 'umap', feature='gene_1'
+        )
+        self.assertIsInstance(fig, plt.Figure)
+        self.assertIsInstance(ax, plt.Axes)
+
+    def test_invalid_method(self):
+        with self.assertRaises(ValueError) as cm:
+            dimensionality_reduction_plot(self.adata, 'invalid_method')
+        expected_msg = "Method should be one of {'tsne', 'umap'}."
+        self.assertEqual(str(cm.exception), expected_msg)
 
 
 if __name__ == '__main__':
