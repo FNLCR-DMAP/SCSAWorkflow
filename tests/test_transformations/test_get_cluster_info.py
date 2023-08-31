@@ -35,6 +35,40 @@ class TestGetClusterInfo(unittest.TestCase):
         self.assertIn("mean_Gene2", result.columns)
         self.assertNotIn("mean_Gene3", result.columns)
 
+    def test_default_features_with_known_values(self):
+        # Create a mock AnnData object with specific known values
+        X_data = np.array([
+            [1, 2],
+            [2, 1],
+            [1, 2],
+            [3, 4],
+            [4, 3]
+        ])  # 5 cells, 2 features
+        cluster_choices = [
+            "Cluster1", "Cluster1", "Cluster2", "Cluster2", "Cluster2"
+        ]
+        obs_data = {
+            "phenograph": cluster_choices,
+        }
+        var_data = pd.DataFrame(index=[f"Gene{i}" for i in range(1, 3)])
+        obs_df = pd.DataFrame(obs_data)
+        adata = AnnData(X=X_data, obs=obs_df, var=var_data)
+
+        # Call the function
+        result = get_cluster_info(
+            adata,
+            annotation="phenograph",
+            features=["Gene1", "Gene2"]
+        )
+
+        # Manually calculate expected output
+        # For example, for Cluster1, mean of Gene1 should be (1+2)/2 = 1.5
+        # Make assertions based on the expected output
+        cluster_filter = result['Cluster'] == 'Cluster1'
+        mean_gene1_value = result.loc[cluster_filter, 'mean_Gene1'].iloc[0]
+
+        self.assertAlmostEqual(mean_gene1_value, 1.5, places=4)
+
 
 if __name__ == "__main__":
     unittest.main()
