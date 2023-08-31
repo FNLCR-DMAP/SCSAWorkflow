@@ -150,6 +150,7 @@ def UMAP(
     else:
         use_rep = 'X'
 
+    # Compute the neighborhood graph
     sc.pp.neighbors(
         adata,
         n_neighbors=n_neighbors,
@@ -158,6 +159,7 @@ def UMAP(
         random_state=random_state
     )
 
+    # Embed the neighborhood graph using UMAP
     sc.tl.umap(
         adata,
         min_dist=min_dist,

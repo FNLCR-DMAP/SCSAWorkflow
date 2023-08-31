@@ -7,6 +7,86 @@ import scanpy as sc
 import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from spac.utils import check_table, check_annotation, check_feature
+
+
+def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
+                                  layer=None, ax=None, **kwargs):
+    """
+    Visualize scatter plot in t-SNE or UMAP basis.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
+        function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
+    method : str
+        Dimensionality reduction method to visualize.
+        Choose from {'tsne', 'umap'}.
+    annotation : str, optional
+        The name of the column in `adata.obs` to use for coloring
+        the scatter plot points based on cell annotations.
+    feature : str, optional
+        The name of the gene or feature in `adata.var_names` to use
+        for coloring the scatter plot points based on feature expression.
+    layer : str, optional
+        The name of the data layer in `adata.layers` to use for visualization.
+        If None, the main data matrix `adata.X` is used.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    **kwargs
+        Parameters passed to scanpy.pl.tsne or scanpy.pl.umap function.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    # Determine coloring scheme first to raise the expected error
+    if annotation and feature:
+        raise ValueError("Please specify either an annotation or a feature "
+                         "for coloring, not both.")
+
+    # Use utility functions for input validation
+    check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=[feature])
+
+    # Check method validity
+    if method not in ['tsne', 'umap']:
+        raise ValueError("Method should be one of {'tsne', 'umap'}.")
+
+    # Assign color value based on annotation or feature
+    color = None
+    if annotation:
+        color = annotation
+    elif feature:
+        color = feature
+
+    # If a layer is provided, use it for visualization
+    if layer:
+        adata.X = adata.layers[layer]
+
+    # Add color column to the kwargs for the scanpy plot`
+    kwargs['color'] = color
+
+    # Plot the chosen method
+    if method == 'tsne':
+        sc.pl.tsne(adata, ax=ax, **kwargs)
+    else:
+        sc.pl.umap(adata, ax=ax, **kwargs)
+
+    fig = plt.gcf()  # Get the current figure
+    if ax is None:  # If no ax was provided, get the current ax
+        ax = plt.gca()
+
+    return fig, ax
 
 
 def tsne_plot(adata, color_column=None, ax=None, **kwargs):
