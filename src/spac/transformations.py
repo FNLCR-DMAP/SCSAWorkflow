@@ -3,7 +3,7 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import scanpy.external as sce
-from spac.utils import check_table
+from spac.utils import check_table, check_annotation, check_feature
 
 
 def phenograph_clustering(adata, features, layer=None, k=30):
@@ -62,6 +62,70 @@ def phenograph_clustering(adata, features, layer=None, k=30):
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
+
+
+def get_cluster_info(adata, annotation="phenograph", features=None):
+    """
+    Retrieve information about clusters based on specific annotation.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+    annotation : str, optional
+        Annotation/column in adata.obs for cluster info.
+    features : list of str, optional
+        Features (e.g., genes) for cluster metrics.
+        Defaults to all features in adata.var_names.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with metrics for each cluster.
+    """
+
+    # Use utility functions for input validation
+    check_annotation(adata, annotations=annotation)
+
+    if features is None:
+        features = list(adata.var_names)
+    else:
+        check_feature(adata, features=features)
+
+    # Count cells in each cluster
+    cluster_counts = adata.obs[annotation].value_counts().reset_index()
+    cluster_counts.columns = ["Cluster", "Number of Cells"]
+
+    # Initialize DataFrame for cluster metrics
+    cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
+
+    # Convert adata.X to DataFrame
+    adata_df = pd.DataFrame(adata.X, columns=adata.var_names)
+
+    # Add cluster annotation
+    adata_df[annotation] = adata.obs[annotation].values
+
+    # Calculate statistics for each feature in each cluster
+    for feature in features:
+        grouped = adata_df.groupby(annotation)[feature].agg(
+            ["mean", "std", "median",
+             lambda x: x.quantile(0),
+             lambda x: x.quantile(0.995)
+             ]).reset_index()
+        grouped.columns = [
+            f"{col}_{feature}" if col != annotation else "Cluster"
+            for col in grouped.columns
+        ]
+        cluster_metrics = cluster_metrics.merge(
+            grouped, on="Cluster", how="left"
+            )
+
+    # Merge cluster counts
+    cluster_metrics = pd.merge(
+        cluster_metrics, cluster_counts, on="Cluster", how="left"
+    )
+
+    return cluster_metrics
 
 
 def tsne(adata, layer=None, **kwargs):
