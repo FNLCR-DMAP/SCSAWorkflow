@@ -55,6 +55,11 @@ def ingest_cells(dataframe,
         all_columns
     )
 
+    if len(all_features) == 0:
+        error_message = "Provided regex patern(s) or feature(s) does " + \
+            "not match any in the dataset, please review the input."
+        raise ValueError(error_message)
+
     features_df = dataframe[all_features]
     adata = ad.AnnData(
         features_df,
