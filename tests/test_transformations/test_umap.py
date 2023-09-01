@@ -38,9 +38,24 @@ class TestUMAP(unittest.TestCase):
         UMAP(self.adata, 5, 2, 0.1, 1.0, 2, 42, self.layer)
 
         # Check that the shape of the UMAP coordinates
-        # matches the number of observations
+        # matches the number of observations and dimensions
         umap_shape = self.adata.obsm[self.layer + "_umap"].shape[0]
         self.assertEqual(umap_shape, self.adata.n_obs)
+
+    def test_type_consistency(self):
+        UMAP(self.adata, 5, 2, 0.1, 1.0, 2, 42, self.layer)
+
+        # Check data type of UMAP coordinates
+        umap_dtype = self.adata.obsm[self.layer + "_umap"].dtype
+        is_floating = np.issubdtype(umap_dtype, np.floating)
+
+        self.assertTrue(is_floating)
+
+    def test_different_parameters(self):
+        try:
+            UMAP(self.adata, 3, 1, 0.2, 0.5, 3, 0, self.layer)
+        except Exception as e:
+            self.fail(f"UMAP raised exception with different parameters: {e}")
 
 
 if __name__ == '__main__':

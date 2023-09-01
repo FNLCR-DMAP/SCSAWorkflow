@@ -208,13 +208,11 @@ def UMAP(
     check_table(adata, tables=layer)
 
     if layer is not None:
-        if layer not in adata.layers:
-            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
         use_rep = layer + "_umap"
         X_umap = adata.layers[layer]
         adata.obsm[use_rep] = X_umap
     else:
-        use_rep = "X"
+        use_rep = 'X'
 
     # Compute the neighborhood graph
     sc.pp.neighbors(
