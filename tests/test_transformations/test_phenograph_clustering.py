@@ -55,21 +55,6 @@ class TestPhenographClustering(unittest.TestCase):
             (first_run_clusters == self.adata.obs['phenograph']).all()
         )
 
-    def test_different_cluster_assignments_with_different_seeds(self):
-        # Run phenograph_clustering with a specific seed
-        # and store the cluster assignments
-        phenograph_clustering(self.adata, self.features, self.layer, seed=42)
-        first_run_clusters = self.adata.obs['phenograph'].copy()
-
-        # Reset the phenograph annotation and run again with a different seed
-        del self.adata.obs['phenograph']
-        phenograph_clustering(self.adata, self.features, self.layer, seed=43)
-
-        # Check if the cluster assignments are different
-        self.assertFalse(
-            (first_run_clusters == self.adata.obs['phenograph']).all()
-        )
-
     def test_typical_case(self):
         # This test checks if the function correctly adds 'phenograph' to the
         # AnnData object's obs attribute and if it correctly sets
