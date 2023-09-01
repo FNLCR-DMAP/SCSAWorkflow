@@ -70,9 +70,7 @@ class TestPhenographClustering(unittest.TestCase):
             (first_run_clusters == self.adata.obs['phenograph']).all()
         )
 
-    @patch('scanpy.external.tl.phenograph',
-           return_value=(np.random.randint(0, 3, 100), {}))
-    def test_typical_case(self, mock_phenograph):
+    def test_typical_case(self):
         # This test checks if the function correctly adds 'phenograph' to the
         # AnnData object's obs attribute and if it correctly sets
         # 'phenograph_features' in the AnnData object's uns attribute.
@@ -81,9 +79,7 @@ class TestPhenographClustering(unittest.TestCase):
         self.assertEqual(self.adata.uns['phenograph_features'],
                          self.features)
 
-    @patch('scanpy.external.tl.phenograph',
-           return_value=(np.random.randint(0, 3, 100), {}))
-    def test_layer_none_case(self, mock_phenograph):
+    def test_layer_none_case(self):
         # This test checks if the function works correctly when layer is None.
         phenograph_clustering(self.adata, self.features, None)
         self.assertIn('phenograph', self.adata.obs)
