@@ -7,6 +7,98 @@ import scanpy as sc
 import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from spac.utils import check_table, check_annotation, check_feature
+
+
+def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
+                                  layer=None, ax=None, **kwargs):
+    """
+    Visualize scatter plot in t-SNE or UMAP basis.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
+        function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
+    method : str
+        Dimensionality reduction method to visualize.
+        Choose from {'tsne', 'umap'}.
+    annotation : str, optional
+        The name of the column in `adata.obs` to use for coloring
+        the scatter plot points based on cell annotations.
+    feature : str, optional
+        The name of the gene or feature in `adata.var_names` to use
+        for coloring the scatter plot points based on feature expression.
+    layer : str, optional
+        The name of the data layer in `adata.layers` to use for visualization.
+        If None, the main data matrix `adata.X` is used.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    **kwargs
+        Parameters passed to scanpy.pl.tsne or scanpy.pl.umap function.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    # Check if both annotation and feature are specified, raise error if so
+    if annotation and feature:
+        raise ValueError(
+            "Please specify either an annotation or a feature for coloring, "
+            "not both.")
+
+    # Use utility functions for input validation
+    check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=[feature])
+
+    # Validate the method and check if the necessary data exists in adata.obsm
+    if method == 'umap':
+        key = 'X_umap'
+    elif method == 'tsne':
+        key = 'X_tsne'
+    else:
+        raise ValueError("Method should be one of {'tsne', 'umap'}.")
+
+    if key not in adata.obsm.keys():
+        error_msg = (
+            f"{key} coordinates not found in adata.obsm."
+            f"Please run {method.upper()} before calling this function."
+        )
+        raise ValueError(error_msg)
+
+    # Determine coloring scheme
+    color = None
+    if annotation:
+        color = annotation
+    elif feature:
+        color = feature
+
+    # If a layer is provided, use it for visualization
+    if layer:
+        adata.X = adata.layers[layer]
+
+    # Add color column to the kwargs for the scanpy plot
+    kwargs['color'] = color
+
+    # Plot the chosen method
+    if method == 'tsne':
+        sc.pl.tsne(adata, ax=ax, **kwargs)
+    else:
+        sc.pl.umap(adata, ax=ax, **kwargs)
+
+    fig = plt.gcf()  # Get the current figure
+    if ax is None:  # If no ax was provided, get the current ax
+        ax = plt.gca()
+
+    return fig, ax
 
 
 def tsne_plot(adata, color_column=None, ax=None, **kwargs):
@@ -602,3 +694,113 @@ def spatial_plot(
         **kwargs)
 
     return ax
+
+
+def boxplot(adata, annotation=None, second_annotation=None,
+            layer=None, ax=None, features=None, **kwargs):
+    """
+    Create a boxplot visualization of the features in the passed adata object.
+    This function offers flexibility in how the boxplots are displayed,
+    based on the arguments provided.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+
+    annotation : str, optional
+        Annotation to determine if separate plots are needed for every label.
+
+    second_annotation : str, optional
+        Second annotation to further divide the data.
+
+    layer : str, optional
+        The name of the matrix layer to use. If not provided,
+        uses the main data matrix adata.X.
+
+    ax : matplotlib.axes.Axes, optional
+        An existing Axes object to draw the plot onto, optional.
+
+    features : list, optional
+        List of feature names to be plotted.
+        If not provided, all features will be plotted.
+
+    **kwargs
+        Additional arguments to pass to seaborn.boxplot.
+
+    Returns
+    -------
+    fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
+        The created figure and axes for the plot.
+
+    Examples
+    --------
+    - Multiple features boxplot: boxplot(adata, features=['GeneA','GeneB'])
+    - Boxplot grouped by a single annotation:
+      boxplot(adata, features=['GeneA'], annotation='cell_type')
+    - Nested grouping by two annotations: boxplot(adata, features=['GeneA'],
+      annotation='cell_type', second_annotation='treatment')
+    """
+
+    # Use utility functions to check inputs
+    check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if second_annotation:
+        check_annotation(adata, annotations=second_annotation)
+    check_feature(adata, features=features)
+
+    # Validate ax instance
+    if ax and not isinstance(ax, plt.Axes):
+        raise TypeError("Input 'ax' must be a matplotlib.axes.Axes object.")
+
+    # Use the specified layer if provided
+    if layer:
+        data_matrix = adata.layers[layer]
+    else:
+        data_matrix = adata.X
+
+    # Create a DataFrame from the data matrix with features as columns
+    df = pd.DataFrame(data_matrix, columns=adata.var_names)
+
+    # Add annotations to the DataFrame if provided
+    if annotation:
+        df[annotation] = adata.obs[annotation].values
+    if second_annotation:
+        df[second_annotation] = adata.obs[second_annotation].values
+
+    # If features is None, set it to all available features
+    if features is None:
+        features = adata.var_names.tolist()
+
+    df = df[features + ([annotation] if annotation else []) +
+            ([second_annotation] if second_annotation else [])]
+
+    # Create the plot
+    if ax:
+        fig = ax.get_figure()
+    else:
+        fig, ax = plt.subplots(figsize=(10, 5))
+
+    # Plotting logic based on provided annotations
+    if annotation and second_annotation:
+        sns.boxplot(data=df, x=features[0], y=annotation,
+                    hue=second_annotation, ax=ax, **kwargs)
+        title_str = f"Nested Grouping by {annotation} and {second_annotation}"
+        ax.set_title(title_str)
+    elif annotation:
+        sns.boxplot(data=df, x=features[0], y=annotation,  ax=ax, **kwargs)
+        ax.set_title(f"Grouped by {annotation}")
+    else:
+        if len(features) > 1:
+            sns.boxplot(data=df[features], orient="h", ax=ax, **kwargs)
+            ax.set_title("Multiple Features")
+        else:
+            sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
+            ax.set_title("Single Horizontal Boxplot")
+
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+    return fig, ax

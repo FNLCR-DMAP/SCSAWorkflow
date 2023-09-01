@@ -3,7 +3,7 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import scanpy.external as sce
-from spac.utils import check_table, check_feature
+from spac.utils import check_table, check_annotation, check_feature
 
 
 def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
@@ -60,6 +60,70 @@ def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     adata.uns["phenograph_features"] = features
 
 
+def get_cluster_info(adata, annotation="phenograph", features=None):
+    """
+    Retrieve information about clusters based on specific annotation.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+    annotation : str, optional
+        Annotation/column in adata.obs for cluster info.
+    features : list of str, optional
+        Features (e.g., genes) for cluster metrics.
+        Defaults to all features in adata.var_names.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with metrics for each cluster.
+    """
+
+    # Use utility functions for input validation
+    check_annotation(adata, annotations=annotation)
+
+    if features is None:
+        features = list(adata.var_names)
+    else:
+        check_feature(adata, features=features)
+
+    # Count cells in each cluster
+    cluster_counts = adata.obs[annotation].value_counts().reset_index()
+    cluster_counts.columns = ["Cluster", "Number of Cells"]
+
+    # Initialize DataFrame for cluster metrics
+    cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
+
+    # Convert adata.X to DataFrame
+    adata_df = pd.DataFrame(adata.X, columns=adata.var_names)
+
+    # Add cluster annotation
+    adata_df[annotation] = adata.obs[annotation].values
+
+    # Calculate statistics for each feature in each cluster
+    for feature in features:
+        grouped = adata_df.groupby(annotation)[feature].agg(
+            ["mean", "std", "median",
+             lambda x: x.quantile(0),
+             lambda x: x.quantile(0.995)
+             ]).reset_index()
+        grouped.columns = [
+            f"{col}_{feature}" if col != annotation else "Cluster"
+            for col in grouped.columns
+        ]
+        cluster_metrics = cluster_metrics.merge(
+            grouped, on="Cluster", how="left"
+            )
+
+    # Merge cluster counts
+    cluster_metrics = pd.merge(
+        cluster_metrics, cluster_counts, on="Cluster", how="left"
+    )
+
+    return cluster_metrics
+
+
 def tsne(adata, layer=None, **kwargs):
     """
     Perform t-SNE transformation on specific layer information.
@@ -95,6 +159,74 @@ def tsne(adata, layer=None, **kwargs):
         tsne_obsm_name = None
 
     sc.tl.tsne(adata, use_rep=tsne_obsm_name, random_state=7)
+
+    return adata
+
+
+def UMAP(
+        adata,
+        n_neighbors=15,
+        n_pcs=30,
+        min_dist=0.1,
+        spread=1.0,
+        n_components=2,
+        random_state=42,
+        layer=None):
+    """
+    Perform UMAP analysis on specific layer information.
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix.
+    n_neighbors : int, default=15
+        Number of neighbors for neighborhood graph.
+    n_pcs : int, default=30
+        Number of principal components.
+    min_dist : float, default=0.1
+        Minimum distance between points in UMAP.
+    spread : float, default=1.0
+        Spread of UMAP embedding.
+    n_components : int, default=2
+        Number of components in UMAP embedding.
+    random_state : int, default=42
+        Seed for random number generation.
+    layer : str, optional
+        Layer of the AnnData object to perform UMAP on.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with UMAP coordinates.
+    """
+
+    # Use utility function to check if the layer exists in adata.layers
+    check_table(adata, tables=layer)
+
+    if layer is not None:
+        use_rep = layer + "_umap"
+        X_umap = adata.layers[layer]
+        adata.obsm[use_rep] = X_umap
+    else:
+        use_rep = 'X'
+
+    # Compute the neighborhood graph
+    sc.pp.neighbors(
+        adata,
+        n_neighbors=n_neighbors,
+        n_pcs=n_pcs,
+        use_rep=use_rep,
+        random_state=random_state
+    )
+
+    # Embed the neighborhood graph using UMAP
+    sc.tl.umap(
+        adata,
+        min_dist=min_dist,
+        spread=spread,
+        n_components=n_components,
+        random_state=random_state
+    )
 
     return adata
 
