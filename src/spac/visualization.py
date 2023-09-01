@@ -46,10 +46,11 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         The axes of the plot.
     """
 
-    # Determine coloring scheme first to raise the expected error
+    # Check if both annotation and feature are specified, raise error if so
     if annotation and feature:
-        raise ValueError("Please specify either an annotation or a feature "
-                         "for coloring, not both.")
+        raise ValueError(
+            "Please specify either an annotation or a feature for coloring, "
+            "not both.")
 
     # Use utility functions for input validation
     check_table(adata, tables=layer)
@@ -58,11 +59,22 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     if feature:
         check_feature(adata, features=[feature])
 
-    # Check method validity
-    if method not in ['tsne', 'umap']:
+    # Validate the method and check if the necessary data exists in adata.obsm
+    if method == 'umap':
+        key = 'X_umap'
+    elif method == 'tsne':
+        key = 'X_tsne'
+    else:
         raise ValueError("Method should be one of {'tsne', 'umap'}.")
 
-    # Assign color value based on annotation or feature
+    if key not in adata.obsm.keys():
+        error_msg = (
+            f"{key} coordinates not found in adata.obsm."
+            f"Please run {method.upper()} before calling this function."
+        )
+        raise ValueError(error_msg)
+
+    # Determine coloring scheme
     color = None
     if annotation:
         color = annotation
@@ -73,7 +85,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     if layer:
         adata.X = adata.layers[layer]
 
-    # Add color column to the kwargs for the scanpy plot`
+    # Add color column to the kwargs for the scanpy plot
     kwargs['color'] = color
 
     # Plot the chosen method
