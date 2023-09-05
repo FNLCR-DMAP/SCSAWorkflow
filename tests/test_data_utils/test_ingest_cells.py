@@ -91,11 +91,12 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         with self.assertRaises(ValueError) as context:
-            ingest_cells(df1, "^Not_There.*", annotation=batch)
+            ingest_cells(df1, ["marker1", "^Not_There.*"], annotation=batch)
 
         expected_error_message = (
-            "Provided regex patern(s) or feature(s) does not "
-            "match any in the dataset, please review the input."
+            "Provided regex pattern(s) or feature(s):\n"
+            '"^Not_There.*"\n'
+            "does not match any in the dataset, please review the input."
         )
         self.assertEqual(str(context.exception), expected_error_message)
 
