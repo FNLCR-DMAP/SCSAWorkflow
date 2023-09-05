@@ -50,10 +50,21 @@ def ingest_cells(dataframe,
         regex_list = regex_str
 
     all_columns = list(dataframe.columns)
-    all_features = regex_search_list(
-        regex_list,
-        all_columns
-    )
+    all_features = []
+
+    for column in regex_list:
+        current_features = regex_search_list(
+            [column],
+            all_columns
+        )
+
+        if len(current_features) == 0:
+            error_message = "Provided regex pattern(s) or feature(s):\n" + \
+                f'"{column}"\n' + \
+                "does not match any in the dataset, please review the input."
+            raise ValueError(error_message)
+
+        all_features.extend(current_features)
 
     features_df = dataframe[all_features]
     adata = ad.AnnData(
