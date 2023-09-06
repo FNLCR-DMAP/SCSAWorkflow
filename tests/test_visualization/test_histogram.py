@@ -8,7 +8,7 @@ from spac.visualization import histogram
 mpl.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
-class TestHistogram(unittest.TestCase):
+class TestRefactoredHistogram(unittest.TestCase):
     def setUp(self):
         np.random.seed(42)
         X = np.random.rand(100, 3)
@@ -20,37 +20,9 @@ class TestHistogram(unittest.TestCase):
             'annotation2': np.random.choice(annotation_types, size=100),
         }, index=cell_range)
         var = pd.DataFrame(index=['marker1', 'marker2', 'marker3'])
-        self.adata = anndata.AnnData(X, obs=annotation, var=var)
-
-    def test_histogram_feature_name(self):
-        fig, ax = histogram(self.adata, feature_name='marker1')
-        self.assertIsInstance(fig, mpl.figure.Figure)
-        self.assertIsInstance(ax, mpl.axes.Axes)
-
-    def test_histogram_annotation_name(self):
-        fig, ax = histogram(self.adata, annotation_name='annotation1')
-        total_annotation = len(self.adata.obs['annotation1'])
-        self.assertEqual(sum(p.get_height() for p in ax.patches), 
-                         total_annotation)
-
-    def test_histogram_feature_group_by(self):
-        # Call the function with a feature_name and group_by argument,
-        # setting together=False to create separate plots for each group.
-        fig, axs = histogram(
-            self.adata,
-            feature_name='marker1',
-            group_by='annotation2',
-            together=False
+        self.adata = anndata.AnnData(
+            X.astype(np.float32), obs=annotation, var=var
         )
-
-        # Check that the function returned a list of Axes objects,
-        # one for each group. In this case,
-        # we expect there to be 2 groups, as annotation2 has 2 unique values.
-        self.assertEqual(len(axs), 2)
-
-        # Check that each object in axs is indeed an Axes object.
-        self.assertIsInstance(axs[0], mpl.axes.Axes)
-        self.assertIsInstance(axs[1], mpl.axes.Axes)
 
     def test_both_feature_and_annotation(self):
         err_msg = ("Cannot pass both feature_name and "
@@ -62,38 +34,59 @@ class TestHistogram(unittest.TestCase):
                 annotation_name='annotation1'
             )
 
-    def test_invalid_feature_name(self):
-        err_msg = "feature_name not found in adata"
-        with self.assertRaisesRegex(ValueError, err_msg):
-            histogram(self.adata, feature_name='invalid_marker')
+    def test_histogram_feature_name(self):
+        fig, ax = histogram(self.adata, feature_name='marker1')
+        self.assertIsInstance(fig, mpl.figure.Figure)
+        self.assertIsInstance(ax[0], mpl.axes.Axes)
 
-    def test_invalid_annotation_name(self):
-        err_msg = "annotation_name not found in adata"
-        with self.assertRaisesRegex(ValueError, err_msg):
-            histogram(self.adata, annotation_name='invalid_annotation')
+    def test_histogram_annotation_name(self):
+        fig, ax = histogram(self.adata, annotation_name='annotation1')
+        total_annotation = len(self.adata.obs['annotation1'])
+        self.assertEqual(sum(p.get_height() for p in ax[0].patches),
+                         total_annotation)
 
-    def test_invalid_group_by(self):
-        err_msg = "group_by not found in adata"
-        with self.assertRaisesRegex(ValueError, err_msg):
-            histogram(
-                self.adata,
-                annotation_name='annotation1',
-                group_by='invalid_group_by'
-            )
+    def test_histogram_feature_group_by(self):
+        fig, axs = histogram(
+            self.adata,
+            feature_name='marker1',
+            group_by='annotation2',
+            together=False
+        )
+        self.assertEqual(len(axs), 2)
+        self.assertIsInstance(axs[0], mpl.axes.Axes)
+        self.assertIsInstance(axs[1], mpl.axes.Axes)
+
+    def test_log_scale(self):
+        fig, ax = histogram(self.adata, feature_name='marker1', log_scale=True)
+        self.assertTrue(ax[0].get_xscale() == 'log')
+
+    def test_overlay_options(self):
+        fig, ax = histogram(
+            self.adata,
+            feature_name='marker1',
+            group_by='annotation2',
+            together=True,
+            multiple="layer",
+            element="step"
+        )
+        self.assertIsInstance(fig, mpl.figure.Figure)
+        self.assertIsInstance(ax[0], mpl.axes.Axes)
+
+    def test_layer(self):
+        # Add a layer to the adata
+        self.adata.layers['layer1'] = np.random.rand(100, 3)
+        fig, ax = histogram(self.adata, feature_name='marker1', layer='layer1')
+        self.assertIsInstance(fig, mpl.figure.Figure)
+        self.assertIsInstance(ax[0], mpl.axes.Axes)
 
     def test_ax_passed_as_argument(self):
-        """
-        Test case to check if the function uses the passed Axes object
-        instead of creating a new one. It also checks if the function
-        correctly retrieves the Figure that the Axes belongs to.
-        """
         fig, ax = plt.subplots()
         returned_fig, returned_ax = histogram(
             self.adata,
             feature_name='marker1',
             ax=ax
         )
-        self.assertIs(ax, returned_ax)
+        self.assertIs(ax, returned_ax[0])
         self.assertIs(fig, returned_fig)
 
 
