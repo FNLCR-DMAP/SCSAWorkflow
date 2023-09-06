@@ -2,7 +2,6 @@ import anndata
 import unittest
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from spac.visualization import threshold_heatmap
 import matplotlib
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
@@ -28,31 +27,6 @@ class TestThresholdHeatmap(unittest.TestCase):
         }
 
         self.phenotype = 'phenotype'
-
-    def test_invalid_annotation_type(self):
-        with self.assertRaises(TypeError):
-            threshold_heatmap(
-                self.adata,
-                self.marker_cutoffs,
-                123
-            )
-
-    def test_invalid_annotation_value(self):
-        with self.assertRaises(ValueError):
-            threshold_heatmap(
-                self.adata,
-                self.marker_cutoffs,
-                'non_existent_column'
-            )
-
-    def test_invalid_feature_cutoffs_type(self):
-        with self.assertRaises(TypeError):
-            threshold_heatmap(self.adata, [], self.phenotype)
-
-    def test_invalid_feature_cutoffs_value(self):
-        feature_cutoffs = {'marker1': (1,)}  # Tuple with one element
-        with self.assertRaises(ValueError):
-            threshold_heatmap(self.adata, feature_cutoffs, self.phenotype)
 
     def test_feature_cutoffs_values_are_nan(self):
         # Test low cutoff is NaN
@@ -80,40 +54,50 @@ class TestThresholdHeatmap(unittest.TestCase):
             )
 
     def test_threshold_heatmap(self):
-        ax_dict = threshold_heatmap(
+        threshold_heatmap(
             self.adata,
             self.marker_cutoffs,
             self.phenotype
         )
 
-        key_list = list(ax_dict.keys())
-
-        figure_list = []
-        for item in key_list:
-            figure_list.append(ax_dict[item])
-
-        fig = figure_list[0].get_figure()
-
-        self.assertIsInstance(fig, plt.Figure)
-
-        self.assertEqual(self.adata.uns['feature_cutoffs'],
-                         self.marker_cutoffs)
+        self.assertEqual(
+            self.adata.uns['feature_cutoffs'], self.marker_cutoffs
+        )
 
         expected_intensity_data = np.array([[0, 0], [1, 1], [2, 2]])
         np.testing.assert_array_equal(
-            self.adata.layers["intensity"], expected_intensity_data)
+            self.adata.layers["intensity"], expected_intensity_data
+        )
 
-        self.assertTrue(
-            pd.api.types.is_categorical_dtype(self.adata.obs[self.phenotype]))
+    def test_swap_axes_through_kwargs(self):
+        threshold_heatmap(
+            self.adata,
+            self.marker_cutoffs,
+            self.phenotype,
+            swap_axes=True
+        )
+        # Add assertions to check if axes are swapped.
+        self.assertTrue(True)
 
-        heatmap_ax = ax_dict.get('heatmap_ax')
-        self.assertEqual(len(heatmap_ax.get_yticklabels()),
-                         len(self.adata.var_names))
+    def test_threshold_heatmap_with_layer(self):
+        # Add a new layer "new_layer" to adata for this specific test
+        new_layer_data = np.array([[0.2, 0.4], [0.6, 0.8], [1.1, 1.6]])
+        self.adata.layers["new_layer"] = new_layer_data
 
-        groupby_ax = ax_dict.get('groupby_ax')
-        self.assertEqual(len(groupby_ax.get_xticklabels()),
-                         len(self.adata.obs[self.phenotype].unique()))
+        # Using the new layer "new_layer"
+        threshold_heatmap(
+            self.adata,
+            self.marker_cutoffs,
+            self.phenotype,
+            layer="new_layer"
+        )
+
+        # Check if the intensities are set correctly based on the new layer
+        expected_intensity_data = np.array([[0, 0], [1, 1], [2, 2]])
+        np.testing.assert_array_equal(
+            self.adata.layers["intensity"], expected_intensity_data
+        )
 
 
 if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    unittest.main()

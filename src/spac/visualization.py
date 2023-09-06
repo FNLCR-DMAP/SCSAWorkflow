@@ -421,7 +421,9 @@ def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
     return mean_intensity, matrixplot
 
 
-def threshold_heatmap(adata, feature_cutoffs, annotation):
+def threshold_heatmap(
+    adata, feature_cutoffs, annotation, layer=None, **kwargs
+):
     """
     Creates a heatmap for each feature, categorizing intensities into low,
     medium, and high based on provided cutoffs.
@@ -429,12 +431,19 @@ def threshold_heatmap(adata, feature_cutoffs, annotation):
     Parameters
     ----------
     adata : anndata.AnnData
-        AnnData object containing the feature intensities in .X attribute.
+        AnnData object containing the feature intensities in .X attribute
+        or specified layer.
     feature_cutoffs : dict
         Dictionary with feature names as keys and tuples with two intensity
         cutoffs as values.
-    annotation : str Column name in .obs DataFrame
-        that contains the annotation used for grouping.
+    annotation : str
+        Column name in .obs DataFrame that contains the annotation
+        used for grouping.
+    layer : str, optional
+        Layer name in adata.layers to use for intensities.
+        If None, uses .X attribute.
+    **kwargs : keyword arguments
+        Additional keyword arguments to pass to scanpy's heatmap function.
 
     Returns
     -------
@@ -444,8 +453,14 @@ def threshold_heatmap(adata, feature_cutoffs, annotation):
         Consistent Key: 'heatmap_ax'
         Potential Keys includes: 'groupby_ax', 'dendrogram_ax', and
         'gene_groups_ax'.
-
     """
+
+    # Use utility functions for input validation
+    check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature_cutoffs:
+        check_feature(adata, features=list(feature_cutoffs.keys()))
 
     # Assert annotation is a string
     if not isinstance(annotation, str):
@@ -474,12 +489,16 @@ def threshold_heatmap(adata, feature_cutoffs, annotation):
 
     adata.uns['feature_cutoffs'] = feature_cutoffs
 
-    intensity_df = pd.DataFrame(index=adata.obs_names,
-                                columns=feature_cutoffs.keys())
+    intensity_df = pd.DataFrame(
+        index=adata.obs_names, columns=feature_cutoffs.keys()
+    )
 
     for feature, cutoffs in feature_cutoffs.items():
         low_cutoff, high_cutoff = cutoffs
-        feature_values = adata[:, feature].X.flatten()
+        feature_values = (
+            adata[:, feature].layers[layer]
+            if layer else adata[:, feature].X
+        ).flatten()
         intensity_df.loc[feature_values <= low_cutoff, feature] = 0
         intensity_df.loc[(feature_values > low_cutoff) &
                          (feature_values <= high_cutoff), feature] = 1
@@ -503,8 +522,7 @@ def threshold_heatmap(adata, feature_cutoffs, annotation):
         layer='intensity',
         cmap=cmap,
         norm=norm,
-        swap_axes=True,
-        show=False
+        **kwargs
     )
 
     colorbar = plt.gcf().axes[-1]
