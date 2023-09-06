@@ -305,12 +305,12 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
 def rename_annotations(
         adata, src_annotation, dest_annotation, mappings,
-        layer=None, feature=None
+        layer=None
 ):
     """
     Rename labels in a given annotation in an AnnData object based on a
-    provided dictionary. This function modifies the adata object in-place and
-    creates a new annotation column.
+    provided dictionary. This function modifies the adata object in-place
+    and creates a new annotation column.
 
     Parameters
     ----------
@@ -327,15 +327,27 @@ def rename_annotations(
         the new labels.
     layer : str, optional
         The name of the layer in the AnnData object to check.
-    feature : str, optional
-        The name of the feature in the AnnData object to check.
+
+    Examples
+    --------
+    >>> adata = your_anndata_object
+    >>> src_annotation = "phenograph"
+    >>> mappings = {
+    ...     "0": "group_8",
+    ...     "1": "group_2",
+    ...     "2": "group_6",
+    ...     # ...
+    ...     "37": "group_5",
+    ... }
+    >>> dest_annotation = "renamed_annotations"
+    >>> adata = rename_annotations(
+    ...     adata, src_annotation, dest_annotation, mappings)
     """
 
     # Use utility functions for input validation
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
     check_annotation(adata, annotations=src_annotation)
-    if feature:
-        check_feature(adata, features=[feature])
 
     # Inform the user about the data type of the original column
     original_dtype = adata.obs[src_annotation].dtype
