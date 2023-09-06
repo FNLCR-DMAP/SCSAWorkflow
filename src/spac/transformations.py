@@ -2,6 +2,7 @@ import numpy as np
 import scanpy as sc
 import pandas as pd
 import anndata
+import warnings
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 
@@ -302,10 +303,14 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     adata.layers[layer] = new_df
 
 
-def rename_labels(adata, src_annotation, dest_annotation, mappings):
+def rename_annotations(
+        adata, src_annotation, dest_annotation, mappings,
+        layer=None
+):
     """
     Rename labels in a given annotation in an AnnData object based on a
-    provided dictionary. This function creates a new annotation column.
+    provided dictionary. This function modifies the adata object in-place
+    and creates a new annotation column.
 
     Parameters
     ----------
@@ -320,12 +325,8 @@ def rename_labels(adata, src_annotation, dest_annotation, mappings):
     mappings : dict
         A dictionary mapping the original annotation labels to
         the new labels.
-
-    Returns
-    -------
-    adata : anndata.AnnData
-        The updated Anndata object with the new column containing the
-        renamed labels.
+    layer : str, optional
+        The name of the layer in the AnnData object to check.
 
     Examples
     --------
@@ -343,53 +344,39 @@ def rename_labels(adata, src_annotation, dest_annotation, mappings):
     ...     adata, src_annotation, dest_annotation, mappings)
     """
 
-    # Check if the source annotation exists in the AnnData object
-    if src_annotation not in adata.obs.columns:
-        raise ValueError(
-            f"Source annotation '{src_annotation}' not found in the "
-            "AnnData object."
-        )
+    # Use utility functions for input validation
+    if layer:
+        check_table(adata, tables=layer)
+    check_annotation(adata, annotations=src_annotation)
 
-    # Get the unique values of the source annotation
-    unique_values = adata.obs[src_annotation].unique()
+    # Inform the user about the data type of the original column
+    original_dtype = adata.obs[src_annotation].dtype
+    print(f"The data type of the original column '{src_annotation}' is "
+          f"{original_dtype}.")
 
     # Convert the keys in mappings to the same data type as the unique values
+    unique_values = adata.obs[src_annotation].unique()
     mappings = {
-        type(unique_values[0])(key): value
-        for key, value in mappings.items()
+        type(unique_values[0])(key): value for key, value in mappings.items()
     }
 
-    # Check if all keys in mappings match the unique values in the
-    # source annotation
-    if not all(key in unique_values for key in mappings.keys()):
-        raise ValueError(
-            "All keys in the mappings dictionary should match the unique "
-            "values in the source annotation."
-        )
+    # Identify and handle unmapped labels
+    missing_mappings = [
+        key for key in unique_values if key not in mappings.keys()
+    ]
 
-    # Check if the destination annotation already exists in the AnnData object
-    if dest_annotation in adata.obs.columns:
-        raise ValueError(
-            f"Destination annotation '{dest_annotation}' already exists "
-            "in the AnnData object."
+    if missing_mappings:
+        warnings.warn(
+            f"Missing mappings for the following labels: {missing_mappings}. "
+            f"They will be set to NaN in the '{dest_annotation}' column."
         )
+        for missing in missing_mappings:
+            mappings[missing] = np.nan  # Assign NaN for missing mappings
 
-    # Create a new column in adata.obs with the updated annotation labels
+    # Create a new column based on the mappings
     adata.obs[dest_annotation] = (
-        adata.obs[src_annotation]
-        .map(mappings)
-        .astype("category")
+        adata.obs[src_annotation].map(mappings).astype("category")
     )
-
-    # Ensure that all categories are covered
-    if adata.obs[dest_annotation].isna().any():
-        raise ValueError(
-            "Not all unique values in the source annotation are "
-            "covered by the mappings. "
-            "Please ensure that the mappings cover all unique values."
-        )
-
-    return adata
 
 
 def normalize_features(
