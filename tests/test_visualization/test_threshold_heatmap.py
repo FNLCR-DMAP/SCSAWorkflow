@@ -79,6 +79,25 @@ class TestThresholdHeatmap(unittest.TestCase):
         # Add assertions to check if axes are swapped.
         self.assertTrue(True)
 
+    def test_threshold_heatmap_with_layer(self):
+        # Add a new layer "new_layer" to adata for this specific test
+        new_layer_data = np.array([[0.2, 0.4], [0.6, 0.8], [1.1, 1.6]])
+        self.adata.layers["new_layer"] = new_layer_data
+
+        # Using the new layer "new_layer"
+        threshold_heatmap(
+            self.adata,
+            self.marker_cutoffs,
+            self.phenotype,
+            layer="new_layer"
+        )
+
+        # Check if the intensities are set correctly based on the new layer
+        expected_intensity_data = np.array([[0, 0], [1, 1], [2, 2]])
+        np.testing.assert_array_equal(
+            self.adata.layers["intensity"], expected_intensity_data
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
