@@ -154,7 +154,7 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     return fig, ax
 
 
-def histogram(adata, feature_name=None, annotation_name=None, layer=None,
+def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
@@ -165,63 +165,108 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
     adata : anndata.AnnData
         The AnnData object.
 
-    feature_name : str, optional
+    feature : str, optional
         Name of continuous feature from adata.X to plot its histogram.
 
-    annotation_name : str, optional
+    annotation : str, optional
         Name of the annotation from adata.obs to plot its histogram.
+
+    layer : str, optional
+        Name of the layer in adata.layers to plot its histogram.
 
     group_by : str, default None
         Choose either to group the histogram by another column.
 
     together : bool, default False
-        If True, and if group_by !=None create one plot for all groups.
-        Otherwise, divide every histogram by the number of elements.
+        If True, and if group_by != None, create one plot combining all groups.
+        If False, create separate histograms for each group.
+        The appearance of combined histograms can be controlled using the
+        `multiple` and `element` parameters in **kwargs.
+        To control how the histograms are normalized (e.g., to divide the
+        histogram by the number of elements in every group), use the `stat`
+        parameter in **kwargs. For example, set `stat="probability"` to show
+        the relative frequencies of each group.
 
     ax : matplotlib.axes.Axes, optional
         An existing Axes object to draw the plot onto, optional.
 
     **kwargs
-        Parameters passed to seaborn histplot function.
+        Additional keyword arguments passed to seaborn histplot function.
+        Key arguments include:
+        - `multiple`: Determines how the subsets of data are displayed
+           on the same axes. Options include:
+            * "layer": Draws each subset on top of the other
+               without adjustments.
+            * "dodge": Dodges bars for each subset side by side.
+            * "stack": Stacks bars for each subset on top of each other.
+            * "fill": Adjusts bar heights to fill the axes.
+        - `element`: Determines the visual representation of the bins.
+           Options include:
+            * "bars": Displays the typical bar-style histogram (default).
+            * "step": Creates a step line plot without bars.
+            * "poly": Creates a polygon where the bottom edge represents
+               the x-axis and the top edge the histogram's bins.
+        - `log_scale`: Determines if the data should be plotted on
+           a logarithmic scale.
+        - `stat`: Determines the statistical transformation to use on the data
+           for the histogram. Options include:
+            * "count": Show the counts of observations in each bin.
+            * "frequency": Show the number of observations divided
+              by the bin width.
+            * "density": Normalize such that the total area of the histogram
+               equals 1.
+            * "probability": Normalize such that each bar's height reflects
+               the probability of observing that bin.
+        - `bins`: Specification of hist bins.
+            Can be a number (indicating the number of bins) or a list
+            (indicating bin edges). For example, `bins=10` will create 10 bins,
+            while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
+            If not provided, the binning will be determined automatically.
 
     Returns
     -------
-    ax : matplotlib.axes.Axes
-        The axes of the histogram plot.
-
     fig : matplotlib.figure.Figure
         The created figure for the plot.
 
-    """
-    # Validate inputs
-    err = "adata must be an instance of anndata.AnnData, not {type(adata)}."
-    if not isinstance(adata, anndata.AnnData):
-        raise TypeError(err)
+    axs : list[matplotlib.axes.Axes]
+        List of the axes of the histogram plots.
 
-    df = adata.to_df()
+    """
+
+    # Use utility functions for input validation
+    if layer:
+        check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=feature)
+    if group_by:
+        check_annotation(adata, annotations=group_by)
+
+    # If layer is specified, get the data from that layer
+    if layer:
+        df = pd.DataFrame(
+            adata.layers[layer], index=adata.obs.index, columns=adata.var_names
+        )
+    else:
+        df = pd.DataFrame(
+             adata.X, index=adata.obs.index, columns=adata.var_names
+        )
+
     df = pd.concat([df, adata.obs], axis=1)
 
-    if feature_name and annotation_name:
-        raise ValueError("Cannot pass both feature_name and annotation_name,"
+    if feature and annotation:
+        raise ValueError("Cannot pass both feature and annotation,"
                          " choose one.")
 
-    if feature_name:
-        if feature_name not in df.columns:
-            raise ValueError("feature_name not found in adata.")
-        x = feature_name
-
-    if annotation_name:
-        if annotation_name not in df.columns:
-            raise ValueError("annotation_name not found in adata.")
-        x = annotation_name
-
-    if group_by and group_by not in df.columns:
-        raise ValueError("group_by not found in adata.")
+    data_column = feature if feature else annotation
 
     if ax is not None:
         fig = ax.get_figure()
     else:
         fig, ax = plt.subplots()
+
+    axs = []
 
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
@@ -229,23 +274,29 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
-        if together:
-            colors = sns.color_palette("hsv", n_groups)
-            sns.histplot(data=df.dropna(), x=x, hue=group_by, multiple="stack",
-                         palette=colors, ax=ax, **kwargs)
-            return fig, ax
-        else:
-            fig, axs = plt.subplots(n_groups, 1, figsize=(5, 5*n_groups))
-            if n_groups == 1:
-                axs = [axs]
-            for i, ax_i in enumerate(axs):
-                sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
-                             x=x, ax=ax_i, **kwargs)
-                ax_i.set_title(groups[i])
-            return fig, axs
 
-    sns.histplot(data=df, x=x, ax=ax, **kwargs)
-    return fig, ax
+        if together:
+            # Set default values if not provided in kwargs
+            kwargs.setdefault("multiple", "stack")
+            kwargs.setdefault("element", "bars")
+
+            sns.histplot(data=df.dropna(), x=data_column, hue=group_by,
+                         ax=ax, **kwargs)
+            axs.append(ax)
+        else:
+            fig, ax_array = plt.subplots(
+                n_groups, 1, figsize=(5, 5 * n_groups)
+            )
+            for i, ax_i in enumerate(ax_array):
+                sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
+                             x=data_column, ax=ax_i, **kwargs)
+                ax_i.set_title(groups[i])
+                axs.append(ax_i)
+    else:
+        sns.histplot(data=df, x=data_column, ax=ax, **kwargs)
+        axs.append(ax)
+
+    return fig, axs
 
 
 def heatmap(adata, column, layer=None, **kwargs):
