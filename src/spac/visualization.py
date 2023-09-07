@@ -154,7 +154,7 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     return fig, ax
 
 
-def histogram(adata, feature_name=None, annotation_name=None, layer=None,
+def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
@@ -162,13 +162,13 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
 
     Parameters
     ----------
-    adata : anndata.AnnData or MockAnnData
-        The AnnData or MockAnnData object.
+    adata : anndata.AnnData
+        The AnnData object.
 
-    feature_name : str, optional
+    feature : str, optional
         Name of continuous feature from adata.X to plot its histogram.
 
-    annotation_name : str, optional
+    annotation : str, optional
         Name of the annotation from adata.obs to plot its histogram.
 
     layer : str, optional
@@ -178,8 +178,14 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
         Choose either to group the histogram by another column.
 
     together : bool, default False
-        If True, and if group_by != None create one plot for all groups.
-        Otherwise, divide every histogram by the number of elements.
+        If True, and if group_by != None, create one plot combining all groups.
+        If False, create separate histograms for each group.
+        The appearance of combined histograms can be controlled using the
+        `multiple` and `element` parameters in **kwargs.
+        To control how the histograms are normalized (e.g., to divide the
+        histogram by the number of elements in every group), use the `stat`
+        parameter in **kwargs. For example, set `stat="probability"` to show
+        the relative frequencies of each group.
 
     ax : matplotlib.axes.Axes, optional
         An existing Axes object to draw the plot onto, optional.
@@ -202,6 +208,20 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
                the x-axis and the top edge the histogram's bins.
         - `log_scale`: Determines if the data should be plotted on
            a logarithmic scale.
+        - `stat`: Determines the statistical transformation to use on the data
+           for the histogram. Options include:
+            * "count": Show the counts of observations in each bin.
+            * "frequency": Show the number of observations divided
+              by the bin width.
+            * "density": Normalize such that the total area of the histogram
+               equals 1.
+            * "probability": Normalize such that each bar's height reflects
+               the probability of observing that bin.
+        - `bins`: Specification of hist bins.
+            Can be a number (indicating the number of bins) or a list
+            (indicating bin edges). For example, `bins=10` will create 10 bins,
+            while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
+            If not provided, the binning will be determined automatically.
 
     Returns
     -------
@@ -216,10 +236,10 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
     # Use utility functions for input validation
     if layer:
         check_table(adata, tables=layer)
-    if annotation_name:
-        check_annotation(adata, annotations=annotation_name)
-    if feature_name:
-        check_feature(adata, features=feature_name)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=feature)
     if group_by:
         check_annotation(adata, annotations=group_by)
 
@@ -235,11 +255,11 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
 
     df = pd.concat([df, adata.obs], axis=1)
 
-    if feature_name and annotation_name:
-        raise ValueError("Cannot pass both feature_name and annotation_name,"
+    if feature and annotation:
+        raise ValueError("Cannot pass both feature and annotation,"
                          " choose one.")
 
-    x = feature_name if feature_name else annotation_name
+    data_column = feature if feature else annotation
 
     if ax is not None:
         fig = ax.get_figure()
@@ -260,7 +280,8 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
-            sns.histplot(data=df.dropna(), x=x, hue=group_by, ax=ax, **kwargs)
+            sns.histplot(data=df.dropna(), x=data_column, hue=group_by,
+                         ax=ax, **kwargs)
             axs.append(ax)
         else:
             fig, ax_array = plt.subplots(
@@ -268,11 +289,11 @@ def histogram(adata, feature_name=None, annotation_name=None, layer=None,
             )
             for i, ax_i in enumerate(ax_array):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
-                             x=x, ax=ax_i, **kwargs)
+                             x=data_column, ax=ax_i, **kwargs)
                 ax_i.set_title(groups[i])
                 axs.append(ax_i)
     else:
-        sns.histplot(data=df, x=x, ax=ax, **kwargs)
+        sns.histplot(data=df, x=data_column, ax=ax, **kwargs)
         axs.append(ax)
 
     return fig, axs
