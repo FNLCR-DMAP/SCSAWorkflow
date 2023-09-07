@@ -157,8 +157,12 @@ class TestHistogram(unittest.TestCase):
             feature='marker1',
             ax=ax
         )
-        self.assertIs(ax, returned_ax[0])
+        # Check that the passed ax is the one that is returned
+        self.assertEqual(id(returned_ax[0]), id(ax))
+
+        # Check that the passed fig is the one that is returned
         self.assertIs(fig, returned_fig)
+
         # Check the number of axes returned
         self.assertEqual(len(returned_ax), 1)
 
