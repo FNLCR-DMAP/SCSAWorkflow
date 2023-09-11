@@ -765,8 +765,8 @@ def spatial_plot(
     return ax
 
 
-def boxplot(adata, annotation=None, second_annotation=None,
-            layer=None, ax=None, features=None, **kwargs):
+def boxplot(adata, annotation=None, second_annotation=None, layer=None,
+            ax=None, features=None, log_scale=False, **kwargs):
     """
     Create a boxplot visualization of the features in the passed adata object.
     This function offers flexibility in how the boxplots are displayed,
@@ -794,9 +794,17 @@ def boxplot(adata, annotation=None, second_annotation=None,
         List of feature names to be plotted.
         If not provided, all features will be plotted.
 
+    log_scale : bool, optional
+        If True, the Y-axis will be in log scale. Default is False.
+
     **kwargs
         Additional arguments to pass to seaborn.boxplot.
-
+        Key arguments include:
+        - `orient`: Determines the orientation of the plot.
+        * "v": Vertical orientation (default). In this case, categorical data
+           will be plotted on the x-axis, and the boxplots will be vertical.
+        * "h": Horizontal orientation. Categorical data will be plotted on the
+           y-axis, and the boxplots will be horizontal.
     Returns
     -------
     fig, ax : matplotlib.figure.Figure, matplotlib.axes.Axes
@@ -807,17 +815,29 @@ def boxplot(adata, annotation=None, second_annotation=None,
     - Multiple features boxplot: boxplot(adata, features=['GeneA','GeneB'])
     - Boxplot grouped by a single annotation:
       boxplot(adata, features=['GeneA'], annotation='cell_type')
+    - Boxplot for multiple features grouped by a single annotation:
+      boxplot(adata, features=['GeneA', 'GeneB'], annotation='cell_type')
     - Nested grouping by two annotations: boxplot(adata, features=['GeneA'],
       annotation='cell_type', second_annotation='treatment')
     """
 
     # Use utility functions to check inputs
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
     if annotation:
         check_annotation(adata, annotations=annotation)
     if second_annotation:
         check_annotation(adata, annotations=second_annotation)
-    check_feature(adata, features=features)
+    if features:
+        check_feature(adata, features=features)
+
+    if 'orient' not in kwargs:
+        kwargs['orient'] = 'v'
+
+    if kwargs['orient'] != 'v':
+        v_orient = False
+    else:
+        v_orient = True
 
     # Validate ax instance
     if ax and not isinstance(ax, plt.Axes):
@@ -842,8 +862,11 @@ def boxplot(adata, annotation=None, second_annotation=None,
     if features is None:
         features = adata.var_names.tolist()
 
-    df = df[features + ([annotation] if annotation else []) +
-            ([second_annotation] if second_annotation else [])]
+    df = df[
+        features +
+        ([annotation] if annotation else []) +
+        ([second_annotation] if second_annotation else [])
+    ]
 
     # Create the plot
     if ax:
@@ -853,20 +876,55 @@ def boxplot(adata, annotation=None, second_annotation=None,
 
     # Plotting logic based on provided annotations
     if annotation and second_annotation:
-        sns.boxplot(data=df, x=features[0], y=annotation,
-                    hue=second_annotation, ax=ax, **kwargs)
+        if v_orient:
+            sns.boxplot(data=df, y=features[0], x=annotation,
+                        hue=second_annotation, ax=ax, **kwargs)
+
+        else:
+            sns.boxplot(data=df, y=annotation, x=features[0],
+                        hue=second_annotation, ax=ax, **kwargs)
+
         title_str = f"Nested Grouping by {annotation} and {second_annotation}"
+
         ax.set_title(title_str)
+
     elif annotation:
-        sns.boxplot(data=df, x=features[0], y=annotation,  ax=ax, **kwargs)
-        ax.set_title(f"Grouped by {annotation}")
+        if len(features) > 1:
+            # Reshape the dataframe to long format for visualization
+            melted_data = df.melt(id_vars=annotation)
+            if v_orient:
+                sns.boxplot(data=melted_data, x="variable", y="value",
+                            hue=annotation,  ax=ax, **kwargs)
+            else:
+                sns.boxplot(data=melted_data, x="value", y="variable",
+                            hue=annotation,  ax=ax, **kwargs)
+            ax.set_title(f"Multiple Features Grouped by {annotation}")
+        else:
+            if v_orient:
+                sns.boxplot(data=df, y=features[0], x=annotation,
+                            ax=ax, **kwargs)
+            else:
+                sns.boxplot(data=df, x=features[0], y=annotation,
+                            ax=ax, **kwargs)
+            ax.set_title(f"Grouped by {annotation}")
+
     else:
         if len(features) > 1:
-            sns.boxplot(data=df[features], orient="h", ax=ax, **kwargs)
+            sns.boxplot(data=df[features], ax=ax, **kwargs)
             ax.set_title("Multiple Features")
         else:
-            sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
-            ax.set_title("Single Horizontal Boxplot")
+            if v_orient:
+                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
+            else:
+                sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
+            ax.set_title("Single Boxplot")
+
+    # Check if all data points are positive and non-zero
+    all_positive = (df[features] > 0).all().all()
+
+    # If log_scale is True and all data points are positive and non-zero
+    if log_scale and all_positive:
+        plt.yscale('log')
 
     plt.xticks(rotation=90)
     plt.tight_layout()
