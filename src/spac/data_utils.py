@@ -327,7 +327,7 @@ def load_csv_files(file_names):
     return dataframe_list
 
 
-def combine_dfs(dataframes, annotations):
+def combine_dfs_depracated(dataframes, annotations):
 
     """
     Combine a list of pandas dataframe into single pandas dataframe.
@@ -694,3 +694,51 @@ def bin2cat(data, one_hot_annotations, new_annotation):
             error_string = "No column was found in the dataframe " + \
                 "with current regrex pattern(s)."
             raise ValueError(error_string)
+
+
+def combine_dfs(dataframes: list):
+    """
+    Combined multiple pandas dataframes into one.
+    Schema of the first dataframe is considered primary.
+    A warming will be printed if schema of current dataframe
+    is different than the primary.
+
+    Parameters:
+    -----------
+    dataframes : list[pd.DataFrame]
+        A list of pandas dataframe to be combined
+
+    Return:
+    ----------
+    A pd.DataFrame of combined dataframs.
+    """
+    # Check if input is list
+    if not isinstance(dataframes, list):
+        raise ValueError("Input is not a list, please check.")
+
+    # Check if the input list is empty
+    if not dataframes:
+        raise ValueError("Input list is empty, please check.")
+
+    # Initialize the combined dataframe with the first dataframe
+    combined_df = dataframes[0]
+
+    # Loop through the remaining dataframes and combine them
+    for i, df in enumerate(dataframes[1:], start=2):
+        if not combined_df.columns.equals(df.columns):
+            warning_message = f"Schema of DataFrame {i} " + \
+                "is different from the primary DataFrame."
+            warnings.warn(warning_message, UserWarning)
+
+        # Add missing columns to the combined dataframe and fill with NaN
+        for col in df.columns:
+            if col not in combined_df.columns:
+                combined_df[col] = np.nan
+
+        # Concatenate the dataframes vertically
+        combined_df = pd.concat([combined_df, df], ignore_index=True)
+
+    # Reset the index of the combined dataframe
+    combined_df.reset_index(drop=True, inplace=True)
+
+    return combined_df
