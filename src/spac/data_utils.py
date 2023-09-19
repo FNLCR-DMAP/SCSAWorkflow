@@ -461,7 +461,6 @@ def select_values(data, annotation, values=None):
             raise ValueError(
                 f"Column {annotation} does not exist in the dataframe"
             )
-
         # If values exist in annotation, filter data
         if values is not None:
             filtered_data = data[data[annotation].isin(values)]
@@ -472,18 +471,18 @@ def select_values(data, annotation, values=None):
     return data
 
 
-def downsample_cells(data, annotation, n_samples=None,
+def downsample_cells(input_data, annotations, n_samples=None,
                      stratify=False, rand=False):
     """
-    Reduces the number of rows in the data by either selecting n_samples from
-    every possible value of annotation(s), or returning n_samples
+    Reduces the number of rows in the input_data by either selecting n_samples
+    from  every possible value of annotations, or returning n_samples
     stratified by the frequency of values in annotations.
 
     Parameters
     ----------
-    data : pd.DataFrame
+    input_data : pd.DataFrame
         The input data frame.
-    annotation : str or list of str
+    annotations : str or list of str
         The column name(s) to downsample on. If multiple column names are
         provided, they are combined into a single column for downsampling.
     n_samples : int, default=None
@@ -497,45 +496,45 @@ def downsample_cells(data, annotation, n_samples=None,
 
     Returns
     -------
-    data : pd.DataFrame
+    output_data : pd.DataFrame
         The downsampled data frame.
 
     Examples
     --------
     >>> df = pd.DataFrame({
-    ...    'annotation1': ['a', 'a', 'b', 'b', 'c', 'c'],
-    ...    'annotation2': ['x', 'y', 'x', 'y', 'x', 'y'],
+    ...    'annotations1': ['a', 'a', 'b', 'b', 'c', 'c'],
+    ...    'annotations2': ['x', 'y', 'x', 'y', 'x', 'y'],
     ...    'value': [1, 2, 3, 4, 5, 6]
     ... })
     >>> print(
-            downsample_cells(df, ['annotation1', 'annotation2'], n_samples=2)
+            downsample_cells(df, ['annotations1', 'annotations2'], n_samples=2)
         )
     """
 
-    # Convert annotation to list if it's a string
-    if isinstance(annotation, str):
-        annotation = [annotation]
+    # Convert annotations to list if it's a string
+    if isinstance(annotations, str):
+        annotations = [annotations]
 
-    # Check if the columns to downsample on exists
-    for col in annotation:
-        if col not in data.columns:
+    # Check if the columns to downsample on exist
+    for col in annotations:
+        if col not in input_data.columns:
             raise ValueError(f"Column {col} does not exist in the dataframe")
 
     if n_samples is not None:
         # Combine annotations into a single column if there
         # are multiple annotations
-        if len(annotation) > 1:
+        if len(annotations) > 1:
             combined_col_name = '_combined_'
-            data[combined_col_name] = data[annotation].apply(
+            input_data[combined_col_name] = input_data[annotations].apply(
                 lambda row: '_'.join(row.values.astype(str)), axis=1)
             grouping_col = combined_col_name
         else:
-            grouping_col = annotation[0]
+            grouping_col = annotations[0]
 
         # Stratify selection
         if stratify:
             # Determine frequencies of each group
-            freqs = data[grouping_col].value_counts(normalize=True)
+            freqs = input_data[grouping_col].value_counts(normalize=True)
             n_samples_per_group = (freqs * n_samples).astype(int)
 
             # Increase the number of samples for groups with 0
@@ -545,8 +544,8 @@ def downsample_cells(data, annotation, n_samples=None,
             )
             samples = []
 
-            # Group by annotation and sample from each group
-            for group, group_data in data.groupby(grouping_col):
+            # Group by annotations and sample from each group
+            for group, group_data in input_data.groupby(grouping_col):
                 n_group_samples = n_samples_per_group.get(group, 0)
                 if rand:
                     samples.append(
@@ -560,20 +559,22 @@ def downsample_cells(data, annotation, n_samples=None,
                     )
 
             # Concatenate all samples
-            data = pd.concat(samples)
+            output_data = pd.concat(samples)
         else:
-            data = data.groupby(grouping_col).apply(
+            output_data = input_data.groupby(grouping_col).apply(
                 lambda x: x.head(min(n_samples, len(x)))
             ).reset_index(drop=True)
 
         # Remove the combined column if it exists
-        if len(annotation) > 1:
-            data = data.drop(columns=combined_col_name)
+        if len(annotations) > 1:
+            output_data = output_data.drop(columns=combined_col_name)
+    else:
+        output_data = input_data.copy()
 
     # Print the number of rows in the resulting data
-    print(f"Number of rows in the returned data: {len(data)}")
+    print(f"Number of rows in the returned data: {len(output_data)}")
 
-    return data
+    return output_data
 
 
 def calculate_centroid(
