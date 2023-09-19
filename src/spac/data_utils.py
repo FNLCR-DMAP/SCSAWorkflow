@@ -475,16 +475,17 @@ def select_values(data, annotation, values=None):
 def downsample_cells(data, annotation, n_samples=None,
                      stratify=False, rand=False):
     """
-    Reduces the number of cells in the data by either selecting n_samples from
-    every possible value of annotation, or returning n_samples
-    stratified by the frequency of values in annotation.
+    Reduces the number of rows in the data by either selecting n_samples from
+    every possible value of annotation(s), or returning n_samples
+    stratified by the frequency of values in annotations.
 
     Parameters
     ----------
     data : pd.DataFrame
         The input data frame.
-    annotation : str
-        The column name to downsample on.
+    annotation : str or list of str
+        The column name(s) to downsample on. If multiple column names are
+        provided, they are combined into a single column for downsampling.
     n_samples : int, default=None
         The max number of samples to return for each group if stratify is
         False, or in total if stratify is True. If None, all samples returned.
@@ -502,43 +503,72 @@ def downsample_cells(data, annotation, n_samples=None,
     Examples
     --------
     >>> df = pd.DataFrame({
-    ...    'annotation': ['a', 'a', 'a', 'b', 'b', 'c'],
+    ...    'annotation1': ['a', 'a', 'b', 'b', 'c', 'c'],
+    ...    'annotation2': ['x', 'y', 'x', 'y', 'x', 'y'],
     ...    'value': [1, 2, 3, 4, 5, 6]
     ... })
-    >>> print(downsample_cells(df, 'annotation', n_samples=2))
-    """
-    # Check if the column to downsample on exists
-    if annotation not in data.columns:
-        raise ValueError(
-            f"Column {annotation} does not exist in the dataframe"
+    >>> print(
+            downsample_cells(df, ['annotation1', 'annotation2'], n_samples=2)
         )
+    """
+
+    # Convert annotation to list if it's a string
+    if isinstance(annotation, str):
+        annotation = [annotation]
+
+    # Check if the columns to downsample on exists
+    for col in annotation:
+        if col not in data.columns:
+            raise ValueError(f"Column {col} does not exist in the dataframe")
 
     if n_samples is not None:
+        # Combine annotations into a single column if there
+        # are multiple annotations
+        if len(annotation) > 1:
+            combined_col_name = '_combined_'
+            data[combined_col_name] = data[annotation].apply(
+                lambda row: '_'.join(row.values.astype(str)), axis=1)
+            grouping_col = combined_col_name
+        else:
+            grouping_col = annotation[0]
+
         # Stratify selection
         if stratify:
             # Determine frequencies of each group
-            freqs = data[annotation].value_counts(normalize=True)
+            freqs = data[grouping_col].value_counts(normalize=True)
             n_samples_per_group = (freqs * n_samples).astype(int)
+
+            # Increase the number of samples for groups with 0
+            # calculated samples.
+            n_samples_per_group = n_samples_per_group.apply(
+                lambda x: max(x, 1)
+            )
             samples = []
+
             # Group by annotation and sample from each group
-            for group, group_data in data.groupby(annotation):
+            for group, group_data in data.groupby(grouping_col):
                 n_group_samples = n_samples_per_group.get(group, 0)
                 if rand:
-                    # Randomly select the returned cells
-                    samples.append(group_data.sample(min(n_group_samples,
-                                                         len(group_data))))
+                    samples.append(
+                        group_data.sample(
+                            min(n_group_samples, len(group_data))
+                        )
+                    )
                 else:
-                    # Choose the first n cells
-                    samples.append(group_data.head(min(n_group_samples,
-                                                       len(group_data))))
+                    samples.append(
+                        group_data.head(min(n_group_samples, len(group_data)))
+                    )
+
             # Concatenate all samples
             data = pd.concat(samples)
         else:
-            # Non-stratified selection
-            # Select the first n cells from each group
-            data = data.groupby(annotation).apply(
-                lambda x: x.head(n=min(n_samples, len(x)))
+            data = data.groupby(grouping_col).apply(
+                lambda x: x.head(min(n_samples, len(x)))
             ).reset_index(drop=True)
+
+        # Remove the combined column if it exists
+        if len(annotation) > 1:
+            data = data.drop(columns=combined_col_name)
 
     # Print the number of rows in the resulting data
     print(f"Number of rows in the returned data: {len(data)}")

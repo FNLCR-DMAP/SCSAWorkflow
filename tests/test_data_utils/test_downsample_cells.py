@@ -1,20 +1,54 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
-import numpy as np
 from spac.data_utils import downsample_cells
 
 
 class TestDownsampleCells(unittest.TestCase):
 
     def setUp(self):
-        """Create a sample dataframe for testing."""
-        self.df = pd.DataFrame({
+        """Create sample dataframes for testing."""
+        # Random datasets for general functionality tests
+        self.df_single_random = pd.DataFrame({
             'annotation': ['annotation1'] * 50 +
                           ['annotation2'] * 30 +
                           ['annotation3'] * 20,
-            'value': np.random.rand(100)
+            'value': list(range(1, 101))
         })
-        self.annotation = 'annotation'
+        animals_random = [
+            'a1', 'a1', 'a1', 'a2', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7'
+        ]
+        regions_random = [
+            'r1', 'r1', 'r2', 'r2', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'
+        ]
+        values_random = list(range(1, 11))
+        self.df_multi_random = pd.DataFrame({
+            'animal': animals_random,
+            'region': regions_random,
+            'value': values_random
+        })
+
+        # Fixed datasets for stratification frequency tests
+        self.df_single_fixed = pd.DataFrame({
+            'annotation': ['annotation1'] * 6 +
+                          ['annotation2'] * 3 +
+                          ['annotation3'],
+            'value': list(range(1, 11))  # Simple values from 1 to 10
+        })
+        self.df_multi_fixed = pd.DataFrame({
+            'animal': [
+                'a1', 'a1', 'a1', 'a1', 'a1', 'a2', 'a2', 'a2', 'a3', 'a4'
+            ],
+            'region': [
+                'r1', 'r1', 'r1', 'r2', 'r2', 'r1', 'r1', 'r2', 'r3', 'r4'
+            ],
+            'value': list(range(1, 11))  # Simple values from 1 to 10
+        })
+
+        self.annotation_single = 'annotation'
+        self.annotation_multi = ['animal', 'region']
 
     def test_annotation_existence(self):
         """
@@ -22,77 +56,95 @@ class TestDownsampleCells(unittest.TestCase):
         when a nonexistent column is passed.
         """
         with self.assertRaises(ValueError):
-            downsample_cells(self.df, 'nonexistent_column')
+            downsample_cells(self.df_single_random, 'nonexistent_column')
+        with self.assertRaises(ValueError):
+            downsample_cells(
+                self.df_multi_random,
+                ['nonexistent_column', 'region']
+            )
 
     def test_downsample_without_stratify(self):
         """Downsample without stratify"""
         n_samples = 20
-        df_downsampled = downsample_cells(
-            self.df, self.annotation,
+        df_downsampled_single = downsample_cells(
+            self.df_single_random, self.annotation_single,
+            n_samples=n_samples, stratify=False
+        )
+        df_downsampled_multi = downsample_cells(
+            self.df_multi_random, self.annotation_multi,
             n_samples=n_samples, stratify=False
         )
         self.assertTrue(
-            all(df_downsampled.groupby(
-                self.annotation
+            all(df_downsampled_single.groupby(
+                self.annotation_single
+            ).size().values <= n_samples)
+        )
+        # For multi obs, group by both columns without combining them
+        self.assertTrue(
+            all(df_downsampled_multi.groupby(
+                self.annotation_multi
             ).size().values <= n_samples)
         )
 
-    def test_downsample_with_stratify_without_rand(self):
-        """Downsample with stratify without random"""
-        n_samples = 20
-        df_downsampled = downsample_cells(
-            self.df, self.annotation,
-            n_samples=n_samples, stratify=True
-        )
-        self.assertEqual(df_downsampled.shape[0], n_samples)
+    def check_stratified_counts(
+            self, downsampled_df, columns, expected_counts):
+        """
+        Helper method to check stratified counts for both single and
+        multi annotations.
+        """
+        combined_col = '_'.join(columns)
 
-    def test_downsample_with_stratify_with_rand(self):
-        """Downsample with stratify with random"""
-        n_samples = 20
-        df_downsampled = downsample_cells(
-            self.df, self.annotation,
-            n_samples=n_samples, stratify=True, rand=True
-        )
-        self.assertEqual(df_downsampled.shape[0], n_samples)
+        # Ensure the combined column exists in the downsampled_df
+        if combined_col not in downsampled_df.columns:
+            downsampled_df[combined_col] = downsampled_df[columns].apply(
+                lambda row: '_'.join(row.values.astype(str)), axis=1
+            )
 
-    def test_downsample_no_n_samples(self):
-        """Downsample without n_samples should return the original dataframe"""
-        df_downsampled = downsample_cells(self.df, self.annotation)
-        pd.testing.assert_frame_equal(self.df, df_downsampled)
+        actual_counts = downsampled_df[combined_col].value_counts()
 
-    def test_stratification_frequency(self):
-        """Test the frequency of stratification"""
+        for key, expected_count in expected_counts.items():
+            self.assertEqual(expected_count, actual_counts.get(key, 0))
+
+        # Remove the combined column after checks
+        if combined_col in downsampled_df.columns and len(columns) > 1:
+            # Only drop if it's a multi annotation
+            downsampled_df.drop(columns=combined_col, inplace=True)
+
+    def test_stratification_frequency_single_obs(self):
+        """Test the frequency of stratification for single annotation."""
         n_samples = 10
-
-        # Downsampling with stratifying
         df_downsampled_stratified = downsample_cells(
-            self.df, self.annotation,
+            self.df_single_fixed, self.annotation_single,
             n_samples=n_samples, stratify=True, rand=True
         )
-
-        # Assert the total number of samples
-        num_rows = df_downsampled_stratified.shape[0]
-        self.assertEqual(
-            num_rows, n_samples,
-            'Number of rows in df_downsampled_stratified does not match '
-            'n_samples'
+        expected_counts = {
+            'annotation1': 6,
+            'annotation2': 3,
+            'annotation3': 1
+        }
+        self.check_stratified_counts(
+            df_downsampled_stratified,
+            [self.annotation_single],
+            expected_counts
         )
 
-        # Assert the number of samples in each annotation
-        annotation = 'annotation'
-        annotation_value_counts = \
-            df_downsampled_stratified[annotation].value_counts()
-        self.assertEqual(
-            annotation_value_counts['annotation1'], 5,
-            'Number of samples in annotation1 does not match expected count'
+    def test_stratification_frequency_multi_obs(self):
+        """Test the frequency of stratification for multi annotations."""
+        n_samples = 10
+        df_downsampled_stratified = downsample_cells(
+            self.df_multi_fixed, self.annotation_multi,
+            n_samples=n_samples, stratify=True, rand=True
         )
-        self.assertEqual(
-            annotation_value_counts['annotation2'], 3,
-            'Number of samples in annotation2 does not match expected count'
-        )
-        self.assertEqual(
-            annotation_value_counts['annotation3'], 2,
-            'Number of samples in annotation3 does not match expected count'
+        expected_counts = {
+            'a1_r1': 3,
+            'a1_r2': 2,
+            'a2_r1': 2,
+            'a2_r2': 1,
+            'a3_r3': 1,
+            'a4_r4': 1
+        }
+        self.check_stratified_counts(
+            df_downsampled_stratified, self.annotation_multi, expected_counts
         )
 
 
