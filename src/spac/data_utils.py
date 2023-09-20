@@ -8,28 +8,25 @@ from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
 
 
-def append_observation(
+def append_annotation(
     data: pd.DataFrame,
-    source_column: str,
-    new_column: str,
-    mapping_rules: list
+    annotation: list
 ) -> pd.DataFrame:
     """
-    Append a new observation to a Pandas DataFrame based on mapping rules.
+    Append a new annotation with single value to
+    a Pandas DataFrame based on mapping rules.
 
     Parameters
     ----------
     data : pd.DataFrame
         The input DataFrame to which the new observation will be appended.
-    source_column : str
-        The name of the column in the 'data' DataFrame that
-        contains the values to be mapped.
-    new_column : str
-        The name of the new column to be added to the DataFrame.
-    mapping_rules : list
-        A list of strings representing the mapping rules.
-        Each string should have this format:
-        <value in source column>:<value in new observation>
+
+    annotation : list
+        list of dictionary of strings representing
+        the new annotation and its value.
+        Each dictionary should have this format:
+        {<new annotation column name>:<value of the annotation>}
+        The values must be a single string or numeric value.
 
     Returns
     -------
@@ -37,52 +34,29 @@ def append_observation(
         The DataFrame with the new observation appended.
     """
 
-    if source_column not in data.columns:
-        error_msg = f"'{source_column}' does not exist in the DataFrame."
+    if not isinstance(annotation, list):
+        error_msg = "Annotation must be provided as a list."
         raise ValueError(error_msg)
 
-    if new_column in data.columns:
-        error_msg = f"'{new_column}' already exist in the DataFrame."
-        raise ValueError(error_msg)
-
-    if not isinstance(mapping_rules, list):
-        error_msg = "Mapping rules must be provided as a list."
-        raise ValueError(error_msg)
-
-    for rule in mapping_rules:
-        if ':' not in rule:
-            error_msg = f"Invalid mapping rule format: '{rule}'. " + \
-                "It should have the format " + \
-                "<value in new observation>:<value in source column>."
+    for dictionary in annotation:
+        if not isinstance(dictionary, dict):
+            error_msg = f"The entry {dictionary} is not " + \
+                "a dictionary, please check."
             raise ValueError(error_msg)
 
-    # Create a copy of the input DataFrame to avoid modifying the original
-    result_data = data.copy()
+        for new_column, value in dictionary.items():
+            if not isinstance(value, (str, int, float)):
+                error_msg = f"The value {value} in {new_column} is not " + \
+                    "a single string or numeric value, please check."
+                raise ValueError(error_msg)
 
-    # Initialize the new column with "Not_Mapped" for all rows
-    result_data[new_column] = "Not_Mapped"
+            if new_column in data.columns:
+                error_msg = f"'{new_column}' already exists in the DataFrame."
+                raise ValueError(error_msg)
 
-    # Store the original data type of the selected column
-    original_dtype = result_data[source_column].dtype
-    result_data[source_column] = result_data[source_column].astype(str)
+            data[new_column] = value
 
-    # Iterate over the mapping rules
-    for rule in mapping_rules:
-        # Split the rule into the source value and the new value
-        source_value, new_value = rule.split(':')
-
-        # Assign the new value to rows where
-        # the source column matches the source value
-        result_data.loc[
-            result_data[source_column] == source_value, new_column
-        ] = new_value
-
-    # Restore the original data type of the selected column
-    result_data[source_column] = result_data[
-                                    source_column
-                                ].astype(original_dtype)
-
-    return result_data
+    return data
 
 
 def ingest_cells(dataframe,

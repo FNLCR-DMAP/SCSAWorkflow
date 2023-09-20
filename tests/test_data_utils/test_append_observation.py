@@ -1,95 +1,57 @@
 import pandas as pd
 import unittest
-from spac.data_utils import append_observation
+from spac.data_utils import append_annotation
 
 
-class TestAppendObservation(unittest.TestCase):
+class TestAppendAnnotation(unittest.TestCase):
 
-    def setUp(self):
-        # Create a sample DataFrame for testing
-        self.data = pd.DataFrame({
-            'A': [1, 2, 3, 4],
-            'B': ['apple', 'banana', 'cherry', 'date']
-        })
+    def test_valid_annotation(self):
+        data = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        annotation = [{'C': 'Alice'}, {'D': 30}]
+        result = append_annotation(data.copy(), annotation)
+        self.assertTrue(all(col in result.columns for col in ['C', 'D']))
 
-    def test_append_observation_success_str_to_str(self):
-        # Test a successful case
-        result = append_observation(
-            self.data, 'B', 'C', ['banana:test1', 'date:test2']
-        )
-        expected = pd.DataFrame({
-            'A': [1, 2, 3, 4],
-            'B': ['apple', 'banana', 'cherry', 'date'],
-            'C': ['Not_Mapped', 'test1', 'Not_Mapped', 'test2']
-        })
-
-        # Ensure both DataFrames have the same shape
-        self.assertEqual(result.shape, expected.shape)
-
-        # Compare each element of the DataFrames
-        for col in result.columns:
-            for idx in result.index:
-                self.assertEqual(
-                    result.at[idx, col],
-                    expected.at[idx, col]
-                )
-
-    def test_append_observation_success_int_to_str(self):
-        # Test a successful case
-        result = append_observation(
-            self.data, 'A', 'C', ['2:test1', '4:test2']
-        )
-        expected = pd.DataFrame({
-            'A': [1, 2, 3, 4],
-            'B': ['apple', 'banana', 'cherry', 'date'],
-            'C': ['Not_Mapped', 'test1', 'Not_Mapped', 'test2']
-        })
-
-        # Ensure both DataFrames have the same shape
-        self.assertEqual(result.shape, expected.shape)
-
-        # Compare each element of the DataFrames
-        for col in result.columns:
-            for idx in result.index:
-                self.assertEqual(
-                    result.at[idx, col],
-                    expected.at[idx, col]
-                )
-
-    def test_source_column_not_in_dataframe(self):
-        # Test when the source column doesn't exist in the DataFrame
+    def test_invalid_annotation_type(self):
+        data = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        annotation = 'Invalid'  # Should be a list
         with self.assertRaises(ValueError) as context:
-            append_observation(self.data, 'X', 'C', ['2:apple'])
-        self.assertEqual(
-            str(context.exception), "'X' does not exist in the DataFrame."
-        )
-
-    def test_new_column_already_exists(self):
-        # Test when the new column already exists in the DataFrame
-        with self.assertRaises(ValueError) as context:
-            append_observation(self.data, 'A', 'B', ['2:apple'])
-        self.assertEqual(
-            str(context.exception), "'B' already exist in the DataFrame."
-        )
-
-    def test_mapping_rules_invalid_format(self):
-        # Test when a mapping rule has an invalid format
-        with self.assertRaises(ValueError) as context:
-            append_observation(self.data, 'A', 'C', ['2:apple', 'banana'])
+            append_annotation(data.copy(), annotation)
         self.assertEqual(
             str(context.exception),
-            "Invalid mapping rule format: 'banana'. "
-            "It should have the format "
-            "<value in new observation>:<value in source column>."
+            "Annotation must be provided as a list."
         )
 
-    def test_mapping_rules_not_list(self):
-        # Test when mapping_rules is not a list
+    def test_invalid_annotation_entry(self):
+        data = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        annotation = [{'C': 'Alice'}, 'Invalid']  # Invalid entry in the list
         with self.assertRaises(ValueError) as context:
-            append_observation(self.data, 'A', 'C', '2:apple')
+            append_annotation(data.copy(), annotation)
         self.assertEqual(
-            str(context.exception), "Mapping rules must be provided as a list."
+            str(context.exception),
+            "The entry Invalid is not a dictionary, please check."
         )
+
+    def test_invalid_annotation_value_type(self):
+        data = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        annotation = [{'C': 'Alice'}, {'D': [1, 2, 3]}]  # Invalid value type
+        with self.assertRaises(ValueError) as context:
+            append_annotation(data.copy(), annotation)
+
+        expecated_str = "The value [1, 2, 3] in D is not a single" + \
+            " string or numeric value, please check."
+
+        self.assertEqual(
+            str(context.exception),
+            expecated_str
+        )
+
+    def test_existing_column(self):
+        data = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        annotation = [{'A': 'Alice'}]  # A already exists in the DataFrame
+        with self.assertRaises(ValueError) as context:
+            append_annotation(data.copy(), annotation)
+        self.assertEqual(
+            str(context.exception), "'A' already exists in the DataFrame.")
 
 
 if __name__ == '__main__':
