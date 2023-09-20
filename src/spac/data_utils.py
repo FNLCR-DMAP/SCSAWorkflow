@@ -10,7 +10,7 @@ from spac.utils import regex_search_list
 
 def append_annotation(
     data: pd.DataFrame,
-    annotation: list
+    annotation: dict
 ) -> pd.DataFrame:
     """
     Append a new annotation with single value to
@@ -21,11 +21,11 @@ def append_annotation(
     data : pd.DataFrame
         The input DataFrame to which the new observation will be appended.
 
-    annotation : list
-        list of dictionary of strings representing
+    annotation : dict
+        dictionary of string pairs representing
         the new annotation and its value.
-        Each dictionary should have this format:
-        {<new annotation column name>:<value of the annotation>}
+        Each pair should have this format:
+        <new annotation column name>:<value of the annotation>
         The values must be a single string or numeric value.
 
     Returns
@@ -34,27 +34,26 @@ def append_annotation(
         The DataFrame with the new observation appended.
     """
 
-    if not isinstance(annotation, list):
-        error_msg = "Annotation must be provided as a list."
+    if not isinstance(annotation, dict):
+        error_msg = "Annotation must be provided as a dictionary."
         raise ValueError(error_msg)
 
-    for dictionary in annotation:
-        if not isinstance(dictionary, dict):
-            error_msg = f"The entry {dictionary} is not " + \
-                "a dictionary, please check."
+    for new_column, value in annotation.items():
+        if not isinstance(new_column, str):
+            error_msg = f"The key {new_column} is not " + \
+                "a single string, please check."
             raise ValueError(error_msg)
 
-        for new_column, value in dictionary.items():
-            if not isinstance(value, (str, int, float)):
-                error_msg = f"The value {value} in {new_column} is not " + \
-                    "a single string or numeric value, please check."
-                raise ValueError(error_msg)
+        if not isinstance(value, (str, int, float)):
+            error_msg = f"The value {value} in {new_column} is not " + \
+                "a single string or numeric value, please check."
+            raise ValueError(error_msg)
 
-            if new_column in data.columns:
-                error_msg = f"'{new_column}' already exists in the DataFrame."
-                raise ValueError(error_msg)
+        if new_column in data.columns:
+            error_msg = f"'{new_column}' already exists in the DataFrame."
+            raise ValueError(error_msg)
 
-            data[new_column] = value
+        data[new_column] = value
 
     return data
 
