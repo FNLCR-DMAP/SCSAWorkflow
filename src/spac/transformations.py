@@ -493,3 +493,45 @@ def normalize_features(
     adata.layers[new_layer_name] = dataframe
 
     return quantiles
+
+
+def z_score_normalization(adata, layer=None):
+    """
+    Compute z-scores for the provided AnnData object.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the data to normalize.
+    layer : str, optional
+        The name of the layer in the AnnData object to normalize.
+        If None, the main data matrix .X is used.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        The AnnData object with a new layer 'z_scores' containing the computed
+        z-scores.
+    """
+
+    # Check if the provided layer exists in the AnnData object
+    if layer:
+        check_table(adata, tables=layer)
+
+        means = np.mean(adata.layers[layer], axis=0)
+        std_devs = np.std(adata.layers[layer], axis=0)
+    else:
+        means = np.mean(adata.X, axis=0)
+        std_devs = np.std(adata.X, axis=0)
+
+    # Avoid division by zero
+    std_devs[std_devs == 0] = 1
+
+    if layer:
+        z_scores = (adata.layers[layer] - means) / std_devs
+        adata.layers['z_scores'] = z_scores
+    else:
+        z_scores = (adata.X - means) / std_devs
+        adata.layers['z_scores'] = z_scores
+
+    return adata
