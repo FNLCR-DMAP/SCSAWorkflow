@@ -8,6 +8,56 @@ from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
 
 
+def append_annotation(
+    data: pd.DataFrame,
+    annotation: dict
+) -> pd.DataFrame:
+    """
+    Append a new annotation with single value to
+    a Pandas DataFrame based on mapping rules.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The input DataFrame to which the new observation will be appended.
+
+    annotation : dict
+        dictionary of string pairs representing
+        the new annotation and its value.
+        Each pair should have this format:
+        <new annotation column name>:<value of the annotation>
+        The values must be a single string or numeric value.
+
+    Returns
+    -------
+    pd.DataFrame
+        The DataFrame with the new observation appended.
+    """
+
+    if not isinstance(annotation, dict):
+        error_msg = "Annotation must be provided as a dictionary."
+        raise ValueError(error_msg)
+
+    for new_column, value in annotation.items():
+        if not isinstance(new_column, str):
+            error_msg = f"The key {new_column} is not " + \
+                "a single string, please check."
+            raise ValueError(error_msg)
+
+        if not isinstance(value, (str, int, float)):
+            error_msg = f"The value {value} in {new_column} is not " + \
+                "a single string or numeric value, please check."
+            raise ValueError(error_msg)
+
+        if new_column in data.columns:
+            error_msg = f"'{new_column}' already exists in the DataFrame."
+            raise ValueError(error_msg)
+
+        data[new_column] = value
+
+    return data
+
+
 def ingest_cells(dataframe,
                  regex_str,
                  x_col=None,
