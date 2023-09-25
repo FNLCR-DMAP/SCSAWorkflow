@@ -356,120 +356,217 @@ def heatmap(adata, column, layer=None, **kwargs):
     return mean_feature, fig, ax
 
 
-def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
-                         standard_scale=None, ax=None, **kwargs):
+def hierarchical_heatmap(
+        adata, annotation, features=None, layer=None,
+        row_cluster=True, col_cluster=True, standard_scale=None,
+        z_score=None, swap_axes=False, rotate_label=False, **kwargs
+):
     """
-    Generates a hierarchical clustering heatmap.
-    Cells are stratified by `annotation`,
-    then mean intensities are calculated for each feature across all cells
-    to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
+    Generates a hierarchical clustering heatmap and dendrogram.
+    By default, the dataset is assumed to have features as rows and
+    annotations as columns. Cells are grouped by annotation (e.g., phenotype),
+    and for each group, the average expression intensity of each feature
+    (e.g., protein or marker) is computed. The heatmap is plotted using
+    seaborn's clustermap.
 
-    Parameters
+    Parameters:
     ----------
     adata : anndata.AnnData
         The AnnData object.
     annotation : str
         Name of the annotation in adata.obs to group by and calculate mean
         intensity.
+    features : list or None, optional
+        List of feature names (e.g., genes) to be included in the
+        visualization. If None, all features are used. Default is None.
     layer : str, optional
         The name of the `adata` layer to use to calculate the mean intensity.
         Default is None.
-    dendrogram : bool, optional
-        If True, a dendrogram based on the hierarchical clustering between
-        the `annotation` categories is computed and plotted. Default is True.
-    ax : matplotlib.axes.Axes, optional
-        A matplotlib axes object. If not provided, a new figure and axes
-        object will be created. Default is None.
+    row_cluster : bool, optional
+        If True (default), perform hierarchical clustering on the rows.
+        This corresponds to clustering the features if `swap_axes` is False,
+        or the annotations if `swap_axes` is True.
+    col_cluster : bool, optional
+        If True (default), perform hierarchical clustering on the columns.
+        This corresponds to clustering the annotations if `swap_axes` is False,
+        or the features if `swap_axes` is True.
+    standard_scale : int or None, optional
+        Whether to standard scale data (0: row-wise or 1: column-wise).
+        Default is None.
+    z_score : int or None, optional
+        Specifies the axis for z-score normalization.
+        - z_score=1: Column-wise standardization. In the default orientation,
+          this applies z-score normalization across features, aiding in
+          comparing different annotations' expression intensities for a
+          specific feature.
+        - z_score=0: Row-wise standardization. In the default orientation,
+          this applies normalization across annotations, helping compare
+          various features within a single annotation.
+        When `swap_axes` is True, the roles of rows and columns are reversed.
+        Default is None.
+    swap_axes : bool, optional
+        Switches the axes of the heatmap, effectively transposing the dataset.
+        Default orientation: Rows represent annotations and columns represent
+        features. When True: Rows represent features and columns represent
+        annotations. This also switches the behavior of parameters like
+        z_score, row_cluster, and col_cluster. Default is False.
+    rotate_label : bool, optional
+        If True, rotate x-axis labels by 45 degrees. This is most useful when
+        the x-axis represents features (i.e., `swap_axes` is False). However,
+        labels will be rotated if this is set to True regardless of the value
+        of `swap_axes`. Default is False.
     **kwargs:
-        Additional parameters passed to sc.pl.matrixplot function.
+        Additional parameters passed to `sns.clustermap` function or its
+        underlying functions. Some essential parameters include:
+        - `cmap` : colormap
+          Colormap to use for the heatmap. It's an argument for the underlying
+          `sns.heatmap()` used within `sns.clustermap()`. Examples include
+          "viridis", "plasma", "coolwarm", etc.
+        - `{row,col}_colors` : Lists or DataFrames
+          Colors to use for annotating the rows/columns. Useful for visualizing
+          additional categorical information alongside the main heatmap.
+        - `{dendrogram,colors}_ratio` : tuple(float)
+          Control the size proportions of the dendrogram and the color labels
+          relative to the main heatmap.
+        - `cbar_pos` : tuple(float) or None
+          Specify the position and size of the colorbar in the figure. If set
+          to None, no colorbar will be added.
+        - `tree_kws` : dict
+          Customize the appearance of the dendrogram tree. Passes additional
+          keyword arguments to the underlying
+          `matplotlib.collections.LineCollection`.
+        - `method` : str
+          The linkage algorithm to use for the hierarchical clustering.
+          Defaults to 'centroid' in the function, but can be changed.
+        - `metric` : str
+          The distance metric to use for the hierarchy. Defaults to 'euclidean'
+          in the function.
 
-    Returns
+    Returns:
     ----------
     mean_intensity : pandas.DataFrame
-        A DataFrame containing the mean intensity of cells for each
-        annotation.
-    matrixplot : scanpy.pl.matrixplot
-        A Scanpy matrixplot object.
+        A DataFrame containing the mean intensity of cells for each annotation.
+    clustergrid : seaborn.matrix.ClusterGrid
+        The seaborn ClusterGrid object representing the heatmap and
+        dendrograms.
+    dendrogram_data : dict
+        A dictionary containing:
+        - 'row_linkage': Hierarchical clustering linkage data for rows.
+        - 'col_linkage': Hierarchical clustering linkage data for columns.
+        These linkage matrices can be used to generate dendrograms with tools
+        like scipy's dendrogram function. This offers flexibility in
+        customizing and plotting dendrograms as needed.
 
     Examples
     --------
-    >>> import matplotlib.pyplot as plt
-    >>> from spac.visualization import hierarchical_heatmap
-    >>> import anndata
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import anndata
+    from spac.visualization import hierarchical_heatmap
+    X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
+    annotation = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
+    all_data = anndata.AnnData(X=X, obs=annotation)
 
-    >>> X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
-    >>> annotation = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
-    >>> all_data = anndata.AnnData(X=X, obs=annotation)
+    mean_intensity, clustergrid, dendrogram_data = hierarchical_heatmap(
+        all_data,
+        "cell_type",
+        layer=None,
+        z_score=0,
+        swap_axes=True,
+        col_cluster=True
+    )
 
-    >>> fig, ax = plt.subplots()  # Create a new figure and axes object
-    >>> mean_intensity, matrixplot = hierarchical_heatmap(all_data,
-    ...                                                   "cell_type",
-    ...                                                   layer=None,
-    ...                                                   standard_scale='var',
-    ...                                                   ax=None)
-    # Display the figure
-    # matrixplot.show()
+    # To display a standalone dendrogram using the returned linkage matrix:
+    import scipy.cluster.hierarchy as sch
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # Convert the linkage data to type double
+    dendro_row_data = np.array(dendrogram_data['row_linkage'], dtype=np.double)
+
+    # Plot the dendrogram
+    fig, ax = plt.subplots(figsize=(10, 7))
+    sch.dendrogram(dendro_row_data, ax=ax)
+    plt.title('Row Dendrogram')
+    plt.show()
+
     """
 
-    # Check if annotation exists in adata
-    if annotation not in adata.obs.columns:
-        msg = (f"The annotation '{annotation}' does not exist in the "
-               f"provided AnnData object. Available annotations are: "
-               f"{list(adata.obs.columns)}")
-        raise KeyError(msg)
-
-    # Check if the layer exists in adata
-    if layer and layer not in adata.layers.keys():
-        msg = (f"The layer '{layer}' does not exist in the "
-               f"provided AnnData object. Available layers are: "
-               f"{list(adata.layers.keys())}")
-        raise KeyError(msg)
+    # Use utility functions to check inputs
+    check_annotation(adata, annotations=annotation)
+    if features:
+        check_feature(adata, features=features)
+    if layer:
+        check_table(adata, tables=layer)
 
     # Raise an error if there are any NaN values in the annotation column
     if adata.obs[annotation].isna().any():
         raise ValueError("NaN values found in annotation column.")
 
+    # Convert the observation column to categorical if it's not already
+    if not pd.api.types.is_categorical_dtype(adata.obs[annotation]):
+        adata.obs[annotation] = adata.obs[annotation].astype('category')
+
     # Calculate mean intensity
-    intensities = adata.to_df(layer=layer)
+    if layer:
+        intensities = pd.DataFrame(
+            adata.layers[layer],
+            index=adata.obs_names,
+            columns=adata.var_names
+        )
+    else:
+        intensities = adata.to_df()
+
     labels = adata.obs[annotation]
     grouped = pd.concat([intensities, labels], axis=1).groupby(annotation)
     mean_intensity = grouped.mean()
 
-    # Reset the index of mean_feature
-    mean_intensity = mean_intensity.reset_index()
+    # Transpose if swap_axes is True. Note that this will swap the meaning
+    # of row and column operations, like z_score normalization and clustering.
+    if swap_axes:
+        mean_intensity = mean_intensity.T
+        # Swap the behavior of z_score, row_cluster, and col_cluster
+        z_score = 0 if z_score is None else (1 if z_score == 0 else 0)
+        temp_row_cluster, temp_col_cluster = row_cluster, col_cluster
+        row_cluster, col_cluster = temp_col_cluster, temp_row_cluster
 
-    # Convert mean_intensity to AnnData
-    mean_intensity_adata = sc.AnnData(
-        X=mean_intensity.iloc[:, 1:].values,
-        obs=pd.DataFrame(
-            index=mean_intensity.index,
-            data={
-                annotation: mean_intensity.iloc[:, 0]
-                .astype('category').values
-            }
-        ),
-        var=pd.DataFrame(index=mean_intensity.columns[1:])
-    )
+    # Subset the mean_intensity DataFrame based on selected features
+    if features is not None and len(features) > 0:
+        mean_intensity = mean_intensity.loc[features]
 
-    # Compute dendrogram if needed
-    if dendrogram:
-        sc.tl.dendrogram(
-            mean_intensity_adata,
-            groupby=annotation,
-            var_names=mean_intensity_adata.var_names,
-            n_pcs=None
-        )
+    # Use seaborn's clustermap for hierarchical clustering and
+    # heatmap visualization.
+    clustergrid = sns.clustermap(mean_intensity,
+                                 standard_scale=standard_scale,
+                                 z_score=z_score,
+                                 method='centroid',
+                                 metric='euclidean',
+                                 row_cluster=row_cluster,
+                                 col_cluster=col_cluster,
+                                 cmap="viridis",
+                                 **kwargs)
 
-    # Create the matrix plot
-    matrixplot = sc.pl.matrixplot(
-        mean_intensity_adata,
-        var_names=mean_intensity_adata.var_names,
-        groupby=annotation, use_raw=False,
-        dendrogram=dendrogram,
-        standard_scale=standard_scale, cmap="viridis",
-        return_fig=True, ax=ax, show=False, **kwargs
-    )
-    return mean_intensity, matrixplot
+    # Rotate x-axis tick labels if rotate_label is True
+    if rotate_label:
+        plt.setp(clustergrid.ax_heatmap.get_xticklabels(), rotation=45)
+
+    # Extract the dendrogram data for return
+    dendro_row_data = None
+    dendro_col_data = None
+
+    if clustergrid.dendrogram_row:
+        dendro_row_data = clustergrid.dendrogram_row.linkage
+
+    if clustergrid.dendrogram_col:
+        dendro_col_data = clustergrid.dendrogram_col.linkage
+
+    # Define the dendrogram_data dictionary
+    dendrogram_data = {
+        'row_linkage': dendro_row_data,
+        'col_linkage': dendro_col_data
+    }
+
+    return mean_intensity, clustergrid, dendrogram_data
 
 
 def threshold_heatmap(
