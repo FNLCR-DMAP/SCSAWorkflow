@@ -2,12 +2,16 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
+import pickle
+import io
+from spac.utils import check_annotation
 
 
 def spatial_interaction(
         adata,
         annotation,
         analysis_method,
+        stratify_by=None,
         ax=None,
         **kwargs):
     """
@@ -27,6 +31,13 @@ def spatial_interaction(
             The analysis method to use, currently available:
             "Neighborhood Enrichment" and "Cluster Interaction Matrix".
 
+        stratify_by : str or list of strs
+            The annotation[s] to stratify the dataset. If single annotation is
+            passed, the dataset will stratify by the unique values in
+            the annotation column. If n (n>=2) annotations are passed,
+            the function will stratify the dataset basing on existing
+            label combinations.
+
         ax: matplotlib.axes.Axes, default None
             The matplotlib Axes to display the image.
 
@@ -34,8 +45,10 @@ def spatial_interaction(
             Keyword arguments for matplotlib.pyplot.text()
     Returns:
     -------
-        ax : matplotlib.axes.Axes
-            The matplotlib Axes containing the analysis plots.
+        ax_dictionary : dictionary of matplotlib.axes.Axes
+            A dictionary of the matplotlib Axes containing the analysis plots.
+            If not stratify, the key for analysis will be "Full",
+            otherwise the plot will be stored with key <stratify combination>.
             The returned ax is the passed ax or new ax created.
     """
 
@@ -86,19 +99,45 @@ def spatial_interaction(
 
         return ax
 
+    # Error Check Section
+    # -----------------------------------------------
     if not isinstance(adata, anndata.AnnData):
         error_text = "Input data is not an AnnData object. " + \
             f"Got {str(type(adata))}"
         raise ValueError(error_text)
 
-    # Extract column name
-    column_names = adata.obs.columns.tolist()
-    column_names_str = ",".join(column_names)
+    # Check if annotation is in the dataset
+    check_annotation(
+        adata,
+        [annotation]
+    )
 
-    if annotation not in column_names:
-        error_text = f"Annotation {annotation} not found in the " + \
-            f"dataset. Existing annotations are: {column_names_str}"
-        raise ValueError(error_text)
+    # Check if stratify_by is list or list of str
+    if stratify_by:
+        if not isinstance(stratify_by, str):
+            if isinstance(stratify_by, list):
+                for item in stratify_by:
+                    if not isinstance(item, str):
+                        error_text = "Item in the stratify_by " + \
+                            "list should be " + \
+                            f"strings, getting {type(item)} for {item}."
+                        raise ValueError(error_text)
+
+                    check_annotation(
+                        adata,
+                        item
+                    )
+
+            else:
+                error_text = "The stratify_by variable should be " + \
+                    "single string or a list of string, currently is" + \
+                    f"{type(stratify_by)}"
+                raise ValueError(error_text)
+        else:
+            check_annotation(
+                adata,
+                stratify_by
+            )
 
     if not isinstance(analysis_method, str):
         error_text = "The analysis methods must be a string."
@@ -120,25 +159,75 @@ def spatial_interaction(
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
 
+    # Operational Section
+    # -----------------------------------------------
+
     # Create a categorical column data for plotting
     new_annotation_name = annotation + "_plot"
 
     adata.obs[new_annotation_name] = pd.Categorical(
         adata.obs[annotation])
 
+    if stratify_by:
+        if isinstance(stratify_by, list):
+            adata.obs[
+                'concatenated_obs'
+            ] = adata.obs[stratify_by].astype(str).agg('_'.join, axis=1)
+        else:
+            adata.obs[
+                'concatenated_obs'
+            ] = adata.obs[stratify_by]
+
     # Compute a connectivity matrix from spatial coordinates
-    sq.gr.spatial_neighbors(adata)
+    if stratify_by:
+        ax_dictionary = {}
+        unique_values = adata.obs['concatenated_obs'].unique()
+        buffer = io.BytesIO()
+        pickle.dump(ax, buffer)
+        for subset_key in unique_values:
+            # Subset the original AnnData object based on the unique value
+            subset_adata = adata[
+                adata.obs[
+                    'concatenated_obs'
+                ] == subset_key
+            ].copy()
 
-    if analysis_method == "Neighborhood Enrichment":
-        ax = Neighborhood_Enrichment_Analysis(
-                adata,
-                new_annotation_name,
-                ax)
+            sq.gr.spatial_neighbors(subset_adata)
 
-    elif analysis_method == "Cluster Interaction Matrix":
-        ax = Cluster_Interaction_Matrix_Analysis(
-                adata,
-                new_annotation_name,
-                ax)
+            buffer.seek(0)
 
-    return ax
+            ax_copy = pickle.load(buffer)
+
+            if analysis_method == "Neighborhood Enrichment":
+                ax_copy = Neighborhood_Enrichment_Analysis(
+                        subset_adata,
+                        new_annotation_name,
+                        ax_copy)
+
+            elif analysis_method == "Cluster Interaction Matrix":
+                ax_copy = Cluster_Interaction_Matrix_Analysis(
+                        subset_adata,
+                        new_annotation_name,
+                        ax_copy)
+
+            ax_dictionary[subset_key] = ax_copy
+
+            del subset_adata
+
+    else:
+        sq.gr.spatial_neighbors(adata)
+
+        if analysis_method == "Neighborhood Enrichment":
+            ax = Neighborhood_Enrichment_Analysis(
+                    adata,
+                    new_annotation_name,
+                    ax)
+
+        elif analysis_method == "Cluster Interaction Matrix":
+            ax = Cluster_Interaction_Matrix_Analysis(
+                    adata,
+                    new_annotation_name,
+                    ax)
+        ax_dictionary = {"Full": ax}
+
+    return ax_dictionary
