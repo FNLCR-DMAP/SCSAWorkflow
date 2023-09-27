@@ -1,8 +1,8 @@
 import unittest
 import pandas as pd
 import anndata
-import seaborn as sns
 import matplotlib
+import seaborn as sns
 from spac.visualization import hierarchical_heatmap
 
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
@@ -12,9 +12,9 @@ class TestHierarchicalHeatmap(unittest.TestCase):
 
     def setUp(self):
         X = pd.DataFrame({
-            'feature1': [1, 3, 5, 7, 9, 11, 13, 15],
-            'feature2': [2, 4, 6, 8, 10, 12, 14, 16],
-            'feature3': [3, 5, 7, 9, 11, 13, 15, 17]
+            'feature1': [1, 3, 5, 7, 9, 12, 14, 16],
+            'feature2': [2, 4, 6, 8, 10, 13, 15, 18],
+            'feature3': [3, 5, 7, 9, 11, 14, 16, 19]
         })
 
         annotation = pd.DataFrame({
@@ -74,7 +74,7 @@ class TestHierarchicalHeatmap(unittest.TestCase):
     def test_zscore_normalization(self):
         """Test z-score normalization."""
         _, clustergrid, _ = hierarchical_heatmap(
-            self.adata, 'phenotype', z_score=1
+            self.adata, 'phenotype', z_score="feature"
         )
         self.assertTrue((clustergrid.data2d.mean().round(2) == 0).all())
 
