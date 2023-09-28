@@ -471,44 +471,77 @@ def select_values(data, annotation, values=None):
     return data
 
 
-def downsample_cells(input_data, annotations, n_samples=None,
-                     stratify=False, rand=False):
+def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
+                     rand=False, combined_col_name='_combined_',
+                     min_threshold=5):
     """
-    Reduces the number of rows in the input_data by either selecting n_samples
-    from  every possible value of annotations, or returning n_samples
-    stratified by the frequency of values in annotations.
+    Custom downsampling of data based on one or more annotations.
 
+    This function offers two primary modes of operation:
+    1. **Grouping (stratify=False)**:
+       - For a single annotation: The data is grouped by unique values of the
+         annotation,and 'n_samples' rows are selected from each group.
+       - For multiple annotations: The data is grouped based on unique
+         combinations of the annotations, and 'n_samples' rows are selected
+         from each combined group.
+
+    2. **Stratification (stratify=True)**:
+       - Annotations (single or multiple) are combined into a new column.
+       - Proportionate stratified sampling is performed based on the unique
+         combinations in the new column, ensuring that the downsampled dataset
+         maintains the proportionate representation of each combined group
+         from the original dataset.
+
+    Parameters
+    ----------
     Parameters
     ----------
     input_data : pd.DataFrame
         The input data frame.
     annotations : str or list of str
         The column name(s) to downsample on. If multiple column names are
-        provided, they are combined into a single column for downsampling.
+        provided, their values are combined using an underscore as a separator.
     n_samples : int, default=None
-        The max number of samples to return for each group if stratify is
-        False, or in total if stratify is True. If None, all samples returned.
+        The number of samples to return. Behavior differs based on the
+        'stratify' parameter:
+        - stratify=False: Returns 'n_samples' for each unique value (or
+          combination) of annotations.
+        - stratify=True: Returns a total of 'n_samples' stratified by the
+          frequency of annotations.
     stratify : bool, default=False
-        If true, stratify the returned values based on their input frequency.
+        If true, perform proportionate stratified sampling based on the unique
+        combinations of annotations. This ensures that the downsampled dataset
+        maintains the proportionate representation of each combined group from
+        the original dataset.
     rand : bool, default=False
         If true and stratify is True, randomly select the returned cells.
         Otherwise, choose the first n cells.
+    combined_col_name : str, default='_combined_'
+        Name of the column that will store combined values when multiple
+        annotation columns are provided.
+    min_threshold : int, default=5
+        The minimum number of samples a combined group should have in the
+        original dataset to be considered in the downsampled dataset. Groups
+        with fewer samples than this threshold will be excluded from the
+        stratification process. Adjusting this parameter determines the
+        minimum presence a combined group should have in the original dataset
+        to appear in the downsampled version.
 
     Returns
     -------
-    output_data : pd.DataFrame
-        The downsampled data frame.
+    output_data: pd.DataFrame
+        The proportionately stratified downsampled data frame.
 
-    Examples
-    --------
-    >>> df = pd.DataFrame({
-    ...    'annotations1': ['a', 'a', 'b', 'b', 'c', 'c'],
-    ...    'annotations2': ['x', 'y', 'x', 'y', 'x', 'y'],
-    ...    'value': [1, 2, 3, 4, 5, 6]
-    ... })
-    >>> print(
-            downsample_cells(df, ['annotations1', 'annotations2'], n_samples=2)
-        )
+    Notes
+    -----
+    This function emphasizes proportionate stratified sampling, ensuring that
+    the downsampled dataset is a representative subset of the original data
+    with respect to the combined annotations. Due to this proportionate nature,
+    not all unique combinations from the original dataset might be present in
+    the downsampled dataset, especially if a particular combination has very
+    few samples in the original dataset. The `min_threshold` parameter can be
+    adjusted to determine the minimum number of samples a combined group
+    should have in the original dataset to appear in the downsampled version.
     """
 
     # Convert annotations to list if it's a string
@@ -516,60 +549,67 @@ def downsample_cells(input_data, annotations, n_samples=None,
         annotations = [annotations]
 
     # Check if the columns to downsample on exist
-    for col in annotations:
-        if col not in input_data.columns:
-            raise ValueError(f"Column {col} does not exist in the dataframe")
+    missing_columns = [
+        col for col in annotations if col not in input_data.columns
+    ]
+    if missing_columns:
+        raise ValueError(
+            f"Columns {missing_columns} do not exist in the dataframe"
+        )
 
-    if n_samples is not None:
-        # Combine annotations into a single column if there
-        # are multiple annotations
-        if len(annotations) > 1:
-            combined_col_name = '_combined_'
-            input_data[combined_col_name] = input_data[annotations].apply(
-                lambda row: '_'.join(row.values.astype(str)), axis=1)
-            grouping_col = combined_col_name
-        else:
-            grouping_col = annotations[0]
+    # If n_samples is None, return the input data without processing
+    if n_samples is None:
+        return input_data.copy()
 
-        # Stratify selection
-        if stratify:
-            # Determine frequencies of each group
-            freqs = input_data[grouping_col].value_counts(normalize=True)
-            n_samples_per_group = (freqs * n_samples).astype(int)
-
-            # Increase the number of samples for groups with 0
-            # calculated samples.
-            n_samples_per_group = n_samples_per_group.apply(
-                lambda x: max(x, 1)
-            )
-            samples = []
-
-            # Group by annotations and sample from each group
-            for group, group_data in input_data.groupby(grouping_col):
-                n_group_samples = n_samples_per_group.get(group, 0)
-                if rand:
-                    samples.append(
-                        group_data.sample(
-                            min(n_group_samples, len(group_data))
-                        )
-                    )
-                else:
-                    samples.append(
-                        group_data.head(min(n_group_samples, len(group_data)))
-                    )
-
-            # Concatenate all samples
-            output_data = pd.concat(samples)
-        else:
-            output_data = input_data.groupby(grouping_col).apply(
-                lambda x: x.head(min(n_samples, len(x)))
-            ).reset_index(drop=True)
-
-        # Remove the combined column if it exists
-        if len(annotations) > 1:
-            output_data = output_data.drop(columns=combined_col_name)
+    # Combine annotations into a single column if multiple annotations
+    if len(annotations) > 1:
+        input_data[combined_col_name] = input_data[annotations].apply(
+            lambda row: '_'.join(row.values.astype(str)), axis=1)
+        grouping_col = combined_col_name
     else:
-        output_data = input_data.copy()
+        grouping_col = annotations[0]
+
+    # Stratify selection
+    if stratify:
+        # Calculate proportions
+        freqs = input_data[grouping_col].value_counts(normalize=True)
+
+        # Exclude groups with fewer samples than the min_threshold
+        filtered_freqs = freqs[freqs * len(input_data) >= min_threshold]
+        freqs = freqs[freqs.index.isin(filtered_freqs.index)]
+
+        samples_per_group = (freqs * n_samples).round().astype(int)
+
+        # Ensure each group has at least one sample if its frequency
+        # is non-zero
+        condition = samples_per_group == 0
+        samples_per_group[condition] = freqs[condition].apply(
+            lambda x: 1 if x > 0 else 0
+        )
+
+        # If have extra samples due to rounding, remove them from the
+        # largest groups
+        while samples_per_group.sum() > n_samples:
+            max_group = samples_per_group.idxmax()
+            samples_per_group[max_group] -= 1
+
+        # Sample data
+        sampled_data = []
+        for group, group_data in input_data.groupby(grouping_col):
+            sample_count = samples_per_group.get(group, 0)
+            sample_size = min(sample_count, len(group_data))
+            if rand:
+                sampled_data.append(group_data.sample(sample_size))
+            else:
+                sampled_data.append(group_data.head(sample_size))
+
+        # Concatenate all samples
+        output_data = pd.concat(sampled_data)
+
+    else:
+        output_data = input_data.groupby(grouping_col).apply(
+            lambda x: x.head(min(n_samples, len(x)))
+        ).reset_index(drop=True)
 
     # Print the number of rows in the resulting data
     print(f"Number of rows in the returned data: {len(output_data)}")
