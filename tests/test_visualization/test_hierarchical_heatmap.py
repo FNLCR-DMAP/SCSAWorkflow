@@ -85,8 +85,8 @@ class TestHierarchicalHeatmap(unittest.TestCase):
         """Test if dendrogram data has expected attributes."""
         _, _, dendro_data = hierarchical_heatmap(self.adata, 'phenotype', dendrogram=True)
         self.assertIn('dendrogram_info', dendro_data)
-        self.assertIn('categories_idx_ordered', dendro_data['dendrogram_info'])
-        self.assertIn('correlation_matrix', dendro_data['dendrogram_info'])
+        self.assertIn('leaves', dendro_data['dendrogram_info'])
+
 
 if __name__ == '__main__':
     unittest.main()
