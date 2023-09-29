@@ -396,7 +396,10 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         "annotation". Default is "annotation".
     swap_axes : bool, optional
         If True, switches the axes of the heatmap, effectively transposing
-        the dataset. Default is False.
+        the dataset. By default (when False), annotations are on the vertical
+        axis (rows) and features are on the horizontal axis (columns).
+        When set to True, features will be on the vertical axis and
+        annotations on the horizontal axis. Default is False.
     rotate_label : bool, optional
         If True, rotate x-axis labels by 45 degrees. Default is False.
     **kwargs:

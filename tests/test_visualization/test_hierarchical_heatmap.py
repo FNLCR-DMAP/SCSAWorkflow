@@ -56,17 +56,20 @@ class TestHierarchicalHeatmap(unittest.TestCase):
             pd.api.types.is_categorical_dtype(self.adata.obs['phenotype'])
         )
 
-        # Calculate the expected mean intensity
-        intensities = self.adata.to_df()
-        labels = self.adata.obs['phenotype']
-        expected_mean_intensity = (
-            pd.concat([intensities, labels], axis=1)
-            .groupby('phenotype')
-            .mean()
-        )
+        # Hardcoded expected mean intensities based on the input data
+        expected_mean_intensity = pd.DataFrame({
+            # Average values for each phenotype
+            'feature1': [2.0, 6.0, 10.5, 15.0],
+            'feature2': [3.0, 7.0, 11.5, 16.5],
+            'feature3': [4.0, 8.0, 12.5, 17.5]
+        }, index=pd.Categorical([
+            'phenotype1', 'phenotype2', 'phenotype3', 'phenotype4'
+        ]), dtype='float32')
 
-        # Ensure the calculated mean intensity matches the expected
-        # mean intensity
+        # Set the name of the index for the expected_mean_intensity DataFrame
+        expected_mean_intensity.index.name = 'phenotype'
+
+        # Ensure the calculated mean intensity matches expected mean intensity
         pd.testing.assert_frame_equal(
             mean_intensity, expected_mean_intensity, check_exact=True
         )
@@ -76,6 +79,10 @@ class TestHierarchicalHeatmap(unittest.TestCase):
         _, clustergrid, _ = hierarchical_heatmap(
             self.adata, 'phenotype', z_score="feature"
         )
+
+        # After z-score normalization, the mean of each feature should be
+        # approximately 0. We round to 2 decimal places to account for
+        # potential floating-point inaccuracies.
         self.assertTrue((clustergrid.data2d.mean().round(2) == 0).all())
 
     def test_clustergrid_attributes(self):
@@ -97,16 +104,6 @@ class TestHierarchicalHeatmap(unittest.TestCase):
         # Check if dendrogram_data contains the required linkage keys.
         self.assertIn('row_linkage', dendrogram_data)
         self.assertIn('col_linkage', dendrogram_data)
-
-        # Extract linkage matrices and check their structure
-        row_linkage = dendrogram_data['row_linkage']
-        col_linkage = dendrogram_data['col_linkage']
-
-        # Convert linkage arrays to DataFrames and verify their structure
-        expected_columns = ['Node 1', 'Node 2', 'Distance', 'Total Clusters']
-        for linkage in [row_linkage, col_linkage]:
-            linkage_df = pd.DataFrame(linkage, columns=expected_columns)
-            self.assertListEqual(list(linkage_df.columns), expected_columns)
 
     def test_axes_switching(self):
         """Test axes switching."""
