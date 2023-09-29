@@ -356,47 +356,56 @@ def heatmap(adata, column, layer=None, **kwargs):
     return mean_feature, fig, ax
 
 
-def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
-                         standard_scale=None, ax=None, **kwargs):
+def hierarchical_heatmap(adata, annotation, features=None, layer=None,
+                         dendrogram=True, z_score=None, swap_axes=False, **kwargs):
     """
-    Generates a hierarchical clustering heatmap.
-    Cells are stratified by `annotation`,
-    then mean intensities are calculated for each feature across all cells
-    to plot the heatmap using scanpy.tl.dendrogram and sc.pl.matrixplot.
+    Generates a hierarchical clustering heatmap and dendrogram.
+    Cells are grouped by annotation (e.g., cell types or clusters), and for each group,
+    the average expression intensity of each feature (e.g., protein or marker) is computed.
+    The heatmap is plotted using sc.pl.matrixplot and
+    the dendrogram using sc.pl.dendrogram if `dendrogram` is set to True.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
     annotation : str
-        Name of the annotation in adata.obs to group by and calculate mean
-        intensity.
+        Name of the annotation in adata.obs to group by and calculate mean intensity.
+    feature : list or None, optional
+        List of feature names (e.g., genes) to be included in the visualization.
+        If None, all features are used. Default is None.
     layer : str, optional
         The name of the `adata` layer to use to calculate the mean intensity.
         Default is None.
     dendrogram : bool, optional
-        If True, a dendrogram based on the hierarchical clustering between
-        the `annotation` categories is computed and plotted. Default is True.
-    ax : matplotlib.axes.Axes, optional
-        A matplotlib axes object. If not provided, a new figure and axes
-        object will be created. Default is None.
+        If True, a dendrogram based on the hierarchical clustering between the
+        `annotation` categories is computed and plotted alongside the matrix.
+        Default is True.
+    z_score : str, optional
+        If 'var', the z-score normalization is applied across features or markers.
+        Default is None.
+    swap_axes : bool, optional
+        If True, the axes of the heatmap are switched using the scanpy's
+        swap_axes functionality, effectively swapping rows and columns in the plot.
+        Default is False.
     **kwargs:
         Additional parameters passed to sc.pl.matrixplot function.
 
     Returns
     ----------
     mean_intensity : pandas.DataFrame
-        A DataFrame containing the mean intensity of cells for each
-        annotation.
+        A DataFrame containing the mean intensity of cells for each annotation.
     matrixplot : scanpy.pl.matrixplot
         A Scanpy matrixplot object.
+    dendro_data : dict or None
+        A dictionary containing the dendrogram data if `dendrogram` is True, else None.
 
     Examples
     --------
     >>> import matplotlib.pyplot as plt
-    >>> from spac.visualization import hierarchical_heatmap
+    >>> import pandas as pd
     >>> import anndata
-
+    >>> from spac.visualization import hierarchical_heatmap
     >>> X = pd.DataFrame([[1, 2], [3, 4]], columns=['gene1', 'gene2'])
     >>> annotation = pd.DataFrame(['type1', 'type2'], columns=['cell_type'])
     >>> all_data = anndata.AnnData(X=X, obs=annotation)
@@ -405,25 +414,19 @@ def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
     >>> mean_intensity, matrixplot = hierarchical_heatmap(all_data,
     ...                                                   "cell_type",
     ...                                                   layer=None,
-    ...                                                   standard_scale='var',
-    ...                                                   ax=None)
+    ...                                                   z_score='var',
+    ...                                                   ax=ax,
+    ...                                                   swap_axes=True)
     # Display the figure
     # matrixplot.show()
     """
 
-    # Check if annotation exists in adata
-    if annotation not in adata.obs.columns:
-        msg = (f"The annotation '{annotation}' does not exist in the "
-               f"provided AnnData object. Available annotations are: "
-               f"{list(adata.obs.columns)}")
-        raise KeyError(msg)
-
-    # Check if the layer exists in adata
-    if layer and layer not in adata.layers.keys():
-        msg = (f"The layer '{layer}' does not exist in the "
-               f"provided AnnData object. Available layers are: "
-               f"{list(adata.layers.keys())}")
-        raise KeyError(msg)
+    # Use utility functions to check inputs
+    check_annotation(adata, annotations=annotation)
+    if features:
+        check_feature(adata, features=features)
+    if layer:
+        check_table(adata, tables=layer)
 
     # Raise an error if there are any NaN values in the annotation column
     if adata.obs[annotation].isna().any():
@@ -435,30 +438,52 @@ def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
     grouped = pd.concat([intensities, labels], axis=1).groupby(annotation)
     mean_intensity = grouped.mean()
 
+    # Apply z-score normalization if required
+    if z_score == 'var':
+        mean_intensity = (mean_intensity - mean_intensity.mean()) / mean_intensity.std(ddof=0)
+        mean_intensity = mean_intensity.round(4)
+
+    # Enforce Symmetry on mean_intensity (assuming it's a square matrix)
+    #upper_tri_idx = np.triu_indices_from(mean_intensity, 1)
+    #mean_intensity.values[upper_tri_idx] = mean_intensity.T.values[upper_tri_idx]
+
     # Reset the index of mean_feature
     mean_intensity = mean_intensity.reset_index()
+    print(mean_intensity)
 
     # Convert mean_intensity to AnnData
     mean_intensity_adata = sc.AnnData(
-        X=mean_intensity.iloc[:, 1:].values,
+        X=mean_intensity.iloc[:, 1:].values,  # Use data starting from the second column
         obs=pd.DataFrame(
             index=mean_intensity.index,
             data={
                 annotation: mean_intensity.iloc[:, 0]
-                .astype('category').values
+                .astype('category').values  # Use the first column as annotations
             }
         ),
-        var=pd.DataFrame(index=mean_intensity.columns[1:])
+        var=pd.DataFrame(index=mean_intensity.columns[1:])  # Use column names starting from the second column as variable names
     )
 
-    # Compute dendrogram if needed
+    # Inspect the mean_intensity_adata object for symmetry and shape
+    #print("Shape of mean_intensity_adata.X:", mean_intensity_adata.X.shape)
+    #is_symmetric = np.allclose(mean_intensity_adata.X, mean_intensity_adata.X.T)
+    #print("Is the matrix symmetric?", is_symmetric)
+    #if not is_symmetric:
+    #    print("The matrix isn't symmetric, which may cause issues in dendrogram computation.")
+
+    # Compute and plot dendrogram if needed
+    dendro_data = None
+    mean_intensity_adata.obs[annotation] = mean_intensity_adata.obs[annotation].astype('category')
     if dendrogram:
         sc.tl.dendrogram(
             mean_intensity_adata,
             groupby=annotation,
-            var_names=mean_intensity_adata.var_names,
-            n_pcs=None
+            var_names=mean_intensity_adata.var_names
         )
+        # Plotting the dendrogram
+        plt.figure(figsize=(8, 6))
+        sc.pl.dendrogram(mean_intensity_adata, groupby=annotation, show=False)
+        dendro_data = mean_intensity_adata.uns.get(f'dendrogram_{annotation}', None)
 
     # Create the matrix plot
     matrixplot = sc.pl.matrixplot(
@@ -466,10 +491,18 @@ def hierarchical_heatmap(adata, annotation, layer=None, dendrogram=True,
         var_names=mean_intensity_adata.var_names,
         groupby=annotation, use_raw=False,
         dendrogram=dendrogram,
-        standard_scale=standard_scale, cmap="viridis",
-        return_fig=True, ax=ax, show=False, **kwargs
+        cmap="viridis", return_fig=True,
+        swap_axes=swap_axes,
+        show=False,
+        **kwargs
     )
-    return mean_intensity, matrixplot
+
+    # Rotate numbers 90 degrees if axes are swapped
+    if swap_axes and matrixplot and hasattr(matrixplot, 'ax') and matrixplot.ax:
+        for text in matrixplot.ax.get_xticklabels():
+            text.set_rotation(90)
+
+    return mean_intensity, matrixplot, dendro_data
 
 
 def threshold_heatmap(
