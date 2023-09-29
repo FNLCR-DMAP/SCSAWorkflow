@@ -5,6 +5,7 @@ import anndata
 import warnings
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
+from scipy import stats
 
 
 def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
@@ -517,21 +518,14 @@ def z_score_normalization(adata, layer=None):
     # Check if the provided layer exists in the AnnData object
     if layer:
         check_table(adata, tables=layer)
-
-        means = np.mean(adata.layers[layer], axis=0)
-        std_devs = np.std(adata.layers[layer], axis=0)
+        data_to_normalize = adata.layers[layer]
     else:
-        means = np.mean(adata.X, axis=0)
-        std_devs = np.std(adata.X, axis=0)
+        data_to_normalize = adata.X
 
-    # Avoid division by zero
-    std_devs[std_devs == 0] = 1
+    # Compute z-scores using scipy.stats.zscore
+    z_scores = stats.zscore(data_to_normalize, axis=0, nan_policy='omit')
 
-    if layer:
-        z_scores = (adata.layers[layer] - means) / std_devs
-        adata.layers['z_scores'] = z_scores
-    else:
-        z_scores = (adata.X - means) / std_devs
-        adata.layers['z_scores'] = z_scores
+    # Store the computed z-scores in the 'z_scores' layer
+    adata.layers['z_scores'] = z_scores
 
     return adata
