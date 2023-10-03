@@ -79,7 +79,7 @@ class TestDownsampleCells(unittest.TestCase):
             n_samples=n_samples, stratify=True
         )
         actual_counts = df_downsampled['annotations'].value_counts()
-        self.assertTrue(actual_counts.get('group_small', 0) >= 1)
+        self.assertTrue(actual_counts.get('group_small', 0), 1)
 
     def test_stratification_with_rounding(self):
         """Test stratification behavior with rounding.
@@ -91,7 +91,7 @@ class TestDownsampleCells(unittest.TestCase):
         of samples matches the desired 'n_samples'. The expected outcome should
         closely match the original distribution of groups.
         """
-
+        # Use Dictionary with Lists Directly
         data_dict = {
             'annotations': (
                 ['group1'] * 487 +
@@ -101,7 +101,9 @@ class TestDownsampleCells(unittest.TestCase):
             'value': list(range(1, 1001))
         }
 
+        # Explicitly Specify Index
         df_rounding = pd.DataFrame(data_dict, index=range(1000))
+
         n_samples = 100
         df_downsampled = downsample_cells(
             df_rounding, 'annotations', n_samples=n_samples, stratify=True
@@ -125,11 +127,13 @@ class TestDownsampleCells(unittest.TestCase):
         )
 
         # Expected counts based on stratified sampling
-        total_cells = len(self.df_single_random)
+        # annotations1: round(50/total_cells * n_samples)
+        # annotations2: round(30/total_cells * n_samples)
+        # annotations3: round(20/total_cells * n_samples)
         expected_counts = {
-            'annotations1': round(50/total_cells * n_samples),
-            'annotations2': round(30/total_cells * n_samples),
-            'annotations3': round(20/total_cells * n_samples)
+            'annotations1': 30,  # 50% of total observations
+            'annotations2': 18,  # 30% of total observations
+            'annotations3': 12   # 20% of total observations
         }
 
         actual_counts = df_downsampled_stratified[

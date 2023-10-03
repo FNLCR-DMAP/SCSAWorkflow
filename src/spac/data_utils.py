@@ -6,6 +6,7 @@ import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
+import logging
 
 
 def ingest_cells(dataframe,
@@ -480,7 +481,7 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
     This function offers two primary modes of operation:
     1. **Grouping (stratify=False)**:
        - For a single annotation: The data is grouped by unique values of the
-         annotation,and 'n_samples' rows are selected from each group.
+         annotation, and 'n_samples' rows are selected from each group.
        - For multiple annotations: The data is grouped based on unique
          combinations of the annotations, and 'n_samples' rows are selected
          from each combined group.
@@ -507,7 +508,7 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
         - stratify=False: Returns 'n_samples' for each unique value (or
           combination) of annotations.
         - stratify=True: Returns a total of 'n_samples' stratified by the
-          frequency of annotations.
+          frequency of the every label or combined label in the annotation(s).
     stratify : bool, default=False
         If true, perform proportionate stratified sampling based on the unique
         combinations of annotations. This ensures that the downsampled dataset
@@ -544,6 +545,7 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
     should have in the original dataset to appear in the downsampled version.
     """
 
+    logging.basicConfig(level=logging.WARNING)
     # Convert annotations to list if it's a string
     if isinstance(annotations, str):
         annotations = [annotations]
@@ -576,9 +578,25 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
 
         # Exclude groups with fewer samples than the min_threshold
         filtered_freqs = freqs[freqs * len(input_data) >= min_threshold]
+
+        # Log warning for groups that are excluded
+        excluded_groups = freqs[~freqs.index.isin(filtered_freqs.index)]
+        for group, count in excluded_groups.items():
+            logging.warning(
+                f"Group '{group}' with count {count} is excluded"
+                f" due to low frequency."
+            )
+
         freqs = freqs[freqs.index.isin(filtered_freqs.index)]
 
         samples_per_group = (freqs * n_samples).round().astype(int)
+
+        # Identify groups that have non-zero frequency
+        # but zero samples after rounding
+        zero_sample_groups = samples_per_group[samples_per_group == 0]
+        groups_with_zero_samples = zero_sample_groups.index
+        group_freqs = freqs[groups_with_zero_samples]
+        original_counts = group_freqs * len(input_data)
 
         # Ensure each group has at least one sample if its frequency
         # is non-zero
@@ -586,6 +604,19 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
         samples_per_group[condition] = freqs[condition].apply(
             lambda x: 1 if x > 0 else 0
         )
+
+        # Log a warning for the adjusted groups
+        if not original_counts.empty:
+            group_count_pairs = [
+                f"'{group}': {count}"
+                for group, count in original_counts.items()
+            ]
+            summary = ', '.join(group_count_pairs)
+
+            logging.warning(
+                f"Groups adjusted to have at least one sample"
+                f" due to non-zero frequency: {summary}."
+            )
 
         # If have extra samples due to rounding, remove them from the
         # largest groups
@@ -607,7 +638,7 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
         output_data = pd.concat(sampled_data)
 
     else:
-        output_data = input_data.groupby(grouping_col).apply(
+        output_data = input_data.groupby(grouping_col, group_keys=False).apply(
             lambda x: x.head(min(n_samples, len(x)))
         ).reset_index(drop=True)
 
