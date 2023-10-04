@@ -7,6 +7,7 @@ import warnings
 from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
 import logging
+from collections import defaultdict
 
 
 def ingest_cells(dataframe,
@@ -508,7 +509,7 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
         - stratify=False: Returns 'n_samples' for each unique value (or
           combination) of annotations.
         - stratify=True: Returns a total of 'n_samples' stratified by the
-          frequency of the every label or combined label in the annotation(s).
+          frequency of every label or combined labels in the annotation(s).
     stratify : bool, default=False
         If true, perform proportionate stratified sampling based on the unique
         combinations of annotations. This ensures that the downsampled dataset
@@ -582,9 +583,11 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
         # Log warning for groups that are excluded
         excluded_groups = freqs[~freqs.index.isin(filtered_freqs.index)]
         for group, count in excluded_groups.items():
+            frequency = freqs.get(group, 0)
             logging.warning(
-                f"Group '{group}' with count {count} is excluded"
-                f" due to low frequency."
+                f"Group '{group}' with count {count} "
+                f"(frequency: {frequency:.4f}) "
+                f"is excluded due to low frequency."
             )
 
         freqs = freqs[freqs.index.isin(filtered_freqs.index)]
@@ -620,9 +623,18 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
 
         # If have extra samples due to rounding, remove them from the
         # largest groups
+        removed_samples = defaultdict(int)
         while samples_per_group.sum() > n_samples:
             max_group = samples_per_group.idxmax()
             samples_per_group[max_group] -= 1
+            removed_samples[max_group] += 1
+
+        # Log warning about the number of samples removed from each group
+        for group, count in removed_samples.items():
+            logging.warning(
+                f"{count} sample(s) were removed from group '{group}'"
+                f" due to rounding adjustments."
+            )
 
         # Sample data
         sampled_data = []
@@ -642,8 +654,13 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
             lambda x: x.head(min(n_samples, len(x)))
         ).reset_index(drop=True)
 
-    # Print the number of rows in the resulting data
-    print(f"Number of rows in the returned data: {len(output_data)}")
+    # Log the final counts for each label in the downsampled dataset
+    label_counts = output_data[grouping_col].value_counts()
+    for label, count in label_counts.items():
+        logging.info(f"Final count for label '{label}': {count}")
+
+    # Log the total number of rows in the resulting data
+    logging.info(f"Number of rows in the returned data: {len(output_data)}")
 
     return output_data
 
