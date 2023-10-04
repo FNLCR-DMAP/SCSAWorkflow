@@ -6,6 +6,8 @@ import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
+import logging
+from collections import defaultdict
 
 
 def append_annotation(
@@ -511,7 +513,6 @@ def select_values(data, annotation, values=None):
             raise ValueError(
                 f"Column {annotation} does not exist in the dataframe"
             )
-
         # If values exist in annotation, filter data
         if values is not None:
             filtered_data = data[data[annotation].isin(values)]
@@ -522,78 +523,196 @@ def select_values(data, annotation, values=None):
     return data
 
 
-def downsample_cells(data, annotation, n_samples=None,
-                     stratify=False, rand=False):
+def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
+                     rand=False, combined_col_name='_combined_',
+                     min_threshold=5):
     """
-    Reduces the number of cells in the data by either selecting n_samples from
-    every possible value of annotation, or returning n_samples
-    stratified by the frequency of values in annotation.
+    Custom downsampling of data based on one or more annotations.
+
+    This function offers two primary modes of operation:
+    1. **Grouping (stratify=False)**:
+       - For a single annotation: The data is grouped by unique values of the
+         annotation, and 'n_samples' rows are selected from each group.
+       - For multiple annotations: The data is grouped based on unique
+         combinations of the annotations, and 'n_samples' rows are selected
+         from each combined group.
+
+    2. **Stratification (stratify=True)**:
+       - Annotations (single or multiple) are combined into a new column.
+       - Proportionate stratified sampling is performed based on the unique
+         combinations in the new column, ensuring that the downsampled dataset
+         maintains the proportionate representation of each combined group
+         from the original dataset.
 
     Parameters
     ----------
-    data : pd.DataFrame
+    Parameters
+    ----------
+    input_data : pd.DataFrame
         The input data frame.
-    annotation : str
-        The column name to downsample on.
+    annotations : str or list of str
+        The column name(s) to downsample on. If multiple column names are
+        provided, their values are combined using an underscore as a separator.
     n_samples : int, default=None
-        The max number of samples to return for each group if stratify is
-        False, or in total if stratify is True. If None, all samples returned.
+        The number of samples to return. Behavior differs based on the
+        'stratify' parameter:
+        - stratify=False: Returns 'n_samples' for each unique value (or
+          combination) of annotations.
+        - stratify=True: Returns a total of 'n_samples' stratified by the
+          frequency of every label or combined labels in the annotation(s).
     stratify : bool, default=False
-        If true, stratify the returned values based on their input frequency.
+        If true, perform proportionate stratified sampling based on the unique
+        combinations of annotations. This ensures that the downsampled dataset
+        maintains the proportionate representation of each combined group from
+        the original dataset.
     rand : bool, default=False
         If true and stratify is True, randomly select the returned cells.
         Otherwise, choose the first n cells.
+    combined_col_name : str, default='_combined_'
+        Name of the column that will store combined values when multiple
+        annotation columns are provided.
+    min_threshold : int, default=5
+        The minimum number of samples a combined group should have in the
+        original dataset to be considered in the downsampled dataset. Groups
+        with fewer samples than this threshold will be excluded from the
+        stratification process. Adjusting this parameter determines the
+        minimum presence a combined group should have in the original dataset
+        to appear in the downsampled version.
 
     Returns
     -------
-    data : pd.DataFrame
-        The downsampled data frame.
+    output_data: pd.DataFrame
+        The proportionately stratified downsampled data frame.
 
-    Examples
-    --------
-    >>> df = pd.DataFrame({
-    ...    'annotation': ['a', 'a', 'a', 'b', 'b', 'c'],
-    ...    'value': [1, 2, 3, 4, 5, 6]
-    ... })
-    >>> print(downsample_cells(df, 'annotation', n_samples=2))
+    Notes
+    -----
+    This function emphasizes proportionate stratified sampling, ensuring that
+    the downsampled dataset is a representative subset of the original data
+    with respect to the combined annotations. Due to this proportionate nature,
+    not all unique combinations from the original dataset might be present in
+    the downsampled dataset, especially if a particular combination has very
+    few samples in the original dataset. The `min_threshold` parameter can be
+    adjusted to determine the minimum number of samples a combined group
+    should have in the original dataset to appear in the downsampled version.
     """
-    # Check if the column to downsample on exists
-    if annotation not in data.columns:
+
+    logging.basicConfig(level=logging.WARNING)
+    # Convert annotations to list if it's a string
+    if isinstance(annotations, str):
+        annotations = [annotations]
+
+    # Check if the columns to downsample on exist
+    missing_columns = [
+        col for col in annotations if col not in input_data.columns
+    ]
+    if missing_columns:
         raise ValueError(
-            f"Column {annotation} does not exist in the dataframe"
+            f"Columns {missing_columns} do not exist in the dataframe"
         )
 
-    if n_samples is not None:
-        # Stratify selection
-        if stratify:
-            # Determine frequencies of each group
-            freqs = data[annotation].value_counts(normalize=True)
-            n_samples_per_group = (freqs * n_samples).astype(int)
-            samples = []
-            # Group by annotation and sample from each group
-            for group, group_data in data.groupby(annotation):
-                n_group_samples = n_samples_per_group.get(group, 0)
-                if rand:
-                    # Randomly select the returned cells
-                    samples.append(group_data.sample(min(n_group_samples,
-                                                         len(group_data))))
-                else:
-                    # Choose the first n cells
-                    samples.append(group_data.head(min(n_group_samples,
-                                                       len(group_data))))
-            # Concatenate all samples
-            data = pd.concat(samples)
-        else:
-            # Non-stratified selection
-            # Select the first n cells from each group
-            data = data.groupby(annotation).apply(
-                lambda x: x.head(n=min(n_samples, len(x)))
-            ).reset_index(drop=True)
+    # If n_samples is None, return the input data without processing
+    if n_samples is None:
+        return input_data.copy()
 
-    # Print the number of rows in the resulting data
-    print(f"Number of rows in the returned data: {len(data)}")
+    # Combine annotations into a single column if multiple annotations
+    if len(annotations) > 1:
+        input_data[combined_col_name] = input_data[annotations].apply(
+            lambda row: '_'.join(row.values.astype(str)), axis=1)
+        grouping_col = combined_col_name
+    else:
+        grouping_col = annotations[0]
 
-    return data
+    # Stratify selection
+    if stratify:
+        # Calculate proportions
+        freqs = input_data[grouping_col].value_counts(normalize=True)
+
+        # Exclude groups with fewer samples than the min_threshold
+        filtered_freqs = freqs[freqs * len(input_data) >= min_threshold]
+
+        # Log warning for groups that are excluded
+        excluded_groups = freqs[~freqs.index.isin(filtered_freqs.index)]
+        for group, count in excluded_groups.items():
+            frequency = freqs.get(group, 0)
+            logging.warning(
+                f"Group '{group}' with count {count} "
+                f"(frequency: {frequency:.4f}) "
+                f"is excluded due to low frequency."
+            )
+
+        freqs = freqs[freqs.index.isin(filtered_freqs.index)]
+
+        samples_per_group = (freqs * n_samples).round().astype(int)
+
+        # Identify groups that have non-zero frequency
+        # but zero samples after rounding
+        zero_sample_groups = samples_per_group[samples_per_group == 0]
+        groups_with_zero_samples = zero_sample_groups.index
+        group_freqs = freqs[groups_with_zero_samples]
+        original_counts = group_freqs * len(input_data)
+
+        # Ensure each group has at least one sample if its frequency
+        # is non-zero
+        condition = samples_per_group == 0
+        samples_per_group[condition] = freqs[condition].apply(
+            lambda x: 1 if x > 0 else 0
+        )
+
+        # Log a warning for the adjusted groups
+        if not original_counts.empty:
+            group_count_pairs = [
+                f"'{group}': {count}"
+                for group, count in original_counts.items()
+            ]
+            summary = ', '.join(group_count_pairs)
+
+            logging.warning(
+                f"Groups adjusted to have at least one sample"
+                f" due to non-zero frequency: {summary}."
+            )
+
+        # If have extra samples due to rounding, remove them from the
+        # largest groups
+        removed_samples = defaultdict(int)
+        while samples_per_group.sum() > n_samples:
+            max_group = samples_per_group.idxmax()
+            samples_per_group[max_group] -= 1
+            removed_samples[max_group] += 1
+
+        # Log warning about the number of samples removed from each group
+        for group, count in removed_samples.items():
+            logging.warning(
+                f"{count} sample(s) were removed from group '{group}'"
+                f" due to rounding adjustments."
+            )
+
+        # Sample data
+        sampled_data = []
+        for group, group_data in input_data.groupby(grouping_col):
+            sample_count = samples_per_group.get(group, 0)
+            sample_size = min(sample_count, len(group_data))
+            if rand:
+                sampled_data.append(group_data.sample(sample_size))
+            else:
+                sampled_data.append(group_data.head(sample_size))
+
+        # Concatenate all samples
+        output_data = pd.concat(sampled_data)
+
+    else:
+        output_data = input_data.groupby(grouping_col, group_keys=False).apply(
+            lambda x: x.head(min(n_samples, len(x)))
+        ).reset_index(drop=True)
+
+    # Log the final counts for each label in the downsampled dataset
+    label_counts = output_data[grouping_col].value_counts()
+    for label, count in label_counts.items():
+        logging.info(f"Final count for label '{label}': {count}")
+
+    # Log the total number of rows in the resulting data
+    logging.info(f"Number of rows in the returned data: {len(output_data)}")
+
+    return output_data
 
 
 def calculate_centroid(
