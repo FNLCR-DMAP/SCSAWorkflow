@@ -464,13 +464,21 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         var=pd.DataFrame(index=mean_intensity.columns[1:])  # Use column names starting from the second column as variable names
     )
 
-    # Inspect the mean_intensity_adata object for symmetry and shape
+    print("FL - Inspect the mean_intensity_adata object for symmetry and shape")
+    print("FL - Shape of mean_intensity_adata.X:", mean_intensity_adata.X.shape)
     #print("Shape of mean_intensity_adata.X:", mean_intensity_adata.X.shape)
     #is_symmetric = np.allclose(mean_intensity_adata.X, mean_intensity_adata.X.T)
     #print("Is the matrix symmetric?", is_symmetric)
     #if not is_symmetric:
     #    print("The matrix isn't symmetric, which may cause issues in dendrogram computation.")
 
+    # Inspecting mean_intensity_adata
+    print("===== mean_intensity_adata =====")
+    print("mean_intensity_adata shape:", mean_intensity_adata.shape)
+    print("First few rows of mean_intensity_adata:\n", mean_intensity_adata.to_df().head())
+    print("mean_intensity_adata.obs:\n", mean_intensity_adata.obs.head())
+    print("mean_intensity_adata.var:\n", mean_intensity_adata.var.head())
+    print("Number of NaN values in mean_intensity_adata.X:", np.isnan(mean_intensity_adata.X).sum())
     # Compute and plot dendrogram if needed
     dendro_data = None
     mean_intensity_adata.obs[annotation] = mean_intensity_adata.obs[annotation].astype('category')
