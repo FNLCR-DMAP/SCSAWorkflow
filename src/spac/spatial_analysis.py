@@ -13,6 +13,7 @@ def spatial_interaction(
         analysis_method,
         stratify_by=None,
         ax=None,
+        return_matrix=False,
         **kwargs):
     """
     Perform spatial analysis on the selected annotation in the dataset.
@@ -32,14 +33,23 @@ def spatial_interaction(
             "Neighborhood Enrichment" and "Cluster Interaction Matrix".
 
         stratify_by : str or list of strs
-            The annotation[s] to stratify the dataset. If single annotation is
-            passed, the dataset will stratify by the unique values in
-            the annotation column. If n (n>=2) annotations are passed,
-            the function will stratify the dataset basing on existing
-            label combinations.
+            The annotation[s] to stratify the dataset when generating
+            interaction plots. If single annotation is passed, the dataset
+            will be stratified by the unique labels in the annotation column.
+            If n (n>=2) annotations are passed, the function will be stratified
+            based on existing combination of labels in the passed annotations.
 
         ax: matplotlib.axes.Axes, default None
             The matplotlib Axes to display the image.
+
+        return_matrix: boolean, default False
+            If true, the fucntion will return a list of two dictionaries,
+            the first contains axes and the second containing computed matrix.
+            Note that for Neighborhood Encrichment, the matrix will be a tuple
+            with the z-score and the enrichment count.
+            For Cluster Interaction Matrix, it will returns the
+            interaction matrix.
+            If False, the function will return only the axes dictaionary.
 
         **kwargs
             Keyword arguments for matplotlib.pyplot.text()
@@ -64,38 +74,106 @@ def spatial_interaction(
     def Neighborhood_Enrichment_Analysis(
                 adata,
                 new_annotation_name,
-                ax):
+                ax,
+                return_matrix=False
+            ):
 
         # Calculate Neighborhood_Enrichment
-        sq.gr.nhood_enrichment(
-                    adata,
-                    cluster_key=new_annotation_name)
+        if return_matrix:
+            matrix = sq.gr.nhood_enrichment(
+                        adata,
+                        copy=True,
+                        cluster_key=new_annotation_name
+                )
+
+            sq.gr.nhood_enrichment(
+                        adata,
+                        cluster_key=new_annotation_name
+                )
+        else:
+            sq.gr.nhood_enrichment(
+                        adata,
+                        cluster_key=new_annotation_name
+                )
 
         # Plot Neighborhood_Enrichment
         sq.pl.nhood_enrichment(
                     adata,
                     cluster_key=new_annotation_name,
                     ax=ax,
-                    **kwargs)
+                    **kwargs
+            )
 
-        return ax
+        if return_matrix:
+            return [ax, matrix]
+        else:
+            return ax
 
     def Cluster_Interaction_Matrix_Analysis(
                 adata,
                 new_annotation_name,
-                ax):
+                ax,
+                return_matrix=False
+            ):
 
         # Calculate Cluster_Interaction_Matrix
-        sq.gr.interaction_matrix(
+
+        if return_matrix:
+            matrix = sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name)
+                    cluster_key=new_annotation_name,
+                    copy=True
+            )
+
+            sq.gr.interaction_matrix(
+                    adata,
+                    cluster_key=new_annotation_name
+            )
+
+        else:
+            sq.gr.interaction_matrix(
+                    adata,
+                    cluster_key=new_annotation_name
+            )
 
         # Plot Cluster_Interaction_Matrix
         sq.pl.interaction_matrix(
                     adata,
                     cluster_key=new_annotation_name,
                     ax=ax,
-                    **kwargs)
+                    **kwargs
+            )
+
+        if return_matrix:
+            return [ax, matrix]
+        else:
+            return ax
+
+    # Perfrom the actual analysis, first call sq.gr.spatial_neighbors
+    # to calculate neighboring graph, then do different analysis.
+    def perform_analysis(
+            adata,
+            analysis_method,
+            new_annotation_name,
+            ax,
+            return_matrix=False
+    ):
+
+        sq.gr.spatial_neighbors(adata)
+
+        if analysis_method == "Neighborhood Enrichment":
+            ax = Neighborhood_Enrichment_Analysis(
+                    adata,
+                    new_annotation_name,
+                    ax,
+                    return_matrix)
+
+        elif analysis_method == "Cluster Interaction Matrix":
+            ax = Cluster_Interaction_Matrix_Analysis(
+                    adata,
+                    new_annotation_name,
+                    ax,
+                    return_matrix)
 
         return ax
 
@@ -117,17 +195,10 @@ def spatial_interaction(
         if not isinstance(stratify_by, str):
             if isinstance(stratify_by, list):
                 for item in stratify_by:
-                    if not isinstance(item, str):
-                        error_text = "Item in the stratify_by " + \
-                            "list should be " + \
-                            f"strings, getting {type(item)} for {item}."
-                        raise ValueError(error_text)
-
                     check_annotation(
                         adata,
                         item
                     )
-
             else:
                 error_text = "The stratify_by variable should be " + \
                     "single string or a list of string, currently is" + \
@@ -181,6 +252,7 @@ def spatial_interaction(
     # Compute a connectivity matrix from spatial coordinates
     if stratify_by:
         ax_dictionary = {}
+        matrix_dictionary = {}
         unique_values = adata.obs['concatenated_obs'].unique()
         buffer = io.BytesIO()
         pickle.dump(ax, buffer)
@@ -192,42 +264,49 @@ def spatial_interaction(
                 ] == subset_key
             ].copy()
 
-            sq.gr.spatial_neighbors(subset_adata)
-
             buffer.seek(0)
 
             ax_copy = pickle.load(buffer)
 
-            if analysis_method == "Neighborhood Enrichment":
-                ax_copy = Neighborhood_Enrichment_Analysis(
-                        subset_adata,
-                        new_annotation_name,
-                        ax_copy)
+            ax_copy = perform_analysis(
+                            subset_adata,
+                            analysis_method,
+                            new_annotation_name,
+                            ax_copy,
+                            return_matrix
+                        )
 
-            elif analysis_method == "Cluster Interaction Matrix":
-                ax_copy = Cluster_Interaction_Matrix_Analysis(
-                        subset_adata,
-                        new_annotation_name,
-                        ax_copy)
-
-            ax_dictionary[subset_key] = ax_copy
+            if return_matrix:
+                ax_dictionary[subset_key] = ax_copy[0]
+                matrix_dictionary[subset_key] = ax_copy[1]
+            else:
+                ax_dictionary[subset_key] = ax_copy
 
             del subset_adata
 
+        if return_matrix:
+            results = [
+                {"Ax": ax_dictionary},
+                {"Matrix": matrix_dictionary}
+            ]
+        else:
+            results = ax_dictionary
+
     else:
-        sq.gr.spatial_neighbors(adata)
+        ax = perform_analysis(
+                adata,
+                analysis_method,
+                new_annotation_name,
+                ax,
+                return_matrix
+            )
 
-        if analysis_method == "Neighborhood Enrichment":
-            ax = Neighborhood_Enrichment_Analysis(
-                    adata,
-                    new_annotation_name,
-                    ax)
+        if return_matrix:
+            results = [
+                {"Ax": ax[0]},
+                {"Matrix": ax[1]}
+            ]
+        else:
+            results = {"Full": ax}
 
-        elif analysis_method == "Cluster Interaction Matrix":
-            ax = Cluster_Interaction_Matrix_Analysis(
-                    adata,
-                    new_annotation_name,
-                    ax)
-        ax_dictionary = {"Full": ax}
-
-    return ax_dictionary
+    return results

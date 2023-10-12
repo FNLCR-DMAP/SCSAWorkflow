@@ -386,7 +386,7 @@ class TestSpatialInteraction(unittest.TestCase):
             # Each should be a matplotlib axis object
             self.assertIsInstance(ax_dict[value], plt.Axes)
 
-    def test_List_stratify_by(self):
+    def test_list_stratify_by(self):
         ax_dict = spatial_interaction(
             self.adata,
             "cluster_str",
@@ -409,6 +409,78 @@ class TestSpatialInteraction(unittest.TestCase):
 
             # Each should be a matplotlib axis object
             self.assertIsInstance(ax_dict[key], plt.Axes)
+
+    def test_return_matrix_and_stratify_by_combinations(self):
+        annotation = "cluster_num"
+        analysis_method = "Cluster Interaction Matrix"
+        stratify_options = [None, "cluster_str"]
+
+        for stratify_by in stratify_options:
+            for return_matrix in [False, True]:
+                with self.subTest(
+                        stratify_by=stratify_by,
+                        return_matrix=return_matrix
+                ):
+                    result = spatial_interaction(
+                        self.adata,
+                        annotation,
+                        analysis_method,
+                        stratify_by=stratify_by,
+                        return_matrix=return_matrix
+                    )
+
+                    # Assert that the result is a
+                    # list when return_matrix is True
+                    if return_matrix:
+                        self.assertIsInstance(result, list)
+                        self.assertEqual(len(result), 2)
+                        # Expect two dictionaries
+
+                        self.assertIsInstance(result, list)
+                        self.assertIn("Ax", result[0].keys())
+                        self.assertIn("Matrix", result[1].keys())
+
+                        if stratify_by is not None:
+                            # If stratification is used, assert that
+                            # the keys correspond to the unique values
+                            # in the stratification column
+                            unique_values = self.adata.obs[
+                                stratify_by
+                            ].unique()
+                            for item in result:
+                                for value in unique_values:
+                                    if value in item:
+                                        self.assertIsInstance(
+                                                item["Ax"][value],
+                                                plt.Axes
+                                            )
+                                        self.assertIsInstance(
+                                                item["Matrix"][value],
+                                                np.ndarray
+                                            )
+                    else:
+                        # When return_matrix is False, assert
+                        # that the result is a dictionary
+                        self.assertIsInstance(result, dict)
+
+                        if stratify_by is not None:
+                            # If stratification is used, assert
+                            # that the keys correspond to the unique values
+                            # in the stratification column
+                            unique_values = self.adata.obs[
+                                stratify_by
+                            ].unique()
+                            for value in unique_values:
+                                self.assertIn(value, result)
+                                self.assertIsInstance(
+                                        result[value],
+                                        plt.Axes
+                                    )
+                        else:
+                            # If no stratification is used, assert
+                            # that there is only one key
+                            self.assertEqual(len(result), 1)
+                            self.assertIn("Full", result.keys())
 
     def tearDown(self):
         del self.adata
