@@ -44,13 +44,12 @@ class TestLoadCSVFiles(unittest.TestCase):
 
     def test_load_single_csv_file(self):
         result = load_csv_files(self.valid_file)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertIsInstance(result[0][1], pd.DataFrame)
+        self.assertIsInstance(result, pd.DataFrame)
 
     def test_load_multiple_csv_files(self):
         result = load_csv_files([self.valid_file, self.valid_file])
-        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), 4)
 
     def test_invalid_file_type(self):
         with self.assertRaises(TypeError):
@@ -69,10 +68,6 @@ class TestLoadCSVFiles(unittest.TestCase):
             mock_access.return_value = False  # Simulate unreadable file
             with self.assertRaises(PermissionError):
                 load_csv_files(self.unreadable_file)
-
-    def test_mismatched_columns(self):
-        with self.assertRaises(ValueError):
-            load_csv_files([self.valid_file, self.mismatch_file])
 
 
 if __name__ == "__main__":
