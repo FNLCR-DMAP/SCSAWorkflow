@@ -301,8 +301,8 @@ def load_csv_files(file_names):
 
     Returns
     -------
-    list
-        A list of pandas dataframe of all the csv files.
+    pandas.dataframe
+        A wpandas dataframe of all the csv files.
     """
 
     # meta_schema = []
