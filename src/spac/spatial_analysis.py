@@ -14,6 +14,7 @@ def spatial_interaction(
         stratify_by=None,
         ax=None,
         return_matrix=False,
+        seed=None,
         **kwargs):
     """
     Perform spatial analysis on the selected annotation in the dataset.
@@ -51,6 +52,10 @@ def spatial_interaction(
             interaction matrix.
             If False, the function will return only the axes dictaionary.
 
+        seed: int, default None
+            Random seed for reproducibility, used in Neighborhood Enrichment
+            Analysis.
+
         **kwargs
             Keyword arguments for matplotlib.pyplot.text()
     Returns:
@@ -75,7 +80,9 @@ def spatial_interaction(
                 adata,
                 new_annotation_name,
                 ax,
-                return_matrix=False
+                return_matrix=False,
+                title=None,
+                seed=None
             ):
 
         # Calculate Neighborhood_Enrichment
@@ -83,26 +90,39 @@ def spatial_interaction(
             matrix = sq.gr.nhood_enrichment(
                         adata,
                         copy=True,
+                        seed=seed,
                         cluster_key=new_annotation_name
                 )
 
             sq.gr.nhood_enrichment(
                         adata,
+                        seed=seed,
                         cluster_key=new_annotation_name
                 )
         else:
             sq.gr.nhood_enrichment(
                         adata,
+                        seed=seed,
                         cluster_key=new_annotation_name
                 )
 
-        # Plot Neighborhood_Enrichment
-        sq.pl.nhood_enrichment(
-                    adata,
-                    cluster_key=new_annotation_name,
-                    ax=ax,
-                    **kwargs
-            )
+        if title:
+            # Plot Neighborhood_Enrichment
+            sq.pl.nhood_enrichment(
+                        adata,
+                        cluster_key=new_annotation_name,
+                        title=title,
+                        ax=ax,
+                        **kwargs
+                )
+        else:
+            # Plot Neighborhood_Enrichment
+            sq.pl.nhood_enrichment(
+                        adata,
+                        cluster_key=new_annotation_name,
+                        ax=ax,
+                        **kwargs
+                )
 
         if return_matrix:
             return [ax, matrix]
@@ -113,7 +133,8 @@ def spatial_interaction(
                 adata,
                 new_annotation_name,
                 ax,
-                return_matrix=False
+                return_matrix=False,
+                title=None
             ):
 
         # Calculate Cluster_Interaction_Matrix
@@ -136,12 +157,21 @@ def spatial_interaction(
                     cluster_key=new_annotation_name
             )
 
-        # Plot Cluster_Interaction_Matrix
-        sq.pl.interaction_matrix(
-                    adata,
-                    cluster_key=new_annotation_name,
-                    ax=ax,
-                    **kwargs
+        if title:
+            # Plot Cluster_Interaction_Matrix
+            sq.pl.interaction_matrix(
+                        adata,
+                        title=title,
+                        cluster_key=new_annotation_name,
+                        ax=ax,
+                        **kwargs
+                )
+        else:
+            sq.pl.interaction_matrix(
+                        adata,
+                        cluster_key=new_annotation_name,
+                        ax=ax,
+                        **kwargs
             )
 
         if return_matrix:
@@ -156,7 +186,9 @@ def spatial_interaction(
             analysis_method,
             new_annotation_name,
             ax,
-            return_matrix=False
+            return_matrix=False,
+            title=None,
+            seed=None
     ):
 
         sq.gr.spatial_neighbors(adata)
@@ -166,14 +198,17 @@ def spatial_interaction(
                     adata,
                     new_annotation_name,
                     ax,
-                    return_matrix)
+                    return_matrix,
+                    title,
+                    seed)
 
         elif analysis_method == "Cluster Interaction Matrix":
             ax = Cluster_Interaction_Matrix_Analysis(
                     adata,
                     new_annotation_name,
                     ax,
-                    return_matrix)
+                    return_matrix,
+                    title)
 
         return ax
 
@@ -268,12 +303,16 @@ def spatial_interaction(
 
             ax_copy = pickle.load(buffer)
 
+            image_title = f"Group: {subset_key}"
+
             ax_copy = perform_analysis(
                             subset_adata,
                             analysis_method,
                             new_annotation_name,
                             ax_copy,
-                            return_matrix
+                            return_matrix,
+                            image_title,
+                            seed
                         )
 
             if return_matrix:
@@ -298,7 +337,8 @@ def spatial_interaction(
                 analysis_method,
                 new_annotation_name,
                 ax,
-                return_matrix
+                return_matrix,
+                seed=seed
             )
 
         if return_matrix:

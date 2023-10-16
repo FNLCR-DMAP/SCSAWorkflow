@@ -2,6 +2,7 @@ import anndata
 import unittest
 import numpy as np
 import pandas as pd
+from numpy import array
 import matplotlib.pyplot as plt
 from spac.spatial_analysis import spatial_interaction
 
@@ -9,110 +10,46 @@ from spac.spatial_analysis import spatial_interaction
 class TestSpatialInteraction(unittest.TestCase):
     def setUp(self):
         # Create a mock AnnData object for testing
+        repetition = 2
         annotation = pd.DataFrame({
-            "cluster_num": [1, 2, 2, 1, 1, 2, 1, 2] * 5,
-            "cluster_str": [
-                "A", "B", "A", "B",
-                "A", "B", "A", "B"
-                ] * 5,
-            "labels": [
-                "Un", "De", "De", "De",
-                "Un", "Un", "De", "Un",
-                "Un", "Un", "Un", "De",
-                "De", "De", "De", "Un",
-                "Un", "De", "Un", "De"
-                ] * 2
-        })
+                    "cluster_num": [1, 1, 1, 1, 2, 2, 2, 2] * repetition,
+                    "cluster_str": [
+                        "A", "A", "B", "A",
+                        "B", "B", "A", "B"
+                        ] * repetition,
+                    "cluster_str2": [
+                        "Un", "De", "De", "De",
+                        "Un", "Un", "Un", "De"
+                        ] * repetition
+                })
+
         features = np.array(
-            [
-                [0.74676753, 0.46408353, 1.57989469],
-                [-0.70239818, 0.72763876, -0.97137637],
-                [0.7668926, 1.28649109, 0.00439471],
-                [0.1626119, -0.67745485, 0.133223],
-                [-0.76999373, 0.68962473, 1.21965841],
-                [0.30440098, -0.21207851, 0.06921215],
-                [2.02199453, 1.26504621, 0.1908807],
-                [-1.29639493, 0.24391637, 0.99816421],
-                [1.78321933, 0.17752491, -1.09286752],
-                [-0.30869161, 1.0884462, 0.57758739],
-                [0.48271656, -0.20947287, -0.69081094],
-                [-0.37602375, -0.46224323, -0.10643137],
-                [1.38178975, -1.15352462, 1.33530468],
-                [-0.89947323, 2.71234519, -1.2043588],
-                [1.03564018, -0.39764877, 1.07528684],
-                [-2.18967361, -0.8862305, 0.23347924],
-                [-0.14314478, -0.51110142, -0.59105464],
-                [-1.4396892, 0.98799238, 1.07133854],
-                [-0.69406544, 1.53425436, 0.06986254],
-                [-2.05036209, 0.0242316, -1.97612371],
-                [0.67404544, -0.36911984, 0.50482678],
-                [-0.6759334, -0.61206631, 1.60611651],
-                [-0.13852431, -0.68823812, 0.90864488],
-                [-0.40529142, -2.28500196, -0.49695203],
-                [-0.82450205, 0.08434124, 0.13808722],
-                [-0.0394261, 0.6574769, 0.99616492],
-                [-2.53752236, 0.6023303, -0.59271762],
-                [0.79551212, -0.69543986, -0.45754289],
-                [0.0151175, -1.54801625, 1.2467797],
-                [0.79318999, 2.11103018, 0.54927102],
-                [-0.14915621, -0.38113325, -0.11962863],
-                [-1.52999662, -0.99229833, -1.79421771],
-                [0.41009931, -1.76932615, 0.89048498],
-                [1.38687137, -0.51228094, 0.41986469],
-                [0.32971825, -1.45386377, -0.60882985],
-                [-0.5973023, -1.05662806, -1.44705104],
-                [-0.43171187, 0.68328617, 0.15106893],
-                [-0.2422716, -0.27264463, 2.87836626],
-                [0.3660139, 0.33811382, 0.20605574],
-                [-0.22853678, 0.89296266, -1.08729805]
-            ]
-        )
-        spatial_coords = np.array(
-            [
-                [-0.50022065, -0.07619456],
-                [0.80629849, 1.3394628],
-                [-1.76129432, -0.05689653],
-                [0.5263589, 0.44512444],
-                [0.5464698, 0.33697916],
-                [0.38636183, 1.02076166],
-                [-0.0772483, -0.61370415],
-                [-0.67429891, -2.04728207],
-                [1.64487174, 2.00882995],
-                [2.18092253, 0.59974797],
-                [-0.57880274, 1.15883317],
-                [-1.29041131, -0.62178807],
-                [0.33430965, -0.24713342],
-                [0.03485657, -0.1041557],
-                [0.65980237, -1.23234249],
-                [0.81474365, -1.22294307],
-                [-0.14663293, 1.51689158],
-                [0.09116057, 0.36915328],
-                [-0.91581849, 1.0130385],
-                [0.72576781, 0.00269482],
-                [0.01994862, 1.12024613],
-                [-0.13322151, -1.78447807],
-                [0.26643831, -0.42013604],
-                [-0.37204659, 0.13233973],
-                [-0.62107268, 0.56311141],
-                [0.60191124, -0.62487495],
-                [-0.77451973, -0.35540268],
-                [0.6807837, -0.14351254],
-                [0.06994339, 0.89862981],
-                [0.32838978, 0.07389066],
-                [-0.4867984, -1.09153204],
-                [1.41409357, -0.78526777],
-                [0.83992281, 1.78054052],
-                [-0.75939187, -0.72872904],
-                [-0.60859419, -0.3976462],
-                [0.51635987, 0.58870188],
-                [0.31449339, 0.31681774],
-                [-0.42982571, -0.70367001],
-                [-1.48978518, -0.1277682],
-                [-1.0395289, -0.50693076]
-            ]
-        )
-        self.adata = anndata.AnnData(X=features, obs=annotation)
-        self.adata.obsm['spatial'] = spatial_coords
+                    [
+                        [1, 3, 5],
+                        [1, 3, 6],
+                        [1, 4, 5],
+                        [1, 4, 6],
+                        [2, 3, 5],
+                        [2, 3, 6],
+                        [2, 4, 5],
+                        [2, 4, 6]
+                    ])
+
+        n_features = np.tile(features, (repetition, 1))
+
+        spatial_coords = np.array([
+            [1, 1],
+            [1, 11],
+            [1, 11],
+            [1, 1],
+            [2, 1],
+            [2, 22],
+            [2, 22],
+            [2, 1]
+        ])
+        n_spatial_coords = np.tile(spatial_coords, (repetition, 1))
+        self.adata = anndata.AnnData(X=n_features, obs=annotation)
+        self.adata.obsm['spatial'] = n_spatial_coords
         self.run_CI = False
 
     def test_spatial_interaction_invalid_data_type(self):
@@ -149,7 +86,7 @@ class TestSpatialInteraction(unittest.TestCase):
         expect_string = "The annotation 'nonexistent_annotation' " + \
                         "does not exist in the provided dataset.\n" + \
                         "Existing annotations are:\n" + \
-                        "cluster_num\ncluster_str\nlabels"
+                        "cluster_num\ncluster_str\ncluster_str2"
         self.assertIsInstance(cm.exception, ValueError)
         print(str(cm.exception))
         self.assertEqual(
@@ -391,17 +328,11 @@ class TestSpatialInteraction(unittest.TestCase):
             self.adata,
             "cluster_str",
             "Neighborhood Enrichment",
-            stratify_by=[
-                "cluster_num",
-                "labels"
-                ]
+            stratify_by=["cluster_num"]
             )
         combined_keys = self.adata.obs[
-            [
-                "cluster_num",
-                "labels"
-            ]
-             ].astype(str).agg('_'.join, axis=1).unique()
+                "cluster_num"
+            ].astype(str).unique()
 
         for key in combined_keys:
             # Expect each combined key as a key in the returned dict
@@ -481,6 +412,96 @@ class TestSpatialInteraction(unittest.TestCase):
                             # that there is only one key
                             self.assertEqual(len(result), 1)
                             self.assertIn("Full", result.keys())
+
+    def test_interaction_matrix_stratify_compute(self):
+        ax_dict = spatial_interaction(
+            self.adata,
+            "cluster_str2",
+            "Cluster Interaction Matrix",
+            stratify_by="cluster_num",
+            return_matrix=True
+            )
+
+        expected_ax_dict = {
+                    1: array([[24., 10.], [12., 2.]]),
+                    2: array([[2.,  8.], [10., 28.]])
+                }
+
+        for key, value in ax_dict[1]['Matrix'].items():
+            self.assertIn(
+                key,
+                expected_ax_dict.keys()
+            )
+
+            self.assertTrue(
+                np.array_equal(
+                    value,
+                    expected_ax_dict[key]
+                    )
+                )
+
+    def test_interaction_matrix_no_stratify_compute(self):
+        ax_dict = spatial_interaction(
+            self.adata,
+            "cluster_num",
+            "Cluster Interaction Matrix",
+            return_matrix=True
+            )
+
+        expected_array = array([[36., 24.], [12., 24.]])
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict[1]['Matrix'],
+                expected_array
+            )
+        )
+
+    def test_interaction_matrix_compute(self):
+        ax_dict = spatial_interaction(
+            self.adata,
+            "cluster_str2",
+            "Neighborhood Enrichment",
+            stratify_by="cluster_num",
+            return_matrix=True,
+            seed=42
+            )
+
+        expected_ax_dict = {
+            1: (
+                array([
+                            [-0.89849487, -0.52617258],
+                            [0.89849487,  0.52617258]
+                        ]),
+                array([
+                            [24, 10],
+                            [12,  2]
+                        ])
+                ),
+            2: (
+                array([
+                        [0.53420803, -1.1833491],
+                        [-0.53420803, 1.1833491]
+                    ]),
+                array([
+                        [2,  8],
+                        [10, 28]
+                    ])
+                )
+            }
+
+        for key, tuple_values in ax_dict[1]['Matrix'].items():
+            self.assertIn(
+                key,
+                expected_ax_dict.keys()
+            )
+            for i in range(len(tuple_values)):
+                self.assertTrue(
+                    np.allclose(
+                        tuple_values[i],
+                        expected_ax_dict[key][i]
+                    )
+                )
 
     def tearDown(self):
         del self.adata
