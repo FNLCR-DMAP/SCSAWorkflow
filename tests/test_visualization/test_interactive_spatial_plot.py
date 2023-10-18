@@ -49,11 +49,28 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         self.assertEqual(fig.layout.height, 10 * 100)
 
     def test_correct_image(self):
-        # Still in progress
         fig = interative_spatial_plot(self.adata, 'annotation_1')
-        # For demonstration, let's just check
-        # a single property of the plotly figure:
-        self.assertEqual(len(fig.data), 3)
+
+        # Check that all plots are scatter plots
+        for trace in fig.data:
+            self.assertEqual(trace.type, 'scatter')
+
+        # Check the x and y data
+        expected_x = self.adata.obsm['spatial'][:, 0]
+        expected_y = self.adata.obsm['spatial'][:, 1]
+        for idx, trace in enumerate(fig.data):
+            self.assertEqual(trace.x[0], expected_x[idx])
+            self.assertEqual(trace.y[0], expected_y[idx])
+
+        # Check the annotations/colors
+        # Assuming 'annotation_1' in your adata has unique colors
+        # that are represented in the plot
+        expected_colors = [
+            "annotation_1_" +
+            str(item) for item in self.adata.obs['annotation_1']
+        ]
+        for idx, trace in enumerate(fig.data):
+            self.assertEqual(trace.customdata[0], expected_colors[idx])
 
 
 if __name__ == "__main__":
