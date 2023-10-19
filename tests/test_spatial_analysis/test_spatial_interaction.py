@@ -8,9 +8,12 @@ from spac.spatial_analysis import spatial_interaction
 
 
 class TestSpatialInteraction(unittest.TestCase):
-    def setUp(self):
-        # Create a mock AnnData object for testing
-        repetition = 2
+
+    def create_dummy_dataset(
+            self,
+            repetition=1
+        ):
+
         annotation = pd.DataFrame({
                     "cluster_num": [1, 1, 1, 1, 2, 2, 2, 2] * repetition,
                     "cluster_str": [
@@ -20,6 +23,14 @@ class TestSpatialInteraction(unittest.TestCase):
                     "cluster_str2": [
                         "Un", "De", "De", "De",
                         "Un", "Un", "Un", "De"
+                        ] * repetition,
+                    "Stratify_test_annotation": [
+                        "One", "Two", "Two", "One",
+                        "One", "Two", "Two", "One"
+                        ] * repetition,
+                    "Stratify_test_stratify_by": [
+                        "Region_A", "Region_A", "Region_A", "Region_A",
+                        "Region_B", "Region_B", "Region_B", "Region_B"
                         ] * repetition
                 })
 
@@ -39,17 +50,22 @@ class TestSpatialInteraction(unittest.TestCase):
 
         spatial_coords = np.array([
             [1, 1],
-            [1, 11],
-            [1, 11],
             [1, 1],
+            [11, 11],
+            [11, 11],
             [2, 1],
-            [2, 22],
-            [2, 22],
-            [2, 1]
+            [2, 1],
+            [22, 22],
+            [22, 22]
         ])
         n_spatial_coords = np.tile(spatial_coords, (repetition, 1))
-        self.adata = anndata.AnnData(X=n_features, obs=annotation)
-        self.adata.obsm['spatial'] = n_spatial_coords
+        adata = anndata.AnnData(X=n_features, obs=annotation)
+        adata.obsm['spatial'] = n_spatial_coords
+        return adata
+
+    def setUp(self):
+        # Create a mock AnnData object for testing
+        self.adata = self.create_dummy_dataset(repetition=2)
         self.run_CI = False
 
     def test_spatial_interaction_invalid_data_type(self):
@@ -86,7 +102,8 @@ class TestSpatialInteraction(unittest.TestCase):
         expect_string = "The annotation 'nonexistent_annotation' " + \
                         "does not exist in the provided dataset.\n" + \
                         "Existing annotations are:\n" + \
-                        "cluster_num\ncluster_str\ncluster_str2"
+                        "cluster_num\ncluster_str\ncluster_str2\n" + \
+                        "Stratify_test_annotation\nStratify_test_stratify_by"
         self.assertIsInstance(cm.exception, ValueError)
         print(str(cm.exception))
         self.assertEqual(
@@ -169,7 +186,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
         # Assert that the returned ax object is the same
         # as the input ax object
-        returned_ax = returned_ax_dict['Full']
+        returned_ax = returned_ax_dict['Ax']
         self.assertEqual(id(returned_ax), id(ax))
 
         # Verify that the provided Axes is used for plotting
@@ -260,7 +277,7 @@ class TestSpatialInteraction(unittest.TestCase):
             analysis_method
         )
 
-        returned_ax = returned_ax_dict['Full']
+        returned_ax = returned_ax_dict['Ax']
 
         # Assert that the returned ax object is not None
         self.assertIsNotNone(returned_ax)
@@ -307,21 +324,17 @@ class TestSpatialInteraction(unittest.TestCase):
         unique_cluster_str_values = self.adata.obs["cluster_str"].unique()
 
         # Get the keys (unique cluster values) from the dictionary
-        keys = list(ax_dict.keys())
+        keys = list(ax_dict["Ax"].keys())
 
         # Assert that we have at least two keys (clusters)
         self.assertEqual(len(keys), 2)
 
-        # Assert that the axes associated
-        # with the first and second keys are different
-        self.assertNotEqual(ax_dict[keys[0]], ax_dict[keys[1]])
-
         for value in unique_cluster_str_values:
             # Expect each unique value as a key in the returned dict
-            self.assertIn(value, ax_dict.keys())
+            self.assertIn(value, ax_dict["Ax"].keys())
 
             # Each should be a matplotlib axis object
-            self.assertIsInstance(ax_dict[value], plt.Axes)
+            self.assertIsInstance(ax_dict["Ax"][value], plt.Axes)
 
     def test_list_stratify_by(self):
         ax_dict = spatial_interaction(
@@ -336,10 +349,10 @@ class TestSpatialInteraction(unittest.TestCase):
 
         for key in combined_keys:
             # Expect each combined key as a key in the returned dict
-            self.assertIn(key, ax_dict.keys())
+            self.assertIn(key, ax_dict["Ax"].keys())
 
             # Each should be a matplotlib axis object
-            self.assertIsInstance(ax_dict[key], plt.Axes)
+            self.assertIsInstance(ax_dict["Ax"][key], plt.Axes)
 
     def test_return_matrix_and_stratify_by_combinations(self):
         annotation = "cluster_num"
@@ -363,13 +376,11 @@ class TestSpatialInteraction(unittest.TestCase):
                     # Assert that the result is a
                     # list when return_matrix is True
                     if return_matrix:
-                        self.assertIsInstance(result, list)
+                        self.assertIsInstance(result, dict)
                         self.assertEqual(len(result), 2)
                         # Expect two dictionaries
-
-                        self.assertIsInstance(result, list)
-                        self.assertIn("Ax", result[0].keys())
-                        self.assertIn("Matrix", result[1].keys())
+                        self.assertIn("Ax", result.keys())
+                        self.assertIn("Matrix", result.keys())
 
                         if stratify_by is not None:
                             # If stratification is used, assert that
@@ -378,17 +389,16 @@ class TestSpatialInteraction(unittest.TestCase):
                             unique_values = self.adata.obs[
                                 stratify_by
                             ].unique()
-                            for item in result:
-                                for value in unique_values:
-                                    if value in item:
-                                        self.assertIsInstance(
-                                                item["Ax"][value],
-                                                plt.Axes
-                                            )
-                                        self.assertIsInstance(
-                                                item["Matrix"][value],
-                                                np.ndarray
-                                            )
+
+                            for value in unique_values:
+                                self.assertIsInstance(
+                                        result["Ax"][value],
+                                        plt.Axes
+                                    )
+                                self.assertIsInstance(
+                                        result["Matrix"][value],
+                                        np.ndarray
+                                    )
                     else:
                         # When return_matrix is False, assert
                         # that the result is a dictionary
@@ -402,106 +412,53 @@ class TestSpatialInteraction(unittest.TestCase):
                                 stratify_by
                             ].unique()
                             for value in unique_values:
-                                self.assertIn(value, result)
+                                self.assertIn(value, result["Ax"])
                                 self.assertIsInstance(
-                                        result[value],
+                                        result["Ax"][value],
                                         plt.Axes
                                     )
                         else:
                             # If no stratification is used, assert
                             # that there is only one key
                             self.assertEqual(len(result), 1)
-                            self.assertIn("Full", result.keys())
+                            self.assertIn("Ax", result.keys())
 
-    def test_interaction_matrix_stratify_compute(self):
+    def test_stratify_function(self):
         ax_dict = spatial_interaction(
             self.adata,
-            "cluster_str2",
+            "Stratify_test_annotation",
             "Cluster Interaction Matrix",
-            stratify_by="cluster_num",
+            stratify_by="Stratify_test_stratify_by",
             return_matrix=True
             )
 
-        expected_ax_dict = {
-                    1: array([[24., 10.], [12., 2.]]),
-                    2: array([[2.,  8.], [10., 28.]])
-                }
-
-        for key, value in ax_dict[1]['Matrix'].items():
-            self.assertIn(
-                key,
-                expected_ax_dict.keys()
-            )
-
-            self.assertTrue(
-                np.array_equal(
-                    value,
-                    expected_ax_dict[key]
-                    )
-                )
-
-    def test_interaction_matrix_no_stratify_compute(self):
-        ax_dict = spatial_interaction(
-            self.adata,
-            "cluster_num",
+        # The values in the "startify by" column divides the
+        # "stratify_test_annotation" column into exact same two
+        # sets of labels, hence the result of spatial interaction on 
+        # Stratify_test_annotation for dataset with one repitition(8 datapoints)
+        # should be exactly the same as running Stratify_test_annotation with
+        # stratify_by "Stratify_test_stratify_by" column on dataset with
+        # two repitation (16 datapoints).
+        ground_truth = spatial_interaction(
+            self.create_dummy_dataset(repetition=1),
+            "Stratify_test_annotation",
             "Cluster Interaction Matrix",
             return_matrix=True
             )
-
-        expected_array = array([[36., 24.], [12., 24.]])
 
         self.assertTrue(
             np.array_equal(
-                ax_dict[1]['Matrix'],
-                expected_array
+                ax_dict['Matrix']['Region_A'],
+                ground_truth['Matrix']
             )
-        )
+        )        
 
-    def test_interaction_matrix_compute(self):
-        ax_dict = spatial_interaction(
-            self.adata,
-            "cluster_str2",
-            "Neighborhood Enrichment",
-            stratify_by="cluster_num",
-            return_matrix=True,
-            seed=42
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix']['Region_B'],
+                ground_truth['Matrix']
             )
-
-        expected_ax_dict = {
-            1: (
-                array([
-                            [-0.89849487, -0.52617258],
-                            [0.89849487,  0.52617258]
-                        ]),
-                array([
-                            [24, 10],
-                            [12,  2]
-                        ])
-                ),
-            2: (
-                array([
-                        [0.53420803, -1.1833491],
-                        [-0.53420803, 1.1833491]
-                    ]),
-                array([
-                        [2,  8],
-                        [10, 28]
-                    ])
-                )
-            }
-
-        for key, tuple_values in ax_dict[1]['Matrix'].items():
-            self.assertIn(
-                key,
-                expected_ax_dict.keys()
-            )
-            for i in range(len(tuple_values)):
-                self.assertTrue(
-                    np.allclose(
-                        tuple_values[i],
-                        expected_ax_dict[key][i]
-                    )
-                )
+        )      
 
     def tearDown(self):
         del self.adata

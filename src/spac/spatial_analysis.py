@@ -106,23 +106,15 @@ def spatial_interaction(
                         cluster_key=new_annotation_name
                 )
 
-        if title:
-            # Plot Neighborhood_Enrichment
-            sq.pl.nhood_enrichment(
-                        adata,
-                        cluster_key=new_annotation_name,
-                        title=title,
-                        ax=ax,
-                        **kwargs
-                )
-        else:
-            # Plot Neighborhood_Enrichment
-            sq.pl.nhood_enrichment(
-                        adata,
-                        cluster_key=new_annotation_name,
-                        ax=ax,
-                        **kwargs
-                )
+        # Plot Neighborhood_Enrichment
+        sq.pl.nhood_enrichment(
+                    adata,
+                    cluster_key=new_annotation_name,
+                    title=title,
+                    ax=ax,
+                    **kwargs
+            )
+
 
         if return_matrix:
             return [ax, matrix]
@@ -157,21 +149,12 @@ def spatial_interaction(
                     cluster_key=new_annotation_name
             )
 
-        if title:
-            # Plot Cluster_Interaction_Matrix
-            sq.pl.interaction_matrix(
-                        adata,
-                        title=title,
-                        cluster_key=new_annotation_name,
-                        ax=ax,
-                        **kwargs
-                )
-        else:
-            sq.pl.interaction_matrix(
-                        adata,
-                        cluster_key=new_annotation_name,
-                        ax=ax,
-                        **kwargs
+        sq.pl.interaction_matrix(
+                    adata,
+                    title=title,
+                    cluster_key=new_annotation_name,
+                    ax=ax,
+                    **kwargs
             )
 
         if return_matrix:
@@ -219,31 +202,12 @@ def spatial_interaction(
             f"Got {str(type(adata))}"
         raise ValueError(error_text)
 
-    # Check if annotation is in the dataset
+    # Check if stratify_by is list or list of str
     check_annotation(
         adata,
-        [annotation]
-    )
-
-    # Check if stratify_by is list or list of str
-    if stratify_by:
-        if not isinstance(stratify_by, str):
-            if isinstance(stratify_by, list):
-                for item in stratify_by:
-                    check_annotation(
-                        adata,
-                        item
-                    )
-            else:
-                error_text = "The stratify_by variable should be " + \
-                    "single string or a list of string, currently is" + \
-                    f"{type(stratify_by)}"
-                raise ValueError(error_text)
-        else:
-            check_annotation(
-                adata,
-                stratify_by
-            )
+        annotations=annotation,
+        parameter_name="stratify_by",
+        should_exist=True)
 
     if not isinstance(analysis_method, str):
         error_text = "The analysis methods must be a string."
@@ -276,13 +240,11 @@ def spatial_interaction(
 
     if stratify_by:
         if isinstance(stratify_by, list):
-            adata.obs[
-                'concatenated_obs'
-            ] = adata.obs[stratify_by].astype(str).agg('_'.join, axis=1)
+            adata.obs['concatenated_obs'] = \
+                adata.obs[stratify_by].astype(str).agg('_'.join, axis=1)
         else:
-            adata.obs[
-                'concatenated_obs'
-            ] = adata.obs[stratify_by]
+            adata.obs['concatenated_obs'] = \
+                adata.obs[stratify_by]
 
     # Compute a connectivity matrix from spatial coordinates
     if stratify_by:
@@ -294,9 +256,7 @@ def spatial_interaction(
         for subset_key in unique_values:
             # Subset the original AnnData object based on the unique value
             subset_adata = adata[
-                adata.obs[
-                    'concatenated_obs'
-                ] == subset_key
+                adata.obs['concatenated_obs'] == subset_key
             ].copy()
 
             buffer.seek(0)
@@ -324,12 +284,13 @@ def spatial_interaction(
             del subset_adata
 
         if return_matrix:
-            results = [
-                {"Ax": ax_dictionary},
-                {"Matrix": matrix_dictionary}
-            ]
+            results = {
+                "Ax": ax_dictionary,
+                "Matrix": matrix_dictionary
+            }
+
         else:
-            results = ax_dictionary
+            results = {"Ax": ax_dictionary}
 
     else:
         ax = perform_analysis(
@@ -342,11 +303,11 @@ def spatial_interaction(
             )
 
         if return_matrix:
-            results = [
-                {"Ax": ax[0]},
-                {"Matrix": ax[1]}
-            ]
+            results = {
+                "Ax": ax[0],
+                "Matrix": ax[1]
+            }
         else:
-            results = {"Full": ax}
+            results = {"Ax": ax}
 
     return results
