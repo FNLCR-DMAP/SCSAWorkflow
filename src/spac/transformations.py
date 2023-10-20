@@ -6,6 +6,7 @@ import warnings
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
+import umap as umap_lib
 
 
 def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
@@ -165,70 +166,83 @@ def tsne(adata, layer=None, **kwargs):
     return adata
 
 
-def UMAP(
+def run_umap(
         adata,
-        n_neighbors=15,
-        n_pcs=30,
+        n_neighbors=75,
         min_dist=0.1,
-        spread=1.0,
         n_components=2,
-        random_state=42,
-        layer=None):
+        metric='euclidean',
+        random_state=0,
+        transform_seed=42,
+        layer=None,
+        **kwargs
+):
     """
-    Perform UMAP analysis on specific layer information.
+    Perform UMAP analysis on the specific layer of the AnnData object
+    or the default data.
 
     Parameters
     ----------
     adata : AnnData
         Annotated data matrix.
-    n_neighbors : int, default=15
-        Number of neighbors for neighborhood graph.
-    n_pcs : int, default=30
-        Number of principal components.
+    n_neighbors : int, default=75
+        Number of neighbors to consider when constructing the UMAP. This
+        influences the balance between preserving local and global structures
+        in the data.
     min_dist : float, default=0.1
-        Minimum distance between points in UMAP.
-    spread : float, default=1.0
-        Spread of UMAP embedding.
+        Minimum distance between points in the UMAP space. Controls how
+        tightly the embedding is allowed to compress points together.
     n_components : int, default=2
-        Number of components in UMAP embedding.
-    random_state : int, default=42
-        Seed for random number generation.
+        Number of dimensions for embedding.
+    metric : str, optional
+        Metric to compute distances in high dimensional space.
+        Check `https://umap-learn.readthedocs.io/en/latest/api.html` for
+        options. The default is 'euclidean'.
+    random_state : int, default=0
+        Seed used by the random number generator(RNG) during UMAP fitting.
+    transform_seed : int, default=42
+        RNG seed during UMAP transformation.
     layer : str, optional
-        Layer of the AnnData object to perform UMAP on.
+        Layer of AnnData object for UMAP. Defaults to `adata.X`.
 
     Returns
     -------
     adata : anndata.AnnData
-        Updated AnnData object with UMAP coordinates.
+        Updated AnnData object with UMAP coordinates stored in the `obsm`
+        attribute. The key for the UMAP embedding in `obsm` is "X_umap".
     """
 
     # Use utility function to check if the layer exists in adata.layers
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
 
+    # Extract the data from the specified layer or the default data
     if layer is not None:
-        use_rep = layer + "_umap"
-        X_umap = adata.layers[layer]
-        adata.obsm[use_rep] = X_umap
+        data = adata.layers[layer]
     else:
-        use_rep = 'X'
+        data = adata.X
 
-    # Compute the neighborhood graph
-    sc.pp.neighbors(
-        adata,
+    # Convert data to pandas DataFrame for better memory handling
+    data = pd.DataFrame(data.astype(np.float32))
+
+    # Create and configure the UMAP model
+    umap_model = umap_lib.UMAP(
         n_neighbors=n_neighbors,
-        n_pcs=n_pcs,
-        use_rep=use_rep,
-        random_state=random_state
+        min_dist=min_dist,
+        n_components=n_components,
+        metric=metric,
+        low_memory=True,
+        random_state=random_state,
+        transform_seed=transform_seed,
+        **kwargs
     )
 
-    # Embed the neighborhood graph using UMAP
-    sc.tl.umap(
-        adata,
-        min_dist=min_dist,
-        spread=spread,
-        n_components=n_components,
-        random_state=random_state
-    )
+    # Fit and transform the data with the UMAP model
+    embedding = umap_model.fit_transform(data)
+
+    # Store the UMAP coordinates back into the AnnData object under the
+    # 'X_umap' key, always
+    adata.obsm['X_umap'] = embedding
 
     return adata
 
