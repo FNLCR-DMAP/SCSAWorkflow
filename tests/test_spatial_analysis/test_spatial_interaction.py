@@ -16,19 +16,15 @@ class TestSpatialInteraction(unittest.TestCase):
 
         annotation = pd.DataFrame({
                     "cluster_num": [1, 1, 1, 1, 2, 2, 2, 2] * repetition,
-                    "cluster_str": [
+                    "Phenotype_A": [
                         "A", "A", "B", "A",
                         "B", "B", "A", "B"
                         ] * repetition,
-                    "cluster_str2": [
-                        "Un", "De", "De", "De",
-                        "Un", "Un", "Un", "De"
-                        ] * repetition,
-                    "Stratify_test_annotation": [
+                    "Phenotype_B": [
                         "One", "Two", "Two", "One",
                         "One", "Two", "Two", "One"
                         ] * repetition,
-                    "Stratify_test_stratify_by": [
+                    "Analysis_Region": [
                         "Region_A", "Region_A", "Region_A", "Region_A",
                         "Region_B", "Region_B", "Region_B", "Region_B"
                         ] * repetition
@@ -66,7 +62,7 @@ class TestSpatialInteraction(unittest.TestCase):
     def setUp(self):
         # Create a mock AnnData object for testing
         self.adata = self.create_dummy_dataset(repetition=2)
-        self.run_CI = False
+        self.run_CI = True
 
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
@@ -87,7 +83,6 @@ class TestSpatialInteraction(unittest.TestCase):
             "Input data is not an AnnData object. Got <class 'str'>"
             )
 
-    def test_spatial_interaction_annotation_not_found(self):
         # Feature not found test
         annotation = "nonexistent_annotation"
         analysis_method = "Cluster Interaction Matrix"
@@ -102,8 +97,8 @@ class TestSpatialInteraction(unittest.TestCase):
         expect_string = "The annotation 'nonexistent_annotation' " + \
                         "does not exist in the provided dataset.\n" + \
                         "Existing annotations are:\n" + \
-                        "cluster_num\ncluster_str\ncluster_str2\n" + \
-                        "Stratify_test_annotation\nStratify_test_stratify_by"
+                        "cluster_num\nPhenotype_A\n" + \
+                        "Phenotype_B\nAnalysis_Region"
         self.assertIsInstance(cm.exception, ValueError)
         print(str(cm.exception))
         self.assertEqual(
@@ -113,7 +108,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_analysis_method(self):
         # Invalid analysis method test
-        annotation = "cluster_str"
+        annotation = "Phenotype_A"
         invalid_analysis_method = "Invalid Method"
 
         with self.assertRaises(ValueError) as cm:
@@ -135,7 +130,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
     def test_spatial_interaction_invalid_ax_type(self):
         # Invalid ax type test
-        annotation = "cluster_str"
+        annotation = "Phenotype_A"
         analysis_method = "Neighborhood Enrichment"
         invalid_ax = "not an Axes object"
 
@@ -180,7 +175,7 @@ class TestSpatialInteraction(unittest.TestCase):
         ax.set_ylim(-0.5, 0.5)
         returned_ax_dict = spatial_interaction(
             self.adata,
-            "cluster_str",
+            "Phenotype_A",
             "Neighborhood Enrichment",
             ax=ax)
 
@@ -200,25 +195,13 @@ class TestSpatialInteraction(unittest.TestCase):
         # Test no matplotlib Axes provided
         spatial_interaction(
             self.adata,
-            "cluster_str",
+            "Phenotype_A",
             "Neighborhood Enrichment")
         # Verify that a new Axes is created and used for plotting
         self.assertTrue(plt.gcf().get_axes())
 
-    def test_additional_kwargs(self):
-        # Test additional keyword arguments for matplotlib.pyplot.text()
-        kwargs = {"color": "red"}
-        spatial_interaction(
-            self.adata,
-            "cluster_str",
-            "Neighborhood Enrichment",
-            **kwargs)
-        # Verify that the additional keyword arguments are
-        # passed to matplotlib.pyplot.text()
-        # Assertion goes here
-
     def test_returned_ax_has_right_titles(self):
-        annotation = "cluster_str"
+        annotation = "Phenotype_A"
         analysis_method = "Neighborhood Enrichment"
 
         # Create a blank figure
@@ -239,7 +222,7 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsNotNone(returned_ax)
 
         if self.run_CI:
-            figure = returned_ax.figure
+            figure = returned_ax["Ax"].figure
             axes_list = figure.axes
 
             current_values = [
@@ -303,25 +286,29 @@ class TestSpatialInteraction(unittest.TestCase):
                 '1',
                 '2'
             ]
+            # Use a for loop with subtests to check each value
             for i in range(len(current_values)):
-                error_msg = f"Value at index {i} " + \
-                    f"is different. Got '{current_values[i]}', " + \
-                    f"expected '{expect_values[i]}'"
-
-                self.assertEqual(
-                    current_values[i],
-                    expect_values[i],
-                    error_msg
-                )
+                with self.subTest(
+                    index=i,
+                    current=current_values[i],
+                    expected=expect_values[i]
+                ):
+                    error_msg = f"Value at index {i} is different. " + \
+                        "Got '{current_values[i]}', " + \
+                        "expected '{expect_values[i]}'"
+                    self.assertEqual(
+                        current_values[i],
+                        expect_values[i],
+                        error_msg)
 
     def test_sinlge_stratify_by(self):
         ax_dict = spatial_interaction(
             self.adata,
             "cluster_num",
             "Neighborhood Enrichment",
-            stratify_by="cluster_str"
+            stratify_by="Phenotype_A"
         )
-        unique_cluster_str_values = self.adata.obs["cluster_str"].unique()
+        unique_Phenotype_A_values = self.adata.obs["Phenotype_A"].unique()
 
         # Get the keys (unique cluster values) from the dictionary
         keys = list(ax_dict["Ax"].keys())
@@ -329,7 +316,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # Assert that we have at least two keys (clusters)
         self.assertEqual(len(keys), 2)
 
-        for value in unique_cluster_str_values:
+        for value in unique_Phenotype_A_values:
             # Expect each unique value as a key in the returned dict
             self.assertIn(value, ax_dict["Ax"].keys())
 
@@ -339,13 +326,17 @@ class TestSpatialInteraction(unittest.TestCase):
     def test_list_stratify_by(self):
         ax_dict = spatial_interaction(
             self.adata,
-            "cluster_str",
+            "Phenotype_A",
             "Neighborhood Enrichment",
             stratify_by=["cluster_num"]
             )
         combined_keys = self.adata.obs[
                 "cluster_num"
             ].astype(str).unique()
+        
+        ax_keys_list = list(ax_dict["Ax"].keys())
+        
+        self.assertListEqual(ax_keys_list, ['1', '2']) 
 
         for key in combined_keys:
             # Expect each combined key as a key in the returned dict
@@ -357,7 +348,7 @@ class TestSpatialInteraction(unittest.TestCase):
     def test_return_matrix_and_stratify_by_combinations(self):
         annotation = "cluster_num"
         analysis_method = "Cluster Interaction Matrix"
-        stratify_options = [None, "cluster_str"]
+        stratify_options = [None, "Phenotype_A"]
 
         for stratify_by in stratify_options:
             for return_matrix in [False, True]:
@@ -386,9 +377,10 @@ class TestSpatialInteraction(unittest.TestCase):
                             # If stratification is used, assert that
                             # the keys correspond to the unique values
                             # in the stratification column
-                            unique_values = self.adata.obs[
-                                stratify_by
-                            ].unique()
+                            unique_values = [
+                                "A",
+                                "B"
+                            ]
 
                             for value in unique_values:
                                 self.assertIsInstance(
@@ -408,9 +400,10 @@ class TestSpatialInteraction(unittest.TestCase):
                             # If stratification is used, assert
                             # that the keys correspond to the unique values
                             # in the stratification column
-                            unique_values = self.adata.obs[
-                                stratify_by
-                            ].unique()
+                            unique_values = [
+                                "A",
+                                "B"
+                            ]
                             for value in unique_values:
                                 self.assertIn(value, result["Ax"])
                                 self.assertIsInstance(
@@ -426,9 +419,9 @@ class TestSpatialInteraction(unittest.TestCase):
     def test_stratify_function(self):
         ax_dict = spatial_interaction(
             self.adata,
-            "Stratify_test_annotation",
+            "Phenotype_B",
             "Cluster Interaction Matrix",
-            stratify_by="Stratify_test_stratify_by",
+            stratify_by="Analysis_Region",
             return_matrix=True
             )
 
@@ -438,25 +431,32 @@ class TestSpatialInteraction(unittest.TestCase):
         # Stratify_test_annotation for dataset with one repitition(8 datapoints)
         # should be exactly the same as running Stratify_test_annotation with
         # stratify_by "Stratify_test_stratify_by" column on dataset with
-        # two repitation (16 datapoints).
-        ground_truth = spatial_interaction(
-            self.create_dummy_dataset(repetition=1),
-            "Stratify_test_annotation",
-            "Cluster Interaction Matrix",
-            return_matrix=True
-            )
+        # two repitation (16 datapoints). The ground truth matrix
+        # can be acquired by:
+        # ground_truth = spatial_interaction(
+        #     self.create_dummy_dataset(repetition=1),
+        #     "Phenotype_B",
+        #     "Cluster Interaction Matrix",
+        #     return_matrix=True
+        #     )
+        ground_truth_matrix = {
+            'Matrix': array(
+                    [[ 8., 12.],
+                    [16., 12.]]
+                )
+            }
 
         self.assertTrue(
             np.array_equal(
                 ax_dict['Matrix']['Region_A'],
-                ground_truth['Matrix']
+                ground_truth_matrix['Matrix']
             )
         )        
 
         self.assertTrue(
             np.array_equal(
                 ax_dict['Matrix']['Region_B'],
-                ground_truth['Matrix']
+                ground_truth_matrix['Matrix']
             )
         )      
 

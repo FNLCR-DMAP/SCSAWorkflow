@@ -60,11 +60,19 @@ def spatial_interaction(
             Keyword arguments for matplotlib.pyplot.text()
     Returns:
     -------
-        ax_dictionary : dictionary of matplotlib.axes.Axes
-            A dictionary of the matplotlib Axes containing the analysis plots.
-            If not stratify, the key for analysis will be "Full",
-            otherwise the plot will be stored with key <stratify combination>.
-            The returned ax is the passed ax or new ax created.
+        ax_dictionary : dictionary
+            The returned dictionary containse matplotlib.axes.Axes
+            under 'Ax' key and optional matrix under 'Matrix' key.
+            If stratify is used, the function will return dictionary
+            of Axes and optional matrix with keys representing
+            the stratification groups.
+            For example: if stratify is not used and matrix is called,
+            the matrix can be acquired by result['Matrix'], and axes
+            from result['Ax']. If stratify is used and has two levels,
+            "A" and "B", the axes for A can be extracted by
+            result['Ax']['A'] and matrix through result['Matrix']['A'].
+
+           
     """
 
     # List all available methods
@@ -82,7 +90,8 @@ def spatial_interaction(
                 ax,
                 return_matrix=False,
                 title=None,
-                seed=None
+                seed=None,
+                **kwargs
             ):
 
         # Calculate Neighborhood_Enrichment
@@ -126,7 +135,8 @@ def spatial_interaction(
                 new_annotation_name,
                 ax,
                 return_matrix=False,
-                title=None
+                title=None,
+                **kwargs
             ):
 
         # Calculate Cluster_Interaction_Matrix
@@ -171,7 +181,8 @@ def spatial_interaction(
             ax,
             return_matrix=False,
             title=None,
-            seed=None
+            seed=None,
+            **kwargs
     ):
 
         sq.gr.spatial_neighbors(adata)
@@ -183,7 +194,8 @@ def spatial_interaction(
                     ax,
                     return_matrix,
                     title,
-                    seed)
+                    seed,
+                    **kwargs)
 
         elif analysis_method == "Cluster Interaction Matrix":
             ax = Cluster_Interaction_Matrix_Analysis(
@@ -191,7 +203,8 @@ def spatial_interaction(
                     new_annotation_name,
                     ax,
                     return_matrix,
-                    title)
+                    title,
+                    **kwargs)
 
         return ax
 
@@ -201,11 +214,17 @@ def spatial_interaction(
         error_text = "Input data is not an AnnData object. " + \
             f"Got {str(type(adata))}"
         raise ValueError(error_text)
+    
+    check_annotation(
+        adata,
+        annotations=annotation,
+        parameter_name="annotation",
+        should_exist=True)
 
     # Check if stratify_by is list or list of str
     check_annotation(
         adata,
-        annotations=annotation,
+        annotations=stratify_by,
         parameter_name="stratify_by",
         should_exist=True)
 
@@ -272,7 +291,8 @@ def spatial_interaction(
                             ax_copy,
                             return_matrix,
                             image_title,
-                            seed
+                            seed,
+                            **kwargs
                         )
 
             if return_matrix:
@@ -299,7 +319,8 @@ def spatial_interaction(
                 new_annotation_name,
                 ax,
                 return_matrix,
-                seed=seed
+                seed=seed,
+                **kwargs
             )
 
         if return_matrix:
