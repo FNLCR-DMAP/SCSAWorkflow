@@ -302,7 +302,9 @@ def load_csv_files(file_names):
     Returns
     -------
     pandas.dataframe
-        A wpandas dataframe of all the csv files.
+        A pandas dataframe of all the csv files. The returned dataset
+        will have an extra column called "loaded_file_name" containing
+        source file name.
     """
 
     # meta_schema = []
@@ -319,11 +321,6 @@ def load_csv_files(file_names):
             file_names = [file_names]
 
     for file_name in file_names:
-
-        # Check if the file exists
-        if not os.path.exists(file_name):
-            error_message = f"The file '{file_name}' does not exist."
-            raise FileNotFoundError(error_message)
 
         # Try to load the csv into pandas DataFrame.
         # Check if the file exists
@@ -370,17 +367,17 @@ def load_csv_files(file_names):
         dataframe_list.append(current_df)
         dataframe_name.append(file_name)
 
-    print("CSVs are converted into dataframes and combined into a list!")
-    print("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
+    logging.info("CSVs are converted into dataframes and combined into a list!")
+    logging.info("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
     for i, each_file in enumerate(dataframe_list):
-        print("File name: ", dataframe_name[0])
-        print("Info: ")
-        print(each_file.info())
-        print("Description: ")
-        print(each_file.describe())
-        print()
+        logging.info(f"File name: {dataframe_name[0]}")
+        logging.info("Info: ")
+        logging.info(each_file.info())
+        logging.info("Description: ")
+        logging.info(each_file.describe())
+        logging.info("\n")
 
-    print("Combining Dataframes into Single Dataframe...")
+    logging.info("Combining Dataframes into Single Dataframe...")
     combined_dataframe = combine_dfs(dataframe_list)
 
     return combined_dataframe
