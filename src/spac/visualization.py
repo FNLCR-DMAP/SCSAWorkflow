@@ -10,6 +10,123 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation, check_feature
 
 
+def visualize_2D_scatter(
+    x, y, labels=None, point_size=None, theme=None,
+    ax=None, legend_label_size=50, annotate_centers=False, **kwargs
+):
+    """
+    Visualize 2D data using plt.scatter.
+
+    Parameters
+    ----------
+    x, y : array-like
+        Coordinates of the data.
+    labels : array-like, optional
+        Array of labels for the data points. Can be numerical or categorical.
+    point_size : float, optional
+        Size of the points. If None, it will be automatically determined.
+    theme : str, optional
+        Color theme for the plot.
+        Defaults to 'viridis' if theme not recognized.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        Matplotlib axis object. If None, a new one is created.
+    annotate_centers : bool, optional (default: False)
+        Annotate the centers of clusters if labels are categorical.
+    **kwargs
+        Additional keyword arguments passed to plt.scatter.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The figure of the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    # Input validation
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define color themes
+    themes = {
+        'fire': plt.get_cmap('inferno'),
+        'viridis': plt.get_cmap('viridis'),
+        'inferno': plt.get_cmap('inferno'),
+        'blue': plt.get_cmap('Blues'),
+        'red': plt.get_cmap('Reds'),
+        'green': plt.get_cmap('Greens'),
+        'darkblue': ListedColormap(['#00008B']),
+        'darkred': ListedColormap(['#8B0000']),
+        'darkgreen': ListedColormap(['#006400'])
+    }
+
+    if theme and theme not in themes:
+        error_msg = (
+            f"Theme '{theme}' not recognized. Please use a valid theme."
+        )
+        raise ValueError(error_msg)
+    cmap = themes.get(theme, plt.get_cmap('viridis'))
+
+    # Determine point size
+    num_points = len(x)
+    if point_size is None:
+        point_size = 5000 / num_points
+
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
+    # Plotting logic
+    if labels is not None:
+        # Check if labels are categorical
+        if pd.api.types.is_categorical_dtype(labels):
+            unique_clusters = labels.cat.categories
+            cmap = plt.get_cmap('tab10', len(unique_clusters))
+            for idx, cluster in enumerate(unique_clusters):
+                mask = np.array(labels) == cluster
+                ax.scatter(
+                    x[mask], y[mask],
+                    color=cmap(idx),
+                    label=cluster,
+                    s=point_size
+                )
+
+                if annotate_centers:
+                    center_x = np.mean(x[mask])
+                    center_y = np.mean(y[mask])
+                    ax.text(
+                        center_x, center_y, cluster,
+                        fontsize=9, ha='center', va='center'
+                    )
+
+            ax.legend(loc='upper right')
+        else:
+            # If labels are continuous
+            scatter = ax.scatter(
+                x, y, c=labels, cmap=cmap, s=point_size, **kwargs
+            )
+            plt.colorbar(scatter, ax=ax)
+    else:
+        scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+
+    # Equal aspect ratio for the axes
+    ax.set_aspect('equal', 'datalim')
+
+    # Customizing the legend
+    handles, labels = ax.get_legend_handles_labels()
+    if len(handles) > 0:
+        legend = ax.legend(handles=handles, labels=labels, loc='upper right')
+        for handle in legend.legendHandles:
+            handle.set_sizes([legend_label_size])
+
+    return fig, ax
+
+
 def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
                                   layer=None, ax=None, **kwargs):
     """
