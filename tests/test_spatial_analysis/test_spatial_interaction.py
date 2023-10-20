@@ -417,13 +417,6 @@ class TestSpatialInteraction(unittest.TestCase):
                             self.assertIn("Ax", result.keys())
 
     def test_stratify_function(self):
-        ax_dict = spatial_interaction(
-            self.adata,
-            "Phenotype_B",
-            "Cluster Interaction Matrix",
-            stratify_by="Analysis_Region",
-            return_matrix=True
-            )
 
         # The values in the "startify by" column divides the
         # "stratify_test_annotation" column into exact same two
@@ -438,7 +431,17 @@ class TestSpatialInteraction(unittest.TestCase):
         #     "Phenotype_B",
         #     "Cluster Interaction Matrix",
         #     return_matrix=True
-        #     )
+        #     )  
+        
+        # Check if stratify works.
+        ax_dict = spatial_interaction(
+            self.adata,
+            "Phenotype_B",
+            "Cluster Interaction Matrix",
+            stratify_by="Analysis_Region",
+            return_matrix=True
+            )
+        
         ground_truth_matrix = {
             'Matrix': array(
                     [[ 8., 12.],
@@ -458,7 +461,30 @@ class TestSpatialInteraction(unittest.TestCase):
                 ax_dict['Matrix']['Region_B'],
                 ground_truth_matrix['Matrix']
             )
-        )      
+        )    
+
+        # Check if stratify=None works
+        ax_dict = spatial_interaction(
+            self.adata,
+            "Phenotype_B",
+            "Cluster Interaction Matrix",
+            stratify_by=None,
+            return_matrix=True
+            )
+        
+        ground_truth_matrix = {
+            'Matrix': array(
+                    [[22., 30.],
+                    [26., 18.]]
+                )
+            }
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix'],
+                ground_truth_matrix['Matrix']
+            )
+        )   
 
     def tearDown(self):
         del self.adata
