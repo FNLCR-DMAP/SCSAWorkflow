@@ -62,7 +62,7 @@ class TestSpatialInteraction(unittest.TestCase):
     def setUp(self):
         # Create a mock AnnData object for testing
         self.adata = self.create_dummy_dataset(repetition=2)
-        self.run_CI = True
+        self.run_CI = False
 
     def test_spatial_interaction_invalid_data_type(self):
         # Invalid data type test
