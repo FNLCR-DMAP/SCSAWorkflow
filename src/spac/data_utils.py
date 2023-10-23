@@ -301,12 +301,15 @@ def load_csv_files(file_names):
 
     Returns
     -------
-    list
-        A list of pandas dataframe of all the csv files.
+    pandas.dataframe
+        A pandas dataframe of all the csv files. The returned dataset
+        will have an extra column called "loaded_file_name" containing
+        source file name.
     """
 
-    meta_schema = []
+    # meta_schema = []
     dataframe_list = []
+    dataframe_name = []
 
     if not isinstance(file_names, list):
         if not isinstance(file_names, str):
@@ -318,11 +321,6 @@ def load_csv_files(file_names):
             file_names = [file_names]
 
     for file_name in file_names:
-
-        # Check if the file exists
-        if not os.path.exists(file_name):
-            error_message = f"The file '{file_name}' does not exist."
-            raise FileNotFoundError(error_message)
 
         # Try to load the csv into pandas DataFrame.
         # Check if the file exists
@@ -346,37 +344,43 @@ def load_csv_files(file_names):
                             "Please check that the file is a valid CSV."
             raise TypeError(error_message)
 
-        current_schema = current_df.columns.to_list()
+        current_df["loaded_file_name"] = file_name
 
-        if len(meta_schema) == 0:
-            meta_schema = current_schema
-            print("Meta schema acquired. Columns are:")
-            for column_name in meta_schema:
-                print(column_name)
+        # current_schema = current_df.columns.to_list()
 
-        if len(meta_schema) == len(current_schema):
-            if set(meta_schema) != set(current_schema):
-                error_message = "Column in current file does not match " + \
-                        f"the meta_schema, got:\n {current_schema}. "
-                raise ValueError(error_message)
-        else:
-            error_message = "Column in current file does not match " + \
-                        f"the meta_schema, got:\n {current_schema}. "
-            raise ValueError(error_message)
+        # if len(meta_schema) == 0:
+        #     meta_schema = current_schema
+        #     print("Meta schema acquired. Columns are:")
+        #     for column_name in meta_schema:
+        #         print(column_name)
 
-        dataframe_list.append([file_name, current_df])
+        # if len(meta_schema) == len(current_schema):
+        #     if set(meta_schema) != set(current_schema):
+        #         error_message = "Column in current file does not match " + \
+        #                 f"the meta_schema, got:\n {current_schema}. "
+        #         raise ValueError(error_message)
+        # else:
+        #     error_message = "Column in current file does not match " + \
+        #                 f"the meta_schema, got:\n {current_schema}. "
+        #     raise ValueError(error_message)
 
-    print("CSVs are converted into dataframes and combined into a list!")
-    print("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
-    for each_file in dataframe_list:
-        print("File name: ", each_file[0])
-        print("Info: ")
-        print(each_file[1].info())
-        print("Description: ")
-        print(each_file[1].describe())
-        print()
+        dataframe_list.append(current_df)
+        dataframe_name.append(file_name)
 
-    return dataframe_list
+    logging.info("CSVs are converted into dataframes and combined into a list!")
+    logging.info("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
+    for i, each_file in enumerate(dataframe_list):
+        logging.info(f"File name: {dataframe_name[0]}")
+        logging.info("Info: ")
+        logging.info(each_file.info())
+        logging.info("Description: ")
+        logging.info(each_file.describe())
+        logging.info("\n")
+
+    logging.info("Combining Dataframes into Single Dataframe...")
+    combined_dataframe = combine_dfs(dataframe_list)
+
+    return combined_dataframe
 
 
 def combine_dfs_depracated(dataframes, annotations):
