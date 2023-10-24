@@ -212,7 +212,7 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsInstance(returned_ax, plt.Axes)
 
         if self.run_CI:
-            axes_list = returned_ax["Ax"].get_figure().axes
+            axes_list = returned_ax.get_figure().axes
 
             current_values = [
                 axes_list[2].get_title(),
