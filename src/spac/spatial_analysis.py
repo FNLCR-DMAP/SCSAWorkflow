@@ -43,7 +43,8 @@ def spatial_interaction(
             based on existing combination of labels in the passed annotations.
 
         ax: matplotlib.axes.Axes, default None
-            The matplotlib Axes to display the image.
+            The matplotlib Axes to display the image. This option is only
+            available when stratify is None.
 
         return_matrix: boolean, default False
             If true, the fucntion will return a list of two dictionaries,
