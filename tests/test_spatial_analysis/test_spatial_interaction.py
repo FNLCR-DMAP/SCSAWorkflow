@@ -1,3 +1,4 @@
+import sys
 import anndata
 import unittest
 import numpy as np
@@ -158,6 +159,7 @@ class TestSpatialInteraction(unittest.TestCase):
         print(id(fig))
         print(fig.axes)
         print(ax.get_figure().axes)
+        print(sys. getsizeof(ax))
 
         # Call the function
         returned_ax = spatial_interaction(
@@ -169,9 +171,11 @@ class TestSpatialInteraction(unittest.TestCase):
 
         print(id(returned_ax['Ax']))
         print(returned_ax['Ax'])
+        print(sys. getsizeof(returned_ax['Ax']))
         print(returned_ax['Ax'].get_figure().axes)
         print(fig.axes)
         print(ax.get_figure().axes)
+        print(sys. getsizeof(ax))
         
 
         # Assert that the returned ax object is not None
