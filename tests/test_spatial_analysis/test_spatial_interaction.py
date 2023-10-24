@@ -156,9 +156,11 @@ class TestSpatialInteraction(unittest.TestCase):
 
         print(id(ax))
         print(id(fig))
+        print("Print")
 
         Warning(id(ax))
         Warning(id(fig))
+        Warning("Warning")
 
         # Call the function
         returned_ax = spatial_interaction(
@@ -174,7 +176,8 @@ class TestSpatialInteraction(unittest.TestCase):
         Warning(returned_ax['Ax'])
         print(fig.axes)
         Warning(fig.axes)
-
+        print(returned_ax['Ax'].get_figure().axes)
+        Warning(returned_ax['Ax'].get_figure().axes)
         
 
         # Assert that the returned ax object is not None
