@@ -154,7 +154,8 @@ class TestSpatialInteraction(unittest.TestCase):
 
         # Create a blank figure
         fig, ax = plt.subplots()
-
+        ax.set_xlim(-0.5, 1.5)
+        ax.set_ylim(-0.5, 0.5)
         print(id(ax))
         print(id(fig))
         print(fig.axes)
