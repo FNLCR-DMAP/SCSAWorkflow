@@ -2,8 +2,6 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-import pickle
-import io
 from spac.utils import check_annotation
 
 
@@ -15,6 +13,10 @@ def spatial_interaction(
         ax=None,
         return_matrix=False,
         seed=None,
+        coord_type=None,
+        n_rings=1,
+        n_neighs=6,
+        radius=None,
         **kwargs):
     """
     Perform spatial analysis on the selected annotation in the dataset.
@@ -56,6 +58,30 @@ def spatial_interaction(
             Random seed for reproducibility, used in Neighborhood Enrichment
             Analysis.
 
+        coord_type : str, optional
+            Type of coordinate system used in sq.gr.spatial_neighbors.
+            Should be either 'grid' (Visium Data) or 'generic' (Others).
+            Default is None, decided by the squidy pacakge. If spatial_key
+            is in anndata.uns the coord_type would be 'grid', otherwise
+            general.
+
+        n_rings : int, default 1
+            Number of rings of neighbors for grid data. 
+            Only used when coord_type = 'grid' (Visium)
+        
+        n_neights : int, optional
+            Default is 6.
+            Depending on the ``coord_type``:
+            - 'grid' (Visium) - number of neighboring tiles.
+            - 'generic' - number of neighborhoods for non-grid data.
+            
+        radius : float, optional
+            Default is None.
+            Only available when coord_type = 'generic'. Depending on the type:
+            - :class:`float` - compute the graph based on neighborhood radius.
+            - :class:`tuple` - prune the final graph to only contain
+                edges in interval `[min(radius), max(radius)]`.
+
         **kwargs
             Keyword arguments for matplotlib.pyplot.text()
     Returns:
@@ -74,7 +100,7 @@ def spatial_interaction(
 
            
     """
-
+    print(n_neighs)
     # List all available methods
     available_methods = [
         "Neighborhood Enrichment",
@@ -179,13 +205,23 @@ def spatial_interaction(
             analysis_method,
             new_annotation_name,
             ax,
+            coord_type,
+            n_rings,
+            n_neighs,
+            radius,
             return_matrix=False,
             title=None,
             seed=None,
             **kwargs
     ):
 
-        sq.gr.spatial_neighbors(adata)
+        sq.gr.spatial_neighbors(
+            adata,
+            coord_type=coord_type,
+            n_rings=n_rings,
+            n_neighs=n_neighs,
+            radius=radius
+        )
 
         if analysis_method == "Neighborhood Enrichment":
             ax = Neighborhood_Enrichment_Analysis(
@@ -245,8 +281,7 @@ def spatial_interaction(
                 f"Got {str(type(ax))}"
             raise ValueError(error_text)
     else:
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
+        fig, ax = plt.subplots()
 
     # Operational Section
     # -----------------------------------------------
@@ -270,25 +305,26 @@ def spatial_interaction(
         ax_dictionary = {}
         matrix_dictionary = {}
         unique_values = adata.obs['concatenated_obs'].unique()
-        buffer = io.BytesIO()
-        pickle.dump(ax, buffer)
+        
         for subset_key in unique_values:
             # Subset the original AnnData object based on the unique value
             subset_adata = adata[
                 adata.obs['concatenated_obs'] == subset_key
             ].copy()
 
-            buffer.seek(0)
-
-            ax_copy = pickle.load(buffer)
+            fig, ax = plt.subplots()
 
             image_title = f"Group: {subset_key}"
 
-            ax_copy = perform_analysis(
+            ax = perform_analysis(
                             subset_adata,
                             analysis_method,
                             new_annotation_name,
-                            ax_copy,
+                            ax,
+                            coord_type,
+                            n_rings,
+                            n_neighs,
+                            radius,
                             return_matrix,
                             image_title,
                             seed,
@@ -296,10 +332,10 @@ def spatial_interaction(
                         )
 
             if return_matrix:
-                ax_dictionary[subset_key] = ax_copy[0]
-                matrix_dictionary[subset_key] = ax_copy[1]
+                ax_dictionary[subset_key] = ax[0]
+                matrix_dictionary[subset_key] = ax[1]
             else:
-                ax_dictionary[subset_key] = ax_copy
+                ax_dictionary[subset_key] = ax
 
             del subset_adata
 
@@ -318,6 +354,10 @@ def spatial_interaction(
                 analysis_method,
                 new_annotation_name,
                 ax,
+                coord_type,
+                n_rings,
+                n_neighs,
+                radius,
                 return_matrix,
                 seed=seed,
                 **kwargs

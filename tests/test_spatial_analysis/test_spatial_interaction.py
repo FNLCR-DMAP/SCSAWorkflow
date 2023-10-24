@@ -442,6 +442,83 @@ class TestSpatialInteraction(unittest.TestCase):
             )
         )
 
+    def test_n_neighbor_function(self):
+        # Using the previous stratify example as reference
+
+        ax_dict = spatial_interaction(
+            self.adata,
+            "Phenotypes",
+            "Cluster Interaction Matrix",
+            stratify_by="Analysis_Region",
+            return_matrix=True,
+            n_neighs=5
+            )
+
+        # The first 7 cells are in Region_A are on a row and not 
+        # connected to the last 7 cells in Region_B.
+        # Given the default squidpy using KNN to make the graph
+        # with 5 neighbors, the ground truth matrix is:
+        region_a_ground_truth = array(
+            [[15., 8.],
+             [10., 2.]])
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix']['Region_A'],
+                region_a_ground_truth
+            )
+        )
+
+        region_b_ground_truth = array(
+            [[6., 12.],
+             [9., 8.]])
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix']['Region_B'],
+                region_b_ground_truth 
+            )
+        )
+
+    def test_radius_function(self):
+        # Using the previous stratify example as reference
+
+        ax_dict = spatial_interaction(
+            self.adata,
+            "Phenotypes",
+            "Cluster Interaction Matrix",
+            stratify_by="Analysis_Region",
+            return_matrix=True,
+            radius=1
+            )
+
+        # The first 7 cells are in Region_A are on a row and not 
+        # connected to the last 7 cells in Region_B.
+        # Given the default squidpy using KNN to make the graph
+        # with radius = 1, the ground truth matrix is:
+        region_a_ground_truth = array(
+            [[4., 4.],
+             [4., 0.]])
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix']['Region_A'],
+                region_a_ground_truth
+            )
+        )
+
+        region_b_ground_truth = array(
+            [[0., 6.],
+             [6., 0.]])
+
+        self.assertTrue(
+            np.array_equal(
+                ax_dict['Matrix']['Region_B'],
+                region_b_ground_truth 
+            )
+        )
+
+
     def tearDown(self):
         del self.adata
 
