@@ -2,10 +2,11 @@ import anndata
 import unittest
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 from numpy import array
 import matplotlib.pyplot as plt
 from spac.spatial_analysis import spatial_interaction
-
+mpl.use('agg')
 
 class TestSpatialInteraction(unittest.TestCase):
 
