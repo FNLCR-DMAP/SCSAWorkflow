@@ -165,7 +165,7 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsNotNone(returned_ax)
 
         if self.run_CI:
-            axes_list = returned_ax["Ax"].get_figure().axes
+            axes_list = fig.axes
         
             current_values = [
                 axes_list[2].get_title(),
