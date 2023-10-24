@@ -160,6 +160,7 @@ class TestSpatialInteraction(unittest.TestCase):
         print(fig.axes)
         print(ax.get_figure().axes)
         print(sys. getsizeof(ax))
+        print(plt.gcf().get_axes())
 
         # Call the function
         returned_ax = spatial_interaction(
@@ -176,6 +177,8 @@ class TestSpatialInteraction(unittest.TestCase):
         print(fig.axes)
         print(ax.get_figure().axes)
         print(sys. getsizeof(ax))
+        print(plt.gcf().get_axes())
+
         
 
         # Assert that the returned ax object is not None
