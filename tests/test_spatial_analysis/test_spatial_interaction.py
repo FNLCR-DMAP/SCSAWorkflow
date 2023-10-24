@@ -154,6 +154,12 @@ class TestSpatialInteraction(unittest.TestCase):
         # Create a blank figure
         fig, ax = plt.subplots()
 
+        print(id(ax))
+        print(id(fig))
+
+        Warning(id(ax))
+        Warning(id(fig))
+
         # Call the function
         returned_ax = spatial_interaction(
             self.adata,
@@ -161,6 +167,15 @@ class TestSpatialInteraction(unittest.TestCase):
             analysis_method,
             ax=ax
         )
+
+        print(id(returned_ax['Ax']))
+        Warning(id(returned_ax['Ax']))
+        print(returned_ax['Ax'])
+        Warning(returned_ax['Ax'])
+        print(fig.axes)
+        Warning(fig.axes)
+
+        
 
         # Assert that the returned ax object is not None
         self.assertIsNotNone(returned_ax)
