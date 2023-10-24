@@ -154,14 +154,6 @@ class TestSpatialInteraction(unittest.TestCase):
 
         # Create a blank figure
         fig, ax = plt.subplots()
-        ax.set_xlim(-0.5, 1.5)
-        ax.set_ylim(-0.5, 0.5)
-        print(id(ax))
-        print(id(fig))
-        print(fig.axes)
-        print(ax.get_figure().axes)
-        print(sys. getsizeof(ax))
-        print(plt.gcf().get_axes())
 
         # Call the function
         returned_ax = spatial_interaction(
@@ -169,24 +161,18 @@ class TestSpatialInteraction(unittest.TestCase):
             annotation,
             analysis_method,
             ax=ax
-        )
-
-        print(id(returned_ax['Ax']))
-        print(returned_ax['Ax'])
-        print(sys. getsizeof(returned_ax['Ax']))
-        print(returned_ax['Ax'].get_figure().axes)
-        print(fig.axes)
-        print(ax.get_figure().axes)
-        print(sys. getsizeof(ax))
-        print(plt.gcf().get_axes())
-
-        
+        )        
 
         # Assert that the returned ax object is not None
         self.assertIsNotNone(returned_ax)
 
         if self.run_CI:
-            axes_list = fig.axes
+            # For some reason on CI, the image ax is registered to plt
+            # but the object was not able to accessed through
+            # fig.axes nor ax.get_figure().axes
+            # However, the information can be acquired with
+            # plt.gcf -> plt. get current figure.
+            axes_list = plt.gcf().get_axes()
         
             current_values = [
                 axes_list[2].get_title(),
@@ -233,7 +219,12 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsInstance(returned_ax, plt.Axes)
 
         if self.run_CI:
-            axes_list = returned_ax.get_figure().axes
+            # For some reason on CI, the image ax is registered to plt
+            # but the object was not able to accessed through
+            # fig.axes nor ax.get_figure().axes
+            # However, the information can be acquired with
+            # plt.gcf -> plt. get current figure.
+            axes_list = plt.gcf().get_axes()
 
             current_values = [
                 axes_list[2].get_title(),
