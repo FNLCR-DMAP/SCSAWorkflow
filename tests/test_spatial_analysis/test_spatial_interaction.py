@@ -135,7 +135,7 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertEqual(returned_ax.get_ylim(), (-0.5, 0.5))
 
         # Clean up the figure
-        plt.close(fig)
+        # plt.close(fig)
 
     def test_no_axes_provided(self):
         # Test no matplotlib Axes provided
