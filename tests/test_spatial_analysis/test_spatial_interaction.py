@@ -151,10 +151,7 @@ class TestSpatialInteraction(unittest.TestCase):
         analysis_method = "Neighborhood Enrichment"
 
         # Create a blank figure
-        fig = plt.figure()
-
-        # Get the ax object associated with the figure
-        ax = fig.add_subplot(111)
+        fig, ax = plt.subplots()
 
         # Call the function
         returned_ax = spatial_interaction(
@@ -168,9 +165,8 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsNotNone(returned_ax)
 
         if self.run_CI:
-            figure = returned_ax["Ax"].figure
-            axes_list = figure.axes
-
+            axes_list = returned_ax["Ax"].get_figure().axes
+        
             current_values = [
                 axes_list[2].get_title(),
                 axes_list[1].get_ylabel(),
@@ -216,8 +212,7 @@ class TestSpatialInteraction(unittest.TestCase):
         self.assertIsInstance(returned_ax, plt.Axes)
 
         if self.run_CI:
-            figure = returned_ax.figure
-            axes_list = figure.axes
+            axes_list = returned_ax["Ax"].get_figure().axes
 
             current_values = [
                 axes_list[2].get_title(),
