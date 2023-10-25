@@ -10,10 +10,127 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation, check_feature
 
 
+def visualize_2D_scatter(
+    x, y, labels=None, point_size=None, theme=None,
+    ax=None, legend_label_size=50, annotate_centers=False, **kwargs
+):
+    """
+    Visualize 2D data using plt.scatter.
+
+    Parameters
+    ----------
+    x, y : array-like
+        Coordinates of the data.
+    labels : array-like, optional
+        Array of labels for the data points. Can be numerical or categorical.
+    point_size : float, optional
+        Size of the points. If None, it will be automatically determined.
+    theme : str, optional
+        Color theme for the plot.
+        Defaults to 'viridis' if theme not recognized.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        Matplotlib axis object. If None, a new one is created.
+    annotate_centers : bool, optional (default: False)
+        Annotate the centers of clusters if labels are categorical.
+    **kwargs
+        Additional keyword arguments passed to plt.scatter.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The figure of the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    # Input validation
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define color themes
+    themes = {
+        'fire': plt.get_cmap('inferno'),
+        'viridis': plt.get_cmap('viridis'),
+        'inferno': plt.get_cmap('inferno'),
+        'blue': plt.get_cmap('Blues'),
+        'red': plt.get_cmap('Reds'),
+        'green': plt.get_cmap('Greens'),
+        'darkblue': ListedColormap(['#00008B']),
+        'darkred': ListedColormap(['#8B0000']),
+        'darkgreen': ListedColormap(['#006400'])
+    }
+
+    if theme and theme not in themes:
+        error_msg = (
+            f"Theme '{theme}' not recognized. Please use a valid theme."
+        )
+        raise ValueError(error_msg)
+    cmap = themes.get(theme, plt.get_cmap('viridis'))
+
+    # Determine point size
+    num_points = len(x)
+    if point_size is None:
+        point_size = 5000 / num_points
+
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
+    # Plotting logic
+    if labels is not None:
+        # Check if labels are categorical
+        if isinstance(labels, pd.Categorical):
+            unique_clusters = labels.categories
+            cmap = plt.get_cmap('tab10', len(unique_clusters))
+            for idx, cluster in enumerate(unique_clusters):
+                mask = np.array(labels) == cluster
+                ax.scatter(
+                    x[mask], y[mask],
+                    color=cmap(idx),
+                    label=cluster,
+                    s=point_size
+                )
+
+                if annotate_centers:
+                    center_x = np.mean(x[mask])
+                    center_y = np.mean(y[mask])
+                    ax.text(
+                        center_x, center_y, cluster,
+                        fontsize=9, ha='center', va='center'
+                    )
+
+            ax.legend(loc='upper right')
+        else:
+            # If labels are continuous
+            scatter = ax.scatter(
+                x, y, c=labels, cmap=cmap, s=point_size, **kwargs
+            )
+            plt.colorbar(scatter, ax=ax)
+    else:
+        scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+
+    # Equal aspect ratio for the axes
+    ax.set_aspect('equal', 'datalim')
+
+    # Customizing the legend
+    handles, labels = ax.get_legend_handles_labels()
+    if len(handles) > 0:
+        legend = ax.legend(handles=handles, labels=labels, loc='upper right')
+        for handle in legend.legendHandles:
+            handle.set_sizes([legend_label_size])
+
+    return fig, ax
+
+
 def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
                                   layer=None, ax=None, **kwargs):
     """
-    Visualize scatter plot in t-SNE or UMAP basis.
+    Visualize scatter plot in PCA, t-SNE or UMAP basis.
 
     Parameters
     ----------
@@ -22,7 +139,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
     method : str
         Dimensionality reduction method to visualize.
-        Choose from {'tsne', 'umap'}.
+        Choose from {'tsne', 'umap', 'pca'}.
     annotation : str, optional
         The name of the column in `adata.obs` to use for coloring
         the scatter plot points based on cell annotations.
@@ -36,7 +153,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
     **kwargs
-        Parameters passed to scanpy.pl.tsne or scanpy.pl.umap function.
+        Parameters passed to visualize_2D_scatter function.
 
     Returns
     -------
@@ -53,50 +170,38 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
             "not both.")
 
     # Use utility functions for input validation
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
     if annotation:
         check_annotation(adata, annotations=annotation)
     if feature:
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    if method == 'umap':
-        key = 'X_umap'
-    elif method == 'tsne':
-        key = 'X_tsne'
-    else:
-        raise ValueError("Method should be one of {'tsne', 'umap'}.")
+    valid_methods = ['tsne', 'umap', 'pca']
+    if method not in valid_methods:
+        raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}.")
 
+    key = f'X_{method}'
     if key not in adata.obsm.keys():
-        error_msg = (
-            f"{key} coordinates not found in adata.obsm."
+        raise ValueError(
+            f"{key} coordinates not found in adata.obsm. "
             f"Please run {method.upper()} before calling this function."
         )
-        raise ValueError(error_msg)
+
+    # Extract the 2D coordinates
+    x, y = adata.obsm[key].T
 
     # Determine coloring scheme
-    color = None
     if annotation:
-        color = annotation
+        color_values = adata.obs[annotation].astype('category').values
     elif feature:
-        color = feature
-
-    # If a layer is provided, use it for visualization
-    if layer:
-        adata.X = adata.layers[layer]
-
-    # Add color column to the kwargs for the scanpy plot
-    kwargs['color'] = color
-
-    # Plot the chosen method
-    if method == 'tsne':
-        sc.pl.tsne(adata, ax=ax, **kwargs)
+        data_source = adata.layers[layer] if layer else adata.X
+        color_values = data_source[:, adata.var_names == feature].squeeze()
     else:
-        sc.pl.umap(adata, ax=ax, **kwargs)
+        color_values = None
 
-    fig = plt.gcf()  # Get the current figure
-    if ax is None:  # If no ax was provided, get the current ax
-        ax = plt.gca()
+    fig, ax = visualize_2D_scatter(x, y, ax=ax, labels=color_values, **kwargs)
 
     return fig, ax
 
