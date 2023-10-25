@@ -1057,6 +1057,8 @@ def interative_spatial_plot(
     annotations : list of str or str
         Column(s) in `adata.obs` that contain the annotations to plot. 
         If a single string is provided, it will be converted to a list.
+        The interactive plot will show all the labels in the annotation
+        columns passed.
     dot_size : float, optional
         Size of the scatter dots in the plot. Default is 1.5.
     dot_transparancy : float, optional
@@ -1089,11 +1091,6 @@ def interative_spatial_plot(
         annotations = [annotations]
 
     for annotation in annotations:
-        if not isinstance(annotation, str):
-            error_msg = "Provided annotation should be a string or " + \
-                f"a list of strings, get {str(type(annotation))} for " + \
-                f"{str(annotation)} entry."
-            raise TypeError(error_msg)
         check_annotation(
             adata,
             annotations=annotation
@@ -1152,6 +1149,9 @@ def interative_spatial_plot(
         hover_data=[annotations[0]]
     )
 
+    # If annotation is more than 1, we would first call px.scatter
+    # to create plotly object, than append the data to main figure
+    # with add_trace for a centralized view. 
     if len(annotations) > 1:
         for obs in annotations[1:]:
             scatter_fig = px.scatter(

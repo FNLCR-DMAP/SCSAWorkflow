@@ -19,18 +19,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         spatial_coords = np.array([[0, 0], [1, 1], [2, 2]])
         self.adata.obsm["spatial"] = spatial_coords
 
-    def test_error_raised(self):
-        # Test if the function raises the expected error message
-        error_msg = "Provided annotation should be a string " + \
-            "or a list of strings, get <class 'int'> for 1234 entry."
-
-        with self.assertRaisesRegex(
-            TypeError,
-            error_msg
-
-        ):
-            interative_spatial_plot(self.adata, [1234])  # Invalid annotation
-
     def test_return_object(self):
         # Test if the return object is of the correct type
         fig = interative_spatial_plot(self.adata, 'annotation_1')
@@ -41,7 +29,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         # like a specific width and height
         fig = interative_spatial_plot(
             self.adata,
-            'annotation_1',
+            ['annotation_1','annotation_2'],
             figure_width=15,
             figure_height=10,
             figure_dpi=100)
@@ -66,8 +54,12 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         # Assuming 'annotation_1' in your adata has unique colors
         # that are represented in the plot
         expected_colors = [
-            "annotation_1_" +
-            str(item) for item in self.adata.obs['annotation_1']
+            "annotation_1_a",
+            "annotation_1_b",
+            "annotation_1_c",
+            "annotation_2_x",
+            "annotation_2_y",
+            "annotation_2_z"            
         ]
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.customdata[0], expected_colors[idx])
