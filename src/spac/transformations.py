@@ -4,6 +4,7 @@ import scanpy as sc
 import pandas as pd
 import anndata
 import warnings
+import logging
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
@@ -566,11 +567,7 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
 
     # Check if output_layer already exists and issue a warning if it does
     if output_layer in adata.layers:
-        warnings.warn(
-            f"Layer '{output_layer}' already exists. It will be overwritten "
-            "with the new transformed data."
-        )
-        warnings.warn(
+        logging.warning(
             f"Layer '{output_layer}' already exists. It will be overwritten "
             "with the new transformed data."
         )

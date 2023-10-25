@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 import anndata
+from unittest.mock import patch
 from spac.transformations import arcsinh_transformation
 
 
@@ -74,13 +75,13 @@ class TestArcsinhTransformation(unittest.TestCase):
 
     def test_invalid_percentile_handling(self):
         with self.assertRaises(ValueError) as context:
-            arcsinh_transformation(self.adata, percentile=-5)
+            arcsinh_transformation(self.adata, percentile=-0.1)
         self.assertEqual(
             str(context.exception), "Percentile should be between 0 and 100."
         )
 
         with self.assertRaises(ValueError) as context:
-            arcsinh_transformation(self.adata, percentile=105)
+            arcsinh_transformation(self.adata, percentile=100.1)
         self.assertEqual(
             str(context.exception), "Percentile should be between 0 and 100."
         )
@@ -89,12 +90,29 @@ class TestArcsinhTransformation(unittest.TestCase):
         # Since the default output_layer is "arcsinh", the second
         # transformation should overwrite it
         arcsinh_transformation(self.adata)
-        with self.assertWarns(UserWarning) as cm:
+
+        with patch("spac.transformations.logging.warning") as mock_warning:
             arcsinh_transformation(self.adata)
-        self.assertEqual(
-            str(cm.warning),
-            "Layer 'arcsinh' already exists. It will be overwritten with "
-            "the new transformed data."
+            mock_warning.assert_called_once_with(
+                "Layer 'arcsinh' already exists. It will be overwritten with "
+                "the new transformed data."
+            )
+
+    def test_cofactor_takes_precedence_over_percentile(self):
+        # Set both co_factor and percentile
+        transformed_adata = arcsinh_transformation(
+            self.adata, co_factor=5, percentile=20
+        )
+
+        # Hardcoded expected transformation using fixed co-factor of 5
+        expected_data = np.array([
+            [0.39003532, 0.88137359],
+            [0.73266826, 1.44363548],
+            [1.01597313, 1.81844646]
+        ])
+
+        np.testing.assert_array_almost_equal(
+            transformed_adata.layers['arcsinh'], expected_data
         )
 
 
