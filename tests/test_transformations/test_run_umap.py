@@ -16,23 +16,8 @@ class TestRunUMAP(unittest.TestCase):
         )
 
     def test_typical_case(self):
-        try:
-            run_umap(self.adata, n_neighbors=5, min_dist=0.1, n_components=2,
-                     random_state=42, layer=self.layer)
-        except Exception as e:
-            self.fail(f"run_umap raised exception: {e}")
-
-        # Check that the UMAP coordinates were added to adata.obsm
-        self.assertIn("X_umap", self.adata.obsm)
-
-    def test_no_layer(self):
-        try:
-            run_umap(self.adata, n_neighbors=5, min_dist=0.1, n_components=2,
-                     random_state=42)
-        except Exception as e:
-            self.fail(f"run_umap raised exception: {e}")
-
-        # Check that the UMAP coordinates were added to adata.obsm
+        run_umap(self.adata, n_neighbors=5, min_dist=0.1, n_components=2,
+                 random_state=42, layer=self.layer)
         self.assertIn("X_umap", self.adata.obsm)
 
     def test_output_shape(self):
@@ -55,13 +40,12 @@ class TestRunUMAP(unittest.TestCase):
         self.assertTrue(is_floating)
 
     def test_different_parameters(self):
-        try:
-            run_umap(self.adata, n_neighbors=3, min_dist=0.2, n_components=3,
-                     random_state=0, layer=self.layer)
-        except Exception as e:
-            self.fail(
-                f"run_umap raised exception with different parameters: {e}"
-            )
+        run_umap(self.adata, n_neighbors=3, min_dist=0.2, n_components=3,
+                 random_state=0, layer=self.layer)
+
+        # Check that the shape of the UMAP coordinates matches the expected
+        umap_shape = self.adata.obsm["X_umap"].shape
+        self.assertEqual(umap_shape, (self.adata.n_obs, 3))
 
 
 if __name__ == '__main__':
