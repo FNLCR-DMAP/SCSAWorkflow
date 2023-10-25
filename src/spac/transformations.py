@@ -1,11 +1,14 @@
 import numpy as np
+from numpy import arcsinh
 import scanpy as sc
 import pandas as pd
 import anndata
 import warnings
+import logging
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
+from scipy.sparse import issparse
 
 
 def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
@@ -494,6 +497,85 @@ def normalize_features(
     adata.layers[new_layer_name] = dataframe
 
     return quantiles
+
+
+def arcsinh_transformation(adata, input_layer=None, co_factor=None,
+                           percentile=20, output_layer="arcsinh"):
+    """
+    Apply arcsinh transformation using a co-factor.
+
+    The co-factor is determined either by the given percentile of each
+    biomarker (feature-wise) or a provided fixed number. The function computes
+    the co-factor for each biomarker individually, considering its unique
+    range of expression levels. This ensures that each biomarker is scaled
+    based on its inherent distribution, which is particularly important when
+    dealing with datasets where features have a wide range of values.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the data to transform.
+    input_layer : str, optional
+        The name of the layer in the AnnData object to transform.
+        If None, the main data matrix .X is used.
+    co_factor : float, optional
+        A fixed positive number to use as a co-factor for the transformation.
+        If provided, it takes precedence over the percentile argument.
+    percentile : int, default=20
+        The percentile to determine the co-factor if co_factor is not provided.
+        The percentile is computed for each feature (column) individually.
+    output_layer : str, default="arcsinh"
+        Name of the layer to put the transformed results. If it already exists,
+        it will be overwritten with a warning.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        The AnnData object with the transformed data stored in the specified
+        output_layer.
+    """
+
+    # Check if the provided input_layer exists in the AnnData object
+    if input_layer:
+        check_table(adata, tables=input_layer)
+        data_to_transform = adata.layers[input_layer]
+    else:
+        data_to_transform = adata.X
+
+    # Validate input parameters
+    if co_factor and co_factor <= 0:
+        raise ValueError("Co_factor should be a positive value.")
+
+    if not (0 <= percentile <= 100):
+        raise ValueError("Percentile should be between 0 and 100.")
+
+    # Determine the co-factor
+    if co_factor:
+        factor = co_factor
+    else:
+        # Handle sparse matrix
+        if issparse(data_to_transform):
+            data_to_transform = data_to_transform.toarray()
+        # Compute the percentiles per column (feature-wise)
+        factor = np.percentile(data_to_transform, percentile, axis=0)
+        # Check for zero values in factor and replace them to avoid division
+        # by zero
+        factor[factor == 0] = 1e-10
+
+    # Apply the arcsinh transformation using the co-factor
+    transformed_data = np.arcsinh(data_to_transform / factor)
+
+    # Check if output_layer already exists and issue a warning if it does
+    if output_layer in adata.layers:
+        logging.warning(
+            f"Layer '{output_layer}' already exists. It will be overwritten "
+            "with the new transformed data."
+        )
+
+    # Store the transformed data in the specified output_layer
+    adata.layers[output_layer] = transformed_data
+
+    return adata
 
 
 def z_score_normalization(adata, layer=None):
