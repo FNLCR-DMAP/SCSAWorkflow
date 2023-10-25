@@ -25,7 +25,7 @@ class TestLoadCSVFiles(unittest.TestCase):
             pass
 
         # Create csv file with mismatched columns
-        data = {'different_column': [1, 2], 'column2': [3, 4]}
+        data = {'different_column': [1, 2], 'column2': [1, 2]}
         df = pd.DataFrame(data)
         df.to_csv(cls.mismatch_file, index=False)
 
@@ -44,13 +44,20 @@ class TestLoadCSVFiles(unittest.TestCase):
 
     def test_load_single_csv_file(self):
         result = load_csv_files(self.valid_file)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertIsInstance(result[0][1], pd.DataFrame)
+        self.assertIsInstance(result, pd.DataFrame)
 
     def test_load_multiple_csv_files(self):
-        result = load_csv_files([self.valid_file, self.valid_file])
-        self.assertEqual(len(result), 2)
+        result = load_csv_files([self.valid_file, self.mismatch_file])
+        column_names_list = result.columns.tolist()
+        file_names = result['loaded_file_name'].tolist()
+        self.assertIn("loaded_file_name", column_names_list)
+        self.assertIn("column1", column_names_list)
+        self.assertIn("column2", column_names_list)
+        self.assertIn("different_column", column_names_list)
+        self.assertIn("valid.csv", file_names)
+        self.assertIn("mismatch.csv", file_names)
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(len(result), 4)
 
     def test_invalid_file_type(self):
         with self.assertRaises(TypeError):
@@ -69,10 +76,6 @@ class TestLoadCSVFiles(unittest.TestCase):
             mock_access.return_value = False  # Simulate unreadable file
             with self.assertRaises(PermissionError):
                 load_csv_files(self.unreadable_file)
-
-    def test_mismatched_columns(self):
-        with self.assertRaises(ValueError):
-            load_csv_files([self.valid_file, self.mismatch_file])
 
 
 if __name__ == "__main__":
