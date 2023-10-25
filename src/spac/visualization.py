@@ -26,8 +26,10 @@ def visualize_2D_scatter(
     point_size : float, optional
         Size of the points. If None, it will be automatically determined.
     theme : str, optional
-        Color theme for the plot.
-        Defaults to 'viridis' if theme not recognized.
+        Color theme for the plot. Defaults to 'viridis' if theme not
+        recognized. For a list of supported themes, refer to Matplotlib's
+        colormap documentation:
+        https://matplotlib.org/stable/tutorials/colors/colormaps.html
     ax : matplotlib.axes.Axes, optional (default: None)
         Matplotlib axis object. If None, a new one is created.
     annotate_centers : bool, optional (default: False)
@@ -85,7 +87,7 @@ def visualize_2D_scatter(
     if labels is not None:
         # Check if labels are categorical
         if pd.api.types.is_categorical_dtype(labels):
-            unique_clusters = labels.categories
+            unique_clusters = labels.cat.categories
             cmap = plt.get_cmap('tab10', len(unique_clusters))
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster

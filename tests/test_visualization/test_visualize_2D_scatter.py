@@ -37,6 +37,11 @@ class TestVisualize2DScatter(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), expected_msg)
 
+    def test_custom_point_size(self):
+        custom_size = 100
+        _, ax = visualize_2D_scatter(self.x, self.y, point_size=custom_size)
+        self.assertEqual(ax.collections[0].get_sizes()[0], custom_size)
+
     def test_categorical_labels(self):
         fig, ax = visualize_2D_scatter(
             self.x, self.y, labels=self.labels_categorical
@@ -44,12 +49,39 @@ class TestVisualize2DScatter(unittest.TestCase):
         # Check if legend is present
         self.assertTrue(len(ax.get_legend().get_texts()) > 0)
 
+    def test_annotate_cluster_centers(self):
+        fig, ax = visualize_2D_scatter(
+            self.x, self.y, labels=self.labels_categorical,
+            annotate_centers=True
+        )
+        self.assertEqual(
+            len(ax.texts),
+            len(self.labels_categorical.cat.categories)
+        )
+
     def test_continuous_labels(self):
         fig, ax = visualize_2D_scatter(
             self.x, self.y, labels=self.labels_continuous
         )
         # Check if colorbar is present
         self.assertIsNotNone(ax.collections[0].colorbar)
+
+    def test_equal_aspect_ratio(self):
+        _, ax = visualize_2D_scatter(self.x, self.y)
+        self.assertTrue(ax.get_aspect() == 'equal' or ax.get_aspect() == 1.0)
+
+    def test_legend_label_size(self):
+        custom_size = 100
+        _, ax = visualize_2D_scatter(
+            self.x, self.y, labels=self.labels_categorical,
+            legend_label_size=custom_size
+        )
+        self.assertTrue(
+            all([
+                h.get_sizes()[0] == custom_size
+                for h in ax.get_legend().legendHandles
+            ])
+        )
 
 
 if __name__ == '__main__':
