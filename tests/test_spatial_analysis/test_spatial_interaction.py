@@ -55,7 +55,6 @@ class TestSpatialInteraction(unittest.TestCase):
     def setUp(self):
         # Create a mock AnnData object for testing
         self.adata = self.create_dummy_dataset(repetition=1)
-        self.run_CI = True
 
     def test_spatial_interaction_invalid_analysis_method(self):
         # Invalid analysis method test
@@ -166,37 +165,36 @@ class TestSpatialInteraction(unittest.TestCase):
         # Assert that the returned ax object is not None
         self.assertIsNotNone(returned_ax)
 
-        if self.run_CI:
-            # For some reason on CI, the image ax is registered to plt
-            # but the object was not able to accessed through
-            # fig.axes nor ax.get_figure().axes
-            # However, the information can be acquired with
-            # plt.gcf -> plt. get current figure.
-            axes_list = plt.gcf().get_axes()
-        
-            current_values = [
-                axes_list[2].get_title(),
-                axes_list[1].get_ylabel(),
-                axes_list[1].get_yticklabels()[1].get_text(),
-                axes_list[1].get_yticklabels()[0].get_text()
-            ]
+        # For some reason on CI, the image ax is registered to plt
+        # but the object was not able to accessed through
+        # fig.axes nor ax.get_figure().axes
+        # However, the information can be acquired with
+        # plt.gcf -> plt. get current figure.
+        axes_list = plt.gcf().get_axes()
+    
+        current_values = [
+            axes_list[2].get_title(),
+            axes_list[1].get_ylabel(),
+            axes_list[1].get_yticklabels()[1].get_text(),
+            axes_list[1].get_yticklabels()[0].get_text()
+        ]
 
-            expect_values = [
-                'Neighborhood enrichment',
-                annotation + "_plot",
-                'A',
-                'B'
-            ]
-            for i in range(len(current_values)):
-                error_msg = f"Value at index {i} " + \
-                    f"is different. Got '{current_values[i]}', " + \
-                    f"expected '{expect_values[i]}'"
+        expect_values = [
+            'Neighborhood enrichment',
+            annotation + "_plot",
+            'A',
+            'B'
+        ]
+        for i in range(len(current_values)):
+            error_msg = f"Value at index {i} " + \
+                f"is different. Got '{current_values[i]}', " + \
+                f"expected '{expect_values[i]}'"
 
-                self.assertEqual(
-                    current_values[i],
-                    expect_values[i],
-                    error_msg
-                )
+            self.assertEqual(
+                current_values[i],
+                expect_values[i],
+                error_msg
+            )
 
     def test_new_ax_has_right_titles(self):
         annotation = "cluster_num"
@@ -218,41 +216,40 @@ class TestSpatialInteraction(unittest.TestCase):
         # as the input ax object
         self.assertIsInstance(returned_ax, plt.Axes)
 
-        if self.run_CI:
-            # For some reason on CI, the image ax is registered to plt
-            # but the object was not able to accessed through
-            # fig.axes nor ax.get_figure().axes
-            # However, the information can be acquired with
-            # plt.gcf -> plt. get current figure.
-            axes_list = plt.gcf().get_axes()
+        # For some reason on CI, the image ax is registered to plt
+        # but the object was not able to accessed through
+        # fig.axes nor ax.get_figure().axes
+        # However, the information can be acquired with
+        # plt.gcf -> plt. get current figure.
+        axes_list = plt.gcf().get_axes()
 
-            current_values = [
-                axes_list[2].get_title(),
-                axes_list[1].get_ylabel(),
-                axes_list[1].get_yticklabels()[1].get_text(),
-                axes_list[1].get_yticklabels()[0].get_text()
-            ]
+        current_values = [
+            axes_list[2].get_title(),
+            axes_list[1].get_ylabel(),
+            axes_list[1].get_yticklabels()[1].get_text(),
+            axes_list[1].get_yticklabels()[0].get_text()
+        ]
 
-            expect_values = [
-                'Neighborhood enrichment',
-                annotation + "_plot",
-                '1',
-                '2'
-            ]
-            # Use a for loop with subtests to check each value
-            for i in range(len(current_values)):
-                with self.subTest(
-                    index=i,
-                    current=current_values[i],
-                    expected=expect_values[i]
-                ):
-                    error_msg = f"Value at index {i} is different. " + \
-                        "Got '{current_values[i]}', " + \
-                        "expected '{expect_values[i]}'"
-                    self.assertEqual(
-                        current_values[i],
-                        expect_values[i],
-                        error_msg)
+        expect_values = [
+            'Neighborhood enrichment',
+            annotation + "_plot",
+            '1',
+            '2'
+        ]
+        # Use a for loop with subtests to check each value
+        for i in range(len(current_values)):
+            with self.subTest(
+                index=i,
+                current=current_values[i],
+                expected=expect_values[i]
+            ):
+                error_msg = f"Value at index {i} is different. " + \
+                    "Got '{current_values[i]}', " + \
+                    "expected '{expect_values[i]}'"
+                self.assertEqual(
+                    current_values[i],
+                    expect_values[i],
+                    error_msg)
 
     def test_sinlge_stratify_by(self):
         ax_dict = spatial_interaction(
