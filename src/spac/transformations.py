@@ -303,10 +303,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     adata.layers[layer] = new_df
 
 
-def rename_annotations(
-        adata, src_annotation, dest_annotation, mappings,
-        layer=None
-):
+def rename_annotations(adata, src_annotation, dest_annotation, mappings):
     """
     Rename labels in a given annotation in an AnnData object based on a
     provided dictionary. This function modifies the adata object in-place
@@ -325,8 +322,6 @@ def rename_annotations(
     mappings : dict
         A dictionary mapping the original annotation labels to
         the new labels.
-    layer : str, optional
-        The name of the layer in the AnnData object to check.
 
     Examples
     --------
@@ -345,8 +340,6 @@ def rename_annotations(
     """
 
     # Use utility functions for input validation
-    if layer:
-        check_table(adata, tables=layer)
     check_annotation(adata, annotations=src_annotation)
 
     # Inform the user about the data type of the original column
