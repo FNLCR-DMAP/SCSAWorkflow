@@ -392,10 +392,10 @@ class TestSpatialInteraction(unittest.TestCase):
             return_matrix=True
             )
 
-        # The first 7 cells are in Region_A are on a row and not connected to the last 7 
-        # cells in Region_B.
-        # Given the default squidpy using KNN to make the graph with 6 neighbors, the ground
-        # truth matrix is:
+        # The first 7 cells are in Region_A are on a row and
+        # not connected to the last 7 cells in Region_B.
+        # Given the default squidpy using KNN to make the graph
+        # with 6 neighbors, the ground truth matrix is:
         region_a_ground_truth = array(
             [[20., 10.],
              [10., 2.]])
@@ -448,16 +448,16 @@ class TestSpatialInteraction(unittest.TestCase):
             "Cluster Interaction Matrix",
             stratify_by="Analysis_Region",
             return_matrix=True,
-            n_neighs=5
+            n_neighs=2
             )
 
         # The first 7 cells are in Region_A are on a row and not 
         # connected to the last 7 cells in Region_B.
-        # Given the default squidpy using KNN to make the graph
-        # with 5 neighbors, the ground truth matrix is:
+        # Given the squidpy using KNN to make the graph
+        # with 2 neighbors, the ground truth matrix is:
         region_a_ground_truth = array(
-            [[15., 8.],
-             [10., 2.]])
+            [[6., 4.],
+             [4., 0.]])
 
         self.assertTrue(
             np.array_equal(
@@ -467,8 +467,8 @@ class TestSpatialInteraction(unittest.TestCase):
         )
 
         region_b_ground_truth = array(
-            [[6., 12.],
-             [9., 8.]])
+            [[0., 6.],
+             [6., 2.]])
 
         self.assertTrue(
             np.array_equal(
@@ -491,7 +491,7 @@ class TestSpatialInteraction(unittest.TestCase):
 
         # The first 7 cells are in Region_A are on a row and not 
         # connected to the last 7 cells in Region_B.
-        # Given the default squidpy using KNN to make the graph
+        # Given the squidpy using KNN to make the graph
         # with radius = 1, the ground truth matrix is:
         region_a_ground_truth = array(
             [[4., 4.],

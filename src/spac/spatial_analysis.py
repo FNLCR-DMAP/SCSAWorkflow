@@ -101,7 +101,7 @@ def spatial_interaction(
 
            
     """
-    print(n_neighs)
+
     # List all available methods
     available_methods = [
         "Neighborhood Enrichment",
