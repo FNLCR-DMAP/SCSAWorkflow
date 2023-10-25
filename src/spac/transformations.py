@@ -11,7 +11,8 @@ from scipy import stats
 from scipy.sparse import issparse
 
 
-def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
+def phenograph_clustering(adata, features, layer=None,
+                          k=50, seed=None, **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -59,7 +60,8 @@ def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     phenograph_out = sce.tl.phenograph(phenograph_df,
                                        clustering_algo="leiden",
                                        k=k,
-                                       seed=seed)
+                                       seed=seed,
+                                       **kwargs)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
