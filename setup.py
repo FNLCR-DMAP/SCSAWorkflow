@@ -30,6 +30,11 @@ setup(
         'seaborn==0.12.2',
         'scanpy==1.8.0',
         'phenograph==1.5.7',
+        'zarr==2.12.0',
+        'numba',
+        'Pillow',
+        'datashader',
+        'plotly'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

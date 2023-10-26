@@ -30,6 +30,18 @@ class TestCheckAnnotation(unittest.TestCase):
             "please check the input dataset source."
         )
 
+    def test_set_parameter_name(self):
+        with self.assertRaises(ValueError) as context:
+            check_annotation(self.adata,
+                             annotations=1,
+                             parameter_name="test_parameter_name")
+        self.assertEqual(
+            str(context.exception),
+            "The 'test_parameter_name' parameter "
+            "should be a string or a list of strings."
+        )
+
+
     def test_valid_annotation(self):
         # Test with valid annotation
         self.assertIsNone(check_annotation(self.adata, 

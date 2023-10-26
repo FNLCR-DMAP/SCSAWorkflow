@@ -202,6 +202,7 @@ def check_table(
 def check_annotation(
         adata,
         annotations=None,
+        parameter_name=None,
         should_exist=True):
 
     """
@@ -240,9 +241,13 @@ def check_annotation(
 
     # Check for tables
     existing_annotation = adata.obs.columns.to_list()
+
+    if not parameter_name:
+        parameter_name="annotations"
+
     check_list_in_list(
             input=annotations,
-            input_name="annotations",
+            input_name=parameter_name,
             input_type="annotation",
             target_list=existing_annotation,
             need_exist=should_exist
