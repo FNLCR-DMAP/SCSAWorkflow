@@ -153,7 +153,7 @@ def visualize_2D_scatter(
 def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
                                   layer=None, ax=None, **kwargs):
     """
-    Visualize scatter plot in t-SNE or UMAP basis.
+    Visualize scatter plot in PCA, t-SNE or UMAP basis.
 
     Parameters
     ----------
@@ -162,7 +162,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
     method : str
         Dimensionality reduction method to visualize.
-        Choose from {'tsne', 'umap'}.
+        Choose from {'tsne', 'umap', 'pca'}.
     annotation : str, optional
         The name of the column in `adata.obs` to use for coloring
         the scatter plot points based on cell annotations.
@@ -176,7 +176,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
     **kwargs
-        Parameters passed to scanpy.pl.tsne or scanpy.pl.umap function.
+        Parameters passed to visualize_2D_scatter function.
 
     Returns
     -------
@@ -193,50 +193,38 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
             "not both.")
 
     # Use utility functions for input validation
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
     if annotation:
         check_annotation(adata, annotations=annotation)
     if feature:
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    if method == 'umap':
-        key = 'X_umap'
-    elif method == 'tsne':
-        key = 'X_tsne'
-    else:
-        raise ValueError("Method should be one of {'tsne', 'umap'}.")
+    valid_methods = ['tsne', 'umap', 'pca']
+    if method not in valid_methods:
+        raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}.")
 
+    key = f'X_{method}'
     if key not in adata.obsm.keys():
-        error_msg = (
-            f"{key} coordinates not found in adata.obsm."
+        raise ValueError(
+            f"{key} coordinates not found in adata.obsm. "
             f"Please run {method.upper()} before calling this function."
         )
-        raise ValueError(error_msg)
+
+    # Extract the 2D coordinates
+    x, y = adata.obsm[key].T
 
     # Determine coloring scheme
-    color = None
     if annotation:
-        color = annotation
+        color_values = adata.obs[annotation].astype('category').values
     elif feature:
-        color = feature
-
-    # If a layer is provided, use it for visualization
-    if layer:
-        adata.X = adata.layers[layer]
-
-    # Add color column to the kwargs for the scanpy plot
-    kwargs['color'] = color
-
-    # Plot the chosen method
-    if method == 'tsne':
-        sc.pl.tsne(adata, ax=ax, **kwargs)
+        data_source = adata.layers[layer] if layer else adata.X
+        color_values = data_source[:, adata.var_names == feature].squeeze()
     else:
-        sc.pl.umap(adata, ax=ax, **kwargs)
+        color_values = None
 
-    fig = plt.gcf()  # Get the current figure
-    if ax is None:  # If no ax was provided, get the current ax
-        ax = plt.gca()
+    fig, ax = visualize_2D_scatter(x, y, ax=ax, labels=color_values, **kwargs)
 
     return fig, ax
 

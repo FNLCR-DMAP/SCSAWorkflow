@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from spac.visualization import dimensionality_reduction_plot
-matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
+matplotlib.use('Agg')
 
 
 class TestDimensionalityReductionPlot(unittest.TestCase):
@@ -13,6 +13,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.adata = anndata.AnnData(X=np.random.rand(10, 10))
         self.adata.obsm['X_tsne'] = np.random.rand(10, 2)
         self.adata.obsm['X_umap'] = np.random.rand(10, 2)
+        self.adata.obsm['X_pca'] = np.random.rand(10, 2)
         self.adata.obs['annotation_column'] = np.random.choice(
             ['A', 'B', 'C'], size=10
         )
@@ -23,7 +24,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(self.adata, 'umap')
         expected_msg = (
-            "X_umap coordinates not found in adata.obsm."
+            "X_umap coordinates not found in adata.obsm. "
             "Please run UMAP before calling this function."
         )
         self.assertEqual(str(cm.exception), expected_msg)
@@ -33,7 +34,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(self.adata, 'tsne')
         expected_msg = (
-            "X_tsne coordinates not found in adata.obsm."
+            "X_tsne coordinates not found in adata.obsm. "
             "Please run TSNE before calling this function."
         )
         self.assertEqual(str(cm.exception), expected_msg)
@@ -87,10 +88,17 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
 
+    def test_real_pca_plot(self):
+        fig, ax = dimensionality_reduction_plot(
+            self.adata, 'pca', annotation='annotation_column'
+        )
+        self.assertIsInstance(fig, plt.Figure)
+        self.assertIsInstance(ax, plt.Axes)
+
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(self.adata, 'invalid_method')
-        expected_msg = "Method should be one of {'tsne', 'umap'}."
+        expected_msg = "Method should be one of {'tsne', 'umap', 'pca'}."
         self.assertEqual(str(cm.exception), expected_msg)
 
 

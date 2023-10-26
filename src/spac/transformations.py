@@ -1,14 +1,19 @@
 import numpy as np
+from numpy import arcsinh
 import scanpy as sc
 import pandas as pd
 import anndata
 import warnings
+import logging
 import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
+import umap as umap_lib
+from scipy.sparse import issparse
 
 
-def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
+def phenograph_clustering(adata, features, layer=None,
+                          k=50, seed=None, **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -56,7 +61,8 @@ def phenograph_clustering(adata, features, layer=None, k=50, seed=None):
     phenograph_out = sce.tl.phenograph(phenograph_df,
                                        clustering_algo="leiden",
                                        k=k,
-                                       seed=seed)
+                                       seed=seed,
+                                       **kwargs)
 
     adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
@@ -165,70 +171,83 @@ def tsne(adata, layer=None, **kwargs):
     return adata
 
 
-def UMAP(
+def run_umap(
         adata,
-        n_neighbors=15,
-        n_pcs=30,
+        n_neighbors=75,
         min_dist=0.1,
-        spread=1.0,
         n_components=2,
-        random_state=42,
-        layer=None):
+        metric='euclidean',
+        random_state=0,
+        transform_seed=42,
+        layer=None,
+        **kwargs
+):
     """
-    Perform UMAP analysis on specific layer information.
+    Perform UMAP analysis on the specific layer of the AnnData object
+    or the default data.
 
     Parameters
     ----------
     adata : AnnData
         Annotated data matrix.
-    n_neighbors : int, default=15
-        Number of neighbors for neighborhood graph.
-    n_pcs : int, default=30
-        Number of principal components.
+    n_neighbors : int, default=75
+        Number of neighbors to consider when constructing the UMAP. This
+        influences the balance between preserving local and global structures
+        in the data.
     min_dist : float, default=0.1
-        Minimum distance between points in UMAP.
-    spread : float, default=1.0
-        Spread of UMAP embedding.
+        Minimum distance between points in the UMAP space. Controls how
+        tightly the embedding is allowed to compress points together.
     n_components : int, default=2
-        Number of components in UMAP embedding.
-    random_state : int, default=42
-        Seed for random number generation.
+        Number of dimensions for embedding.
+    metric : str, optional
+        Metric to compute distances in high dimensional space.
+        Check `https://umap-learn.readthedocs.io/en/latest/api.html` for
+        options. The default is 'euclidean'.
+    random_state : int, default=0
+        Seed used by the random number generator(RNG) during UMAP fitting.
+    transform_seed : int, default=42
+        RNG seed during UMAP transformation.
     layer : str, optional
-        Layer of the AnnData object to perform UMAP on.
+        Layer of AnnData object for UMAP. Defaults to `adata.X`.
 
     Returns
     -------
     adata : anndata.AnnData
-        Updated AnnData object with UMAP coordinates.
+        Updated AnnData object with UMAP coordinates stored in the `obsm`
+        attribute. The key for the UMAP embedding in `obsm` is "X_umap".
     """
 
     # Use utility function to check if the layer exists in adata.layers
-    check_table(adata, tables=layer)
+    if layer:
+        check_table(adata, tables=layer)
 
+    # Extract the data from the specified layer or the default data
     if layer is not None:
-        use_rep = layer + "_umap"
-        X_umap = adata.layers[layer]
-        adata.obsm[use_rep] = X_umap
+        data = adata.layers[layer]
     else:
-        use_rep = 'X'
+        data = adata.X
 
-    # Compute the neighborhood graph
-    sc.pp.neighbors(
-        adata,
+    # Convert data to pandas DataFrame for better memory handling
+    data = pd.DataFrame(data.astype(np.float32))
+
+    # Create and configure the UMAP model
+    umap_model = umap_lib.UMAP(
         n_neighbors=n_neighbors,
-        n_pcs=n_pcs,
-        use_rep=use_rep,
-        random_state=random_state
+        min_dist=min_dist,
+        n_components=n_components,
+        metric=metric,
+        low_memory=True,
+        random_state=random_state,
+        transform_seed=transform_seed,
+        **kwargs
     )
 
-    # Embed the neighborhood graph using UMAP
-    sc.tl.umap(
-        adata,
-        min_dist=min_dist,
-        spread=spread,
-        n_components=n_components,
-        random_state=random_state
-    )
+    # Fit and transform the data with the UMAP model
+    embedding = umap_model.fit_transform(data)
+
+    # Store the UMAP coordinates back into the AnnData object under the
+    # 'X_umap' key, always
+    adata.obsm['X_umap'] = embedding
 
     return adata
 
@@ -304,10 +323,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     adata.layers[layer] = new_df
 
 
-def rename_annotations(
-        adata, src_annotation, dest_annotation, mappings,
-        layer=None
-):
+def rename_annotations(adata, src_annotation, dest_annotation, mappings):
     """
     Rename labels in a given annotation in an AnnData object based on a
     provided dictionary. This function modifies the adata object in-place
@@ -326,8 +342,6 @@ def rename_annotations(
     mappings : dict
         A dictionary mapping the original annotation labels to
         the new labels.
-    layer : str, optional
-        The name of the layer in the AnnData object to check.
 
     Examples
     --------
@@ -346,8 +360,6 @@ def rename_annotations(
     """
 
     # Use utility functions for input validation
-    if layer:
-        check_table(adata, tables=layer)
     check_annotation(adata, annotations=src_annotation)
 
     # Inform the user about the data type of the original column
@@ -494,6 +506,85 @@ def normalize_features(
     adata.layers[new_layer_name] = dataframe
 
     return quantiles
+
+
+def arcsinh_transformation(adata, input_layer=None, co_factor=None,
+                           percentile=20, output_layer="arcsinh"):
+    """
+    Apply arcsinh transformation using a co-factor.
+
+    The co-factor is determined either by the given percentile of each
+    biomarker (feature-wise) or a provided fixed number. The function computes
+    the co-factor for each biomarker individually, considering its unique
+    range of expression levels. This ensures that each biomarker is scaled
+    based on its inherent distribution, which is particularly important when
+    dealing with datasets where features have a wide range of values.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the data to transform.
+    input_layer : str, optional
+        The name of the layer in the AnnData object to transform.
+        If None, the main data matrix .X is used.
+    co_factor : float, optional
+        A fixed positive number to use as a co-factor for the transformation.
+        If provided, it takes precedence over the percentile argument.
+    percentile : int, default=20
+        The percentile to determine the co-factor if co_factor is not provided.
+        The percentile is computed for each feature (column) individually.
+    output_layer : str, default="arcsinh"
+        Name of the layer to put the transformed results. If it already exists,
+        it will be overwritten with a warning.
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        The AnnData object with the transformed data stored in the specified
+        output_layer.
+    """
+
+    # Check if the provided input_layer exists in the AnnData object
+    if input_layer:
+        check_table(adata, tables=input_layer)
+        data_to_transform = adata.layers[input_layer]
+    else:
+        data_to_transform = adata.X
+
+    # Validate input parameters
+    if co_factor and co_factor <= 0:
+        raise ValueError("Co_factor should be a positive value.")
+
+    if not (0 <= percentile <= 100):
+        raise ValueError("Percentile should be between 0 and 100.")
+
+    # Determine the co-factor
+    if co_factor:
+        factor = co_factor
+    else:
+        # Handle sparse matrix
+        if issparse(data_to_transform):
+            data_to_transform = data_to_transform.toarray()
+        # Compute the percentiles per column (feature-wise)
+        factor = np.percentile(data_to_transform, percentile, axis=0)
+        # Check for zero values in factor and replace them to avoid division
+        # by zero
+        factor[factor == 0] = 1e-10
+
+    # Apply the arcsinh transformation using the co-factor
+    transformed_data = np.arcsinh(data_to_transform / factor)
+
+    # Check if output_layer already exists and issue a warning if it does
+    if output_layer in adata.layers:
+        logging.warning(
+            f"Layer '{output_layer}' already exists. It will be overwritten "
+            "with the new transformed data."
+        )
+
+    # Store the transformed data in the specified output_layer
+    adata.layers[output_layer] = transformed_data
+
+    return adata
 
 
 def z_score_normalization(adata, layer=None):
