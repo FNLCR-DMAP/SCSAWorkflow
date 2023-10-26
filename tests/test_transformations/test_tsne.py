@@ -38,7 +38,7 @@ class TestTsne(unittest.TestCase):
     def test_output_shape(self):
         tsne(self.adata, self.layer)
 
-        # Check that the shape of X_tsne matches the number of observations
+        # Check that the shape of X_tsne matches the number of annotations
         tsne_shape = self.adata.obsm[self.layer + "_tsne"].shape[0]
         self.assertEqual(tsne_shape, self.adata.n_obs)
 

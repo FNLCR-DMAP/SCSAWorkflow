@@ -3,8 +3,7 @@ run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor
 
 on:
   push:
-    branches: ['*', '!dev', '!main']
-    
+    branches: ['*', '!dev', '!main', '!github_page']    
   pull_request:
     types: ['opened', 'closed']
     branches: ['main', 'release*', 'dev', 'master']

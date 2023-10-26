@@ -17,7 +17,7 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker.*",
-                             obs=batch)
+                             annotation=batch)
 
         self.assertCountEqual(
             list(adata.var_names),
@@ -37,7 +37,7 @@ class TestAnalysisMethods(unittest.TestCase):
         adata = ingest_cells(df1,
                              ["^marker1$",
                               "^marker2$"],
-                             obs=batch)
+                             annotation=batch)
 
         self.assertCountEqual(
             list(adata.var_names),
@@ -55,7 +55,7 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker1$",
-                             obs=batch)
+                             annotation=batch)
         self.assertCountEqual(
             list(adata.var_names),
             ["marker1"])
@@ -72,11 +72,33 @@ class TestAnalysisMethods(unittest.TestCase):
 
         adata = ingest_cells(df1,
                              "^marker1$",
-                             obs=["region1",
-                                  "region2"])
+                             annotation=[
+                                 "region1",
+                                 "region2"
+                                ])
         self.assertCountEqual(
             list(adata.obs_keys()),
             ["region1", "region2"])
+
+    def test_ingest_marker_regex_not_found(self):
+
+        batch = "region"
+        # Marker for first region
+        df1 = pd.DataFrame({
+            'marker1': [1, 2],
+            'marker2': [2, 4],
+            batch: "reg1"
+        })
+
+        with self.assertRaises(ValueError) as context:
+            ingest_cells(df1, ["marker1", "^Not_There.*"], annotation=batch)
+
+        expected_error_message = (
+            "Provided regex pattern(s) or feature(s):\n"
+            '"^Not_There.*"\n'
+            "does not match any in the dataset, please review the input."
+        )
+        self.assertEqual(str(context.exception), expected_error_message)
 
 
 if __name__ == '__main__':

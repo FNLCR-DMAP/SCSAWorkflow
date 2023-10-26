@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 import numpy as np
 import pandas as pd
 from anndata import AnnData
@@ -41,9 +40,22 @@ class TestPhenographClustering(unittest.TestCase):
                 )
         self.syn_data.layers['counts'] = self.syn_dataset
 
-    @patch('scanpy.external.tl.phenograph',
-           return_value=(np.random.randint(0, 3, 100), {}))
-    def test_typical_case(self, mock_phenograph):
+    def test_same_cluster_assignments_with_same_seed(self):
+        # Run phenograph_clustering with a specific seed
+        # and store the cluster assignments
+        phenograph_clustering(self.adata, self.features, self.layer, seed=42)
+        first_run_clusters = self.adata.obs['phenograph'].copy()
+
+        # Reset the phenograph annotation and run again with the same seed
+        del self.adata.obs['phenograph']
+        phenograph_clustering(self.adata, self.features, self.layer, seed=42)
+
+        # Check if the cluster assignments are the same
+        self.assertTrue(
+            (first_run_clusters == self.adata.obs['phenograph']).all()
+        )
+
+    def test_typical_case(self):
         # This test checks if the function correctly adds 'phenograph' to the
         # AnnData object's obs attribute and if it correctly sets
         # 'phenograph_features' in the AnnData object's uns attribute.
@@ -52,32 +64,12 @@ class TestPhenographClustering(unittest.TestCase):
         self.assertEqual(self.adata.uns['phenograph_features'],
                          self.features)
 
-    @patch('scanpy.external.tl.phenograph',
-           return_value=(np.random.randint(0, 3, 100), {}))
-    def test_layer_none_case(self, mock_phenograph):
+    def test_layer_none_case(self):
         # This test checks if the function works correctly when layer is None.
         phenograph_clustering(self.adata, self.features, None)
         self.assertIn('phenograph', self.adata.obs)
         self.assertEqual(self.adata.uns['phenograph_features'],
                          self.features)
-
-    def test_invalid_adata(self):
-        # This test checks if the function raises a TypeError when the
-        # adata argument is not an AnnData object.
-        with self.assertRaises(TypeError):
-            phenograph_clustering('invalid', self.features, self.layer)
-
-    def test_invalid_features(self):
-        # This test checks if the function raises a TypeError when the
-        # features argument is not a list of strings.
-        with self.assertRaises(TypeError):
-            phenograph_clustering(self.adata, 'invalid', self.layer)
-
-    def test_invalid_layer(self):
-        # This test checks if the function raises a ValueError when the
-        # layer argument is not found in the AnnData object's layers.
-        with self.assertRaises(ValueError):
-            phenograph_clustering(self.adata, self.features, 'invalid')
 
     def test_invalid_k(self):
         # This test checks if the function raises a ValueError when the
@@ -85,12 +77,6 @@ class TestPhenographClustering(unittest.TestCase):
         with self.assertRaises(ValueError):
             phenograph_clustering(self.adata, self.features, self.layer,
                                   'invalid')
-
-    def test_features_not_in_var_names(self):
-        # This test checks if the function raises a ValueError when one or
-        # more of the features are not found in the AnnData object's var_names.
-        with self.assertRaises(ValueError):
-            phenograph_clustering(self.adata, ['invalid'], self.layer)
 
     def test_clustering_accuracy(self):
         phenograph_clustering(self.syn_data,

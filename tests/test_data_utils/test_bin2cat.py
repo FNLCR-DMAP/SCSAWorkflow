@@ -13,8 +13,8 @@ class TestBin2Cat(unittest.TestCase):
             'B_0': [0, 0, 1, 0, 0],
             'B_1': [0, 0, 0, 1, 0]
         })
-        one_hot_observations = ['A.*', 'B.*']
-        new_observation = 'new_category'
+        one_hot_annotations = ['A.*', 'B.*']
+        new_annotation = 'new_category'
 
         # Expected output data
         expected_data = pd.DataFrame({
@@ -26,23 +26,23 @@ class TestBin2Cat(unittest.TestCase):
         })
 
         # Call the function
-        result = bin2cat(data, one_hot_observations, new_observation)
+        result = bin2cat(data, one_hot_annotations, new_annotation)
 
         # Check if the result matches the expected output
         pd.testing.assert_frame_equal(result, expected_data)
 
-    def test_bin2cat_duplicate_new_observation(self):
+    def test_bin2cat_duplicate_new_annotation(self):
         # Sample input data
         data = pd.DataFrame({
             'A_0': [1, 0, 0],
             'A_1': [0, 1, 0],
         })
-        one_hot_observations = ['A.*']
-        new_observation = 'A_0'  # Duplicate name
+        one_hot_annotations = ['A.*']
+        new_annotation = 'A_0'  # Duplicate name
 
         # Call the function and check for ValueError
         with self.assertRaises(ValueError):
-            bin2cat(data, one_hot_observations, new_observation)
+            bin2cat(data, one_hot_annotations, new_annotation)
 
     def test_bin2cat_multiple_instances(self):
         # Sample input data
@@ -52,12 +52,12 @@ class TestBin2Cat(unittest.TestCase):
             'B_0': [0, 0, 1],
             'B_1': [1, 0, 1],
         })
-        one_hot_observations = ['A.*', 'B.*']
-        new_observation = 'new_category'
+        one_hot_annotations = ['A.*', 'B.*']
+        new_annotation = 'new_category'
 
         # Call the function and check for ValueError
         with self.assertRaises(ValueError) as cm:
-            bin2cat(data, one_hot_observations, new_observation)
+            bin2cat(data, one_hot_annotations, new_annotation)
             expect_str = "Multiple instances found: " + \
                 "Index(['A_0', 'B_1'], dtype='object')"
 
@@ -72,12 +72,12 @@ class TestBin2Cat(unittest.TestCase):
             'A_0': [1, 0, 0],
             'A_1': [0, 1, 0],
         })
-        one_hot_observations = ['B.*']  # Non-existent column
-        new_observation = 'new_category'
+        one_hot_annotations = ['B.*']  # Non-existent column
+        new_annotation = 'new_category'
 
         # Call the function and check for ValueError
         with self.assertRaises(ValueError) as cm:
-            bin2cat(data, one_hot_observations, new_observation)
+            bin2cat(data, one_hot_annotations, new_annotation)
             error_string = "No column was found in the dataframe " + \
                 "with current regex pattern(s)."
             self.assertEqual(str(cm.exception), error_string)
