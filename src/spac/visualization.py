@@ -6,6 +6,8 @@ import anndata
 import scanpy as sc
 import math
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation, check_feature
 
@@ -1154,3 +1156,200 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     plt.show()
 
     return fig, ax
+
+
+def interative_spatial_plot(
+    adata,
+    annotations,
+    dot_size=1.5,
+    dot_transparancy=0.75,
+    colorscale='Viridis',
+    figure_width=12,
+    figure_height=8,
+    figure_dpi=200,
+    font_size=12
+
+):
+
+    """
+    Create an interactive scatter plot for
+    spatial data using provided annotations.
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix object,
+        must have a .obsm attribute with 'spatial' key.
+    annotations : list of str or str
+        Column(s) in `adata.obs` that contain the annotations to plot. 
+        If a single string is provided, it will be converted to a list.
+        The interactive plot will show all the labels in the annotation
+        columns passed.
+    dot_size : float, optional
+        Size of the scatter dots in the plot. Default is 1.5.
+    dot_transparancy : float, optional
+        Transparancy level of the scatter dots. Default is 0.75.
+    colorscale : str, optional
+        Name of the color scale to use for the dots. Default is 'Viridis'.
+    figure_width : int, optional
+        Width of the figure in inches. Default is 12.
+    figure_height : int, optional
+        Height of the figure in inches. Default is 8.
+    figure_dpi : int, optional
+        DPI (dots per inch) for the figure. Default is 200.
+    font_size : int, optional
+        Font size for text in the plot. Default is 12.
+
+    Returns
+    -------
+    plotly.graph_objs._figure.Figure
+        A plotly figure object containing the spatial plot.
+
+    Notes
+    -----
+    This function is specifically tailored for
+    spatial single-cell data and expects the input AnnData object
+    to have spatial coordinates stored in its .obsm attribute
+    under the 'spatial' key.
+    """
+
+    if not isinstance(annotations, list):
+        annotations = [annotations]
+
+    for annotation in annotations:
+        check_annotation(
+            adata,
+            annotations=annotation
+        )
+
+    if not hasattr(adata, 'obsm'):
+        error_msg = ".obsm attribute (Spatial Coordinate) does not exist " + \
+            "in the input AnnData object. Please check."
+        raise ValueError(error_msg)
+
+    if 'spatial' not in adata.obsm:
+        error_msg = 'The key "spatial" is missing from .obsm field, hence ' + \
+            "missing spatial coordniates. Please check."
+        raise ValueError(error_msg)
+
+    spatial_coords = adata.obsm['spatial']
+
+    extract_columns_raw = []
+
+    for item in annotations:
+        extract_columns_raw.append(adata.obs[item])
+
+    extract_columns = []
+
+    for i, item in enumerate(extract_columns_raw):
+        extract_columns.append(
+            [annotations[i] + "_" + str(value) for value in item]
+        )
+
+    xcoord = [coord[0] for coord in spatial_coords]
+    ycoord = [coord[1] for coord in spatial_coords]
+
+    data = {'X': xcoord, 'Y': ycoord}
+
+    # Add the extract_columns data as columns in the dictionary
+    for i, column in enumerate(extract_columns):
+        column_name = annotations[i]
+        data[column_name] = column
+
+    # Create the DataFrame
+    df = pd.DataFrame(data)
+
+    max_x_range = max(xcoord) * 1.1
+    min_x_range = min(xcoord) * 0.9
+    max_y_range = max(ycoord) * 1.1
+    min_y_range = min(ycoord) * 0.9
+
+    width_px = int(figure_width * figure_dpi)
+    height_px = int(figure_height * figure_dpi)
+
+    main_fig = px.scatter(
+        df,
+        x='X',
+        y='Y',
+        color=annotations[0],
+        hover_data=[annotations[0]]
+    )
+
+    # If annotation is more than 1, we would first call px.scatter
+    # to create plotly object, than append the data to main figure
+    # with add_trace for a centralized view. 
+    if len(annotations) > 1:
+        for obs in annotations[1:]:
+            scatter_fig = px.scatter(
+                                df,
+                                x='X',
+                                y='Y',
+                                color=obs,
+                                hover_data=[obs]
+                            )
+
+            main_fig.add_traces(scatter_fig.data)
+
+    # Reset the color attribute of the traces in combined_fig
+    for trace in main_fig.data:
+        trace.marker.color = None
+
+    main_fig.update_traces(
+        mode='markers',
+        marker=dict(
+            size=dot_size,
+            colorscale=colorscale,
+            opacity=dot_transparancy
+        ),
+        hovertemplate="%{customdata[0]}<extra></extra>"
+    )
+
+    main_fig.update_layout(
+        width=width_px,
+        height=height_px,
+        plot_bgcolor='white',
+        font=dict(size=font_size),
+        margin=dict(l=10, r=10, t=10, b=10),
+        legend=dict(
+            orientation='v',
+            yanchor='middle',
+            y=0.5,
+            xanchor='right',
+            x=1.15,
+            title='',
+            itemwidth=30,
+            bgcolor="rgba(0, 0, 0, 0)",
+            traceorder='normal',
+            entrywidth=50
+        ),
+        xaxis=dict(
+                    range=[min_x_range, max_x_range],
+                    showgrid=False,
+                    showticklabels=False,
+                    title_standoff=5,
+                    constrain="domain"
+                ),
+        yaxis=dict(
+                    range=[max_y_range, min_y_range],
+                    showgrid=False,
+                    scaleanchor="x",
+                    scaleratio=1,
+                    showticklabels=False,
+                    title_standoff=5,
+                    constrain="domain"
+                ),
+        shapes=[
+            go.layout.Shape(
+                type="rect",
+                xref="x",
+                yref="y",
+                x0=min_x_range,
+                y0=min_y_range,
+                x1=max_x_range,
+                y1=max_y_range,
+                line=dict(color="black", width=1),
+                fillcolor="rgba(0,0,0,0)",
+            )
+        ]
+    )
+    return main_fig
