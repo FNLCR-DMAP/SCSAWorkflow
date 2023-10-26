@@ -87,7 +87,19 @@ def visualize_2D_scatter(
     if labels is not None:
         # Check if labels are categorical
         if pd.api.types.is_categorical_dtype(labels):
-            unique_clusters = labels.cat.categories
+
+            # Determine how to access the categories based on
+            # the type of 'labels'
+            if isinstance(labels, pd.Series):
+                unique_clusters = labels.cat.categories
+            elif isinstance(labels, pd.Categorical):
+                unique_clusters = labels.categories
+            else:
+                raise TypeError(
+                    "Expected labels to be of type Series[Categorical] or "
+                    "Categorical."
+                )
+
             cmap = plt.get_cmap('tab10', len(unique_clusters))
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
