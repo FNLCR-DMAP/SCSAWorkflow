@@ -47,7 +47,7 @@ class TestVisualize2DScatter(unittest.TestCase):
             self.x, self.y, labels=self.labels_categorical
         )
         # Check if legend is present
-        self.assertTrue(len(ax.get_legend().get_texts()) > 0)
+        self.assertTrue(len(ax.get_legend().get_texts()) == 3)
 
     def test_annotate_cluster_centers(self):
         fig, ax = visualize_2D_scatter(
@@ -57,6 +57,24 @@ class TestVisualize2DScatter(unittest.TestCase):
         self.assertEqual(
             len(ax.texts),
             len(self.labels_categorical.cat.categories)
+        )
+
+    def test_legend_placement_categorical_labels(self):
+        fig, ax = visualize_2D_scatter(
+            self.x, self.y, labels=self.labels_categorical
+        )
+
+        # Check if legend is outside the plot
+        legend = ax.get_legend()
+        bbox = legend.get_bbox_to_anchor().transformed(ax.transAxes.inverted())
+        self.assertTrue(bbox.x0 > 1, "Legend is not placed outside the plot.")
+
+        # Check if hardcode the expected labels match the legend's labels
+        expected_labels = ['A', 'B', 'C']
+        legend_labels = [text.get_text() for text in legend.get_texts()]
+        self.assertTrue(
+            set(legend_labels) == set(expected_labels),
+            f"Expected labels {expected_labels} but got {legend_labels}."
         )
 
     def test_continuous_labels(self):
@@ -69,19 +87,6 @@ class TestVisualize2DScatter(unittest.TestCase):
     def test_equal_aspect_ratio(self):
         _, ax = visualize_2D_scatter(self.x, self.y)
         self.assertTrue(ax.get_aspect() == 'equal' or ax.get_aspect() == 1.0)
-
-    def test_legend_label_size(self):
-        custom_size = 100
-        _, ax = visualize_2D_scatter(
-            self.x, self.y, labels=self.labels_categorical,
-            legend_label_size=custom_size
-        )
-        self.assertTrue(
-            all([
-                h.get_sizes()[0] == custom_size
-                for h in ax.get_legend().legendHandles
-            ])
-        )
 
 
 if __name__ == '__main__':

@@ -79,7 +79,7 @@ def visualize_2D_scatter(
         point_size = 5000 / num_points
 
     if ax is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10, 6))
     else:
         fig = ax.figure
 
@@ -106,7 +106,23 @@ def visualize_2D_scatter(
                         fontsize=9, ha='center', va='center'
                     )
 
-            ax.legend(loc='upper right')
+            # Extract current handles and labels for the legend
+            handles, labels = ax.get_legend_handles_labels()
+
+            # Adjust the size of legend items
+            for handle in handles:
+                handle.set_sizes([legend_label_size])
+
+            # Create a custom legend
+            ax.legend(
+                handles,
+                labels,
+                loc='upper right',
+                bbox_to_anchor=(1.25, 1),  # Adjusting position
+                handlelength=2,
+                handletextpad=1
+            )
+
         else:
             # If labels are continuous
             scatter = ax.scatter(
@@ -118,13 +134,6 @@ def visualize_2D_scatter(
 
     # Equal aspect ratio for the axes
     ax.set_aspect('equal', 'datalim')
-
-    # Customizing the legend
-    handles, labels = ax.get_legend_handles_labels()
-    if len(handles) > 0:
-        legend = ax.legend(handles=handles, labels=labels, loc='upper right')
-        for handle in legend.legendHandles:
-            handle.set_sizes([legend_label_size])
 
     return fig, ax
 
