@@ -28,8 +28,10 @@ def visualize_2D_scatter(
     point_size : float, optional
         Size of the points. If None, it will be automatically determined.
     theme : str, optional
-        Color theme for the plot.
-        Defaults to 'viridis' if theme not recognized.
+        Color theme for the plot. Defaults to 'viridis' if theme not
+        recognized. For a list of supported themes, refer to Matplotlib's
+        colormap documentation:
+        https://matplotlib.org/stable/tutorials/colors/colormaps.html
     ax : matplotlib.axes.Axes, optional (default: None)
         Matplotlib axis object. If None, a new one is created.
     annotate_centers : bool, optional (default: False)
