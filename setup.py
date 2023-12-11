@@ -19,7 +19,8 @@ setup(
     ),
     author='Fang Liu, Rui He, and George Zaki',
     url='https://github.com/FNLCR-DMAP/SCSAWorkflow',
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     install_requires=[
         'pandas==1.4.3',
         'anndata==0.8.0',
