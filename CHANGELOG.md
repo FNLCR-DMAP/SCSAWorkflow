@@ -2,9 +2,46 @@
 
 
 
+## v0.3.1 (2023-12-14)
+
+### Fix
+
+* fix: Update test_tsne input sample size to avoid perplexity error in sklearn ([`07a38d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07a38d60cfc56227ced4b31eb4f1976ec57a4285))
+
+* fix(setup.py): Update pacakge find location ([`b3a9b3e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3a9b3ec39c9a453a55a2b6cc8639aedff0ee056))
+
+### Performance
+
+* perf: Add meta.yaml for Continuous Deployment ([`ce8c9fa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce8c9fa23edc7e00cbbde95113e8fe442b847072))
+
+* perf: change production rid ([`6723eef`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6723eef29ce60e2286dccc044ad77aa780b5ed7f))
+
+* perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
+
+### Unknown
+
+* Merge pull request #131 from FNLCR-DMAP/dev
+
+Continuous Deployment Implementation Request ([`e73b8b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e73b8b15f8acbcae60cc355a6058e58762b98d42))
+
+* Merge pull request #130 from FNLCR-DMAP/tsne_update
+
+fix: Update test_tsne input sample size to avoid perplexity error in … ([`bd17419`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bd17419086b1d972e220724c766403d5ce2e5ba7))
+
+* Merge pull request #129 from FNLCR-DMAP/conda_recipe
+
+perf: Add meta.yaml for Continuous Deployment ([`52fce58`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/52fce58f134714c7b831eaebed0aadb406f28a6a))
+
+* Merge pull request #128 from FNLCR-DMAP/Update_workflow
+
+Update GitHub action file for Continuous Deployment implementation ([`47217c1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/47217c1ff4f24f45ca303bf5009dd06e93e8dd41))
+
+
 ## v0.3.0 (2023-10-26)
 
 ### Documentation
+
+* docs(version): Automatic Version Bumping ([`43483c5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/43483c51536aa37bdc5bc8a4756ec936ff36b8a4))
 
 * docs: updates the function descriptions and tests ([`37d768f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37d768fcd9d5d1d0283973f245126c0903d9e627))
 
