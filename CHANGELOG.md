@@ -4,6 +4,16 @@
 
 ## v0.3.1 (2023-12-14)
 
+### Documentation
+
+* docs(version): Automatic development release ([`5d0ed2f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d0ed2fec79ecad57dace4bcfb13fd45a8ebb49f))
+
+* docs(version): Automatic Version Bumping ([`4bb20ba`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bb20bac08c152009b0c20ec99c8a0475d5e82b9))
+
+* docs(version): Automatic development release ([`e081258`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e08125820142817c5d57385f685765ed65a8d622))
+
+* docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
+
 ### Fix
 
 * fix: Update test_tsne input sample size to avoid perplexity error in sklearn ([`07a38d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07a38d60cfc56227ced4b31eb4f1976ec57a4285))
@@ -20,10 +30,29 @@
 
 ### Unknown
 
+* Merge pull request #135 from FNLCR-DMAP/release_dev
+
+Continuous deployment to NIDAP production ([`6266d05`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6266d05e124dd2316f8d14ef3b578c3e62c68ba1))
+
+* Merge branch &#39;main&#39; into release_dev ([`98f551d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/98f551d6ce04037bdf992d75c1800e027efc9e73))
+
+* Merge pull request #134 from FNLCR-DMAP/dev
+
+Continuous deployment to NIDAP dev artifact ([`4e4a0c6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e4a0c658e6c1fd48de5971fb06eda18a4d19088))
+
+* Merge pull request #133 from FNLCR-DMAP/update_action
+
+doc: Update github action file ([`118dbad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/118dbadcbdc1670c756fe7b6acc0f0e0c28a9798))
+
+* doc: Update github action file ([`7f1a60b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7f1a60bd2f139ca81ed3e325120f8264a7637d02))
 
 * Merge pull request #132 from FNLCR-DMAP/dev
 
 Continuous Deployment Implementation ([`705f07c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/705f07c2c70b3bf3a630231b21779934617357d2))
+
+* Merge pull request #131 from FNLCR-DMAP/dev
+
+Continuous Deployment Implementation Request ([`e73b8b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e73b8b15f8acbcae60cc355a6058e58762b98d42))
 
 * Merge pull request #130 from FNLCR-DMAP/tsne_update
 
