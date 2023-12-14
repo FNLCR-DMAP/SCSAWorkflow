@@ -4,6 +4,10 @@
 
 ## v0.3.1 (2023-12-14)
 
+### Documentation
+
+* docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
+
 ### Fix
 
 * fix: Update test_tsne input sample size to avoid perplexity error in sklearn ([`07a38d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07a38d60cfc56227ced4b31eb4f1976ec57a4285))
