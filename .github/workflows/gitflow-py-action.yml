@@ -11,8 +11,8 @@ jobs:
   Activating_Parser:
     uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
     with:
-      artifact_rid_production: "ri.artifacts.main.repository.17a52d33-f600-4a19-8969-71d0601af346"
-      artifact_rid_development: "ri.artifacts.main.repository.00852eef-c60b-4b78-8f14-cd48cdfde051"
+      artifact_rid_production: "ri.artifacts.main.repository.92434867-d670-4bc2-9625-570d322ef0b2"
+      artifact_rid_development: "ri.artifacts.main.repository.e537634a-0a9c-42f1-affb-1a152c2e331b"
     secrets:
       NIDAP_TOKEN_PRODUCTION: ${{ secrets.NIDAP_TOKEN_PRODUCTION }}
       NIDAP_TOKEN_DEVELOPMENT: ${{ secrets.NIDAP_TOKEN_DEVELOPMENT }}
