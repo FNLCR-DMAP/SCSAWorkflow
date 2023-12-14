@@ -1,0 +1,57 @@
+{% set version = '<CURRENT_VERSION>' %}
+
+package:
+  name: spac
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/FNLCR-DMAP/SCSAWorkflow.git
+  git_rev: "continuous_deployment"
+ 
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv "
+
+channels:
+  - conda-forge
+  - leej3
+  - anaconda
+
+requirements:
+  host:
+    - python
+    - setuptools
+  run:
+    - python>=3.7.8
+    - pandas
+    - anndata
+    - numpy
+    - scikit-learn
+    - matplotlib
+    - seaborn
+    - scanpy
+    - zarr
+    - numba
+    - Pillow
+    - datashader
+    - plotly
+    - squidpy
+    - phenograph
+
+test:
+  imports:
+    - spac
+
+about:
+  home: https://github.com/FNLCR-DMAP/SCSAWorkflow
+  license: BSD 3-Clause License
+  license_file: LICENSE
+  summary: SPatial Analysis for single-Cell analysis (SPAC)is a Scalable Python package for single-cell spatial protein data analysis from multiplexed whole-slide tissue images.
+  doc_url: https://fnlcr-dmap.github.io/SCSAWorkflow/
+  dev_url: https://github.com/FNLCR-DMAP/SCSAWorkflow
+
+extra:
+  recipe-maintainers:
+    - georgezakinih
+    - ruiheesi
+    - fangliu117
