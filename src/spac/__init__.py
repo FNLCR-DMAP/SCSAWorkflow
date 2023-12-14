@@ -14,11 +14,12 @@ module_files = glob.glob(os.path.join(os.path.dirname(__file__), subdirectory, "
 module_files = [f for f in module_files if not f.endswith("__init__.py")]
 
 # Dynamically import all functions from all modules
+functions = []
 for module_file in module_files:
     module_name = os.path.basename(module_file)[:-3]  # Remove the ".py" extension
     module = __import__(f"{__name__}.{module_name}", fromlist=["*"])
-    functions = [name for name in dir(module) if callable(getattr(module, name))]
-    globals().update({name: getattr(module, name) for name in functions})
+    module_functions = [name for name in dir(module) if callable(getattr(module, name))]
+    functions.extend(module_functions)
 
 # Define the package version before using it in __all__
 __version__ = "0.3.1"
