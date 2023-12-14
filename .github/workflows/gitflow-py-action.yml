@@ -3,12 +3,16 @@ run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor
 
 on:
   push:
-    branches: ['*', '!dev', '!main', '!github_page']    
+    branches: ['*', '!dev', '!main', '!github_page', '!Conda_Package']    
   pull_request:
     types: ['opened', 'closed']
     branches: ['main', 'release*', 'dev', 'master']
 jobs:
   Activating_Parser:
     uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
+    with:
+      artifact_rid_production: "ri.artifacts.main.repository.00852eef-c60b-4b78-8f14-cd48cdfde051"
+      artifact_rid_development: "ri.artifacts.main.repository.00852eef-c60b-4b78-8f14-cd48cdfde051"
     secrets:
-      PAT: ${{ secrets.PAT }}
+      NIDAP_TOKEN_PRODUCTION: ${{ secrets.NIDAP_TOKEN_PRODUCTION }}
+      NIDAP_TOKEN_DEVELOPMENT: ${{ secrets.NIDAP_TOKEN_DEVELOPMENT }}
