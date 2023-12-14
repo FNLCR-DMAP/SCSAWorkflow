@@ -302,3 +302,70 @@ def check_feature(
             target_list=existing_features,
             need_exist=should_exist
         )
+
+
+def check_column_name(
+    column_name,
+    field_name,
+    symbol_checklist="!?,.",
+):
+
+    if column_name.find(" ") != -1:
+        raise ValueError(f"The {column_name} for {field_name} contains a space character.")
+    else:
+        if any(symbol in column_name for symbol in symbol_checklist):
+            raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
+
+
+def text_to_others(
+    parameter,
+    text="None",
+    to_None=True,
+    to_False=False,
+    to_True=False,
+    to_Int=False,
+    to_Float=False
+):
+    def check_same(
+        parameter,
+        text,
+        target
+    ):
+        if parameter == text:
+            parameter = target
+            return parameter
+        else:
+            return parameter
+
+    if to_None:
+        parameter = check_same(
+            parameter,
+            text,
+            None
+        )
+
+    if to_False:
+        parameter = check_same(
+            parameter,
+            text,
+            False
+        )
+
+    if to_True:
+        parameter = check_same(
+            parameter,
+            text,
+            True
+        )
+
+    if isinstance(parameter, str):
+        if to_Int and to_Float:
+            raise ValueError("Please select one numeric conversion at a time, thank you.")
+
+        if to_Int:
+            parameter = int(parameter)
+
+        if to_Float:
+            parameter = float(parameter)
+
+    return parameter

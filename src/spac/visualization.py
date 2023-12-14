@@ -1155,7 +1155,7 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
 
     plt.xticks(rotation=90)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
     return fig, ax
 
