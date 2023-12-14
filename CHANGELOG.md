@@ -6,6 +6,8 @@
 
 ### Documentation
 
+* docs(version): Automatic development release ([`e081258`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e08125820142817c5d57385f685765ed65a8d622))
+
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
 
 ### Fix
@@ -23,6 +25,16 @@
 * perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
 
 ### Unknown
+
+* Merge pull request #134 from FNLCR-DMAP/dev
+
+Continuous deployment to NIDAP dev artifact ([`4e4a0c6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e4a0c658e6c1fd48de5971fb06eda18a4d19088))
+
+* Merge pull request #133 from FNLCR-DMAP/update_action
+
+doc: Update github action file ([`118dbad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/118dbadcbdc1670c756fe7b6acc0f0e0c28a9798))
+
+* doc: Update github action file ([`7f1a60b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7f1a60bd2f139ca81ed3e325120f8264a7637d02))
 
 * Merge pull request #131 from FNLCR-DMAP/dev
 
