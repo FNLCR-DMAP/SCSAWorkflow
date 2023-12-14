@@ -7,9 +7,9 @@ from spac.transformations import tsne
 class TestTsne(unittest.TestCase):
 
     def setUp(self):
-        self.adata = anndata.AnnData(X=np.random.rand(10, 10))
+        self.adata = anndata.AnnData(X=np.random.rand(100, 100))
         self.layer = 'layer1'
-        self.adata.layers[self.layer] = np.random.rand(10, 10)
+        self.adata.layers[self.layer] = np.random.rand(100, 100)
 
     def test_typical_case(self):
         try:
