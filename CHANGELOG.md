@@ -2,6 +2,49 @@
 
 
 
+## v0.3.2 (2023-12-18)
+
+### Documentation
+
+* docs: Update init.py to export function methods and version ([`53b7284`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/53b7284ceabbc0fa3d6b9175f079f010a2dd474f))
+
+* docs: update __init__.py ([`d3bcf35`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d3bcf35a7091660872b52a5d279d384349c5e55f))
+
+* docs(version): Automatic Version Bumping ([`6858c35`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6858c3516bbc0229b5f2377d11df880a95062eca))
+
+### Fix
+
+* fix: update boxplot to mute plt.show, add utils functions ([`2d94abc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2d94abcdf553ec84ef081e81dbb4538dfe2e82e5))
+
+### Refactor
+
+* refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
+
+### Unknown
+
+* Merge pull request #139 from FNLCR-DMAP/dev
+
+Continuous Deployment Development Series: Closing Merges #1 ([`ea32b4d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea32b4d39779c84e8cf600dad75658bbddaec8b6))
+
+* Merge pull request #138 from FNLCR-DMAP/docstring_updates
+
+refactor: Update docstring format ([`d997cce`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d997cceadbfd9972a91fe0b41f73cb8d7fca31aa))
+
+* Merge pull request #137 from FNLCR-DMAP/NIDAP_updates
+
+fix: update boxplot to mute plt.show, add utils functions ([`03e6d1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/03e6d1e14411e0a5f1e63637e83c1c1f7ac39a25))
+
+* Merge pull request #136 from FNLCR-DMAP/update_init.py
+
+Update init.py to reflect version and functions ([`7322fb7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7322fb72bafad401b085e3869b7a7048d32f82be))
+
+* Merge pull request #135 from FNLCR-DMAP/release_dev
+
+Continuous deployment to NIDAP production ([`6266d05`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6266d05e124dd2316f8d14ef3b578c3e62c68ba1))
+
+* Merge branch &#39;main&#39; into release_dev ([`98f551d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/98f551d6ce04037bdf992d75c1800e027efc9e73))
+
+
 ## v0.3.1 (2023-12-14)
 
 ### Documentation
@@ -29,12 +72,6 @@
 * perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
 
 ### Unknown
-
-* Merge pull request #135 from FNLCR-DMAP/release_dev
-
-Continuous deployment to NIDAP production ([`6266d05`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6266d05e124dd2316f8d14ef3b578c3e62c68ba1))
-
-* Merge branch &#39;main&#39; into release_dev ([`98f551d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/98f551d6ce04037bdf992d75c1800e027efc9e73))
 
 * Merge pull request #134 from FNLCR-DMAP/dev
 
