@@ -550,8 +550,6 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
 
     Parameters
     ----------
-    Parameters
-    ----------
     input_data : pd.DataFrame
         The input data frame.
     annotations : str or list of str
@@ -791,23 +789,23 @@ def bin2cat(data, one_hot_annotations, new_annotation):
     a binary one hot encoding of categories
     into a new categorical column.
 
-    Parameters:
-    -----------
-        data : pandas.DataFrame
-            The pandas dataframe containing the one hot encoded annotations.
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The pandas dataframe containing the one hot encoded annotations.
 
-        one_hot_annotations : str or list of str
-            A string or a list of strings representing
-            python regular expression of the one hot encoded annotations
-            columns in the data frame.
+    one_hot_annotations : str or list of str
+        A string or a list of strings representing
+        python regular expression of the one hot encoded annotations
+        columns in the data frame.
 
-        new_annotation: str
-            The column name for new categorical annotation to be created.
+    new_annotation: str
+        The column name for new categorical annotation to be created.
 
-    Returns:
-    --------
-        pandas.DataFrame
-            DataFrame with new categorical column added.
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with new categorical column added.
 
     Example:
     --------
@@ -876,13 +874,13 @@ def combine_dfs(dataframes: list):
     A warming will be printed if schema of current dataframe
     is different than the primary.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     dataframes : list[pd.DataFrame]
         A list of pandas dataframe to be combined
 
-    Return:
-    ----------
+    Return
+    ------
     A pd.DataFrame of combined dataframs.
     """
     # Check if input is list
