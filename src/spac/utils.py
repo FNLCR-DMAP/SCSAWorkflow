@@ -9,22 +9,22 @@ def regex_search_list(
     Perfrom regex (regular expression) search in a list and
     return list of strings matching the regex pattern
 
-    Parameters:
-    -----------
-        regex_pattern : str or a list of str
-            The regex pattern to look for,
-            single pattern or a list of patterns.
+    Parameters
+    ----------
+    regex_pattern : str or a list of str
+        The regex pattern to look for,
+        single pattern or a list of patterns.
 
-        list_to_search : list of str
-            A list of string to seach for string that matches regex pattern.
+    list_to_search : list of str
+        A list of string to seach for string that matches regex pattern.
 
-    Returns:
-    --------
-        list of str
-            A list of strings containing results from search.
+    Returns
+    -------
+    list of str
+        A list of strings containing results from search.
 
-    Example:
-    --------
+    Example
+    -------
     >>> regex_pattern = ["A", "^B.*"]
     >>> list_to_search = ["ABC", "BC", "AC", "AB"]
     >>> result = regex_search_list(regex_pattern, list_to_search)

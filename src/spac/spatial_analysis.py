@@ -23,81 +23,82 @@ def spatial_interaction(
     Current analysis methods are provided in squidpy:
         Neighborhood Enrichment,
         Cluster Interaction Matrix
-    Parameters:
-    -----------
-        adata : anndata.AnnData
-            The AnnData object.
 
-        annotation : str
-            The column name of the annotation to analysis in the dataset.
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
 
-        analysis_method : str
-            The analysis method to use, currently available:
-            "Neighborhood Enrichment" and "Cluster Interaction Matrix".
+    annotation : str
+        The column name of the annotation to analysis in the dataset.
 
-        stratify_by : str or list of strs
-            The annotation[s] to stratify the dataset when generating
-            interaction plots. If single annotation is passed, the dataset
-            will be stratified by the unique labels in the annotation column.
-            If n (n>=2) annotations are passed, the function will be stratified
-            based on existing combination of labels in the passed annotations.
+    analysis_method : str
+        The analysis method to use, currently available:
+        "Neighborhood Enrichment" and "Cluster Interaction Matrix".
 
-        ax: matplotlib.axes.Axes, default None
-            The matplotlib Axes to display the image. This option is only
-            available when stratify is None.
+    stratify_by : str or list of strs
+        The annotation[s] to stratify the dataset when generating
+        interaction plots. If single annotation is passed, the dataset
+        will be stratified by the unique labels in the annotation column.
+        If n (n>=2) annotations are passed, the function will be stratified
+        based on existing combination of labels in the passed annotations.
 
-        return_matrix: boolean, default False
-            If true, the fucntion will return a list of two dictionaries,
-            the first contains axes and the second containing computed matrix.
-            Note that for Neighborhood Encrichment, the matrix will be a tuple
-            with the z-score and the enrichment count.
-            For Cluster Interaction Matrix, it will returns the
-            interaction matrix.
-            If False, the function will return only the axes dictaionary.
+    ax: matplotlib.axes.Axes, default None
+        The matplotlib Axes to display the image. This option is only
+        available when stratify is None.
 
-        seed: int, default None
-            Random seed for reproducibility, used in Neighborhood Enrichment
-            Analysis.
+    return_matrix: boolean, default False
+        If true, the fucntion will return a list of two dictionaries,
+        the first contains axes and the second containing computed matrix.
+        Note that for Neighborhood Encrichment, the matrix will be a tuple
+        with the z-score and the enrichment count.
+        For Cluster Interaction Matrix, it will returns the
+        interaction matrix.
+        If False, the function will return only the axes dictaionary.
 
-        coord_type : str, optional
-            Type of coordinate system used in sq.gr.spatial_neighbors.
-            Should be either 'grid' (Visium Data) or 'generic' (Others).
-            Default is None, decided by the squidy pacakge. If spatial_key
-            is in anndata.uns the coord_type would be 'grid', otherwise
-            general.
+    seed: int, default None
+        Random seed for reproducibility, used in Neighborhood Enrichment
+        Analysis.
 
-        n_rings : int, default 1
-            Number of rings of neighbors for grid data. 
-            Only used when coord_type = 'grid' (Visium)
+    coord_type : str, optional
+        Type of coordinate system used in sq.gr.spatial_neighbors.
+        Should be either 'grid' (Visium Data) or 'generic' (Others).
+        Default is None, decided by the squidy pacakge. If spatial_key
+        is in anndata.uns the coord_type would be 'grid', otherwise
+        general.
+
+    n_rings : int, default 1
+        Number of rings of neighbors for grid data. 
+        Only used when coord_type = 'grid' (Visium)
+    
+    n_neights : int, optional
+        Default is 6.
+        Depending on the ``coord_type``:
+        - 'grid' (Visium) - number of neighboring tiles.
+        - 'generic' - number of neighborhoods for non-grid data.
         
-        n_neights : int, optional
-            Default is 6.
-            Depending on the ``coord_type``:
-            - 'grid' (Visium) - number of neighboring tiles.
-            - 'generic' - number of neighborhoods for non-grid data.
-            
-        radius : float, optional
-            Default is None.
-            Only available when coord_type = 'generic'. Depending on the type:
-            - :class:`float` - compute the graph based on neighborhood radius.
-            - :class:`tuple` - prune the final graph to only contain
-                edges in interval `[min(radius), max(radius)]`.
+    radius : float, optional
+        Default is None.
+        Only available when coord_type = 'generic'. Depending on the type:
+        - :class:`float` - compute the graph based on neighborhood radius.
+        - :class:`tuple` - prune the final graph to only contain
+            edges in interval `[min(radius), max(radius)]`.
 
-        **kwargs
-            Keyword arguments for matplotlib.pyplot.text()
+    **kwargs
+        Keyword arguments for matplotlib.pyplot.text()
     Returns:
     -------
-        ax_dictionary : dictionary
-            The returned dictionary containse matplotlib.axes.Axes
-            under 'Ax' key and optional matrix under 'Matrix' key.
-            If stratify is used, the function will return dictionary
-            of Axes and optional matrix with keys representing
-            the stratification groups.
-            For example: if stratify is not used and matrix is called,
-            the matrix can be acquired by result['Matrix'], and axes
-            from result['Ax']. If stratify is used and has two levels,
-            "A" and "B", the axes for A can be extracted by
-            result['Ax']['A'] and matrix through result['Matrix']['A'].
+    ax_dictionary : dictionary
+        The returned dictionary containse matplotlib.axes.Axes
+        under 'Ax' key and optional matrix under 'Matrix' key.
+        If stratify is used, the function will return dictionary
+        of Axes and optional matrix with keys representing
+        the stratification groups.
+        For example: if stratify is not used and matrix is called,
+        the matrix can be acquired by result['Matrix'], and axes
+        from result['Ax']. If stratify is used and has two levels,
+        "A" and "B", the axes for A can be extracted by
+        result['Ax']['A'] and matrix through result['Matrix']['A'].
 
            
     """

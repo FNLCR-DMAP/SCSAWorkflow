@@ -499,7 +499,7 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
     (e.g., protein or marker) is computed. The heatmap is plotted using
     seaborn's clustermap.
 
-    Parameters:
+    Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object.
@@ -559,8 +559,8 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
           The distance metric to use for the hierarchy. Defaults to 'euclidean'
           in the function.
 
-    Returns:
-    ----------
+    Returns
+    -------
     mean_intensity : pandas.DataFrame
         A DataFrame containing the mean intensity of cells for each annotation.
     clustergrid : seaborn.matrix.ClusterGrid
