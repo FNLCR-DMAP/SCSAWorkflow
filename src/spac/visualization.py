@@ -102,7 +102,7 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            cmap = plt.get_cmap('tab10', len(unique_clusters))
+            cmap = plt.get_cmap('tab20', len(unique_clusters))
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -1183,7 +1183,7 @@ def interative_spatial_plot(
         Annotated data matrix object,
         must have a .obsm attribute with 'spatial' key.
     annotations : list of str or str
-        Column(s) in `adata.obs` that contain the annotations to plot. 
+        Column(s) in `adata.obs` that contain the annotations to plot.
         If a single string is provided, it will be converted to a list.
         The interactive plot will show all the labels in the annotation
         columns passed.
@@ -1279,7 +1279,7 @@ def interative_spatial_plot(
 
     # If annotation is more than 1, we would first call px.scatter
     # to create plotly object, than append the data to main figure
-    # with add_trace for a centralized view. 
+    # with add_trace for a centralized view.
     if len(annotations) > 1:
         for obs in annotations[1:]:
             scatter_fig = px.scatter(
