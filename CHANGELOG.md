@@ -2,9 +2,32 @@
 
 
 
+## v0.3.3 (2023-12-21)
+
+### Fix
+
+* fix: visualize_2D_scatter ([`0aae308`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0aae3086b47a96d84cb332c9cd17a982e5dbb705))
+
+### Unknown
+
+* Merge pull request #142 from FNLCR-DMAP/dev
+
+Dev to release_dev for test_CD ([`00a81d1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00a81d183c884a961cb8a5f424d726e68a809777))
+
+* Merge pull request #141 from FNLCR-DMAP/test_CD
+
+fix: visualize_2D_scatter ([`6fe8348`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6fe8348db4e6eca0a95dcfd96045d97dc9ba9bca))
+
+* Merge pull request #140 from FNLCR-DMAP/release_dev
+
+Continuous Deployment Development Series: Final Merge ([`4197208`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41972087824bbc2fcfea4392928c1b7416d3b0e0))
+
+
 ## v0.3.2 (2023-12-18)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`232801c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/232801c6dc69ee6a8218e7b7c9e2a9fb866d916f))
 
 * docs: Update init.py to export function methods and version ([`53b7284`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/53b7284ceabbc0fa3d6b9175f079f010a2dd474f))
 
@@ -12,9 +35,29 @@
 
 * docs(version): Automatic Version Bumping ([`6858c35`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6858c3516bbc0229b5f2377d11df880a95062eca))
 
+* docs(version): Automatic development release ([`5d0ed2f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d0ed2fec79ecad57dace4bcfb13fd45a8ebb49f))
+
+* docs(version): Automatic Version Bumping ([`4bb20ba`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bb20bac08c152009b0c20ec99c8a0475d5e82b9))
+
+* docs(version): Automatic development release ([`e081258`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e08125820142817c5d57385f685765ed65a8d622))
+
+* docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
+
 ### Fix
 
 * fix: update boxplot to mute plt.show, add utils functions ([`2d94abc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2d94abcdf553ec84ef081e81dbb4538dfe2e82e5))
+
+* fix: Update test_tsne input sample size to avoid perplexity error in sklearn ([`07a38d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07a38d60cfc56227ced4b31eb4f1976ec57a4285))
+
+* fix(setup.py): Update pacakge find location ([`b3a9b3e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3a9b3ec39c9a453a55a2b6cc8639aedff0ee056))
+
+### Performance
+
+* perf: Add meta.yaml for Continuous Deployment ([`ce8c9fa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce8c9fa23edc7e00cbbde95113e8fe442b847072))
+
+* perf: change production rid ([`6723eef`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6723eef29ce60e2286dccc044ad77aa780b5ed7f))
+
+* perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
 
 ### Refactor
 
@@ -43,35 +86,6 @@ Update init.py to reflect version and functions ([`7322fb7`](https://github.com/
 Continuous deployment to NIDAP production ([`6266d05`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6266d05e124dd2316f8d14ef3b578c3e62c68ba1))
 
 * Merge branch &#39;main&#39; into release_dev ([`98f551d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/98f551d6ce04037bdf992d75c1800e027efc9e73))
-
-
-## v0.3.1 (2023-12-14)
-
-### Documentation
-
-* docs(version): Automatic development release ([`5d0ed2f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d0ed2fec79ecad57dace4bcfb13fd45a8ebb49f))
-
-* docs(version): Automatic Version Bumping ([`4bb20ba`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bb20bac08c152009b0c20ec99c8a0475d5e82b9))
-
-* docs(version): Automatic development release ([`e081258`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e08125820142817c5d57385f685765ed65a8d622))
-
-* docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
-
-### Fix
-
-* fix: Update test_tsne input sample size to avoid perplexity error in sklearn ([`07a38d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07a38d60cfc56227ced4b31eb4f1976ec57a4285))
-
-* fix(setup.py): Update pacakge find location ([`b3a9b3e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3a9b3ec39c9a453a55a2b6cc8639aedff0ee056))
-
-### Performance
-
-* perf: Add meta.yaml for Continuous Deployment ([`ce8c9fa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce8c9fa23edc7e00cbbde95113e8fe442b847072))
-
-* perf: change production rid ([`6723eef`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6723eef29ce60e2286dccc044ad77aa780b5ed7f))
-
-* perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
-
-### Unknown
 
 * Merge pull request #134 from FNLCR-DMAP/dev
 
