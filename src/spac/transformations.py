@@ -279,41 +279,45 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
-    regions = adata.obs[annotation].unique().tolist()
+    batches = adata.obs[annotation].unique().tolist()
     original = adata.to_df()
 
     if log:
         original = np.log2(1+original)
 
     if method == "median" or method == "Q50":
-        all_regions_quantile = original.quantile(q=0.5)
+        all_batch_quantile = original.quantile(q=0.5)
+        print("Median for all cells:", all_batch_quantile)
     elif method == "Q75":
-        all_regions_quantile = original.quantile(q=0.75)
+        all_batch_quantile = original.quantile(q=0.75)
+        print("Q75 for all cells:", all_batch_quantile)
     else:
         raise Exception(
             "Unsupported normalization {0}, allowed methods = {1]",
             method, allowed_methods)
 
-    # Place holder for normalized dataframes per region
-    for region in regions:
-        region_cells = original[adata.obs[annotation] == region]
+    # Place holder for normalized dataframes per batch
+    for batch in batches:
+        batch_cells = original[adata.obs[annotation] == batch]
 
         if method == "median":
-            region_median = region_cells.quantile(q=0.5)
+            batch_median = batch_cells.quantile(q=0.5)
+            print(f"Median for {batch}:", batch_median)
             original.loc[
-                (adata.obs[annotation] == region)
-            ] = region_cells + (all_regions_quantile - region_median)
+                (adata.obs[annotation] == batch)
+            ] = batch_cells + (all_batch_quantile - batch_median)
 
-        if method == "Q50":
-            region_median = region_cells.quantile(q=0.5)
-            original.loc[adata.obs[annotation] == region] = (
-                region_cells * all_regions_quantile / region_median
+        elif method == "Q50":
+            batch_median = batch_cells.quantile(q=0.5)
+            original.loc[adata.obs[annotation] == batch] = (
+                batch_cells * all_batch_quantile / batch_median
             )
 
-        if method == "Q75":
-            region_75quantile = region_cells.quantile(q=0.75)
-            original.loc[adata.obs[annotation] == region] = (
-                region_cells * all_regions_quantile / region_75quantile)
+        elif method == "Q75":
+            batch_75quantile = batch_cells.quantile(q=0.75)
+            print(f"Q75 for {batch}:", batch_75quantile)
+            original.loc[adata.obs[annotation] == batch] = (
+                batch_cells * all_batch_quantile / batch_75quantile)
 
     adata.layers[layer] = original
 
