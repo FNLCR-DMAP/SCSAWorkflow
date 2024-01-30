@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import arcsinh
 import scanpy as sc
 import pandas as pd
 import anndata
@@ -296,31 +295,27 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
             method, allowed_methods)
 
     # Place holder for normalized dataframes per region
-    new_df_list = []
     for region in regions:
         region_cells = original[adata.obs[annotation] == region]
 
         if method == "median":
             region_median = region_cells.quantile(q=0.5)
-            new_features = region_cells + \
-                (all_regions_quantile - region_median)
+            original.loc[
+                (adata.obs[annotation] == region)
+            ] = region_cells + (all_regions_quantile - region_median)
 
         if method == "Q50":
             region_median = region_cells.quantile(q=0.5)
-            new_features = (region_cells
-                            * all_regions_quantile
-                            / region_median)
+            original.loc[adata.obs[annotation] == region] = (
+                region_cells * all_regions_quantile / region_median
+            )
 
         if method == "Q75":
             region_75quantile = region_cells.quantile(q=0.75)
-            new_features = (region_cells
-                            * all_regions_quantile
-                            / region_75quantile)
+            original.loc[adata.obs[annotation] == region] = (
+                region_cells * all_regions_quantile / region_75quantile)
 
-        new_df_list.append(new_features)
-
-    new_df = pd.concat(new_df_list)
-    adata.layers[layer] = new_df
+    adata.layers[layer] = original
 
 
 def rename_annotations(adata, src_annotation, dest_annotation, mappings):

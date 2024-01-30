@@ -180,6 +180,38 @@ class TestAnalysisMethods(unittest.TestCase):
         # print(ground_truth)
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
+    def test_batch_normalize_median_single_marker(self):
+        # Marker values and annotations
+        df = pd.DataFrame({
+            'marker1': [1, 5, 2, 6],
+            'batch_annotation': ["batch1", "batch2", "batch1", "batch2"]
+        })
+
+        # Assuming ingest_cells and concatinate_regions work as expected
+        adata = ingest_cells(df, "^marker.*", annotation="batch_annotation")
+
+        # Perform batch normalization
+        median_normalized_layer = "median_normalization"
+        batch_normalize(
+            adata,
+            "batch_annotation",
+            median_normalized_layer,
+            "median")
+
+        # Calculate the expected normalized values
+        # Normalized values: [1+(3.5-1.5), 5+(3.5-5.5),
+        # 2+(3.5-1.5), 6+(3.5-5.5)]
+        ground_truth = np.array([3.0, 3.0, 4.0, 4.0])
+
+        # Extract the normalized array
+        normalized_df = adata.to_df(layer=median_normalized_layer)
+        normalized_array = normalized_df.to_numpy().flatten()
+        print("Ground Truth:", ground_truth)
+        print("Normalized Array:", normalized_array)
+
+        # Check if the normalized values match the ground truth
+        self.assertTrue(np.array_equal(ground_truth, normalized_array))
+
 
 if __name__ == '__main__':
     unittest.main()
