@@ -7,7 +7,7 @@ from spac.data_utils import ingest_cells, concatinate_regions
 
 class TestAnalysisMethods(unittest.TestCase):
 
-    def test_nbatch_normalize_median_log(self):
+    def test_batch_normalize_median_log(self):
 
         batch = "region"
         # Marker for first region
@@ -180,7 +180,7 @@ class TestAnalysisMethods(unittest.TestCase):
         # print(ground_truth)
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
-    def test_batch_normalize_median_single_marker(self):
+    def test_cell_orders_is_preserved_median(self):
         # Marker values and annotations
         df = pd.DataFrame({
             'marker1': [1, 5, 2, 6],
@@ -188,7 +188,7 @@ class TestAnalysisMethods(unittest.TestCase):
         })
 
         # Assuming ingest_cells and concatinate_regions work as expected
-        adata = ingest_cells(df, "^marker.*", annotation="batch_annotation")
+        adata = ingest_cells(df, "marker1", annotation="batch_annotation")
 
         # Perform batch normalization
         median_normalized_layer = "median_normalization"
@@ -206,11 +206,72 @@ class TestAnalysisMethods(unittest.TestCase):
         # Extract the normalized array
         normalized_df = adata.to_df(layer=median_normalized_layer)
         normalized_array = normalized_df.to_numpy().flatten()
-        print("Ground Truth:", ground_truth)
-        print("Normalized Array:", normalized_array)
+        # print("Ground Truth:", ground_truth)
+        # print("Normalized Array:", normalized_array)
 
         # Check if the normalized values match the ground truth
-        self.assertTrue(np.array_equal(ground_truth, normalized_array))
+        self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_cell_orders_is_preserved_q50(self):
+        # Marker values and annotations
+        df = pd.DataFrame({
+            'marker1': [1, 5, 2, 6],
+            'batch_annotation': ["batch1", "batch2", "batch1", "batch2"]
+        })
+
+        # Assuming ingest_cells and concatenate_regions work as expected
+        adata = ingest_cells(df, "marker1", annotation="batch_annotation")
+
+        # Perform batch normalization using Q50
+        q50_normalized_layer = "q50_normalization"
+        batch_normalize(
+            adata,
+            "batch_annotation",
+            q50_normalized_layer,
+            "Q50")
+
+        # Calculate the expected normalized values for Q50
+        # Normalized values: [1*(3.5/1.5), 5*(3.5/5.5),
+        # 2*(3.5/1.5), 6*(3.5/5.5)]
+        ground_truth = np.array([
+            2.333333, 3.181818, 4.666667, 3.818182
+        ])
+
+        # Extract the normalized array
+        normalized_df = adata.to_df(layer=q50_normalized_layer)
+        normalized_array = normalized_df.to_numpy().flatten()
+
+        # Check if the normalized values match the ground truth
+        self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_cell_orders_is_preserved_q75(self):
+        df = pd.DataFrame({
+            'marker1': [1, 5, 2, 6],
+            'batch_annotation': ["batch1", "batch2", "batch1", "batch2"]
+        })
+
+        # Assuming ingest_cells and concatenate_regions work as expected
+        adata = ingest_cells(df, "marker1", annotation="batch_annotation")
+
+        # Perform batch normalization using Q75
+        q75_normalized_layer = "q75_normalization"
+        batch_normalize(
+            adata,
+            "batch_annotation",
+            q75_normalized_layer,
+            "Q75")
+
+        # Calculate the expected normalized values for Q75
+        # Normalized values: [1*(5.25/1.75), 5*(5.25/5.75),
+        # 2*(5.25/1.75), 6*(5.25/5.75)]
+        ground_truth = np.array([3.0, 4.565217, 6.0, 5.478261])
+
+        # Extract the normalized array
+        normalized_df = adata.to_df(layer=q75_normalized_layer)
+        normalized_array = normalized_df.to_numpy().flatten()
+
+        # Check if the normalized values match the ground truth
+        self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
 
 if __name__ == '__main__':

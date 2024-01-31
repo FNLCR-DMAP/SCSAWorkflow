@@ -299,6 +299,7 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     # Place holder for normalized dataframes per batch
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
+        print(f"Processing batch: {batch}, original values:\n", batch_cells)
 
         if method == "median":
             batch_median = batch_cells.quantile(q=0.5)
@@ -308,16 +309,18 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
             ] = batch_cells + (all_batch_quantile - batch_median)
 
         elif method == "Q50":
-            batch_median = batch_cells.quantile(q=0.5)
+            batch_50quantile = batch_cells.quantile(q=0.5)
+            print(f"Q50 for {batch}:", batch_50quantile)
             original.loc[adata.obs[annotation] == batch] = (
-                batch_cells * all_batch_quantile / batch_median
+                batch_cells * all_batch_quantile / batch_50quantile
             )
 
         elif method == "Q75":
             batch_75quantile = batch_cells.quantile(q=0.75)
             print(f"Q75 for {batch}:", batch_75quantile)
             original.loc[adata.obs[annotation] == batch] = (
-                batch_cells * all_batch_quantile / batch_75quantile)
+                batch_cells * all_batch_quantile / batch_75quantile
+            )
 
     adata.layers[layer] = original
 
