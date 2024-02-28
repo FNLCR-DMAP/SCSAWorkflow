@@ -49,11 +49,16 @@ def regex_search_list(
             raise TypeError(error_text)
 
     def regex_search(pattern, str):
-        found = re.search(pattern, str)
-        if found is None:
-            pass
-        else:
-            return found.group(0)
+        try:
+            found = re.search(pattern, str)
+            if found is not None:
+                return found.group(0)
+        except re.error as e:
+            raise ValueError(
+                "Error occurred when searching with regex:\n{}\n"
+                "Please review your regex pattern: {}\nIf using * at the start"
+                ", always have a . before the asterisk.".format(e, pattern)
+            )
 
     all_results = []
 
