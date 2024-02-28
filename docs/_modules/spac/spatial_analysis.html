@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.spatial_analysis &mdash; spac  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> spac
+          </a>
+              <div class="version">
+                0.3.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">SPatial Analysis for single Cell (SPAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">spac</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../spac.html">spac package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utils">spac.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.visualization">spac.visualization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spac.spatial_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spac.spatial_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">squidpy</span> <span class="k">as</span> <span class="nn">sq</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">from</span> <span class="nn">spac.utils</span> <span class="kn">import</span> <span class="n">check_annotation</span>
+
+
+<div class="viewcode-block" id="spatial_interaction"><a class="viewcode-back" href="../../spac.html#spac.spatial_analysis.spatial_interaction">[docs]</a><span class="k">def</span> <span class="nf">spatial_interaction</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span>
+        <span class="n">annotation</span><span class="p">,</span>
+        <span class="n">analysis_method</span><span class="p">,</span>
+        <span class="n">stratify_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">coord_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_rings</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">n_neighs</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform spatial analysis on the selected annotation in the dataset.</span>
+<span class="sd">    Current analysis methods are provided in squidpy:</span>
+<span class="sd">        Neighborhood Enrichment,</span>
+<span class="sd">        Cluster Interaction Matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    adata : anndata.AnnData</span>
+<span class="sd">        The AnnData object.</span>
+
+<span class="sd">    annotation : str</span>
+<span class="sd">        The column name of the annotation to analysis in the dataset.</span>
+
+<span class="sd">    analysis_method : str</span>
+<span class="sd">        The analysis method to use, currently available:</span>
+<span class="sd">        &quot;Neighborhood Enrichment&quot; and &quot;Cluster Interaction Matrix&quot;.</span>
+
+<span class="sd">    stratify_by : str or list of strs</span>
+<span class="sd">        The annotation[s] to stratify the dataset when generating</span>
+<span class="sd">        interaction plots. If single annotation is passed, the dataset</span>
+<span class="sd">        will be stratified by the unique labels in the annotation column.</span>
+<span class="sd">        If n (n&gt;=2) annotations are passed, the function will be stratified</span>
+<span class="sd">        based on existing combination of labels in the passed annotations.</span>
+
+<span class="sd">    ax: matplotlib.axes.Axes, default None</span>
+<span class="sd">        The matplotlib Axes to display the image. This option is only</span>
+<span class="sd">        available when stratify is None.</span>
+
+<span class="sd">    return_matrix: boolean, default False</span>
+<span class="sd">        If true, the fucntion will return a list of two dictionaries,</span>
+<span class="sd">        the first contains axes and the second containing computed matrix.</span>
+<span class="sd">        Note that for Neighborhood Encrichment, the matrix will be a tuple</span>
+<span class="sd">        with the z-score and the enrichment count.</span>
+<span class="sd">        For Cluster Interaction Matrix, it will returns the</span>
+<span class="sd">        interaction matrix.</span>
+<span class="sd">        If False, the function will return only the axes dictaionary.</span>
+
+<span class="sd">    seed: int, default None</span>
+<span class="sd">        Random seed for reproducibility, used in Neighborhood Enrichment</span>
+<span class="sd">        Analysis.</span>
+
+<span class="sd">    coord_type : str, optional</span>
+<span class="sd">        Type of coordinate system used in sq.gr.spatial_neighbors.</span>
+<span class="sd">        Should be either &#39;grid&#39; (Visium Data) or &#39;generic&#39; (Others).</span>
+<span class="sd">        Default is None, decided by the squidy pacakge. If spatial_key</span>
+<span class="sd">        is in anndata.uns the coord_type would be &#39;grid&#39;, otherwise</span>
+<span class="sd">        general.</span>
+
+<span class="sd">    n_rings : int, default 1</span>
+<span class="sd">        Number of rings of neighbors for grid data. </span>
+<span class="sd">        Only used when coord_type = &#39;grid&#39; (Visium)</span>
+<span class="sd">    </span>
+<span class="sd">    n_neights : int, optional</span>
+<span class="sd">        Default is 6.</span>
+<span class="sd">        Depending on the ``coord_type``:</span>
+<span class="sd">        - &#39;grid&#39; (Visium) - number of neighboring tiles.</span>
+<span class="sd">        - &#39;generic&#39; - number of neighborhoods for non-grid data.</span>
+<span class="sd">        </span>
+<span class="sd">    radius : float, optional</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">        Only available when coord_type = &#39;generic&#39;. Depending on the type:</span>
+<span class="sd">        - :class:`float` - compute the graph based on neighborhood radius.</span>
+<span class="sd">        - :class:`tuple` - prune the final graph to only contain</span>
+<span class="sd">            edges in interval `[min(radius), max(radius)]`.</span>
+
+<span class="sd">    **kwargs</span>
+<span class="sd">        Keyword arguments for matplotlib.pyplot.text()</span>
+<span class="sd">    Returns:</span>
+<span class="sd">    -------</span>
+<span class="sd">    ax_dictionary : dictionary</span>
+<span class="sd">        The returned dictionary containse matplotlib.axes.Axes</span>
+<span class="sd">        under &#39;Ax&#39; key and optional matrix under &#39;Matrix&#39; key.</span>
+<span class="sd">        If stratify is used, the function will return dictionary</span>
+<span class="sd">        of Axes and optional matrix with keys representing</span>
+<span class="sd">        the stratification groups.</span>
+<span class="sd">        For example: if stratify is not used and matrix is called,</span>
+<span class="sd">        the matrix can be acquired by result[&#39;Matrix&#39;], and axes</span>
+<span class="sd">        from result[&#39;Ax&#39;]. If stratify is used and has two levels,</span>
+<span class="sd">        &quot;A&quot; and &quot;B&quot;, the axes for A can be extracted by</span>
+<span class="sd">        result[&#39;Ax&#39;][&#39;A&#39;] and matrix through result[&#39;Matrix&#39;][&#39;A&#39;].</span>
+
+<span class="sd">           </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># List all available methods</span>
+    <span class="n">available_methods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;Neighborhood Enrichment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Cluster Interaction Matrix&quot;</span>
+    <span class="p">]</span>
+    <span class="n">available_methods_str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">available_methods</span><span class="p">)</span>
+
+    <span class="c1"># pacakge each methods into a function to allow</span>
+    <span class="c1"># centralized control and improve flexibility</span>
+    <span class="k">def</span> <span class="nf">Neighborhood_Enrichment_Analysis</span><span class="p">(</span>
+                <span class="n">adata</span><span class="p">,</span>
+                <span class="n">new_annotation_name</span><span class="p">,</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">return_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="c1"># Calculate Neighborhood_Enrichment</span>
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">nhood_enrichment</span><span class="p">(</span>
+                        <span class="n">adata</span><span class="p">,</span>
+                        <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+                        <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span>
+                <span class="p">)</span>
+
+            <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">nhood_enrichment</span><span class="p">(</span>
+                        <span class="n">adata</span><span class="p">,</span>
+                        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+                        <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">nhood_enrichment</span><span class="p">(</span>
+                        <span class="n">adata</span><span class="p">,</span>
+                        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+                        <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Plot Neighborhood_Enrichment</span>
+        <span class="n">sq</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">nhood_enrichment</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">ax</span><span class="p">,</span> <span class="n">matrix</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span> <span class="nf">Cluster_Interaction_Matrix_Analysis</span><span class="p">(</span>
+                <span class="n">adata</span><span class="p">,</span>
+                <span class="n">new_annotation_name</span><span class="p">,</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">return_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="c1"># Calculate Cluster_Interaction_Matrix</span>
+
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="n">matrix</span> <span class="o">=</span> <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">interaction_matrix</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span><span class="p">,</span>
+                    <span class="n">copy</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+
+            <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">interaction_matrix</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">interaction_matrix</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span>
+            <span class="p">)</span>
+
+        <span class="n">sq</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">interaction_matrix</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                    <span class="n">cluster_key</span><span class="o">=</span><span class="n">new_annotation_name</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">ax</span><span class="p">,</span> <span class="n">matrix</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="c1"># Perfrom the actual analysis, first call sq.gr.spatial_neighbors</span>
+    <span class="c1"># to calculate neighboring graph, then do different analysis.</span>
+    <span class="k">def</span> <span class="nf">perform_analysis</span><span class="p">(</span>
+            <span class="n">adata</span><span class="p">,</span>
+            <span class="n">analysis_method</span><span class="p">,</span>
+            <span class="n">new_annotation_name</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">coord_type</span><span class="p">,</span>
+            <span class="n">n_rings</span><span class="p">,</span>
+            <span class="n">n_neighs</span><span class="p">,</span>
+            <span class="n">radius</span><span class="p">,</span>
+            <span class="n">return_matrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">spatial_neighbors</span><span class="p">(</span>
+            <span class="n">adata</span><span class="p">,</span>
+            <span class="n">coord_type</span><span class="o">=</span><span class="n">coord_type</span><span class="p">,</span>
+            <span class="n">n_rings</span><span class="o">=</span><span class="n">n_rings</span><span class="p">,</span>
+            <span class="n">n_neighs</span><span class="o">=</span><span class="n">n_neighs</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="n">radius</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">analysis_method</span> <span class="o">==</span> <span class="s2">&quot;Neighborhood Enrichment&quot;</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">Neighborhood_Enrichment_Analysis</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">new_annotation_name</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="p">,</span>
+                    <span class="n">return_matrix</span><span class="p">,</span>
+                    <span class="n">title</span><span class="p">,</span>
+                    <span class="n">seed</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">analysis_method</span> <span class="o">==</span> <span class="s2">&quot;Cluster Interaction Matrix&quot;</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">Cluster_Interaction_Matrix_Analysis</span><span class="p">(</span>
+                    <span class="n">adata</span><span class="p">,</span>
+                    <span class="n">new_annotation_name</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="p">,</span>
+                    <span class="n">return_matrix</span><span class="p">,</span>
+                    <span class="n">title</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="c1"># Error Check Section</span>
+    <span class="c1"># -----------------------------------------------</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">):</span>
+        <span class="n">error_text</span> <span class="o">=</span> <span class="s2">&quot;Input data is not an AnnData object. &quot;</span> <span class="o">+</span> \
+            <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">adata</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_text</span><span class="p">)</span>
+    
+    <span class="n">check_annotation</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span>
+        <span class="n">annotations</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span>
+        <span class="n">parameter_name</span><span class="o">=</span><span class="s2">&quot;annotation&quot;</span><span class="p">,</span>
+        <span class="n">should_exist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Check if stratify_by is list or list of str</span>
+    <span class="n">check_annotation</span><span class="p">(</span>
+        <span class="n">adata</span><span class="p">,</span>
+        <span class="n">annotations</span><span class="o">=</span><span class="n">stratify_by</span><span class="p">,</span>
+        <span class="n">parameter_name</span><span class="o">=</span><span class="s2">&quot;stratify_by&quot;</span><span class="p">,</span>
+        <span class="n">should_exist</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">analysis_method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">error_text</span> <span class="o">=</span> <span class="s2">&quot;The analysis methods must be a string.&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_text</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">analysis_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_methods</span><span class="p">:</span>
+            <span class="n">error_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Method </span><span class="si">{</span><span class="n">analysis_method</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> \
+                <span class="s2">&quot; is not supported currently. &quot;</span> <span class="o">+</span> \
+                <span class="sa">f</span><span class="s2">&quot;Available methods are: </span><span class="si">{</span><span class="n">available_methods_str</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_text</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+            <span class="n">error_text</span> <span class="o">=</span> <span class="s2">&quot;Invalid &#39;ax&#39; argument. &quot;</span> <span class="o">+</span> \
+                <span class="s2">&quot;Expected an instance of matplotlib.axes.Axes. &quot;</span> <span class="o">+</span> \
+                <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ax</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_text</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="c1"># Operational Section</span>
+    <span class="c1"># -----------------------------------------------</span>
+
+    <span class="c1"># Create a categorical column data for plotting</span>
+    <span class="n">new_annotation_name</span> <span class="o">=</span> <span class="n">annotation</span> <span class="o">+</span> <span class="s2">&quot;_plot&quot;</span>
+
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">new_annotation_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span>
+        <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">annotation</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">stratify_by</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stratify_by</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;concatenated_obs&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">stratify_by</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;concatenated_obs&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">stratify_by</span><span class="p">]</span>
+
+    <span class="c1"># Compute a connectivity matrix from spatial coordinates</span>
+    <span class="k">if</span> <span class="n">stratify_by</span><span class="p">:</span>
+        <span class="n">ax_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">matrix_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">unique_values</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;concatenated_obs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">subset_key</span> <span class="ow">in</span> <span class="n">unique_values</span><span class="p">:</span>
+            <span class="c1"># Subset the original AnnData object based on the unique value</span>
+            <span class="n">subset_adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span>
+                <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">&#39;concatenated_obs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">subset_key</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+            <span class="n">image_title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Group: </span><span class="si">{</span><span class="n">subset_key</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">perform_analysis</span><span class="p">(</span>
+                            <span class="n">subset_adata</span><span class="p">,</span>
+                            <span class="n">analysis_method</span><span class="p">,</span>
+                            <span class="n">new_annotation_name</span><span class="p">,</span>
+                            <span class="n">ax</span><span class="p">,</span>
+                            <span class="n">coord_type</span><span class="p">,</span>
+                            <span class="n">n_rings</span><span class="p">,</span>
+                            <span class="n">n_neighs</span><span class="p">,</span>
+                            <span class="n">radius</span><span class="p">,</span>
+                            <span class="n">return_matrix</span><span class="p">,</span>
+                            <span class="n">image_title</span><span class="p">,</span>
+                            <span class="n">seed</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span>
+                        <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+                <span class="n">ax_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">matrix_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ax</span>
+
+            <span class="k">del</span> <span class="n">subset_adata</span>
+
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Ax&quot;</span><span class="p">:</span> <span class="n">ax_dictionary</span><span class="p">,</span>
+                <span class="s2">&quot;Matrix&quot;</span><span class="p">:</span> <span class="n">matrix_dictionary</span>
+            <span class="p">}</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Ax&quot;</span><span class="p">:</span> <span class="n">ax_dictionary</span><span class="p">}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">perform_analysis</span><span class="p">(</span>
+                <span class="n">adata</span><span class="p">,</span>
+                <span class="n">analysis_method</span><span class="p">,</span>
+                <span class="n">new_annotation_name</span><span class="p">,</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">coord_type</span><span class="p">,</span>
+                <span class="n">n_rings</span><span class="p">,</span>
+                <span class="n">n_neighs</span><span class="p">,</span>
+                <span class="n">radius</span><span class="p">,</span>
+                <span class="n">return_matrix</span><span class="p">,</span>
+                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_matrix</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Ax&quot;</span><span class="p">:</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;Matrix&quot;</span><span class="p">:</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Ax&quot;</span><span class="p">:</span> <span class="n">ax</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+Metadata-Version: 2.1
+Name: spac
+Version: 0.3.5
+Summary: SPatial Analysis for single-Cell analysis (SPAC)is a Scalable Python package for single-cell spatial protein data analysis from multiplexed whole-slide tissue images.
+Home-page: https://github.com/FNLCR-DMAP/SCSAWorkflow
+Author: Fang Liu, Rui He, and George Zaki
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD 3-Clause License
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+License-File: LICENSE
+Requires-Dist: pandas==1.4.3
+Requires-Dist: anndata==0.8.0
+Requires-Dist: numpy==1.19.5
+Requires-Dist: scikit-learn==1.1.1
+Requires-Dist: squidpy==1.2.2
+Requires-Dist: matplotlib==3.5.2
+Requires-Dist: seaborn==0.12.2
+Requires-Dist: scanpy==1.8.0
+Requires-Dist: phenograph==1.5.7
+Requires-Dist: zarr==2.12.0
+Requires-Dist: numba
+Requires-Dist: Pillow
+Requires-Dist: datashader
+Requires-Dist: plotly
+
+SPAC is a scalable, Python-based package for analyzing single-cell spatial protein data from multiplexed whole-slide tissue images. It integrates with other single-cell toolkits through the anndata framework and provides various functional and visualization modules. SPAC enables user-friendly web interfaces and offers insights into cell interactions in diverse environments, benefiting studies of cancer microenvironments, stem cell niches, and drug responses.

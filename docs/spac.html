@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac package &mdash; spac  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="modules/visualization.html" />
+    <link rel="prev" title="spac" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> spac
+          </a>
+              <div class="version">
+                0.3.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">SPatial Analysis for single Cell (SPAC)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">spac</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac.data_utils">spac.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac.utils">spac.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac.visualization">spac.visualization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-spac">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">spac</a></li>
+      <li class="breadcrumb-item active">spac package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/spac.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spac-package">
+<h1>spac package<a class="headerlink" href="#spac-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-spac.data_utils">
+<span id="spac-data-utils-module"></span><h2>spac.data_utils module<a class="headerlink" href="#module-spac.data_utils" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.add_rescaled_features">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">add_rescaled_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#add_rescaled_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.add_rescaled_features" title="Permalink to this definition"></a></dt>
+<dd><p>Clip and rescale the features matrix.</p>
+<p>The results will be added into a new layer in the AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to rescale to zero.</p></li>
+<li><p><strong>max_quantile</strong> (<em>float</em>) – The maximum quantile to rescale to one.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – The name of the new layer to add to the anndata object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.append_annotation">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">append_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/spac/data_utils.html#append_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.append_annotation" title="Permalink to this definition"></a></dt>
+<dd><p>Append a new annotation with single value to
+a Pandas DataFrame based on mapping rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – The input DataFrame to which the new observation will be appended.</p></li>
+<li><p><strong>annotation</strong> (<em>dict</em>) – dictionary of string pairs representing
+the new annotation and its value.
+Each pair should have this format:
+&lt;new annotation column name&gt;:&lt;value of the annotation&gt;
+The values must be a single string or numeric value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The DataFrame with the new observation appended.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.bin2cat">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">bin2cat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_hot_annotations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_annotation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#bin2cat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.bin2cat" title="Permalink to this definition"></a></dt>
+<dd><p>Combine a set of columns representing
+a binary one hot encoding of categories
+into a new categorical column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe containing the one hot encoded annotations.</p></li>
+<li><p><strong>one_hot_annotations</strong> (<em>str</em><em> or </em><em>list of str</em>) – A string or a list of strings representing
+python regular expression of the one hot encoded annotations
+columns in the data frame.</p></li>
+<li><p><strong>new_annotation</strong> (<em>str</em>) – The column name for new categorical annotation to be created.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>pandas.DataFrame</em> – DataFrame with new categorical column added.</p></li>
+<li><p><em>Example</em></p></li>
+<li><p><em>——–</em></p></li>
+<li><p><em>&gt;&gt;&gt; data = pd.DataFrame({</em></p></li>
+<li><p><strong>…    ‘A’</strong> (<em>[1, 1, 0, 0],</em>)</p></li>
+<li><p><strong>…     ‘B’</strong> (<em>[0, 0, 1, 0]</em>)</p></li>
+<li><p><em>… })</em></p></li>
+<li><p><em>&gt;&gt;&gt; one_hot_annotations = [‘A’, ‘B’]</em></p></li>
+<li><p><em>&gt;&gt;&gt; new_annotation = ‘new_category’</em></p></li>
+<li><p><em>&gt;&gt;&gt; result = bin2cat(data, one_hot_annotations, new_annotation)</em></p></li>
+<li><p><em>&gt;&gt;&gt; print(result[new_annotation])</em></p></li>
+<li><p><em>0      A</em></p></li>
+<li><p><em>1      A</em></p></li>
+<li><p><em>2      B</em></p></li>
+<li><p><em>3    NaN</em></p></li>
+<li><p><strong>Name</strong> (<em>new_category, dtype: object</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.calculate_centroid">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">calculate_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#calculate_centroid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.calculate_centroid" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the spatial coordinates of the cell centroid as the average of
+min and max coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – The input data frame. The dataframe should contain four columns for
+x_min, x_max, y_min, and y_max for centroid calculation.</p></li>
+<li><p><strong>x_min</strong> (<em>str</em>) – column name with minimum x value</p></li>
+<li><p><strong>x_max</strong> (<em>str</em>) – column name with maximum x value</p></li>
+<li><p><strong>y_min</strong> (<em>str</em>) – column name with minimum y value</p></li>
+<li><p><strong>y_max</strong> (<em>str</em>) – column name with maximum y value</p></li>
+<li><p><strong>new_x</strong> (<em>str</em>) – the new column name of the x dimension of the centroid,
+allowing characters are alphabetic, digits and underscore</p></li>
+<li><p><strong>new_y</strong> (<em>str</em>) – the new column name of the y dimension of the centroid,
+allowing characters are alphabetic, digits and underscore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data</strong> – dataframe with two new columns names</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.combine_dfs">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">combine_dfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#combine_dfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.combine_dfs" title="Permalink to this definition"></a></dt>
+<dd><p>Combined multiple pandas dataframes into one.
+Schema of the first dataframe is considered primary.
+A warming will be printed if schema of current dataframe
+is different than the primary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataframes</strong> (<em>list</em><em>[</em><em>pd.DataFrame</em><em>]</em>) – A list of pandas dataframe to be combined</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pd.DataFrame of combined dataframs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.combine_dfs_depracated">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">combine_dfs_depracated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#combine_dfs_depracated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.combine_dfs_depracated" title="Permalink to this definition"></a></dt>
+<dd><p>Combine a list of pandas dataframe into single pandas dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframes</strong> (<em>list of tuple</em>) – A list containing (file name, pandas dataframe) to be combined
+into single dataframe output</p></li>
+<li><p><strong>annotations</strong> (<em>pandas.DataFrame</em>) – A pandas data frame where the index is the file name, and
+the columns are various annotations to
+add to all cells in a given dataframe.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas data frame of all the cells
+where each cell has a unique index.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.concatinate_regions">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">concatinate_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#concatinate_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.concatinate_regions" title="Permalink to this definition"></a></dt>
+<dd><p>Concatinate data from multiple regions and create new indexes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>regions</strong> (<em>list of anndata.AnnData</em>) – AnnData objects to be concatinated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New AnddData object with the concatinated values in AnnData.X</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.downsample_cells">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">downsample_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined_col_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_combined_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#downsample_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.downsample_cells" title="Permalink to this definition"></a></dt>
+<dd><p>Custom downsampling of data based on one or more annotations.</p>
+<p>This function offers two primary modes of operation:
+1. <strong>Grouping (stratify=False)</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For a single annotation: The data is grouped by unique values of the
+annotation, and ‘n_samples’ rows are selected from each group.</p></li>
+<li><p>For multiple annotations: The data is grouped based on unique
+combinations of the annotations, and ‘n_samples’ rows are selected
+from each combined group.</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Stratification (stratify=True)</strong>:
+- Annotations (single or multiple) are combined into a new column.
+- Proportionate stratified sampling is performed based on the unique</p>
+<blockquote>
+<div><p>combinations in the new column, ensuring that the downsampled dataset
+maintains the proportionate representation of each combined group
+from the original dataset.</p>
+</div></blockquote>
+</li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data</strong> (<em>pd.DataFrame</em>) – The input data frame.</p></li>
+<li><p><strong>annotations</strong> (<em>str</em><em> or </em><em>list of str</em>) – The column name(s) to downsample on. If multiple column names are
+provided, their values are combined using an underscore as a separator.</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em><em>, </em><em>default=None</em>) – <p>The number of samples to return. Behavior differs based on the
+‘stratify’ parameter:
+- stratify=False: Returns ‘n_samples’ for each unique value (or</p>
+<blockquote>
+<div><p>combination) of annotations.</p>
+</div></blockquote>
+<ul>
+<li><p>stratify=True: Returns a total of ‘n_samples’ stratified by the
+frequency of every label or combined labels in the annotation(s).</p></li>
+</ul>
+</p></li>
+<li><p><strong>stratify</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If true, perform proportionate stratified sampling based on the unique
+combinations of annotations. This ensures that the downsampled dataset
+maintains the proportionate representation of each combined group from
+the original dataset.</p></li>
+<li><p><strong>rand</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If true and stratify is True, randomly select the returned cells.
+Otherwise, choose the first n cells.</p></li>
+<li><p><strong>combined_col_name</strong> (<em>str</em><em>, </em><em>default='_combined_'</em>) – Name of the column that will store combined values when multiple
+annotation columns are provided.</p></li>
+<li><p><strong>min_threshold</strong> (<em>int</em><em>, </em><em>default=5</em>) – The minimum number of samples a combined group should have in the
+original dataset to be considered in the downsampled dataset. Groups
+with fewer samples than this threshold will be excluded from the
+stratification process. Adjusting this parameter determines the
+minimum presence a combined group should have in the original dataset
+to appear in the downsampled version.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>output_data</strong> – The proportionately stratified downsampled data frame.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function emphasizes proportionate stratified sampling, ensuring that
+the downsampled dataset is a representative subset of the original data
+with respect to the combined annotations. Due to this proportionate nature,
+not all unique combinations from the original dataset might be present in
+the downsampled dataset, especially if a particular combination has very
+few samples in the original dataset. The <cite>min_threshold</cite> parameter can be
+adjusted to determine the minimum number of samples a combined group
+should have in the original dataset to appear in the downsampled version.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.ingest_cells">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">ingest_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#ingest_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.ingest_cells" title="Permalink to this definition"></a></dt>
+<dd><p>Read the csv file into an anndata object.</p>
+<p>The function will also intialize features and spatial coordiantes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> (<em>pandas.DataFrame</em>) – The data frame that contains cells as rows, and cells informations as
+columns.</p></li>
+<li><p><strong>regex_str</strong> (<em>str</em><em> or </em><em>list of str</em>) – A string or a list of strings representing python regular expression
+for the features columns in the data frame.  x_col : str The column
+name for the x coordinate of the cell.</p></li>
+<li><p><strong>y_col</strong> (<em>str</em>) – The column name for the y coordinate of the cell.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em> or </em><em>list of str</em>) – The column name for the region that the cells. If a list is passed,
+multiple annotations will be created in the returned AnnData object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated AnnData object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.load_csv_files">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_csv_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#load_csv_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.load_csv_files" title="Permalink to this definition"></a></dt>
+<dd><p>Read the csv file(s) into a pandas dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_names</strong> (<em>str</em><em> or </em><em>list</em>) – A list of csv file paths to be
+combined into single list of dataframe output</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas dataframe of all the csv files. The returned dataset
+will have an extra column called “loaded_file_name” containing
+source file name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.rescale_features">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">rescale_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#rescale_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.rescale_features" title="Permalink to this definition"></a></dt>
+<dd><p>Clip and rescale features outside the minimum and maximum quantile.</p>
+<p>The rescaled features will be between 0 and 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<em>pandas.Dataframe</em>) – The DataRrame of features.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to be consider zero.</p></li>
+<li><p><strong>max_quantile</strong> (<em>float</em>) – The maximum quantile to be considerd 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The created DataFrame with normalized features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.select_values">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">select_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#select_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.select_values" title="Permalink to this definition"></a></dt>
+<dd><p>Selects rows from input dataframe matching specified values in a column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pandas.DataFrame</em>) – The input dataframe.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The column name to be used for selection.</p></li>
+<li><p><strong>values</strong> (<em>list</em><em>, </em><em>optional</em>) – List of values for annotation to include.
+If None, return all values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe containing only the selected rows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If annotation does not exist or one or more values passed
+    do not exist in the specified column.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;column1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;column2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">select_values</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;column1&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">])</span>
+<span class="go">  column1  column2</span>
+<span class="go">0       A        1</span>
+<span class="go">2       A        3</span>
+<span class="go">4       A        5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.subtract_min_per_region">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">subtract_min_per_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#subtract_min_per_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.subtract_min_per_region" title="Permalink to this definition"></a></dt>
+<dd><p>Substract the minimum quantile of every marker per region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation in <cite>adata</cite> to define batches.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to rescale to zero.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – The name of the new layer to add to the AnnData object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.subtract_min_quantile">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">subtract_min_quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/data_utils.html#subtract_min_quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.subtract_min_quantile" title="Permalink to this definition"></a></dt>
+<dd><p>Subtract the features defined by the minimum quantile from all columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<em>pandas.DataFrame</em>) – The dataframe of features.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to be consider zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe with rescaled features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-spac.spatial_analysis">
+<span id="spac-spatial-analysis-module"></span><h2>spac.spatial_analysis module<a class="headerlink" href="#module-spac.spatial_analysis" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.spatial_analysis.spatial_interaction">
+<span class="sig-prename descclassname"><span class="pre">spac.spatial_analysis.</span></span><span class="sig-name descname"><span class="pre">spatial_interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/spatial_analysis.html#spatial_interaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.spatial_analysis.spatial_interaction" title="Permalink to this definition"></a></dt>
+<dd><p>Perform spatial analysis on the selected annotation in the dataset.
+Current analysis methods are provided in squidpy:</p>
+<blockquote>
+<div><p>Neighborhood Enrichment,
+Cluster Interaction Matrix</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The column name of the annotation to analysis in the dataset.</p></li>
+<li><p><strong>analysis_method</strong> (<em>str</em>) – The analysis method to use, currently available:
+“Neighborhood Enrichment” and “Cluster Interaction Matrix”.</p></li>
+<li><p><strong>stratify_by</strong> (<em>str</em><em> or </em><em>list of strs</em>) – The annotation[s] to stratify the dataset when generating
+interaction plots. If single annotation is passed, the dataset
+will be stratified by the unique labels in the annotation column.
+If n (n&gt;=2) annotations are passed, the function will be stratified
+based on existing combination of labels in the passed annotations.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>default None</em>) – The matplotlib Axes to display the image. This option is only
+available when stratify is None.</p></li>
+<li><p><strong>return_matrix</strong> (<em>boolean</em><em>, </em><em>default False</em>) – If true, the fucntion will return a list of two dictionaries,
+the first contains axes and the second containing computed matrix.
+Note that for Neighborhood Encrichment, the matrix will be a tuple
+with the z-score and the enrichment count.
+For Cluster Interaction Matrix, it will returns the
+interaction matrix.
+If False, the function will return only the axes dictaionary.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>default None</em>) – Random seed for reproducibility, used in Neighborhood Enrichment
+Analysis.</p></li>
+<li><p><strong>coord_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of coordinate system used in sq.gr.spatial_neighbors.
+Should be either ‘grid’ (Visium Data) or ‘generic’ (Others).
+Default is None, decided by the squidy pacakge. If spatial_key
+is in anndata.uns the coord_type would be ‘grid’, otherwise
+general.</p></li>
+<li><p><strong>n_rings</strong> (<em>int</em><em>, </em><em>default 1</em>) – Number of rings of neighbors for grid data.
+Only used when coord_type = ‘grid’ (Visium)</p></li>
+<li><p><strong>n_neights</strong> (<em>int</em><em>, </em><em>optional</em>) – Default is 6.
+Depending on the <code class="docutils literal notranslate"><span class="pre">coord_type</span></code>:
+- ‘grid’ (Visium) - number of neighboring tiles.
+- ‘generic’ - number of neighborhoods for non-grid data.</p></li>
+<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Default is None.
+Only available when coord_type = ‘generic’. Depending on the type:
+- <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> - compute the graph based on neighborhood radius.
+- <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> - prune the final graph to only contain</p>
+<blockquote>
+<div><p>edges in interval <cite>[min(radius), max(radius)]</cite>.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments for matplotlib.pyplot.text()</p></li>
+<li><p><strong>Returns</strong> – </p></li>
+<li><p><strong>-------</strong> – </p></li>
+<li><p><strong>ax_dictionary</strong> (<em>dictionary</em>) – The returned dictionary containse matplotlib.axes.Axes
+under ‘Ax’ key and optional matrix under ‘Matrix’ key.
+If stratify is used, the function will return dictionary
+of Axes and optional matrix with keys representing
+the stratification groups.
+For example: if stratify is not used and matrix is called,
+the matrix can be acquired by result[‘Matrix’], and axes
+from result[‘Ax’]. If stratify is used and has two levels,
+“A” and “B”, the axes for A can be extracted by
+result[‘Ax’][‘A’] and matrix through result[‘Matrix’][‘A’].</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-spac.transformations">
+<span id="spac-transformations-module"></span><h2>spac.transformations module<a class="headerlink" href="#module-spac.transformations" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.arcsinh_transformation">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">arcsinh_transformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">co_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'arcsinh'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#arcsinh_transformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.arcsinh_transformation" title="Permalink to this definition"></a></dt>
+<dd><p>Apply arcsinh transformation using a co-factor.</p>
+<p>The co-factor is determined either by the given percentile of each
+biomarker (feature-wise) or a provided fixed number. The function computes
+the co-factor for each biomarker individually, considering its unique
+range of expression levels. This ensures that each biomarker is scaled
+based on its inherent distribution, which is particularly important when
+dealing with datasets where features have a wide range of values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object containing the data to transform.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer in the AnnData object to transform.
+If None, the main data matrix .X is used.</p></li>
+<li><p><strong>co_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – A fixed positive number to use as a co-factor for the transformation.
+If provided, it takes precedence over the percentile argument.</p></li>
+<li><p><strong>percentile</strong> (<em>int</em><em>, </em><em>default=20</em>) – The percentile to determine the co-factor if co_factor is not provided.
+The percentile is computed for each feature (column) individually.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em><em>, </em><em>default=&quot;arcsinh&quot;</em>) – Name of the layer to put the transformed results. If it already exists,
+it will be overwritten with a warning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – The AnnData object with the transformed data stored in the specified
+output_layer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.batch_normalize">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">batch_normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#batch_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.batch_normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Adjust the features of every marker using a normalization method.</p>
+<p>The normalization methods are summarized here:
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/</a>
+Adds the normalized values in
+<cite>.layers[`layer</cite>]`</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation in <cite>adata</cite> to define batches.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – The name of the new layer to add to the anndata object.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;median&quot;</em><em>, </em><em>&quot;Q50&quot;</em><em>, </em><em>&quot;Q75}</em>) – The normlalization method to use.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, take the log2 of features before normalization.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.get_cluster_info">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">get_cluster_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'phenograph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#get_cluster_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.get_cluster_info" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve information about clusters based on specific annotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Annotation/column in adata.obs for cluster info.</p></li>
+<li><p><strong>features</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Features (e.g., genes) for cluster metrics.
+Defaults to all features in adata.var_names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with metrics for each cluster.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.normalize_features">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">normalize_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata:</span> <span class="pre">&lt;module</span> <span class="pre">'anndata'</span> <span class="pre">from</span> <span class="pre">'/conda/envs/SCSAWorkflow_NIDAP/lib/python3.8/site-packages/anndata/__init__.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_quantile:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_quantile:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer:</span> <span class="pre">~typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_layer_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'normalized_feature'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#normalize_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.normalize_features" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize the features stored in an AnnData object.
+Any entry lower than the value corresponding to low_quantile of the column
+will be assigned a value of 0, and entry that are greater than
+high_quantile value will be assigned as 1. Other entries will be normalized
+with (values - quantile min)/(quantile max - quantile min).
+Resulting column will have value ranged between [0, 1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – An AnnData object containing the data to be normalized.</p></li>
+<li><p><strong>low_quantile</strong> (<em>float</em><em>, </em><em>optional</em><em> (</em><em>default: 0.02</em><em>)</em>) – The lower quantile to use for normalization. Determines the
+minimum value after normalization.
+Must be a positive float between [0,1).</p></li>
+<li><p><strong>high_quantile</strong> (<em>float</em><em>, </em><em>optional</em><em> (</em><em>default: 0.02</em><em>)</em>) – The higher quantile to use for normalization. Determines the
+maximum value after normalization.
+Must be a positive float between (0,1].</p></li>
+<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: &quot;nearest&quot;</em><em>)</em>) – The interpolation method to use when selecting the value for
+low and high quantile. Values can be “nearest” or “linear”</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – The name of the layer in the AnnData object to be normalized.
+If None, the function will use the default data layer.</p></li>
+<li><p><strong>new_layer_name</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: &quot;normalized_feature&quot;</em><em>)</em>) – The name of the new layer where the normalized features
+will be stored in the AnnData object.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default: True</em><em>)</em>) – If the new layer name exists in the anndata object,
+the function will defaultly overwrite the existing table unless
+‘overwrite’ is False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>quantiles</strong> – A DataFrame containing the quantile values calculated for every
+feature. The DataFrame has columns representing the features and rows
+representing the quantile values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.phenograph_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">phenograph_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#phenograph_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.phenograph_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate automatic phenotypes using phenograph.</p>
+<p>The function will add these two attributes to <cite>adata</cite>:
+<cite>.obs[“phenograph”]</cite></p>
+<blockquote>
+<div><p>The assigned int64 class by phenograph</p>
+</div></blockquote>
+<dl class="simple">
+<dt><cite>.uns[“phenograph_features”]</cite></dt><dd><p>The features used to calculate the phenograph clusters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list of str</em>) – The variables that would be included in creating the phenograph
+clusters.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used in calculating the phengraph clusters.</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nearest neighbor to be used in creating the graph.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.rename_annotations">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">rename_annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#rename_annotations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.rename_annotations" title="Permalink to this definition"></a></dt>
+<dd><p>Rename labels in a given annotation in an AnnData object based on a
+provided dictionary. This function modifies the adata object in-place
+and creates a new annotation column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>src_annotation</strong> (<em>str</em>) – Name of the column in adata.obs containing the original
+labels of the source annotation.</p></li>
+<li><p><strong>dest_annotation</strong> (<em>str</em>) – The name of the new column to be created in the AnnData object
+containing the renamed labels.</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – A dictionary mapping the original annotation labels to
+the new labels.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span> <span class="o">=</span> <span class="n">your_anndata_object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src_annotation</span> <span class="o">=</span> <span class="s2">&quot;phenograph&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mappings</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="s2">&quot;group_8&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;group_2&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;group_6&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="c1"># ...</span>
+<span class="gp">... </span>    <span class="s2">&quot;37&quot;</span><span class="p">:</span> <span class="s2">&quot;group_5&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dest_annotation</span> <span class="o">=</span> <span class="s2">&quot;renamed_annotations&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span> <span class="o">=</span> <span class="n">rename_annotations</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">adata</span><span class="p">,</span> <span class="n">src_annotation</span><span class="p">,</span> <span class="n">dest_annotation</span><span class="p">,</span> <span class="n">mappings</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.run_umap">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">run_umap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#run_umap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.run_umap" title="Permalink to this definition"></a></dt>
+<dd><p>Perform UMAP analysis on the specific layer of the AnnData object
+or the default data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix.</p></li>
+<li><p><strong>n_neighbors</strong> (<em>int</em><em>, </em><em>default=75</em>) – Number of neighbors to consider when constructing the UMAP. This
+influences the balance between preserving local and global structures
+in the data.</p></li>
+<li><p><strong>min_dist</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – Minimum distance between points in the UMAP space. Controls how
+tightly the embedding is allowed to compress points together.</p></li>
+<li><p><strong>n_components</strong> (<em>int</em><em>, </em><em>default=2</em>) – Number of dimensions for embedding.</p></li>
+<li><p><strong>metric</strong> (<em>str</em><em>, </em><em>optional</em>) – Metric to compute distances in high dimensional space.
+Check <cite>https://umap-learn.readthedocs.io/en/latest/api.html</cite> for
+options. The default is ‘euclidean’.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>default=0</em>) – Seed used by the random number generator(RNG) during UMAP fitting.</p></li>
+<li><p><strong>transform_seed</strong> (<em>int</em><em>, </em><em>default=42</em>) – RNG seed during UMAP transformation.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Layer of AnnData object for UMAP. Defaults to <cite>adata.X</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with UMAP coordinates stored in the <cite>obsm</cite>
+attribute. The key for the UMAP embedding in <cite>obsm</cite> is “X_umap”.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.tsne">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">tsne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#tsne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.tsne" title="Permalink to this definition"></a></dt>
+<dd><p>Perform t-SNE transformation on specific layer information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – Layer for phenograph cluster calculation.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters for scanpy.tl.tsne function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with t-SNE coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.z_score_normalization">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">z_score_normalization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/transformations.html#z_score_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.z_score_normalization" title="Permalink to this definition"></a></dt>
+<dd><p>Compute z-scores for the provided AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object containing the data to normalize.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer in the AnnData object to normalize.
+If None, the main data matrix .X is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – The AnnData object with a new layer ‘z_scores’ containing the computed
+z-scores.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-spac.utils">
+<span id="spac-utils-module"></span><h2>spac.utils module<a class="headerlink" href="#module-spac.utils" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_annotation">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_exist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#check_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_annotation" title="Permalink to this definition"></a></dt>
+<dd><p>Perform common error checks for annotations in
+anndata related objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object to be checked.</p></li>
+<li><p><strong>annotations</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – The annotation(s) to check for existence in adata.obs.</p></li>
+<li><p><strong>should_exist</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – Determines whether to check if elements exist in the
+target list (True), or if they should not exist (False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If adata is not an instance of anndata.AnnData.</p></li>
+<li><p><strong>ValueError</strong> – If any of the specified layers, annotations, or features do not exist.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_column_name">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_column_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_checklist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'!?,.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#check_column_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_column_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_feature">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_exist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#check_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_feature" title="Permalink to this definition"></a></dt>
+<dd><p>Perform common error checks for features in
+anndata related objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object to be checked.</p></li>
+<li><p><strong>features</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – The feature(s) to check for existence in adata.var_names.</p></li>
+<li><p><strong>should_exist</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – Determines whether to check if elements exist in the
+target list (True), or if they should not exist (False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If adata is not an instance of anndata.AnnData.</p></li>
+<li><p><strong>ValueError</strong> – If any of the specified layers, annotations, or features do not exist.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_list_in_list">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_list_in_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_exist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#check_list_in_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_list_in_list" title="Permalink to this definition"></a></dt>
+<dd><p>Check if items in a given list exist in a target list.</p>
+<p>This function is used to validate whether all or none of the
+items in a given list exist in a target list.
+It helps to ensure that the input list contains only valid elements
+that are present in the target list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>str</em><em> or </em><em>list of str</em><em> or </em><em>None</em>) – The input list or a single string element. If it is a string,
+it will be converted to a list containing
+only that string element. If <cite>None</cite>, no validation will be performed.</p></li>
+<li><p><strong>input_name</strong> (<em>str</em>) – The name of the input list used for displaying helpful error messages.</p></li>
+<li><p><strong>input_type</strong> (<em>str</em>) – The type of items in the input list
+(e.g., “item”, “element”, “category”).</p></li>
+<li><p><strong>target_list</strong> (<em>list of str</em>) – The target list containing valid items that the input list elements
+should be compared against.</p></li>
+<li><p><strong>need_exist</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – Determines whether to check if elements exist in the
+target list (True), or if they should not exist (False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the <cite>input</cite> is not a string or a list of strings.
+    If <cite>need_exist</cite> is True and any element of the input
+        list does not exist in the target list.
+    If <cite>need_exist</cite> is False and any element of the input
+        list exists in the target list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_table">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_exist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#check_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_table" title="Permalink to this definition"></a></dt>
+<dd><p>Perform common error checks for table (layers) in
+anndata related objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object to be checked.</p></li>
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – The term “table” is equivalent to layer in anndata structure.
+The layer(s) to check for existence in adata.layers.keys().</p></li>
+<li><p><strong>should_exist</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – Determines whether to check if elements exist in the
+target list (True), or if they should not exist (False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If adata is not an instance of anndata.AnnData.</p></li>
+<li><p><strong>ValueError</strong> – If any of the specified layers, annotations, or features do not exist.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.regex_search_list">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">regex_search_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regex_patterns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_to_search</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#regex_search_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.regex_search_list" title="Permalink to this definition"></a></dt>
+<dd><p>Perfrom regex (regular expression) search in a list and
+return list of strings matching the regex pattern</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regex_pattern</strong> (<em>str</em><em> or </em><em>a list of str</em>) – The regex pattern to look for,
+single pattern or a list of patterns.</p></li>
+<li><p><strong>list_to_search</strong> (<em>list of str</em>) – A list of string to seach for string that matches regex pattern.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of strings containing results from search.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">regex_pattern</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;^B.*&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_to_search</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ABC&quot;</span><span class="p">,</span> <span class="s2">&quot;BC&quot;</span><span class="p">,</span> <span class="s2">&quot;AC&quot;</span><span class="p">,</span> <span class="s2">&quot;AB&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">regex_search_list</span><span class="p">(</span><span class="n">regex_pattern</span><span class="p">,</span> <span class="n">list_to_search</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="go">[&#39;BC&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.text_to_others">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">text_to_others</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_None</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_False</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_True</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_Int</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_Float</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/utils.html#text_to_others"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.text_to_others" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-spac.visualization">
+<span id="spac-visualization-module"></span><h2>spac.visualization module<a class="headerlink" href="#module-spac.visualization" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.boxplot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">boxplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#boxplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.boxplot" title="Permalink to this definition"></a></dt>
+<dd><p>Create a boxplot visualization of the features in the passed adata object.
+This function offers flexibility in how the boxplots are displayed,
+based on the arguments provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Annotation to determine if separate plots are needed for every label.</p></li>
+<li><p><strong>second_annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Second annotation to further divide the data.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the matrix layer to use. If not provided,
+uses the main data matrix adata.X.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – An existing Axes object to draw the plot onto, optional.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em>, </em><em>optional</em>) – List of feature names to be plotted.
+If not provided, all features will be plotted.</p></li>
+<li><p><strong>log_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the Y-axis will be in log scale. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional arguments to pass to seaborn.boxplot.
+Key arguments include:
+- <cite>orient</cite>: Determines the orientation of the plot.
+* “v”: Vertical orientation (default). In this case, categorical data</p>
+<blockquote>
+<div><p>will be plotted on the x-axis, and the boxplots will be vertical.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>”h”: Horizontal orientation. Categorical data will be plotted on the</dt><dd><p>y-axis, and the boxplots will be horizontal.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fig, ax</strong> – The created figure and axes for the plot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure, matplotlib.axes.Axes</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ul class="simple">
+<li><p>Multiple features boxplot: boxplot(adata, features=[‘GeneA’,’GeneB’])</p></li>
+<li><p>Boxplot grouped by a single annotation:
+boxplot(adata, features=[‘GeneA’], annotation=’cell_type’)</p></li>
+<li><p>Boxplot for multiple features grouped by a single annotation:
+boxplot(adata, features=[‘GeneA’, ‘GeneB’], annotation=’cell_type’)</p></li>
+<li><p>Nested grouping by two annotations: boxplot(adata, features=[‘GeneA’],
+annotation=’cell_type’, second_annotation=’treatment’)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.dimensionality_reduction_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">dimensionality_reduction_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#dimensionality_reduction_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.dimensionality_reduction_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize scatter plot in PCA, t-SNE or UMAP basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object with coordinates precomputed by the ‘tsne’ or ‘UMAP’
+function and stored in ‘adata.obsm[“X_tsne”]’ or ‘adata.obsm[“X_umap”]’</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Dimensionality reduction method to visualize.
+Choose from {‘tsne’, ‘umap’, ‘pca’}.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column in <cite>adata.obs</cite> to use for coloring
+the scatter plot points based on cell annotations.</p></li>
+<li><p><strong>feature</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the gene or feature in <cite>adata.var_names</cite> to use
+for coloring the scatter plot points based on feature expression.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the data layer in <cite>adata.layers</cite> to use for visualization.
+If None, the main data matrix <cite>adata.X</cite> is used.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – A matplotlib axes object to plot on.
+If not provided, a new figure and axes will be created.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to visualize_2D_scatter function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The created figure for the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the heatmap of the mean feature of cells that belong to a <cite>column</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – Name of member of adata.obs to plot the histogram.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>default None</em>) – The name of the <cite>adata</cite> layer to use to calculate the mean feature.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to seaborn heatmap function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>pandas.DataFrame</em> – A dataframe tha has the labels as indexes the mean feature for every
+marker.</p></li>
+<li><p><em>matplotlib.figure.Figure</em> – The figure of the heatmap.</p></li>
+<li><p><em>matplotlib.axes._subplots.AxesSubplot</em> – The AsxesSubplot of the heatmap.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.hierarchical_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">hierarchical_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'annotation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#hierarchical_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.hierarchical_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a hierarchical clustering heatmap and dendrogram.
+By default, the dataset is assumed to have features as columns and
+annotations as rows. Cells are grouped by annotation (e.g., phenotype),
+and for each group, the average expression intensity of each feature
+(e.g., protein or marker) is computed. The heatmap is plotted using
+seaborn’s clustermap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Name of the annotation in adata.obs to group by and calculate mean
+intensity.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – List of feature names (e.g., markers) to be included in the
+visualization. If None, all features are used. Default is None.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the <cite>adata</cite> layer to use to calculate the mean intensity.
+If not provided, uses the main matrix. Default is None.</p></li>
+<li><p><strong>cluster_feature</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the feature axis.
+Default is False.</p></li>
+<li><p><strong>cluster_annotations</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the annotations axis.
+Default is False.</p></li>
+<li><p><strong>standard_scale</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to standard scale data (0: row-wise or 1: column-wise).
+Default is None.</p></li>
+<li><p><strong>z_score</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the axis for z-score normalization. Can be “feature” or
+“annotation”. Default is “annotation”.</p></li>
+<li><p><strong>swap_axes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, switches the axes of the heatmap, effectively transposing
+the dataset. By default (when False), annotations are on the vertical
+axis (rows) and features are on the horizontal axis (columns).
+When set to True, features will be on the vertical axis and
+annotations on the horizontal axis. Default is False.</p></li>
+<li><p><strong>rotate_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, rotate x-axis labels by 45 degrees. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional parameters passed to <cite>sns.clustermap</cite> function or its
+underlying functions. Some essential parameters include:
+- <cite>cmap</cite> : colormap</p>
+<blockquote>
+<div><p>Colormap to use for the heatmap. It’s an argument for the underlying
+<cite>sns.heatmap()</cite> used within <cite>sns.clustermap()</cite>. Examples include
+“viridis”, “plasma”, “coolwarm”, etc.</p>
+</div></blockquote>
+<ul>
+<li><p><cite>{row,col}_colors</cite> : Lists or DataFrames
+Colors to use for annotating the rows/columns. Useful for visualizing
+additional categorical information alongside the main heatmap.</p></li>
+<li><p><cite>{dendrogram,colors}_ratio</cite> : tuple(float)
+Control the size proportions of the dendrogram and the color labels
+relative to the main heatmap.</p></li>
+<li><p><cite>cbar_pos</cite> : tuple(float) or None
+Specify the position and size of the colorbar in the figure. If set
+to None, no colorbar will be added.</p></li>
+<li><p><cite>tree_kws</cite> : dict
+Customize the appearance of the dendrogram tree. Passes additional
+keyword arguments to the underlying
+<cite>matplotlib.collections.LineCollection</cite>.</p></li>
+<li><p><cite>method</cite> : str
+The linkage algorithm to use for the hierarchical clustering.
+Defaults to ‘centroid’ in the function, but can be changed.</p></li>
+<li><p><cite>metric</cite> : str
+The distance metric to use for the hierarchy. Defaults to ‘euclidean’
+in the function.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>mean_intensity</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the mean intensity of cells for each annotation.</p></li>
+<li><p><strong>clustergrid</strong> (<em>seaborn.matrix.ClusterGrid</em>) – The seaborn ClusterGrid object representing the heatmap and
+dendrograms.</p></li>
+<li><p><strong>dendrogram_data</strong> (<em>dict</em>) – A dictionary containing hierarchical clustering linkage data for both
+rows and columns. These linkage matrices can be used to generate
+dendrograms with tools like scipy’s dendrogram function. This offers
+flexibility in customizing and plotting dendrograms as needed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>import matplotlib.pyplot as plt
+import pandas as pd
+import anndata
+from spac.visualization import hierarchical_heatmap
+X = pd.DataFrame([[1, 2], [3, 4]], columns=[‘gene1’, ‘gene2’])
+annotation = pd.DataFrame([‘type1’, ‘type2’], columns=[‘cell_type’])
+all_data = anndata.AnnData(X=X, obs=annotation)</p>
+<dl class="simple">
+<dt>mean_intensity, clustergrid, dendrogram_data = hierarchical_heatmap(</dt><dd><p>all_data,
+“cell_type”,
+layer=None,
+z_score=”annotation”,
+swap_axes=True,
+cluster_feature=False,
+cluster_annotations=True</p>
+</dd>
+</dl>
+<p>)</p>
+<p># To display a standalone dendrogram using the returned linkage matrix:
+import scipy.cluster.hierarchy as sch
+import numpy as np
+import matplotlib.pyplot as plt</p>
+<p># Convert the linkage data to type double
+dendro_col_data = np.array(dendrogram_data[‘col_linkage’], dtype=np.double)</p>
+<p># Ensure the linkage matrix has at least two dimensions and
+more than one linkage
+if dendro_col_data.ndim == 2 and dendro_col_data.shape[0] &gt; 1:</p>
+<blockquote>
+<div><p>fig, ax = plt.subplots(figsize=(10, 7))
+sch.dendrogram(dendro_col_data, ax=ax)
+plt.title(‘Standalone Col Dendrogram’)
+plt.show()</p>
+</div></blockquote>
+<dl class="simple">
+<dt>else:</dt><dd><p>print(“Insufficient data to plot a dendrogram.”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.histogram">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">together</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.histogram" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the histogram of cells based on a specific feature from adata.X
+or annotation from adata.obs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>feature</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of continuous feature from adata.X to plot its histogram.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the annotation from adata.obs to plot its histogram.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the layer in adata.layers to plot its histogram.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em>, </em><em>default None</em>) – Choose either to group the histogram by another column.</p></li>
+<li><p><strong>together</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, and if group_by != None, create one plot combining all groups.
+If False, create separate histograms for each group.
+The appearance of combined histograms can be controlled using the
+<cite>multiple</cite> and <cite>element</cite> parameters in <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs.
+To control how the histograms are normalized (e.g., to divide the
+histogram by the number of elements in every group), use the <cite>stat</cite>
+parameter in <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs. For example, set <cite>stat=”probability”</cite> to show
+the relative frequencies of each group.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – An existing Axes object to draw the plot onto, optional.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional keyword arguments passed to seaborn histplot function.
+Key arguments include:
+- <cite>multiple</cite>: Determines how the subsets of data are displayed</p>
+<blockquote>
+<div><dl class="simple">
+<dt>on the same axes. Options include:</dt><dd><ul>
+<li><dl class="simple">
+<dt>”layer”: Draws each subset on top of the other</dt><dd><p>without adjustments.</p>
+</dd>
+</dl>
+</li>
+<li><p>”dodge”: Dodges bars for each subset side by side.</p></li>
+<li><p>”stack”: Stacks bars for each subset on top of each other.</p></li>
+<li><p>”fill”: Adjusts bar heights to fill the axes.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt><cite>element</cite>: Determines the visual representation of the bins.</dt><dd><dl class="simple">
+<dt>Options include:</dt><dd><ul>
+<li><p>”bars”: Displays the typical bar-style histogram (default).</p></li>
+<li><p>”step”: Creates a step line plot without bars.</p></li>
+<li><dl class="simple">
+<dt>”poly”: Creates a polygon where the bottom edge represents</dt><dd><p>the x-axis and the top edge the histogram’s bins.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>log_scale</cite>: Determines if the data should be plotted on</dt><dd><p>a logarithmic scale.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>stat</cite>: Determines the statistical transformation to use on the data</dt><dd><dl class="simple">
+<dt>for the histogram. Options include:</dt><dd><ul>
+<li><p>”count”: Show the counts of observations in each bin.</p></li>
+<li><p>”frequency”: Show the number of observations divided
+by the bin width.</p></li>
+<li><dl class="simple">
+<dt>”density”: Normalize such that the total area of the histogram</dt><dd><p>equals 1.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>”probability”: Normalize such that each bar’s height reflects</dt><dd><p>the probability of observing that bin.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>bins</cite>: Specification of hist bins.</dt><dd><p>Can be a number (indicating the number of bins) or a list
+(indicating bin edges). For example, <cite>bins=10</cite> will create 10 bins,
+while <cite>bins=[0, 1, 2, 3]</cite> will create bins [0,1), [1,2), [2,3].
+If not provided, the binning will be determined automatically.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The created figure for the plot.</p></li>
+<li><p><strong>axs</strong> (<em>list[matplotlib.axes.Axes]</em>) – List of the axes of the histogram plots.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.interative_spatial_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">interative_spatial_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dot_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dot_transparancy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#interative_spatial_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.interative_spatial_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Create an interactive scatter plot for
+spatial data using provided annotations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix object,
+must have a .obsm attribute with ‘spatial’ key.</p></li>
+<li><p><strong>annotations</strong> (<em>list of str</em><em> or </em><em>str</em>) – Column(s) in <cite>adata.obs</cite> that contain the annotations to plot.
+If a single string is provided, it will be converted to a list.
+The interactive plot will show all the labels in the annotation
+columns passed.</p></li>
+<li><p><strong>dot_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Size of the scatter dots in the plot. Default is 1.5.</p></li>
+<li><p><strong>dot_transparancy</strong> (<em>float</em><em>, </em><em>optional</em>) – Transparancy level of the scatter dots. Default is 0.75.</p></li>
+<li><p><strong>colorscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the color scale to use for the dots. Default is ‘Viridis’.</p></li>
+<li><p><strong>figure_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the figure in inches. Default is 12.</p></li>
+<li><p><strong>figure_height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of the figure in inches. Default is 8.</p></li>
+<li><p><strong>figure_dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – DPI (dots per inch) for the figure. Default is 200.</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Font size for text in the plot. Default is 12.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A plotly figure object containing the spatial plot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objs._figure.Figure</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function is specifically tailored for
+spatial single-cell data and expects the input AnnData object
+to have spatial coordinates stored in its .obsm attribute
+under the ‘spatial’ key.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.spatial_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">spatial_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#spatial_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.spatial_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Generate the spatial plot of selected features
+:param adata: The AnnData object containing target feature and spatial coordinates.
+:type adata: anndata.AnnData
+:param spot_size: The size of spot on the spatial plot.
+:type spot_size: int
+:param alpha: The transparency of spots, range from 0 (invisible) to 1 (solid)
+:type alpha: float
+:param vmin: The lower limit of the feature value for visualization
+:type vmin: float or int
+:param vmax: The upper limit of the feature value for visualization
+:type vmax: float or int
+:param feature: The feature to visualize on the spatial plot.</p>
+<blockquote>
+<div><p>Default None.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>annotation</strong> (<em>str</em>) – The annotation to visualize in the spatial plot.
+Can’t be set with feature, default None.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – Name of the AnnData object layer that wants to be plotted.
+By default adata.raw.X is plotted.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The matplotlib Axes containing the analysis plots.
+The returned ax is the passed ax or new ax created.
+Only works if plotting a single component.</p></li>
+<li><p><strong>**kwargs</strong> – Arguments to pass to matplotlib.pyplot.scatter()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Single or a list of class</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>~matplotlib.axes.Axes</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.threshold_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">threshold_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_cutoffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#threshold_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.threshold_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a heatmap for each feature, categorizing intensities into low,
+medium, and high based on provided cutoffs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – AnnData object containing the feature intensities in .X attribute
+or specified layer.</p></li>
+<li><p><strong>feature_cutoffs</strong> (<em>dict</em>) – Dictionary with feature names as keys and tuples with two intensity
+cutoffs as values.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Column name in .obs DataFrame that contains the annotation
+used for grouping.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Layer name in adata.layers to use for intensities.
+If None, uses .X attribute.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword arguments</em>) – Additional keyword arguments to pass to scanpy’s heatmap function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary contains the axes of figures generated in the scanpy
+heatmap function.
+Consistent Key: ‘heatmap_ax’
+Potential Keys includes: ‘groupby_ax’, ‘dendrogram_ax’, and
+‘gene_groups_ax’.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.tsne_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">tsne_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#tsne_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.tsne_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize scatter plot in tSNE basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object with t-SNE coordinates precomputed by the ‘tsne’
+function and stored in ‘adata.obsm[“X_tsne”]’.</p></li>
+<li><p><strong>color_column</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column to use for coloring the scatter plot points.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – A matplotlib axes object to plot on.
+If not provided, a new figure and axes will be created.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to scanpy.pl.tsne function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The created figure for the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the tsne plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.visualize_2D_scatter">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">visualize_2D_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_label_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spac/visualization.html#visualize_2D_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.visualize_2D_scatter" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize 2D data using plt.scatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array-like</em>) – Coordinates of the data.</p></li>
+<li><p><strong>y</strong> (<em>array-like</em>) – Coordinates of the data.</p></li>
+<li><p><strong>labels</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Array of labels for the data points. Can be numerical or categorical.</p></li>
+<li><p><strong>point_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Size of the points. If None, it will be automatically determined.</p></li>
+<li><p><strong>theme</strong> (<em>str</em><em>, </em><em>optional</em>) – Color theme for the plot. Defaults to ‘viridis’ if theme not
+recognized. For a list of supported themes, refer to Matplotlib’s
+colormap documentation:
+<a class="reference external" href="https://matplotlib.org/stable/tutorials/colors/colormaps.html">https://matplotlib.org/stable/tutorials/colors/colormaps.html</a></p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – Matplotlib axis object. If None, a new one is created.</p></li>
+<li><p><strong>annotate_centers</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default: False</em><em>)</em>) – Annotate the centers of clusters if labels are categorical.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to plt.scatter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The figure of the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-spac">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spac" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="spac" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules/visualization.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
