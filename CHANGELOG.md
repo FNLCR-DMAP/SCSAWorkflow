@@ -2,30 +2,30 @@
 
 
 
-## v0.3.3 (2023-12-21)
+## v0.3.5 (2024-02-28)
 
 ### Fix
 
-* fix: visualize_2D_scatter ([`0aae308`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0aae3086b47a96d84cb332c9cd17a982e5dbb705))
+* fix(regex): Added error handle for regex pattern error ([`c7dd296`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7dd29650e469eb4576e2ad7b01d1fa20489b865))
 
 ### Unknown
 
-* Merge pull request #142 from FNLCR-DMAP/dev
+* Merge pull request #147 from FNLCR-DMAP/dev
 
-Dev to release_dev for test_CD ([`00a81d1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00a81d183c884a961cb8a5f424d726e68a809777))
+hotfix for regex pattern error ([`78b2c42`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/78b2c42a372a76ac08e9c726244834242b374860))
 
-* Merge pull request #141 from FNLCR-DMAP/test_CD
+* Merge pull request #146 from FNLCR-DMAP/regex-hotfix
 
-fix: visualize_2D_scatter ([`6fe8348`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6fe8348db4e6eca0a95dcfd96045d97dc9ba9bca))
-
-* Merge pull request #140 from FNLCR-DMAP/release_dev
-
-Continuous Deployment Development Series: Final Merge ([`4197208`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41972087824bbc2fcfea4392928c1b7416d3b0e0))
+fix(regex): Added error handle for regex pattern error ([`d4b884c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d4b884c8851b06bb57823a607ffa2d25e5de85a9))
 
 
-## v0.3.2 (2023-12-18)
+## v0.3.4 (2024-01-31)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`2c73dee`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2c73dee29b54c0568ef794e67888d6f315bf5c98))
+
+* docs(version): Automatic development release ([`e79d350`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d35088d2b03abe9ebb1f1835768ce3dcd016c))
 
 * docs(version): Automatic development release ([`232801c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/232801c6dc69ee6a8218e7b7c9e2a9fb866d916f))
 
@@ -44,6 +44,16 @@ Continuous Deployment Development Series: Final Merge ([`4197208`](https://githu
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
 
 ### Fix
+
+* fix(batch_normalize): changed to loggin ([`0c9e13a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0c9e13ab522d2a519a4e38c8686fda2cec27f991))
+
+* fix(batch_normalize): Corrected function and test ([`39db025`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/39db02552f8f8e8868ae87ad58432c17f78cf2ca))
+
+* fix(batch_normalization): Corrected function and test ([`56df083`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/56df0833fce4c5ab92530af959e81a75098c8e3f))
+
+* fix: batch_norm and unit test ([`086dd12`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/086dd1242f761cb539174bae965e035fc4cee621))
+
+* fix: visualize_2D_scatter ([`0aae308`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0aae3086b47a96d84cb332c9cd17a982e5dbb705))
 
 * fix: update boxplot to mute plt.show, add utils functions ([`2d94abc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2d94abcdf553ec84ef081e81dbb4538dfe2e82e5))
 
@@ -64,6 +74,30 @@ Continuous Deployment Development Series: Final Merge ([`4197208`](https://githu
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #145 from FNLCR-DMAP/dev
+
+Dev to release_dev: batch_normalize ([`fe1725e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe1725e45a9b11f339abc35f95693b220bbae807))
+
+* Merge pull request #144 from FNLCR-DMAP/batch_norm
+
+fix: batch_norm and unit test ([`7cd45b5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7cd45b50575eff1770ae6971e03cff7f10f445c2))
+
+* Merge pull request #143 from FNLCR-DMAP/release_dev
+
+Release dev to main ([`5ab9ee4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5ab9ee4c92c89de96a57142a27cd3a4363e0a1ed))
+
+* Merge pull request #142 from FNLCR-DMAP/dev
+
+Dev to release_dev for test_CD ([`00a81d1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00a81d183c884a961cb8a5f424d726e68a809777))
+
+* Merge pull request #141 from FNLCR-DMAP/test_CD
+
+fix: visualize_2D_scatter ([`6fe8348`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6fe8348db4e6eca0a95dcfd96045d97dc9ba9bca))
+
+* Merge pull request #140 from FNLCR-DMAP/release_dev
+
+Continuous Deployment Development Series: Final Merge ([`4197208`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41972087824bbc2fcfea4392928c1b7416d3b0e0))
 
 * Merge pull request #139 from FNLCR-DMAP/dev
 

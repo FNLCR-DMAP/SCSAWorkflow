@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import arcsinh
 import scanpy as sc
 import pandas as pd
 import anndata
@@ -252,6 +251,11 @@ def run_umap(
     return adata
 
 
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 def batch_normalize(adata, annotation, layer, method="median", log=False):
     """
     Adjust the features of every marker using a normalization method.
@@ -280,47 +284,52 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
 
     """
     allowed_methods = ["median", "Q50", "Q75"]
-    regions = adata.obs[annotation].unique().tolist()
+    batches = adata.obs[annotation].unique().tolist()
     original = adata.to_df()
 
     if log:
         original = np.log2(1+original)
+        logging.info("Data transformed with log2")
 
     if method == "median" or method == "Q50":
-        all_regions_quantile = original.quantile(q=0.5)
+        all_batch_quantile = original.quantile(q=0.5)
+        logging.info("Median for al cells: %s", all_batch_quantile)
     elif method == "Q75":
-        all_regions_quantile = original.quantile(q=0.75)
+        all_batch_quantile = original.quantile(q=0.75)
+        logging.info("Q75 for all cells: %s", all_batch_quantile)
     else:
         raise Exception(
             "Unsupported normalization {0}, allowed methods = {1]",
             method, allowed_methods)
 
-    # Place holder for normalized dataframes per region
-    new_df_list = []
-    for region in regions:
-        region_cells = original[adata.obs[annotation] == region]
+    # Place holder for normalized dataframes per batch
+    for batch in batches:
+        batch_cells = original[adata.obs[annotation] == batch]
+        logging.info(f"Processing batch: {batch}, "
+                     f"original values:\n{batch_cells}")
 
         if method == "median":
-            region_median = region_cells.quantile(q=0.5)
-            new_features = region_cells + \
-                (all_regions_quantile - region_median)
+            batch_median = batch_cells.quantile(q=0.5)
+            logging.info(f"Median for {batch}: %s", batch_median)
+            original.loc[
+                (adata.obs[annotation] == batch)
+            ] = batch_cells + (all_batch_quantile - batch_median)
 
-        if method == "Q50":
-            region_median = region_cells.quantile(q=0.5)
-            new_features = (region_cells
-                            * all_regions_quantile
-                            / region_median)
+        elif method == "Q50":
+            batch_50quantile = batch_cells.quantile(q=0.5)
+            logging.info(f"Q50 for {batch}: %s", batch_50quantile)
+            original.loc[adata.obs[annotation] == batch] = (
+                batch_cells * all_batch_quantile / batch_50quantile
+            )
 
-        if method == "Q75":
-            region_75quantile = region_cells.quantile(q=0.75)
-            new_features = (region_cells
-                            * all_regions_quantile
-                            / region_75quantile)
+        elif method == "Q75":
+            batch_75quantile = batch_cells.quantile(q=0.75)
+            logging.info(f"Q75 for {batch}: %s", batch_75quantile)
+            original.loc[adata.obs[annotation] == batch] = (
+                batch_cells * all_batch_quantile / batch_75quantile
+            )
 
-        new_df_list.append(new_features)
-
-    new_df = pd.concat(new_df_list)
-    adata.layers[layer] = new_df
+    adata.layers[layer] = original
 
 
 def rename_annotations(adata, src_annotation, dest_annotation, mappings):

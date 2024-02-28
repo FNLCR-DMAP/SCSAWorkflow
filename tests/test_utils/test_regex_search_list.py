@@ -70,6 +70,19 @@ class RegexSearchListTests(unittest.TestCase):
         result = regex_search_list(regex_pattern, list_to_search)
         self.assertEqual(result, expected_result)
 
+    def test_invalid_search_pattern(self):
+        regex_pattern = "*ABCD$"
+        list_to_search = ["ABCD", "ABCD1", "ABCD2", "ABCD3", "ABCD4"]
+        expected_error_msg = (
+            "Error occurred when searching with regex:\n"
+            "nothing to repeat at position 0\nPlease review "
+            "your regex pattern: *ABCD$\nIf using * at the "
+            "start, always have a . before the asterisk."
+                )
+        with self.assertRaises(ValueError) as context:
+            regex_search_list(regex_pattern, list_to_search)
+        self.assertEqual(str(context.exception), expected_error_msg)
+
 
 if __name__ == '__main__':
     unittest.main()
