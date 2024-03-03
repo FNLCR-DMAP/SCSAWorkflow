@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from spac.utils import regex_search_list
 import logging
 from collections import defaultdict
+from spac.utils import check_table, check_annotation
 
 
 def append_annotation(
@@ -367,8 +368,10 @@ def load_csv_files(file_names):
         dataframe_list.append(current_df)
         dataframe_name.append(file_name)
 
-    logging.info("CSVs are converted into dataframes and combined into a list!")
-    logging.info("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
+    logging.info("CSVs are converted into dataframes and combined"
+                 " into a list!")
+    logging.info("Total of " + str(len(dataframe_list)) +
+                 " dataframes in the list.")
     for i, each_file in enumerate(dataframe_list):
         logging.info(f"File name: {dataframe_name[0]}")
         logging.info("Info: ")
@@ -475,7 +478,49 @@ def combine_dfs_depracated(dataframes, annotations):
 
 def select_values(data, annotation, values=None):
     """
-    Selects rows from input dataframe matching specified values in a column.
+    Selects values from either a pandas DataFrame or an AnnData object based
+    on the annotation and values.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame or anndata.AnnData
+        The input data. Can be a DataFrame for tabular data or an AnnData
+        object for single-cell data analyses.
+    annotation : str
+        The column name in a DataFrame or the annotation key in an AnnData
+        object to be used for selection.
+    values : list, optional
+        List of values for the annotation to include. If None, all values are
+        considered for selection.
+
+    Returns
+    -------
+    pandas.DataFrame or anndata.AnnData
+        The filtered DataFrame or AnnData object containing only the selected
+        rows based on the annotation and values.
+    """
+    if isinstance(data, pd.DataFrame):
+        if values is None:
+            return data
+        else:
+            return dataframe_select_values(data, annotation, values)
+    elif isinstance(data, ad.AnnData):
+        if values is None:
+            return data
+        else:
+            return adata_select_values(data, annotation, values)
+    else:
+        error_msg = (
+            "Unsupported data type. Data must be either a pandas DataFrame"
+            " or an AnnData object."
+        )
+        logging.error(error_msg)
+        raise TypeError(error_msg)
+
+
+def dataframe_select_values(data, annotation, values=None):
+    """
+    Selects rows from an input dataframe matching specified values in a column.
 
     Parameters
     ----------
@@ -490,7 +535,8 @@ def select_values(data, annotation, values=None):
     Returns
     -------
     pandas.DataFrame
-        Dataframe containing only the selected rows.
+        Dataframe containing only the selected rows based on the specified
+        values in the annotation.
 
     Raises
     ------
@@ -514,6 +560,9 @@ def select_values(data, annotation, values=None):
     if not data.empty:
         # If DataFrame is not empty, check if annotation exists
         if annotation not in data.columns:
+            logging.error(
+                f"Column {annotation} does not exist in the dataframe"
+            )
             raise ValueError(
                 f"Column {annotation} does not exist in the dataframe"
             )
@@ -521,10 +570,51 @@ def select_values(data, annotation, values=None):
         if values is not None:
             filtered_data = data[data[annotation].isin(values)]
             if filtered_data.empty:
-                warnings.warn("No matching values found in the data.")
+                logging.info("No matching values found in the data.")
             return filtered_data
-
+    else:
+        logging.info("Input DataFrame is empty.")
     return data
+
+
+def adata_select_values(adata, annotation, values=None, layer=None):
+    """
+    Selects cells from an input AnnData object matching specified values in an
+    annotation.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The input AnnData object.
+    annotation : str
+        The annotation name within .obs to be used for selection.
+    values : list, optional
+        List of values for annotation to include.
+        If None, return all cells.
+    layer : str, optional
+        The specific layer of the AnnData object to consider for selection.
+        If None, the default layer is used.
+
+    Returns
+    -------
+    anndata.AnnData
+        AnnData object containing only the selected cells based on the
+        specified values in the annotation.
+    """
+    # Use utility function to check if the layer exists in adata.layers
+    if layer:
+        check_table(adata, tables=layer)
+    check_annotation(adata, annotations=annotation)
+
+    if values is not None:
+        if not isinstance(values, list):
+            values = [values]
+        mask = adata.obs[annotation].isin(values)
+        if not mask.any():
+            logging.info("No matching values found in the data.")
+            return adata[[]]  # Return an empty AnnData object
+        return adata[mask]
+    return adata
 
 
 def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
