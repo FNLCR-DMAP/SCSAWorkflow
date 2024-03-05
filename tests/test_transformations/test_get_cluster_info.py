@@ -18,6 +18,8 @@ class TestGetClusterInfo(unittest.TestCase):
         var_data = pd.DataFrame(index=[f"Gene{i}" for i in range(1, 6)])
         obs_df = pd.DataFrame(obs_data)
         self.adata = AnnData(X=X_data, obs=obs_df, var=var_data)
+        # Add a layer with some modified data
+        self.adata.layers["scaled"] = X_data * 2
 
     def test_default_features_with_percentage(self):
         result = get_cluster_info(self.adata)
@@ -40,6 +42,26 @@ class TestGetClusterInfo(unittest.TestCase):
         self.assertIn("mean_Gene1", result.columns)
         self.assertIn("mean_Gene2", result.columns)
         self.assertNotIn("mean_Gene3", result.columns)
+
+    def test_layer_specific_features_with_percentage(self):
+        # Test functionality with a specific layer
+        result = get_cluster_info(self.adata, layer="scaled")
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertIn("Cluster", result.columns)
+        self.assertIn("Number of Cells", result.columns)
+        self.assertIn("Percentage", result.columns)
+        # Ensure features are processed from the specified layer
+        self.assertIn("mean_Gene1", result.columns)
+        # Extract the mean of the first feature in the 'scaled' layer
+        scaled_mean = self.adata.layers["scaled"][:, 0]
+        expected_mean = np.mean(scaled_mean)
+        # Calculate the mean of the reported means for Gene1 in Cluster1
+        # Select rows where the cluster is 'Cluster1'
+        cluster1_filter = result["Cluster"] == "Cluster1"
+        # Calculate the mean of 'mean_Gene1' for those rows
+        cluster1_means = result.loc[cluster1_filter, "mean_Gene1"]
+        actual_mean = cluster1_means.mean()
+        self.assertTrue(np.isclose(expected_mean, actual_mean, atol=0.1))
 
     def test_default_features_with_known_values_and_percentage(self):
         # Create a mock AnnData object with specific known values

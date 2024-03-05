@@ -67,7 +67,9 @@ def phenograph_clustering(adata, features, layer=None,
     adata.uns["phenograph_features"] = features
 
 
-def get_cluster_info(adata, annotation="phenograph", features=None):
+def get_cluster_info(
+    adata, annotation="phenograph", features=None, layer=None
+):
     """
     Retrieve information about clusters based on specific annotation.
 
@@ -80,20 +82,37 @@ def get_cluster_info(adata, annotation="phenograph", features=None):
     features : list of str, optional
         Features (e.g., genes) for cluster metrics.
         Defaults to all features in adata.var_names.
+    layer : str, optional
+        Specific layer from which to retrieve the features.
+        If None, uses adata.X.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame with metrics for each cluster.
+        DataFrame with metrics for each cluster including the percentage of
+        each cluster to the whole sample.
     """
 
     # Use utility functions for input validation
     check_annotation(adata, annotations=annotation)
-
     if features is None:
         features = list(adata.var_names)
     else:
         check_feature(adata, features=features)
+
+    # Check if the layer is specified and validate it
+    if layer:
+        check_table(adata, tables=layer)
+        data_matrix = adata.layers[layer]
+    else:
+        data_matrix = adata.X
+
+    # Convert adata.X to DataFrame
+    if isspmatrix(data_matrix):
+        data_array = data_matrix.toarray()
+    else:
+        data_array = data_matrix
+    data_df = pd.DataFrame(data_array, columns=adata.var_names)
 
     # Count cells in each cluster
     cluster_counts = adata.obs[annotation].value_counts().reset_index()
@@ -108,16 +127,12 @@ def get_cluster_info(adata, annotation="phenograph", features=None):
     # Initialize DataFrame for cluster metrics
     cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
 
-    # Convert adata.X to DataFrame
-    adata_array = adata.X.toarray() if isspmatrix(adata.X) else adata.X
-    adata_df = pd.DataFrame(adata_array, columns=adata.var_names)
-
     # Add cluster annotation
-    adata_df[annotation] = adata.obs[annotation].values
+    data_df[annotation] = adata.obs[annotation].values
 
     # Calculate statistics for each feature in each cluster
     for feature in features:
-        grouped = adata_df.groupby(annotation)[feature]\
+        grouped = data_df.groupby(annotation)[feature]\
                             .agg(["mean", "median"])\
                             .reset_index()
         grouped.columns = [
