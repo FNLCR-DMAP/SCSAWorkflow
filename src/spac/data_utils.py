@@ -484,10 +484,10 @@ def select_values(data, annotation, values=None):
     ----------
     data : pandas.DataFrame or anndata.AnnData
         The input data. Can be a DataFrame for tabular data or an AnnData
-        object for single-cell data analyses.
+        object.
     annotation : str
-        The column name in a DataFrame or the annotation key to be used for
-        selection.
+        The column name in a DataFrame or the annotation key in an AnnData
+        object to be used for selection.
     values : str or list of str
         List of values for the annotation to include. If None, all values are
         considered for selection.
@@ -502,26 +502,11 @@ def select_values(data, annotation, values=None):
     if values is not None and not isinstance(values, list):
         values = [values]
 
+    # Initialize possible_annotations based on the data type
     if isinstance(data, pd.DataFrame):
-        # Check if the annotation exists in the DataFrame
-        if annotation not in data.columns:
-            error_msg = (f"Annotation '{annotation}' does not exist "
-                         "in the DataFrame.")
-            logging.error(error_msg)
-            raise KeyError(error_msg)
-        # For pandas DataFrame, extract unique values from the column
-        unique_values = data[annotation].unique().tolist()
+        possible_annotations = data.columns.tolist()
     elif isinstance(data, ad.AnnData):
-        # Check if the annotation exists in the AnnData object
-        if annotation not in data.obs.columns:
-            error_msg = (
-                f"Annotation '{annotation}' does not exist "
-                f"in the AnnData object."
-            )
-            logging.error(error_msg)
-            raise KeyError(error_msg)
-        # For anndata.AnnData, get unique values from the annotation in .obs
-        unique_values = data.obs[annotation].unique().tolist()
+        possible_annotations = data.obs.columns.tolist()
     else:
         error_msg = (
             "Unsupported data type. Data must be either a pandas DataFrame"
@@ -530,8 +515,21 @@ def select_values(data, annotation, values=None):
         logging.error(error_msg)
         raise TypeError(error_msg)
 
+    # Check if the annotation exists using check_list_in_list
+    check_list_in_list(
+        input=[annotation],
+        input_name="annotation",
+        input_type="column name/annotation key",
+        target_list=possible_annotations,
+        need_exist=True
+    )
+
     # Validate provided values against unique ones, if not None
     if values is not None:
+        if isinstance(data, pd.DataFrame):
+            unique_values = data[annotation].unique().tolist()
+        elif isinstance(data, ad.AnnData):
+            unique_values = data.obs[annotation].unique().tolist()
         check_list_in_list(
             values, "values", "label", unique_values, need_exist=True
         )

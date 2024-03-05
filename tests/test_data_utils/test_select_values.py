@@ -24,14 +24,14 @@ class TestSelectValues(unittest.TestCase):
         """
         Test error raised for a nonexistent annotation in a DataFrame.
         """
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             select_values(self.df, 'nonexistent_column', ['A', 'B'])
 
     def test_adata_nonexistent_annotation(self):
         """
         Test error raised for a nonexistent annotation in an AnnData object.
         """
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             select_values(self.adata, 'nonexistent_column', ['X', 'Y'])
 
     def test_select_values_dataframe_typical_case(self):
@@ -41,13 +41,11 @@ class TestSelectValues(unittest.TestCase):
         result_df = select_values(self.df, 'column1', ['A', 'B'])
         # Expecting 5 rows where column1 is either 'A' or 'B'
         self.assertEqual(len(result_df), 5)
-        # Check that the 'column1' only contains the values 'A' and 'B'
-        unique_values_in_result = result_df['column1'].unique().tolist()
-        self.assertTrue(set(unique_values_in_result).issubset(set(['A', 'B'])))
-        # Alternatively, assert directly the expected values are in the result
+        # Assert that the sets of unique values in the result and expected
+        # values are identical.
         expected_values = ['A', 'B']
-        for value in unique_values_in_result:
-            self.assertIn(value, expected_values)
+        unique_values_in_result = result_df['column1'].unique().tolist()
+        self.assertCountEqual(unique_values_in_result, expected_values)
 
     def test_select_values_adata_typical_case(self):
         """
@@ -57,7 +55,8 @@ class TestSelectValues(unittest.TestCase):
         # Expecting 5 rows where column1 is either 'X' or 'Y'
         self.assertEqual(result_adata.n_obs, 5)
         unique_values_in_result = result_adata.obs['column1'].unique().tolist()
-        self.assertTrue(set(unique_values_in_result).issubset({'X', 'Y'}))
+        expected_values = ['X', 'Y']
+        self.assertCountEqual(unique_values_in_result, expected_values)
 
     def test_select_values_dataframe_all_values(self):
         """
@@ -66,9 +65,9 @@ class TestSelectValues(unittest.TestCase):
         result_df = select_values(self.df, 'column1')
         # Expecting all rows to be returned
         self.assertEqual(len(result_df), 6)
-        self.assertTrue(
-            set(result_df['column1'].unique()).issubset({'A', 'B', 'C'})
-        )
+        unique_values_in_result = result_df['column1'].unique().tolist()
+        expected_values = ['A', 'B', 'C']
+        self.assertCountEqual(unique_values_in_result, expected_values)
 
     def test_select_values_adata_all_values(self):
         """
@@ -77,9 +76,9 @@ class TestSelectValues(unittest.TestCase):
         result_adata = select_values(self.adata, 'column1')
         # Expecting all values to be returned
         self.assertEqual(result_adata.n_obs, 6)
-        self.assertTrue(
-            set(result_adata.obs['column1'].unique()).issubset({'X', 'Y', 'Z'})
-        )
+        unique_values_in_result = result_adata.obs['column1'].unique().tolist()
+        expected_values = ['X', 'Y', 'Z']
+        self.assertCountEqual(unique_values_in_result, expected_values)
 
     def test_unsupported_data_type(self):
         """
