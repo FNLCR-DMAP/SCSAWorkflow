@@ -67,9 +67,7 @@ def phenograph_clustering(adata, features, layer=None,
     adata.uns["phenograph_features"] = features
 
 
-def get_cluster_info(
-    adata, annotation="phenograph", features=None, layer=None
-):
+def get_cluster_info(adata, annotation, features=None, layer=None):
     """
     Retrieve information about clusters based on specific annotation.
 
@@ -83,7 +81,7 @@ def get_cluster_info(
         Features (e.g., genes) for cluster metrics.
         Defaults to all features in adata.var_names.
     layer : str, optional
-        Specific layer from which to retrieve the features.
+        The layer to be used in the aggregate summaries.
         If None, uses adata.X.
 
     Returns
@@ -100,6 +98,12 @@ def get_cluster_info(
     else:
         check_feature(adata, features=features)
 
+    # Convert data matrix or specified layer to DataFrame using to_df()
+    if layer:
+        data_df = adata.to_df(layer=layer)
+    else:
+        data_df = adata.to_df()
+
     # Check if the layer is specified and validate it
     if layer:
         check_table(adata, tables=layer)
@@ -113,6 +117,9 @@ def get_cluster_info(
     else:
         data_array = data_matrix
     data_df = pd.DataFrame(data_array, columns=adata.var_names)
+
+    if features is None:
+        features = list(adata.var_names)
 
     # Count cells in each cluster
     cluster_counts = adata.obs[annotation].value_counts().reset_index()
