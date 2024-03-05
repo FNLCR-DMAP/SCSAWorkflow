@@ -7,10 +7,7 @@ import warnings
 from sklearn.preprocessing import MinMaxScaler
 import logging
 from collections import defaultdict
-from spac.utils import (
-    regex_search_list, check_list_in_list,
-    check_table, check_annotation
-)
+from spac.utils import regex_search_list, check_list_in_list
 
 
 def append_annotation(
@@ -489,9 +486,9 @@ def select_values(data, annotation, values=None):
         The input data. Can be a DataFrame for tabular data or an AnnData
         object for single-cell data analyses.
     annotation : str
-        The column name in a DataFrame or the annotation key in an AnnData
-        object to be used for selection.
-    values : list, optional
+        The column name in a DataFrame or the annotation key to be used for
+        selection.
+    values : str or list of str
         List of values for the annotation to include. If None, all values are
         considered for selection.
 
@@ -506,9 +503,23 @@ def select_values(data, annotation, values=None):
         values = [values]
 
     if isinstance(data, pd.DataFrame):
+        # Check if the annotation exists in the DataFrame
+        if annotation not in data.columns:
+            error_msg = (f"Annotation '{annotation}' does not exist "
+                         "in the DataFrame.")
+            logging.error(error_msg)
+            raise KeyError(error_msg)
         # For pandas DataFrame, extract unique values from the column
         unique_values = data[annotation].unique().tolist()
     elif isinstance(data, ad.AnnData):
+        # Check if the annotation exists in the AnnData object
+        if annotation not in data.obs.columns:
+            error_msg = (
+                f"Annotation '{annotation}' does not exist "
+                f"in the AnnData object."
+            )
+            logging.error(error_msg)
+            raise KeyError(error_msg)
         # For anndata.AnnData, get unique values from the annotation in .obs
         unique_values = data.obs[annotation].unique().tolist()
     else:
@@ -522,7 +533,7 @@ def select_values(data, annotation, values=None):
     # Validate provided values against unique ones, if not None
     if values is not None:
         check_list_in_list(
-            values, "values", "value", unique_values, need_exist=True
+            values, "values", "label", unique_values, need_exist=True
         )
 
     # Proceed with filtering based on data type
@@ -531,132 +542,6 @@ def select_values(data, annotation, values=None):
     elif isinstance(data, ad.AnnData):
         return data if values is None else \
             data[data.obs[annotation].isin(values)]
-
-
-def dataframe_select_values(data, annotation, values=None):
-    """
-    Selects rows from an input dataframe matching specified values in a column.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        The input dataframe.
-    annotation : str
-        The column name to be used for selection.
-    values : list, optional
-        List of values for annotation to include.
-        If None, return all values.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Dataframe containing only the selected rows based on the specified
-        values in the annotation.
-
-    Raises
-    ------
-    ValueError
-        If annotation does not exist or one or more values passed
-        do not exist in the specified column.
-
-    Examples
-    --------
-    >>> df = pd.DataFrame({
-    ...     'column1': ['A', 'B', 'A', 'B', 'A'],
-    ...     'column2': [1, 2, 3, 4, 5]
-    ... })
-    >>> select_values(df, 'column1', ['A'])
-      column1  column2
-    0       A        1
-    2       A        3
-    4       A        5
-    """
-    # Check if the DataFrame is empty
-    if data.empty:
-        logging.info("Input DataFrame is empty.")
-        return data
-
-    # Check if the specified annotation exists in the DataFrame.
-    if annotation not in data.columns:
-        error_message = f"Column {annotation} does not exist in the dataframe"
-        logging.error(error_message)
-        raise ValueError(error_message)
-
-    # If the values are provided, proceed with validation.
-    if values is not None:
-        # Get all unique values from the specified annotation in the DataFrame.
-        unique_values_in_annotation = data[annotation].unique().tolist()
-
-        # Directly call check_list_in_list for validation
-        check_list_in_list(
-            values,
-            "values",
-            "value",
-            unique_values_in_annotation,
-            need_exist=True
-        )
-
-        # Filter the dataframe based on validated values
-        filtered_data = data[data[annotation].isin(values)]
-        if filtered_data.empty:
-            logging.info("No matching values found in the data.")
-        return filtered_data
-
-    # If no specific values were provided, return the original DataFrame.
-    return data
-
-
-def adata_select_values(adata, annotation, values=None, layer=None):
-    """
-    Selects cells from an input AnnData object matching specified values in an
-    annotation.
-
-    Parameters
-    ----------
-    adata : anndata.AnnData
-        The input AnnData object.
-    annotation : str
-        The annotation name within .obs to be used for selection.
-    values : list, optional
-        List of values for annotation to include.
-        If None, return all cells.
-    layer : str, optional
-        The specific layer of the AnnData object to consider for selection.
-        If None, the default layer is used.
-
-    Returns
-    -------
-    anndata.AnnData
-        AnnData object containing only the selected cells based on the
-        specified values in the annotation.
-    """
-    # Use utility function to check if the layer exists in adata.layers
-    if layer:
-        check_table(adata, tables=layer)
-    check_annotation(adata, annotations=annotation)
-
-    if values is not None:
-        if not isinstance(values, list):
-            values = [values]
-
-        # Extract unique values from the annotation column
-        unique_values_in_annotation = adata.obs[annotation].unique().tolist()
-
-        # Use check_list_in_list to validate the provided values
-        check_list_in_list(
-            values,
-            "values",
-            "value",
-            unique_values_in_annotation,
-            need_exist=True
-        )
-
-        mask = adata.obs[annotation].isin(values)
-        if not mask.any():
-            logging.info("No matching values found in the data.")
-            return adata[[]]  # Return an empty AnnData object
-        return adata[mask]
-    return adata
 
 
 def downsample_cells(input_data, annotations, n_samples=None, stratify=False,

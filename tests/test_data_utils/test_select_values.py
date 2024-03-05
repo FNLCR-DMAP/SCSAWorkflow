@@ -20,6 +20,20 @@ class TestSelectValues(unittest.TestCase):
             obs={'column1': ['X', 'Y', 'X', 'Y', 'X', 'Z']}
         )
 
+    def test_dataframe_nonexistent_annotation(self):
+        """
+        Test error raised for a nonexistent annotation in a DataFrame.
+        """
+        with self.assertRaises(KeyError):
+            select_values(self.df, 'nonexistent_column', ['A', 'B'])
+
+    def test_adata_nonexistent_annotation(self):
+        """
+        Test error raised for a nonexistent annotation in an AnnData object.
+        """
+        with self.assertRaises(KeyError):
+            select_values(self.adata, 'nonexistent_column', ['X', 'Y'])
+
     def test_select_values_dataframe_typical_case(self):
         """
         Test selecting specified values from a DataFrame column.
@@ -27,14 +41,23 @@ class TestSelectValues(unittest.TestCase):
         result_df = select_values(self.df, 'column1', ['A', 'B'])
         # Expecting 5 rows where column1 is either 'A' or 'B'
         self.assertEqual(len(result_df), 5)
+        # Check that the 'column1' only contains the values 'A' and 'B'
+        unique_values_in_result = result_df['column1'].unique().tolist()
+        self.assertTrue(set(unique_values_in_result).issubset(set(['A', 'B'])))
+        # Alternatively, assert directly the expected values are in the result
+        expected_values = ['A', 'B']
+        for value in unique_values_in_result:
+            self.assertIn(value, expected_values)
 
     def test_select_values_adata_typical_case(self):
         """
         Test selecting specified values from an AnnData object.
         """
         result_adata = select_values(self.adata, 'column1', ['X', 'Y'])
-        # Expecting 5 observations where column1 is either 'X' or 'Y'
+        # Expecting 5 rows where column1 is either 'X' or 'Y'
         self.assertEqual(result_adata.n_obs, 5)
+        unique_values_in_result = result_adata.obs['column1'].unique().tolist()
+        self.assertTrue(set(unique_values_in_result).issubset({'X', 'Y'}))
 
     def test_select_values_dataframe_all_values(self):
         """
@@ -43,6 +66,9 @@ class TestSelectValues(unittest.TestCase):
         result_df = select_values(self.df, 'column1')
         # Expecting all rows to be returned
         self.assertEqual(len(result_df), 6)
+        self.assertTrue(
+            set(result_df['column1'].unique()).issubset({'A', 'B', 'C'})
+        )
 
     def test_select_values_adata_all_values(self):
         """
@@ -51,6 +77,9 @@ class TestSelectValues(unittest.TestCase):
         result_adata = select_values(self.adata, 'column1')
         # Expecting all values to be returned
         self.assertEqual(result_adata.n_obs, 6)
+        self.assertTrue(
+            set(result_adata.obs['column1'].unique()).issubset({'X', 'Y', 'Z'})
+        )
 
     def test_unsupported_data_type(self):
         """
