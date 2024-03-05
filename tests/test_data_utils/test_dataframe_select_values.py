@@ -12,41 +12,37 @@ class TestDataFrameSelectValues(unittest.TestCase):
         })
 
     def test_select_values_typical_case(self):
-        """
-        Test that function correctly selects specified values from an
-        annotation.
-        """
+        """Test selecting specified values."""
         result = dataframe_select_values(self.data, 'column1', ['A', 'B'])
         self.assertEqual(len(result), 5)
         # Assert that 'C' is not in the result
         self.assertFalse((result['column1'] == 'C').any())
 
     def test_select_values_all_values(self):
-        """
-        Test that function correctly selects all values
-        when no specific values given.
-        """
+        """Test selecting all values when none are specified."""
         result = dataframe_select_values(self.data, 'column1')
         self.assertEqual(len(result), 6)
 
     def test_no_matching_values(self):
-        """
-        Test the case with no matching values.
-        """
-        result = dataframe_select_values(self.data, 'column1', ['D'])
-        self.assertEqual(len(result), 0)
+        """Test selecting with no matching values."""
+        # This expects a ValueError due to validation failure
+        with self.assertRaises(ValueError):
+            dataframe_select_values(self.data, 'column1', ['D'])
+
+    def test_values_not_in_annotation(self):
+        """Test selecting values not present in the specified column."""
+        # This test ensures that the function raises a ValueError
+        # when provided values do not exist in the annotation.
+        with self.assertRaises(ValueError):
+            dataframe_select_values(self.data, 'column1', ['Z'])
 
     def test_invalid_annotation(self):
-        """
-        Test function handling when an invalid annotation name is provided.
-        """
+        """Test with an invalid column name."""
         with self.assertRaises(ValueError):
             dataframe_select_values(self.data, 'invalid_column', ['A'])
 
     def test_empty_dataframe(self):
-        """
-        Test that function correctly handles an empty dataframe.
-        """
+        """Test handling an empty dataframe."""
         empty_data = pd.DataFrame()
         result = dataframe_select_values(empty_data, 'column1', ['A'])
         self.assertEqual(len(result), 0)

@@ -59,6 +59,20 @@ class TestSelectValues(unittest.TestCase):
         with self.assertRaises(TypeError):
             select_values(["not", "a", "valid", "input"], 'column1', ['A'])
 
+    def test_select_values_dataframe_nonexistent_values(self):
+        """
+        Test error raised for nonexistent values from a DataFrame.
+        """
+        with self.assertRaises(ValueError):
+            select_values(self.df, 'column1', ['Nonexistent'])
+
+    def test_select_values_adata_nonexistent_values(self):
+        """
+        Test error raised for nonexistent values from an AnnData object.
+        """
+        with self.assertRaises(ValueError):
+            select_values(self.adata, 'column1', ['Nonexistent'])
+
 
 if __name__ == '__main__':
     unittest.main()

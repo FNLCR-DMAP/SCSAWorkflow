@@ -39,13 +39,13 @@ class TestAdataSelectValues(unittest.TestCase):
         # Expecting all cells to be returned
         self.assertEqual(result.n_obs, 10)
 
-    def test_no_matching_values(self):
+    def test_no_matching_values_raises_error(self):
         """
-        Test selecting cells with no matching values.
+        Test providing values not present in the annotation raises a
+        ValueError.
         """
-        result = adata_select_values(self.adata, 'cell_type', ['Nonexistent'])
-        # Expecting no cells to match
-        self.assertEqual(result.n_obs, 0)
+        with self.assertRaises(ValueError):
+            adata_select_values(self.adata, 'cell_type', ['Nonexistent'])
 
     def test_specific_layer(self):
         """
