@@ -75,7 +75,7 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    annotation : str, optional
+    annotation : str
         Annotation/column in adata.obs for cluster info.
     features : list of str, optional
         Features (e.g., genes) for cluster metrics.
