@@ -8,7 +8,7 @@ import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
 import umap as umap_lib
-from scipy.sparse import issparse, isspmatrix
+from scipy.sparse import issparse
 
 
 def phenograph_clustering(adata, features, layer=None,
@@ -97,29 +97,14 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
         features = list(adata.var_names)
     else:
         check_feature(adata, features=features)
+    if layer:
+        check_table(adata, tables=layer)
 
-    # Convert data matrix or specified layer to DataFrame using to_df()
+    # Convert data matrix or specified layer to DataFrame directly
     if layer:
         data_df = adata.to_df(layer=layer)
     else:
         data_df = adata.to_df()
-
-    # Check if the layer is specified and validate it
-    if layer:
-        check_table(adata, tables=layer)
-        data_matrix = adata.layers[layer]
-    else:
-        data_matrix = adata.X
-
-    # Convert adata.X to DataFrame
-    if isspmatrix(data_matrix):
-        data_array = data_matrix.toarray()
-    else:
-        data_array = data_matrix
-    data_df = pd.DataFrame(data_array, columns=adata.var_names)
-
-    if features is None:
-        features = list(adata.var_names)
 
     # Count cells in each cluster
     cluster_counts = adata.obs[annotation].value_counts().reset_index()
