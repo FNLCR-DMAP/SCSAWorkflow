@@ -67,7 +67,7 @@ def phenograph_clustering(adata, features, layer=None,
     adata.uns["phenograph_features"] = features
 
 
-def get_cluster_info(adata, annotation="phenograph", features=None):
+def get_cluster_info(adata, annotation, features=None, layer=None):
     """
     Retrieve information about clusters based on specific annotation.
 
@@ -75,57 +75,70 @@ def get_cluster_info(adata, annotation="phenograph", features=None):
     ----------
     adata : anndata.AnnData
         The AnnData object.
-    annotation : str, optional
+    annotation : str
         Annotation/column in adata.obs for cluster info.
     features : list of str, optional
         Features (e.g., genes) for cluster metrics.
         Defaults to all features in adata.var_names.
+    layer : str, optional
+        The layer to be used in the aggregate summaries.
+        If None, uses adata.X.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame with metrics for each cluster.
+        DataFrame with metrics for each cluster including the percentage of
+        each cluster to the whole sample.
     """
 
     # Use utility functions for input validation
     check_annotation(adata, annotations=annotation)
-
     if features is None:
         features = list(adata.var_names)
     else:
         check_feature(adata, features=features)
+    if layer:
+        check_table(adata, tables=layer)
+
+    # Convert data matrix or specified layer to DataFrame directly
+    if layer:
+        data_df = adata.to_df(layer=layer)
+    else:
+        data_df = adata.to_df()
 
     # Count cells in each cluster
     cluster_counts = adata.obs[annotation].value_counts().reset_index()
     cluster_counts.columns = ["Cluster", "Number of Cells"]
 
+    # Calculate the percentage of cells in each cluster
+    total_cells = adata.obs.shape[0]
+    cluster_counts['Percentage'] = (
+        cluster_counts['Number of Cells'] / total_cells
+    ) * 100
+
     # Initialize DataFrame for cluster metrics
     cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
 
-    # Convert adata.X to DataFrame
-    adata_df = pd.DataFrame(adata.X, columns=adata.var_names)
-
     # Add cluster annotation
-    adata_df[annotation] = adata.obs[annotation].values
+    data_df[annotation] = adata.obs[annotation].values
 
     # Calculate statistics for each feature in each cluster
     for feature in features:
-        grouped = adata_df.groupby(annotation)[feature].agg(
-            ["mean", "std", "median",
-             lambda x: x.quantile(0),
-             lambda x: x.quantile(0.995)
-             ]).reset_index()
+        grouped = data_df.groupby(annotation)[feature]\
+                            .agg(["mean", "median"])\
+                            .reset_index()
         grouped.columns = [
             f"{col}_{feature}" if col != annotation else "Cluster"
             for col in grouped.columns
         ]
         cluster_metrics = cluster_metrics.merge(
             grouped, on="Cluster", how="left"
-            )
+        )
 
-    # Merge cluster counts
+    # Merge cluster counts and percentage
     cluster_metrics = pd.merge(
-        cluster_metrics, cluster_counts, on="Cluster", how="left"
+        cluster_metrics, cluster_counts,
+        on="Cluster", how="left"
     )
 
     return cluster_metrics
