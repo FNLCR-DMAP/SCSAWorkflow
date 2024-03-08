@@ -74,7 +74,7 @@ class TestSelectValues(unittest.TestCase):
         Test returning all AnnData values when no specific values are given.
         """
         result_adata = select_values(self.adata, 'column1')
-        # Expecting all values to be returned
+        # Expecting all rows to be returned
         self.assertEqual(result_adata.n_obs, 6)
         unique_values_in_result = result_adata.obs['column1'].unique().tolist()
         expected_values = ['X', 'Y', 'Z']
