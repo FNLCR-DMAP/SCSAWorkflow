@@ -2,50 +2,28 @@
 
 
 
-## v0.3.6 (2024-03-07)
+## v0.4.0 (2024-03-09)
 
-### Fix
+### Feature
 
-* fix(get_cluster_info): fix convert dataframe in function ([`ff8e107`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ff8e1077a5901914ce659068b6d5463ecf637a3d))
-
-* fix(get_cluster_info): add layer in function and corresponding unit tests ([`6f897b5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6f897b5c3a2318bc16ccc39dc23c23e8ccbc6ab8))
-
-* fix(select_values): edit check annotation and corresponding unit tests ([`2460dd6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2460dd602c9f505a315a919a9f31f3f4662a8fcb))
-
-* fix(select_values): add check annotation in function and modify unit tests ([`e82da40`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e82da405751d51cabd88daad79176e85da166ff5))
-
-* fix(select_values): modify check values in function and corresponding unit tests ([`8529eaa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8529eaa91e07f2ee571ca2a72c77cfd530b956d6))
-
-* fix(get_cluster_info): add layer in the function and corresponding unit test ([`034ca8e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/034ca8eb72a0f9f49504aea83b3aca0f26067a24))
-
-* fix(get_cluster_info): modified the function and corresponding unit test ([`11fddc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/11fddc13ae04a53fdfe226bb6784a6fbd2994090))
-
-* fix: select_values and corresponding unit tests ([`bc22732`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bc22732abb213f866fadf501b0ad5b3cc00bd397))
+* feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Unknown
 
-* Merge pull request #151 from FNLCR-DMAP/dev
+* Merge pull request #155 from FNLCR-DMAP/dev
 
-merge select_values and get_cluster_info to release_dev ([`6e40e7e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e40e7e7ae57884e7cb08879551f9330a79d0eb7))
+Update Sankey Plot for testing ([`1d73b13`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d73b134558cf9fbb2296d0bccccfac1c9339334))
 
-* Merge pull request #150 from FNLCR-DMAP/get_cluster_info
+* Merge pull request #154 from FNLCR-DMAP/sankey_plot
 
-fix(get_cluster_info): modified the function and corresponding unit test ([`a66622b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a66622bdf70a3bfed328cafa6e131a53c92cd1f3))
-
-* fix(get_cluster_info):fix docstring in function ([`04e5d31`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/04e5d3191050e932b73aaea11ea27beade68e8c5))
-
-* Merge pull request #149 from FNLCR-DMAP/select_values
-
-fix(select_values): expanded the original function and added corresponding unit tests ([`857cff9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/857cff90cec7b5a6e396dea0bd7c16a06582f90d))
-
-* Merge pull request #148 from FNLCR-DMAP/release_dev
-
-Update 2/28 to production. ([`c18c51b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c18c51ba13ccc2b0ee8b3e062428a5ad253f2819))
+feat: Add sankey plot and related utils ([`dc6ba4b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dc6ba4b8e62eb7365befa11fc1ba1b9eebbfa087))
 
 
-## v0.3.5 (2024-02-28)
+## v0.3.6 (2024-03-08)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`d8ccd56`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d8ccd56a6d826845974452211e45e8a7cc91e306))
 
 * docs(version): Automatic development release ([`eaa7896`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/eaa78964ba428de0a90301154321c0c2b3410be0))
 
@@ -70,6 +48,22 @@ Update 2/28 to production. ([`c18c51b`](https://github.com/FNLCR-DMAP/SCSAWorkfl
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
 
 ### Fix
+
+* fix(get_cluster_info): fix convert dataframe in function ([`ff8e107`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ff8e1077a5901914ce659068b6d5463ecf637a3d))
+
+* fix(get_cluster_info): add layer in function and corresponding unit tests ([`6f897b5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6f897b5c3a2318bc16ccc39dc23c23e8ccbc6ab8))
+
+* fix(select_values): edit check annotation and corresponding unit tests ([`2460dd6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2460dd602c9f505a315a919a9f31f3f4662a8fcb))
+
+* fix(select_values): add check annotation in function and modify unit tests ([`e82da40`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e82da405751d51cabd88daad79176e85da166ff5))
+
+* fix(select_values): modify check values in function and corresponding unit tests ([`8529eaa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8529eaa91e07f2ee571ca2a72c77cfd530b956d6))
+
+* fix(get_cluster_info): add layer in the function and corresponding unit test ([`034ca8e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/034ca8eb72a0f9f49504aea83b3aca0f26067a24))
+
+* fix(get_cluster_info): modified the function and corresponding unit test ([`11fddc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/11fddc13ae04a53fdfe226bb6784a6fbd2994090))
+
+* fix: select_values and corresponding unit tests ([`bc22732`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bc22732abb213f866fadf501b0ad5b3cc00bd397))
 
 * fix(regex): Added error handle for regex pattern error ([`c7dd296`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7dd29650e469eb4576e2ad7b01d1fa20489b865))
 
@@ -102,6 +96,36 @@ Update 2/28 to production. ([`c18c51b`](https://github.com/FNLCR-DMAP/SCSAWorkfl
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #153 from FNLCR-DMAP/dev
+
+fix(test_select_values):change a comment to correct commit message sy… ([`962bb80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/962bb805638407b18f9f9a5312d005fd967e4bbb))
+
+* fix(test_select_values):change a comment to correct commit message syntax ([`d8b0703`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d8b0703ee981d0cc74b0f35f15eca5ef349115c7))
+
+* Merge pull request #152 from FNLCR-DMAP/dev
+
+Removed test_adata_select_values.py and test_dataframe_select_values.py ([`4d2db96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4d2db96c570cce4c370257531547f33d8160021d))
+
+* Removed test_adata_select_values.py and test_dataframe_select_values.py ([`363959f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/363959fb7c607eb3b51ca2db9a8be57a1ada6183))
+
+* Merge pull request #151 from FNLCR-DMAP/dev
+
+merge select_values and get_cluster_info to release_dev ([`6e40e7e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e40e7e7ae57884e7cb08879551f9330a79d0eb7))
+
+* Merge pull request #150 from FNLCR-DMAP/get_cluster_info
+
+fix(get_cluster_info): modified the function and corresponding unit test ([`a66622b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a66622bdf70a3bfed328cafa6e131a53c92cd1f3))
+
+* fix(get_cluster_info):fix docstring in function ([`04e5d31`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/04e5d3191050e932b73aaea11ea27beade68e8c5))
+
+* Merge pull request #149 from FNLCR-DMAP/select_values
+
+fix(select_values): expanded the original function and added corresponding unit tests ([`857cff9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/857cff90cec7b5a6e396dea0bd7c16a06582f90d))
+
+* Merge pull request #148 from FNLCR-DMAP/release_dev
+
+Update 2/28 to production. ([`c18c51b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c18c51ba13ccc2b0ee8b3e062428a5ad253f2819))
 
 * Merge pull request #147 from FNLCR-DMAP/dev
 
