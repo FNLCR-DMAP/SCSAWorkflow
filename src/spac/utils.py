@@ -1,5 +1,7 @@
 import re
 import anndata as ad
+import numpy as np
+import matplotlib.cm as cm
 
 
 def regex_search_list(
@@ -374,3 +376,151 @@ def text_to_others(
             parameter = float(parameter)
 
     return parameter
+
+
+def annotation_category_relations(
+    adata,
+    source_annotation,
+    target_annotation,
+    prefix=False
+):
+    """
+    Calculate and return the relationships between two annotation categories.
+
+    This function groups the data by the source and target annotations, 
+    calculates the size of each group, and returns a DataFrame with
+    the source and target categories and their counts.
+
+    If the `prefix` is set to True, it appends "Source_" and "Target_"
+    prefixes to labels in the "Source" and "Target" columns, respectively.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The annotated data matrix of shape `n_obs` * `n_vars`.
+        Rows correspond to cells and columns to genes.
+    source_annotation : str
+        The name of the source annotation column in the `adata` object.
+    target_annotation : str
+        The name of the target annotation column in the `adata` object.
+    prefix : bool, optional
+        If True, appends "Source_" and "Target_" prefixes to the
+        "Source" and "Target" columns, respectively.
+
+    Returns
+    -------
+    relationships : pandas.DataFrame
+        A DataFrame with the source and target categories and their counts.
+    """
+
+    check_annotation(
+        adata,
+        [
+            source_annotation,
+            target_annotation
+        ]
+    )
+
+    # Iterate through annotation columns and calculate label relationships
+    print(f"Source: {source_annotation}")
+    print(f"Target: {target_annotation}")
+
+    # Calculate label relationships between source and target columns
+    relationships = adata.obs.groupby(
+        [source_annotation, target_annotation]
+        ).size().reset_index(name='Count')
+    print(relationships)
+
+    relationships.rename(
+        columns={
+            source_annotation: "Source",
+            target_annotation: "Target"
+        },
+        inplace=True
+    )
+
+    relationships["Source"] = relationships["Source"].astype(str)
+    relationships["Target"] = relationships["Target"].astype(str)
+    relationships["Count"] = relationships["Count"].astype('int64')
+
+    # Reset the index of the label_relations DataFrame
+    relationships.reset_index(drop=True, inplace=True)
+
+    if prefix:
+        # Add "Source_" prefix to the "Source" column
+        relationships["Source"] = relationships[
+            "Source"
+        ].apply(lambda x: "Source_" + x)
+
+        # Add "Target_" prefix to the "Target" column
+        relationships["Target"] = relationships[
+            "Target"
+        ].apply(lambda x: "Target_" + x)
+
+    return relationships
+
+
+def color_mapping(
+        labels,
+        color_map='viridis',
+        opacity=1.0
+):
+    """
+    Map a list of labels to colors using a specified colormap and opacity.
+
+    This function takes a list of labels and maps each one to a color from the
+    specified colormap. If the colormap is continuous, it linearly interpolates
+    between the colors. For discrete colormap, it calculates the number of
+    categories per color and interpolates between the colors.
+
+    Parameters
+    ----------
+    labels : list
+        The list of labels to map to colors.
+    color_map : str, optional
+        The name of the colormap to use. Default is 'viridis'.
+    opacity : float, optional
+        The opacity of the colors. Must be between 0 and 1. Default is 1.0.
+
+    Returns
+    -------
+    label_colors : list
+        A list of colors corresponding to the labels.
+
+    Raises
+    ------
+    ValueError
+        If the opacity is not between 0 and 1, or if the colormap name is invalid.
+    """
+
+    if not 0 <= opacity <= 1:
+        raise ValueError("Opacity must be between 0 and 1")
+
+    try:
+        cmap = cm.get_cmap(color_map)
+    except ValueError:
+        raise ValueError(f"Invalid color map name: {color_map}")
+
+    if cmap.N > 50:  # This is a continuous colormap
+        label_colors = [
+            cmap(i / (len(labels) - 1)) for i in range(len(labels))
+        ]
+    else:  # This is a discrete colormap
+        # Calculate the number of categories per color
+        categories_per_color = np.ceil(len(labels) / cmap.N)
+
+        # Interpolate between the colors
+
+        label_colors = [
+            cmap(i / (categories_per_color * cmap.N - 1))
+            for i in range(len(labels))
+        ]
+
+    label_colors = [
+        f'rgba({int(color[0]*255)},'
+        f'{int(color[1]*255)},'
+        f'{int(color[2]*255)},{opacity})'
+        for color in label_colors
+    ]
+
+    return label_colors

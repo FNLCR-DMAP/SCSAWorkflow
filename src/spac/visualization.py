@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from spac.utils import check_table, check_annotation, check_feature
+from spac.utils import check_table, check_annotation
+from spac.utils import check_feature, annotation_category_relations
+from spac.utils import color_mapping
 
 
 def visualize_2D_scatter(
@@ -1355,3 +1357,113 @@ def interative_spatial_plot(
         ]
     )
     return main_fig
+
+
+def generate_sankey_plot(
+        adata: anndata.AnnData,
+        source_annotation: str,
+        target_annotation: str,
+        source_color_map: str,
+        target_color_map: str,
+        sankey_font: float = 12.0,
+        prefix: bool = True
+):
+    """
+    Generates a Sankey plot from the given AnnData object.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The annotated data matrix.
+    source_annotation : str
+        The source annotation to use for the Sankey plot.
+    target_annotation : str
+        The target annotation to use for the Sankey plot.
+    source_color_map : str
+        The color map to use for the source nodes.
+    target_color_map : str
+        The color map to use for the target nodes.
+    sankey_font : float, optional
+        The font size to use for the Sankey plot. Defaults to 12.0.
+    prefix : bool, optional
+        Whether to prefix the target labels with the source labels. Defaults to True.
+
+    Returns
+    -------
+    plotly.graph_objs._figure.Figure
+        The generated Sankey plot.
+    """
+
+    label_relations = annotation_category_relations(
+        adata=adata,
+        source_annotation=source_annotation,
+        target_annotation=target_annotation,
+        prefix=prefix
+    )
+    # Extract and prepare source and target labels
+    source_labels = label_relations["Source"].unique().tolist()
+    target_labels = label_relations["Target"].unique().tolist()
+    all_labels = source_labels + target_labels
+
+    source_label_colors = color_mapping(source_labels, source_color_map)
+    target_label_colors = color_mapping(target_labels, target_color_map)
+    label_colors = source_label_colors + target_label_colors
+
+    # Create a dictionary to map labels to indices
+    label_to_index = {
+        label: index for index, label in enumerate(all_labels)}
+
+    # Initialize lists to store the source indices, target indices, and values
+    source_indices = []
+    target_indices = []
+    values = []
+
+    # For each row in label_relations, add the source index, target index,
+    # and count to the respective lists
+    for _, row in label_relations.iterrows():
+        source_indices.append(label_to_index[row['Source']])
+        target_indices.append(label_to_index[row['Target']])
+        values.append(row['Count'])
+
+    # Generate Sankey diagram
+    # Calculate the x-coordinate for each label
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            pad=sankey_font * 1.05,
+            thickness=sankey_font * 1.05,
+            line=dict(color=None, width=0.1),
+            label=all_labels,
+            color=label_colors
+        ),
+        link=dict(
+            arrowlen=15,
+            source=source_indices,
+            target=target_indices,
+            value=values,
+            color=source_label_colors
+        ),
+        arrangement="snap",
+        textfont=dict(
+            color='black',
+            size=sankey_font
+        )
+    ))
+
+    # Add column labels at the center of each column
+    for x, label in zip(
+        [0.2, 0.8],
+        [source_annotation, source_annotation]
+    ):
+        fig.add_annotation(
+            x=x,
+            y=1.01,
+            text=label,
+            showarrow=False,
+            font=dict(
+                size=sankey_font,
+                color='black',
+                family='Arial, bold'
+            )
+        )
+
+    return fig
