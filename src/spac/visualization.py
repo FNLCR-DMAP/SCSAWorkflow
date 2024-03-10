@@ -1438,14 +1438,14 @@ def generate_sankey_plot(
             thickness=sankey_font * 1.05,
             line=dict(color=None, width=0.1),
             label=all_labels,
-            color=link_colors
+            color=label_colors
         ),
         link=dict(
             arrowlen=15,
             source=source_indices,
             target=target_indices,
             value=values,
-            color=source_label_colors
+            color=link_colors
         ),
         arrangement="snap",
         textfont=dict(
