@@ -2,26 +2,24 @@
 
 
 
-## v0.4.2 (2024-03-10)
+## v0.4.3 (2024-03-10)
 
 ### Fix
 
-* fix: fix link color mapping issue ([`d6cfd8d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6cfd8dc10a26f41444cbeeb08bd92086e3d47f3))
+* fix(test_ visualize_2D): add comment to merge release_dev ([`d6e987a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6e987a48045697d2a722f45a07816c2d808112b))
 
 ### Unknown
 
-* Merge pull request #159 from FNLCR-DMAP/dev
+* Merge pull request #161 from FNLCR-DMAP/dev
 
-Update Sankey development ([`69e343e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69e343e304cf127efb00d1a28c88d9e7027211c4))
-
-* Merge pull request #158 from FNLCR-DMAP/sankey_plot
-
-fix: fix link color mapping issue ([`e2f1563`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e2f1563f502b3a47f322d2765710c1d59ed850a1))
+fix(test_ visualize_2D): add comment to merge release_dev ([`79e810f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/79e810f950b6ae488c5ba09ed71ef64a2e2b6192))
 
 
-## v0.4.1 (2024-03-10)
+## v0.4.2 (2024-03-10)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`1ca011d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1ca011ddb35d36ee9f61ef8cef112ea9400015de))
 
 * docs(version): Automatic development release ([`bfbf39c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bfbf39cc4b33f0f49929f6a435f08406781d04cf))
 
@@ -56,6 +54,8 @@ fix: fix link color mapping issue ([`e2f1563`](https://github.com/FNLCR-DMAP/SCS
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix: fix link color mapping issue ([`d6cfd8d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6cfd8dc10a26f41444cbeeb08bd92086e3d47f3))
 
 * fix: fix link color mapping issue ([`f390d18`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f390d18e2e154a191f20db22426ccdefb2ff17f7))
 
@@ -108,6 +108,20 @@ fix: fix link color mapping issue ([`e2f1563`](https://github.com/FNLCR-DMAP/SCS
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #160 from FNLCR-DMAP/dev
+
+fix(test_visualize_2D_scatter):remove random choice and fix categoric… ([`291c09c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/291c09c12397680a961a76b38f4f0bd31b22f6a3))
+
+* fix(test_visualize_2D_scatter):remove random choice and fix categorical labels ([`45e5a6d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/45e5a6d026b6622eac3f6dfe6d779b3136094f44))
+
+* Merge pull request #159 from FNLCR-DMAP/dev
+
+Update Sankey development ([`69e343e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69e343e304cf127efb00d1a28c88d9e7027211c4))
+
+* Merge pull request #158 from FNLCR-DMAP/sankey_plot
+
+fix: fix link color mapping issue ([`e2f1563`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e2f1563f502b3a47f322d2765710c1d59ed850a1))
 
 * Merge pull request #157 from FNLCR-DMAP/dev
 
