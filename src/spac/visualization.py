@@ -1438,7 +1438,7 @@ def generate_sankey_plot(
             thickness=sankey_font * 1.05,
             line=dict(color=None, width=0.1),
             label=all_labels,
-            color=label_colors
+            color=link_colors
         ),
         link=dict(
             arrowlen=15,
