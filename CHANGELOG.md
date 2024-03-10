@@ -2,26 +2,30 @@
 
 
 
-## v0.4.0 (2024-03-09)
+## v0.4.1 (2024-03-10)
 
-### Feature
+### Fix
 
-* feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
+* fix: fix link color mapping issue ([`f390d18`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f390d18e2e154a191f20db22426ccdefb2ff17f7))
+
+* fix: fix link color mapping issue ([`0feb051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0feb051ef1fa710b91fcaff0b5c936788de53415))
 
 ### Unknown
 
-* Merge pull request #155 from FNLCR-DMAP/dev
+* Merge pull request #157 from FNLCR-DMAP/dev
 
-Update Sankey Plot for testing ([`1d73b13`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d73b134558cf9fbb2296d0bccccfac1c9339334))
+Update sankey plot ([`ea83db2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea83db2964df6e0653b38880c3c0580e78c3c894))
 
-* Merge pull request #154 from FNLCR-DMAP/sankey_plot
+* Merge pull request #156 from FNLCR-DMAP/sankey_plot
 
-feat: Add sankey plot and related utils ([`dc6ba4b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dc6ba4b8e62eb7365befa11fc1ba1b9eebbfa087))
+Sankey plot ([`c50e2a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c50e2a67936282f864de607d76d39fd7aedbe0b0))
 
 
-## v0.3.6 (2024-03-08)
+## v0.4.0 (2024-03-09)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`8142ca6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8142ca62c911b7263df82aa6b71f84452f117894))
 
 * docs(version): Automatic development release ([`d8ccd56`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d8ccd56a6d826845974452211e45e8a7cc91e306))
 
@@ -46,6 +50,10 @@ feat: Add sankey plot and related utils ([`dc6ba4b`](https://github.com/FNLCR-DM
 * docs(version): Automatic development release ([`e081258`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e08125820142817c5d57385f685765ed65a8d622))
 
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
+
+### Feature
+
+* feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
 
@@ -96,6 +104,14 @@ feat: Add sankey plot and related utils ([`dc6ba4b`](https://github.com/FNLCR-DM
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #155 from FNLCR-DMAP/dev
+
+Update Sankey Plot for testing ([`1d73b13`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d73b134558cf9fbb2296d0bccccfac1c9339334))
+
+* Merge pull request #154 from FNLCR-DMAP/sankey_plot
+
+feat: Add sankey plot and related utils ([`dc6ba4b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dc6ba4b8e62eb7365befa11fc1ba1b9eebbfa087))
 
 * Merge pull request #153 from FNLCR-DMAP/dev
 
