@@ -2,28 +2,28 @@
 
 
 
-## v0.4.1 (2024-03-10)
+## v0.4.2 (2024-03-10)
 
 ### Fix
 
-* fix: fix link color mapping issue ([`f390d18`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f390d18e2e154a191f20db22426ccdefb2ff17f7))
-
-* fix: fix link color mapping issue ([`0feb051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0feb051ef1fa710b91fcaff0b5c936788de53415))
+* fix: fix link color mapping issue ([`d6cfd8d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6cfd8dc10a26f41444cbeeb08bd92086e3d47f3))
 
 ### Unknown
 
-* Merge pull request #157 from FNLCR-DMAP/dev
+* Merge pull request #159 from FNLCR-DMAP/dev
 
-Update sankey plot ([`ea83db2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea83db2964df6e0653b38880c3c0580e78c3c894))
+Update Sankey development ([`69e343e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69e343e304cf127efb00d1a28c88d9e7027211c4))
 
-* Merge pull request #156 from FNLCR-DMAP/sankey_plot
+* Merge pull request #158 from FNLCR-DMAP/sankey_plot
 
-Sankey plot ([`c50e2a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c50e2a67936282f864de607d76d39fd7aedbe0b0))
+fix: fix link color mapping issue ([`e2f1563`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e2f1563f502b3a47f322d2765710c1d59ed850a1))
 
 
-## v0.4.0 (2024-03-09)
+## v0.4.1 (2024-03-10)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`bfbf39c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bfbf39cc4b33f0f49929f6a435f08406781d04cf))
 
 * docs(version): Automatic development release ([`8142ca6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8142ca62c911b7263df82aa6b71f84452f117894))
 
@@ -56,6 +56,10 @@ Sankey plot ([`c50e2a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c50e2
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix: fix link color mapping issue ([`f390d18`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f390d18e2e154a191f20db22426ccdefb2ff17f7))
+
+* fix: fix link color mapping issue ([`0feb051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0feb051ef1fa710b91fcaff0b5c936788de53415))
 
 * fix(get_cluster_info): fix convert dataframe in function ([`ff8e107`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ff8e1077a5901914ce659068b6d5463ecf637a3d))
 
@@ -104,6 +108,14 @@ Sankey plot ([`c50e2a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c50e2
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #157 from FNLCR-DMAP/dev
+
+Update sankey plot ([`ea83db2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea83db2964df6e0653b38880c3c0580e78c3c894))
+
+* Merge pull request #156 from FNLCR-DMAP/sankey_plot
+
+Sankey plot ([`c50e2a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c50e2a67936282f864de607d76d39fd7aedbe0b0))
 
 * Merge pull request #155 from FNLCR-DMAP/dev
 
