@@ -1408,15 +1408,19 @@ def generate_sankey_plot(
     source_label_colors = color_mapping(source_labels, source_color_map)
     target_label_colors = color_mapping(target_labels, target_color_map)
     label_colors = source_label_colors + target_label_colors
-
+    
     # Create a dictionary to map labels to indices
     label_to_index = {
         label: index for index, label in enumerate(all_labels)}
-
+    color_to_map = {
+        label: color
+        for label, color in zip(source_labels, source_label_colors)
+    }
     # Initialize lists to store the source indices, target indices, and values
     source_indices = []
     target_indices = []
     values = []
+    link_colors = []
 
     # For each row in label_relations, add the source index, target index,
     # and count to the respective lists
@@ -1424,6 +1428,7 @@ def generate_sankey_plot(
         source_indices.append(label_to_index[row['Source']])
         target_indices.append(label_to_index[row['Target']])
         values.append(row['Count'])
+        link_colors.append(color_to_map[row['Source']])
 
     # Generate Sankey diagram
     # Calculate the x-coordinate for each label
