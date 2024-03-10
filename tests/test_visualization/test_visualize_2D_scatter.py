@@ -9,6 +9,7 @@ matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 class TestVisualize2DScatter(unittest.TestCase):
 
     def setUp(self):
+        """Prepare data for testing."""
         self.x = np.random.rand(10)
         self.y = np.random.rand(10)
         # Fixed categorical labels to ensure representation of each category
