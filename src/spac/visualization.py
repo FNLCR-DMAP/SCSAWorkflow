@@ -1464,23 +1464,6 @@ def sankey_plot(
     )
     fig.data[0].link.hovertemplate = hovertemplate
 
-    # Add column labels at the center of each column
-    for x, label in zip(
-        [0.2, 0.8],
-        [source_annotation, source_annotation]
-    ):
-        fig.add_annotation(
-            x=x,
-            y=1.01,
-            text=label,
-            showarrow=False,
-            font=dict(
-                size=sankey_font,
-                color='black',
-                family='Arial, bold'
-            )
-        )
-
         # Customize the Sankey diagram layout
     fig.update_layout(
         title_text=(
@@ -1494,4 +1477,4 @@ def sankey_plot(
         )
     )
 
-    return fig
+    return fig 
