@@ -19,7 +19,7 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
                 "A", "A", "B", "B", "B", "C", "C", "D", "D", "D", "D"
                 ],
                  "annotation2": [
-                "b", "b", "a", "a", "a", "d", "c", "d", "c", "d", "c"
+                "b", "b", "a", "a", "a", "d", "c", "c", "c", "d", "c"
                 ]}
         )
 
@@ -44,7 +44,8 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
         ground_truth = pd.DataFrame({
             'Source': ['A', 'B', 'C', 'C', 'D', 'D'],
             'Target': ['b', 'a', 'c', 'd', 'c', 'd'],
-            'Count': [2, 3, 1, 1, 2, 2]
+            'Count': [2, 3, 1, 1, 3, 1],
+            'Percentage': [100.0, 100.0, 50.0, 50.0, 75.0, 25.0]
         })
 
         # Assert the result is equal to the ground truth
