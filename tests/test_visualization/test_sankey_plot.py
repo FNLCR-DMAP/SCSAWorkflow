@@ -1,12 +1,12 @@
 import unittest
-from spac.visualization import generate_sankey_plot
+from spac.visualization import sankey_plot
 from anndata import AnnData
 import numpy as np
 import pandas as pd
 from plotly.graph_objs import Figure
 
 
-class TestGenerateSankeyPlot(unittest.TestCase):
+class TestSankeyPlot(unittest.TestCase):
     def setUp(self):
         # Create a simple AnnData object for testing
         self.adata = AnnData(
@@ -22,7 +22,7 @@ class TestGenerateSankeyPlot(unittest.TestCase):
 
     def test_valid_type(self):
         # Test the function with valid inputs
-        fig = generate_sankey_plot(
+        fig = sankey_plot(
             self.adata,
             'source_annotation',
             'target_annotation',
@@ -34,7 +34,7 @@ class TestGenerateSankeyPlot(unittest.TestCase):
 
     def test_valid_labels(self):
         # Test the function with valid inputs
-        fig = generate_sankey_plot(
+        fig = sankey_plot(
             self.adata,
             'source_annotation',
             'target_annotation',
@@ -53,7 +53,7 @@ class TestGenerateSankeyPlot(unittest.TestCase):
 
     def test_valid_link_setting(self):
         # Test the function with valid inputs
-        fig = generate_sankey_plot(
+        fig = sankey_plot(
             self.adata,
             'source_annotation',
             'target_annotation',
@@ -72,7 +72,7 @@ class TestGenerateSankeyPlot(unittest.TestCase):
     def test_invalid_source_annotation(self):
         # Test the function with an invalid source_annotation
         with self.assertRaises(ValueError):
-            generate_sankey_plot(
+            sankey_plot(
                 self.adata,
                 'invalid_source_annotation',
                 'target_annotation',
@@ -83,7 +83,7 @@ class TestGenerateSankeyPlot(unittest.TestCase):
     def test_invalid_target_annotation(self):
         # Test the function with an invalid target_annotation
         with self.assertRaises(ValueError):
-            generate_sankey_plot(
+            sankey_plot(
                 self.adata,
                 'source_annotation',
                 'invalid_target_annotation',

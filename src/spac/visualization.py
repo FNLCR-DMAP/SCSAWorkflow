@@ -1359,7 +1359,7 @@ def interative_spatial_plot(
     return main_fig
 
 
-def generate_sankey_plot(
+def sankey_plot(
         adata: anndata.AnnData,
         source_annotation: str,
         target_annotation: str,
