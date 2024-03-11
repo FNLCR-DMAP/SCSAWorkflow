@@ -513,8 +513,9 @@ def color_mapping(
 
     Returns
     -------
-    label_colors : list
-        A list of colors corresponding to the labels.
+    label_colors : list[str]
+        A list of strings, each representing an rgba color in CSS format.
+        The opacity of each color is set to the provided `opacity` value.
 
     Raises
     ------
