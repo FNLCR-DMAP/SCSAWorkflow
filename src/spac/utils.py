@@ -397,6 +397,10 @@ def annotation_category_relations(
     percentage of count of the same source label, and 'Percentage_Target'
     represent the percentage of count of the same target label.
 
+    In summary, Percentage_Source represent the percentage of the count of link
+    over the total count of the source label, and Percentage_Target represent
+    the percentage of the count of link over the total count of the target.
+
     If the `prefix` is set to True, it appends "Source_" and "Target_"
     prefixes to labels in the "Source" and "Target" columns, respectively.
 
@@ -520,7 +524,8 @@ def color_mapping(
     Raises
     ------
     ValueError
-        If the opacity is not between 0 and 1, or if the colormap name is invalid.
+        If the opacity is not between 0 and 1,
+        or if the colormap name is invalid.
     """
 
     if not 0 <= opacity <= 1:
