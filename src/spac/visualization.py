@@ -1408,7 +1408,7 @@ def generate_sankey_plot(
     source_label_colors = color_mapping(source_labels, source_color_map)
     target_label_colors = color_mapping(target_labels, target_color_map)
     label_colors = source_label_colors + target_label_colors
-    
+
     # Create a dictionary to map labels to indices
     label_to_index = {
         label: index for index, label in enumerate(all_labels)}
@@ -1454,6 +1454,16 @@ def generate_sankey_plot(
         )
     ))
 
+    fig.data[0].link.customdata = label_relations[
+        ['Percentage_Source', 'Percentage_Target']
+    ]
+    hovertemplate = (
+        '%{source.label} to %{target.label}<br>'
+        '%{customdata[0]}% to %{customdata[1]}%<br>'
+        'Count: %{value}%<extra></extra>'
+    )
+    fig.data[0].link.hovertemplate = hovertemplate
+
     # Add column labels at the center of each column
     for x, label in zip(
         [0.2, 0.8],
@@ -1470,5 +1480,18 @@ def generate_sankey_plot(
                 family='Arial, bold'
             )
         )
+
+        # Customize the Sankey diagram layout
+    fig.update_layout(
+        title_text=(
+            f'"{source_annotation}" to "{target_annotation}" Sankey Diagram'
+        ),
+        title_x=0.5,
+        title_font=dict(
+            family='Arial, bold',
+            size=sankey_font,  # Set the title font size
+            color="black"  # Set the title font color
+        )
+    )
 
     return fig

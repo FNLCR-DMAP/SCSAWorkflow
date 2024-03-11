@@ -45,7 +45,8 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
             'Source': ['A', 'B', 'C', 'C', 'D', 'D'],
             'Target': ['b', 'a', 'c', 'd', 'c', 'd'],
             'Count': [2, 3, 1, 1, 3, 1],
-            'Percentage': [100.0, 100.0, 50.0, 50.0, 75.0, 25.0]
+            'Percentage_Source': [100.0, 100.0, 50.0, 50.0, 75.0, 25.0],
+            'Percentage_Target': [100.0, 100.0, 25.0, 50.0, 75.0, 50.0]
         })
 
         # Assert the result is equal to the ground truth

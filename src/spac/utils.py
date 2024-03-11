@@ -392,9 +392,10 @@ def annotation_category_relations(
     one from the 'source_annotation' and one from the 'target_annotation'.
 
     Returns a DataFrame with columns 'source_annotation', 'target_annotation',
-    'Count', and 'Percentage', where 'Count' represents the number of
-    occurrences of each relationship, and 'Percentage' represent the percentage
-    of count of the same source label.
+    'Count', and 'Percentage_Source'. Where 'Count' represents the number of
+    occurrences of each relationship, and 'Percentage_Source' represent the
+    percentage of count of the same source label, and 'Percentage_Target'
+    represent the percentage of count of the same target label.
 
     If the `prefix` is set to True, it appends "Source_" and "Target_"
     prefixes to labels in the "Source" and "Target" columns, respectively.
@@ -437,12 +438,21 @@ def annotation_category_relations(
         ).size().reset_index(name='Count')
 
     # Calculate the total count for each source
-    total_counts = relationships.groupby(source_annotation)['Count'].transform('sum')
-
+    total_counts = (
+        relationships.groupby(source_annotation)['Count'].transform('sum')
+    )
     # Calculate the percentage of the total count for each source
-    relationships['Percentage'] = round(
-        relationships['Count'] / total_counts * 100,
-        1
+    relationships['Percentage_Source'] = (
+        (relationships['Count'] / total_counts * 100).round(1)
+    )
+
+    total_counts_target = (
+        relationships.groupby(target_annotation)['Count'].transform('sum')
+    )
+
+    # Calculate the percentage of the total count for each target
+    relationships['Percentage_Target'] = (
+        (relationships['Count'] / total_counts_target * 100).round(1)
     )
 
     relationships.rename(
@@ -456,7 +466,12 @@ def annotation_category_relations(
     relationships["Source"] = relationships["Source"].astype(str)
     relationships["Target"] = relationships["Target"].astype(str)
     relationships["Count"] = relationships["Count"].astype('int64')
-    relationships["Percentage"] = relationships["Percentage"].astype(float)
+    relationships[
+        "Percentage_Source"
+        ] = relationships["Percentage_Source"].astype(float)
+    relationships[
+        "Percentage_Target"
+        ] = relationships["Percentage_Target"].astype(float)
 
     # Reset the index of the label_relations DataFrame
     relationships.reset_index(drop=True, inplace=True)
