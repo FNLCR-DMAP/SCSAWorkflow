@@ -1460,14 +1460,14 @@ def sankey_plot(
     hovertemplate = (
         '%{source.label} to %{target.label}<br>'
         '%{customdata[0]}% to %{customdata[1]}%<br>'
-        'Count: %{value}%<extra></extra>'
+        'Count: %{value}<extra></extra>'
     )
     fig.data[0].link.hovertemplate = hovertemplate
 
-        # Customize the Sankey diagram layout
+    # Customize the Sankey diagram layout
     fig.update_layout(
         title_text=(
-            f'"{source_annotation}" to "{target_annotation}" Sankey Diagram'
+            f'"{source_annotation}" to "{target_annotation}"<br>Sankey Diagram'
         ),
         title_x=0.5,
         title_font=dict(
@@ -1477,4 +1477,10 @@ def sankey_plot(
         )
     )
 
-    return fig 
+    fig.update_layout(margin=dict(
+        l=10,
+        r=10,
+        t=sankey_font * 3,
+        b=sankey_font))
+
+    return fig
