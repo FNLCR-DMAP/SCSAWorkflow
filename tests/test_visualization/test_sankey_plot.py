@@ -43,10 +43,10 @@ class TestSankeyPlot(unittest.TestCase):
         )
 
         expected_labels = [
-            "Source_source1",
-            "Source_source2",
-            "Target_target1",
-            "Target_target2"
+            "source_source1",
+            "source_source2",
+            "target_target1",
+            "target_target2"
         ]
 
         self.assertCountEqual(fig.data[0].node.label, expected_labels)

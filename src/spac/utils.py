@@ -392,17 +392,14 @@ def annotation_category_relations(
     one from the 'source_annotation' and one from the 'target_annotation'.
 
     Returns a DataFrame with columns 'source_annotation', 'target_annotation',
-    'Count', and 'Percentage_Source'. Where 'Count' represents the number of
-    occurrences of each relationship, and 'Percentage_Source' represent the
-    percentage of count of the same source label, and 'Percentage_Target'
-    represent the percentage of count of the same target label.
-
-    In summary, Percentage_Source represent the percentage of the count of link
-    over the total count of the source label, and Percentage_Target represent
+    'count', 'percentage_source', and 'percentage_target'.
+    Where 'count' represents the number of occurrences of each relationship,
+    percentage_source represents the percentage of the count of link
+    over the total count of the source label, and percentage_target represents
     the percentage of the count of link over the total count of the target.
 
-    If the `prefix` is set to True, it appends "Source_" and "Target_"
-    prefixes to labels in the "Source" and "Target" columns, respectively.
+    If the `prefix` is set to True, it appends "source_" and "target_"
+    prefixes to labels in the "source" and "target" columns, respectively.
 
     Parameters
     ----------
@@ -414,14 +411,14 @@ def annotation_category_relations(
     target_annotation : str
         The name of the target annotation column in the `adata` object.
     prefix : bool, optional
-        If True, appends "Source_" and "Target_" prefixes to the
-        "Source" and "Target" columns, respectively.
+        If True, appends "source_" and "target_" prefixes to the
+        "source" and "target" columns, respectively.
 
     Returns
     -------
     relationships : pandas.DataFrame
         A DataFrame with the source and target categories,
-        their counts and their percentage.
+        their counts and their percentages.
     """
 
     check_annotation(
@@ -439,56 +436,56 @@ def annotation_category_relations(
     # Calculate label relationships between source and target columns
     relationships = adata.obs.groupby(
         [source_annotation, target_annotation]
-        ).size().reset_index(name='Count')
+        ).size().reset_index(name='count')
 
     # Calculate the total count for each source
     total_counts = (
-        relationships.groupby(source_annotation)['Count'].transform('sum')
+        relationships.groupby(source_annotation)['count'].transform('sum')
     )
     # Calculate the percentage of the total count for each source
-    relationships['Percentage_Source'] = (
-        (relationships['Count'] / total_counts * 100).round(1)
+    relationships['percentage_source'] = (
+        (relationships['count'] / total_counts * 100).round(1)
     )
 
     total_counts_target = (
-        relationships.groupby(target_annotation)['Count'].transform('sum')
+        relationships.groupby(target_annotation)['count'].transform('sum')
     )
 
     # Calculate the percentage of the total count for each target
-    relationships['Percentage_Target'] = (
-        (relationships['Count'] / total_counts_target * 100).round(1)
+    relationships['percentage_target'] = (
+        (relationships['count'] / total_counts_target * 100).round(1)
     )
 
     relationships.rename(
         columns={
-            source_annotation: "Source",
-            target_annotation: "Target"
+            source_annotation: "source",
+            target_annotation: "target"
         },
         inplace=True
     )
 
-    relationships["Source"] = relationships["Source"].astype(str)
-    relationships["Target"] = relationships["Target"].astype(str)
-    relationships["Count"] = relationships["Count"].astype('int64')
+    relationships["source"] = relationships["source"].astype(str)
+    relationships["target"] = relationships["target"].astype(str)
+    relationships["count"] = relationships["count"].astype('int64')
     relationships[
-        "Percentage_Source"
-        ] = relationships["Percentage_Source"].astype(float)
+        "percentage_source"
+        ] = relationships["percentage_source"].astype(float)
     relationships[
-        "Percentage_Target"
-        ] = relationships["Percentage_Target"].astype(float)
+        "percentage_target"
+        ] = relationships["percentage_target"].astype(float)
 
     # Reset the index of the label_relations DataFrame
     relationships.reset_index(drop=True, inplace=True)
     if prefix:
         # Add "Source_" prefix to the "Source" column
-        relationships["Source"] = relationships[
-            "Source"
-        ].apply(lambda x: "Source_" + x)
+        relationships["source"] = relationships[
+            "source"
+        ].apply(lambda x: "source_" + x)
 
         # Add "Target_" prefix to the "Target" column
-        relationships["Target"] = relationships[
-            "Target"
-        ].apply(lambda x: "Target_" + x)
+        relationships["target"] = relationships[
+            "target"
+        ].apply(lambda x: "target_" + x)
 
     return relationships
 

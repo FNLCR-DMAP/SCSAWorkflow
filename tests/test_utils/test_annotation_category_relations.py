@@ -10,16 +10,16 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
         # Create a sample AnnData object for testing
         data = {
             "feature": pd.Series([
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                0, 1, 2, 3
                 ], dtype='int64')
         }
         self.adata = ad.AnnData(
             X=pd.DataFrame(data, dtype=data["feature"].dtype),
             obs={"annotation1": [
-                "A", "A", "B", "B", "B", "C", "C", "D", "D", "D", "D"
+                "a", "a", "b", "b"
                 ],
                  "annotation2": [
-                "b", "b", "a", "a", "a", "d", "c", "c", "c", "d", "c"
+                "x", "y", "y", "y"
                 ]}
         )
 
@@ -42,11 +42,11 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
 
         # Create a ground truth DataFrame for checking the result
         ground_truth = pd.DataFrame({
-            'Source': ['A', 'B', 'C', 'C', 'D', 'D'],
-            'Target': ['b', 'a', 'c', 'd', 'c', 'd'],
-            'Count': [2, 3, 1, 1, 3, 1],
-            'Percentage_Source': [100.0, 100.0, 50.0, 50.0, 75.0, 25.0],
-            'Percentage_Target': [100.0, 100.0, 25.0, 50.0, 75.0, 50.0]
+            'source': ['a', 'a', 'b'],
+            'target': ['x', 'y', 'y'],
+            'count': [1, 1, 2],
+            'percentage_source': [50.0, 50.0, 100.0],
+            'percentage_target': [100.0, 33.3, 66.7]
         })
 
         # Assert the result is equal to the ground truth

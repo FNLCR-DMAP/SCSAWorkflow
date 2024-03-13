@@ -1401,8 +1401,8 @@ def sankey_plot(
         prefix=prefix
     )
     # Extract and prepare source and target labels
-    source_labels = label_relations["Source"].unique().tolist()
-    target_labels = label_relations["Target"].unique().tolist()
+    source_labels = label_relations["source"].unique().tolist()
+    target_labels = label_relations["target"].unique().tolist()
     all_labels = source_labels + target_labels
 
     source_label_colors = color_mapping(source_labels, source_color_map)
@@ -1425,10 +1425,10 @@ def sankey_plot(
     # For each row in label_relations, add the source index, target index,
     # and count to the respective lists
     for _, row in label_relations.iterrows():
-        source_indices.append(label_to_index[row['Source']])
-        target_indices.append(label_to_index[row['Target']])
-        values.append(row['Count'])
-        link_colors.append(color_to_map[row['Source']])
+        source_indices.append(label_to_index[row['source']])
+        target_indices.append(label_to_index[row['target']])
+        values.append(row['count'])
+        link_colors.append(color_to_map[row['source']])
 
     # Generate Sankey diagram
     # Calculate the x-coordinate for each label
@@ -1455,7 +1455,7 @@ def sankey_plot(
     ))
 
     fig.data[0].link.customdata = label_relations[
-        ['Percentage_Source', 'Percentage_Target']
+        ['percentage_source', 'percentage_target']
     ]
     hovertemplate = (
         '%{source.label} to %{target.label}<br>'
