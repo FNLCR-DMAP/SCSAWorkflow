@@ -2,6 +2,11 @@ import re
 import anndata as ad
 import numpy as np
 import matplotlib.cm as cm
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def regex_search_list(
@@ -387,9 +392,9 @@ def annotation_category_relations(
     """
     Calculates the count of unique relationships between two
     annotations in an AnnData object.
-
-    A relationship is defined as a unique pair of values,
-    one from the 'source_annotation' and one from the 'target_annotation'.
+ip is defined as a unique pair of values,
+    one from th
+    A relationshe 'source_annotation' and one from the 'target_annotation'.
 
     Returns a DataFrame with columns 'source_annotation', 'target_annotation',
     'count', 'percentage_source', and 'percentage_target'.
@@ -430,8 +435,8 @@ def annotation_category_relations(
     )
 
     # Iterate through annotation columns and calculate label relationships
-    print(f"Source: {source_annotation}")
-    print(f"Target: {target_annotation}")
+    logging.info((f"Source: {source_annotation}"))
+    logging.info((f"Target: {target_annotation}"))
 
     # Calculate label relationships between source and target columns
     relationships = adata.obs.groupby(
@@ -496,12 +501,16 @@ def color_mapping(
         opacity=1.0
 ):
     """
-    Map a list of labels to colors using a specified colormap and opacity.
+    Map a list of labels to colors using a specified
+    matplotlib colormap and opacity.
 
     This function takes a list of labels and maps each one to a color from the
     specified colormap. If the colormap is continuous, it linearly interpolates
     between the colors. For discrete colormap, it calculates the number of
     categories per color and interpolates between the colors.
+
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
 
     Parameters
     ----------

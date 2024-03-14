@@ -12,6 +12,11 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def visualize_2D_scatter(
@@ -1363,13 +1368,17 @@ def sankey_plot(
         adata: anndata.AnnData,
         source_annotation: str,
         target_annotation: str,
-        source_color_map: str,
-        target_color_map: str,
+        source_color_map: str = "tab20",
+        target_color_map: str = "tab20c",
         sankey_font: float = 12.0,
         prefix: bool = True
 ):
     """
     Generates a Sankey plot from the given AnnData object.
+    The color map refers to matplotlib color maps, default is tab20 for
+    source annotation, and tab20c for target annotation.
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
 
     Parameters
     ----------
@@ -1380,13 +1389,14 @@ def sankey_plot(
     target_annotation : str
         The target annotation to use for the Sankey plot.
     source_color_map : str
-        The color map to use for the source nodes.
+        The color map to use for the source nodes. Default is tab20.
     target_color_map : str
-        The color map to use for the target nodes.
+        The color map to use for the target nodes. Default is tab20c.
     sankey_font : float, optional
         The font size to use for the Sankey plot. Defaults to 12.0.
     prefix : bool, optional
-        Whether to prefix the target labels with the source labels. Defaults to True.
+        Whether to prefix the target labels with
+        the source labels. Defaults to True.
 
     Returns
     -------
