@@ -392,9 +392,8 @@ def annotation_category_relations(
     """
     Calculates the count of unique relationships between two
     annotations in an AnnData object.
-ip is defined as a unique pair of values,
-    one from th
-    A relationshe 'source_annotation' and one from the 'target_annotation'.
+    Relationship is defined as a unique pair of values, one from the
+    'source_annotation' and one from the 'target_annotation'.
 
     Returns a DataFrame with columns 'source_annotation', 'target_annotation',
     'count', 'percentage_source', and 'percentage_target'.
