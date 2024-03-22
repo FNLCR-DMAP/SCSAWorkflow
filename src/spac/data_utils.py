@@ -536,10 +536,23 @@ def select_values(data, annotation, values=None):
 
     # Proceed with filtering based on data type
     if isinstance(data, pd.DataFrame):
-        return data if values is None else data[data[annotation].isin(values)]
+        filtered_data = data if values is None else \
+            data[data[annotation].isin(values)]
     elif isinstance(data, ad.AnnData):
-        return data if values is None else \
+        filtered_data = data if values is None else \
             data[data.obs[annotation].isin(values)]
+
+    # Summary information
+    if isinstance(filtered_data, pd.DataFrame):
+        count = filtered_data.shape[0]
+    elif isinstance(filtered_data, ad.AnnData):
+        count = filtered_data.n_obs
+        logging.info("Note: The summary pertains to the default layer "
+                     "of the AnnData object.")
+    logging.info(f"Summary of returned dataset: {count} rows (cells) "
+                 "match the selected labels.")
+
+    return filtered_data
 
 
 def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
