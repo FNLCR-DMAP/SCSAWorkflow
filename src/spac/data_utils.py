@@ -372,7 +372,7 @@ def load_csv_files(file_names):
     logging.info("Total of " + str(len(dataframe_list)) +
                  " dataframes in the list.")
     for i, each_file in enumerate(dataframe_list):
-        logging.info(f"File name: {dataframe_name[0]}")
+        logging.info(f"File name: {dataframe_name[i]}")
         logging.info("Info: ")
         logging.info(each_file.info())
         logging.info("Description: ")
