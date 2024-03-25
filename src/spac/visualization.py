@@ -12,6 +12,11 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def visualize_2D_scatter(
@@ -1359,17 +1364,21 @@ def interative_spatial_plot(
     return main_fig
 
 
-def generate_sankey_plot(
+def sankey_plot(
         adata: anndata.AnnData,
         source_annotation: str,
         target_annotation: str,
-        source_color_map: str,
-        target_color_map: str,
+        source_color_map: str = "tab20",
+        target_color_map: str = "tab20c",
         sankey_font: float = 12.0,
         prefix: bool = True
 ):
     """
     Generates a Sankey plot from the given AnnData object.
+    The color map refers to matplotlib color maps, default is tab20 for
+    source annotation, and tab20c for target annotation.
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
 
     Parameters
     ----------
@@ -1380,13 +1389,14 @@ def generate_sankey_plot(
     target_annotation : str
         The target annotation to use for the Sankey plot.
     source_color_map : str
-        The color map to use for the source nodes.
+        The color map to use for the source nodes. Default is tab20.
     target_color_map : str
-        The color map to use for the target nodes.
+        The color map to use for the target nodes. Default is tab20c.
     sankey_font : float, optional
         The font size to use for the Sankey plot. Defaults to 12.0.
     prefix : bool, optional
-        Whether to prefix the target labels with the source labels. Defaults to True.
+        Whether to prefix the target labels with
+        the source labels. Defaults to True.
 
     Returns
     -------
@@ -1401,8 +1411,8 @@ def generate_sankey_plot(
         prefix=prefix
     )
     # Extract and prepare source and target labels
-    source_labels = label_relations["Source"].unique().tolist()
-    target_labels = label_relations["Target"].unique().tolist()
+    source_labels = label_relations["source"].unique().tolist()
+    target_labels = label_relations["target"].unique().tolist()
     all_labels = source_labels + target_labels
 
     source_label_colors = color_mapping(source_labels, source_color_map)
@@ -1425,10 +1435,10 @@ def generate_sankey_plot(
     # For each row in label_relations, add the source index, target index,
     # and count to the respective lists
     for _, row in label_relations.iterrows():
-        source_indices.append(label_to_index[row['Source']])
-        target_indices.append(label_to_index[row['Target']])
-        values.append(row['Count'])
-        link_colors.append(color_to_map[row['Source']])
+        source_indices.append(label_to_index[row['source']])
+        target_indices.append(label_to_index[row['target']])
+        values.append(row['count'])
+        link_colors.append(color_to_map[row['source']])
 
     # Generate Sankey diagram
     # Calculate the x-coordinate for each label
@@ -1455,36 +1465,19 @@ def generate_sankey_plot(
     ))
 
     fig.data[0].link.customdata = label_relations[
-        ['Percentage_Source', 'Percentage_Target']
+        ['percentage_source', 'percentage_target']
     ]
     hovertemplate = (
         '%{source.label} to %{target.label}<br>'
         '%{customdata[0]}% to %{customdata[1]}%<br>'
-        'Count: %{value}%<extra></extra>'
+        'Count: %{value}<extra></extra>'
     )
     fig.data[0].link.hovertemplate = hovertemplate
 
-    # Add column labels at the center of each column
-    for x, label in zip(
-        [0.2, 0.8],
-        [source_annotation, source_annotation]
-    ):
-        fig.add_annotation(
-            x=x,
-            y=1.01,
-            text=label,
-            showarrow=False,
-            font=dict(
-                size=sankey_font,
-                color='black',
-                family='Arial, bold'
-            )
-        )
-
-        # Customize the Sankey diagram layout
+    # Customize the Sankey diagram layout
     fig.update_layout(
         title_text=(
-            f'"{source_annotation}" to "{target_annotation}" Sankey Diagram'
+            f'"{source_annotation}" to "{target_annotation}"<br>Sankey Diagram'
         ),
         title_x=0.5,
         title_font=dict(
@@ -1493,5 +1486,11 @@ def generate_sankey_plot(
             color="black"  # Set the title font color
         )
     )
+
+    fig.update_layout(margin=dict(
+        l=10,
+        r=10,
+        t=sankey_font * 3,
+        b=sankey_font))
 
     return fig
