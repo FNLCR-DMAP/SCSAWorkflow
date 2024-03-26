@@ -2,28 +2,56 @@
 
 
 
-## v0.4.4 (2024-03-11)
+## v0.4.5 (2024-03-26)
+
+### Documentation
+
+* docs: Update description in annotation category relations ([`00c5d10`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00c5d1051c69bb19734ce4315ad15264eaf5e6fe))
+
+* docs: Update function descriptions ([`76bb8ce`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/76bb8ce0cd103598364694f9239d3d8e3cc6a79f))
+
+* docs: Rename the function to sankey_plot to following the naming convention ([`9da02e1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9da02e19d7de6876030deb36859a67a9f27f23bd))
+
+* docs: Update documentation for color mapping output ([`afaf4c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/afaf4c400a70a0656d84d63d45c15b066a4aa73f))
+
+### Fix
+
+* fix(select_values): add summary in function using logging ([`983c475`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/983c475fbf071b30ce4c955cdf99c5fbf996bd1b))
 
 ### Performance
 
-* perf: Added percentage columns, and update Sankey hover info template ([`60d3d8a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60d3d8a2caf3a77b50637cac5fd28ac10d9d3614))
+* perf: Added default color map values and updated color map related description ([`8b22714`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b22714ac6d8e57fb832eb8ebdb5cd6c45af544a))
 
-* perf: Added percentage to relation to expand usecase ([`e521acf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e521acfb2c940294baf253cfebfe562535e24473))
+* perf: Update hover info template message ([`faa63e2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/faa63e22e09bd47dbd5753f707296633a9efbba9))
+
+* perf: remove redundent annotation from sankey plot ([`1a856e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a856e9f0b542329b43025846865092f16d41c88))
+
+### Refactor
+
+* refactor(select_values): remove unnecessary logging and add astype(str) ([`50410c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50410c22414b833fd69b76a7da23bc179d3ee1da))
 
 ### Unknown
 
-* Merge pull request #163 from FNLCR-DMAP/dev
+* Merge pull request #170 from FNLCR-DMAP/dev
 
-Update Sankey plot and its utils ([`4b28aed`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b28aedf115523eb28440eca0506d4cc614861ff))
+CI/CD: merge from dev to release_dev ([`b216284`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b216284826fc59ca88b663b1c751a6de0b079f13))
 
-* Merge pull request #162 from FNLCR-DMAP/sankey_plot
+* Merge pull request #168 from FNLCR-DMAP/select_values
 
-Update information extraction and Sankey plot hover template ([`4362c59`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4362c5979399cef66da3d3b6ab39b99630077849))
+fix(select_values): add summary in function using logging ([`99d7ef5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/99d7ef5922fd36aa7631a3a5d8cf8817212c8cde))
+
+* Merge pull request #167 from FNLCR-DMAP/sankey_plot
+
+Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea1c66ebfb7528de7a04a0e137d9d1b7667f6840))
+
+* perf:Update per code review discussion ([`83eb72f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83eb72f1a428a2dcdb4f17f0afa96ce23248ef56))
 
 
-## v0.4.3 (2024-03-10)
+## v0.4.4 (2024-03-11)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`1a3fff0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a3fff0ba08fe7e0059bf2e6bca84a4cc021005c))
 
 * docs(version): Automatic development release ([`2f0f82e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2f0f82ef6c32e9accb5e614ad91924f43aad3a34))
 
@@ -107,6 +135,10 @@ Update information extraction and Sankey plot hover template ([`4362c59`](https:
 
 ### Performance
 
+* perf: Added percentage columns, and update Sankey hover info template ([`60d3d8a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60d3d8a2caf3a77b50637cac5fd28ac10d9d3614))
+
+* perf: Added percentage to relation to expand usecase ([`e521acf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e521acfb2c940294baf253cfebfe562535e24473))
+
 * perf: Add meta.yaml for Continuous Deployment ([`ce8c9fa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce8c9fa23edc7e00cbbde95113e8fe442b847072))
 
 * perf: change production rid ([`6723eef`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6723eef29ce60e2286dccc044ad77aa780b5ed7f))
@@ -118,6 +150,14 @@ Update information extraction and Sankey plot hover template ([`4362c59`](https:
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #163 from FNLCR-DMAP/dev
+
+Update Sankey plot and its utils ([`4b28aed`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b28aedf115523eb28440eca0506d4cc614861ff))
+
+* Merge pull request #162 from FNLCR-DMAP/sankey_plot
+
+Update information extraction and Sankey plot hover template ([`4362c59`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4362c5979399cef66da3d3b6ab39b99630077849))
 
 * Merge pull request #161 from FNLCR-DMAP/dev
 
