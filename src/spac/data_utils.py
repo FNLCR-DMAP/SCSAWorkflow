@@ -527,19 +527,27 @@ def select_values(data, annotation, values=None):
     # Validate provided values against unique ones, if not None
     if values is not None:
         if isinstance(data, pd.DataFrame):
-            unique_values = data[annotation].unique().tolist()
+            unique_values = data[annotation].astype(str).unique().tolist()
         elif isinstance(data, ad.AnnData):
-            unique_values = data.obs[annotation].unique().tolist()
+            unique_values = data.obs[annotation].astype(str).unique().tolist()
         check_list_in_list(
             values, "values", "label", unique_values, need_exist=True
         )
 
-    # Proceed with filtering based on data type
+    # Proceed with filtering based on data type and count matching cells
     if isinstance(data, pd.DataFrame):
-        return data if values is None else data[data[annotation].isin(values)]
+        filtered_data = data if values is None else \
+            data[data[annotation].isin(values)]
+        count = filtered_data.shape[0]
     elif isinstance(data, ad.AnnData):
-        return data if values is None else \
+        filtered_data = data if values is None else \
             data[data.obs[annotation].isin(values)]
+        count = filtered_data.n_obs
+
+    logging.info(f"Summary of returned dataset: {count} cells "
+                 "match the selected labels.")
+
+    return filtered_data
 
 
 def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
