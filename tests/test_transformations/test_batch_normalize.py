@@ -1,5 +1,9 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import numpy as np
+import anndata as ad
 import pandas as pd
 from spac.transformations import batch_normalize
 from spac.data_utils import ingest_cells, concatinate_regions
@@ -32,21 +36,19 @@ class TestAnalysisMethods(unittest.TestCase):
 
         all_adata = concatinate_regions([adata1, adata2])
 
-        median_normalized_layer = "median_normalization"
+        # median_normalized_layer = "median_normalization"
         batch_normalize(
             all_adata,
-            batch,
-            median_normalized_layer,
-            "median",
+            annotation=batch,
+            output_layer="median_normalization",
+            method="median",
             log=True)
 
         ground_truth = np.array(
             [[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]
             ).transpose()
 
-        normalized_array = all_adata.to_df(
-            layer=median_normalized_layer
-            ).to_numpy()
+        normalized_array = all_adata.layers["median_normalization"]
         # print(normalized_array)
         # print(ground_truth)
         self.assertEqual(np.array_equal(ground_truth, normalized_array), True)
@@ -81,7 +83,8 @@ class TestAnalysisMethods(unittest.TestCase):
             all_adata,
             batch,
             median_normalized_layer,
-            "median")
+            "median",
+            log=True)
 
         ground_truth = np.array(
             [[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]
@@ -272,6 +275,86 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Check if the normalized values match the ground truth
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_batch_normalize_z_score(self):
+        batch = "batch_annotation"
+        df = pd.DataFrame({
+            'marker1': [1, 5, 2, 6, 3, 7],
+            'marker2': [2, 6, 3, 7, 4, 8],
+            batch: ["batch1", "batch1", "batch2", "batch2", "batch3", "batch3"]
+        })
+
+        adata = ingest_cells(df, "^marker.*", annotation=batch)
+
+        z_score_normalized_layer = "z_score_normalization"
+        batch_normalize(
+            adata,
+            batch,
+            z_score_normalized_layer,
+            method="z-score")
+
+        # Calculate the z-score normalization manually:
+        ground_truth = np.array([
+            [-1, -1],
+            [1, 1],
+            [-1, -1],
+            [1, 1],
+            [-1, -1],
+            [1, 1],
+        ])
+
+        normalized_array = adata.layers[z_score_normalized_layer]
+        self.assertTrue(np.array_equal(ground_truth, normalized_array))
+
+    def test_batch_normalize_with_input_layer(self):
+        batch = "batch_annotation"
+        df = pd.DataFrame({
+            'marker1': [1, 2, 3],
+            'marker2': [4, 5, 6],
+            batch: ["batch1", "batch2", "batch3"]
+        })
+
+        adata = ingest_cells(df, "^marker.*", annotation=batch)
+        # Simulate an existing layer with modified data
+        adata.layers["preprocessed"] = adata.X * 2
+
+        batch_normalize(
+            adata,
+            batch,
+            "normalized_from_preprocessed",
+            input_layer="preprocessed",
+            method="median")
+
+        # Completed ground_truth array based on the doubled values
+        ground_truth = np.array([
+            [2, 8],
+            [4, 10],
+            [6, 12],
+        ])
+
+        normalized_array = (
+            adata.layers["normalized_from_preprocessed"].toarray()
+        )
+        self.assertTrue(np.array_equal(ground_truth, normalized_array))
+
+    def test_batch_normalize_log_type_check(self):
+        data = np.array([
+            [1, 2],
+            [3, 4],
+            [5, 6]
+        ])
+
+        obs = pd.DataFrame({'batch': ['batch1', 'batch2', 'batch1']})
+        adata = ad.AnnData(X=data, obs=obs)
+
+        # Function call that should raise ValueError for non-boolean 'log'
+        with self.assertRaises(ValueError):
+            batch_normalize(
+                adata=adata,
+                annotation="batch",
+                output_layer="test_layer",
+                log="not_boolean",  # Intentionally incorrect type
+                method="median")
 
 
 if __name__ == '__main__':
