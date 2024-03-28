@@ -255,6 +255,7 @@ def run_umap(
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 def batch_normalize(adata, annotation, output_layer,
                     input_layer=None, method="median", log=False):
     """
@@ -297,8 +298,11 @@ def batch_normalize(adata, annotation, output_layer,
         )
 
     batches = adata.obs[annotation].unique().tolist()
-    original = pd.DataFrame(adata.X) if not input_layer else \
-               pd.DataFrame(adata.layers[input_layer])
+    if input_layer:
+        original = pd.DataFrame(adata.layers[input_layer],
+                                index=adata.obs.index)
+    else:
+        original = pd.DataFrame(adata.X, index=adata.obs.index)
 
     if log:
         original = np.log2(1+original)
@@ -348,11 +352,11 @@ def batch_normalize(adata, annotation, output_layer,
             logging.info(f"mean for {batch}: %s", mean)
             logging.info(f"std for {batch}: %s", std)
             # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
-            std = max(std, 1e-8)
+            std = np.maximum(std, 1e-8)
             original.loc[adata.obs[annotation] == batch] = \
                 (batch_cells - mean) / std
 
-    adata.layers[layer] = original
+    adata.layers[output_layer] = original
 
 
 def rename_annotations(adata, src_annotation, dest_annotation, mappings):
