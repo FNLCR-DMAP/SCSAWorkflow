@@ -104,7 +104,7 @@ def ripley(
     support
         list of bins (radiis) for the support. Overrides `max_dist` and `n_steps`.
     phenotypes
-        For Ripley L, calculate the function for the cells of these two phentypes.
+        For Ripley L, calculate the function for the cells of these two phenotypes.
     %(seed)s
         The seed for the random number generator.
     %(area)s
