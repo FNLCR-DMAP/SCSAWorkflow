@@ -11,8 +11,13 @@ import umap as umap_lib
 from scipy.sparse import issparse
 
 
-def phenograph_clustering(adata, features, layer=None,
-                          k=50, seed=None, **kwargs):
+def phenograph_clustering(adata,
+                          features,
+                          layer=None,
+                          k=50,
+                          seed=None,
+                          output_layer="phenograph",
+                          **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -40,6 +45,9 @@ def phenograph_clustering(adata, features, layer=None,
 
     seed : int, optional
         Random seed for reproducibility.
+
+    output_layer : str, optional
+        The name of the output layer where the clusters are stored.
     """
 
     # Use utility functions for input validation
@@ -63,7 +71,7 @@ def phenograph_clustering(adata, features, layer=None,
                                        seed=seed,
                                        **kwargs)
 
-    adata.obs["phenograph"] = pd.Categorical(phenograph_out[0])
+    adata.obs[output_layer] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
