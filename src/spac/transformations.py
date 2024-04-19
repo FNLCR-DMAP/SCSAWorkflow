@@ -16,7 +16,7 @@ def phenograph_clustering(adata,
                           layer=None,
                           k=50,
                           seed=None,
-                          output_layer="phenograph",
+                          output_annotation="phenograph",
                           **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
@@ -46,7 +46,7 @@ def phenograph_clustering(adata,
     seed : int, optional
         Random seed for reproducibility.
 
-    output_layer : str, optional
+    output_annotation : str, optional
         The name of the output layer where the clusters are stored.
     """
 
@@ -71,7 +71,7 @@ def phenograph_clustering(adata,
                                        seed=seed,
                                        **kwargs)
 
-    adata.obs[output_layer] = pd.Categorical(phenograph_out[0])
+    adata.obs[output_annotation] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
