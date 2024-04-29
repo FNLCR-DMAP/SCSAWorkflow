@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
 from spac.utils import check_annotation
+import numpy as np
+from scipy.spatial import KDTree
+from scipy.spatial import distance_matrix
 
 
 def spatial_interaction(
@@ -374,3 +377,93 @@ def spatial_interaction(
             results = {"Ax": ax}
 
     return results
+
+
+def _neighborhood_profile_core(coord,
+                               phenotypes,
+                               n_phenotypes,
+                               distances_bins,
+                               normalize=None
+                               ):
+    """
+    Calculate the neighborhood profile for every cell in a region.
+
+    Parameters
+    ----------
+    coord : numpy.ndarray
+        The coordinates of the cells in the region. Should be a 2D array of
+        shape (n_cells, 2) representing x, y coordinates.
+
+    phenotypes : numpy.ndarray
+        The phenotypes of the cells in the region.
+
+    n_phenotypes : int
+        The number of unique phenotypes in the region.
+
+    distances_bins : list
+        The bins defining the distance ranges for the neighborhood profile.
+
+    normalize : str or None, optional
+        If 'total_cells', normalize the neighborhood profile based on the
+        total number of cells in each bin.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 3D array containing the neighborhood profile for every cell in the
+        region. The dimensions are (n_cells, n_phenotypes, n_intervals).
+
+    Notes
+    -----
+    - The function calculates the neighborhood profile for each cell, which
+      represents the distribution of neighboring cells' phenotypes within
+      different distance intervals.
+    - The 'distances_bins' parameter should be a list defining the bins for
+      the distance intervals. It is assumed that the bins are incremental,
+      starting from 0.
+    """
+
+    # TODO Check that distances bins is incremental
+
+    max_distance = distances_bins[-1]
+    kdtree = KDTree(coord)
+
+    # indexes is a list of neighbors coordinate for every
+    # cell
+    indexes = kdtree.query_ball_tree(kdtree, r=max_distance)
+
+    # Create phenotype bins to include the integer equivalent of 
+    # every phenotype to use the histogram2d function instead of
+    # a for loop over every phenotype
+    phenotype_bins = np.arange(-0.5, n_phenotypes + 0.5, 1)
+    n_intervals = len(distances_bins) - 1
+
+    neighborhood_profile = []
+    for i, neighbors in enumerate(indexes):
+        
+        # Query_ball_tree will include the point itself
+        neighbors.remove(i)
+
+        # To potentially save on calculating the histogram
+        if len(neighbors) == 0:
+            neighborhood_profile.append(np.zeros((n_phenotypes, n_intervals)))
+        else:
+            neighbor_coords = coord[neighbors]
+            dist_matrix = distance_matrix(coord[i:i+1], neighbor_coords)[0]
+            neighbors_phenotypes = phenotypes[neighbors]
+            # Returns a 2D histogram of size n_phenotypes * n_intervals
+            histograms_array,_ ,_ = np.histogram2d(neighbors_phenotypes,
+                                                   dist_matrix,
+                                                   bins=[
+                                                       phenotype_bins,
+                                                       distances_bins
+                                                       ])
+            neighborhood_profile.append(histograms_array)
+
+    neighborhood_array = np.stack(neighborhood_profile)
+    if normalize == "total_cells":
+        bins_sum = neighborhood_array.sum(axis=1)
+        bins_sum[bins_sum == 0] = 1
+        neighborhood_array = neighborhood_array / bins_sum[:, np.newaxis, :]
+
+    return neighborhood_array
