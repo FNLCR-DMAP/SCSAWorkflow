@@ -282,37 +282,37 @@ class TestAnalysisMethods(unittest.TestCase):
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
     def test_batch_normalize_z_score(self):
-        batch = "batch_annotation"
         df = pd.DataFrame({
-            'marker1': [1, 5, 2, 6, 3, 7],
-            'marker2': [2, 6, 3, 7, 4, 8],
-            batch: ["batch1", "batch1", "batch2", "batch2", "batch3", "batch3"]
+            'marker1': [1, 2, 3, 4],
+            'marker2': [2, 4, 6, 8],
+            'batch_annotation': ["batch1", "batch1", "batch2", "batch2"]
         })
 
-        adata = ingest_cells(df, "^marker.*", annotation=batch)
+        adata = ingest_cells(df, "^marker.*", annotation='batch_annotation')
 
         z_score_normalized_layer = "z_score_normalization"
         batch_normalize(
             adata,
-            annotation=batch,
+            annotation='batch_annotation',
             output_layer=z_score_normalized_layer,
             method="z-score")
 
         # Calculate the z-score normalization manually:
+        # For both markers, mean for each batch = 1.5 and 3.5,
+        # std dev = sqrt(((0.5^2 + 0.5^2) / 2)) = 0.5
+        # Thus, z-scores are [-1, 1] for both markers in each batch
         ground_truth = np.array([
-            [-0.707107, -0.707107],
-            [0.707107, 0.707107],
-            [-0.707107, -0.707107],
-            [0.707107, 0.707107],
-            [-0.707107, -0.707107],
-            [0.707107, 0.7071071],
+            [-1, -1],  # Batch 1 marker1, marker2
+            [1, 1],    # Batch 1 marker1, marker2
+            [-1, -1],  # Batch 2 marker1, marker2
+            [1, 1]     # Batch 2 marker1, marker2
         ])
 
         normalized_array = adata.to_df(
             layer=z_score_normalized_layer
             ).to_numpy()
-        # print(normalized_array)
-        # print(ground_truth)
+        print("Actual Normalized Array:\n", normalized_array)
+        print("Expected Ground Truth:\n", ground_truth)
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
     def test_batch_normalize_log_type_check(self):

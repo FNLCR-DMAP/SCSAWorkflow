@@ -315,9 +315,7 @@ def batch_normalize(adata, annotation, output_layer,
         all_batch_quantile = original.quantile(q=0.75)
         logging.info("Q75 for all cells: %s", all_batch_quantile)
     elif method == "z-score":
-        # Z-score normalization will be processed individually
-        # for each batch in the loop below.
-        pass
+        logging.info("Z-score setup is handled in batch processing loop.")
 
     # Place holder for normalized dataframes per batch
     for batch in batches:
@@ -348,7 +346,7 @@ def batch_normalize(adata, annotation, output_layer,
 
         elif method == "z-score":
             mean = batch_cells.mean()
-            std = batch_cells.std()
+            std = batch_cells.std(ddof=0)  # DataFrame.std(ddof=1)
             logging.info(f"mean for {batch}: %s", mean)
             logging.info(f"std for {batch}: %s", std)
             # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
