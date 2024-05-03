@@ -311,8 +311,8 @@ class TestAnalysisMethods(unittest.TestCase):
         normalized_array = adata.to_df(
             layer=z_score_normalized_layer
             ).to_numpy()
-        print("Actual Normalized Array:\n", normalized_array)
-        print("Expected Ground Truth:\n", ground_truth)
+        # print("Actual Normalized Array:\n", normalized_array)
+        # print("Expected Ground Truth:\n", ground_truth)
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
     def test_batch_normalize_log_type_check(self):

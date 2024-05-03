@@ -346,7 +346,7 @@ def batch_normalize(adata, annotation, output_layer,
 
         elif method == "z-score":
             mean = batch_cells.mean()
-            std = batch_cells.std(ddof=0)  # DataFrame.std(ddof=1)
+            std = batch_cells.std(ddof=0)  # DataFrame.std() by default ddof=1
             logging.info(f"mean for {batch}: %s", mean)
             logging.info(f"std for {batch}: %s", std)
             # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
