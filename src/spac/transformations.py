@@ -192,6 +192,8 @@ def run_umap(
         random_state=0,
         transform_seed=42,
         layer=None,
+        output_derived_feature='X_umap',
+        input_derived_feature=None,
         **kwargs
 ):
     """
@@ -221,12 +223,19 @@ def run_umap(
         RNG seed during UMAP transformation.
     layer : str, optional
         Layer of AnnData object for UMAP. Defaults to `adata.X`.
+    output_derived_feature : str, default='X_umap' 
+        The name of the column in adata.obsm that will contain the
+        umap coordinates.
+    input_derived_feature : str, optional
+        If set, use the corresponding key `adata.obsm` to calcuate the
+        UMAP. Takes priority over the layer argument.
 
     Returns
     -------
     adata : anndata.AnnData
         Updated AnnData object with UMAP coordinates stored in the `obsm`
-        attribute. The key for the UMAP embedding in `obsm` is "X_umap".
+        attribute. The key for the UMAP embedding in `obsm` is "X_umap" by
+        default.
     """
 
     # Use utility function to check if the layer exists in adata.layers
@@ -238,6 +247,12 @@ def run_umap(
         data = adata.layers[layer]
     else:
         data = adata.X
+
+    data = _select_input_features(
+        adata=adata,
+        layer=layer,
+        input_derived_feature=input_derived_feature
+    )
 
     # Convert data to pandas DataFrame for better memory handling
     data = pd.DataFrame(data.astype(np.float32))
@@ -258,8 +273,8 @@ def run_umap(
     embedding = umap_model.fit_transform(data)
 
     # Store the UMAP coordinates back into the AnnData object under the
-    # 'X_umap' key, always
-    adata.obsm['X_umap'] = embedding
+    # output_derived_feature key
+    adata.obsm[output_derived_feature] = embedding
 
     return adata
 
@@ -267,6 +282,52 @@ def run_umap(
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+def _select_input_features(adata: anndata,
+                           layer: str = None,
+                           input_derived_feature: str = None) -> np.ndarray:
+    """
+    Selects the numpy array to be used as input for transformations
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix.
+    layer : str, optional
+        Layer of AnnData object for UMAP. Defaults to `None`.
+    input_derived_feature : str, optional
+        Name of the key in `adata.obsm` that contains the numpy array.
+        Defaults to `None`.
+
+    Returns
+    -------
+    np.ndarray
+        The selected numpy array.
+
+    Raises
+    ------
+    ValueError
+        If both `layer` and `input_derived_feature` are specified, or
+        if `input_derived_feature` is specified but not found in `adata.obsm`.
+    """
+    if input_derived_feature is not None and layer is not None:
+        raise ValueError("Cannot specify both"
+                         f" 'associated table':'{input_derived_feature}'"
+                         f" and 'table':'{layer}'. Please choose one.")
+
+    if input_derived_feature is not None:
+        check_table(adata=adata,
+                    tables=input_derived_feature,
+                    should_exist=True,
+                    associated_table=True)
+        # Flatten the obsm numpy array before returning it
+        np_array = adata.obsm[input_derived_feature]
+        return np_array.reshape(np_array.shape[0], -1)
+    else:
+        check_table(adata=adata,
+                    tables=layer)
+        return adata.layers[layer] if layer is not None else adata.X
 
 
 def batch_normalize(adata, annotation, output_layer,
