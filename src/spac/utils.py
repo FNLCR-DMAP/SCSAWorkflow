@@ -3,6 +3,7 @@ import anndata as ad
 import numpy as np
 import matplotlib.cm as cm
 import logging
+import warnings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -90,7 +91,8 @@ def check_list_in_list(
         input_name,
         input_type,
         target_list,
-        need_exist=True
+        need_exist=True,
+        warning=False
 ):
 
     """
@@ -119,6 +121,11 @@ def check_list_in_list(
         Determines whether to check if elements exist in the
         target list (True), or if they should not exist (False).
 
+     warning: bool, optional (default=False)
+        If true, generate a warning instead of raising an exception
+
+
+
     Raises
     ------
     ValueError
@@ -127,6 +134,15 @@ def check_list_in_list(
             list does not exist in the target list.
         If `need_exist` is False and any element of the input
             list exists in the target list.
+
+
+    Warns
+    -----
+    UserWarning
+        If the specified behavior is not present 
+        and `warning` is True.
+
+
     """
 
     if input is not None:
@@ -143,30 +159,39 @@ def check_list_in_list(
         if need_exist:
             for item in input:
                 if item not in target_list:
-                    raise ValueError(
+                    message = (
                         f"The {input_type} '{item}' "
                         "does not exist in the provided dataset.\n"
                         f"Existing {input_type}s are:\n"
                         f"{target_list_str}"
                     )
+                    if warning is False:
+                        raise ValueError(message)
+                    else:
+                        warnings.warn(message)
         else:
             for item in input:
                 if item in target_list:
-                    raise ValueError(
+                    message = (
                         f"The {input_type} '{item}' "
                         "exist in the provided dataset.\n"
                         f"Existing {input_type}s are:\n"
-                        f"{target_list_str}"
                     )
+                    if warning is False:
+                        raise ValueError(message)
+                    else:
+                        warnings.warn(message)
 
 
 def check_table(
         adata,
         tables=None,
-        should_exist=True):
+        should_exist=True,
+        associated_table=False,
+        warning=False):
 
     """
-    Perform common error checks for table (layers) in
+    Perform common error checks for table (layers) or derived tables (obsm) in
     anndata related objects.
 
     Parameters
@@ -182,13 +207,28 @@ def check_table(
         Determines whether to check if elements exist in the
         target list (True), or if they should not exist (False).
 
+    associtated_table : bool, optional (default=False)
+        Determines whether to check if the passed tables names
+        should exist as layers or in obsm in the andata object.
+
+    warning : bool, optional (default=False)
+        If True, generate a warning instead of raising an exception.
+
     Raises
     ------
     TypeError
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, annotations, or features do not exist.
+        If any of the specified layers, annotations, obsm, 
+        or features do not exist.
+
+
+    Warns
+    -----
+    UserWarning
+        If any of the specified layers, annotations, obsm,
+        or features do not exist, and `warning` is True.
 
     """
 
@@ -201,13 +241,22 @@ def check_table(
             )
 
     # Check for tables
-    existing_tables = list(adata.layers.keys())
+    if associated_table is False:
+        existing_tables = list(adata.layers.keys())
+        input_name = "tables"
+        input_type = "table"
+    else:
+        existing_tables = list(adata.obsm.keys())
+        input_name = "associated tables"
+        input_type = "associated table"
+
     check_list_in_list(
             input=tables,
-            input_name="tables",
-            input_type="table",
+            input_name=input_name,
+            input_type=input_type,
             target_list=existing_tables,
-            need_exist=should_exist
+            need_exist=should_exist,
+            warning=warning
         )
 
 

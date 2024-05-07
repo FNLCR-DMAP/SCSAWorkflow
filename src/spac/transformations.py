@@ -269,14 +269,13 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def batch_normalize(adata, annotation, layer, method="median", log=False):
+def batch_normalize(adata, annotation, output_layer,
+                    input_layer=None, method="median", log=False):
     """
     Adjust the features of every marker using a normalization method.
 
     The normalization methods are summarized here:
     https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/
-    Adds the normalized values in
-    `.layers[`layer`]`
 
     Parameters
     ----------
@@ -286,19 +285,37 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     annotation: str
         The name of the annotation in `adata` to define batches.
 
-    layer : str
-        The name of the new layer to add to the anndata object.
+    output_layer : str
+        The name of the new layer to add to the anndata object for storing
+        normalized data.
 
-    method : {"median", "Q50", "Q75}
-        The normlalization method to use.
+    input_layer : str, optional
+        The name of the layer from which to read data. If None, read from `.X`.
+
+    method : {"median", "Q50", "Q75", "z-score"}, default "median"
+        The normalization method to use.
 
     log : bool, default False
         If True, take the log2 of features before normalization.
-
+        Ensure this is boolean.
     """
-    allowed_methods = ["median", "Q50", "Q75"]
+    if not isinstance(log, bool):
+        logging.error("Argument 'log' must be of type bool.")
+        raise ValueError("Argument 'log' must be of type bool.")
+
+    allowed_methods = ["median", "Q50", "Q75", "z-score"]
+    if method not in allowed_methods:
+        raise ValueError(
+            f"Unsupported normalization method '{method}', "
+            f"allowed methods = {allowed_methods}"
+        )
+
     batches = adata.obs[annotation].unique().tolist()
-    original = adata.to_df()
+    if input_layer:
+        original = pd.DataFrame(adata.layers[input_layer],
+                                index=adata.obs.index)
+    else:
+        original = pd.DataFrame(adata.X, index=adata.obs.index)
 
     if log:
         original = np.log2(1+original)
@@ -310,10 +327,8 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
     elif method == "Q75":
         all_batch_quantile = original.quantile(q=0.75)
         logging.info("Q75 for all cells: %s", all_batch_quantile)
-    else:
-        raise Exception(
-            "Unsupported normalization {0}, allowed methods = {1]",
-            method, allowed_methods)
+    elif method == "z-score":
+        logging.info("Z-score setup is handled in batch processing loop.")
 
     # Place holder for normalized dataframes per batch
     for batch in batches:
@@ -342,7 +357,17 @@ def batch_normalize(adata, annotation, layer, method="median", log=False):
                 batch_cells * all_batch_quantile / batch_75quantile
             )
 
-    adata.layers[layer] = original
+        elif method == "z-score":
+            mean = batch_cells.mean()
+            std = batch_cells.std(ddof=0)  # DataFrame.std() by default ddof=1
+            logging.info(f"mean for {batch}: %s", mean)
+            logging.info(f"std for {batch}: %s", std)
+            # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
+            std = np.maximum(std, 1e-8)
+            original.loc[adata.obs[annotation] == batch] = \
+                (batch_cells - mean) / std
+
+    adata.layers[output_layer] = original
 
 
 def rename_annotations(adata, src_annotation, dest_annotation, mappings):
