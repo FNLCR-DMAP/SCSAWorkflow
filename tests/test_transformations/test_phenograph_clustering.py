@@ -64,17 +64,15 @@ class TestPhenographClustering(unittest.TestCase):
         self.assertEqual(self.adata.uns['phenograph_features'],
                          self.features)
 
-    def test_output_layer(self):
-        # This test checks if the function correctly adds the "output_layer" to the
-        # AnnData object's obs attribute 
-        output_layer_name = 'my_output_layer'
+    def test_output_annotation(self):
+        # This test checks if the function correctly adds the "output_layer" 
+        # to the # AnnData object's obs attribute 
+        output_annotation_name = 'my_output_annotation'
         phenograph_clustering(self.adata,
                               self.features,
                               self.layer,
-                              output_layer=output_layer_name)
-        self.assertIn(output_layer_name, self.adata.obs)
-        
-
+                              output_annotation=output_annotation_name)
+        self.assertIn(output_annotation_name, self.adata.obs)
 
     def test_layer_none_case(self):
         # This test checks if the function works correctly when layer is None.
