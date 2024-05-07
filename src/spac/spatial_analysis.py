@@ -2,7 +2,7 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-from spac.utils import check_annotation
+from spac.utils import check_annotation, check_table
 import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
@@ -474,16 +474,29 @@ def neighborhood_profile(
 
     # TODO, check that spatial_key is in adata.obsm
 
+    check_table(
+        adata=adata,
+        tables=spatial_key,
+        should_exist=True,
+        associated_table=True
+    )
+
     # Check the values of normalize
     if normalize is not None and normalize not in ['total_cells', 'bin_area']:
         raise ValueError((f'normalize must be "total_cells", "bin_area"'
                           f' or None. Got "{normalize}"'))
 
-    # TODO, check that derived_feature_name is not in adata.obsm
-    if derived_feature_name in adata.obsm:
-        logger.warning(f"The analysis already contains the \
-                       derived feature name:{derived_feature_name}. \
-                       It will be overwriten")
+    # Check that the derived_feature name does not exist.
+    # Raise a warning othewise
+    check_table(
+        adata=adata,
+        tables=derived_feature_name,
+        should_exist=False,
+        associated_table=True,
+        warning=True
+    )
+
+    logger = logging.getLogger()
 
     # Convert the phenotypes to integers using label encoder
     labels = adata.obs[phenotypes].values
@@ -493,8 +506,6 @@ def neighborhood_profile(
     # Create a place holder for the neighborhood profile
     all_cells_profiles = np.zeros(
         (adata.n_obs, n_phenotypes, len(distances)-1))
-
-    logger = logging.getLogger()
 
     # If regions is None, use all cells in adata
     if regions is not None:
@@ -512,7 +523,7 @@ def neighborhood_profile(
                distances,
                normalize
             )
-   
+
             # Updated profiles of the cells of the current slide
             all_cells_profiles[adata.obs[regions] == region] = (
                region_profiles
@@ -540,7 +551,6 @@ def neighborhood_profile(
                        unstructured value:{derived_feature_name}. \
                        It will be overwriten")
     adata.uns[derived_feature_name] = summary
-
 
 def _neighborhood_profile_core(
         coord,
