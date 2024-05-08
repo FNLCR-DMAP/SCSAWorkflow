@@ -10,11 +10,13 @@ class TestPhenographClustering(unittest.TestCase):
         # This method is run before each test.
         # It sets up a test case with an AnnData object, a list of features,
         # and a layer name.
-        self.adata = AnnData(np.random.rand(100, 3),
+        n_cells = 100 
+        self.adata = AnnData(np.random.rand(n_cells, 3),
                              var=pd.DataFrame(index=['gene1',
                                                      'gene2',
                                                      'gene3']))
         self.adata.layers['counts'] = np.random.rand(100, 3)
+
         self.features = ['gene1', 'gene2']
         self.layer = 'counts'
 
@@ -39,6 +41,9 @@ class TestPhenographClustering(unittest.TestCase):
                                         'gene2'])
                 )
         self.syn_data.layers['counts'] = self.syn_dataset
+
+        self.syn_data.obsm["derived_features"] = \
+            self.syn_dataset
 
     def test_same_cluster_assignments_with_same_seed(self):
         # Run phenograph_clustering with a specific seed
@@ -92,11 +97,33 @@ class TestPhenographClustering(unittest.TestCase):
         phenograph_clustering(self.syn_data,
                               self.features,
                               'counts',
-                              500)
+                              k=50,
+                              resolution_parameter=0.1)
+
         self.assertIn('phenograph', self.syn_data.obs)
         self.assertEqual(
             len(np.unique(self.syn_data.obs['phenograph'])),
             2)
+
+    def test_associated_features(self):
+        # Run phenograph using the derived feature and generate two clusters
+        output_annotation = 'derived_phenograph'
+        input_derived_feature = 'derived_features'
+        phenograph_clustering(
+            adata=self.syn_data,
+            features=None,
+            layer=None,
+            k=50,
+            seed=None,
+            output_annotation=output_annotation,
+            input_derived_feature=input_derived_feature,
+            resolution_parameter=0.1
+        )
+
+        self.assertEqual(
+            len(np.unique(self.syn_data.obs[output_annotation])),
+            2)
+
 
 
 if __name__ == '__main__':

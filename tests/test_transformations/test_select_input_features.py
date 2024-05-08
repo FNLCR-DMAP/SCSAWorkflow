@@ -1,6 +1,7 @@
 import unittest
 import anndata
 import numpy as np
+import pandas as pd
 from spac.transformations import _select_input_features
 
 
@@ -20,45 +21,43 @@ class TestSelectFeatureInput(unittest.TestCase):
             obsm={'input_derived_feature': np.array([
                 [[19, 20]],
                 [[21, 22]],
-                [[23, 24]]])}
+                [[23, 24]]])},
+            var=pd.DataFrame(index=["a", "b", "c"])
         )
 
-    def test__select_input_features_no_input(self):
+    def test_no_input(self):
         # Test when no layer or input_derived_feature is specified
         selected_array = _select_input_features(self.adata)
         self.assertTrue(np.array_equal(selected_array, self.adata.X))
 
-    def test__select_input_features_with_layer(self):
+    def test_with_layer(self):
         # Test when layer is specified
         selected_array = _select_input_features(self.adata, layer='layer1')
         self.assertTrue(
             np.array_equal(selected_array, self.adata.layers['layer1']))
 
-    def test__select_input_features_with_input_derived_feature(self):
+    def test_input_derived_feature(self):
         # Test when input_derived_feature is specified
         selected_array = _select_input_features(
             self.adata,
             input_derived_feature='input_derived_feature')
         expected_array = self.adata.obsm['input_derived_feature'].reshape(3, 2)
-            
         self.assertTrue(np.array_equal(selected_array, expected_array))
 
-    def test__select_input_features_invalid_args(self):
-        # Test when both layer and input_derived_feature are specified
-        with self.assertRaises(ValueError) as context:
-            _select_input_features(
-                self.adata, layer='layer1',
-                input_derived_feature='input_derived_feature')
+    def test_features_names_list(self):
+        selected_array = _select_input_features(
+            self.adata,
+            features=['a', 'c'])
+        expected_array = self.adata.to_df()[['a', 'c']].values
+        self.assertTrue(np.array_equal(selected_array, expected_array))
 
-        expected_message = ("Cannot specify both 'associated table':"
-                            "'input_derived_feature'"
-                            " and 'table':'layer1'. Please choose one.")
-        self.assertEqual(expected_message, str(context.exception))
-
-        with self.assertRaises(ValueError):
-            _select_input_features(
-                self.adata,
-                input_derived_feature='unknown_key')
+    def test_features_names_str(self):
+        selected_array = _select_input_features(
+            self.adata,
+            features='a')
+        # Convert the 1D array to 2D
+        expected_array = np.reshape(self.adata.X[:, 0], (-1,1))
+        self.assertTrue(np.array_equal(selected_array, expected_array))
 
 
 if __name__ == '__main__':

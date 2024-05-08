@@ -9,15 +9,25 @@ from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
 import umap as umap_lib
 from scipy.sparse import issparse
+from typing import List, Union, Optional
 
 
-def phenograph_clustering(adata,
-                          features,
-                          layer=None,
-                          k=50,
-                          seed=None,
-                          output_annotation="phenograph",
-                          **kwargs):
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='SPAC:%(asctime)s - %(levelname)s - %(message)s')
+
+logger = logging.getLogger(__name__)
+
+
+def phenograph_clustering(
+        adata,
+        features,
+        layer=None,
+        k=50,
+        seed=None,
+        output_annotation="phenograph",
+        input_derived_feature=None,
+        **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -48,11 +58,25 @@ def phenograph_clustering(adata,
 
     output_annotation : str, optional
         The name of the output layer where the clusters are stored.
-    """
 
-    # Use utility functions for input validation
-    check_table(adata, tables=layer)
-    check_feature(adata, features=features)
+    input_derived_feature : str, optional
+        If set, use the corresponding key `adata.obsm` to calcuate the
+        Phenograph. Takes priority over the layer argument.
+
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with the phenograph clusters 
+        stored in `adata.obs[output_annotation]`
+    """
+        
+    _validate_transformation_inputs(
+        adata=adata,
+        layer=layer,
+        input_derived_feature=input_derived_feature,
+        features=features
+    )
 
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
@@ -60,12 +84,14 @@ def phenograph_clustering(adata,
     if seed is not None:
         np.random.seed(seed)
 
-    if layer is not None:
-        phenograph_df = adata.to_df(layer=layer)[features]
-    else:
-        phenograph_df = adata.to_df()[features]
+    data = _select_input_features(
+        adata=adata,
+        layer=layer,
+        input_derived_feature=input_derived_feature,
+        features=features
+    )
 
-    phenograph_out = sce.tl.phenograph(phenograph_df,
+    phenograph_out = sce.tl.phenograph(data,
                                        clustering_algo="leiden",
                                        k=k,
                                        seed=seed,
@@ -246,15 +272,11 @@ def run_umap(
         default.
     """
 
-    # Use utility function to check if the layer exists in adata.layers
-    if layer:
-        check_table(adata, tables=layer)
-
-    # Extract the data from the specified layer or the default data
-    if layer is not None:
-        data = adata.layers[layer]
-    else:
-        data = adata.X
+    _validate_transformation_inputs(
+        adata=adata,
+        layer=layer,
+        input_derived_feature=input_derived_feature
+    )
 
     data = _select_input_features(
         adata=adata,
@@ -287,14 +309,56 @@ def run_umap(
     return adata
 
 
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+def _validate_transformation_inputs(
+        adata: anndata,
+        layer: Optional[str] = None,
+        input_derived_feature: Optional[str] = None,
+        features: Optional[Union[List[str], str]] = None
+        ) -> None:
+    """
+    Validate inputs for transformation functions.
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix.
+    layer : str, optional
+        Name of the layer in `adata` to use for transformation.
+    input_derived_feature : str, optional
+        Name of the key in `obsm` that contains the numpy array.
+    features : list of str or str, optional
+        Names of features to use for transformation.
+
+    Raises
+    ------
+    ValueError
+        If both `input_derived_feature` and `layer` are specified.
+    """
+
+    if input_derived_feature is not None and layer is not None:
+        raise ValueError("Cannot specify both"
+                         f" 'associated table':'{input_derived_feature}'"
+                         f" and 'table':'{layer}'. Please choose one.")
+
+    if input_derived_feature is not None:
+        check_table(adata=adata,
+                    tables=input_derived_feature,
+                    should_exist=True,
+                    associated_table=True)
+    else:
+        check_table(adata=adata,
+                    tables=layer)
+
+    if features is not None:
+        check_feature(adata, features=features)
 
 
 def _select_input_features(adata: anndata,
                            layer: str = None,
-                           input_derived_feature: str = None) -> np.ndarray:
+                           input_derived_feature: str = None,
+                           features: Optional[Union[str, List[str]]] = None,
+
+                           ) -> np.ndarray:
     """
     Selects the numpy array to be used as input for transformations
 
@@ -307,35 +371,33 @@ def _select_input_features(adata: anndata,
     input_derived_feature : str, optional
         Name of the key in `adata.obsm` that contains the numpy array.
         Defaults to `None`.
+    features : str or List[str], optional
+        Names of the features to select from layer. If None, all features are 
+        selected. Defaults to None.
 
     Returns
     -------
     np.ndarray
         The selected numpy array.
 
-    Raises
-    ------
-    ValueError
-        If both `layer` and `input_derived_feature` are specified, or
-        if `input_derived_feature` is specified but not found in `adata.obsm`.
     """
-    if input_derived_feature is not None and layer is not None:
-        raise ValueError("Cannot specify both"
-                         f" 'associated table':'{input_derived_feature}'"
-                         f" and 'table':'{layer}'. Please choose one.")
-
     if input_derived_feature is not None:
-        check_table(adata=adata,
-                    tables=input_derived_feature,
-                    should_exist=True,
-                    associated_table=True)
         # Flatten the obsm numpy array before returning it
+        logger.info(f'Using the derived table:"{input_derived_feature}"')
         np_array = adata.obsm[input_derived_feature]
         return np_array.reshape(np_array.shape[0], -1)
     else:
-        check_table(adata=adata,
-                    tables=layer)
-        return adata.layers[layer] if layer is not None else adata.X
+        np_array = adata.layers[layer] if layer is not None else adata.X
+        logger.info(f'Using the table:"{layer}"')
+        if features is not None:
+            if isinstance(features, str):
+                features = [features]
+
+            logger.info(f'Using features:"{features}"')
+            np_array = np_array[:,
+                                [adata.var_names.get_loc(feature)
+                                 for feature in features]]
+        return np_array
 
 
 def batch_normalize(adata, annotation, output_layer,
@@ -369,7 +431,7 @@ def batch_normalize(adata, annotation, output_layer,
         Ensure this is boolean.
     """
     if not isinstance(log, bool):
-        logging.error("Argument 'log' must be of type bool.")
+        logger.error("Argument 'log' must be of type bool.")
         raise ValueError("Argument 'log' must be of type bool.")
 
     allowed_methods = ["median", "Q50", "Q75", "z-score"]
@@ -388,40 +450,40 @@ def batch_normalize(adata, annotation, output_layer,
 
     if log:
         original = np.log2(1+original)
-        logging.info("Data transformed with log2")
+        logger.info("Data transformed with log2")
 
     if method == "median" or method == "Q50":
         all_batch_quantile = original.quantile(q=0.5)
-        logging.info("Median for al cells: %s", all_batch_quantile)
+        logger.info("Median for al cells: %s", all_batch_quantile)
     elif method == "Q75":
         all_batch_quantile = original.quantile(q=0.75)
-        logging.info("Q75 for all cells: %s", all_batch_quantile)
+        logger.info("Q75 for all cells: %s", all_batch_quantile)
     elif method == "z-score":
-        logging.info("Z-score setup is handled in batch processing loop.")
+        logger.info("Z-score setup is handled in batch processing loop.")
 
     # Place holder for normalized dataframes per batch
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
-        logging.info(f"Processing batch: {batch}, "
+        logger.info(f"Processing batch: {batch}, "
                      f"original values:\n{batch_cells}")
 
         if method == "median":
             batch_median = batch_cells.quantile(q=0.5)
-            logging.info(f"Median for {batch}: %s", batch_median)
+            logger.info(f"Median for {batch}: %s", batch_median)
             original.loc[
                 (adata.obs[annotation] == batch)
             ] = batch_cells + (all_batch_quantile - batch_median)
 
         elif method == "Q50":
             batch_50quantile = batch_cells.quantile(q=0.5)
-            logging.info(f"Q50 for {batch}: %s", batch_50quantile)
+            logger.info(f"Q50 for {batch}: %s", batch_50quantile)
             original.loc[adata.obs[annotation] == batch] = (
                 batch_cells * all_batch_quantile / batch_50quantile
             )
 
         elif method == "Q75":
             batch_75quantile = batch_cells.quantile(q=0.75)
-            logging.info(f"Q75 for {batch}: %s", batch_75quantile)
+            logger.info(f"Q75 for {batch}: %s", batch_75quantile)
             original.loc[adata.obs[annotation] == batch] = (
                 batch_cells * all_batch_quantile / batch_75quantile
             )
@@ -429,8 +491,8 @@ def batch_normalize(adata, annotation, output_layer,
         elif method == "z-score":
             mean = batch_cells.mean()
             std = batch_cells.std(ddof=0)  # DataFrame.std() by default ddof=1
-            logging.info(f"mean for {batch}: %s", mean)
-            logging.info(f"std for {batch}: %s", std)
+            logger.info(f"mean for {batch}: %s", mean)
+            logger.info(f"std for {batch}: %s", std)
             # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
             std = np.maximum(std, 1e-8)
             original.loc[adata.obs[annotation] == batch] = \
@@ -692,7 +754,7 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
 
     # Check if output_layer already exists and issue a warning if it does
     if output_layer in adata.layers:
-        logging.warning(
+        logger.warning(
             f"Layer '{output_layer}' already exists. It will be overwritten "
             "with the new transformed data."
         )
