@@ -376,6 +376,43 @@ class TestAnalysisMethods(unittest.TestCase):
             ).to_numpy()
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
 
+    def test_original_data_preserved(self):
+        batch = "region"
+
+        # Original marker data
+        df1 = pd.DataFrame({
+            'marker1': [1, 2, 3],
+            'marker2': [4, 5, 6],
+            batch: "reg1"
+        })
+
+        df2 = pd.DataFrame({
+            'marker1': [7, 8, 9],
+            'marker2': [10, 11, 12],
+            batch: "reg2"
+        })
+
+        # Ingesting the data and concatenating regions
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
+
+        all_adata = concatinate_regions([adata1, adata2])
+
+        # Copy the original data to compare later
+        original_data = all_adata.X.copy()
+
+        # Perform batch normalization
+        normalized_layer = "median_normalization"
+        batch_normalize(
+            all_adata,
+            annotation=batch,
+            output_layer=normalized_layer,
+            method="median"
+        )
+
+        # Check that the original data remains intact
+        self.assertTrue(np.array_equal(original_data, all_adata.X))
+
 
 if __name__ == '__main__':
     unittest.main()
