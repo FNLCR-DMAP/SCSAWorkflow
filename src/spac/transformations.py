@@ -501,7 +501,9 @@ def batch_normalize(adata, annotation, output_layer,
             original.loc[adata.obs[annotation] == batch] = \
                 (batch_cells - mean) / std
 
+    # Store normalized data in the specified output layer
     adata.layers[output_layer] = original
+    logging.info(f"Normalization completed. Data in layer '{output_layer}'.")
 
 
 def rename_annotations(adata, src_annotation, dest_annotation, mappings):
