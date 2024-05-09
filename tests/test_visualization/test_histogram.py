@@ -122,7 +122,7 @@ class TestHistogram(unittest.TestCase):
         )
         self.assertEqual(len(axs), 1)
 
-        # Check the number of axes returned
+        # Check the number of returned axes matches the unique group count
         unique_annotations = adata.obs['annotation1'].nunique()
         self.assertEqual(len(axs), unique_annotations)
 
