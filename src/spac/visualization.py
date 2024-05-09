@@ -437,7 +437,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 n_groups, 1, figsize=(5, 5 * n_groups)
             )
 
-            # convert a single Axes object to a list
+            # Convert a single Axes object to a list
+            # Ensure ax_array is always iterable
             if n_groups == 1:
                 ax_array = [ax_array]
 
