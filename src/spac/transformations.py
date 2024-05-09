@@ -297,17 +297,20 @@ def batch_normalize(adata, annotation, output_layer,
             f"allowed methods = {allowed_methods}"
         )
 
-    batches = adata.obs[annotation].unique().tolist()
+    # Create a copy of the input layer or '.X'
     if input_layer:
         original = pd.DataFrame(adata.layers[input_layer],
-                                index=adata.obs.index)
+                                index=adata.obs.index).copy()
     else:
-        original = pd.DataFrame(adata.X, index=adata.obs.index)
+        original = pd.DataFrame(adata.X, index=adata.obs.index).copy()
 
+    # Logarithmic transformation if required
     if log:
         original = np.log2(1+original)
         logging.info("Data transformed with log2")
 
+    # Initialize the batch annotation values
+    batches = adata.obs[annotation].unique().tolist()
     if method == "median" or method == "Q50":
         all_batch_quantile = original.quantile(q=0.5)
         logging.info("Median for al cells: %s", all_batch_quantile)
@@ -317,7 +320,7 @@ def batch_normalize(adata, annotation, output_layer,
     elif method == "z-score":
         logging.info("Z-score setup is handled in batch processing loop.")
 
-    # Place holder for normalized dataframes per batch
+    # Normalize each batch
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
         logging.info(f"Processing batch: {batch}, "
