@@ -4,6 +4,8 @@ import pandas as pd
 import anndata
 from unittest.mock import patch
 from spac.transformations import arcsinh_transformation
+import warnings
+import logging
 
 
 class TestArcsinhTransformation(unittest.TestCase):
@@ -91,12 +93,29 @@ class TestArcsinhTransformation(unittest.TestCase):
         # transformation should overwrite it
         arcsinh_transformation(self.adata)
 
-        with patch("spac.transformations.logging.warning") as mock_warning:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='SPAC:%(asctime)s - %(levelname)s - %(message)s')
+
+        expected_message = ("Layer 'arcsinh' already exists."
+                            " It will be overwritten with "
+                            "the new transformed data.")
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause a warning by calling the function with an
+            # existing output_layer
             arcsinh_transformation(self.adata)
-            mock_warning.assert_called_once_with(
-                "Layer 'arcsinh' already exists. It will be overwritten with "
-                "the new transformed data."
-            )
+
+            # Check if the warning message is as expected
+            self.assertEqual(len(w), 1)
+            self.assertEqual(expected_message, str(w[0].message))
+
+#        with patch("spac.transformations.logging.warning") as mock_warning:
+#            arcsinh_transformation(self.adata)
+#            mock_warning.assert_called_once_with(
+#                "Layer 'arcsinh' already exists. It will be overwritten with "
+#                "the new transformed data."
+#            )
 
     def test_cofactor_takes_precedence_over_percentile(self):
         # Set both co_factor and percentile
