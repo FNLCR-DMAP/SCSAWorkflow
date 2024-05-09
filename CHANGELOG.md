@@ -2,34 +2,28 @@
 
 
 
-## v0.5.0 (2024-05-03)
+## v0.5.1 (2024-05-09)
 
-### Feature
+### Fix
 
-* feat(batch_normalize): add input_layer and z-score method and fix unit tests ([`5bd1ebe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bd1ebe1827b0b9c9266fccaf65c6e294bf4f28b))
-
-* feat(batch_normalize): add features input_layer and z-score method and corresponding unit tests ([`a693640`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a693640cfd413c0e61d06d9ed93b147b0f70d8fa))
-
-### Refactor
-
-* refactor: batch_normalize unit tests ([`cc73faa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc73faab46719164f59ded07f98833f52763ac0a))
-
-* refactor: batch_normalize and z_score unit test ([`632848d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/632848dc2d76531d707b1323f3b54a3456704d6e))
+* fix: histogram and unit test on commits ([`cd8e672`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8e672f555cc8f690513ef0ff0453aa146890c1))
 
 ### Unknown
 
-* Merge pull request #174 from FNLCR-DMAP/dev
+* Merge pull request #183 from FNLCR-DMAP/dev
 
-merge pull request from dev to release_dev for batch normalize ([`0e49703`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e49703d72fcdba7c676ce9c2b60dbf8f3fc90c9))
+merge histogram from dev to release_dev ([`d90e216`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d90e216a1fc2a28267de3ad67c7c1c4c985b5767))
 
-* Merge pull request #171 from FNLCR-DMAP/batch_norm
+* Merge pull request #182 from FNLCR-DMAP/histogram
 
-feat(batch_normalize): add features input_layer and z-score method and fix unit tests ([`c373abe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c373abe7bbcd0a32f8d934031b20cd2e95f1213a))
+fix: histogram and unit test on commits ([`5b545b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5b545b20a1ff11c66030a61223df0ec3c8526b80))
 
 
-## v0.4.5 (2024-03-26)
+## v0.5.0 (2024-05-09)
 
 ### Documentation
+
+* docs(version): Automatic development release ([`c4858b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4858b3014272873d8c9a17316196d5af9b33706))
 
 * docs(version): Automatic development release ([`ffd8861`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ffd8861d7f8043bd4b86beb001ee091882f0ae2b))
 
@@ -76,6 +70,10 @@ feat(batch_normalize): add features input_layer and z-score method and fix unit 
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
 
 ### Feature
+
+* feat(batch_normalize): add input_layer and z-score method and fix unit tests ([`5bd1ebe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bd1ebe1827b0b9c9266fccaf65c6e294bf4f28b))
+
+* feat(batch_normalize): add features input_layer and z-score method and corresponding unit tests ([`a693640`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a693640cfd413c0e61d06d9ed93b147b0f70d8fa))
 
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
@@ -145,11 +143,39 @@ feat(batch_normalize): add features input_layer and z-score method and fix unit 
 
 ### Refactor
 
+* refactor: batch_normalize and unit test ([`cb619a1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cb619a1b795e80ed5062737485f84d569e86eed4))
+
+* refactor: batch_normalize unit tests ([`cc73faa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc73faab46719164f59ded07f98833f52763ac0a))
+
+* refactor: batch_normalize and z_score unit test ([`632848d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/632848dc2d76531d707b1323f3b54a3456704d6e))
+
 * refactor(select_values): remove unnecessary logging and add astype(str) ([`50410c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50410c22414b833fd69b76a7da23bc179d3ee1da))
 
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
 ### Unknown
+
+* Merge pull request #180 from FNLCR-DMAP/dev
+
+merge histogram &amp; batch normalize from dev to release_dev ([`f9a1ad8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f9a1ad8c3574315944250cebc8ff0a02c44ec953))
+
+* Merge pull request #178 from FNLCR-DMAP/batch_norm
+
+refactor: batch_normalize and unit test ([`4c20566`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4c205665bde8d804e03eb2f6c54f0f734518c688))
+
+* Merge pull request #179 from FNLCR-DMAP/histogram
+
+fix:histogram and corresponding unit tests ([`a2e8a52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a2e8a525948c248c37e1d8f541e153fecf38a924))
+
+* fix:histogram and corresponding unit tests ([`05dc768`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05dc768b90ba154c11e80a4595493e8500da0b02))
+
+* Merge pull request #174 from FNLCR-DMAP/dev
+
+merge pull request from dev to release_dev for batch normalize ([`0e49703`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e49703d72fcdba7c676ce9c2b60dbf8f3fc90c9))
+
+* Merge pull request #171 from FNLCR-DMAP/batch_norm
+
+feat(batch_normalize): add features input_layer and z-score method and fix unit tests ([`c373abe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c373abe7bbcd0a32f8d934031b20cd2e95f1213a))
 
 * Merge pull request #170 from FNLCR-DMAP/dev
 
