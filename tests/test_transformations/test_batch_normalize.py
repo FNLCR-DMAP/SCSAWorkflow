@@ -410,7 +410,7 @@ class TestAnalysisMethods(unittest.TestCase):
             method="median"
         )
 
-        # Check that the original data remains intact
+        # Verify that the original data remains intact
         self.assertTrue(np.array_equal(original_data, all_adata.X))
 
 
