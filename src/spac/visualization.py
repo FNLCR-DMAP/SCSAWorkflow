@@ -13,6 +13,7 @@ from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping
 import logging
+import warnings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -370,6 +371,17 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     """
 
+    # If no feature or annotation is specified, apply default behavior
+    if feature is None and annotation is None:
+        # Default to the first feature in adata.var_names
+        feature = adata.var_names[0]
+        warnings.warn(
+            "No feature or annotation specified. "
+            "Defaulting to the first feature: "
+            f"'{feature}'.",
+            UserWarning
+        )
+
     # Use utility functions for input validation
     if layer:
         check_table(adata, tables=layer)
@@ -424,6 +436,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             fig, ax_array = plt.subplots(
                 n_groups, 1, figsize=(5, 5 * n_groups)
             )
+
+            # convert a single Axes object to a list
+            if n_groups == 1:
+                ax_array = [ax_array]
+
             for i, ax_i in enumerate(ax_array):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
                              x=data_column, ax=ax_i, **kwargs)
