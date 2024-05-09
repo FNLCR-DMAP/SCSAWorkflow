@@ -115,3 +115,7 @@ Datetime: 2024-05-09 14:41:45, Version:  spac-dev-0.5.0-py38_0.tar.bz2
 Datetime: 2024-05-09 16:09:56, Version:  spac-dev-0.5.1-py38_0.tar.bz2
 <br>[View Commit Log](Commit_Log_spac-dev-0.5.1-py38_0.log)
 <br>Deployment Status: Success
+
+Datetime: 2024-05-09 18:45:22, Version:  spac-dev-0.6.0-py38_0.tar.bz2
+<br>[View Commit Log](Commit_Log_spac-dev-0.6.0-py38_0.log)
+<br>Deployment Status: Success
