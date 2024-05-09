@@ -754,7 +754,7 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
 
     # Check if output_layer already exists and issue a warning if it does
     if output_layer in adata.layers:
-        logger.warning(
+        warnings.warn(
             f"Layer '{output_layer}' already exists. It will be overwritten "
             "with the new transformed data."
         )

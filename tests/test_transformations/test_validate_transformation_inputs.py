@@ -18,8 +18,6 @@ class TestValidateTransformationInputs(unittest.TestCase):
                             " and 'table':'layer_name'. Please choose one.")
         self.assertEqual(expected_message, str(context.exception))
 
-
-
     def test_input_derived_feature_existence(self):
         adata = anndata.AnnData()
         with self.assertRaises(ValueError):
