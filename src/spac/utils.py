@@ -486,10 +486,18 @@ def annotation_category_relations(
     logging.info((f"Source: {source_annotation}"))
     logging.info((f"Target: {target_annotation}"))
 
+    if source_annotation == source_annotation:
+        logging.info("Source and Target are the same")
+        target_annotation_copy = f"{target_annotation}_copy"
+        adata.obs[target_annotation_copy] = adata.obs[target_annotation]
+        target_annotation = target_annotation_copy
+
     # Calculate label relationships between source and target columns
     relationships = adata.obs.groupby(
         [source_annotation, target_annotation]
         ).size().reset_index(name='count')
+
+    adata.obs.drop(columns=[target_annotation_copy], inplace=True)
 
     # Calculate the total count for each source
     total_counts = (
