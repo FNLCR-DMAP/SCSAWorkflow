@@ -194,7 +194,7 @@ def dimensionality_reduction_plot(
         If not provided, a new figure and axes will be created.
     associated_table : str, optional (default: None)
         Name of the key in `obsm` that contains the numpy array. Takes
-        precendene over `method`
+        precedence over `method`
     **kwargs
         Parameters passed to visualize_2D_scatter function.
 
