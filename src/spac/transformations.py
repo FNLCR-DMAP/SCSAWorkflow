@@ -67,10 +67,10 @@ def phenograph_clustering(
     Returns
     -------
     adata : anndata.AnnData
-        Updated AnnData object with the phenograph clusters 
+        Updated AnnData object with the phenograph clusters
         stored in `adata.obs[output_annotation]`
     """
-        
+
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,
@@ -257,7 +257,7 @@ def run_umap(
         RNG seed during UMAP transformation.
     layer : str, optional
         Layer of AnnData object for UMAP. Defaults to `adata.X`.
-    output_derived_feature : str, default='X_umap' 
+    output_derived_feature : str, default='X_umap'
         The name of the column in adata.obsm that will contain the
         umap coordinates.
     input_derived_feature : str, optional
@@ -372,7 +372,7 @@ def _select_input_features(adata: anndata,
         Name of the key in `adata.obsm` that contains the numpy array.
         Defaults to `None`.
     features : str or List[str], optional
-        Names of the features to select from layer. If None, all features are 
+        Names of the features to select from layer. If None, all features are
         selected. Defaults to None.
 
     Returns
@@ -468,7 +468,7 @@ def batch_normalize(adata, annotation, output_layer,
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
         logger.info(f"Processing batch: {batch}, "
-                     f"original values:\n{batch_cells}")
+                    f"original values:\n{batch_cells}")
 
         if method == "median":
             batch_median = batch_cells.quantile(q=0.5)
@@ -573,6 +573,57 @@ def rename_annotations(adata, src_annotation, dest_annotation, mappings):
     adata.obs[dest_annotation] = (
         adata.obs[src_annotation].map(mappings).astype("category")
     )
+
+
+def apply_per_batch(adata, batches, func, output_layer, input_layer=None,
+                    **kwargs):
+    """
+    Apply a given function to normalize data per batch, with additional
+    parameters.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the data to transform.
+    batches : pd.Series
+        Batch annotations for each row in the data.
+    func : Callable[[anndata.AnnData, **kwargs], anndata.AnnData]
+        The normalization function to apply to each batch.
+        Accepts additional keyword arguments.
+    input_layer : str, optional
+        The name of the layer in the AnnData object to transform.
+        If None, the main data matrix .X is used.
+    output_layer : str
+        Name of the layer to put the transformed results.
+
+    kwargs:
+        Additional parameters to pass to the normalization function.
+
+    Returns
+    -------
+    anndata.AnnData
+        The normalized data with the same index and columns as the input.
+    """
+    normalized_batches = []
+    unique_batches = batches.unique()
+
+    for batch in unique_batches:
+        batch_indices = batches[batches == batch].index
+        batch_adata = adata[batch_indices].copy()
+        normalized_batch_adata = func(batch_adata,
+                                      input_layer=input_layer,
+                                      output_layer=output_layer,
+                                      **kwargs)
+        normalized_batches.append(normalized_batch_adata)
+
+    normalized_data = anndata.AnnData.concatenate(
+        *normalized_batches, join='outer', batch_key=None
+    )
+    normalized_data.obs_names = adata.obs_names
+
+    adata.layers[output_layer] = normalized_data.layers[output_layer]
+
+    return adata
 
 
 def normalize_features(
@@ -691,8 +742,10 @@ def normalize_features(
     return quantiles
 
 
-def arcsinh_transformation(adata, input_layer=None, co_factor=None,
-                           percentile=20, output_layer="arcsinh"):
+def arcsinh_transformation(
+    adata, input_layer=None, co_factor=None, percentile=20,
+    output_layer="arcsinh", per_batch=False, batches=None
+):
     """
     Apply arcsinh transformation using a co-factor.
 
@@ -713,12 +766,17 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
     co_factor : float, optional
         A fixed positive number to use as a co-factor for the transformation.
         If provided, it takes precedence over the percentile argument.
-    percentile : int, default=20
+    percentile : float, default=20
         The percentile to determine the co-factor if co_factor is not provided.
         The percentile is computed for each feature (column) individually.
     output_layer : str, default="arcsinh"
         Name of the layer to put the transformed results. If it already exists,
         it will be overwritten with a warning.
+    per_batch : bool, optional, default=False
+        Whether to apply the transformation per batch.
+    batches : pd.Series, optional
+        Batch annotations for each row in the data. Required if per_batch is
+        True.
 
     Returns
     -------
@@ -726,6 +784,15 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
         The AnnData object with the transformed data stored in the specified
         output_layer.
     """
+
+    if per_batch:
+        if batches is None:
+            raise ValueError("batches must be provided if per_batch is True.")
+        return apply_per_batch(
+            adata, batches, arcsinh_transformation, input_layer=input_layer,
+            output_layer=output_layer, co_factor=co_factor,
+            percentile=percentile
+        )
 
     # Check if the provided input_layer exists in the AnnData object
     if input_layer:
@@ -738,8 +805,10 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
     if co_factor and co_factor <= 0:
         raise ValueError("Co_factor should be a positive value.")
 
-    if not (0 <= percentile <= 100):
+    if percentile is not None and not (0 <= percentile <= 100):
         raise ValueError("Percentile should be between 0 and 100.")
+    if co_factor is None and percentile is None:
+        raise ValueError("Either co_factor or percentile must be provided.")
 
     # Determine the co-factor
     if co_factor:
