@@ -70,7 +70,7 @@ def phenograph_clustering(
         Updated AnnData object with the phenograph clusters 
         stored in `adata.obs[output_annotation]`
     """
-        
+
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,

@@ -160,8 +160,15 @@ def visualize_2D_scatter(
     return fig, ax
 
 
-def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
-                                  layer=None, ax=None, **kwargs):
+def dimensionality_reduction_plot(
+        adata,
+        method=None,
+        annotation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        input_derived_feature=None,
+        **kwargs):
     """
     Visualize scatter plot in PCA, t-SNE or UMAP basis.
 
@@ -170,7 +177,7 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     adata : anndata.AnnData
         The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
         function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
-    method : str
+    method : str, optional (default: None)
         Dimensionality reduction method to visualize.
         Choose from {'tsne', 'umap', 'pca'}.
     annotation : str, optional
@@ -185,6 +192,9 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     ax : matplotlib.axes.Axes, optional (default: None)
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
+    input_derived_feature : str, optional (default: None)
+        Name of the key in `obsm` that contains the numpy array. Takes
+        precendene over `method`
     **kwargs
         Parameters passed to visualize_2D_scatter function.
 
@@ -211,16 +221,37 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    valid_methods = ['tsne', 'umap', 'pca']
-    if method not in valid_methods:
-        raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}.")
+    if input_derived_feature is None:
+        valid_methods = ['tsne', 'umap', 'pca']
+        if method not in valid_methods:
+            raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}"
+                             f'. Got:"{method}"')
 
-    key = f'X_{method}'
-    if key not in adata.obsm.keys():
-        raise ValueError(
-            f"{key} coordinates not found in adata.obsm. "
-            f"Please run {method.upper()} before calling this function."
+        key = f'X_{method}'
+        if key not in adata.obsm.keys():
+            raise ValueError(
+                f"{key} coordinates not found in adata.obsm. "
+                f"Please run {method.upper()} before calling this function."
+            )
+
+    else:
+        check_table(
+            adata=adata,
+            tables=input_derived_feature,
+            should_exist=True,
+            associated_table=True
         )
+
+        derived_feature_shape = adata.obsm[input_derived_feature].shape
+        if derived_feature_shape[1] != 2:
+            raise ValueError(
+                f'The associated table:"{input_derived_feature}" does not have'
+                f' two dimensions. It shape is:"{derived_feature_shape}"'
+            )
+        key = input_derived_feature
+
+    logger = logging.getLogger()
+    logger.info(f'Running visualizaiton using the coordinates:"{key}"')
 
     # Extract the 2D coordinates
     x, y = adata.obsm[key].T

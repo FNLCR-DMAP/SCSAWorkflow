@@ -14,6 +14,8 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.adata.obsm['X_tsne'] = np.random.rand(10, 2)
         self.adata.obsm['X_umap'] = np.random.rand(10, 2)
         self.adata.obsm['X_pca'] = np.random.rand(10, 2)
+        self.adata.obsm['sumap'] = np.random.rand(10, 2)
+        self.adata.obsm['3dsumap'] = np.random.rand(10, 3)
         self.adata.obs['annotation_column'] = np.random.choice(
             ['A', 'B', 'C'], size=10
         )
@@ -59,6 +61,15 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
 
+    def test_input_derived_feature(self):
+        fig, ax = dimensionality_reduction_plot(
+            self.adata,
+            annotation='annotation_column',
+            input_derived_feature='sumap'
+        )
+        self.assertIsNotNone(fig)
+        self.assertIsNotNone(ax)
+
     def test_feature_column(self):
         fig, ax = dimensionality_reduction_plot(
             self.adata, 'tsne', feature='gene_1'
@@ -98,7 +109,18 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(self.adata, 'invalid_method')
-        expected_msg = "Method should be one of {'tsne', 'umap', 'pca'}."
+        expected_msg = ("Method should be one of {'tsne', 'umap', 'pca'}."
+                        ' Got:"invalid_method"')
+        self.assertEqual(str(cm.exception), expected_msg)
+
+    def test_input_derived_feature_3d(self):
+        with self.assertRaises(ValueError) as cm:
+            dimensionality_reduction_plot(
+                self.adata,
+                input_derived_feature='3dsumap')
+        expected_msg = ('The associated table:"3dsumap" does not have'
+                        ' two dimensions. It shape is:"(10, 3)"')
+
         self.assertEqual(str(cm.exception), expected_msg)
 
 
