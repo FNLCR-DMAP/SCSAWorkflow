@@ -170,7 +170,7 @@ def dimensionality_reduction_plot(
         associated_table=None,
         **kwargs):
     """
-    Visualize scatter plot in PCA, t-SNE or UMAP basis.
+    Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.
 
     Parameters
     ----------
