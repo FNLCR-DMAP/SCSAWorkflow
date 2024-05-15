@@ -167,7 +167,7 @@ def dimensionality_reduction_plot(
         feature=None,
         layer=None,
         ax=None,
-        input_derived_feature=None,
+        associated_table=None,
         **kwargs):
     """
     Visualize scatter plot in PCA, t-SNE or UMAP basis.
@@ -192,7 +192,7 @@ def dimensionality_reduction_plot(
     ax : matplotlib.axes.Axes, optional (default: None)
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
-    input_derived_feature : str, optional (default: None)
+    associated_table : str, optional (default: None)
         Name of the key in `obsm` that contains the numpy array. Takes
         precendene over `method`
     **kwargs
@@ -221,7 +221,7 @@ def dimensionality_reduction_plot(
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    if input_derived_feature is None:
+    if associated_table is None:
         valid_methods = ['tsne', 'umap', 'pca']
         if method not in valid_methods:
             raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}"
@@ -237,18 +237,18 @@ def dimensionality_reduction_plot(
     else:
         check_table(
             adata=adata,
-            tables=input_derived_feature,
+            tables=associated_table,
             should_exist=True,
             associated_table=True
         )
 
-        derived_feature_shape = adata.obsm[input_derived_feature].shape
-        if derived_feature_shape[1] != 2:
+        associated_table_shape = adata.obsm[associated_table].shape
+        if associated_table_shape[1] != 2:
             raise ValueError(
-                f'The associated table:"{input_derived_feature}" does not have'
-                f' two dimensions. It shape is:"{derived_feature_shape}"'
+                f'The associated table:"{associated_table}" does not have'
+                f' two dimensions. It shape is:"{associated_table_shape}"'
             )
-        key = input_derived_feature
+        key = associated_table
 
     logger = logging.getLogger()
     logger.info(f'Running visualizaiton using the coordinates:"{key}"')

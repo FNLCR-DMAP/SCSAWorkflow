@@ -389,7 +389,7 @@ def neighborhood_profile(
     regions=None,
     spatial_key="spatial",
     normalize=None,
-    derived_feature_name="neighborhood_profile"
+    associated_table_name="neighborhood_profile"
 ):
 
     """
@@ -417,7 +417,7 @@ def neighborhood_profile(
         If 'bin_area', normalize the neighborhood profile based on the area
         of every bin.  Default is None.
     
-    derived_feature_name : str, optional
+    associated_table_name : str, optional
         The name of the column in adata.obsm that will contain the
         neighborhood profile. Default is 'neighborhood_profile'.
 
@@ -436,12 +436,12 @@ def neighborhood_profile(
     -----
     The input AnnData object 'adata' is modified in place. The function adds a
     new column containing the neighborhood profile to adata.obsm, named by the
-    parameter 'derived_feature_name'. The derived_feature_name is a 3D array of
+    parameter 'associated_table_name'. The associated_table_name is a 3D array of
     shape (n_cells, n_phenotypes, n_bins) where n_cells is the number of cells
     in the all slides, n_phenotypes is the number of unique phenotypes, and
     n_bins is the number of bins in the distances list.
 
-    A dictionary is added to adata.uns[derived_feature_name] with the two keys
+    A dictionary is added to adata.uns[associated_table_name] with the two keys
     "bins" and "labels". "labels" will store all the values in the phenotype
     annotation.
     """
@@ -486,11 +486,11 @@ def neighborhood_profile(
         raise ValueError((f'normalize must be "total_cells", "bin_area"'
                           f' or None. Got "{normalize}"'))
 
-    # Check that the derived_feature name does not exist.
+    # Check that the associated_table_name does not exist.
     # Raise a warning othewise
     check_table(
         adata=adata,
-        tables=derived_feature_name,
+        tables=associated_table_name,
         should_exist=False,
         associated_table=True,
         warning=True
@@ -542,15 +542,15 @@ def neighborhood_profile(
         )
 
     # Add the neighborhood profile to the AnnData object
-    adata.obsm[derived_feature_name] = all_cells_profiles
+    adata.obsm[associated_table_name] = all_cells_profiles
 
     # Store the bins and the lables in uns
     summary = {"bins": distances, "labels": le.classes_}
-    if derived_feature_name in adata.uns:
+    if associated_table_name in adata.uns:
         logger.warning(f"The analysis already contains the \
-                       unstructured value:{derived_feature_name}. \
+                       unstructured value:{associated_table_name}. \
                        It will be overwriten")
-    adata.uns[derived_feature_name] = summary
+    adata.uns[associated_table_name] = summary
 
 def _neighborhood_profile_core(
         coord,

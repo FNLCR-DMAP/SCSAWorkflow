@@ -61,11 +61,11 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
 
-    def test_input_derived_feature(self):
+    def test_associated_table(self):
         fig, ax = dimensionality_reduction_plot(
             self.adata,
             annotation='annotation_column',
-            input_derived_feature='sumap'
+            associated_table='sumap'
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
@@ -117,7 +117,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(
                 self.adata,
-                input_derived_feature='3dsumap')
+                associated_table='3dsumap')
         expected_msg = ('The associated table:"3dsumap" does not have'
                         ' two dimensions. It shape is:"(10, 3)"')
 

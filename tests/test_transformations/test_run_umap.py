@@ -49,7 +49,7 @@ class TestRunUMAP(unittest.TestCase):
         umap_shape = self.adata.obsm[output_name].shape
         self.assertEqual(umap_shape, (self.adata.n_obs, 2))
 
-    def test_input_derived_feature(self):
+    def test_associated_table(self):
 
         run_umap(
             self.adata,
@@ -57,7 +57,7 @@ class TestRunUMAP(unittest.TestCase):
             min_dist=0.1,
             n_components=2,
             random_state=42,
-            input_derived_feature="derived_features"
+            associated_table="derived_features"
         )
 
         umap_shape = self.adata.obsm['X_umap'].shape

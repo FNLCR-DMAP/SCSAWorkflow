@@ -108,7 +108,7 @@ class TestPhenographClustering(unittest.TestCase):
     def test_associated_features(self):
         # Run phenograph using the derived feature and generate two clusters
         output_annotation = 'derived_phenograph'
-        input_derived_feature = 'derived_features'
+        associated_table = 'derived_features'
         phenograph_clustering(
             adata=self.syn_data,
             features=None,
@@ -116,7 +116,7 @@ class TestPhenographClustering(unittest.TestCase):
             k=50,
             seed=None,
             output_annotation=output_annotation,
-            input_derived_feature=input_derived_feature,
+            associated_table=associated_table,
             resolution_parameter=0.1
         )
 

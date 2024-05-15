@@ -26,7 +26,7 @@ def phenograph_clustering(
         k=50,
         seed=None,
         output_annotation="phenograph",
-        input_derived_feature=None,
+        associated_table=None,
         **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
@@ -59,7 +59,7 @@ def phenograph_clustering(
     output_annotation : str, optional
         The name of the output layer where the clusters are stored.
 
-    input_derived_feature : str, optional
+    associated_table : str, optional
         If set, use the corresponding key `adata.obsm` to calcuate the
         Phenograph. Takes priority over the layer argument.
 
@@ -74,7 +74,7 @@ def phenograph_clustering(
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,
-        input_derived_feature=input_derived_feature,
+        associated_table=associated_table,
         features=features
     )
 
@@ -87,7 +87,7 @@ def phenograph_clustering(
     data = _select_input_features(
         adata=adata,
         layer=layer,
-        input_derived_feature=input_derived_feature,
+        associated_table=associated_table,
         features=features
     )
 
@@ -227,7 +227,7 @@ def run_umap(
         transform_seed=42,
         layer=None,
         output_derived_feature='X_umap',
-        input_derived_feature=None,
+        associated_table=None,
         **kwargs
 ):
     """
@@ -260,7 +260,7 @@ def run_umap(
     output_derived_feature : str, default='X_umap' 
         The name of the column in adata.obsm that will contain the
         umap coordinates.
-    input_derived_feature : str, optional
+    associated_table : str, optional
         If set, use the corresponding key `adata.obsm` to calcuate the
         UMAP. Takes priority over the layer argument.
 
@@ -275,13 +275,13 @@ def run_umap(
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,
-        input_derived_feature=input_derived_feature
+        associated_table=associated_table
     )
 
     data = _select_input_features(
         adata=adata,
         layer=layer,
-        input_derived_feature=input_derived_feature
+        associated_table=associated_table
     )
 
     # Convert data to pandas DataFrame for better memory handling
@@ -312,7 +312,7 @@ def run_umap(
 def _validate_transformation_inputs(
         adata: anndata,
         layer: Optional[str] = None,
-        input_derived_feature: Optional[str] = None,
+        associated_table: Optional[str] = None,
         features: Optional[Union[List[str], str]] = None
         ) -> None:
     """
@@ -324,7 +324,7 @@ def _validate_transformation_inputs(
         Annotated data matrix.
     layer : str, optional
         Name of the layer in `adata` to use for transformation.
-    input_derived_feature : str, optional
+    associated_table : str, optional
         Name of the key in `obsm` that contains the numpy array.
     features : list of str or str, optional
         Names of features to use for transformation.
@@ -332,17 +332,17 @@ def _validate_transformation_inputs(
     Raises
     ------
     ValueError
-        If both `input_derived_feature` and `layer` are specified.
+        If both `associated_table` and `layer` are specified.
     """
 
-    if input_derived_feature is not None and layer is not None:
+    if associated_table is not None and layer is not None:
         raise ValueError("Cannot specify both"
-                         f" 'associated table':'{input_derived_feature}'"
+                         f" 'associated table':'{associated_table}'"
                          f" and 'table':'{layer}'. Please choose one.")
 
-    if input_derived_feature is not None:
+    if associated_table is not None:
         check_table(adata=adata,
-                    tables=input_derived_feature,
+                    tables=associated_table,
                     should_exist=True,
                     associated_table=True)
     else:
@@ -355,7 +355,7 @@ def _validate_transformation_inputs(
 
 def _select_input_features(adata: anndata,
                            layer: str = None,
-                           input_derived_feature: str = None,
+                           associated_table: str = None,
                            features: Optional[Union[str, List[str]]] = None,
 
                            ) -> np.ndarray:
@@ -368,7 +368,7 @@ def _select_input_features(adata: anndata,
         Annotated data matrix.
     layer : str, optional
         Layer of AnnData object for UMAP. Defaults to `None`.
-    input_derived_feature : str, optional
+    associated_table : str, optional
         Name of the key in `adata.obsm` that contains the numpy array.
         Defaults to `None`.
     features : str or List[str], optional
@@ -381,10 +381,10 @@ def _select_input_features(adata: anndata,
         The selected numpy array.
 
     """
-    if input_derived_feature is not None:
+    if associated_table is not None:
         # Flatten the obsm numpy array before returning it
-        logger.info(f'Using the derived table:"{input_derived_feature}"')
-        np_array = adata.obsm[input_derived_feature]
+        logger.info(f'Using the associated table:"{associated_table}"')
+        np_array = adata.obsm[associated_table]
         return np_array.reshape(np_array.shape[0], -1)
     else:
         np_array = adata.layers[layer] if layer is not None else adata.X
