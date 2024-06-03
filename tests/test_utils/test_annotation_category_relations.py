@@ -33,6 +33,16 @@ class TestAnnotationCategoryRelations(unittest.TestCase):
         # Assert the result is a pandas DataFrame
         self.assertIsInstance(result, pd.DataFrame)
 
+    def test_same_input(self):
+        result = annotation_category_relations(
+            self.adata,
+            'annotation1',
+            'annotation1'
+        )
+
+        # Assert the result is a pandas DataFrame
+        self.assertIsInstance(result, pd.DataFrame)
+
     def test_annotation_category_relations(self):
         result = annotation_category_relations(
             self.adata,
