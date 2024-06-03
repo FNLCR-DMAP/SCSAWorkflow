@@ -942,7 +942,7 @@ def combine_dfs(dataframes: list):
 def add_pin_color_rules(
     adata,
     label_color_dict: dict,
-    color_map_name: str,
+    color_map_name: str = "_spac_colors",
     overwrite: bool = True
 ) -> Tuple[dict, str]:
     """
