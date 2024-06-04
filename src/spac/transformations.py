@@ -757,8 +757,8 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
             f"passed value is: {interpolation}")
 
     # Calculate the quantiles
-    quantiles = np.percentile(
-        data, [low_quantile * 100, high_quantile * 100], axis=0,
+    quantiles = np.quantile(
+        data, [low_quantile, high_quantile], axis=0,
         method=interpolation)
 
     qmin = quantiles[0]
@@ -767,7 +767,7 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
     # Prevent division by zero in case qmax equals qmin
     range_values = qmax - qmin
     range_values = range_values.astype(float)
-    range_values[range_values == 0] = 1e-10  # Use a small epsilon value
+    range_values[range_values == 0] = 1
 
     # Clip raw values to the quantile range before normalization
     clipped_data = np.clip(data, qmin, qmax)
@@ -918,9 +918,14 @@ def arcsinh_transformation_core(data, co_factor=None, percentile=None):
         if not (0 <= percentile <= 100):
             raise ValueError("Percentile should be between 0 and 100.")
         co_factor = np.percentile(data, percentile, axis=0)
-        co_factor[co_factor == 0] = 1e-10  # Avoid division by zero
 
-    return np.arcsinh(data / co_factor)
+    # Perform arcsinh transformation with special handling for zero co_factor
+    # If co_factor > 0, apply arcsinh(data / co_factor)
+    # If co_factor == 0, apply arcsinh(data) to avoid division by zero
+    transformed_data = np.where(co_factor > 0, np.arcsinh(data / co_factor),
+                                np.arcsinh(data))
+
+    return transformed_data
 
 
 def z_score_normalization(adata, layer=None):
@@ -1001,7 +1006,7 @@ def apply_per_batch(data, annotation, method, **kwargs):
 
     transform_function = method_dict[method]
 
-    normalized_batches = []
+    transformed_data = np.zeros_like(data)
     unique_batches = np.unique(annotation)
 
     for batch in unique_batches:
@@ -1010,6 +1015,6 @@ def apply_per_batch(data, annotation, method, **kwargs):
 
         normalized_batch_data = transform_function(batch_data, **kwargs)
 
-        normalized_batches.append(normalized_batch_data)
+        transformed_data[batch_indices] = normalized_batch_data
 
-    return np.concatenate(normalized_batches, axis=0)
+    return transformed_data

@@ -192,6 +192,31 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
         self.assertTrue(np.all(normalized_data <= 1),
                         "All values in normalized data should be <= 1")
 
+    def test_qmin_equals_qmax(self):
+        # Create a dataset where all features have constant values
+        data = np.array([
+            [1, 2, 3, 4, 5],
+            [1, 2, 3, 4, 5],
+            [1, 2, 3, 4, 5]
+        ])
+        low_quantile = 0.0
+        high_quantile = 1.0
+        interpolation = 'linear'
+
+        # Since qmin and qmax for each column will be the same value
+        # Normalize data for each column should result in zeros
+        expected_result = np.array([
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]
+        ])
+        normalized_data = normalize_features_core(
+            data, low_quantile, high_quantile, interpolation
+        )
+        np.testing.assert_almost_equal(
+            normalized_data, expected_result, decimal=6
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
