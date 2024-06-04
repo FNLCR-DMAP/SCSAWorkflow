@@ -67,10 +67,10 @@ def phenograph_clustering(
     Returns
     -------
     adata : anndata.AnnData
-        Updated AnnData object with the phenograph clusters 
+        Updated AnnData object with the phenograph clusters
         stored in `adata.obs[output_annotation]`
     """
-        
+
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,
@@ -257,7 +257,7 @@ def run_umap(
         RNG seed during UMAP transformation.
     layer : str, optional
         Layer of AnnData object for UMAP. Defaults to `adata.X`.
-    output_derived_feature : str, default='X_umap' 
+    output_derived_feature : str, default='X_umap'
         The name of the column in adata.obsm that will contain the
         umap coordinates.
     input_derived_feature : str, optional
@@ -372,7 +372,7 @@ def _select_input_features(adata: anndata,
         Name of the key in `adata.obsm` that contains the numpy array.
         Defaults to `None`.
     features : str or List[str], optional
-        Names of the features to select from layer. If None, all features are 
+        Names of the features to select from layer. If None, all features are
         selected. Defaults to None.
 
     Returns
@@ -468,7 +468,7 @@ def batch_normalize(adata, annotation, output_layer,
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
         logger.info(f"Processing batch: {batch}, "
-                     f"original values:\n{batch_cells}")
+                    f"original values:\n{batch_cells}")
 
         if method == "median":
             batch_median = batch_cells.quantile(q=0.5)
@@ -576,132 +576,222 @@ def rename_annotations(adata, src_annotation, dest_annotation, mappings):
 
 
 def normalize_features(
-    adata: anndata,
-    low_quantile: float = 0.02,
-    high_quantile: float = 0.98,
-    interpolation: str = "nearest",
-    input_layer: str = None,
-    new_layer_name: str = "normalized_feature",
-    overwrite: bool = True
+    adata,
+    low_quantile=0.02,
+    high_quantile=0.98,
+    interpolation="linear",
+    input_layer=None,
+    output_layer="normalized_feature",
+    per_batch=False,
+    annotation=None
 ):
-
     """
     Normalize the features stored in an AnnData object.
-    Any entry lower than the value corresponding to low_quantile of the column
-    will be assigned a value of 0, and entry that are greater than
-    high_quantile value will be assigned as 1. Other entries will be normalized
-    with (values - quantile min)/(quantile max - quantile min).
+    Any entry lower than the value corresponding to low_quantile of the
+    column will be assigned a value of low_quantile, and entry that
+    are greater than high_quantile value will be assigned as the value of
+    high_quantile.
+    Other entries will be normalized with
+    (values - quantile min)/(quantile max - quantile min).
     Resulting column will have value ranged between [0, 1].
+    """
+    # Check if the provided input_layer exists in the AnnData object
+    if input_layer is not None:
+        check_table(adata, tables=input_layer)
+
+    # Check if output_layer already exists and issue a warning if it does
+    if output_layer in adata.layers:
+        warnings.warn(
+            f"Layer '{output_layer}' already exists. It will be overwritten "
+            "with the new transformed data."
+        )
+
+    if not isinstance(high_quantile, (int, float)):
+        raise TypeError(
+            "The high quantile should be a numeric value, currently got {}"
+            .format(type(high_quantile))
+        )
+    if not isinstance(low_quantile, (int, float)):
+        raise TypeError(
+            "The low quantile should be a numeric value, currently got {}"
+            .format(type(low_quantile))
+        )
+    if low_quantile >= high_quantile:
+        raise ValueError(
+            "The low quantile should be smaller than the high quantile, "
+            "current values are: low quantile: {}, high_quantile: {}"
+            .format(low_quantile, high_quantile)
+        )
+    if high_quantile <= 0 or high_quantile > 1:
+        raise ValueError(
+            "The high quantile value should be within (0, 1], current value:"
+            " {}".format(high_quantile)
+        )
+    if low_quantile < 0 or low_quantile >= 1:
+        raise ValueError(
+            "The low quantile value should be within [0, 1), current value: {}"
+            .format(low_quantile)
+        )
+    if interpolation not in ["nearest", "linear"]:
+        raise ValueError(
+            "interpolation must be either 'nearest' or 'linear', passed value"
+            " is: {}".format(interpolation)
+        )
+
+    # Extract the data to transform
+    if input_layer is not None:
+        data_to_transform = adata.layers[input_layer]
+    else:
+        data_to_transform = adata.X
+
+    # Ensure data is in numpy array format
+    data_to_transform = (data_to_transform.toarray()
+                         if issparse(data_to_transform)
+                         else data_to_transform)
+
+    if per_batch:
+        if annotation is None:
+            raise ValueError(
+                "annotation must be provided if per_batch is True."
+            )
+        transformed_data = apply_per_batch(
+            data_to_transform, adata.obs[annotation].values,
+            method='normalize_features',
+            low_quantile=low_quantile,
+            high_quantile=high_quantile,
+            interpolation=interpolation
+        )
+    else:
+        transformed_data = normalize_features_core(
+            data_to_transform,
+            low_quantile=low_quantile,
+            high_quantile=high_quantile,
+            interpolation=interpolation
+        )
+
+    # Store the transformed data in the specified output_layer
+    adata.layers[output_layer] = pd.DataFrame(
+        transformed_data,
+        index=adata.obs_names,
+        columns=adata.var_names
+    )
+
+    return adata
+
+
+def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
+                            interpolation='linear'):
+    """
+    Normalize the features in a numpy array.
+
+    Any entry lower than the value corresponding to low_quantile of the column
+    will be assigned a value of low_quantile, and entry that are greater than
+    high_quantile value will be assigned as value of high_quantile.
+    Other entries will be normalized with
+    (values - quantile min)/(quantile max - quantile min).
+    Resulting column will have values ranged between [0, 1].
 
     Parameters
     ----------
-    adata : anndata.AnnData
-        An AnnData object containing the data to be normalized.
+    data : np.ndarray
+        The data to be normalized.
 
     low_quantile : float, optional (default: 0.02)
         The lower quantile to use for normalization. Determines the
         minimum value after normalization.
         Must be a positive float between [0,1).
 
-    high_quantile : float, optional (default: 0.02)
+    high_quantile : float, optional (default: 0.98)
         The higher quantile to use for normalization. Determines the
         maximum value after normalization.
         Must be a positive float between (0,1].
 
-    interpolation : str, optional (default: "nearest")
+    interpolation: str, optional (default: "linear")
         The interpolation method to use when selecting the value for
-        low and high quantile. Values can be "nearest" or "linear"
-
-    input_layer : str, optional (default: None)
-        The name of the layer in the AnnData object to be normalized.
-        If None, the function will use the default data layer.
-
-    new_layer_name : str, optional (default: "normalized_feature")
-        The name of the new layer where the normalized features
-        will be stored in the AnnData object.
-
-    overwrite: bool, optional (default: True)
-        If the new layer name exists in the anndata object,
-        the function will defaultly overwrite the existing table unless
-        'overwrite' is False
+        low and high quantile. Values can be "nearest" or "linear".
 
     Returns
     -------
-    quantiles : pandas.DataFrame
-        A DataFrame containing the quantile values calculated for every
-        feature. The DataFrame has columns representing the features and rows
-        representing the quantile values.
- """
+    np.ndarray
+        The normalized data.
 
-    # Perform error checks for anndata object:
-    check_table(adata, input_layer, should_exist=True)
-
-    if not overwrite:
-        check_table(adata, new_layer_name, should_exist=False)
-
+    Raises
+    ------
+    TypeError
+        If low_quantile or high_quantile are not numeric.
+    ValueError
+        If low_quantile is not less than high_quantile, or if they are
+        out of the range [0, 1] and (0, 1], respectively.
+    ValueError
+        If method is not one of the allowed values.
+    """
     if not isinstance(high_quantile, (int, float)):
-        raise TypeError("The high quantile should a numeric values, "
-                        f"currently get {str(type(high_quantile))}")
+        raise TypeError(
+            "The high quantile should be a numeric value, "
+            f"currently got {str(type(high_quantile))}")
 
     if not isinstance(low_quantile, (int, float)):
-        raise TypeError("The low quantile should a numeric values, "
-                        f"currently get {str(type(low_quantile))}")
+        raise TypeError(
+            "The low quantile should be a numeric value, "
+            f"currently got {str(type(low_quantile))}")
 
     if low_quantile < high_quantile:
         if high_quantile <= 0 or high_quantile > 1:
-            raise ValueError("The high quantile value should be within"
-                             f"(0, 1], current value: {high_quantile}")
+            raise ValueError(
+                "The high quantile value should be within "
+                f"(0, 1], current value: {high_quantile}")
         if low_quantile < 0 or low_quantile >= 1:
-            raise ValueError("The low quantile value should be within"
-                             f"[0, 1), current value: {low_quantile}")
+            raise ValueError(
+                "The low quantile value should be within "
+                f"[0, 1), current value: {low_quantile}")
     else:
-        raise ValueError("The low quantile shoud be smaller than"
-                         "the high quantile, currently value is:\n"
-                         f"low quantile: {low_quantile}\n"
-                         f"high quantile: {high_quantile}")
+        raise ValueError(
+            "The low quantile should be smaller than "
+            "the high quantile, current values are:\n"
+            f"low quantile: {low_quantile}\n"
+            f"high quantile: {high_quantile}")
 
     if interpolation not in ["nearest", "linear"]:
-        raise ValueError("interpolation must be either 'nearest' or 'linear'"
-                         f"passed value is:{interpolation}")
+        raise ValueError(
+            "Interpolation must be either 'nearest' or 'linear', "
+            f"passed value is: {interpolation}")
 
-    dataframe = adata.to_df(layer=input_layer)
+    # Calculate the quantiles
+    quantiles = np.quantile(
+        data, [low_quantile, high_quantile], axis=0,
+        method=interpolation)
 
-    # Calculate low and high quantiles
-    quantiles = dataframe.quantile([low_quantile, high_quantile],
-                                   interpolation=interpolation)
+    qmin = quantiles[0]
+    qmax = quantiles[1]
 
-    for column in dataframe.columns:
-        # low quantile value
-        qmin = quantiles.loc[low_quantile, column]
+    # Prevent division by zero in case qmax equals qmin
+    range_values = qmax - qmin
+    range_values = range_values.astype(float)
+    range_values[range_values == 0] = 1
 
-        # high quantile value
-        qmax = quantiles.loc[high_quantile, column]
+    # Clip raw values to the quantile range before normalization
+    clipped_data = np.clip(data, qmin, qmax)
 
-        # Scale column values
-        if qmax != 0:
-            dataframe[column] = dataframe[column].apply(
-                lambda x: 0 if x < qmin else (
-                    1 if x > qmax else (x - qmin) / (qmax - qmin)
-                )
-            )
+    # Normalize the clipped values
+    normalized_data = (clipped_data - qmin) / range_values
 
-    # Append normalized feature to the anndata object
-    adata.layers[new_layer_name] = dataframe
+    # Handle columns where qmax equals qmin
+    normalized_data[:, qmax == qmin] = 0
 
-    return quantiles
+    return normalized_data
 
 
-def arcsinh_transformation(adata, input_layer=None, co_factor=None,
-                           percentile=20, output_layer="arcsinh"):
+def arcsinh_transformation(
+    adata, input_layer=None, co_factor=None, percentile=None,
+    output_layer="arcsinh", per_batch=False, annotation=None
+):
     """
-    Apply arcsinh transformation using a co-factor.
+    Apply arcsinh transformation using a co-factor (fixed number) or a given
+    percentile of each feature. This transformation can be applied to the
+    entire dataset or per batch based on provided parameters.
 
-    The co-factor is determined either by the given percentile of each
-    biomarker (feature-wise) or a provided fixed number. The function computes
-    the co-factor for each biomarker individually, considering its unique
-    range of expression levels. This ensures that each biomarker is scaled
-    based on its inherent distribution, which is particularly important when
-    dealing with datasets where features have a wide range of values.
+    Computes the co-factor or percentile for each biomarker individually,
+    ensuring proper scaling based on its unique range of expression levels.
 
     Parameters
     ----------
@@ -712,13 +802,16 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
         If None, the main data matrix .X is used.
     co_factor : float, optional
         A fixed positive number to use as a co-factor for the transformation.
-        If provided, it takes precedence over the percentile argument.
-    percentile : int, default=20
-        The percentile to determine the co-factor if co_factor is not provided.
+    percentile : float, optional
         The percentile is computed for each feature (column) individually.
     output_layer : str, default="arcsinh"
         Name of the layer to put the transformed results. If it already exists,
         it will be overwritten with a warning.
+    per_batch : bool, optional, default=False
+        Whether to apply the transformation per batch.
+    annotation : str, optional
+        The name of the annotation in `adata` to define batches. Required if
+        per_batch is True.
 
     Returns
     -------
@@ -726,6 +819,20 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
         The AnnData object with the transformed data stored in the specified
         output_layer.
     """
+    # Validate input parameters
+    if co_factor is None and percentile is None:
+        raise ValueError("Either co_factor or percentile must be provided.")
+
+    if co_factor is not None and percentile is not None:
+        raise ValueError(
+            "Please specify either co_factor or percentile, not both."
+        )
+
+    if co_factor and co_factor <= 0:
+        raise ValueError("Co_factor should be a positive value.")
+
+    if percentile is not None and not (0 <= percentile <= 100):
+        raise ValueError("Percentile should be between 0 and 100.")
 
     # Check if the provided input_layer exists in the AnnData object
     if input_layer:
@@ -734,28 +841,25 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
     else:
         data_to_transform = adata.X
 
-    # Validate input parameters
-    if co_factor and co_factor <= 0:
-        raise ValueError("Co_factor should be a positive value.")
+    # Ensure data is in numpy array format
+    data_to_transform = data_to_transform.toarray() \
+        if issparse(data_to_transform) else data_to_transform
 
-    if not (0 <= percentile <= 100):
-        raise ValueError("Percentile should be between 0 and 100.")
-
-    # Determine the co-factor
-    if co_factor:
-        factor = co_factor
+    if per_batch:
+        if annotation is None:
+            raise ValueError(
+                "annotation must be provided if per_batch is True."
+            )
+        transformed_data = apply_per_batch(
+            data_to_transform, adata.obs[annotation].values,
+            method='arcsinh_transformation', co_factor=co_factor,
+            percentile=percentile
+        )
     else:
-        # Handle sparse matrix
-        if issparse(data_to_transform):
-            data_to_transform = data_to_transform.toarray()
-        # Compute the percentiles per column (feature-wise)
-        factor = np.percentile(data_to_transform, percentile, axis=0)
-        # Check for zero values in factor and replace them to avoid division
-        # by zero
-        factor[factor == 0] = 1e-10
-
-    # Apply the arcsinh transformation using the co-factor
-    transformed_data = np.arcsinh(data_to_transform / factor)
+        # Apply the arcsinh transformation using the core function
+        transformed_data = arcsinh_transformation_core(
+            data_to_transform, co_factor=co_factor, percentile=percentile
+        )
 
     # Check if output_layer already exists and issue a warning if it does
     if output_layer in adata.layers:
@@ -765,9 +869,63 @@ def arcsinh_transformation(adata, input_layer=None, co_factor=None,
         )
 
     # Store the transformed data in the specified output_layer
-    adata.layers[output_layer] = transformed_data
+    adata.layers[output_layer] = pd.DataFrame(
+        transformed_data,
+        index=adata.obs_names,
+        columns=adata.var_names
+    )
 
     return adata
+
+
+def arcsinh_transformation_core(data, co_factor=None, percentile=None):
+    """
+    Apply arcsinh transformation using a co-factori or a percentile.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        The data to transform.
+    co_factor : float, optional
+        A fixed positive number to use as a co-factor for the
+        transformation.
+    percentile : float, optional
+        The percentile to determine the co-factor if co_factor is not
+        provided.
+        The percentile is computed for each feature (column)
+        individually.
+
+    Returns
+    -------
+    np.ndarray
+        The transformed data.
+
+    Raises
+    ------
+    ValueError
+        If both co_factor and percentile are None.
+        If both co_factor and percentile are specified.
+        If percentile is not in the range [0, 100].
+    """
+    if co_factor is None and percentile is None:
+        raise ValueError("Either co_factor or percentile must be provided.")
+
+    if co_factor is not None and percentile is not None:
+        raise ValueError(
+            "Please specify either co_factor or percentile, not both.")
+
+    if co_factor is None:
+        if not (0 <= percentile <= 100):
+            raise ValueError("Percentile should be between 0 and 100.")
+        co_factor = np.percentile(data, percentile, axis=0)
+
+    # Perform arcsinh transformation with special handling for zero co_factor
+    # If co_factor > 0, apply arcsinh(data / co_factor)
+    # If co_factor == 0, apply arcsinh(data) to avoid division by zero
+    transformed_data = np.where(co_factor > 0, np.arcsinh(data / co_factor),
+                                np.arcsinh(data))
+
+    return transformed_data
 
 
 def z_score_normalization(adata, layer=None):
@@ -803,3 +961,60 @@ def z_score_normalization(adata, layer=None):
     adata.layers['z_scores'] = z_scores
 
     return adata
+
+
+def apply_per_batch(data, annotation, method, **kwargs):
+    """
+    Apply a given function to data per batch, with additional parameters.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        The data to transform.
+    annotation : np.ndarray
+        Batch annotations for each row in the data.
+    method : str
+        The function to apply to each batch. Options: 'arcsinh_transformation'
+        or 'normalize_features'.
+
+    kwargs:
+        Additional parameters to pass to the function.
+
+    Returns
+    -------
+    np.ndarray
+        The transformed data.
+    """
+    # Check data integrity
+    if not isinstance(data, np.ndarray) or not isinstance(annotation,
+                                                          np.ndarray):
+        raise ValueError("data and annotation must be numpy arrays")
+    if len(data) != len(annotation):
+        raise ValueError("data and annotation must have the same number of "
+                         "rows")
+    if data.ndim != 2:
+        raise ValueError("data must be a 2D array")
+
+    method_dict = {
+        'arcsinh_transformation': arcsinh_transformation_core,
+        'normalize_features': normalize_features_core
+    }
+
+    if method not in method_dict:
+        raise ValueError("method must be 'arcsinh_transformation' or "
+                         "'normalize_features'")
+
+    transform_function = method_dict[method]
+
+    transformed_data = np.zeros_like(data)
+    unique_batches = np.unique(annotation)
+
+    for batch in unique_batches:
+        batch_indices = np.where(annotation == batch)[0]
+        batch_data = data[batch_indices]
+
+        normalized_batch_data = transform_function(batch_data, **kwargs)
+
+        transformed_data[batch_indices] = normalized_batch_data
+
+    return transformed_data
