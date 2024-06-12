@@ -2,36 +2,24 @@
 
 
 
-## v0.6.1 (2024-06-07)
-
-### Feature
-
-* feat: correct functions and unit tests based on CR ([`f97f25b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f97f25bc05be5c13ba58d351d3c54a8e39fd2484))
-
-* feat(normalize_per_batch): add intra_batch normalization and unit tests ([`7ec823b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7ec823b808e0afc9928b34b8b7c7bf588754b1dc))
-
-* feat(relational_heatmap): added tests and function ([`e1927c7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e1927c7f61296140cbaa90c07318f9fee3087032))
-
-### Performance
-
-* perf(annot_cat_rel): update the code to handle same column input ([`d01d48d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d01d48def54140fbab5378457fd97259cbb8936b))
+## v0.6.2 (2024-06-12)
 
 ### Unknown
 
-* Merge pull request #191 from FNLCR-DMAP/dev
+* Merge pull request #192 from FNLCR-DMAP/dev
 
-PR for relational heatmap ([`5627ab2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5627ab2ae0afcc4cec972f9f9c4ddd8268169c3b))
+merge dev to release_dev ([`249f6df`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/249f6df23cb67e71763a5030113dda7676b23ef3))
 
-* Merge pull request #189 from FNLCR-DMAP/new_apply_per_batch
+* Merge pull request #188 from FNLCR-DMAP/feat_visualize_associated_table
 
-feat(normalize_per_batch): add intra_batch normalization and unit tests ([`b308c4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b308c4ebef642fbe036c39e7c2fcf3f351d9f42b))
-
-* Merge pull request #186 from FNLCR-DMAP/relational_heatmap
-
-Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1bc520b76f995078b96d58293171dc9de945bfc5))
+Feat visualize associated table ([`31da888`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31da888067613e291b2319f4fcb734fe85cf1317))
 
 
-## v0.6.0 (2024-05-09)
+## v0.6.1 (2024-06-07)
+
+### Ci
+
+* ci(version): Automatic development release ([`25d6747`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25d67479b8558ac84365681919daedd71ce02aff))
 
 ### Documentation
 
@@ -86,6 +74,14 @@ Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMA
 * docs(version): Automatic development release ([`9b8606c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9b8606c86c151af3ea964aa96954bc4bf49eed79))
 
 ### Feature
+
+* feat: correct functions and unit tests based on CR ([`f97f25b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f97f25bc05be5c13ba58d351d3c54a8e39fd2484))
+
+* feat(normalize_per_batch): add intra_batch normalization and unit tests ([`7ec823b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7ec823b808e0afc9928b34b8b7c7bf588754b1dc))
+
+* feat(visualization): Added the option to visualiza an associated table in dimentionality reduction plot ([`480fa58`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/480fa5801d326c5a3edb2be7fc89ac54b5765477))
+
+* feat(relational_heatmap): added tests and function ([`e1927c7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e1927c7f61296140cbaa90c07318f9fee3087032))
 
 * feat(neighborhood_profile): Add neighborhood_profile_core function for calculating neighborhood profiles ([`1b1eede`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b1eedec22788aa122e4fdfcf87ddc89defe40db))
 
@@ -151,6 +147,8 @@ Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMA
 
 ### Performance
 
+* perf(annot_cat_rel): update the code to handle same column input ([`d01d48d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d01d48def54140fbab5378457fd97259cbb8936b))
+
 * perf: Added default color map values and updated color map related description ([`8b22714`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b22714ac6d8e57fb832eb8ebdb5cd6c45af544a))
 
 * perf: Update hover info template message ([`faa63e2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/faa63e22e09bd47dbd5753f707296633a9efbba9))
@@ -168,6 +166,8 @@ Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMA
 * perf: Update action files for latest CD ([`73e2517`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73e2517a98069fc2d38b405a7c4141abf22d46b0))
 
 ### Refactor
+
+* refactor: changed the name input_derived_feature to associated_table ([`e50a609`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e50a609741fba66de14ebb191d8ec52da608ef9c))
 
 * refactor: batch_normalize and unit test ([`cb619a1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cb619a1b795e80ed5062737485f84d569e86eed4))
 
@@ -188,6 +188,22 @@ Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMA
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #191 from FNLCR-DMAP/dev
+
+PR for relational heatmap ([`5627ab2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5627ab2ae0afcc4cec972f9f9c4ddd8268169c3b))
+
+* Merge pull request #189 from FNLCR-DMAP/new_apply_per_batch
+
+feat(normalize_per_batch): add intra_batch normalization and unit tests ([`b308c4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b308c4ebef642fbe036c39e7c2fcf3f351d9f42b))
+
+* Merge pull request #186 from FNLCR-DMAP/relational_heatmap
+
+Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1bc520b76f995078b96d58293171dc9de945bfc5))
+
+* doc: fixed  typo ([`61fa363`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61fa363fc6f52cae7e2a1d073e7baea7d023f033))
+
+* doc: added additional context ([`407a1bf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/407a1bf0f0c9b3db938c63905870148ea92524f8))
 
 * Merge pull request #185 from FNLCR-DMAP/dev
 
