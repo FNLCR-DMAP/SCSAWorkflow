@@ -2,22 +2,28 @@
 
 
 
-## v0.6.2 (2024-06-12)
+## v0.6.3 (2024-06-14)
+
+### Fix
+
+* fix(arcsinh_transformation): add error message and unit tests ([`f4ba1e8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f4ba1e82a487dfb9bbcf2ef28300e8780405f235))
 
 ### Unknown
 
-* Merge pull request #192 from FNLCR-DMAP/dev
+* Merge pull request #194 from FNLCR-DMAP/dev
 
-merge dev to release_dev ([`249f6df`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/249f6df23cb67e71763a5030113dda7676b23ef3))
+merge arcsinh transformation from dev to release dev ([`cc8a2f8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc8a2f810e4ff2a732431aa2a36883f92e049ee0))
 
-* Merge pull request #188 from FNLCR-DMAP/feat_visualize_associated_table
+* Merge pull request #193 from FNLCR-DMAP/arcsinh_transformation
 
-Feat visualize associated table ([`31da888`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31da888067613e291b2319f4fcb734fe85cf1317))
+fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48b04e91f67f8d320c5c9281959b3b024ca337af))
 
 
-## v0.6.1 (2024-06-07)
+## v0.6.2 (2024-06-12)
 
 ### Ci
+
+* ci(version): Automatic development release ([`59e6cb9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/59e6cb9f210e387a42cb6832722efd659a81de6d))
 
 * ci(version): Automatic development release ([`25d6747`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25d67479b8558ac84365681919daedd71ce02aff))
 
@@ -188,6 +194,14 @@ Feat visualize associated table ([`31da888`](https://github.com/FNLCR-DMAP/SCSAW
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #192 from FNLCR-DMAP/dev
+
+merge dev to release_dev ([`249f6df`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/249f6df23cb67e71763a5030113dda7676b23ef3))
+
+* Merge pull request #188 from FNLCR-DMAP/feat_visualize_associated_table
+
+Feat visualize associated table ([`31da888`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31da888067613e291b2319f4fcb734fe85cf1317))
 
 * Merge pull request #191 from FNLCR-DMAP/dev
 
