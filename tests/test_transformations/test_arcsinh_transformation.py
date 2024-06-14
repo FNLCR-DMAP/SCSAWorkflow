@@ -1,6 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import numpy as np
 import pandas as pd
@@ -207,8 +204,8 @@ class TestArcsinhTransformation(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             arcsinh_transformation(self.adata)
         self.assertEqual(
-            str(context.exception), "Either co_factor or percentile "
-            "must be provided."
+            str(context.exception),
+            "Both co_factor and percentile are None. Provide one to proceed."
         )
 
     def test_arcsinh_transformation_per_batch(self):
@@ -248,6 +245,18 @@ class TestArcsinhTransformation(unittest.TestCase):
         # print("Expected (per batch):", expected_data)
         np.testing.assert_array_almost_equal(
             transformed_adata.layers['arcsinh'], expected_data, decimal=5
+        )
+
+    def test_non_existing_annotation(self):
+        with self.assertRaises(ValueError) as context:
+            arcsinh_transformation(
+                self.adata, per_batch=True,
+                annotation='non_existing', percentile=20
+            )
+        self.assertEqual(
+            str(context.exception),
+            "The annotation 'non_existing' does not exist in the "
+            "AnnData object."
         )
 
 
