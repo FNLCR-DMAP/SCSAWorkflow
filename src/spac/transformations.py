@@ -821,7 +821,9 @@ def arcsinh_transformation(
     """
     # Validate input parameters
     if co_factor is None and percentile is None:
-        raise ValueError("Either co_factor or percentile must be provided.")
+        raise ValueError(
+            "Both co_factor and percentile are None. Provide one to proceed."
+        )
 
     if co_factor is not None and percentile is not None:
         raise ValueError(
@@ -849,6 +851,11 @@ def arcsinh_transformation(
         if annotation is None:
             raise ValueError(
                 "annotation must be provided if per_batch is True."
+            )
+        if annotation not in adata.obs.columns:
+            raise ValueError(
+                f"The annotation '{annotation}' does not exist in the "
+                "AnnData object."
             )
         transformed_data = apply_per_batch(
             data_to_transform, adata.obs[annotation].values,
