@@ -2,26 +2,28 @@
 
 
 
-## v0.6.3 (2024-06-14)
+## v0.6.4 (2024-06-18)
 
 ### Fix
 
-* fix(arcsinh_transformation): add error message and unit tests ([`f4ba1e8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f4ba1e82a487dfb9bbcf2ef28300e8780405f235))
+* fix(arcsinh_transformation): change error message and corresponding unit tests ([`417afd2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/417afd2fb343c9a1f682166ba00b7012719ee8c7))
 
 ### Unknown
 
-* Merge pull request #194 from FNLCR-DMAP/dev
+* Merge pull request #196 from FNLCR-DMAP/dev
 
-merge arcsinh transformation from dev to release dev ([`cc8a2f8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc8a2f810e4ff2a732431aa2a36883f92e049ee0))
+merge dev with modified arcsinh_transformation to release_dev ([`6827f8a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6827f8acfedf7426249821207dfb97ab42c8c155))
 
-* Merge pull request #193 from FNLCR-DMAP/arcsinh_transformation
+* Merge pull request #195 from FNLCR-DMAP/arcsinh_transformation
 
-fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48b04e91f67f8d320c5c9281959b3b024ca337af))
+fix(arcsinh_transformation): change error message and unit tests ([`506838a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/506838a46af0403a662884ce7664f3d5daa02071))
 
 
-## v0.6.2 (2024-06-12)
+## v0.6.3 (2024-06-14)
 
 ### Ci
+
+* ci(version): Automatic development release ([`19644ac`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/19644aca355a40ce674b40377872990abe98584a))
 
 * ci(version): Automatic development release ([`59e6cb9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/59e6cb9f210e387a42cb6832722efd659a81de6d))
 
@@ -100,6 +102,8 @@ fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(arcsinh_transformation): add error message and unit tests ([`f4ba1e8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f4ba1e82a487dfb9bbcf2ef28300e8780405f235))
 
 * fix(batch_normalize): minor changes on comments of function and unit test ([`f2e5b0e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2e5b0ecb1769ffdf2f0965a65f8569964644d04))
 
@@ -194,6 +198,14 @@ fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #194 from FNLCR-DMAP/dev
+
+merge arcsinh transformation from dev to release dev ([`cc8a2f8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc8a2f810e4ff2a732431aa2a36883f92e049ee0))
+
+* Merge pull request #193 from FNLCR-DMAP/arcsinh_transformation
+
+fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48b04e91f67f8d320c5c9281959b3b024ca337af))
 
 * Merge pull request #192 from FNLCR-DMAP/dev
 
