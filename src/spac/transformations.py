@@ -831,10 +831,14 @@ def arcsinh_transformation(
         )
 
     if co_factor and co_factor <= 0:
-        raise ValueError("Co_factor should be a positive value.")
+        raise ValueError(
+            f'Co_factor should be a positive value. Received: "{co_factor}"'
+        )
 
     if percentile is not None and not (0 <= percentile <= 100):
-        raise ValueError("Percentile should be between 0 and 100.")
+        raise ValueError(
+            f'Percentile should be between 0 and 100. Received: "{percentile}"'
+        )
 
     # Check if the provided input_layer exists in the AnnData object
     if input_layer:
@@ -852,11 +856,9 @@ def arcsinh_transformation(
             raise ValueError(
                 "annotation must be provided if per_batch is True."
             )
-        if annotation not in adata.obs.columns:
-            raise ValueError(
-                f"The annotation '{annotation}' does not exist in the "
-                "AnnData object."
-            )
+        check_annotation(
+            adata, annotations=annotation,parameter_name="annotation"
+        )
         transformed_data = apply_per_batch(
             data_to_transform, adata.obs[annotation].values,
             method='arcsinh_transformation', co_factor=co_factor,

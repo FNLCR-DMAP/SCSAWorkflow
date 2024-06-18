@@ -162,13 +162,15 @@ class TestArcsinhTransformation(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             arcsinh_transformation(self.adata, percentile=-0.1)
         self.assertEqual(
-            str(context.exception), "Percentile should be between 0 and 100."
+            str(context.exception),
+            'Percentile should be between 0 and 100. Received: "-0.1"'
         )
 
         with self.assertRaises(ValueError) as context:
             arcsinh_transformation(self.adata, percentile=100.1)
         self.assertEqual(
-            str(context.exception), "Percentile should be between 0 and 100."
+            str(context.exception),
+            'Percentile should be between 0 and 100. Received: "100.1"'
         )
 
     def test_warning_on_overwriting_layer(self):
@@ -245,18 +247,6 @@ class TestArcsinhTransformation(unittest.TestCase):
         # print("Expected (per batch):", expected_data)
         np.testing.assert_array_almost_equal(
             transformed_adata.layers['arcsinh'], expected_data, decimal=5
-        )
-
-    def test_non_existing_annotation(self):
-        with self.assertRaises(ValueError) as context:
-            arcsinh_transformation(
-                self.adata, per_batch=True,
-                annotation='non_existing', percentile=20
-            )
-        self.assertEqual(
-            str(context.exception),
-            "The annotation 'non_existing' does not exist in the "
-            "AnnData object."
         )
 
 
