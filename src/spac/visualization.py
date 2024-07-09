@@ -1152,6 +1152,10 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
         ([second_annotation] if second_annotation else [])
     ]
 
+    # Apply log1p transformation if log_scale is True
+    if log_scale:
+        df[features] = np.log1p(df[features])
+
     # Create the plot
     if ax:
         fig = ax.get_figure()
@@ -1194,7 +1198,12 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
 
     else:
         if len(features) > 1:
-            sns.boxplot(data=df[features], ax=ax, **kwargs)
+            if v_orient:
+                sns.boxplot(data=df[features], ax=ax, **kwargs)
+            else:
+                melted_data = df.melf()
+                sns.boxplot(data=melted_data, x="value", y="variable",
+                            hue=annotation,  ax=ax, **kwargs)
             ax.set_title("Multiple Features")
         else:
             if v_orient:
@@ -1203,16 +1212,11 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
                 sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
             ax.set_title("Single Boxplot")
 
-    # Check if all data points are positive and non-zero
-    all_positive = (df[features] > 0).all().all()
-
-    # If log_scale is True and all data points are positive and non-zero
-    if log_scale and all_positive:
-        plt.yscale('log')
+    if log_scale:
+        ax.set_yscale('log') if v_orient else ax.set_xscale('log')
 
     plt.xticks(rotation=90)
     plt.tight_layout()
-    # plt.show()
 
     return fig, ax
 

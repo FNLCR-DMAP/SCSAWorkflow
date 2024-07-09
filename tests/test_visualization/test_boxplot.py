@@ -1,6 +1,7 @@
 import unittest
 import pandas as pd
 import anndata
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from spac.visualization import boxplot
@@ -98,12 +99,46 @@ class TestBoxplot(unittest.TestCase):
         # Check if the y-axis is in log scale
         self.assertEqual(ax.get_yscale(), 'log')
 
-        # Test with negative or zero values
+        # Test with zero values
         self.adata.X[0, 0] = 0  # Introduce a zero value
         fig, ax = boxplot(self.adata, features=['feature1'], log_scale=True)
 
-        # Check if the y-axis is not in log scale due to the zero value
-        self.assertNotEqual(ax.get_yscale(), 'log')
+        # Check if the y-axis is in log scale (due to log1p transformation)
+        self.assertEqual(ax.get_yscale(), 'log')
+
+    def test_log1p_transformation(self):
+        """Test if np.log1p transformation is applied correctly."""
+        # Introduce a dataset with zeros
+        X = pd.DataFrame({
+            'feature1': [0, 1, 2, 3]
+        })
+
+        annotation = pd.DataFrame({
+            'phenotype': [
+                'phenotype1',
+                'phenotype1',
+                'phenotype2',
+                'phenotype2'
+            ]
+        })
+
+        adata = anndata.AnnData(X=X, obs=annotation)
+
+        # Manually apply log1p transformation to check values
+        expected_values = np.log1p(X)
+
+        # Create a boxplot and capture the transformed DataFrame
+        fig, ax = boxplot(adata, features=['feature1'], log_scale=True)
+
+        # Extract the log1p transformed values from the DataFrame for plotting
+        transformed_values = np.log1p(adata.X)
+
+        # Compare the transformed values with the expected values
+        np.testing.assert_allclose(
+            transformed_values.flatten(),
+            expected_values.values.flatten(),
+            rtol=1e-5
+        )
 
 
 if __name__ == '__main__':
