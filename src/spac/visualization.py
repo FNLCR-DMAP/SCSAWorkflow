@@ -1152,6 +1152,13 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
         ([second_annotation] if second_annotation else [])
     ]
 
+    # Check for negative values
+    if log_scale and (df[features] < 0).any().any():
+        print(
+            "There are negative values in this data, disabling the log scale."
+        )
+        log_scale = False
+
     # Apply log1p transformation if log_scale is True
     if log_scale:
         df[features] = np.log1p(df[features])
@@ -1218,7 +1225,7 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     plt.xticks(rotation=90)
     plt.tight_layout()
 
-    return fig, ax
+    return fig, ax, df
 
 
 def interative_spatial_plot(
