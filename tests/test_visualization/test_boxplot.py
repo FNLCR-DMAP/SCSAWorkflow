@@ -193,6 +193,63 @@ class TestBoxplot(unittest.TestCase):
         # Ensure the y-axis is not in log scale
         self.assertEqual(ax.get_yscale(), 'linear')
 
+    def test_single_feature_orientation(self):
+        """
+        Test single feature plotting to use the correct axis
+        based on orientation.
+        """
+        # Test for vertical orientation
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='v')
+        self.assertEqual(ax.get_ylabel(), 'Intensity')
+
+        # Test for horizontal orientation
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='h')
+        self.assertEqual(ax.get_xlabel(), 'Intensity')
+
+    def test_axis_labels(self):
+        """Test x-axis, y-axis, and log labeling."""
+        # Test for vertical orientation without log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='v'
+        )
+        self.assertEqual(ax.get_xlabel(), 'phenotype')
+        self.assertEqual(ax.get_ylabel(), 'Intensity')
+
+        # Test for vertical orientation with log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='v',
+            log_scale=True
+        )
+        self.assertEqual(ax.get_xlabel(), 'phenotype')
+        self.assertEqual(ax.get_ylabel(), 'log(Intensity)')
+
+        # Test for horizontal orientation without log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='h'
+        )
+        self.assertEqual(ax.get_xlabel(), 'Intensity')
+        self.assertEqual(ax.get_ylabel(), 'phenotype')
+
+        # Test for horizontal orientation with log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='h',
+            log_scale=True
+        )
+        self.assertEqual(ax.get_xlabel(), 'log(Intensity)')
+        self.assertEqual(ax.get_ylabel(), 'phenotype')
+
 
 if __name__ == '__main__':
     unittest.main()
