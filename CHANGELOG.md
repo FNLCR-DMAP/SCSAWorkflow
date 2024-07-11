@@ -2,28 +2,28 @@
 
 
 
-## v0.6.5 (2024-07-10)
+## v0.6.6 (2024-07-11)
 
 ### Fix
 
-* fix(boxplot): check negative values and unit tests ([`30e08c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/30e08c4dac8142babea40b35a563276eb8f6b752))
-
-* fix(boxplot): log1p transformation and unit tests ([`bcd5f2c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcd5f2cee50284fb748bdfb1285a6a601b001134))
+* fix(boxplot): single feature orientation and add axis labels and unit tests ([`b40e7a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b40e7a009b0a026c4aff93626f933837b2a2e024))
 
 ### Unknown
 
-* Merge pull request #199 from FNLCR-DMAP/dev
+* Merge pull request #201 from FNLCR-DMAP/dev
 
-boxplot: deal with log transformation when the presence of negative values and 0 ([`a4e0fad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4e0fad54146e662afad9cbe1290ca44f40ff07d))
+merge the boxplot from dev to release dev ([`332eae3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/332eae34fdbd1666c4830de705198e37e0ab9947))
 
-* Merge pull request #198 from FNLCR-DMAP/boxplot
+* Merge pull request #200 from FNLCR-DMAP/boxplot
 
-fix(boxplot): log1p transformation and unit tests ([`0459025`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0459025428a9425c7a1f27204fe235e8b8a462c7))
+fix(boxplot): single feature orientation and add axis labels and unit… ([`28383a2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28383a290ac7989c1221f634f4d4a048e9f88cbb))
 
 
-## v0.6.4 (2024-06-18)
+## v0.6.5 (2024-07-10)
 
 ### Ci
+
+* ci(version): Automatic development release ([`1b9acf0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b9acf06c6319f418bf7b61c6d4f0286a31f2fe1))
 
 * ci(version): Automatic development release ([`ed79d5f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ed79d5f3608599c5c561d57a6cc6d5fbb0e38130))
 
@@ -106,6 +106,10 @@ fix(boxplot): log1p transformation and unit tests ([`0459025`](https://github.co
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(boxplot): check negative values and unit tests ([`30e08c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/30e08c4dac8142babea40b35a563276eb8f6b752))
+
+* fix(boxplot): log1p transformation and unit tests ([`bcd5f2c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcd5f2cee50284fb748bdfb1285a6a601b001134))
 
 * fix(arcsinh_transformation): change error message and corresponding unit tests ([`417afd2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/417afd2fb343c9a1f682166ba00b7012719ee8c7))
 
@@ -204,6 +208,14 @@ fix(boxplot): log1p transformation and unit tests ([`0459025`](https://github.co
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #199 from FNLCR-DMAP/dev
+
+boxplot: deal with log transformation when the presence of negative values and 0 ([`a4e0fad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4e0fad54146e662afad9cbe1290ca44f40ff07d))
+
+* Merge pull request #198 from FNLCR-DMAP/boxplot
+
+fix(boxplot): log1p transformation and unit tests ([`0459025`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0459025428a9425c7a1f27204fe235e8b8a462c7))
 
 * Merge pull request #196 from FNLCR-DMAP/dev
 
