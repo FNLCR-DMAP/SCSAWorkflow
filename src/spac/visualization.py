@@ -1214,13 +1214,25 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
             ax.set_title("Multiple Features")
         else:
             if v_orient:
-                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
-            else:
                 sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
+            else:
+                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
             ax.set_title("Single Boxplot")
 
     if log_scale:
         ax.set_yscale('log') if v_orient else ax.set_xscale('log')
+
+    # Set x and y-axis labels
+    if v_orient:
+        xlabel = annotation if annotation else 'Feature'
+        ylabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    else:
+        xlabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ylabel = annotation if annotation else 'Feature'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     plt.xticks(rotation=90)
     plt.tight_layout()
