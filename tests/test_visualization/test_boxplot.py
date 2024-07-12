@@ -250,6 +250,16 @@ class TestBoxplot(unittest.TestCase):
         self.assertEqual(ax.get_xlabel(), 'log(Intensity)')
         self.assertEqual(ax.get_ylabel(), 'phenotype')
 
+    def test_single_feature_labeling(self):
+        """Test if single feature name is displayed correctly on the x-axis."""
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='v')
+        xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
+        self.assertEqual(xtick_labels, ['feature1'])
+
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='h')
+        ytick_labels = [tick.get_text() for tick in ax.get_yticklabels()]
+        self.assertEqual(ytick_labels, ['feature1'])
+
 
 if __name__ == '__main__':
     unittest.main()
