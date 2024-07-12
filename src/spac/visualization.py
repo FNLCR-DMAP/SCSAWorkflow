@@ -1215,8 +1215,12 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
         else:
             if v_orient:
                 sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
+                ax.set_xticks([0])  # Set a single tick for the single feature
+                ax.set_xticklabels([features[0]])  # Set the label for the tick
             else:
                 sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
+                ax.set_yticks([0])  # Set a single tick for the single feature
+                ax.set_yticklabels([features[0]])  # Set the label for the tick
             ax.set_title("Single Boxplot")
 
     if log_scale:
