@@ -2,26 +2,30 @@
 
 
 
-## v0.6.7 (2024-07-12)
+## v0.6.8 (2024-07-12)
 
 ### Fix
 
-* fix(boxplot): set a single tick and label explicitly for single features and unit test ([`6b869a3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b869a3ccc4ec9578a326358b7abd0654289c7b9))
+* fix(dimensionality_reduction_plot): change axis label of associate table and unit test ([`71c54f5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71c54f59dec45cfae566d822522c11b9a031166c))
+
+* fix: axis and plot titles and unit tests ([`8dc438b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8dc438bf6e374bd93973ee7cbb743fd2c2fc5c67))
 
 ### Unknown
 
-* Merge pull request #203 from FNLCR-DMAP/dev
+* Merge pull request #205 from FNLCR-DMAP/dev
 
-merge boxplot from dev to release_dev by setting a single tick and label for single features ([`51d1161`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/51d116168ef2c3660f0cb680242743df8064c357))
+merge updated dimensionality reduction plot and 2D visualization scatter functions from dev to release_dev ([`507564d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/507564d02968545bcd780a48135078740928c2e0))
 
-* Merge pull request #202 from FNLCR-DMAP/boxplot
+* Merge pull request #204 from FNLCR-DMAP/umap
 
-fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81aa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce81aa01e32a958f8e1328405efc07dba6e8dfb2))
+fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65798be0affd6f4aed655e1ca492e3dc884b9093))
 
 
-## v0.6.6 (2024-07-11)
+## v0.6.7 (2024-07-12)
 
 ### Ci
+
+* ci(version): Automatic development release ([`15710d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/15710d756a537d7c958e5ab965d2cd1779c0770a))
 
 * ci(version): Automatic development release ([`6e0434e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0434ebed748257fd2bb71b52e750f4a472b065))
 
@@ -108,6 +112,8 @@ fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(boxplot): set a single tick and label explicitly for single features and unit test ([`6b869a3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b869a3ccc4ec9578a326358b7abd0654289c7b9))
 
 * fix(boxplot): single feature orientation and add axis labels and unit tests ([`b40e7a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b40e7a009b0a026c4aff93626f933837b2a2e024))
 
@@ -212,6 +218,14 @@ fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #203 from FNLCR-DMAP/dev
+
+merge boxplot from dev to release_dev by setting a single tick and label for single features ([`51d1161`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/51d116168ef2c3660f0cb680242743df8064c357))
+
+* Merge pull request #202 from FNLCR-DMAP/boxplot
+
+fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81aa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce81aa01e32a958f8e1328405efc07dba6e8dfb2))
 
 * Merge pull request #201 from FNLCR-DMAP/dev
 
