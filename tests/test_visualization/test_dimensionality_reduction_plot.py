@@ -72,8 +72,8 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
-        self.assertEqual(ax.get_xlabel(), 'UMAP 1')
-        self.assertEqual(ax.get_ylabel(), 'UMAP 2')
+        self.assertEqual(ax.get_xlabel(), 'sumap 1')
+        self.assertEqual(ax.get_ylabel(), 'sumap 2')
         self.assertEqual(ax.get_title(), 'sumap')
 
     def test_feature_column(self):

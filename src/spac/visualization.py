@@ -305,8 +305,8 @@ def dimensionality_reduction_plot(
         y_axis_title = 'UMAP 2'
         plot_title = 'UMAP'
     else:
-        x_axis_title = 'UMAP 1'
-        y_axis_title = 'UMAP 2'
+        x_axis_title = f'{associated_table} 1'
+        y_axis_title = f'{associated_table} 2'
         plot_title = associated_table
 
     fig, ax = visualize_2D_scatter(
