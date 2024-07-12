@@ -95,6 +95,35 @@ class TestVisualize2DScatter(unittest.TestCase):
         aspect = axis.get_aspect()
         self.assertTrue(aspect == 'equal' or aspect == 1.0)
 
+    def test_axis_titles(self):
+        """Test if axis titles are set correctly."""
+        x_axis_title = 'Test X Axis'
+        y_axis_title = 'Test Y Axis'
+        figure, axis = visualize_2D_scatter(
+            self.x, self.y, x_axis_title=x_axis_title,
+            y_axis_title=y_axis_title
+        )
+        self.assertEqual(axis.get_xlabel(), x_axis_title)
+        self.assertEqual(axis.get_ylabel(), y_axis_title)
+
+    def test_plot_title(self):
+        """Test if plot title is set correctly."""
+        plot_title = 'Test Plot Title'
+        figure, axis = visualize_2D_scatter(
+            self.x, self.y, plot_title=plot_title
+        )
+        self.assertEqual(axis.get_title(), plot_title)
+
+    def test_color_representation(self):
+        """Test if color representation description is included in legend."""
+        color_representation = 'Test Color Representation'
+        figure, axis = visualize_2D_scatter(
+            self.x, self.y, labels=self.labels_categorical,
+            color_representation=color_representation
+        )
+        legend = axis.get_legend()
+        self.assertIn(color_representation, legend.get_title().get_text())
+
 
 if __name__ == '__main__':
     unittest.main()

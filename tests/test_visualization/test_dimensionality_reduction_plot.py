@@ -60,6 +60,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE')
 
     def test_associated_table(self):
         fig, ax = dimensionality_reduction_plot(
@@ -69,6 +72,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 'UMAP 1')
+        self.assertEqual(ax.get_ylabel(), 'UMAP 2')
+        self.assertEqual(ax.get_title(), 'sumap')
 
     def test_feature_column(self):
         fig, ax = dimensionality_reduction_plot(
@@ -76,6 +82,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE')
 
     def test_ax_provided(self):
         fig, ax_provided = plt.subplots()
@@ -91,6 +100,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE')
 
     def test_real_umap_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -98,6 +110,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 'UMAP 1')
+        self.assertEqual(ax.get_ylabel(), 'UMAP 2')
+        self.assertEqual(ax.get_title(), 'UMAP')
 
     def test_real_pca_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -105,6 +120,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 'PCA 1')
+        self.assertEqual(ax.get_ylabel(), 'PCA 2')
+        self.assertEqual(ax.get_title(), 'PCA')
 
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:

@@ -23,7 +23,9 @@ logging.basicConfig(level=logging.INFO,
 
 def visualize_2D_scatter(
     x, y, labels=None, point_size=None, theme=None,
-    ax=None, legend_label_size=50, annotate_centers=False, **kwargs
+    ax=None, legend_label_size=50, annotate_centers=False,
+    x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
+    color_representation=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -45,6 +47,14 @@ def visualize_2D_scatter(
         Matplotlib axis object. If None, a new one is created.
     annotate_centers : bool, optional (default: False)
         Annotate the centers of clusters if labels are categorical.
+    x_axis_title : str, optional
+        Title for the x-axis.
+    y_axis_title : str, optional
+        Title for the y-axis.
+    plot_title : str, optional
+        Title for the plot.
+    color_representation : str, optional
+        Description of what the colors represent.
     **kwargs
         Additional keyword arguments passed to plt.scatter.
 
@@ -111,7 +121,7 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            cmap = plt.get_cmap('tab20', len(unique_clusters))
+            cmap = plt.get_cmap('tab20b', len(unique_clusters))
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -136,14 +146,15 @@ def visualize_2D_scatter(
             for handle in handles:
                 handle.set_sizes([legend_label_size])
 
-            # Create a custom legend
+            # Create a custom legend with color representation
             ax.legend(
                 handles,
                 labels,
                 loc='upper right',
                 bbox_to_anchor=(1.25, 1),  # Adjusting position
                 handlelength=2,
-                handletextpad=1
+                handletextpad=1,
+                title=f"Color represents: {color_representation}"
             )
 
         else:
@@ -152,11 +163,23 @@ def visualize_2D_scatter(
                 x, y, c=labels, cmap=cmap, s=point_size, **kwargs
             )
             plt.colorbar(scatter, ax=ax)
+            if color_representation is not None:
+                ax.set_title(
+                    f"{plot_title}\nColor represents: {color_representation}"
+                )
     else:
         scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
 
     # Equal aspect ratio for the axes
     ax.set_aspect('equal', 'datalim')
+
+    # Set axis labels
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+
+    # Set plot title
+    if plot_title is not None:
+        ax.set_title(plot_title)
 
     return fig, ax
 
@@ -251,8 +274,7 @@ def dimensionality_reduction_plot(
             )
         key = associated_table
 
-    logger = logging.getLogger()
-    logger.info(f'Running visualizaiton using the coordinates:"{key}"')
+    print(f'Running visualization using the coordinates: "{key}"')
 
     # Extract the 2D coordinates
     x, y = adata.obsm[key].T
@@ -260,13 +282,39 @@ def dimensionality_reduction_plot(
     # Determine coloring scheme
     if annotation:
         color_values = adata.obs[annotation].astype('category').values
+        color_representation = annotation
     elif feature:
         data_source = adata.layers[layer] if layer else adata.X
         color_values = data_source[:, adata.var_names == feature].squeeze()
+        color_representation = feature
     else:
         color_values = None
+        color_representation = None
 
-    fig, ax = visualize_2D_scatter(x, y, ax=ax, labels=color_values, **kwargs)
+    # Set axis titles based on method
+    if method == 'tsne':
+        x_axis_title = 't-SNE 1'
+        y_axis_title = 't-SNE 2'
+        plot_title = 'TSNE'
+    elif method == 'pca':
+        x_axis_title = 'PCA 1'
+        y_axis_title = 'PCA 2'
+        plot_title = 'PCA'
+    elif method == 'umap':
+        x_axis_title = 'UMAP 1'
+        y_axis_title = 'UMAP 2'
+        plot_title = 'UMAP'
+    else:
+        x_axis_title = 'UMAP 1'
+        y_axis_title = 'UMAP 2'
+        plot_title = associated_table
+
+    fig, ax = visualize_2D_scatter(
+        x, y, ax=ax, labels=color_values,
+        color_representation=color_representation,
+        x_axis_title=x_axis_title, y_axis_title=y_axis_title,
+        plot_title=plot_title, **kwargs
+    )
 
     return fig, ax
 
