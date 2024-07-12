@@ -141,6 +141,23 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), expected_msg)
 
+    def test_conflicting_kwargs(self):
+        # This test ensures conflicting keys are removed from kwargs
+        fig, ax = dimensionality_reduction_plot(
+            self.adata,
+            'tsne',
+            annotation='annotation_column',
+            x_axis_title='Conflict X',
+            y_axis_title='Conflict Y',
+            plot_title='Conflict Title',
+            color_representation='Conflict Color'
+        )
+        self.assertIsNotNone(fig)
+        self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE')
+
 
 if __name__ == '__main__':
     unittest.main()
