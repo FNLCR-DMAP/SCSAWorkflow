@@ -2,26 +2,28 @@
 
 
 
-## v0.6.6 (2024-07-11)
+## v0.6.7 (2024-07-12)
 
 ### Fix
 
-* fix(boxplot): single feature orientation and add axis labels and unit tests ([`b40e7a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b40e7a009b0a026c4aff93626f933837b2a2e024))
+* fix(boxplot): set a single tick and label explicitly for single features and unit test ([`6b869a3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b869a3ccc4ec9578a326358b7abd0654289c7b9))
 
 ### Unknown
 
-* Merge pull request #201 from FNLCR-DMAP/dev
+* Merge pull request #203 from FNLCR-DMAP/dev
 
-merge the boxplot from dev to release dev ([`332eae3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/332eae34fdbd1666c4830de705198e37e0ab9947))
+merge boxplot from dev to release_dev by setting a single tick and label for single features ([`51d1161`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/51d116168ef2c3660f0cb680242743df8064c357))
 
-* Merge pull request #200 from FNLCR-DMAP/boxplot
+* Merge pull request #202 from FNLCR-DMAP/boxplot
 
-fix(boxplot): single feature orientation and add axis labels and unit… ([`28383a2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28383a290ac7989c1221f634f4d4a048e9f88cbb))
+fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81aa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce81aa01e32a958f8e1328405efc07dba6e8dfb2))
 
 
-## v0.6.5 (2024-07-10)
+## v0.6.6 (2024-07-11)
 
 ### Ci
+
+* ci(version): Automatic development release ([`6e0434e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0434ebed748257fd2bb71b52e750f4a472b065))
 
 * ci(version): Automatic development release ([`1b9acf0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b9acf06c6319f418bf7b61c6d4f0286a31f2fe1))
 
@@ -106,6 +108,8 @@ fix(boxplot): single feature orientation and add axis labels and unit… ([`2838
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(boxplot): single feature orientation and add axis labels and unit tests ([`b40e7a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b40e7a009b0a026c4aff93626f933837b2a2e024))
 
 * fix(boxplot): check negative values and unit tests ([`30e08c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/30e08c4dac8142babea40b35a563276eb8f6b752))
 
@@ -208,6 +212,14 @@ fix(boxplot): single feature orientation and add axis labels and unit… ([`2838
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #201 from FNLCR-DMAP/dev
+
+merge the boxplot from dev to release dev ([`332eae3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/332eae34fdbd1666c4830de705198e37e0ab9947))
+
+* Merge pull request #200 from FNLCR-DMAP/boxplot
+
+fix(boxplot): single feature orientation and add axis labels and unit… ([`28383a2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28383a290ac7989c1221f634f4d4a048e9f88cbb))
 
 * Merge pull request #199 from FNLCR-DMAP/dev
 
