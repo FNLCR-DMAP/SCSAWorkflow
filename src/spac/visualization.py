@@ -291,23 +291,23 @@ def dimensionality_reduction_plot(
         color_values = None
         color_representation = None
 
-    # Set axis titles based on method
+    # Set axis titles based on method and color representation
     if method == 'tsne':
         x_axis_title = 't-SNE 1'
         y_axis_title = 't-SNE 2'
-        plot_title = 'TSNE'
+        plot_title = f'TSNE-{color_representation}'
     elif method == 'pca':
         x_axis_title = 'PCA 1'
         y_axis_title = 'PCA 2'
-        plot_title = 'PCA'
+        plot_title = f'PCA-{color_representation}'
     elif method == 'umap':
         x_axis_title = 'UMAP 1'
         y_axis_title = 'UMAP 2'
-        plot_title = 'UMAP'
+        plot_title = f'UMAP-{color_representation}'
     else:
         x_axis_title = f'{associated_table} 1'
         y_axis_title = f'{associated_table} 2'
-        plot_title = associated_table
+        plot_title = f'{associated_table}-{color_representation}'
 
     # Remove conflicting keys from kwargs
     kwargs.pop('x_axis_title', None)

@@ -62,7 +62,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(ax)
         self.assertEqual(ax.get_xlabel(), 't-SNE 1')
         self.assertEqual(ax.get_ylabel(), 't-SNE 2')
-        self.assertEqual(ax.get_title(), 'TSNE')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
 
     def test_associated_table(self):
         fig, ax = dimensionality_reduction_plot(
@@ -74,7 +74,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(ax)
         self.assertEqual(ax.get_xlabel(), 'sumap 1')
         self.assertEqual(ax.get_ylabel(), 'sumap 2')
-        self.assertEqual(ax.get_title(), 'sumap')
+        self.assertEqual(ax.get_title(), 'sumap-annotation_column')
 
     def test_feature_column(self):
         fig, ax = dimensionality_reduction_plot(
@@ -84,7 +84,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(ax)
         self.assertEqual(ax.get_xlabel(), 't-SNE 1')
         self.assertEqual(ax.get_ylabel(), 't-SNE 2')
-        self.assertEqual(ax.get_title(), 'TSNE')
+        self.assertEqual(ax.get_title(), 'TSNE-gene_1')
 
     def test_ax_provided(self):
         fig, ax_provided = plt.subplots()
@@ -102,7 +102,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsInstance(ax, plt.Axes)
         self.assertEqual(ax.get_xlabel(), 't-SNE 1')
         self.assertEqual(ax.get_ylabel(), 't-SNE 2')
-        self.assertEqual(ax.get_title(), 'TSNE')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
 
     def test_real_umap_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -112,7 +112,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsInstance(ax, plt.Axes)
         self.assertEqual(ax.get_xlabel(), 'UMAP 1')
         self.assertEqual(ax.get_ylabel(), 'UMAP 2')
-        self.assertEqual(ax.get_title(), 'UMAP')
+        self.assertEqual(ax.get_title(), 'UMAP-gene_1')
 
     def test_real_pca_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -122,7 +122,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsInstance(ax, plt.Axes)
         self.assertEqual(ax.get_xlabel(), 'PCA 1')
         self.assertEqual(ax.get_ylabel(), 'PCA 2')
-        self.assertEqual(ax.get_title(), 'PCA')
+        self.assertEqual(ax.get_title(), 'PCA-annotation_column')
 
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
@@ -156,7 +156,7 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.assertIsNotNone(ax)
         self.assertEqual(ax.get_xlabel(), 't-SNE 1')
         self.assertEqual(ax.get_ylabel(), 't-SNE 2')
-        self.assertEqual(ax.get_title(), 'TSNE')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
 
 
 if __name__ == '__main__':
