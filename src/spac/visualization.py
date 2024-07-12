@@ -309,11 +309,22 @@ def dimensionality_reduction_plot(
         y_axis_title = f'{associated_table} 2'
         plot_title = associated_table
 
+    # Remove conflicting keys from kwargs
+    kwargs.pop('x_axis_title', None)
+    kwargs.pop('y_axis_title', None)
+    kwargs.pop('plot_title', None)
+    kwargs.pop('color_representation', None)
+
     fig, ax = visualize_2D_scatter(
-        x, y, ax=ax, labels=color_values,
+        x=x,
+        y=y,
+        ax=ax,
+        labels=color_values,
+        x_axis_title=x_axis_title,
+        y_axis_title=y_axis_title,
+        plot_title=plot_title,
         color_representation=color_representation,
-        x_axis_title=x_axis_title, y_axis_title=y_axis_title,
-        plot_title=plot_title, **kwargs
+        **kwargs
     )
 
     return fig, ax
