@@ -2,26 +2,28 @@
 
 
 
-## v0.6.9 (2024-07-12)
+## v0.6.10 (2024-07-12)
 
 ### Fix
 
-* fix(dimensionality_reduction_plot): remove the conflicting keys from kwargs and add unit test ([`efe7812`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/efe781215e9e7e09168665909357c77a6246eafb))
+* fix(dimensionality_reduction_plot): modified the plot title and unit test ([`a57bc34`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a57bc34aa619dd895a90eb08d48e323a33a5b731))
 
 ### Unknown
 
-* Merge pull request #207 from FNLCR-DMAP/dev
+* Merge pull request #209 from FNLCR-DMAP/dev
 
-Merge dimensionality reduction plot with removing conflict of kwargs from dev to release_dev ([`9398679`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/939867997436551d498fe65c9e0f3cf0757b92aa))
+Merge dimensionality reduction plot from dev to release_dev ([`d481cf1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d481cf1469adcff8aded8406726ad2e15eb2e2a0))
 
-* Merge pull request #206 from FNLCR-DMAP/umap
+* Merge pull request #208 from FNLCR-DMAP/umap
 
-fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cfdeb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c2cfdeb631c177517b822af24e3050791b1f890e))
+fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2cdb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61b2cdbb0e6c11717dabbd66f33ae29fa8271180))
 
 
-## v0.6.8 (2024-07-12)
+## v0.6.9 (2024-07-12)
 
 ### Ci
+
+* ci(version): Automatic development release ([`c3bbca3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c3bbca396ff05cd26734cc731eb285e0a3089287))
 
 * ci(version): Automatic development release ([`5484645`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5484645acb5f3142de1aa8e183d691039b91eb7e))
 
@@ -112,6 +114,8 @@ fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cf
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(dimensionality_reduction_plot): remove the conflicting keys from kwargs and add unit test ([`efe7812`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/efe781215e9e7e09168665909357c77a6246eafb))
 
 * fix(dimensionality_reduction_plot): change axis label of associate table and unit test ([`71c54f5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71c54f59dec45cfae566d822522c11b9a031166c))
 
@@ -222,6 +226,14 @@ fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cf
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #207 from FNLCR-DMAP/dev
+
+Merge dimensionality reduction plot with removing conflict of kwargs from dev to release_dev ([`9398679`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/939867997436551d498fe65c9e0f3cf0757b92aa))
+
+* Merge pull request #206 from FNLCR-DMAP/umap
+
+fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cfdeb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c2cfdeb631c177517b822af24e3050791b1f890e))
 
 * Merge pull request #205 from FNLCR-DMAP/dev
 
