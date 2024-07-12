@@ -2,28 +2,28 @@
 
 
 
-## v0.6.8 (2024-07-12)
+## v0.6.9 (2024-07-12)
 
 ### Fix
 
-* fix(dimensionality_reduction_plot): change axis label of associate table and unit test ([`71c54f5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71c54f59dec45cfae566d822522c11b9a031166c))
-
-* fix: axis and plot titles and unit tests ([`8dc438b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8dc438bf6e374bd93973ee7cbb743fd2c2fc5c67))
+* fix(dimensionality_reduction_plot): remove the conflicting keys from kwargs and add unit test ([`efe7812`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/efe781215e9e7e09168665909357c77a6246eafb))
 
 ### Unknown
 
-* Merge pull request #205 from FNLCR-DMAP/dev
+* Merge pull request #207 from FNLCR-DMAP/dev
 
-merge updated dimensionality reduction plot and 2D visualization scatter functions from dev to release_dev ([`507564d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/507564d02968545bcd780a48135078740928c2e0))
+Merge dimensionality reduction plot with removing conflict of kwargs from dev to release_dev ([`9398679`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/939867997436551d498fe65c9e0f3cf0757b92aa))
 
-* Merge pull request #204 from FNLCR-DMAP/umap
+* Merge pull request #206 from FNLCR-DMAP/umap
 
-fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65798be0affd6f4aed655e1ca492e3dc884b9093))
+fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cfdeb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c2cfdeb631c177517b822af24e3050791b1f890e))
 
 
-## v0.6.7 (2024-07-12)
+## v0.6.8 (2024-07-12)
 
 ### Ci
+
+* ci(version): Automatic development release ([`5484645`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5484645acb5f3142de1aa8e183d691039b91eb7e))
 
 * ci(version): Automatic development release ([`15710d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/15710d756a537d7c958e5ab965d2cd1779c0770a))
 
@@ -112,6 +112,10 @@ fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-D
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(dimensionality_reduction_plot): change axis label of associate table and unit test ([`71c54f5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71c54f59dec45cfae566d822522c11b9a031166c))
+
+* fix: axis and plot titles and unit tests ([`8dc438b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8dc438bf6e374bd93973ee7cbb743fd2c2fc5c67))
 
 * fix(boxplot): set a single tick and label explicitly for single features and unit test ([`6b869a3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b869a3ccc4ec9578a326358b7abd0654289c7b9))
 
@@ -218,6 +222,14 @@ fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-D
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #205 from FNLCR-DMAP/dev
+
+merge updated dimensionality reduction plot and 2D visualization scatter functions from dev to release_dev ([`507564d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/507564d02968545bcd780a48135078740928c2e0))
+
+* Merge pull request #204 from FNLCR-DMAP/umap
+
+fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65798be0affd6f4aed655e1ca492e3dc884b9093))
 
 * Merge pull request #203 from FNLCR-DMAP/dev
 
