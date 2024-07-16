@@ -2,26 +2,28 @@
 
 
 
-## v0.6.10 (2024-07-12)
+## v0.6.11 (2024-07-16)
 
 ### Fix
 
-* fix(dimensionality_reduction_plot): modified the plot title and unit test ([`a57bc34`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a57bc34aa619dd895a90eb08d48e323a33a5b731))
+* fix(normalize_features_core): adjust argument to match numpy version and unit test ([`7cda63b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7cda63b9c0a0f1f6a9e920926433787fac622d8f))
 
 ### Unknown
 
-* Merge pull request #209 from FNLCR-DMAP/dev
+* Merge pull request #211 from FNLCR-DMAP/dev
 
-Merge dimensionality reduction plot from dev to release_dev ([`d481cf1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d481cf1469adcff8aded8406726ad2e15eb2e2a0))
+merge normalize_features_core from dev to release_dev by matching numpy version ([`509922c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/509922c2b1e278376b60f12eccf7c89acf9b8a03))
 
-* Merge pull request #208 from FNLCR-DMAP/umap
+* Merge pull request #210 from FNLCR-DMAP/normalize_features_core
 
-fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2cdb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61b2cdbb0e6c11717dabbd66f33ae29fa8271180))
+fix(normalize_features_core): adjust argument to match numpy version … ([`de6026e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/de6026edcae71591146d3fb413335b20db187240))
 
 
-## v0.6.9 (2024-07-12)
+## v0.6.10 (2024-07-12)
 
 ### Ci
+
+* ci(version): Automatic development release ([`0405e1d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0405e1db3054bed552ad195c9c28813cc52e4457))
 
 * ci(version): Automatic development release ([`c3bbca3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c3bbca396ff05cd26734cc731eb285e0a3089287))
 
@@ -114,6 +116,8 @@ fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(dimensionality_reduction_plot): modified the plot title and unit test ([`a57bc34`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a57bc34aa619dd895a90eb08d48e323a33a5b731))
 
 * fix(dimensionality_reduction_plot): remove the conflicting keys from kwargs and add unit test ([`efe7812`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/efe781215e9e7e09168665909357c77a6246eafb))
 
@@ -226,6 +230,14 @@ fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #209 from FNLCR-DMAP/dev
+
+Merge dimensionality reduction plot from dev to release_dev ([`d481cf1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d481cf1469adcff8aded8406726ad2e15eb2e2a0))
+
+* Merge pull request #208 from FNLCR-DMAP/umap
+
+fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2cdb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61b2cdbb0e6c11717dabbd66f33ae29fa8271180))
 
 * Merge pull request #207 from FNLCR-DMAP/dev
 
