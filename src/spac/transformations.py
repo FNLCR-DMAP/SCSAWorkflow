@@ -756,10 +756,20 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
             "Interpolation must be either 'nearest' or 'linear', "
             f"passed value is: {interpolation}")
 
-    # Calculate the quantiles
-    quantiles = np.quantile(
-        data, [low_quantile, high_quantile], axis=0,
-        method=interpolation)
+    # Version check for numpy
+    numpy_version = np.__version__
+    if numpy_version >= '1.22.0':
+        # Use 'method' argument for newer versions
+        quantiles = np.quantile(
+            data, [low_quantile, high_quantile], axis=0,
+            method=interpolation
+        )
+    else:
+        # Use 'interpolation' argument for older versions
+        quantiles = np.quantile(
+            data, [low_quantile, high_quantile], axis=0,
+            interpolation=interpolation
+        )
 
     qmin = quantiles[0]
     qmax = quantiles[1]
@@ -857,7 +867,7 @@ def arcsinh_transformation(
                 "annotation must be provided if per_batch is True."
             )
         check_annotation(
-            adata, annotations=annotation,parameter_name="annotation"
+            adata, annotations=annotation, parameter_name="annotation"
         )
         transformed_data = apply_per_batch(
             data_to_transform, adata.obs[annotation].values,
