@@ -83,7 +83,7 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
             "The low quantile should be smaller than the high quantile, "
             "current values are:\nlow quantile: 0.5\nhigh quantile: 0.5")
 
-    def test_invalid_method(self):
+    def test_invalid_interpolation(self):
         # Test with invalid method
         with self.assertRaises(ValueError) as context:
             normalize_features_core(self.data_normalization, 0.2, 0.8,
