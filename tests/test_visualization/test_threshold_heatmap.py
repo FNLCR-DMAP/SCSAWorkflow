@@ -2,8 +2,9 @@ import anndata
 import unittest
 import numpy as np
 import pandas as pd
-from spac.visualization import threshold_heatmap
 import matplotlib
+from spac.visualization import threshold_heatmap
+import matplotlib.pyplot as plt
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
@@ -54,7 +55,7 @@ class TestThresholdHeatmap(unittest.TestCase):
             )
 
     def test_threshold_heatmap(self):
-        threshold_heatmap(
+        heatmap_plot = threshold_heatmap(
             self.adata,
             self.marker_cutoffs,
             self.phenotype
@@ -69,15 +70,37 @@ class TestThresholdHeatmap(unittest.TestCase):
             self.adata.layers["intensity"], expected_intensity_data
         )
 
-    def test_swap_axes_through_kwargs(self):
-        threshold_heatmap(
+        # Ensure that 'heatmap_ax' and 'groupby_ax' are in the returned
+        # dictionary
+        self.assertIn('heatmap_ax', heatmap_plot)
+        self.assertIn('groupby_ax', heatmap_plot)
+
+    def test_swap_axes(self):
+        # Generate heatmap without swapping axe
+        heatmap_plot = threshold_heatmap(
+            self.adata,
+            self.marker_cutoffs,
+            self.phenotype,
+            swap_axes=False
+        )
+        heatmap_ax = heatmap_plot['heatmap_ax']
+        x_labels_before = heatmap_ax.get_xticks()
+        y_labels_before = heatmap_ax.get_yticks()
+
+        # Generate heatmap with swapping axes
+        heatmap_plot_swapped = threshold_heatmap(
             self.adata,
             self.marker_cutoffs,
             self.phenotype,
             swap_axes=True
         )
-        # Add assertions to check if axes are swapped.
-        self.assertTrue(True)
+        heatmap_ax_swapped = heatmap_plot_swapped['heatmap_ax']
+        x_labels_after = heatmap_ax_swapped.get_xticks()
+        y_labels_after = heatmap_ax_swapped.get_yticks()
+
+        # Check that the axes have been swapped
+        self.assertEqual(len(x_labels_before), len(y_labels_after))
+        self.assertEqual(len(y_labels_before), len(x_labels_after))
 
     def test_threshold_heatmap_with_layer(self):
         # Add a new layer "new_layer" to adata for this specific test
@@ -96,6 +119,45 @@ class TestThresholdHeatmap(unittest.TestCase):
         expected_intensity_data = np.array([[0, 0], [1, 1], [2, 2]])
         np.testing.assert_array_equal(
             self.adata.layers["intensity"], expected_intensity_data
+        )
+
+    def test_heatmap_axes_and_colorbar(self):
+        # Generate the heatmap
+        heatmap_plot = threshold_heatmap(
+            self.adata,
+            self.marker_cutoffs,
+            self.phenotype
+        )
+
+        # Check if 'heatmap_ax' is in the returned dictionary
+        self.assertIn('heatmap_ax', heatmap_plot)
+
+        # Check if 'groupby_ax' is in the returned dictionary
+        self.assertIn('groupby_ax', heatmap_plot)
+
+        # Set the expected ticks and labels
+        new_ticks = [0, 1, 2]
+        new_labels = ['Low', 'Medium', 'High']
+
+        # Find the colorbar by iterating through the figure's axes and their
+        # children
+        colorbar = None
+        for ax in plt.gcf().axes:
+            for child in ax.get_children():
+                if hasattr(child, 'colorbar') and child.colorbar is not None:
+                    colorbar = child.colorbar
+                    break
+            if colorbar is not None:
+                break
+
+        # Ensure a colorbar was found
+        self.assertIsNot(colorbar, None, "No colorbar found in the plot.")
+
+        # Check the ticks and labels of the colorbar
+        self.assertListEqual(colorbar.get_ticks().tolist(), new_ticks)
+        self.assertListEqual(
+            [tick.get_text() for tick in colorbar.ax.get_yticklabels()],
+            new_labels
         )
 
 
