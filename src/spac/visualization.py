@@ -816,7 +816,7 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
 
 
 def threshold_heatmap(
-    adata, feature_cutoffs, annotation, layer=None, **kwargs
+    adata, feature_cutoffs, annotation, layer=None, swap_axes=False, **kwargs
 ):
     """
     Creates a heatmap for each feature, categorizing intensities into low,
@@ -836,6 +836,8 @@ def threshold_heatmap(
     layer : str, optional
         Layer name in adata.layers to use for intensities.
         If None, uses .X attribute.
+    swap_axes : bool, optional
+        If True, swaps the axes of the heatmap.
     **kwargs : keyword arguments
         Additional keyword arguments to pass to scanpy's heatmap function.
 
@@ -916,12 +918,41 @@ def threshold_heatmap(
         layer='intensity',
         cmap=cmap,
         norm=norm,
+        show=False,   # Ensure the plot is not displayed but returned
+        swap_axes=swap_axes,
         **kwargs
     )
 
-    colorbar = plt.gcf().axes[-1]
-    colorbar.set_yticks([0, 1, 2])
-    colorbar.set_yticklabels(['low', 'medium', 'high'])
+    # Print the keys of the heatmap_plot dictionary
+    print("Keys of heatmap_plot:", heatmap_plot.keys())
+
+    # Get the main heatmap axis from the available keys
+    heatmap_ax = heatmap_plot.get('heatmap_ax')
+
+    # If 'heatmap_ax' key does not exist, access the first axis available
+    if heatmap_ax is None:
+        heatmap_ax = next(iter(heatmap_plot.values()))
+    print("Heatmap Axes:", heatmap_ax)
+
+    # Find the colorbar associated with the heatmap
+    cbar = None
+    for child in heatmap_ax.get_children():
+        if hasattr(child, 'colorbar'):
+            cbar = child.colorbar
+            break
+    if cbar is None:
+        print("No colorbar found in the plot.")
+        return
+    print("Colorbar:", cbar)
+
+    new_ticks = [0, 1, 2]
+    new_labels = ['Low', 'Medium', 'High']
+    cbar.set_ticks(new_ticks)
+    cbar.set_ticklabels(new_labels)
+    pos_heatmap = heatmap_ax.get_position()
+    cbar.ax.set_position(
+        [pos_heatmap.x1 + 0.02, pos_heatmap.y0, 0.02, pos_heatmap.height]
+    )
 
     return heatmap_plot
 
