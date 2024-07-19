@@ -2,26 +2,28 @@
 
 
 
-## v0.6.11 (2024-07-16)
+## v0.6.12 (2024-07-19)
 
 ### Fix
 
-* fix(normalize_features_core): adjust argument to match numpy version and unit test ([`7cda63b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7cda63b9c0a0f1f6a9e920926433787fac622d8f))
+* fix(threshold_heatmap): add swap axes and fix colorbar labels and unit tests ([`a834881`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a8348817703679e51342b2d2417d3410443faeb1))
 
 ### Unknown
 
-* Merge pull request #211 from FNLCR-DMAP/dev
+* Merge pull request #213 from FNLCR-DMAP/dev
 
-merge normalize_features_core from dev to release_dev by matching numpy version ([`509922c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/509922c2b1e278376b60f12eccf7c89acf9b8a03))
+merge threshold heatmap from dev to release_dev ([`b818521`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b818521f80b649d99d3d4f230f2a8a0892c08dca))
 
-* Merge pull request #210 from FNLCR-DMAP/normalize_features_core
+* Merge pull request #212 from FNLCR-DMAP/threshold_heatmap
 
-fix(normalize_features_core): adjust argument to match numpy version … ([`de6026e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/de6026edcae71591146d3fb413335b20db187240))
+fix(threshold_heatmap): add swap axes and fix colorbar labels and uni… ([`303e467`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/303e467d7d1d451392855aa7e0c78ec8b208175b))
 
 
-## v0.6.10 (2024-07-12)
+## v0.6.11 (2024-07-16)
 
 ### Ci
+
+* ci(version): Automatic development release ([`47d823a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/47d823a7f12e244ce0f42955226e1ed685a2ff7d))
 
 * ci(version): Automatic development release ([`0405e1d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0405e1db3054bed552ad195c9c28813cc52e4457))
 
@@ -116,6 +118,8 @@ fix(normalize_features_core): adjust argument to match numpy version … ([`de60
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(normalize_features_core): adjust argument to match numpy version and unit test ([`7cda63b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7cda63b9c0a0f1f6a9e920926433787fac622d8f))
 
 * fix(dimensionality_reduction_plot): modified the plot title and unit test ([`a57bc34`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a57bc34aa619dd895a90eb08d48e323a33a5b731))
 
@@ -230,6 +234,14 @@ fix(normalize_features_core): adjust argument to match numpy version … ([`de60
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #211 from FNLCR-DMAP/dev
+
+merge normalize_features_core from dev to release_dev by matching numpy version ([`509922c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/509922c2b1e278376b60f12eccf7c89acf9b8a03))
+
+* Merge pull request #210 from FNLCR-DMAP/normalize_features_core
+
+fix(normalize_features_core): adjust argument to match numpy version … ([`de6026e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/de6026edcae71591146d3fb413335b20db187240))
 
 * Merge pull request #209 from FNLCR-DMAP/dev
 
