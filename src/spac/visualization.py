@@ -853,8 +853,7 @@ def threshold_heatmap(
 
     # Use utility functions for input validation
     check_table(adata, tables=layer)
-    if annotation:
-        check_annotation(adata, annotations=annotation)
+    check_annotation(adata, annotations=annotation)
     if feature_cutoffs:
         check_feature(adata, features=list(feature_cutoffs.keys()))
 
@@ -863,11 +862,6 @@ def threshold_heatmap(
         err_type = type(annotation).__name__
         err_msg = (f'Annotation should be string. Got {err_type}.')
         raise TypeError(err_msg)
-
-    # Assert annotation is a column in adata.obs DataFrame
-    if annotation not in adata.obs.columns:
-        err_msg = f"'{annotation}' not found in adata.obs DataFrame."
-        raise ValueError(err_msg)
 
     if not isinstance(feature_cutoffs, dict):
         raise TypeError("feature_cutoffs should be a dictionary.")
