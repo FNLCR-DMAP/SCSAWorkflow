@@ -947,7 +947,7 @@ def arcsinh_transformation_core(data, co_factor=None, percentile=None):
     return transformed_data
 
 
-def z_score_normalization(adata, layer=None):
+def z_score_normalization(adata, output_layer, input_layer=None, **kwargs):
     """
     Compute z-scores for the provided AnnData object.
 
@@ -955,31 +955,44 @@ def z_score_normalization(adata, layer=None):
     ----------
     adata : anndata.AnnData
         The AnnData object containing the data to normalize.
-    layer : str, optional
+    output_layer : str
+        The name of the layer to store the computed z-scores.
+    input_layer : str, optional
         The name of the layer in the AnnData object to normalize.
         If None, the main data matrix .X is used.
+    **kwargs : dict, optional
+        Additional arguments to pass to scipy.stats.zscore.
 
-    Returns
-    -------
-    adata : anndata.AnnData
-        The AnnData object with a new layer 'z_scores' containing the computed
-        z-scores.
     """
 
-    # Check if the provided layer exists in the AnnData object
-    if layer:
-        check_table(adata, tables=layer)
-        data_to_normalize = adata.layers[layer]
+    # Check if the provided input_layer exists in the AnnData object
+    if input_layer:
+        check_table(adata, tables=input_layer)
+        data_to_normalize = adata.layers[input_layer]
     else:
         data_to_normalize = adata.X
 
+    # Ensure data is in numpy array format
+    data_to_normalize = data_to_normalize.toarray() \
+        if issparse(data_to_normalize) else data_to_normalize
+
     # Compute z-scores using scipy.stats.zscore
-    z_scores = stats.zscore(data_to_normalize, axis=0, nan_policy='omit')
+    normalized_data = stats.zscore(
+        data_to_normalize, axis=0, nan_policy='omit', **kwargs
+    )
 
-    # Store the computed z-scores in the 'z_scores' layer
-    adata.layers['z_scores'] = z_scores
+    # Store the computed z-scores in the specified output_layer
+    adata.layers[output_layer] = pd.DataFrame(
+        normalized_data,
+        index=adata.obs_names,
+        columns=adata.var_names
+    )
 
-    return adata
+    # Print a message indicating that normalization is complete
+    print(
+        f'Z-score normalization completed. '
+        f'Data stored in layer "{output_layer}".'
+    )
 
 
 def apply_per_batch(data, annotation, method, **kwargs):
