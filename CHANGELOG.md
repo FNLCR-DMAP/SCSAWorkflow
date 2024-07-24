@@ -2,26 +2,28 @@
 
 
 
-## v0.6.14 (2024-07-24)
+## v0.6.15 (2024-07-24)
 
 ### Fix
 
-* fix(z_scores): add output_layer and unit tests ([`8bb0c5b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bb0c5bd60234026400d0304da47d9d948eb680f))
+* fix(get_cluster_info): replace cluster with annotation in function and unit tests ([`5c21a22`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5c21a2208b733439349cc35b12f0705e173c5826))
 
 ### Unknown
 
-* Merge pull request #217 from FNLCR-DMAP/dev
+* Merge pull request #219 from FNLCR-DMAP/dev
 
-merge updated z-score normalization from dev to release_dev ([`bcf8f80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcf8f80522e46f5fcb0a47c1698300c8b778e41f))
+merge get_cluster_info from dev to release_dev ([`c4050e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4050e640aa95e5bb34220ccab104b491aa7cf98))
 
-* Merge pull request #216 from FNLCR-DMAP/zscore
+* Merge pull request #218 from FNLCR-DMAP/get_cluster_info
 
-fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/18f84664beac2b541265b1e1105402269e8a4407))
+fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50bf4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe50bf44826869f21cc6fd909e282203737cf28c))
 
 
-## v0.6.13 (2024-07-23)
+## v0.6.14 (2024-07-24)
 
 ### Ci
+
+* ci(version): Automatic development release ([`25b9cf7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25b9cf7ab55fe5f7d0553b4a91ba22f269e2ec48))
 
 * ci(version): Automatic development release ([`07cb4cc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07cb4cc8279d267b814c88882d25d23700e1e68d))
 
@@ -122,6 +124,8 @@ fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/F
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(z_scores): add output_layer and unit tests ([`8bb0c5b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bb0c5bd60234026400d0304da47d9d948eb680f))
 
 * fix(threshold_heatmap): correct the error msg ([`8fbd850`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fbd850da623fb35a05b23b356d774812509816a))
 
@@ -242,6 +246,14 @@ fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/F
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #217 from FNLCR-DMAP/dev
+
+merge updated z-score normalization from dev to release_dev ([`bcf8f80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcf8f80522e46f5fcb0a47c1698300c8b778e41f))
+
+* Merge pull request #216 from FNLCR-DMAP/zscore
+
+fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/18f84664beac2b541265b1e1105402269e8a4407))
 
 * Merge pull request #215 from FNLCR-DMAP/dev
 
