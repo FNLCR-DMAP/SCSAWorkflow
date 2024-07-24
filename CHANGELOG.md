@@ -2,26 +2,28 @@
 
 
 
-## v0.6.13 (2024-07-23)
+## v0.6.14 (2024-07-24)
 
 ### Fix
 
-* fix(threshold_heatmap): correct the error msg ([`8fbd850`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fbd850da623fb35a05b23b356d774812509816a))
+* fix(z_scores): add output_layer and unit tests ([`8bb0c5b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bb0c5bd60234026400d0304da47d9d948eb680f))
 
 ### Unknown
 
-* Merge pull request #215 from FNLCR-DMAP/dev
+* Merge pull request #217 from FNLCR-DMAP/dev
 
-merge from dev to release_dev ([`0bfc9b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0bfc9b2abf2d3f8af33be96adfa88e6693dc8c86))
+merge updated z-score normalization from dev to release_dev ([`bcf8f80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcf8f80522e46f5fcb0a47c1698300c8b778e41f))
 
-* Merge pull request #214 from FNLCR-DMAP/threshold_heatmap
+* Merge pull request #216 from FNLCR-DMAP/zscore
 
-fix(threshold_heatmap): correct the error msg ([`14dd051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/14dd051a1164b7e26a4d28a0106497b750e1e6c1))
+fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/18f84664beac2b541265b1e1105402269e8a4407))
 
 
-## v0.6.12 (2024-07-19)
+## v0.6.13 (2024-07-23)
 
 ### Ci
+
+* ci(version): Automatic development release ([`07cb4cc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07cb4cc8279d267b814c88882d25d23700e1e68d))
 
 * ci(version): Automatic development release ([`83deef9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83deef9cf55b10622a34eeec71dfb9ea796216ca))
 
@@ -120,6 +122,8 @@ fix(threshold_heatmap): correct the error msg ([`14dd051`](https://github.com/FN
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(threshold_heatmap): correct the error msg ([`8fbd850`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fbd850da623fb35a05b23b356d774812509816a))
 
 * fix(threshold_heatmap): add swap axes and fix colorbar labels and unit tests ([`a834881`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a8348817703679e51342b2d2417d3410443faeb1))
 
@@ -238,6 +242,14 @@ fix(threshold_heatmap): correct the error msg ([`14dd051`](https://github.com/FN
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #215 from FNLCR-DMAP/dev
+
+merge from dev to release_dev ([`0bfc9b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0bfc9b2abf2d3f8af33be96adfa88e6693dc8c86))
+
+* Merge pull request #214 from FNLCR-DMAP/threshold_heatmap
+
+fix(threshold_heatmap): correct the error msg ([`14dd051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/14dd051a1164b7e26a4d28a0106497b750e1e6c1))
 
 * Merge pull request #213 from FNLCR-DMAP/dev
 
