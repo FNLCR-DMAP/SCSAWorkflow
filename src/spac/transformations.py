@@ -76,9 +76,9 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
     adata : anndata.AnnData
         The AnnData object.
     annotation : str
-        Annotation/column in adata.obs for cluster info.
+        Annotation in adata.obs for cluster info.
     features : list of str, optional
-        Features (e.g., genes) for cluster metrics.
+        Features (e.g., markers) for cluster metrics.
         Defaults to all features in adata.var_names.
     layer : str, optional
         The layer to be used in the aggregate summaries.
@@ -108,7 +108,7 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
 
     # Count cells in each cluster
     cluster_counts = adata.obs[annotation].value_counts().reset_index()
-    cluster_counts.columns = ["Cluster", "Number of Cells"]
+    cluster_counts.columns = [annotation, "Number of Cells"]
 
     # Calculate the percentage of cells in each cluster
     total_cells = adata.obs.shape[0]
@@ -117,7 +117,7 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
     ) * 100
 
     # Initialize DataFrame for cluster metrics
-    cluster_metrics = pd.DataFrame({"Cluster": cluster_counts["Cluster"]})
+    cluster_metrics = pd.DataFrame({annotation: cluster_counts[annotation]})
 
     # Add cluster annotation
     data_df[annotation] = adata.obs[annotation].values
@@ -128,17 +128,17 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
                             .agg(["mean", "median"])\
                             .reset_index()
         grouped.columns = [
-            f"{col}_{feature}" if col != annotation else "Cluster"
+            f"{col}_{feature}" if col != annotation else annotation
             for col in grouped.columns
         ]
         cluster_metrics = cluster_metrics.merge(
-            grouped, on="Cluster", how="left"
+            grouped, on=annotation, how="left"
         )
 
     # Merge cluster counts and percentage
     cluster_metrics = pd.merge(
         cluster_metrics, cluster_counts,
-        on="Cluster", how="left"
+        on=annotation, how="left"
     )
 
     return cluster_metrics
