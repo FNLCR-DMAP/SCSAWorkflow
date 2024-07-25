@@ -2,26 +2,28 @@
 
 
 
-## v0.6.16 (2024-07-25)
+## v0.7.0 (2024-07-25)
 
-### Fix
+### Step
 
-* fix(visualize_2D_scatter): modify ax setting and unit test ([`69d272d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69d272d3f4e1f8f2adc41b1d50b0c715405528cb))
+* step: minor release update ([`41cf19a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41cf19a75cb0178fa30f6a1e0d7f6ee999ef07f0))
 
 ### Unknown
 
-* Merge pull request #221 from FNLCR-DMAP/dev
+* Merge pull request #223 from FNLCR-DMAP/dev
 
-merge visualize_2D_scatter from dev to release_dev ([`92ecfe0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92ecfe05a25f65cd035bc39622ea0772ca33c9a3))
+Minor version update ([`e4f718e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4f718e293cdf6b3da426403333d762f2ef40693))
 
-* Merge pull request #220 from FNLCR-DMAP/umap
+* Merge pull request #222 from FNLCR-DMAP/version-update
 
-fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7ef7b13d611175a80a60dde2b70152da61ec1d2))
+minor release update ([`ccf7c77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ccf7c7717c152c419e8ba43c3f387b7347762118))
 
 
-## v0.6.15 (2024-07-24)
+## v0.6.16 (2024-07-25)
 
 ### Ci
+
+* ci(version): Automatic development release ([`3ab9b1f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ab9b1f88af707bbf473665e52cd8acf43b409c9))
 
 * ci(version): Automatic development release ([`05a9887`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05a9887967ff8da974f29f9658c0013443836e6f))
 
@@ -126,6 +128,8 @@ fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(visualize_2D_scatter): modify ax setting and unit test ([`69d272d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69d272d3f4e1f8f2adc41b1d50b0c715405528cb))
 
 * fix(get_cluster_info): replace cluster with annotation in function and unit tests ([`5c21a22`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5c21a2208b733439349cc35b12f0705e173c5826))
 
@@ -250,6 +254,14 @@ fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #221 from FNLCR-DMAP/dev
+
+merge visualize_2D_scatter from dev to release_dev ([`92ecfe0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92ecfe05a25f65cd035bc39622ea0772ca33c9a3))
+
+* Merge pull request #220 from FNLCR-DMAP/umap
+
+fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7ef7b13d611175a80a60dde2b70152da61ec1d2))
 
 * Merge pull request #219 from FNLCR-DMAP/dev
 
