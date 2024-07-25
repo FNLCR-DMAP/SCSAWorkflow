@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO,
 
 def visualize_2D_scatter(
     x, y, labels=None, point_size=None, theme=None,
-    ax=None, legend_label_size=50, annotate_centers=False,
+    ax=None, annotate_centers=False,
     x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
     color_representation=None, **kwargs
 ):
@@ -99,8 +99,13 @@ def visualize_2D_scatter(
     if point_size is None:
         point_size = 5000 / num_points
 
+    # Get figure size and fontsize from kwargs or set defaults
+    fig_width = kwargs.get('fig_width', 10)
+    fig_height = kwargs.get('fig_height', 8)
+    fontsize = kwargs.get('fontsize', 12)
+
     if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     else:
         fig = ax.figure
 
@@ -121,7 +126,15 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            cmap = plt.get_cmap('tab20b', len(unique_clusters))
+            # Combine colors from multiple colormaps
+            cmap1 = plt.get_cmap('tab20')
+            cmap2 = plt.get_cmap('tab20b')
+            cmap3 = plt.get_cmap('tab20c')
+            colors = cmap1.colors + cmap2.colors + cmap3.colors
+
+            # Use the number of unique clusters to set the colormap length
+            cmap = ListedColormap(colors[:len(unique_clusters)])
+
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -130,30 +143,19 @@ def visualize_2D_scatter(
                     label=cluster,
                     s=point_size
                 )
+                print(f"Cluster: {cluster}, Points: {np.sum(mask)}")
 
                 if annotate_centers:
                     center_x = np.mean(x[mask])
                     center_y = np.mean(y[mask])
                     ax.text(
                         center_x, center_y, cluster,
-                        fontsize=9, ha='center', va='center'
+                        fontsize=fontsize, ha='center', va='center'
                     )
-
-            # Extract current handles and labels for the legend
-            handles, labels = ax.get_legend_handles_labels()
-
-            # Adjust the size of legend items
-            for handle in handles:
-                handle.set_sizes([legend_label_size])
-
             # Create a custom legend with color representation
             ax.legend(
-                handles,
-                labels,
-                loc='upper right',
+                loc='best',
                 bbox_to_anchor=(1.25, 1),  # Adjusting position
-                handlelength=2,
-                handletextpad=1,
                 title=f"Color represents: {color_representation}"
             )
 
@@ -220,7 +222,8 @@ def dimensionality_reduction_plot(
         Name of the key in `obsm` that contains the numpy array. Takes
         precedence over `method`
     **kwargs
-        Parameters passed to visualize_2D_scatter function.
+        Parameters passed to visualize_2D_scatter function,
+        including point_size.
 
     Returns
     -------

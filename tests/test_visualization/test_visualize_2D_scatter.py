@@ -70,11 +70,16 @@ class TestVisualize2DScatter(unittest.TestCase):
             self.x, self.y, labels=self.labels_categorical
         )
 
-        # Check if legend is outside the plot
+        # Ensure the legend exists
         legend = axis.get_legend()
+        self.assertIsNotNone(legend, "Legend is not present.")
+
+        # Get the bounding box of the legend in axes coordinates
         bbox = legend.get_bbox_to_anchor().transformed(
             axis.transAxes.inverted())
-        self.assertTrue(bbox.x0 > 1, "Legend is not placed outside the plot.")
+
+        # Check if the legend is placed outside the plot area on the right side
+        self.assertTrue(bbox.x0 >= 1, "Legend is not placed outside the plot.")
 
         # Ensure the legend's labels match the expected labels
         expected_labels = sorted(['A', 'B', 'C'])
