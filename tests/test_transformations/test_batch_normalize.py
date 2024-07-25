@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import anndata as ad
 import pandas as pd
 from spac.transformations import batch_normalize
 from spac.data_utils import ingest_cells, concatinate_regions
@@ -35,9 +36,9 @@ class TestAnalysisMethods(unittest.TestCase):
         median_normalized_layer = "median_normalization"
         batch_normalize(
             all_adata,
-            batch,
-            median_normalized_layer,
-            "median",
+            annotation=batch,
+            output_layer=median_normalized_layer,
+            method="median",
             log=True)
 
         ground_truth = np.array(
@@ -54,8 +55,8 @@ class TestAnalysisMethods(unittest.TestCase):
     def test_batch_normalize_median(self):
 
         batch = "region"
-        # vMarker for first region
-        # vMedians = 2, 5
+        # Marker for first region
+        # Medians = 2, 5
         df1 = pd.DataFrame({
             'marker1': [1, 2, 3],
             'marker2': [4, 5, 6],
@@ -79,9 +80,10 @@ class TestAnalysisMethods(unittest.TestCase):
         median_normalized_layer = "median_normalization"
         batch_normalize(
             all_adata,
-            batch,
-            median_normalized_layer,
-            "median")
+            annotation=batch,
+            output_layer=median_normalized_layer,
+            method="median",
+            log=False)
 
         ground_truth = np.array(
             [[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]
@@ -120,7 +122,11 @@ class TestAnalysisMethods(unittest.TestCase):
         all_adata = concatinate_regions([adata1, adata2])
 
         median_normalized_layer = "q50_normalization"
-        batch_normalize(all_adata, batch, median_normalized_layer, "Q50")
+        batch_normalize(
+            all_adata,
+            annotation=batch,
+            output_layer=median_normalized_layer,
+            method="Q50")
 
         ground_truth = np.array(
             [
@@ -164,9 +170,9 @@ class TestAnalysisMethods(unittest.TestCase):
         normalized_layer = "q75_normalization"
         batch_normalize(
             all_adata,
-            batch,
-            normalized_layer,
-            "Q75")
+            annotation=batch,
+            output_layer=normalized_layer,
+            method="Q75")
 
         ground_truth = np.array(
             [
@@ -175,7 +181,9 @@ class TestAnalysisMethods(unittest.TestCase):
             ]
             ).transpose()
 
-        normalized_array = all_adata.to_df(layer=normalized_layer).to_numpy()
+        normalized_array = all_adata.to_df(
+            layer=normalized_layer
+            ).to_numpy()
         # print(normalized_array)
         # print(ground_truth)
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
@@ -194,9 +202,9 @@ class TestAnalysisMethods(unittest.TestCase):
         median_normalized_layer = "median_normalization"
         batch_normalize(
             adata,
-            "batch_annotation",
-            median_normalized_layer,
-            "median")
+            annotation="batch_annotation",
+            output_layer=median_normalized_layer,
+            method="median")
 
         # Calculate the expected normalized values
         # Normalized values: [1+(3.5-1.5), 5+(3.5-5.5),
@@ -226,9 +234,9 @@ class TestAnalysisMethods(unittest.TestCase):
         q50_normalized_layer = "q50_normalization"
         batch_normalize(
             adata,
-            "batch_annotation",
-            q50_normalized_layer,
-            "Q50")
+            annotation="batch_annotation",
+            output_layer=q50_normalized_layer,
+            method="Q50")
 
         # Calculate the expected normalized values for Q50
         # Normalized values: [1*(3.5/1.5), 5*(3.5/5.5),
@@ -257,9 +265,9 @@ class TestAnalysisMethods(unittest.TestCase):
         q75_normalized_layer = "q75_normalization"
         batch_normalize(
             adata,
-            "batch_annotation",
-            q75_normalized_layer,
-            "Q75")
+            annotation="batch_annotation",
+            output_layer=q75_normalized_layer,
+            method="Q75")
 
         # Calculate the expected normalized values for Q75
         # Normalized values: [1*(5.25/1.75), 5*(5.25/5.75),
@@ -272,6 +280,138 @@ class TestAnalysisMethods(unittest.TestCase):
 
         # Check if the normalized values match the ground truth
         self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_batch_normalize_z_score(self):
+        df = pd.DataFrame({
+            'marker1': [1, 2, 3, 4],
+            'marker2': [2, 4, 6, 8],
+            'batch_annotation': ["batch1", "batch1", "batch2", "batch2"]
+        })
+
+        adata = ingest_cells(df, "^marker.*", annotation='batch_annotation')
+
+        z_score_normalized_layer = "z_score_normalization"
+        batch_normalize(
+            adata,
+            annotation='batch_annotation',
+            output_layer=z_score_normalized_layer,
+            method="z-score")
+
+        # Calculate the z-score normalization manually:
+        # For both markers, mean for each batch = 1.5 and 3.5,
+        # std dev = sqrt(((0.5^2 + 0.5^2) / 2)) = 0.5
+        # Thus, z-scores are [-1, 1] for both markers in each batch
+        ground_truth = np.array([
+            [-1, -1],  # Batch 1 marker1, marker2
+            [1, 1],    # Batch 1 marker1, marker2
+            [-1, -1],  # Batch 2 marker1, marker2
+            [1, 1]     # Batch 2 marker1, marker2
+        ])
+
+        normalized_array = adata.to_df(
+            layer=z_score_normalized_layer
+            ).to_numpy()
+        # print("Actual Normalized Array:\n", normalized_array)
+        # print("Expected Ground Truth:\n", ground_truth)
+        self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_batch_normalize_log_type_check(self):
+        data = np.array([
+            [1, 2],
+            [3, 4],
+            [5, 6]
+        ])
+
+        obs = pd.DataFrame({'batch': ['batch1', 'batch2', 'batch1']})
+        adata = ad.AnnData(X=data, obs=obs)
+
+        # Function call that should raise ValueError for non-boolean 'log'
+        with self.assertRaises(ValueError):
+            batch_normalize(
+                adata=adata,
+                annotation="batch",
+                output_layer="test_layer",
+                log="not_boolean",  # Intentionally incorrect type
+                method="median")
+
+    def test_batch_normalize_with_input_layer(self):
+
+        batch = "region"
+        # Medians of log2 (1+x)  = 2, 5
+        df1 = pd.DataFrame({
+            'marker1': [1, 3, 7],
+            'marker2': [15, 31, 63],
+            batch: "reg1"
+        })
+
+        # Median of log2 (1+x) = 5, 8
+        df2 = pd.DataFrame({
+            'marker1': [15, 31, 63],
+            'marker2': [127, 255, 511],
+            batch: "reg2"
+        })
+
+        # Global medians of log2 (1+x) = 3.5, 6.5
+
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
+
+        all_adata = concatinate_regions([adata1, adata2])
+        all_adata.layers["preprocessed"] = np.log2(1 + all_adata.X)
+
+        normalized_layer = "normalized_from_preprocessed"
+        batch_normalize(
+            all_adata,
+            annotation=batch,
+            output_layer=normalized_layer,
+            input_layer="preprocessed",
+            method="median")
+
+        ground_truth = np.array(
+            [[2.5, 3.5, 4.5, 2.5, 3.5, 4.5], [5.5, 6.5, 7.5, 5.5, 6.5, 7.5]]
+            ).transpose()
+
+        normalized_array = all_adata.to_df(
+            layer=normalized_layer
+            ).to_numpy()
+        self.assertEqual(np.allclose(ground_truth, normalized_array), True)
+
+    def test_original_data_preserved(self):
+        batch = "region"
+
+        # Original marker data
+        df1 = pd.DataFrame({
+            'marker1': [1, 2, 3],
+            'marker2': [4, 5, 6],
+            batch: "reg1"
+        })
+
+        df2 = pd.DataFrame({
+            'marker1': [7, 8, 9],
+            'marker2': [10, 11, 12],
+            batch: "reg2"
+        })
+
+        # Ingesting the data and concatenating regions
+        adata1 = ingest_cells(df1, "^marker.*", annotation=batch)
+        adata2 = ingest_cells(df2, "^marker.*", annotation=batch)
+
+        all_adata = concatinate_regions([adata1, adata2])
+
+        # Copy the original data to compare later
+        original_data = all_adata.X.copy()
+
+        # Perform batch normalization
+        normalized_layer = "median_normalization"
+        batch_normalize(
+            all_adata,
+            annotation=batch,
+            output_layer=normalized_layer,
+            method="median"
+        )
+
+        # Verify that the original data remains intact
+        self.assertTrue(np.array_equal(original_data, all_adata.X))
 
 
 if __name__ == '__main__':

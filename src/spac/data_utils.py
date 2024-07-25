@@ -5,9 +5,9 @@ import anndata as ad
 import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
-from spac.utils import regex_search_list
 import logging
 from collections import defaultdict
+from spac.utils import regex_search_list, check_list_in_list
 
 
 def append_annotation(
@@ -367,10 +367,12 @@ def load_csv_files(file_names):
         dataframe_list.append(current_df)
         dataframe_name.append(file_name)
 
-    logging.info("CSVs are converted into dataframes and combined into a list!")
-    logging.info("Total of " + str(len(dataframe_list)) + " dataframes in the list.")
+    logging.info("CSVs are converted into dataframes and combined"
+                 " into a list!")
+    logging.info("Total of " + str(len(dataframe_list)) +
+                 " dataframes in the list.")
     for i, each_file in enumerate(dataframe_list):
-        logging.info(f"File name: {dataframe_name[0]}")
+        logging.info(f"File name: {dataframe_name[i]}")
         logging.info("Info: ")
         logging.info(each_file.info())
         logging.info("Description: ")
@@ -475,56 +477,77 @@ def combine_dfs_depracated(dataframes, annotations):
 
 def select_values(data, annotation, values=None):
     """
-    Selects rows from input dataframe matching specified values in a column.
+    Selects values from either a pandas DataFrame or an AnnData object based
+    on the annotation and values.
 
     Parameters
     ----------
-    data : pandas.DataFrame
-        The input dataframe.
+    data : pandas.DataFrame or anndata.AnnData
+        The input data. Can be a DataFrame for tabular data or an AnnData
+        object.
     annotation : str
-        The column name to be used for selection.
-    values : list, optional
-        List of values for annotation to include.
-        If None, return all values.
+        The column name in a DataFrame or the annotation key in an AnnData
+        object to be used for selection.
+    values : str or list of str
+        List of values for the annotation to include. If None, all values are
+        considered for selection.
 
     Returns
     -------
-    pandas.DataFrame
-        Dataframe containing only the selected rows.
-
-    Raises
-    ------
-    ValueError
-        If annotation does not exist or one or more values passed
-        do not exist in the specified column.
-
-    Examples
-    --------
-    >>> df = pd.DataFrame({
-    ...     'column1': ['A', 'B', 'A', 'B', 'A'],
-    ...     'column2': [1, 2, 3, 4, 5]
-    ... })
-    >>> select_values(df, 'column1', ['A'])
-      column1  column2
-    0       A        1
-    2       A        3
-    4       A        5
+    pandas.DataFrame or anndata.AnnData
+        The filtered DataFrame or AnnData object containing only the selected
+        rows based on the annotation and values.
     """
-    # Check if the DataFrame is empty
-    if not data.empty:
-        # If DataFrame is not empty, check if annotation exists
-        if annotation not in data.columns:
-            raise ValueError(
-                f"Column {annotation} does not exist in the dataframe"
-            )
-        # If values exist in annotation, filter data
-        if values is not None:
-            filtered_data = data[data[annotation].isin(values)]
-            if filtered_data.empty:
-                warnings.warn("No matching values found in the data.")
-            return filtered_data
+    # Ensure values are in a list format if not None
+    if values is not None and not isinstance(values, list):
+        values = [values]
 
-    return data
+    # Initialize possible_annotations based on the data type
+    if isinstance(data, pd.DataFrame):
+        possible_annotations = data.columns.tolist()
+    elif isinstance(data, ad.AnnData):
+        possible_annotations = data.obs.columns.tolist()
+    else:
+        error_msg = (
+            "Unsupported data type. Data must be either a pandas DataFrame"
+            " or an AnnData object."
+        )
+        logging.error(error_msg)
+        raise TypeError(error_msg)
+
+    # Check if the annotation exists using check_list_in_list
+    check_list_in_list(
+        input=[annotation],
+        input_name="annotation",
+        input_type="column name/annotation key",
+        target_list=possible_annotations,
+        need_exist=True
+    )
+
+    # Validate provided values against unique ones, if not None
+    if values is not None:
+        if isinstance(data, pd.DataFrame):
+            unique_values = data[annotation].astype(str).unique().tolist()
+        elif isinstance(data, ad.AnnData):
+            unique_values = data.obs[annotation].astype(str).unique().tolist()
+        check_list_in_list(
+            values, "values", "label", unique_values, need_exist=True
+        )
+
+    # Proceed with filtering based on data type and count matching cells
+    if isinstance(data, pd.DataFrame):
+        filtered_data = data if values is None else \
+            data[data[annotation].isin(values)]
+        count = filtered_data.shape[0]
+    elif isinstance(data, ad.AnnData):
+        filtered_data = data if values is None else \
+            data[data.obs[annotation].isin(values)]
+        count = filtered_data.n_obs
+
+    logging.info(f"Summary of returned dataset: {count} cells "
+                 "match the selected labels.")
+
+    return filtered_data
 
 
 def downsample_cells(input_data, annotations, n_samples=None, stratify=False,

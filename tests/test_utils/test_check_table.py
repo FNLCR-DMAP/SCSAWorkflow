@@ -18,7 +18,9 @@ class TestCheckTable(unittest.TestCase):
             layers={"table1": np.array([[5, 6], [7, 8]]),
                     "table2": np.array([[9, 10], [11, 12]])},
             obs={"annotation1": [1, 2],
-                 "annotation2": [3, 4]}
+                 "annotation2": [3, 4]},
+            obsm={"associated_table1": np.array([-1, -2]),
+                  "associated_table2": np.array([-3, -4])}
         )
 
     def test_wrong_adata_type(self):
@@ -44,6 +46,29 @@ class TestCheckTable(unittest.TestCase):
             check_table(self.adata, tables="invalid_table")
         with self.assertRaises(ValueError):
             check_table(self.adata, tables=["table1", "invalid_table"])
+
+    def test_invalid_tables_warn_true(self):
+        # Test with invalid tables and warning is True
+        with self.assertWarns(UserWarning):
+            check_table(self.adata, tables="invalid_table", warning=True)
+
+    def test_valid_associated_tables(self):
+        # Test with valid associated tables
+        self.assertIsNone(check_table(self.adata, 
+                                      tables="associated_table1",
+                                      associated_table=True))
+
+    def test_invalid_associated_tables(self):
+        # Test with invalid associated tables
+        with self.assertRaises(ValueError):
+            check_table(self.adata, 
+                        tables="invalid_table",
+                        associated_table=True)
+        with self.assertRaises(ValueError):
+            check_table(self.adata, 
+                        tables=["associated_table1",
+                                "invalid_table"],
+                        associated_table=True)
 
     def test_missing_tables(self):
         with self.assertRaises(ValueError) as context:

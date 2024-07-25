@@ -41,6 +41,28 @@ class TestCheckListInList(unittest.TestCase):
                 str(context.exception)
             )
 
+    def test_check_list_not_exist_warn_true(self):
+        # Test when none of the items in the input list
+        # exist in the target list (need_exist=True)
+        # and warning = True
+        target_list = ['apple', 'banana', 'orange', 'grape']
+        input_list = ['mango', 'kiwi']
+        # Warning should be raised with informative message
+        # for each element in the input_list.
+        with self.assertWarns(UserWarning) as context:
+            check_list_in_list(
+                    input_list,
+                    'input_list',
+                    'fruit',
+                    target_list,
+                    need_exist=True,
+                    warning=True
+                )
+        self.assertIn(
+                "The fruit 'mango' does not exist in the provided dataset.",
+                str(context.warning)
+            )
+
     def test_check_list_exist_fail(self):
         # Test when at least one item in the input list does not exist
         # in the target list (need_exist=False)
@@ -60,6 +82,29 @@ class TestCheckListInList(unittest.TestCase):
                 "The fruit 'apple' exist in the provided dataset.",
                 str(context.exception)
             )
+
+    def test_check_list_exist_fail_warning_true(self):
+        # Test when at least one item in the input list does not exist
+        # in the target list (need_exist=False)
+        # and warning = True
+        target_list = ['apple', 'banana', 'orange', 'grape']
+        input_list = ['apple', 'mango']
+        # Warning should be raised with informative message
+        # for each element in the input_list.
+        with self.assertWarns(UserWarning) as context:
+            check_list_in_list(
+                input_list,
+                'input_list',
+                'fruit',
+                target_list,
+                need_exist=False,
+                warning=True
+            )
+        self.assertIn(
+                "The fruit 'apple' exist in the provided dataset.",
+                str(context.warning)
+            )
+
 
     def test_single_string_input(self):
         # Test when a single string is passed as input

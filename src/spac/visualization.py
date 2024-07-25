@@ -8,13 +8,24 @@ import math
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from spac.utils import check_table, check_annotation, check_feature
+from spac.utils import check_table, check_annotation
+from spac.utils import check_feature, annotation_category_relations
+from spac.utils import color_mapping
+import logging
+import warnings
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def visualize_2D_scatter(
     x, y, labels=None, point_size=None, theme=None,
-    ax=None, legend_label_size=50, annotate_centers=False, **kwargs
+    ax=None, annotate_centers=False,
+    x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
+    color_representation=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -36,6 +47,14 @@ def visualize_2D_scatter(
         Matplotlib axis object. If None, a new one is created.
     annotate_centers : bool, optional (default: False)
         Annotate the centers of clusters if labels are categorical.
+    x_axis_title : str, optional
+        Title for the x-axis.
+    y_axis_title : str, optional
+        Title for the y-axis.
+    plot_title : str, optional
+        Title for the plot.
+    color_representation : str, optional
+        Description of what the colors represent.
     **kwargs
         Additional keyword arguments passed to plt.scatter.
 
@@ -80,8 +99,13 @@ def visualize_2D_scatter(
     if point_size is None:
         point_size = 5000 / num_points
 
+    # Get figure size and fontsize from kwargs or set defaults
+    fig_width = kwargs.get('fig_width', 10)
+    fig_height = kwargs.get('fig_height', 8)
+    fontsize = kwargs.get('fontsize', 12)
+
     if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     else:
         fig = ax.figure
 
@@ -102,7 +126,15 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            cmap = plt.get_cmap('tab20', len(unique_clusters))
+            # Combine colors from multiple colormaps
+            cmap1 = plt.get_cmap('tab20')
+            cmap2 = plt.get_cmap('tab20b')
+            cmap3 = plt.get_cmap('tab20c')
+            colors = cmap1.colors + cmap2.colors + cmap3.colors
+
+            # Use the number of unique clusters to set the colormap length
+            cmap = ListedColormap(colors[:len(unique_clusters)])
+
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -111,30 +143,20 @@ def visualize_2D_scatter(
                     label=cluster,
                     s=point_size
                 )
+                print(f"Cluster: {cluster}, Points: {np.sum(mask)}")
 
                 if annotate_centers:
                     center_x = np.mean(x[mask])
                     center_y = np.mean(y[mask])
                     ax.text(
                         center_x, center_y, cluster,
-                        fontsize=9, ha='center', va='center'
+                        fontsize=fontsize, ha='center', va='center'
                     )
-
-            # Extract current handles and labels for the legend
-            handles, labels = ax.get_legend_handles_labels()
-
-            # Adjust the size of legend items
-            for handle in handles:
-                handle.set_sizes([legend_label_size])
-
-            # Create a custom legend
+            # Create a custom legend with color representation
             ax.legend(
-                handles,
-                labels,
-                loc='upper right',
+                loc='best',
                 bbox_to_anchor=(1.25, 1),  # Adjusting position
-                handlelength=2,
-                handletextpad=1
+                title=f"Color represents: {color_representation}"
             )
 
         else:
@@ -143,26 +165,45 @@ def visualize_2D_scatter(
                 x, y, c=labels, cmap=cmap, s=point_size, **kwargs
             )
             plt.colorbar(scatter, ax=ax)
+            if color_representation is not None:
+                ax.set_title(
+                    f"{plot_title}\nColor represents: {color_representation}"
+                )
     else:
         scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
 
     # Equal aspect ratio for the axes
     ax.set_aspect('equal', 'datalim')
 
+    # Set axis labels
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+
+    # Set plot title
+    if plot_title is not None:
+        ax.set_title(plot_title)
+
     return fig, ax
 
 
-def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
-                                  layer=None, ax=None, **kwargs):
+def dimensionality_reduction_plot(
+        adata,
+        method=None,
+        annotation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        associated_table=None,
+        **kwargs):
     """
-    Visualize scatter plot in PCA, t-SNE or UMAP basis.
+    Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
         function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
-    method : str
+    method : str, optional (default: None)
         Dimensionality reduction method to visualize.
         Choose from {'tsne', 'umap', 'pca'}.
     annotation : str, optional
@@ -177,8 +218,12 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     ax : matplotlib.axes.Axes, optional (default: None)
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
+    associated_table : str, optional (default: None)
+        Name of the key in `obsm` that contains the numpy array. Takes
+        precedence over `method`
     **kwargs
-        Parameters passed to visualize_2D_scatter function.
+        Parameters passed to visualize_2D_scatter function,
+        including point_size.
 
     Returns
     -------
@@ -203,16 +248,36 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    valid_methods = ['tsne', 'umap', 'pca']
-    if method not in valid_methods:
-        raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}.")
+    if associated_table is None:
+        valid_methods = ['tsne', 'umap', 'pca']
+        if method not in valid_methods:
+            raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}"
+                             f'. Got:"{method}"')
 
-    key = f'X_{method}'
-    if key not in adata.obsm.keys():
-        raise ValueError(
-            f"{key} coordinates not found in adata.obsm. "
-            f"Please run {method.upper()} before calling this function."
+        key = f'X_{method}'
+        if key not in adata.obsm.keys():
+            raise ValueError(
+                f"{key} coordinates not found in adata.obsm. "
+                f"Please run {method.upper()} before calling this function."
+            )
+
+    else:
+        check_table(
+            adata=adata,
+            tables=associated_table,
+            should_exist=True,
+            associated_table=True
         )
+
+        associated_table_shape = adata.obsm[associated_table].shape
+        if associated_table_shape[1] != 2:
+            raise ValueError(
+                f'The associated table:"{associated_table}" does not have'
+                f' two dimensions. It shape is:"{associated_table_shape}"'
+            )
+        key = associated_table
+
+    print(f'Running visualization using the coordinates: "{key}"')
 
     # Extract the 2D coordinates
     x, y = adata.obsm[key].T
@@ -220,13 +285,50 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     # Determine coloring scheme
     if annotation:
         color_values = adata.obs[annotation].astype('category').values
+        color_representation = annotation
     elif feature:
         data_source = adata.layers[layer] if layer else adata.X
         color_values = data_source[:, adata.var_names == feature].squeeze()
+        color_representation = feature
     else:
         color_values = None
+        color_representation = None
 
-    fig, ax = visualize_2D_scatter(x, y, ax=ax, labels=color_values, **kwargs)
+    # Set axis titles based on method and color representation
+    if method == 'tsne':
+        x_axis_title = 't-SNE 1'
+        y_axis_title = 't-SNE 2'
+        plot_title = f'TSNE-{color_representation}'
+    elif method == 'pca':
+        x_axis_title = 'PCA 1'
+        y_axis_title = 'PCA 2'
+        plot_title = f'PCA-{color_representation}'
+    elif method == 'umap':
+        x_axis_title = 'UMAP 1'
+        y_axis_title = 'UMAP 2'
+        plot_title = f'UMAP-{color_representation}'
+    else:
+        x_axis_title = f'{associated_table} 1'
+        y_axis_title = f'{associated_table} 2'
+        plot_title = f'{associated_table}-{color_representation}'
+
+    # Remove conflicting keys from kwargs
+    kwargs.pop('x_axis_title', None)
+    kwargs.pop('y_axis_title', None)
+    kwargs.pop('plot_title', None)
+    kwargs.pop('color_representation', None)
+
+    fig, ax = visualize_2D_scatter(
+        x=x,
+        y=y,
+        ax=ax,
+        labels=color_values,
+        x_axis_title=x_axis_title,
+        y_axis_title=y_axis_title,
+        plot_title=plot_title,
+        color_representation=color_representation,
+        **kwargs
+    )
 
     return fig, ax
 
@@ -363,6 +465,17 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     """
 
+    # If no feature or annotation is specified, apply default behavior
+    if feature is None and annotation is None:
+        # Default to the first feature in adata.var_names
+        feature = adata.var_names[0]
+        warnings.warn(
+            "No feature or annotation specified. "
+            "Defaulting to the first feature: "
+            f"'{feature}'.",
+            UserWarning
+        )
+
     # Use utility functions for input validation
     if layer:
         check_table(adata, tables=layer)
@@ -417,6 +530,12 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             fig, ax_array = plt.subplots(
                 n_groups, 1, figsize=(5, 5 * n_groups)
             )
+
+            # Convert a single Axes object to a list
+            # Ensure ax_array is always iterable
+            if n_groups == 1:
+                ax_array = [ax_array]
+
             for i, ax_i in enumerate(ax_array):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
                              x=data_column, ax=ax_i, **kwargs)
@@ -700,7 +819,7 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
 
 
 def threshold_heatmap(
-    adata, feature_cutoffs, annotation, layer=None, **kwargs
+    adata, feature_cutoffs, annotation, layer=None, swap_axes=False, **kwargs
 ):
     """
     Creates a heatmap for each feature, categorizing intensities into low,
@@ -720,6 +839,8 @@ def threshold_heatmap(
     layer : str, optional
         Layer name in adata.layers to use for intensities.
         If None, uses .X attribute.
+    swap_axes : bool, optional
+        If True, swaps the axes of the heatmap.
     **kwargs : keyword arguments
         Additional keyword arguments to pass to scanpy's heatmap function.
 
@@ -735,8 +856,7 @@ def threshold_heatmap(
 
     # Use utility functions for input validation
     check_table(adata, tables=layer)
-    if annotation:
-        check_annotation(adata, annotations=annotation)
+    check_annotation(adata, annotations=annotation)
     if feature_cutoffs:
         check_feature(adata, features=list(feature_cutoffs.keys()))
 
@@ -745,11 +865,6 @@ def threshold_heatmap(
         err_type = type(annotation).__name__
         err_msg = (f'Annotation should be string. Got {err_type}.')
         raise TypeError(err_msg)
-
-    # Assert annotation is a column in adata.obs DataFrame
-    if annotation not in adata.obs.columns:
-        err_msg = f"'{annotation}' not found in adata.obs DataFrame."
-        raise ValueError(err_msg)
 
     if not isinstance(feature_cutoffs, dict):
         raise TypeError("feature_cutoffs should be a dictionary.")
@@ -800,12 +915,41 @@ def threshold_heatmap(
         layer='intensity',
         cmap=cmap,
         norm=norm,
+        show=False,   # Ensure the plot is not displayed but returned
+        swap_axes=swap_axes,
         **kwargs
     )
 
-    colorbar = plt.gcf().axes[-1]
-    colorbar.set_yticks([0, 1, 2])
-    colorbar.set_yticklabels(['low', 'medium', 'high'])
+    # Print the keys of the heatmap_plot dictionary
+    print("Keys of heatmap_plot:", heatmap_plot.keys())
+
+    # Get the main heatmap axis from the available keys
+    heatmap_ax = heatmap_plot.get('heatmap_ax')
+
+    # If 'heatmap_ax' key does not exist, access the first axis available
+    if heatmap_ax is None:
+        heatmap_ax = next(iter(heatmap_plot.values()))
+    print("Heatmap Axes:", heatmap_ax)
+
+    # Find the colorbar associated with the heatmap
+    cbar = None
+    for child in heatmap_ax.get_children():
+        if hasattr(child, 'colorbar'):
+            cbar = child.colorbar
+            break
+    if cbar is None:
+        print("No colorbar found in the plot.")
+        return
+    print("Colorbar:", cbar)
+
+    new_ticks = [0, 1, 2]
+    new_labels = ['Low', 'Medium', 'High']
+    cbar.set_ticks(new_ticks)
+    cbar.set_ticklabels(new_labels)
+    pos_heatmap = heatmap_ax.get_position()
+    cbar.ax.set_position(
+        [pos_heatmap.x1 + 0.02, pos_heatmap.y0, 0.02, pos_heatmap.height]
+    )
 
     return heatmap_plot
 
@@ -1095,6 +1239,17 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
         ([second_annotation] if second_annotation else [])
     ]
 
+    # Check for negative values
+    if log_scale and (df[features] < 0).any().any():
+        print(
+            "There are negative values in this data, disabling the log scale."
+        )
+        log_scale = False
+
+    # Apply log1p transformation if log_scale is True
+    if log_scale:
+        df[features] = np.log1p(df[features])
+
     # Create the plot
     if ax:
         fig = ax.get_figure()
@@ -1137,27 +1292,43 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
 
     else:
         if len(features) > 1:
-            sns.boxplot(data=df[features], ax=ax, **kwargs)
+            if v_orient:
+                sns.boxplot(data=df[features], ax=ax, **kwargs)
+            else:
+                melted_data = df.melf()
+                sns.boxplot(data=melted_data, x="value", y="variable",
+                            hue=annotation,  ax=ax, **kwargs)
             ax.set_title("Multiple Features")
         else:
             if v_orient:
-                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
-            else:
                 sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
+                ax.set_xticks([0])  # Set a single tick for the single feature
+                ax.set_xticklabels([features[0]])  # Set the label for the tick
+            else:
+                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
+                ax.set_yticks([0])  # Set a single tick for the single feature
+                ax.set_yticklabels([features[0]])  # Set the label for the tick
             ax.set_title("Single Boxplot")
 
-    # Check if all data points are positive and non-zero
-    all_positive = (df[features] > 0).all().all()
+    if log_scale:
+        ax.set_yscale('log') if v_orient else ax.set_xscale('log')
 
-    # If log_scale is True and all data points are positive and non-zero
-    if log_scale and all_positive:
-        plt.yscale('log')
+    # Set x and y-axis labels
+    if v_orient:
+        xlabel = annotation if annotation else 'Feature'
+        ylabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    else:
+        xlabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ylabel = annotation if annotation else 'Feature'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     plt.xticks(rotation=90)
     plt.tight_layout()
-    # plt.show()
 
-    return fig, ax
+    return fig, ax, df
 
 
 def interative_spatial_plot(
@@ -1355,3 +1526,272 @@ def interative_spatial_plot(
         ]
     )
     return main_fig
+
+
+def sankey_plot(
+        adata: anndata.AnnData,
+        source_annotation: str,
+        target_annotation: str,
+        source_color_map: str = "tab20",
+        target_color_map: str = "tab20c",
+        sankey_font: float = 12.0,
+        prefix: bool = True
+):
+    """
+    Generates a Sankey plot from the given AnnData object.
+    The color map refers to matplotlib color maps, default is tab20 for
+    source annotation, and tab20c for target annotation.
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The annotated data matrix.
+    source_annotation : str
+        The source annotation to use for the Sankey plot.
+    target_annotation : str
+        The target annotation to use for the Sankey plot.
+    source_color_map : str
+        The color map to use for the source nodes. Default is tab20.
+    target_color_map : str
+        The color map to use for the target nodes. Default is tab20c.
+    sankey_font : float, optional
+        The font size to use for the Sankey plot. Defaults to 12.0.
+    prefix : bool, optional
+        Whether to prefix the target labels with
+        the source labels. Defaults to True.
+
+    Returns
+    -------
+    plotly.graph_objs._figure.Figure
+        The generated Sankey plot.
+    """
+
+    label_relations = annotation_category_relations(
+        adata=adata,
+        source_annotation=source_annotation,
+        target_annotation=target_annotation,
+        prefix=prefix
+    )
+    # Extract and prepare source and target labels
+    source_labels = label_relations["source"].unique().tolist()
+    target_labels = label_relations["target"].unique().tolist()
+    all_labels = source_labels + target_labels
+
+    source_label_colors = color_mapping(source_labels, source_color_map)
+    target_label_colors = color_mapping(target_labels, target_color_map)
+    label_colors = source_label_colors + target_label_colors
+
+    # Create a dictionary to map labels to indices
+    label_to_index = {
+        label: index for index, label in enumerate(all_labels)}
+    color_to_map = {
+        label: color
+        for label, color in zip(source_labels, source_label_colors)
+    }
+    # Initialize lists to store the source indices, target indices, and values
+    source_indices = []
+    target_indices = []
+    values = []
+    link_colors = []
+
+    # For each row in label_relations, add the source index, target index,
+    # and count to the respective lists
+    for _, row in label_relations.iterrows():
+        source_indices.append(label_to_index[row['source']])
+        target_indices.append(label_to_index[row['target']])
+        values.append(row['count'])
+        link_colors.append(color_to_map[row['source']])
+
+    # Generate Sankey diagram
+    # Calculate the x-coordinate for each label
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            pad=sankey_font * 1.05,
+            thickness=sankey_font * 1.05,
+            line=dict(color=None, width=0.1),
+            label=all_labels,
+            color=label_colors
+        ),
+        link=dict(
+            arrowlen=15,
+            source=source_indices,
+            target=target_indices,
+            value=values,
+            color=link_colors
+        ),
+        arrangement="snap",
+        textfont=dict(
+            color='black',
+            size=sankey_font
+        )
+    ))
+
+    fig.data[0].link.customdata = label_relations[
+        ['percentage_source', 'percentage_target']
+    ]
+    hovertemplate = (
+        '%{source.label} to %{target.label}<br>'
+        '%{customdata[0]}% to %{customdata[1]}%<br>'
+        'Count: %{value}<extra></extra>'
+    )
+    fig.data[0].link.hovertemplate = hovertemplate
+
+    # Customize the Sankey diagram layout
+    fig.update_layout(
+        title_text=(
+            f'"{source_annotation}" to "{target_annotation}"<br>Sankey Diagram'
+        ),
+        title_x=0.5,
+        title_font=dict(
+            family='Arial, bold',
+            size=sankey_font,  # Set the title font size
+            color="black"  # Set the title font color
+        )
+    )
+
+    fig.update_layout(margin=dict(
+        l=10,
+        r=10,
+        t=sankey_font * 3,
+        b=sankey_font))
+
+    return fig
+
+
+def relational_heatmap(
+        adata: anndata.AnnData,
+        source_annotation: str,
+        target_annotation: str,
+        color_map: str = "mint",
+        **kwargs
+):
+    """
+    Generates a relational heatmap from the given AnnData object.
+    The color map refers to matplotlib color maps, default is mint.
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The annotated data matrix.
+    source_annotation : str
+        The source annotation to use for the relational heatmap.
+    target_annotation : str
+        The target annotation to use for the relational heatmap.
+    color_map : str
+        The color map to use for the relational heatmap. Default is mint.
+    **kwargs : dict, optional
+        Additional keyword arguments. For example, you can pass font_size=12.0.
+
+    Returns
+    -------
+    plotly.graph_objs._figure.Figure
+        The generated relational heatmap.
+    """
+    # Default font size
+    font_size = kwargs.get('font_size', 12.0)
+    prefix = kwargs.get('prefix', True)
+
+    # Get the relationship between source and target annotations
+
+    label_relations = annotation_category_relations(
+            adata=adata,
+            source_annotation=source_annotation,
+            target_annotation=target_annotation,
+            prefix=prefix
+        )
+
+    # Pivot the data to create a matrix for the heatmap
+    heatmap_matrix = label_relations.pivot(
+        index='source',
+        columns='target',
+        values='percentage_source'
+    )
+    x = list(heatmap_matrix.columns)
+    y = list(heatmap_matrix.index)
+
+    # Create text labels for the heatmap
+    label_relations['text_label'] = [
+        '{}%'.format(val) for val in label_relations["percentage_source"]
+    ]
+
+    heatmap_matrix2 = label_relations.pivot(
+        index='source',
+        columns='target',
+        values='percentage_source'
+        )
+
+    hover_template = 'Source: %{z}%<br>Target: %{customdata}%<extra></extra>'
+    # Ensure alignment of the text data with the heatmap matrix
+    z = list()
+    iter_list = list()
+    for y_item in y:
+        iter_list.clear()
+        for x_item in x:
+            z_data_point = label_relations[
+                (
+                    label_relations['target'] == x_item
+                ) & (
+                    label_relations['source'] == y_item
+                )
+            ]['percentage_source']
+            iter_list.append(
+                0 if len(z_data_point) == 0 else z_data_point.iloc[0]
+            )
+        z.append([_ for _ in iter_list])
+
+    # Create heatmap
+    fig = ff.create_annotated_heatmap(
+        z=z,
+        colorscale=color_map,
+        customdata=heatmap_matrix2.values,
+        hovertemplate=hover_template
+    )
+
+    fig.update_layout(
+        overwrite=True,
+        xaxis=dict(
+            ticks="",
+            dtick=1,
+            side="top",
+            gridcolor="rgb(0, 0, 0)",
+            tickvals=list(range(len(x))),
+            ticktext=x
+        ),
+        yaxis=dict(
+            ticks="",
+            dtick=1,
+            ticksuffix="   ",
+            tickvals=list(range(len(y))),
+            ticktext=y
+        )
+    )
+
+    for i in range(len(fig.layout.annotations)):
+        fig.layout.annotations[i].font.size = font_size
+
+    fig.update_layout(
+        xaxis=dict(title=source_annotation),
+        yaxis=dict(title=target_annotation)
+    )
+
+    fig.update_layout(
+        margin=dict(
+            l=5,
+            r=5,
+            t=font_size * 2,
+            b=font_size * 2
+            )
+        )
+
+    fig.update_xaxes(
+        side="bottom",
+        tickangle=90
+    )
+
+    print(fig)
+
+    return fig
