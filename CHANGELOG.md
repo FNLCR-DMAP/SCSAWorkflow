@@ -2,26 +2,28 @@
 
 
 
-## v0.6.15 (2024-07-24)
+## v0.6.16 (2024-07-25)
 
 ### Fix
 
-* fix(get_cluster_info): replace cluster with annotation in function and unit tests ([`5c21a22`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5c21a2208b733439349cc35b12f0705e173c5826))
+* fix(visualize_2D_scatter): modify ax setting and unit test ([`69d272d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69d272d3f4e1f8f2adc41b1d50b0c715405528cb))
 
 ### Unknown
 
-* Merge pull request #219 from FNLCR-DMAP/dev
+* Merge pull request #221 from FNLCR-DMAP/dev
 
-merge get_cluster_info from dev to release_dev ([`c4050e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4050e640aa95e5bb34220ccab104b491aa7cf98))
+merge visualize_2D_scatter from dev to release_dev ([`92ecfe0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92ecfe05a25f65cd035bc39622ea0772ca33c9a3))
 
-* Merge pull request #218 from FNLCR-DMAP/get_cluster_info
+* Merge pull request #220 from FNLCR-DMAP/umap
 
-fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50bf4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe50bf44826869f21cc6fd909e282203737cf28c))
+fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7ef7b13d611175a80a60dde2b70152da61ec1d2))
 
 
-## v0.6.14 (2024-07-24)
+## v0.6.15 (2024-07-24)
 
 ### Ci
+
+* ci(version): Automatic development release ([`05a9887`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05a9887967ff8da974f29f9658c0013443836e6f))
 
 * ci(version): Automatic development release ([`25b9cf7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25b9cf7ab55fe5f7d0553b4a91ba22f269e2ec48))
 
@@ -124,6 +126,8 @@ fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(get_cluster_info): replace cluster with annotation in function and unit tests ([`5c21a22`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5c21a2208b733439349cc35b12f0705e173c5826))
 
 * fix(z_scores): add output_layer and unit tests ([`8bb0c5b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bb0c5bd60234026400d0304da47d9d948eb680f))
 
@@ -246,6 +250,14 @@ fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #219 from FNLCR-DMAP/dev
+
+merge get_cluster_info from dev to release_dev ([`c4050e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4050e640aa95e5bb34220ccab104b491aa7cf98))
+
+* Merge pull request #218 from FNLCR-DMAP/get_cluster_info
+
+fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50bf4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe50bf44826869f21cc6fd909e282203737cf28c))
 
 * Merge pull request #217 from FNLCR-DMAP/dev
 
