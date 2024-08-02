@@ -1120,7 +1120,6 @@ def spatial_plot(
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
 
-    print(feature)
     ax = sc.pl.spatial(
         adata=adata,
         layer=layer,
