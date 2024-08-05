@@ -14,7 +14,7 @@ class TestSpatialInteraction(unittest.TestCase):
     def create_dummy_dataset(
             self,
             repetition=1
-        ):
+    ):
         cluster_num = [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2] * repetition
 
         phenotypes = [
