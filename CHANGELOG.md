@@ -2,26 +2,30 @@
 
 
 
-## v0.7.0 (2024-07-25)
+## v0.7.1 (2024-09-06)
 
-### Step
+### Fix
 
-* step: minor release update ([`41cf19a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41cf19a75cb0178fa30f6a1e0d7f6ee999ef07f0))
+* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
+
+* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
 
 ### Unknown
 
-* Merge pull request #223 from FNLCR-DMAP/dev
+* Merge pull request #226 from FNLCR-DMAP/dev
 
-Minor version update ([`e4f718e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4f718e293cdf6b3da426403333d762f2ef40693))
+add annotation and layer check for batch_normalize ([`d21052d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d21052d375a35f7a0d01f95aa596fa2600ff71a6))
 
-* Merge pull request #222 from FNLCR-DMAP/version-update
+* Merge pull request #225 from FNLCR-DMAP/normalize_batch
 
-minor release update ([`ccf7c77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ccf7c7717c152c419e8ba43c3f387b7347762118))
+fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d61140c8a774c5b18df92c0962ce591c181dce9))
 
 
-## v0.6.16 (2024-07-25)
+## v0.7.0 (2024-07-25)
 
 ### Ci
+
+* ci(version): Automatic development release ([`fdbfea2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fdbfea22cbbaca9875da128358ed8603de7bd859))
 
 * ci(version): Automatic development release ([`3ab9b1f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ab9b1f88af707bbf473665e52cd8acf43b409c9))
 
@@ -249,11 +253,27 @@ minor release update ([`ccf7c77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/com
 
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
+### Step
+
+* step: minor release update ([`41cf19a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41cf19a75cb0178fa30f6a1e0d7f6ee999ef07f0))
+
 ### Test
 
 * test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
 
 ### Unknown
+
+* Merge pull request #224 from FNLCR-DMAP/release_dev
+
+Version v0.7.0 Release! ([`7d6aef3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7d6aef3a20ceb3299df69c03cc8f6ca0cead493b))
+
+* Merge pull request #223 from FNLCR-DMAP/dev
+
+Minor version update ([`e4f718e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4f718e293cdf6b3da426403333d762f2ef40693))
+
+* Merge pull request #222 from FNLCR-DMAP/version-update
+
+minor release update ([`ccf7c77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ccf7c7717c152c419e8ba43c3f387b7347762118))
 
 * Merge pull request #221 from FNLCR-DMAP/dev
 
