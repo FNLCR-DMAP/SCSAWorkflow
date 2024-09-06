@@ -430,6 +430,11 @@ def batch_normalize(adata, annotation, output_layer,
         If True, take the log2 of features before normalization.
         Ensure this is boolean.
     """
+    # Use utility functions for input validation
+    check_annotation(adata, annotations=annotation)
+    if input_layer:
+        check_table(adata, tables=input_layer)
+
     if not isinstance(log, bool):
         logger.error("Argument 'log' must be of type bool.")
         raise ValueError("Argument 'log' must be of type bool.")
