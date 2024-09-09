@@ -1192,6 +1192,7 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     """
 
     # Use utility functions to check inputs
+    print("Calculating Box Plot...")
     if layer:
         check_table(adata, tables=layer)
     if annotation:
