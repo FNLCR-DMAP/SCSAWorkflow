@@ -2,7 +2,24 @@
 
 
 
+## v0.7.2 (2024-09-09)
+
+### Performance
+
+* perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
+
+### Unknown
+
+* Merge pull request #227 from FNLCR-DMAP/dev
+
+perf: deming CD ([`26b6858`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/26b685827da129e0d3c103c882ede9c9ca9261a5))
+
+
 ## v0.7.1 (2024-09-06)
+
+### Ci
+
+* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
 
 ### Fix
 
