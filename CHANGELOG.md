@@ -2,7 +2,40 @@
 
 
 
+## v0.7.3 (2024-09-17)
+
+### Feature
+
+* feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
+
+### Fix
+
+* fix(apply_manual_phenotypes): added __init__.py file for the tests. ([`e79d97b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d97b0cd46e489b2bb256094bc024c006fcc49))
+
+### Unknown
+
+* Merge pull request #229 from FNLCR-DMAP/dev
+
+Dev ([`37d41c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37d41c239cba0102bb58475e7c20b296a5ec4c2e))
+
+* Merge pull request #228 from FNLCR-DMAP/manual_phenotyping
+
+feat(assign_manual_phenotypes): Function to define and associate manu… ([`a640c14`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a640c142f6caa523d44c94e8290735300f71fff3))
+
+
 ## v0.7.2 (2024-09-09)
+
+### Ci
+
+* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
+
+* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
+
+### Fix
+
+* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
+
+* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
 
 ### Performance
 
@@ -13,21 +46,6 @@
 * Merge pull request #227 from FNLCR-DMAP/dev
 
 perf: deming CD ([`26b6858`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/26b685827da129e0d3c103c882ede9c9ca9261a5))
-
-
-## v0.7.1 (2024-09-06)
-
-### Ci
-
-* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
-
-### Fix
-
-* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
-
-* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
-
-### Unknown
 
 * Merge pull request #226 from FNLCR-DMAP/dev
 
