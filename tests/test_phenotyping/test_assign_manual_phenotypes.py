@@ -166,6 +166,65 @@ class TestAssignManualPhenotypes(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), expect_string.strip())
 
+    def test_suffix(self):
+        """
+        Test an error message where suffix is not correct
+        """
+        name = "phenotype_name"
+        code = "phenotype_code"
+        # cd5 is not a column in the dataframe
+        cd4 = {name: "cell_type", code: "cd4+"}
+        phenotypes_df = pd.DataFrame([cd4])
+
+        with self.assertRaises(ValueError) as cm:
+            assign_manual_phenotypes(
+                self.string_df,
+                phenotypes_df,
+                annotation="manual",
+                prefix='',
+                suffix='_wrong_suffix',
+                multiple=True
+            )
+
+        expect_string = (
+            """The feature "cd4_wrong_suffix" does not exist in the """
+            """input table. Existing columns are """
+            """"['cd4_phenotype', 'cd8_phenotype']" """
+        )
+        self.assertEqual(str(cm.exception), expect_string.strip())
+
+
+    def test_prefix(self):
+        """
+        Test an error message where prefix is not correct
+        """
+        name = "phenotype_name"
+        code = "phenotype_code"
+        # cd5 is not a column in the dataframe
+        cd4 = {name: "cell_type", code: "cd4+"}
+        phenotypes_df = pd.DataFrame([cd4])
+
+        with self.assertRaises(ValueError) as cm:
+            assign_manual_phenotypes(
+                self.string_df,
+                phenotypes_df,
+                annotation="manual",
+                prefix='wrong_prefix_',
+                suffix='_phenotype',
+                multiple=True
+            )
+
+        expect_string = (
+            """The feature "wrong_prefix_cd4_phenotype" does not exist in the """
+            """input table. Existing columns are """
+            """"['cd4_phenotype', 'cd8_phenotype']" """
+        )
+        self.assertEqual(str(cm.exception), expect_string.strip())
+
+
+
+
+
     def test_code_with_no_positive_or_negative_sign(self):
         """
         The phenotype code does not have a '+' or '-'
