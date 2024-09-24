@@ -776,7 +776,8 @@ def calculate_centroid(
     Returns
     -------
     data : pd.DataFrame
-        dataframe with two new centroid columns addded.
+        dataframe with two new centroid columns addded. Note that the
+        dataframe is modified in place.
 
     """
 
@@ -807,6 +808,9 @@ def calculate_centroid(
     data[[new_x, new_y]] = pd.concat(
         [x_centroid, y_centroid], axis=1, keys=[new_x, new_y]
     )
+
+    # Return the modified DataFrame
+    return data
 
 
 def bin2cat(data, one_hot_annotations, new_annotation):
