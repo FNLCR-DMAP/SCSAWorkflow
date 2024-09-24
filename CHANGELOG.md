@@ -2,7 +2,42 @@
 
 
 
+## v0.7.4 (2024-09-24)
+
+### Fix
+
+* fix(calculate_centroid): return data ([`d1cca74`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1cca74ea9fe4d74f278de684ebd4f9c1776e1b0))
+
+* fix(calculate_centroid): add new columns in a single operation ([`8e18093`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8e18093838bf25be134165e93c5589e7f047c899))
+
+### Test
+
+* test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
+
+### Unknown
+
+* Merge pull request #232 from FNLCR-DMAP/dev
+
+fix(calculate_centroid): add new columns in a single operation ([`e4af66a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4af66a54cffcd845d92b8f4bb57a3162c3b27d7))
+
+* Merge pull request #231 from FNLCR-DMAP/calculate_centroid
+
+fix(calculate_centroid): add new columns in a single operation ([`63c2cc3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/63c2cc3c4e32dd5ee1452e8478847862f40f59d8))
+
+* Merge pull request #230 from FNLCR-DMAP/manual_phenotyping
+
+test(assign_manual_phenotypes): added tests for prefix and suffix sup… ([`eb17ed4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/eb17ed4eefeaf45f01d66a45e2991c5ad086866f))
+
+
 ## v0.7.3 (2024-09-17)
+
+### Ci
+
+* ci(version): Automatic development release ([`0810a79`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0810a7932125f1216c065a6179a5b1b2c155a584))
+
+* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
+
+* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
 
 ### Feature
 
@@ -11,27 +46,6 @@
 ### Fix
 
 * fix(apply_manual_phenotypes): added __init__.py file for the tests. ([`e79d97b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d97b0cd46e489b2bb256094bc024c006fcc49))
-
-### Unknown
-
-* Merge pull request #229 from FNLCR-DMAP/dev
-
-Dev ([`37d41c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37d41c239cba0102bb58475e7c20b296a5ec4c2e))
-
-* Merge pull request #228 from FNLCR-DMAP/manual_phenotyping
-
-feat(assign_manual_phenotypes): Function to define and associate manu… ([`a640c14`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a640c142f6caa523d44c94e8290735300f71fff3))
-
-
-## v0.7.2 (2024-09-09)
-
-### Ci
-
-* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
-
-* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
-
-### Fix
 
 * fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
 
@@ -42,6 +56,14 @@ feat(assign_manual_phenotypes): Function to define and associate manu… ([`a640
 * perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
 
 ### Unknown
+
+* Merge pull request #229 from FNLCR-DMAP/dev
+
+Dev ([`37d41c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37d41c239cba0102bb58475e7c20b296a5ec4c2e))
+
+* Merge pull request #228 from FNLCR-DMAP/manual_phenotyping
+
+feat(assign_manual_phenotypes): Function to define and associate manu… ([`a640c14`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a640c142f6caa523d44c94e8290735300f71fff3))
 
 * Merge pull request #227 from FNLCR-DMAP/dev
 
