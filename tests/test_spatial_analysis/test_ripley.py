@@ -25,7 +25,7 @@ class TestRipleyL(unittest.TestCase):
         # Extract the feature column as numpy array
         features = dataframe['feature'].to_numpy().reshape(-1, 1)
 
-        # Convert features to float32 
+        # Convert features to float32
         features = features.astype(np.float32)
 
         # Extract the spatial coordinates as numpy array
@@ -47,7 +47,7 @@ class TestRipleyL(unittest.TestCase):
         # Get the number of row in adata
         n_cells = self.adata.shape[0]
 
-        # Set area to n_cells * pi, so that the L statitc 
+        # Set area to n_cells * pi, so that the L statitc
         # at a given radius is: sqrt(average number of neighbor)
         area = np.pi * n_cells
 
@@ -76,7 +76,7 @@ class TestRipleyL(unittest.TestCase):
         # Get the number of row in adata
         n_cells = self.adata.shape[0]
 
-        # Set area to n_cells * pi, so that the L statitc 
+        # Set area to n_cells * pi, so that the L statitc
         # at a given radius is: sqrt(average number of neighbor)
         area = np.pi * n_cells
 
@@ -113,7 +113,7 @@ class TestRipleyL(unittest.TestCase):
         # Get the number of row in adata
         n_cells = self.adata.shape[0]
 
-        # Set area to n_cells * pi, so that the L statitc 
+        # Set area to n_cells * pi, so that the L statitc
         # at a given radius is: sqrt(average number of neighbor)
         area = np.pi * n_cells
 
@@ -153,7 +153,7 @@ class TestRipleyL(unittest.TestCase):
 
     def test_two_different_phenotypes(self):
         """
-        This test will run the two different phenotypes 
+        This test will run the two different phenotypes
         """
 
         # Add four points to form a rectangle that is 1 * 2
@@ -169,7 +169,7 @@ class TestRipleyL(unittest.TestCase):
 
         center_phenotype = "A"
         neighbor_phenotype = "B"
-        # Set area to n_center_cells * pi, so that the L statitc 
+        # Set area to n_center_cells * pi, so that the L statitc
         # at a given radius is: sqrt(average number of neighbor)
         n_center_cells = self.adata[
             self.adata.obs["phenotype"] == center_phenotype].shape[0]
@@ -177,7 +177,7 @@ class TestRipleyL(unittest.TestCase):
 
         radii = [0, 1.1, 2.1]
 
-        ground_truth_l_stats = [0, 
+        ground_truth_l_stats = [0,
                                 1,
                                 np.sqrt(2),
                                 ]
@@ -196,7 +196,7 @@ class TestRipleyL(unittest.TestCase):
         # Get the L statistics
         returned_l_stats = result["L_stat"]["stats"].to_numpy()
 
-        # Check that the returned statistic for the two phenotypes is "A_A"
+        # Check that the returned statistic for the two phenotypes is "A_B"
         unique_phenotypes = result["L_stat"]["phenotype"].unique()
         self.assertEqual(len(unique_phenotypes), 1,
                          "The function should return one unique "
@@ -212,7 +212,7 @@ class TestRipleyL(unittest.TestCase):
 
     def test_csr_same_phenotype(self):
         """
-        Test the L statitic under complete spatial randomness 
+        Test the L statitic under complete spatial randomness
         while using the same phenotype
         """
 
@@ -249,7 +249,7 @@ class TestRipleyL(unittest.TestCase):
         sim_stats_mean = result["sims_stat"].groupby("bins")["stats"].mean()
 
         # Loop over all raddi and ground truth L statistics
-        # L(R) = R under complete spatial randomness ignoring boundry 
+        # L(R) = R under complete spatial randomness ignoring boundry
         # conditions
         for r, gt_l_stat_mean in zip(radii, sim_stats_mean):
             self.assertAlmostEqual(r, gt_l_stat_mean, places=1,
@@ -259,7 +259,7 @@ class TestRipleyL(unittest.TestCase):
 
     def test_csr_two_phenotype(self):
         """
-        Test the L statitic under complete spatial randomness 
+        Test the L statitic under complete spatial randomness
         while using the same phenotype
         """
 
@@ -274,7 +274,7 @@ class TestRipleyL(unittest.TestCase):
             neighbor_phenotype * n_neighbor_cells
 
         features = np.random.rand(n_center_cells + n_neighbor_cells)
-        
+
         # Generate spatial_x at random float position in the square
         x_max = 200
         y_max = 200
@@ -306,7 +306,7 @@ class TestRipleyL(unittest.TestCase):
         sim_stats_mean = result["sims_stat"].groupby("bins")["stats"].mean()
 
         # Loop over all raddi and ground truth L statistics
-        # L(R) = R under complete spatial randomness ignoring boundry 
+        # L(R) = R under complete spatial randomness ignoring boundry
         # conditions
         for r, gt_l_stat_mean in zip(radii, sim_stats_mean):
             self.assertAlmostEqual(r, gt_l_stat_mean, places=1,

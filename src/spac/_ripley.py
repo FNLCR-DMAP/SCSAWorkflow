@@ -46,7 +46,7 @@ def ripley(
     n_observations: int = 1000,
     max_dist: float | None = None,
     n_steps: int = 50,
-    support: List[float] | None = None, 
+    support: List[float] | None = None,
     seed: int | None = None,
     area: float | None = None,
     copy: bool = False,
@@ -132,7 +132,6 @@ def ripley(
 
     # old squidpy code
     # N = coordinates.shape[#0]
-    N = n_observations
     logg.warning(f"Running the simulations with n_cells:{n_observations}")
     hull = ConvexHull(coordinates)
     # pass in the area instead of convex hull
@@ -188,7 +187,8 @@ def ripley(
                 bins, obs_stats = _f_g_function(distances.squeeze(), support)
             elif mode == RipleyStat.L:
                 distances = pdist(coord_c, metric=metric)
-                bins, obs_stats = _l_function(distances, support, N, area)
+                bins, obs_stats = _l_function(distances, support,
+                n_observations, area)
             else:
                 raise NotImplementedError(f"Mode `{mode.s!r}` is not yet implemented.")
 
@@ -244,9 +244,9 @@ def ripley(
             else:
                 raise NotImplementedError(f"Mode `{mode.s!r}` is not yet "
                                           "implemented.")
-   
+
             # These lines for code runs for every single phenotype
-            # to see if the simulation value was greater than the 
+            # to see if the simulation value was greater than the
             # actual value for that phenotype 'j' in obs_arry[j]
             for j in range(obs_arr.shape[0]):
                 pvalues[j] += stats_i >= obs_arr[j]
@@ -255,11 +255,11 @@ def ripley(
     else:
         for i in range(n_simulations):
             if mode == RipleyStat.L:
-                random_i = _ppp(hull, 
-                                n_simulations=1, 
+                random_i = _ppp(hull,
+                                n_simulations=1,
                                 n_observations=n_center+n_neighbor,
                                 seed=seed)
-               
+
                 # Randomly select the frist n_center cells as center cells
                 center_coord = random_i[0:n_center, :]
                 if remove_diagonal:
@@ -275,7 +275,7 @@ def ripley(
                                                   remove_diagonal)
                 sims[i] = stats_i
 
-            else: 
+            else:
                 raise NotImplementedError(f"Mode `{mode.s!r}` is not yet "
                                           "implemented for"
                                           "multipe phenotypes.")
