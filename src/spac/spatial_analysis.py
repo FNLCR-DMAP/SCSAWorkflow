@@ -2,7 +2,13 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-from spac.utils import check_annotation
+from spac.utils import check_annotation, check_table
+import numpy as np
+from scipy.spatial import KDTree
+from scipy.spatial import distance_matrix
+from sklearn.preprocessing import LabelEncoder
+import numbers
+import logging
 
 
 def spatial_interaction(
@@ -30,7 +36,8 @@ def spatial_interaction(
         The AnnData object.
 
     annotation : str
-        The column name of the annotation to analysis in the dataset.
+        The column name of the annotation (e.g., phenotypes) to analyze in the
+        provided dataset.
 
     analysis_method : str
         The analysis method to use, currently available:
@@ -151,7 +158,6 @@ def spatial_interaction(
                     ax=ax,
                     **kwargs
             )
-
 
         if return_matrix:
             return [ax, matrix]
@@ -374,3 +380,270 @@ def spatial_interaction(
             results = {"Ax": ax}
 
     return results
+
+
+def neighborhood_profile(
+    adata,
+    phenotypes,
+    distances,
+    regions=None,
+    spatial_key="spatial",
+    normalize=None,
+    associated_table_name="neighborhood_profile"
+):
+
+    """
+    Calculate the neighborhood profile for every cell in all slides in an analysis
+    and update the input AnnData object in place.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The AnnData object containing the spatial coordinates and phenotypes.
+
+    phenotypes : str
+        The name of the column in adata.obs that contains the phenotypes.
+
+    distances : list
+        The list of increasing distances for the neighborhood profile.
+
+    spatial_key : str, optional
+        The key in adata.obs that contains the spatial coordinates. Default is
+        'spatial'.
+
+    normalize : str or None, optional
+        If 'total_cells', normalize the neighborhood profile based on the
+        total number of cells in each bin. 
+        If 'bin_area', normalize the neighborhood profile based on the area
+        of every bin.  Default is None.
+    
+    associated_table_name : str, optional
+        The name of the column in adata.obsm that will contain the
+        neighborhood profile. Default is 'neighborhood_profile'.
+
+    regions : str or None, optional
+        The name of the column in adata.obs that contains the regions.
+        If None, all cells in adata will be used. Default is None.
+
+
+    Returns
+    -------
+    None
+        The function modifies the input AnnData object in place, adding a new
+        column containing the neighborhood profile to adata.obsm.
+
+    Notes
+    -----
+    The input AnnData object 'adata' is modified in place. The function adds a
+    new column containing the neighborhood profile to adata.obsm, named by the
+    parameter 'associated_table_name'. The associated_table_name is a 3D array of
+    shape (n_cells, n_phenotypes, n_bins) where n_cells is the number of cells
+    in the all slides, n_phenotypes is the number of unique phenotypes, and
+    n_bins is the number of bins in the distances list.
+
+    A dictionary is added to adata.uns[associated_table_name] with the two keys
+    "bins" and "labels". "labels" will store all the values in the phenotype
+    annotation.
+    """
+
+    # Check that distances is array like with incremental positive values
+    if not isinstance(distances, (list, tuple, np.ndarray)):
+        raise TypeError("distances must be a list, tuple, or numpy array. " +
+                        f"Got {type(distances)}")
+
+    if not all(isinstance(x, numbers.Real) and x >= 0 for x in distances):
+        raise ValueError("distances must be a list of positive numbers. " +
+                         f"Got {distances}")
+
+    if not all(distances[i] < distances[i+1] for i in range(len(distances)-1)):
+        raise ValueError("distances must be monotonically increasing. " +
+                         f"Got {distances}")
+
+    # Check that phenotypes is adata.obs
+    check_annotation(
+        adata,
+        annotations=[phenotypes],
+        should_exist=True)
+
+    # Check that phenotypes is adata.obs
+    if regions is not None:
+        check_annotation(
+            adata,
+            annotations=[regions],
+            should_exist=True)
+
+    # TODO, check that spatial_key is in adata.obsm
+
+    check_table(
+        adata=adata,
+        tables=spatial_key,
+        should_exist=True,
+        associated_table=True
+    )
+
+    # Check the values of normalize
+    if normalize is not None and normalize not in ['total_cells', 'bin_area']:
+        raise ValueError((f'normalize must be "total_cells", "bin_area"'
+                          f' or None. Got "{normalize}"'))
+
+    # Check that the associated_table_name does not exist.
+    # Raise a warning othewise
+    check_table(
+        adata=adata,
+        tables=associated_table_name,
+        should_exist=False,
+        associated_table=True,
+        warning=True
+    )
+
+    logger = logging.getLogger()
+
+    # Convert the phenotypes to integers using label encoder
+    labels = adata.obs[phenotypes].values
+    le = LabelEncoder().fit(labels)
+    n_phenotypes = len(le.classes_)
+
+    # Create a place holder for the neighborhood profile
+    all_cells_profiles = np.zeros(
+        (adata.n_obs, n_phenotypes, len(distances)-1))
+
+    # If regions is None, use all cells in adata
+    if regions is not None:
+        # Calculate the neighborhood profile for every slide
+        for i, region in enumerate(adata.obs[regions].unique()):
+            adata_region = adata[adata.obs[regions] == region]
+            logger.info(f"Processing region:{region} \
+                        n_cells:{len(adata_region)}")
+            positions = adata_region.obsm[spatial_key]
+            labels_id = le.transform(adata_region.obs[phenotypes].values)
+            region_profiles = _neighborhood_profile_core(
+               positions,
+               labels_id,
+               n_phenotypes,
+               distances,
+               normalize
+            )
+
+            # Updated profiles of the cells of the current slide
+            all_cells_profiles[adata.obs[regions] == region] = (
+               region_profiles
+            )
+    else:
+        logger.info(("Processing all cells as a single region."
+                     f" n_cells:{len(adata)}"))
+        positions = adata.obsm[spatial_key]
+        labels_id = le.transform(labels)
+        all_cells_profiles = _neighborhood_profile_core(
+            positions,
+            labels_id,
+            n_phenotypes,
+            distances,
+            normalize
+        )
+
+    # Add the neighborhood profile to the AnnData object
+    adata.obsm[associated_table_name] = all_cells_profiles
+
+    # Store the bins and the lables in uns
+    summary = {"bins": distances, "labels": le.classes_}
+    if associated_table_name in adata.uns:
+        logger.warning(f"The analysis already contains the \
+                       unstructured value:{associated_table_name}. \
+                       It will be overwriten")
+    adata.uns[associated_table_name] = summary
+
+def _neighborhood_profile_core(
+        coord,
+        phenotypes,
+        n_phenotypes,
+        distances_bins,
+        normalize=None
+):
+    """
+    Calculate the neighborhood profile for every cell in a region.
+
+    Parameters
+    ----------
+    coord : numpy.ndarray
+        The coordinates of the cells in the region. Should be a 2D array of
+        shape (n_cells, 2) representing x, y coordinates.
+
+    phenotypes : numpy.ndarray
+        The phenotypes of the cells in the region.
+
+    n_phenotypes : int
+        The number of unique phenotypes in the region.
+
+    distances_bins : list
+        The bins defining the distance ranges for the neighborhood profile.
+
+    normalize : str or None, optional
+        If 'total_cells', normalize the neighborhood profile based on the
+        total number of cells in each bin.
+        If 'bin_area', normalize the neighborhood profile based on the area
+        of every bin.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 3D array containing the neighborhood profile for every cell in the
+        region. The dimensions are (n_cells, n_phenotypes, n_intervals).
+
+    Notes
+    -----
+    - The function calculates the neighborhood profile for each cell, which
+      represents the distribution of neighboring cells' phenotypes within
+      different distance intervals.
+    - The 'distances_bins' parameter should be a list defining the bins for
+      the distance intervals. It is assumed that the bins are incremental,
+      starting from 0.
+    """
+
+    # TODO Check that distances bins is incremental
+
+    max_distance = distances_bins[-1]
+    kdtree = KDTree(coord)
+
+    # indexes is a list of neighbors coordinate for every
+    # cell
+    indexes = kdtree.query_ball_tree(kdtree, r=max_distance)
+
+    # Create phenotype bins to include the integer equivalent of 
+    # every phenotype to use the histogram2d function instead of
+    # a for loop over every phenotype
+    phenotype_bins = np.arange(-0.5, n_phenotypes + 0.5, 1)
+    n_intervals = len(distances_bins) - 1
+
+    neighborhood_profile = []
+    for i, neighbors in enumerate(indexes):
+
+        # Query_ball_tree will include the point itself
+        neighbors.remove(i)
+
+        # To potentially save on calculating the histogram
+        if len(neighbors) == 0:
+            neighborhood_profile.append(np.zeros((n_phenotypes, n_intervals)))
+        else:
+            neighbor_coords = coord[neighbors]
+            dist_matrix = distance_matrix(coord[i:i+1], neighbor_coords)[0]
+            neighbors_phenotypes = phenotypes[neighbors]
+            # Returns a 2D histogram of size n_phenotypes * n_intervals
+            histograms_array, _ , _ = np.histogram2d(neighbors_phenotypes,
+                                                     dist_matrix,
+                                                     bins=[
+                                                       phenotype_bins,
+                                                       distances_bins
+                                                       ])
+            neighborhood_profile.append(histograms_array)
+
+    neighborhood_array = np.stack(neighborhood_profile)
+    if normalize == "total_cells":
+        bins_sum = neighborhood_array.sum(axis=1)
+        bins_sum[bins_sum == 0] = 1
+        neighborhood_array = neighborhood_array / bins_sum[:, np.newaxis, :]
+    elif normalize == "bin_area":
+        circles_areas = np.pi * np.array(distances_bins)**2
+        bins_areas = np.diff(circles_areas)
+        neighborhood_array = neighborhood_array / bins_areas[np.newaxis, np.newaxis, :]
+
+    return neighborhood_array

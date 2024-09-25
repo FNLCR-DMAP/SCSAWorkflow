@@ -1,6 +1,8 @@
 import unittest
+from unittest import mock
 import pandas as pd
 import anndata
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from spac.visualization import boxplot
@@ -29,14 +31,14 @@ class TestBoxplot(unittest.TestCase):
 
     def test_returns_correct_types(self):
         """Test if correct types are returned."""
-        fig, ax = boxplot(self.adata)
+        fig, ax, df = boxplot(self.adata)
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
 
     def test_second_annotation_mode(self):
         """Test if second annotation mode works as expected."""
         self.adata.obs['treatment'] = ['Drug1', 'Drug1', 'Drug2', 'Drug2']
-        fig, ax = boxplot(
+        fig, ax, df = boxplot(
             self.adata,
             annotation='phenotype',
             second_annotation='treatment',
@@ -51,8 +53,10 @@ class TestBoxplot(unittest.TestCase):
 
     def test_single_annotation_single_feature(self):
         """Test if annotation mode works as expected with a single feature."""
-        fig, ax = boxplot(self.adata, features=['feature1'],
-                          annotation='phenotype', orient='v')
+        fig, ax, df = boxplot(
+            self.adata, features=['feature1'],
+            annotation='phenotype', orient='v'
+        )
         xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
         expected_unique_labels = ['phenotype1', 'phenotype2']
         for label in expected_unique_labels:
@@ -60,9 +64,11 @@ class TestBoxplot(unittest.TestCase):
 
     def test_single_annotation_multiple_features(self):
         """Test when only one annotation but multiple features."""
-        fig, ax = boxplot(self.adata,
-                          features=['feature1', 'feature2'],
-                          annotation='phenotype', orient='v')
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1', 'feature2'],
+            annotation='phenotype', orient='v'
+        )
         xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
         expected_unique_labels = ['feature1', 'feature2']
         for label in expected_unique_labels:
@@ -70,9 +76,11 @@ class TestBoxplot(unittest.TestCase):
 
     def test_multiple_features_mode(self):
         """Test if multiple features mode works as expected."""
-        fig, ax = boxplot(self.adata,
-                          features=['feature1', 'feature2'],
-                          orient='v')
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1', 'feature2'],
+            orient='v'
+        )
 
         # Get x-tick labels from the plot
         xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
@@ -83,8 +91,10 @@ class TestBoxplot(unittest.TestCase):
 
     def test_orient_kwarg(self):
         """Test for the orient parameter passed via **kwargs."""
-        fig, ax = boxplot(self.adata, features=['feature1'],
-                          annotation='phenotype', orient='h')
+        fig, ax, df = boxplot(
+            self.adata, features=['feature1'],
+            annotation='phenotype', orient='h'
+        )
         # Check if the x-axis ticks contain the expected annotations
         ytick_labels = [tick.get_text() for tick in ax.get_yticklabels()]
         expected_unique_labels = ['phenotype1', 'phenotype2']
@@ -93,17 +103,162 @@ class TestBoxplot(unittest.TestCase):
 
     def test_log_scale(self):
         """Test for the log_scale parameter."""
-        fig, ax = boxplot(self.adata, features=['feature1'], log_scale=True)
+        fig, ax, df = boxplot(
+            self.adata, features=['feature1'], log_scale=True
+        )
 
         # Check if the y-axis is in log scale
         self.assertEqual(ax.get_yscale(), 'log')
 
-        # Test with negative or zero values
+        # Test with zero values
         self.adata.X[0, 0] = 0  # Introduce a zero value
-        fig, ax = boxplot(self.adata, features=['feature1'], log_scale=True)
+        fig, ax, df = boxplot(
+            self.adata, features=['feature1'], log_scale=True
+        )
 
-        # Check if the y-axis is not in log scale due to the zero value
-        self.assertNotEqual(ax.get_yscale(), 'log')
+        # Check if the y-axis is in log scale (due to log1p transformation)
+        self.assertEqual(ax.get_yscale(), 'log')
+
+    def test_log1p_transformation(self):
+        """Test if np.log1p transformation is applied correctly."""
+        # Introduce a dataset with zeros
+        X = pd.DataFrame({
+            'feature1': [0, 1, 2, 3]
+        })
+
+        annotation = pd.DataFrame({
+            'phenotype': [
+                'phenotype1',
+                'phenotype1',
+                'phenotype2',
+                'phenotype2'
+            ]
+        })
+
+        adata = anndata.AnnData(X=X, obs=annotation)
+
+        # Hard-coded expected values after np.log1p transformation
+        expected_values = np.array(
+            [0.0, 0.693147, 1.098612, 1.386294], dtype=np.float32
+        )
+
+        # Create a boxplot and capture the transformed DataFrame
+        fig, ax, transformed_df = boxplot(
+            adata, features=['feature1'], log_scale=True
+        )
+
+        # Extract the log1p transformed values from the DataFrame for plotting
+        transformed_values = transformed_df['feature1'].values.flatten()
+
+        # Debugging: print DataFrame after transformation
+        print("DataFrame after log1p transformation:\n", transformed_values)
+
+        # Compare the transformed values with the expected values
+        np.testing.assert_allclose(
+            transformed_values, expected_values, rtol=1e-5
+        )
+
+    @mock.patch('builtins.print')
+    def test_negative_values(self, mock_print):
+        """Test the negative values disable log scale and print a message."""
+        # Introduce a dataset with negative values
+        X = pd.DataFrame({
+            'feature1': [-1, 0, 1, 2]
+        })
+
+        annotation = pd.DataFrame({
+            'phenotype': [
+                'phenotype1',
+                'phenotype1',
+                'phenotype2',
+                'phenotype2'
+            ]
+        })
+        annotation.index = annotation.index.astype(str)
+        adata = anndata.AnnData(X=X.astype(np.float32), obs=annotation)
+
+        # Create a boxplot and capture the print output
+        fig, ax, _ = boxplot(adata, features=['feature1'], log_scale=True)
+
+        # Extract the printed messages
+        print_calls = [call.args[0] for call in mock_print.call_args_list]
+
+        # Expected message
+        expected_msg = (
+            "There are negative values in this data, disabling the log scale."
+        )
+
+        self.assertIn(expected_msg, print_calls)
+
+        # Ensure the y-axis is not in log scale
+        self.assertEqual(ax.get_yscale(), 'linear')
+
+    def test_single_feature_orientation(self):
+        """
+        Test single feature plotting to use the correct axis
+        based on orientation.
+        """
+        # Test for vertical orientation
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='v')
+        self.assertEqual(ax.get_ylabel(), 'Intensity')
+
+        # Test for horizontal orientation
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='h')
+        self.assertEqual(ax.get_xlabel(), 'Intensity')
+
+    def test_axis_labels(self):
+        """Test x-axis, y-axis, and log labeling."""
+        # Test for vertical orientation without log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='v'
+        )
+        self.assertEqual(ax.get_xlabel(), 'phenotype')
+        self.assertEqual(ax.get_ylabel(), 'Intensity')
+
+        # Test for vertical orientation with log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='v',
+            log_scale=True
+        )
+        self.assertEqual(ax.get_xlabel(), 'phenotype')
+        self.assertEqual(ax.get_ylabel(), 'log(Intensity)')
+
+        # Test for horizontal orientation without log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='h'
+        )
+        self.assertEqual(ax.get_xlabel(), 'Intensity')
+        self.assertEqual(ax.get_ylabel(), 'phenotype')
+
+        # Test for horizontal orientation with log scale
+        fig, ax, df = boxplot(
+            self.adata,
+            features=['feature1'],
+            annotation='phenotype',
+            orient='h',
+            log_scale=True
+        )
+        self.assertEqual(ax.get_xlabel(), 'log(Intensity)')
+        self.assertEqual(ax.get_ylabel(), 'phenotype')
+
+    def test_single_feature_labeling(self):
+        """Test if single feature name is displayed correctly on the x-axis."""
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='v')
+        xtick_labels = [tick.get_text() for tick in ax.get_xticklabels()]
+        self.assertEqual(xtick_labels, ['feature1'])
+
+        fig, ax, df = boxplot(self.adata, features=['feature1'], orient='h')
+        ytick_labels = [tick.get_text() for tick in ax.get_yticklabels()]
+        self.assertEqual(ytick_labels, ['feature1'])
 
 
 if __name__ == '__main__':

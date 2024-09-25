@@ -2,9 +2,107 @@
 
 
 
-## v0.4.5 (2024-03-26)
+## v0.7.3 (2024-09-17)
+
+### Feature
+
+* feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
+
+### Fix
+
+* fix(apply_manual_phenotypes): added __init__.py file for the tests. ([`e79d97b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d97b0cd46e489b2bb256094bc024c006fcc49))
+
+### Unknown
+
+* Merge pull request #229 from FNLCR-DMAP/dev
+
+Dev ([`37d41c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37d41c239cba0102bb58475e7c20b296a5ec4c2e))
+
+* Merge pull request #228 from FNLCR-DMAP/manual_phenotyping
+
+feat(assign_manual_phenotypes): Function to define and associate manu… ([`a640c14`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a640c142f6caa523d44c94e8290735300f71fff3))
+
+
+## v0.7.2 (2024-09-09)
+
+### Ci
+
+* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
+
+* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
+
+### Fix
+
+* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
+
+* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
+
+### Performance
+
+* perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
+
+### Unknown
+
+* Merge pull request #227 from FNLCR-DMAP/dev
+
+perf: deming CD ([`26b6858`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/26b685827da129e0d3c103c882ede9c9ca9261a5))
+
+* Merge pull request #226 from FNLCR-DMAP/dev
+
+add annotation and layer check for batch_normalize ([`d21052d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d21052d375a35f7a0d01f95aa596fa2600ff71a6))
+
+* Merge pull request #225 from FNLCR-DMAP/normalize_batch
+
+fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d61140c8a774c5b18df92c0962ce591c181dce9))
+
+
+## v0.7.0 (2024-07-25)
+
+### Ci
+
+* ci(version): Automatic development release ([`fdbfea2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fdbfea22cbbaca9875da128358ed8603de7bd859))
+
+* ci(version): Automatic development release ([`3ab9b1f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ab9b1f88af707bbf473665e52cd8acf43b409c9))
+
+* ci(version): Automatic development release ([`05a9887`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05a9887967ff8da974f29f9658c0013443836e6f))
+
+* ci(version): Automatic development release ([`25b9cf7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25b9cf7ab55fe5f7d0553b4a91ba22f269e2ec48))
+
+* ci(version): Automatic development release ([`07cb4cc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07cb4cc8279d267b814c88882d25d23700e1e68d))
+
+* ci(version): Automatic development release ([`83deef9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83deef9cf55b10622a34eeec71dfb9ea796216ca))
+
+* ci(version): Automatic development release ([`47d823a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/47d823a7f12e244ce0f42955226e1ed685a2ff7d))
+
+* ci(version): Automatic development release ([`0405e1d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0405e1db3054bed552ad195c9c28813cc52e4457))
+
+* ci(version): Automatic development release ([`c3bbca3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c3bbca396ff05cd26734cc731eb285e0a3089287))
+
+* ci(version): Automatic development release ([`5484645`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5484645acb5f3142de1aa8e183d691039b91eb7e))
+
+* ci(version): Automatic development release ([`15710d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/15710d756a537d7c958e5ab965d2cd1779c0770a))
+
+* ci(version): Automatic development release ([`6e0434e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0434ebed748257fd2bb71b52e750f4a472b065))
+
+* ci(version): Automatic development release ([`1b9acf0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b9acf06c6319f418bf7b61c6d4f0286a31f2fe1))
+
+* ci(version): Automatic development release ([`ed79d5f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ed79d5f3608599c5c561d57a6cc6d5fbb0e38130))
+
+* ci(version): Automatic development release ([`19644ac`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/19644aca355a40ce674b40377872990abe98584a))
+
+* ci(version): Automatic development release ([`59e6cb9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/59e6cb9f210e387a42cb6832722efd659a81de6d))
+
+* ci(version): Automatic development release ([`25d6747`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25d67479b8558ac84365681919daedd71ce02aff))
 
 ### Documentation
+
+* docs(version): Automatic development release ([`3d1bd26`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3d1bd26c856c86f0f6b688ca2e463c888d71ded8))
+
+* docs(version): Automatic development release ([`47f87a7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/47f87a7e519adece780ff6ce4dc6718e986d5057))
+
+* docs(version): Automatic development release ([`c4858b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4858b3014272873d8c9a17316196d5af9b33706))
+
+* docs(version): Automatic development release ([`ffd8861`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ffd8861d7f8043bd4b86beb001ee091882f0ae2b))
 
 * docs: Update description in annotation category relations ([`00c5d10`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00c5d1051c69bb19734ce4315ad15264eaf5e6fe))
 
@@ -13,43 +111,6 @@
 * docs: Rename the function to sankey_plot to following the naming convention ([`9da02e1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9da02e19d7de6876030deb36859a67a9f27f23bd))
 
 * docs: Update documentation for color mapping output ([`afaf4c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/afaf4c400a70a0656d84d63d45c15b066a4aa73f))
-
-### Fix
-
-* fix(select_values): add summary in function using logging ([`983c475`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/983c475fbf071b30ce4c955cdf99c5fbf996bd1b))
-
-### Performance
-
-* perf: Added default color map values and updated color map related description ([`8b22714`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b22714ac6d8e57fb832eb8ebdb5cd6c45af544a))
-
-* perf: Update hover info template message ([`faa63e2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/faa63e22e09bd47dbd5753f707296633a9efbba9))
-
-* perf: remove redundent annotation from sankey plot ([`1a856e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a856e9f0b542329b43025846865092f16d41c88))
-
-### Refactor
-
-* refactor(select_values): remove unnecessary logging and add astype(str) ([`50410c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50410c22414b833fd69b76a7da23bc179d3ee1da))
-
-### Unknown
-
-* Merge pull request #170 from FNLCR-DMAP/dev
-
-CI/CD: merge from dev to release_dev ([`b216284`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b216284826fc59ca88b663b1c751a6de0b079f13))
-
-* Merge pull request #168 from FNLCR-DMAP/select_values
-
-fix(select_values): add summary in function using logging ([`99d7ef5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/99d7ef5922fd36aa7631a3a5d8cf8817212c8cde))
-
-* Merge pull request #167 from FNLCR-DMAP/sankey_plot
-
-Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea1c66ebfb7528de7a04a0e137d9d1b7667f6840))
-
-* perf:Update per code review discussion ([`83eb72f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83eb72f1a428a2dcdb4f17f0afa96ce23248ef56))
-
-
-## v0.4.4 (2024-03-11)
-
-### Documentation
 
 * docs(version): Automatic development release ([`1a3fff0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a3fff0ba08fe7e0059bf2e6bca84a4cc021005c))
 
@@ -87,9 +148,65 @@ Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/comm
 
 ### Feature
 
+* feat: correct functions and unit tests based on CR ([`f97f25b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f97f25bc05be5c13ba58d351d3c54a8e39fd2484))
+
+* feat(normalize_per_batch): add intra_batch normalization and unit tests ([`7ec823b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7ec823b808e0afc9928b34b8b7c7bf588754b1dc))
+
+* feat(visualization): Added the option to visualiza an associated table in dimentionality reduction plot ([`480fa58`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/480fa5801d326c5a3edb2be7fc89ac54b5765477))
+
+* feat(relational_heatmap): added tests and function ([`e1927c7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e1927c7f61296140cbaa90c07318f9fee3087032))
+
+* feat(neighborhood_profile): Add neighborhood_profile_core function for calculating neighborhood profiles ([`1b1eede`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b1eedec22788aa122e4fdfcf87ddc89defe40db))
+
+* feat(phenograph): Add optional argument to define output layer in the returned Anndata object ([`1982459`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/198245928f4a5946cc3fe8a0a2b14708265b777e))
+
+* feat(batch_normalize): add input_layer and z-score method and fix unit tests ([`5bd1ebe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bd1ebe1827b0b9c9266fccaf65c6e294bf4f28b))
+
+* feat(batch_normalize): add features input_layer and z-score method and corresponding unit tests ([`a693640`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a693640cfd413c0e61d06d9ed93b147b0f70d8fa))
+
 * feat: Add sankey plot and related utils ([`0f70c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f70c6cd4c01dcfcac9f84f5e2df142de25bf41e))
 
 ### Fix
+
+* fix(visualize_2D_scatter): modify ax setting and unit test ([`69d272d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/69d272d3f4e1f8f2adc41b1d50b0c715405528cb))
+
+* fix(get_cluster_info): replace cluster with annotation in function and unit tests ([`5c21a22`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5c21a2208b733439349cc35b12f0705e173c5826))
+
+* fix(z_scores): add output_layer and unit tests ([`8bb0c5b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bb0c5bd60234026400d0304da47d9d948eb680f))
+
+* fix(threshold_heatmap): correct the error msg ([`8fbd850`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fbd850da623fb35a05b23b356d774812509816a))
+
+* fix(threshold_heatmap): add swap axes and fix colorbar labels and unit tests ([`a834881`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a8348817703679e51342b2d2417d3410443faeb1))
+
+* fix(normalize_features_core): adjust argument to match numpy version and unit test ([`7cda63b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7cda63b9c0a0f1f6a9e920926433787fac622d8f))
+
+* fix(dimensionality_reduction_plot): modified the plot title and unit test ([`a57bc34`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a57bc34aa619dd895a90eb08d48e323a33a5b731))
+
+* fix(dimensionality_reduction_plot): remove the conflicting keys from kwargs and add unit test ([`efe7812`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/efe781215e9e7e09168665909357c77a6246eafb))
+
+* fix(dimensionality_reduction_plot): change axis label of associate table and unit test ([`71c54f5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71c54f59dec45cfae566d822522c11b9a031166c))
+
+* fix: axis and plot titles and unit tests ([`8dc438b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8dc438bf6e374bd93973ee7cbb743fd2c2fc5c67))
+
+* fix(boxplot): set a single tick and label explicitly for single features and unit test ([`6b869a3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b869a3ccc4ec9578a326358b7abd0654289c7b9))
+
+* fix(boxplot): single feature orientation and add axis labels and unit tests ([`b40e7a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b40e7a009b0a026c4aff93626f933837b2a2e024))
+
+* fix(boxplot): check negative values and unit tests ([`30e08c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/30e08c4dac8142babea40b35a563276eb8f6b752))
+
+* fix(boxplot): log1p transformation and unit tests ([`bcd5f2c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcd5f2cee50284fb748bdfb1285a6a601b001134))
+
+* fix(arcsinh_transformation): change error message and corresponding unit tests ([`417afd2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/417afd2fb343c9a1f682166ba00b7012719ee8c7))
+
+* fix(arcsinh_transformation): add error message and unit tests ([`f4ba1e8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f4ba1e82a487dfb9bbcf2ef28300e8780405f235))
+
+* fix(batch_normalize): minor changes on comments of function and unit test ([`f2e5b0e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2e5b0ecb1769ffdf2f0965a65f8569964644d04))
+
+* fix: histogram and unit test on commits ([`cd8e672`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8e672f555cc8f690513ef0ff0453aa146890c1))
+
+* fix(phenograph_clustering): Changed input argument name from output_layer to output_annotation. ([`b2ebf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2ebf9a1d4495bb4fd79585abcc279e7b787b737))
+
+* fix(select_values): add summary in function using logging ([`983c475`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/983c475fbf071b30ce4c955cdf99c5fbf996bd1b))
 
 * fix(test_ visualize_2D): add comment to merge release_dev ([`d6e987a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6e987a48045697d2a722f45a07816c2d808112b))
 
@@ -135,6 +252,14 @@ Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/comm
 
 ### Performance
 
+* perf(annot_cat_rel): update the code to handle same column input ([`d01d48d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d01d48def54140fbab5378457fd97259cbb8936b))
+
+* perf: Added default color map values and updated color map related description ([`8b22714`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b22714ac6d8e57fb832eb8ebdb5cd6c45af544a))
+
+* perf: Update hover info template message ([`faa63e2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/faa63e22e09bd47dbd5753f707296633a9efbba9))
+
+* perf: remove redundent annotation from sankey plot ([`1a856e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a856e9f0b542329b43025846865092f16d41c88))
+
 * perf: Added percentage columns, and update Sankey hover info template ([`60d3d8a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60d3d8a2caf3a77b50637cac5fd28ac10d9d3614))
 
 * perf: Added percentage to relation to expand usecase ([`e521acf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e521acfb2c940294baf253cfebfe562535e24473))
@@ -147,9 +272,257 @@ Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/comm
 
 ### Refactor
 
+* refactor: changed the name input_derived_feature to associated_table ([`e50a609`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e50a609741fba66de14ebb191d8ec52da608ef9c))
+
+* refactor: batch_normalize and unit test ([`cb619a1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cb619a1b795e80ed5062737485f84d569e86eed4))
+
+* refactor(neighborhood_profile): use the check utilities to raise warnings ([`e2409a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e2409a6a9bd569024f8e0bc03017c3aa686439a3))
+
+* refactor: batch_normalize unit tests ([`cc73faa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc73faab46719164f59ded07f98833f52763ac0a))
+
+* refactor: batch_normalize and z_score unit test ([`632848d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/632848dc2d76531d707b1323f3b54a3456704d6e))
+
+* refactor(select_values): remove unnecessary logging and add astype(str) ([`50410c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50410c22414b833fd69b76a7da23bc179d3ee1da))
+
+* refactor(logging): Update log messages in function load_csv ([`94b3b79`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/94b3b79956183431d7ff740b9f1c87fc2de9b128))
+
 * refactor: Update docstring format ([`07d8541`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07d8541af7e6a817ef21e2c5a784555dbf668fdf))
 
+### Step
+
+* step: minor release update ([`41cf19a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41cf19a75cb0178fa30f6a1e0d7f6ee999ef07f0))
+
+### Test
+
+* test(arcsinh): Changed the implementation of the warning when layer exists ([`4127b45`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4127b452dfff032ecd80269be3b15553acecfd28))
+
 ### Unknown
+
+* Merge pull request #224 from FNLCR-DMAP/release_dev
+
+Version v0.7.0 Release! ([`7d6aef3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7d6aef3a20ceb3299df69c03cc8f6ca0cead493b))
+
+* Merge pull request #223 from FNLCR-DMAP/dev
+
+Minor version update ([`e4f718e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4f718e293cdf6b3da426403333d762f2ef40693))
+
+* Merge pull request #222 from FNLCR-DMAP/version-update
+
+minor release update ([`ccf7c77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ccf7c7717c152c419e8ba43c3f387b7347762118))
+
+* Merge pull request #221 from FNLCR-DMAP/dev
+
+merge visualize_2D_scatter from dev to release_dev ([`92ecfe0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92ecfe05a25f65cd035bc39622ea0772ca33c9a3))
+
+* Merge pull request #220 from FNLCR-DMAP/umap
+
+fix(visualize_2D_scatter): modify ax setting and unit test ([`c7ef7b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c7ef7b13d611175a80a60dde2b70152da61ec1d2))
+
+* Merge pull request #219 from FNLCR-DMAP/dev
+
+merge get_cluster_info from dev to release_dev ([`c4050e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4050e640aa95e5bb34220ccab104b491aa7cf98))
+
+* Merge pull request #218 from FNLCR-DMAP/get_cluster_info
+
+fix(get_cluster_info): replace cluster with annotation in function an… ([`fe50bf4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe50bf44826869f21cc6fd909e282203737cf28c))
+
+* Merge pull request #217 from FNLCR-DMAP/dev
+
+merge updated z-score normalization from dev to release_dev ([`bcf8f80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bcf8f80522e46f5fcb0a47c1698300c8b778e41f))
+
+* Merge pull request #216 from FNLCR-DMAP/zscore
+
+fix(z_scores): add output_layer and unit tests ([`18f8466`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/18f84664beac2b541265b1e1105402269e8a4407))
+
+* Merge pull request #215 from FNLCR-DMAP/dev
+
+merge from dev to release_dev ([`0bfc9b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0bfc9b2abf2d3f8af33be96adfa88e6693dc8c86))
+
+* Merge pull request #214 from FNLCR-DMAP/threshold_heatmap
+
+fix(threshold_heatmap): correct the error msg ([`14dd051`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/14dd051a1164b7e26a4d28a0106497b750e1e6c1))
+
+* Merge pull request #213 from FNLCR-DMAP/dev
+
+merge threshold heatmap from dev to release_dev ([`b818521`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b818521f80b649d99d3d4f230f2a8a0892c08dca))
+
+* Merge pull request #212 from FNLCR-DMAP/threshold_heatmap
+
+fix(threshold_heatmap): add swap axes and fix colorbar labels and uni… ([`303e467`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/303e467d7d1d451392855aa7e0c78ec8b208175b))
+
+* Merge pull request #211 from FNLCR-DMAP/dev
+
+merge normalize_features_core from dev to release_dev by matching numpy version ([`509922c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/509922c2b1e278376b60f12eccf7c89acf9b8a03))
+
+* Merge pull request #210 from FNLCR-DMAP/normalize_features_core
+
+fix(normalize_features_core): adjust argument to match numpy version … ([`de6026e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/de6026edcae71591146d3fb413335b20db187240))
+
+* Merge pull request #209 from FNLCR-DMAP/dev
+
+Merge dimensionality reduction plot from dev to release_dev ([`d481cf1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d481cf1469adcff8aded8406726ad2e15eb2e2a0))
+
+* Merge pull request #208 from FNLCR-DMAP/umap
+
+fix(dimensionality_reduction_plot): modified the plot title and unit … ([`61b2cdb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61b2cdbb0e6c11717dabbd66f33ae29fa8271180))
+
+* Merge pull request #207 from FNLCR-DMAP/dev
+
+Merge dimensionality reduction plot with removing conflict of kwargs from dev to release_dev ([`9398679`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/939867997436551d498fe65c9e0f3cf0757b92aa))
+
+* Merge pull request #206 from FNLCR-DMAP/umap
+
+fix(dimensionality_reduction_plot): remove the conflicting keys from … ([`c2cfdeb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c2cfdeb631c177517b822af24e3050791b1f890e))
+
+* Merge pull request #205 from FNLCR-DMAP/dev
+
+merge updated dimensionality reduction plot and 2D visualization scatter functions from dev to release_dev ([`507564d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/507564d02968545bcd780a48135078740928c2e0))
+
+* Merge pull request #204 from FNLCR-DMAP/umap
+
+fix: axis and plot titles and unit tests ([`65798be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65798be0affd6f4aed655e1ca492e3dc884b9093))
+
+* Merge pull request #203 from FNLCR-DMAP/dev
+
+merge boxplot from dev to release_dev by setting a single tick and label for single features ([`51d1161`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/51d116168ef2c3660f0cb680242743df8064c357))
+
+* Merge pull request #202 from FNLCR-DMAP/boxplot
+
+fix(boxplot): set a single tick and label explicitly for single featu… ([`ce81aa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce81aa01e32a958f8e1328405efc07dba6e8dfb2))
+
+* Merge pull request #201 from FNLCR-DMAP/dev
+
+merge the boxplot from dev to release dev ([`332eae3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/332eae34fdbd1666c4830de705198e37e0ab9947))
+
+* Merge pull request #200 from FNLCR-DMAP/boxplot
+
+fix(boxplot): single feature orientation and add axis labels and unit… ([`28383a2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28383a290ac7989c1221f634f4d4a048e9f88cbb))
+
+* Merge pull request #199 from FNLCR-DMAP/dev
+
+boxplot: deal with log transformation when the presence of negative values and 0 ([`a4e0fad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4e0fad54146e662afad9cbe1290ca44f40ff07d))
+
+* Merge pull request #198 from FNLCR-DMAP/boxplot
+
+fix(boxplot): log1p transformation and unit tests ([`0459025`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0459025428a9425c7a1f27204fe235e8b8a462c7))
+
+* Merge pull request #196 from FNLCR-DMAP/dev
+
+merge dev with modified arcsinh_transformation to release_dev ([`6827f8a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6827f8acfedf7426249821207dfb97ab42c8c155))
+
+* Merge pull request #195 from FNLCR-DMAP/arcsinh_transformation
+
+fix(arcsinh_transformation): change error message and unit tests ([`506838a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/506838a46af0403a662884ce7664f3d5daa02071))
+
+* Merge pull request #194 from FNLCR-DMAP/dev
+
+merge arcsinh transformation from dev to release dev ([`cc8a2f8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cc8a2f810e4ff2a732431aa2a36883f92e049ee0))
+
+* Merge pull request #193 from FNLCR-DMAP/arcsinh_transformation
+
+fix(arcsinh_transformation): add error message and unit tests ([`48b04e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48b04e91f67f8d320c5c9281959b3b024ca337af))
+
+* Merge pull request #192 from FNLCR-DMAP/dev
+
+merge dev to release_dev ([`249f6df`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/249f6df23cb67e71763a5030113dda7676b23ef3))
+
+* Merge pull request #188 from FNLCR-DMAP/feat_visualize_associated_table
+
+Feat visualize associated table ([`31da888`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31da888067613e291b2319f4fcb734fe85cf1317))
+
+* Merge pull request #191 from FNLCR-DMAP/dev
+
+PR for relational heatmap ([`5627ab2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5627ab2ae0afcc4cec972f9f9c4ddd8268169c3b))
+
+* Merge pull request #189 from FNLCR-DMAP/new_apply_per_batch
+
+feat(normalize_per_batch): add intra_batch normalization and unit tests ([`b308c4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b308c4ebef642fbe036c39e7c2fcf3f351d9f42b))
+
+* Merge pull request #186 from FNLCR-DMAP/relational_heatmap
+
+Initial addition of relational heatmap ([`1bc520b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1bc520b76f995078b96d58293171dc9de945bfc5))
+
+* doc: fixed  typo ([`61fa363`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61fa363fc6f52cae7e2a1d073e7baea7d023f033))
+
+* doc: added additional context ([`407a1bf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/407a1bf0f0c9b3db938c63905870148ea92524f8))
+
+* Merge pull request #185 from FNLCR-DMAP/dev
+
+merge fix(batch_normalize) from dev to release_dev ([`b5f6583`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b5f6583de7a94bb4348f4c265d2cd0696a5e0057))
+
+* Merge pull request #184 from FNLCR-DMAP/batch_norm
+
+fix(batch_normalize): minor changes on comments of function and unit test ([`2fc2fd8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2fc2fd862fc7b823e810a09c48561063f0a649a2))
+
+* Merge pull request #175 from FNLCR-DMAP/neighborhood_profile
+
+Neighborhood profile ([`fe2aa63`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe2aa630edc6a0dd993545810ee4d35ade421ed9))
+
+* Merge pull request #169 from FNLCR-DMAP/load_csv_log
+
+refactor(logging): Update log messages in function load_csv ([`9d3b910`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d3b910dcc10442782978d8a05da9907d78a5e00))
+
+* Merge pull request #177 from FNLCR-DMAP/feat_transfrom_associated_table
+
+Feat transform associated table ([`16ea8cc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/16ea8cc79ececd78d3e94497ac7f4bf7e6e2708f))
+
+* Merge pull request #183 from FNLCR-DMAP/dev
+
+merge histogram from dev to release_dev ([`d90e216`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d90e216a1fc2a28267de3ad67c7c1c4c985b5767))
+
+* Merge pull request #182 from FNLCR-DMAP/histogram
+
+fix: histogram and unit test on commits ([`5b545b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5b545b20a1ff11c66030a61223df0ec3c8526b80))
+
+* Merge pull request #180 from FNLCR-DMAP/dev
+
+merge histogram &amp; batch normalize from dev to release_dev ([`f9a1ad8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f9a1ad8c3574315944250cebc8ff0a02c44ec953))
+
+* Merge pull request #178 from FNLCR-DMAP/batch_norm
+
+refactor: batch_normalize and unit test ([`4c20566`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4c205665bde8d804e03eb2f6c54f0f734518c688))
+
+* Merge pull request #179 from FNLCR-DMAP/histogram
+
+fix:histogram and corresponding unit tests ([`a2e8a52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a2e8a525948c248c37e1d8f541e153fecf38a924))
+
+* fix:histogram and corresponding unit tests ([`05dc768`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05dc768b90ba154c11e80a4595493e8500da0b02))
+
+* feat(phenograph) Added option to select derived features when calculating phenograph ([`1568a79`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1568a79034c9759c6ded64cc83c4a359eaa48469))
+
+* Merge branch &#39;feat-phenograph-annotation&#39; into feat_transfrom_associated_table ([`ce9b280`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce9b2801bb19e76b3003199497755e985a1f1415))
+
+* feat(umap) Added ability to select derived feature for UMAP ([`7034bf5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7034bf57b04529fa390a65d1b553ccf4cd088977))
+
+* Merge branch &#39;feat_check_associated_table_and_warning&#39; into neighborhood_profile ([`a95ab80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a95ab8085659d21826a6d6b54866513b0b78c4c2))
+
+* feat(check_table, check list) Add functionality to check associated table obsm and generate a warning instead of exception ([`eb3062a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/eb3062aa1826e4095e1f0f23d8ea9de345ebb6b1))
+
+* fix(phenograph) fixed test with wrong input argument ([`01a9573`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/01a9573e2275a6797c90ba5727b5a2f3b8245363))
+
+* feat(neighborhood profile) Added the neighborhood provile high level function and normalize by area feature to the neighborhood profile core ([`44f2d17`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/44f2d178e466b7b08612788aad53f2a193e42f43))
+
+* Merge pull request #174 from FNLCR-DMAP/dev
+
+merge pull request from dev to release_dev for batch normalize ([`0e49703`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e49703d72fcdba7c676ce9c2b60dbf8f3fc90c9))
+
+* Merge pull request #171 from FNLCR-DMAP/batch_norm
+
+feat(batch_normalize): add features input_layer and z-score method and fix unit tests ([`c373abe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c373abe7bbcd0a32f8d934031b20cd2e95f1213a))
+
+* Merge pull request #170 from FNLCR-DMAP/dev
+
+CI/CD: merge from dev to release_dev ([`b216284`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b216284826fc59ca88b663b1c751a6de0b079f13))
+
+* Merge pull request #168 from FNLCR-DMAP/select_values
+
+fix(select_values): add summary in function using logging ([`99d7ef5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/99d7ef5922fd36aa7631a3a5d8cf8817212c8cde))
+
+* Merge pull request #167 from FNLCR-DMAP/sankey_plot
+
+Sankey plot updates ([`ea1c66e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ea1c66ebfb7528de7a04a0e137d9d1b7667f6840))
+
+* perf:Update per code review discussion ([`83eb72f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83eb72f1a428a2dcdb4f17f0afa96ce23248ef56))
 
 * Merge pull request #163 from FNLCR-DMAP/dev
 
