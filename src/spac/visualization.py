@@ -460,8 +460,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     fig : matplotlib.figure.Figure
         The created figure for the plot.
 
-    axs : list[matplotlib.axes.Axes]
-        List of the axes of the histogram plots.
+    axs : matplotlib.axes.Axes or list of Axes
+        The Axes object(s) of the histogram plot(s). Returns a single Axes
+        if only one plot is created, otherwise returns a list of Axes.
 
     """
 
@@ -535,6 +536,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Ensure ax_array is always iterable
             if n_groups == 1:
                 ax_array = [ax_array]
+            else:
+                ax_array = ax_array.flatten()
 
             for i, ax_i in enumerate(ax_array):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
@@ -545,7 +548,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         sns.histplot(data=df, x=data_column, ax=ax, **kwargs)
         axs.append(ax)
 
-    return fig, axs
+    if len(axs) == 1:
+        return fig, axs[0]
+    else:
+        return fig, axs
 
 
 def heatmap(adata, column, layer=None, **kwargs):
