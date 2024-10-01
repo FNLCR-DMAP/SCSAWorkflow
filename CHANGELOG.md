@@ -2,13 +2,62 @@
 
 
 
+## v0.7.5 (2024-10-01)
+
+### Fix
+
+* fix(histogram): return a single Axes and fix corner case of normalize features core function and unit tests ([`080b4f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/080b4f1c09840a3a340d55a31bedb68a5cda3c8c))
+
+### Refactor
+
+* refactor(ripley): changed variable names ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
+
+### Unknown
+
+* Merge pull request #234 from FNLCR-DMAP/dev
+
+fix the histogram and normalize_features_core functions ([`50a53f4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50a53f4e1538cb4ab2ce082eefb24360faeb74e5))
+
+* Merge pull request #233 from FNLCR-DMAP/fix_histogram_normalization
+
+fix(histogram): return a single Axes and fix corner case of normalize… ([`3e8b7f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e8b7f0949d2d7289924158dc2af3abac0d60de5))
+
+* Merge pull request #172 from FNLCR-DMAP/ripley_l
+
+Refactored implementation of Squidpy Ripley&#39;s L function. ([`679939a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/679939a5b349dc5c5d000c5d8737ef0d938d5e1f))
+
+
 ## v0.7.4 (2024-09-24)
+
+### Ci
+
+* ci(version): Automatic development release ([`ceb679c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ceb679cabedccf7fcd8058a150f1621cf8445f68))
+
+* ci(version): Automatic development release ([`0810a79`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0810a7932125f1216c065a6179a5b1b2c155a584))
+
+* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
+
+* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
+
+### Feature
+
+* feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Fix
 
 * fix(calculate_centroid): return data ([`d1cca74`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1cca74ea9fe4d74f278de684ebd4f9c1776e1b0))
 
 * fix(calculate_centroid): add new columns in a single operation ([`8e18093`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8e18093838bf25be134165e93c5589e7f047c899))
+
+* fix(apply_manual_phenotypes): added __init__.py file for the tests. ([`e79d97b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d97b0cd46e489b2bb256094bc024c006fcc49))
+
+* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
+
+* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
+
+### Performance
+
+* perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
 
 ### Test
 
@@ -27,35 +76,6 @@ fix(calculate_centroid): add new columns in a single operation ([`63c2cc3`](http
 * Merge pull request #230 from FNLCR-DMAP/manual_phenotyping
 
 test(assign_manual_phenotypes): added tests for prefix and suffix sup… ([`eb17ed4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/eb17ed4eefeaf45f01d66a45e2991c5ad086866f))
-
-
-## v0.7.3 (2024-09-17)
-
-### Ci
-
-* ci(version): Automatic development release ([`0810a79`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0810a7932125f1216c065a6179a5b1b2c155a584))
-
-* ci(version): Automatic development release ([`37762f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/37762f0e01ca15fbaa821962491a8c1075893436))
-
-* ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
-
-### Feature
-
-* feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
-
-### Fix
-
-* fix(apply_manual_phenotypes): added __init__.py file for the tests. ([`e79d97b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79d97b0cd46e489b2bb256094bc024c006fcc49))
-
-* fix(batch_normalize): add annotation and layer checks ([`d694c2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d694c2e54e86864c7e79e900d7c4bbc1edc35492))
-
-* fix: Removed the print feature in spatial plot ([`aa3768b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa3768b849288a8ba15b5eb16ec6c75784b4b4ca))
-
-### Performance
-
-* perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
-
-### Unknown
 
 * Merge pull request #229 from FNLCR-DMAP/dev
 
@@ -124,6 +144,8 @@ fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://githu
 
 * docs(version): Automatic development release ([`c4858b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c4858b3014272873d8c9a17316196d5af9b33706))
 
+* docs: fixed typo ([`b33fb1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b33fb1e7fe56b7fa76b8e8b3f68adb8444aa89c1))
+
 * docs(version): Automatic development release ([`ffd8861`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ffd8861d7f8043bd4b86beb001ee091882f0ae2b))
 
 * docs: Update description in annotation category relations ([`00c5d10`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00c5d1051c69bb19734ce4315ad15264eaf5e6fe))
@@ -181,6 +203,14 @@ fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://githu
 * feat(neighborhood_profile): Add neighborhood_profile_core function for calculating neighborhood profiles ([`1b1eede`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b1eedec22788aa122e4fdfcf87ddc89defe40db))
 
 * feat(phenograph): Add optional argument to define output layer in the returned Anndata object ([`1982459`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/198245928f4a5946cc3fe8a0a2b14708265b777e))
+
+* feat(ripley_L): Add functionality for calculating Ripley statistic with multiple phenotypes
+
+This commit introduces changes to the Squidpy Ripley function to enhance its
+functionality. It now includes options to calculate the Ripley statistic for
+multiple phenotypes, allowing for more comprehensive spatial analysis of the
+data. Other options include providing a radii vector, passing a constant value
+for the area, and allowing callers to set the number of cells/observations ([`ad368c3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ad368c3b1be648dcec6ef1c50bfdd25264f481d1))
 
 * feat(batch_normalize): add input_layer and z-score method and fix unit tests ([`5bd1ebe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bd1ebe1827b0b9c9266fccaf65c6e294bf4f28b))
 
@@ -313,6 +343,10 @@ fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://githu
 ### Step
 
 * step: minor release update ([`41cf19a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41cf19a75cb0178fa30f6a1e0d7f6ee999ef07f0))
+
+### Style
+
+* style: Fix minor flake8 formatting ([`cf97301`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf9730111e12b9a4a47427c79e15028e88e17fee))
 
 ### Test
 
