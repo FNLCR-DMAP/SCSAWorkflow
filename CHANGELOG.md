@@ -2,34 +2,40 @@
 
 
 
-## v0.7.5 (2024-10-01)
+## v0.7.6 (2024-10-03)
 
 ### Fix
 
-* fix(histogram): return a single Axes and fix corner case of normalize features core function and unit tests ([`080b4f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/080b4f1c09840a3a340d55a31bedb68a5cda3c8c))
+* fix(ripley_l): Fixed typo of neighbor_phenotype ([`f2df8f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2df8f6cf601099e9bff8fadad454c057161da23))
 
-### Refactor
+### Style
 
-* refactor(ripley): changed variable names ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
+* style(utils): removed extra spaces ([`cf44261`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf442610df7e5a4bca7d761248767c14ddd33dcc))
+
+### Test
+
+* test(plot_riley_l): added unit test to catch exception when data is missing ([`5f6cb11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f6cb117cfda2eaf149cb04c8a92a64eb47f4c98))
 
 ### Unknown
 
-* Merge pull request #234 from FNLCR-DMAP/dev
+* Merge pull request #237 from FNLCR-DMAP/dev
 
-fix the histogram and normalize_features_core functions ([`50a53f4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50a53f4e1538cb4ab2ce082eefb24360faeb74e5))
+Dev ([`a577e11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a577e11e91245b94109f6d2f6bb462d3f314b42a))
 
-* Merge pull request #233 from FNLCR-DMAP/fix_histogram_normalization
+* Merge pull request #236 from FNLCR-DMAP/ripley_l
 
-fix(histogram): return a single Axes and fix corner case of normalize… ([`3e8b7f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e8b7f0949d2d7289924158dc2af3abac0d60de5))
+Ripley l ([`7703c73`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7703c732fb89d65298414d7ea26cfbf6b8ac1713))
 
-* Merge pull request #172 from FNLCR-DMAP/ripley_l
+* Merge branch &#39;dev&#39; into ripley_l ([`adeeb50`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/adeeb50384ea9de91397a6201cabe583604b69db))
 
-Refactored implementation of Squidpy Ripley&#39;s L function. ([`679939a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/679939a5b349dc5c5d000c5d8737ef0d938d5e1f))
+* feat(ripley_l) Added landing and visualization for Ripley L ([`a4ffacc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4ffacc5b0c41f1187d1314f056ab88b92b87fda))
 
 
-## v0.7.4 (2024-09-24)
+## v0.7.5 (2024-10-01)
 
 ### Ci
+
+* ci(version): Automatic development release ([`038c926`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/038c926dc5b377afb0fe96103e8fe113325904c9))
 
 * ci(version): Automatic development release ([`ceb679c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ceb679cabedccf7fcd8058a150f1621cf8445f68))
 
@@ -45,6 +51,8 @@ Refactored implementation of Squidpy Ripley&#39;s L function. ([`679939a`](https
 
 ### Fix
 
+* fix(histogram): return a single Axes and fix corner case of normalize features core function and unit tests ([`080b4f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/080b4f1c09840a3a340d55a31bedb68a5cda3c8c))
+
 * fix(calculate_centroid): return data ([`d1cca74`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1cca74ea9fe4d74f278de684ebd4f9c1776e1b0))
 
 * fix(calculate_centroid): add new columns in a single operation ([`8e18093`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8e18093838bf25be134165e93c5589e7f047c899))
@@ -59,11 +67,29 @@ Refactored implementation of Squidpy Ripley&#39;s L function. ([`679939a`](https
 
 * perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
 
+### Refactor
+
+* refactor(ripley): changed variable names ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
+
 ### Test
 
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #234 from FNLCR-DMAP/dev
+
+fix the histogram and normalize_features_core functions ([`50a53f4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50a53f4e1538cb4ab2ce082eefb24360faeb74e5))
+
+* Merge pull request #233 from FNLCR-DMAP/fix_histogram_normalization
+
+fix(histogram): return a single Axes and fix corner case of normalize… ([`3e8b7f0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e8b7f0949d2d7289924158dc2af3abac0d60de5))
+
+* Merge branch &#39;dev&#39; into ripley_l ([`a04300c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a04300cb1edb8f169cbab28e41d9abea19e1d0a9))
+
+* Merge pull request #172 from FNLCR-DMAP/ripley_l
+
+Refactored implementation of Squidpy Ripley&#39;s L function. ([`679939a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/679939a5b349dc5c5d000c5d8737ef0d938d5e1f))
 
 * Merge pull request #232 from FNLCR-DMAP/dev
 
