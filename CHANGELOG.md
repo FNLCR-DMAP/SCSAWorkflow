@@ -2,38 +2,34 @@
 
 
 
-## v0.7.6 (2024-10-03)
+## v0.7.7 (2024-10-03)
 
 ### Fix
 
-* fix(ripley_l): Fixed typo of neighbor_phenotype ([`f2df8f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2df8f6cf601099e9bff8fadad454c057161da23))
-
-### Style
-
-* style(utils): removed extra spaces ([`cf44261`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf442610df7e5a4bca7d761248767c14ddd33dcc))
-
-### Test
-
-* test(plot_riley_l): added unit test to catch exception when data is missing ([`5f6cb11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f6cb117cfda2eaf149cb04c8a92a64eb47f4c98))
+* fix(ripley_l): Generate write warning messages for n_observations and missing phenotypes ([`23236ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23236ab4e6577f9e86863b60e309cd17b6fff5c6))
 
 ### Unknown
 
-* Merge pull request #237 from FNLCR-DMAP/dev
+* Merge pull request #239 from FNLCR-DMAP/dev
 
-Dev ([`a577e11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a577e11e91245b94109f6d2f6bb462d3f314b42a))
+Dev ([`8ba93d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8ba93d63c65ee3185e54cfffaf92f2af6fceba03))
 
-* Merge pull request #236 from FNLCR-DMAP/ripley_l
+* Merge pull request #238 from FNLCR-DMAP/ripley_l
 
-Ripley l ([`7703c73`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7703c732fb89d65298414d7ea26cfbf6b8ac1713))
+fix(ripley_l): Generate write warning messages for n_observations and… ([`4724d7b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4724d7b26b11ace1782540502681d7f59fc8dc29))
 
-* Merge branch &#39;dev&#39; into ripley_l ([`adeeb50`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/adeeb50384ea9de91397a6201cabe583604b69db))
+* Merge pull request #235 from FNLCR-DMAP/test_ripley_precisioin
 
-* feat(ripley_l) Added landing and visualization for Ripley L ([`a4ffacc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4ffacc5b0c41f1187d1314f056ab88b92b87fda))
+Test ripley precision ([`ad2f4d8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ad2f4d84504af8c08f38e21304afdd2c5fbbe322))
+
+* Merge branch &#39;dev&#39; into test_ripley_precisioin ([`50d888c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50d888ce4ff70534f25b4e40101cf163e0a51557))
 
 
-## v0.7.5 (2024-10-01)
+## v0.7.6 (2024-10-03)
 
 ### Ci
+
+* ci(version): Automatic development release ([`9557d98`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9557d981b9df7e5e33a10b6290c716192d0757c9))
 
 * ci(version): Automatic development release ([`038c926`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/038c926dc5b377afb0fe96103e8fe113325904c9))
 
@@ -47,9 +43,13 @@ Ripley l ([`7703c73`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7703c732
 
 ### Feature
 
+* feat: add conda env setup ([`df257b8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/df257b86ba3f8e8f6e66c6c5549161c1d1c090f4))
+
 * feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Fix
+
+* fix(ripley_l): Fixed typo of neighbor_phenotype ([`f2df8f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2df8f6cf601099e9bff8fadad454c057161da23))
 
 * fix(histogram): return a single Axes and fix corner case of normalize features core function and unit tests ([`080b4f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/080b4f1c09840a3a340d55a31bedb68a5cda3c8c))
 
@@ -71,11 +71,31 @@ Ripley l ([`7703c73`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7703c732
 
 * refactor(ripley): changed variable names ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
 
+### Style
+
+* style(utils): removed extra spaces ([`cf44261`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf442610df7e5a4bca7d761248767c14ddd33dcc))
+
 ### Test
+
+* test(plot_riley_l): added unit test to catch exception when data is missing ([`5f6cb11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f6cb117cfda2eaf149cb04c8a92a64eb47f4c98))
+
+* test(riple_l): Updated the precision calculation for complete spatial randomness tests ([`36e8090`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36e8090882c0357a7b0077f62945931933c98608))
 
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #237 from FNLCR-DMAP/dev
+
+Dev ([`a577e11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a577e11e91245b94109f6d2f6bb462d3f314b42a))
+
+* Merge pull request #236 from FNLCR-DMAP/ripley_l
+
+Ripley l ([`7703c73`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7703c732fb89d65298414d7ea26cfbf6b8ac1713))
+
+* Merge branch &#39;dev&#39; into ripley_l ([`adeeb50`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/adeeb50384ea9de91397a6201cabe583604b69db))
+
+* feat(ripley_l) Added landing and visualization for Ripley L ([`a4ffacc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a4ffacc5b0c41f1187d1314f056ab88b92b87fda))
 
 * Merge pull request #234 from FNLCR-DMAP/dev
 
