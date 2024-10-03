@@ -1795,3 +1795,120 @@ def relational_heatmap(
     print(fig)
 
     return fig
+
+
+def plot_ripley_l(
+        adata,
+        phenotypes,
+        annotation=None,
+        regions=None,
+        sims=False,
+        **kwargs):
+    """
+    Plot Ripley's L statistic for multiple bins and different regions
+    for a given pair of phenotypes.
+
+    Parameters
+    ----------
+    adata : AnnData
+        AnnData object containing Ripley's L results in `adata.uns['ripley_l']`.
+    phenotypes : tuple of str
+        A tuple of two phenotypes: (center_phenotype, neighbor_phenotype).
+    annotation : str, optional
+        The key in `adata.obs` representing the annotation for the regions
+    regions : list of str, optional
+        A list of region labels to plot. If None, plot all available regions.
+        Default is None.
+    sims : bool, optional
+        Whether to plot the simulation results. Default is False.
+    kwargs : dict, optional
+        Additional keyword arguments to pass to `seaborn.lineplot`.
+
+    Raises
+    ------
+    ValueError
+        If the Ripley L results are not found in `adata.uns['ripley_l']`.
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+        The Axes object containing the plot, which can be further modified.
+
+    Example
+    -------
+    >>> ax = plot_ripley_l(
+    ...     adata,
+    ...     phenotypes=('Phenotype1', 'Phenotype2'),
+    ...     regions=['region1', 'region2'])
+    >>> plt.show()
+
+    This returns the `Axes` object for further customization and displays the plot.
+    """
+
+    # Retrieve the results from adata.uns['ripley_l']
+    ripley_results = adata.uns.get('ripley_l')
+
+    if ripley_results is None:
+        raise ValueError(
+            "Ripley L results not found in adata.uns['ripley_l']."
+        )
+
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+
+    # Filter the results for the specific pair of phenotypes
+    filtered_results = ripley_results[
+        (ripley_results['center_phenotype'] == phenotypes[0]) &
+        (ripley_results['neightbor_phenotype'] == phenotypes[1])
+    ]
+
+    # If specific regions are provided, filter them, otherwise plot all regions
+    if annotation is not None and regions is not None:
+        filtered_results = filtered_results[
+            filtered_results[annotation].isin(regions)]
+
+    # Create a figure and axes
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Plot Ripley's L for each region
+    for _, row in filtered_results.iterrows():
+        region = row['region']  # Region label
+
+        n_center = row['ripley_l']['n_center']
+        n_neighbors = row['ripley_l']['n_neighbor']
+        n_cells = f"({n_center}, {n_neighbors})"
+        area = row['ripley_l']['area']
+        # Plot the Ripley L statistic for the region
+        sns.lineplot(
+            data=row['ripley_l']['L_stat'],
+            x='bins',
+            y='stats',
+            label=f'{region}: {n_cells}, {int(area)}',
+            ax=ax,
+            **kwargs)
+
+        if sims:
+            errorbar = ("pi", 95)
+            n_sims = row["n_simulations"]
+            sns.lineplot(
+                x="bins",
+                y="stats",
+                data=row["ripley_l"]["sims_stat"],
+                errorbar=errorbar,
+                label=f"Simulations({region}):{n_sims} runs",
+                **kwargs
+            )
+
+    # Set labels, title, and grid
+    ax.set_title(
+        f"Ripley's L Statistic for phenotypes:({phenotypes[0]}"
+        f"-{phenotypes[1]})\n"
+    )
+    ax.legend(title='Regions:(center, neighbor), area', loc='upper left')
+    ax.grid(True)
+
+    # Set the horizontal axis lable
+    ax.set_xlabel("Radii (pixles)")
+    ax.set_ylabel("Ripley's L Statistic")
+
+    return fig
