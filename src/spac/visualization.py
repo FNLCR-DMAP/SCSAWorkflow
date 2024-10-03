@@ -1891,6 +1891,12 @@ def plot_ripley_l(
     for _, row in filtered_results.iterrows():
         region = row['region']  # Region label
 
+        if row['ripley_l'] is None:
+            logging.warning(
+               f"Ripley L results not found for region: {region}"
+               f"\n Message: {row['message']}"
+            )
+            continue
         n_center = row['ripley_l']['n_center']
         n_neighbors = row['ripley_l']['n_neighbor']
         n_cells = f"({n_center}, {n_neighbors})"
@@ -1918,8 +1924,8 @@ def plot_ripley_l(
 
     # Set labels, title, and grid
     ax.set_title(
-        f"Ripley's L Statistic for phenotypes:({phenotypes[0]}"
-        f"-{phenotypes[1]})\n"
+        "Ripley's L Statistic for phenotypes:"
+        f"({phenotypes[0]}, {phenotypes[1]})\n"
     )
     ax.legend(title='Regions:(center, neighbor), area', loc='upper left')
     ax.grid(True)

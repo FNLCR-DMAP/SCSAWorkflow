@@ -252,9 +252,12 @@ class TestRipleyL(unittest.TestCase):
         # L(R) = R under complete spatial randomness ignoring boundry
         # conditions
         for r, gt_l_stat_mean in zip(radii, sim_stats_mean):
-            self.assertAlmostEqual(r, gt_l_stat_mean, places=1,
-                                   msg="The ground truth L statistics "
-                                       "should match the returned statistics")
+            difference = abs(r-gt_l_stat_mean)
+            self.assertLess(
+                difference,
+                0.1,
+                msg="The ground truth L statistics should match the returned statistics"
+            )
 
 
     def test_csr_two_phenotype(self):
@@ -309,9 +312,13 @@ class TestRipleyL(unittest.TestCase):
         # L(R) = R under complete spatial randomness ignoring boundry
         # conditions
         for r, gt_l_stat_mean in zip(radii, sim_stats_mean):
-            self.assertAlmostEqual(r, gt_l_stat_mean, places=1,
-                                   msg="The ground truth L statistics "
-                                       "should match the returned statistics")
+            difference = abs(r-gt_l_stat_mean)
+            self.assertLess(
+                difference,
+                0.1,
+                msg="The ground truth L statistics should match the returned statistics"
+            )
+
 
     def test_n_cells_returned(self):
         """

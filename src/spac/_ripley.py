@@ -132,7 +132,6 @@ def ripley(
 
     # old squidpy code
     # N = coordinates.shape[#0]
-    logg.warning(f"Running the simulations with n_cells:{n_observations}")
     hull = ConvexHull(coordinates)
     # pass in the area instead of convex hull
     # This is useful when using the same area in multiple ROIs
@@ -174,11 +173,14 @@ def ripley(
     )
 
     if phenotypes is None:
-        logg.warning(f"Running the simulations with n_cells:{n_observations}")
 
         for i in np.arange(np.max(cluster_idx) + 1):
             coord_c = coordinates[cluster_idx == i, :]
             if mode == RipleyStat.F:
+                logg.warning(
+                    f"Running the Ripley F simulations for phenotype ID:{i} "
+                    f"with n_cells:{n_observations}"
+                )
                 random = _ppp(hull, n_simulations=1, n_observations=n_observations, seed=seed)
                 tree_c = NearestNeighbors(metric=metric, n_neighbors=n_neigh).fit(coord_c)
                 distances, _ = tree_c.kneighbors(random, n_neighbors=n_neigh)
@@ -231,11 +233,14 @@ def ripley(
 
     sims = np.empty((n_simulations, len(bins)))
     pvalues = np.ones((le.classes_.shape[0], len(bins)))
+    rng = default_rng(None if seed is None else seed)
 
     if phenotypes is None:
         logg.warning(f"Running the simulations with n_cells:{n_observations}")
         for i in range(n_simulations):
-            random_i = _ppp(hull, n_simulations=1, n_observations=n_observations, seed=seed)
+            random_i = _ppp(
+                hull, n_simulations=1,
+                n_observations=n_observations, rng=rng, seed=seed)
             if mode == RipleyStat.F:
                 tree_i = NearestNeighbors(metric=metric, n_neighbors=n_neigh).fit(random_i)
                 distances_i, _ = tree_i.kneighbors(random, n_neighbors=1)
@@ -259,7 +264,6 @@ def ripley(
             sims[i] = stats_i
 
     else:
-        rng = default_rng(None if seed is None else seed)
         for i in range(n_simulations):
             if mode == RipleyStat.L:
                 random_i = _ppp(hull,
