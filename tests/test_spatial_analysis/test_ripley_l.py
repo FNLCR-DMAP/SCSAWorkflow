@@ -63,7 +63,7 @@ class TestRipleyL(unittest.TestCase):
         self.assertIsInstance(result, pd.DataFrame)
         self.assertIn('ripley_l', result.columns)
         self.assertEqual(result['center_phenotype'].iloc[0], 'A')
-        self.assertEqual(result['neightbor_phenotype'].iloc[0], 'A')
+        self.assertEqual(result['neighbor_phenotype'].iloc[0], 'A')
         self.assertEqual(result['region'].iloc[0], "all")
         self.assertEqual(result['region_cells'].iloc[0], 3)
         # Check that ripley results are not None
@@ -111,8 +111,8 @@ class TestRipleyL(unittest.TestCase):
 
     def test_appending_uns_results(self):
         """
-        Call the function twice with different phenoyptes and 
-        Check that results are appeneded correctly. 
+        Call the function twice with different phenoyptes and
+        Check that results are appeneded correctly.
         """
         adata = self.create_dummy_dataset()
         distances = [5]
@@ -138,11 +138,11 @@ class TestRipleyL(unittest.TestCase):
 
         # Check that the existing results are used or updated
         # The ripley_l should have four results (2 regions * 2 calls)
-        self.assertEqual(adata.uns['ripley_l'].shape[0], 4) 
+        self.assertEqual(adata.uns['ripley_l'].shape[0], 4)
 
     def test_no_phenotype(self):
         """
-        Test that Ripley does not run if a region has a missing phenotype 
+        Test that Ripley does not run if a region has a missing phenotype
         """
         adata = self.create_dummy_dataset()
         adata_region = adata[adata.obs.region == 'region1']
@@ -167,7 +167,7 @@ class TestRipleyL(unittest.TestCase):
 
     def test_two(self):
         """
-        Test that Ripley does not run if a region has a missing phenotype 
+        Test that Ripley does not run if a region has a missing phenotype
         """
         adata = self.create_dummy_dataset()
         adata_region = adata[adata.obs.region == 'region1']

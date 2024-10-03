@@ -437,7 +437,7 @@ def ripley_l(
         the following columns:
         - `region`: The region label or 'all' if no regions are specified.
         - `center_phenotype`: The first phenotype in `phenotypes`.
-        - `neightbor_phenotype`: The second phenotype in `phenotypes`.
+        - `neighbor_phenotype`: The second phenotype in `phenotypes`.
         - `ripley_l`: The Ripley's L statistic calculated for the region.
         - `config`: A dictionary with configuration settings used for the calculation.
 
