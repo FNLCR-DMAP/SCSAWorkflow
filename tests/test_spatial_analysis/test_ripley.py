@@ -320,3 +320,35 @@ class TestRipleyL(unittest.TestCase):
             )
 
 
+    def test_n_cells_returned(self):
+        """
+        Make sure n_center and n_neighbor cells are returned
+        """
+
+        # Add four points to form a rectangle that is 1 * 2
+        dataframe = [
+                    {'phenotype': 'A', 'feature': 10, 'spatial_x': 0,  'spatial_y': 0},
+                    {'phenotype': 'B', 'feature': 20, 'spatial_x': 1,  'spatial_y': 0},
+                    {'phenotype': 'B', 'feature': 20, 'spatial_x': 0,  'spatial_y': 2},
+                    {'phenotype': 'B', 'feature': 20, 'spatial_x': 1,  'spatial_y': 2},
+                    {'phenotype': 'A', 'feature': 20, 'spatial_x': 1,  'spatial_y': 2},
+                ]
+
+        dataframe = pd.DataFrame(dataframe)
+        self.adata = self.create_dummy_dataset(dataframe)
+
+        center_phenotype = "A"
+        neighbor_phenotype = "B"
+
+        phenotypes = (center_phenotype, neighbor_phenotype)
+        result = ripley(self.adata,
+                        cluster_key="phenotype",
+                        mode="L",
+                        n_simulations=0,
+                        phenotypes=phenotypes,
+                        copy=True)
+
+        # Check that the correct number of cells are returned
+        self.assertEqual(result["n_center"], 2)
+        self.assertEqual(result["n_neighbor"], 3)
+

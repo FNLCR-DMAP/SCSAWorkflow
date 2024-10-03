@@ -174,6 +174,8 @@ def ripley(
     )
 
     if phenotypes is None:
+        logg.warning(f"Running the simulations with n_cells:{n_observations}")
+
         for i in np.arange(np.max(cluster_idx) + 1):
             coord_c = coordinates[cluster_idx == i, :]
             if mode == RipleyStat.F:
@@ -186,6 +188,9 @@ def ripley(
                 distances, _ = tree_c.kneighbors(coordinates[cluster_idx != i, :], n_neighbors=n_neigh)
                 bins, obs_stats = _f_g_function(distances.squeeze(), support)
             elif mode == RipleyStat.L:
+
+                n_center = n_observations
+                n_neighbor = n_observations
                 distances = pdist(coord_c, metric=metric)
                 bins, obs_stats = _l_function(distances, support,
                 n_observations, area)
@@ -195,7 +200,7 @@ def ripley(
             obs_arr[i] = obs_stats
     else:
         if mode == RipleyStat.L:
-            center_phenotype =  phenotypes[0]
+            center_phenotype = phenotypes[0]
             neighbor_phenotype = phenotypes[1]
 
             # Index of center and neighbor cells
@@ -228,6 +233,7 @@ def ripley(
     pvalues = np.ones((le.classes_.shape[0], len(bins)))
 
     if phenotypes is None:
+        logg.warning(f"Running the simulations with n_cells:{n_observations}")
         for i in range(n_simulations):
             random_i = _ppp(hull, n_simulations=1, n_observations=n_observations, seed=seed)
             if mode == RipleyStat.F:
@@ -253,11 +259,13 @@ def ripley(
             sims[i] = stats_i
 
     else:
+        rng = default_rng(None if seed is None else seed)
         for i in range(n_simulations):
             if mode == RipleyStat.L:
                 random_i = _ppp(hull,
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
+                                rng=rng,
                                 seed=seed)
 
                 # Randomly select the frist n_center cells as center cells
@@ -299,10 +307,15 @@ def ripley(
                            index=bins,
                            var_name="simulations")
 
-    res = {f"{mode}_stat": obs_df,
-           "sims_stat": sims_df,
-           "bins": bins,
-           "pvalues": pvalues}
+    res = {
+        f"{mode}_stat": obs_df,
+        "sims_stat": sims_df,
+        "bins": bins,
+        "pvalues": pvalues,
+        "n_center": n_center,
+        "n_neighbor": n_neighbor,
+        'area': area
+        }
 
     if TYPE_CHECKING:
         assert isinstance(res, dict)
@@ -359,7 +372,12 @@ def _l_multiple_function(distances: NDArrayA,
     return support, l_estimate
 
 
-def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | None = None) -> NDArrayA:
+def _ppp(
+        hull: ConvexHull,
+        n_simulations: int,
+        n_observations: int,
+        rng: default_rng | None = None,
+        seed: int | None = None) -> NDArrayA:
     """
     Simulate Poisson Point Process on a polygon.
 
@@ -371,6 +389,8 @@ def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | 
         Number of simulated point processes.
     n_observations
         Number of observations to sample from each simulation.
+    rng
+        Random number generator, superseeds seed
     seed
         Random seed.
 
@@ -378,7 +398,9 @@ def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | 
     -------
     An Array with shape ``(n_simulation, n_observations, 2)``.
     """
-    rng = default_rng(None if seed is None else seed)
+
+    if rng is None:
+        rng = default_rng(None if seed is None else seed)
     vxs = hull.points[hull.vertices]
     deln = Delaunay(vxs)
 
