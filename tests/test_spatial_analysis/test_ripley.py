@@ -256,6 +256,7 @@ class TestRipleyL(unittest.TestCase):
                                    msg="The ground truth L statistics "
                                        "should match the returned statistics")
 
+
     def test_csr_two_phenotype(self):
         """
         Test the L statitic under complete spatial randomness
@@ -343,3 +344,4 @@ class TestRipleyL(unittest.TestCase):
         # Check that the correct number of cells are returned
         self.assertEqual(result["n_center"], 2)
         self.assertEqual(result["n_neighbor"], 3)
+

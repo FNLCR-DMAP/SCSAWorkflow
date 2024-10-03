@@ -132,6 +132,7 @@ def ripley(
 
     # old squidpy code
     # N = coordinates.shape[#0]
+    logg.warning(f"Running the simulations with n_cells:{n_observations}")
     hull = ConvexHull(coordinates)
     # pass in the area instead of convex hull
     # This is useful when using the same area in multiple ROIs
@@ -174,6 +175,7 @@ def ripley(
 
     if phenotypes is None:
         logg.warning(f"Running the simulations with n_cells:{n_observations}")
+
         for i in np.arange(np.max(cluster_idx) + 1):
             coord_c = coordinates[cluster_idx == i, :]
             if mode == RipleyStat.F:
@@ -186,6 +188,7 @@ def ripley(
                 distances, _ = tree_c.kneighbors(coordinates[cluster_idx != i, :], n_neighbors=n_neigh)
                 bins, obs_stats = _f_g_function(distances.squeeze(), support)
             elif mode == RipleyStat.L:
+
                 n_center = n_observations
                 n_neighbor = n_observations
                 distances = pdist(coord_c, metric=metric)
@@ -263,6 +266,7 @@ def ripley(
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
                                 rng=rng)
+                                seed=seed)
 
                 # Randomly select the frist n_center cells as center cells
                 center_coord = random_i[0:n_center, :]
@@ -394,6 +398,7 @@ def _ppp(
     -------
     An Array with shape ``(n_simulation, n_observations, 2)``.
     """
+
     if rng is None:
         rng = default_rng(None if seed is None else seed)
     vxs = hull.points[hull.vertices]

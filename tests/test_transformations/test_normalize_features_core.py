@@ -84,7 +84,7 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
             "current values are:\nlow quantile: 0.5\nhigh quantile: 0.5")
 
     def test_invalid_interpolation(self):
-        # Test with invalid method
+        # Test with invalid interpolation method
         with self.assertRaises(ValueError) as context:
             normalize_features_core(self.data_normalization, 0.2, 0.8,
                                     interpolation='invalid')
@@ -119,8 +119,8 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
 
         # Normalize data based on calculated qmin and qmax
         expected_result = np.array([
-            [0, 0, 0, 1, 1],
-            [1, 1, 0, 0, 0]
+            [0.0, 0.0, 0.0, 1.0, 1.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0]
         ])
         normalized_data = normalize_features_core(
             self.data_normalization, low_quantile, high_quantile, interpolation
@@ -129,8 +129,7 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
                                        decimal=6)
 
     def test_correct_normalization_nearest(self):
-        # Test scaling the features between 0-1 with quantile-based
-        # normalization
+        # Test scaling the features between 0-1 with 'nearest' interpolationn
         low_quantile = 0.2
         high_quantile = 0.8
         interpolation = 'nearest'
@@ -153,8 +152,8 @@ class TestNormalizeFeaturesCore(unittest.TestCase):
         # = (2 - 2) / (4 - 2) = 0
         # Normalize data based on calculated qmin and qmax
         expected_result = np.array([
-            [0, 0, 0, 1, 1],
-            [1, 1, 0, 0, 0]
+            [0.0, 0.0, 0.0, 1.0, 1.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0]
         ])
 
         normalized_data = normalize_features_core(
