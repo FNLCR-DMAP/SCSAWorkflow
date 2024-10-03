@@ -215,7 +215,7 @@ class TestPlotRipleyL(unittest.TestCase):
             sims=True
         )
 
-        # fig.savefig("two_phenotypes.png")
+        fig.savefig("two_phenotypes.png")
 
         # Test that one legend shows the correct number of A and B cells
         legends = fig.get_axes()[0].get_legend().get_texts()
@@ -253,6 +253,39 @@ class TestPlotRipleyL(unittest.TestCase):
                 regions="region",
                 sims=True
             )
+
+    def test_warning_no_region_phenotypes(self):
+        """
+        Test Ripley does not has passed phenotypes
+        """
+        adata = self.create_dummy_dataset()
+        distances = [5]
+        phenotypes = ['A', 'C']
+
+        ripley_l(
+            adata=adata,
+            annotation='phenotype',
+            phenotypes=phenotypes,
+            distances=distances,
+        )
+
+        expected_warning_message = (
+            'WARNING, phenotype "C" not found in region "all",'
+            ' skipping Ripley L.'
+        )
+
+        with self.assertLogs(level='WARNING') as log:
+            # Call the function that triggers the warning
+            plot_ripley_l(
+                adata,
+                phenotypes=("A", "C"),
+                regions="region",
+                sims=True
+            )
+       
+        # Check that the expected warning message is in the logs
+        self.assertTrue(
+            any(expected_warning_message in text for text in log.output))
 
     def test_no_ripley_l(self):
         """
