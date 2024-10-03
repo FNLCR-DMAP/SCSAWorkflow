@@ -544,7 +544,7 @@ def ripley_l(
         new_result = {
             'region': region_label,
             'center_phenotype': phenotypes[0],
-            'neightbor_phenotype': phenotypes[1],
+            'neighbor_phenotype': phenotypes[1],
             'ripley_l': ripley_result,
             'region_cells': region_cells,
             'message': message,

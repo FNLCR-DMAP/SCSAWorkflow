@@ -265,7 +265,7 @@ def ripley(
                 random_i = _ppp(hull,
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
-                                rng=rng)
+                                rng=rng,
                                 seed=seed)
 
                 # Randomly select the frist n_center cells as center cells

@@ -87,7 +87,7 @@ class TestPlotRipleyL(unittest.TestCase):
         # Check that the legend has two values
         legends = fig.get_axes()[0].get_legend().get_texts()
         self.assertEqual(len(legends), 1)
- 
+
         # Test simulations is on
         fig = plot_ripley_l(
             self.adata,
@@ -98,7 +98,7 @@ class TestPlotRipleyL(unittest.TestCase):
         # Check that the legend has two values
         legends = fig.get_axes()[0].get_legend().get_texts()
         self.assertEqual(len(legends), 2)
-        
+
         # Check that the second legend is "simulations"
         self.assertEqual(
             legends[1].get_text(),
@@ -115,7 +115,7 @@ class TestPlotRipleyL(unittest.TestCase):
         phenotype_name = ["A"]
         n_cells = 200
         phenotypes = phenotype_name * n_cells * 2
-        features = np.random.rand(n_cells * 2) 
+        features = np.random.rand(n_cells * 2)
         # Generate spatial_x at random float position in the square
         x_max = 200
         y_max = 200
@@ -123,15 +123,15 @@ class TestPlotRipleyL(unittest.TestCase):
         region1_spatial_x = np.random.rand(n_cells) * x_max
         region1_spatial_y = np.random.rand(n_cells) * y_max
 
-        # Cells for region 'region2' are clustered 
+        # Cells for region 'region2' are clustered
         region2_spatial_x = np.random.rand(n_cells) * x_max / 8
-        region2_spatial_y = np.random.rand(n_cells) * y_max / 8 
+        region2_spatial_y = np.random.rand(n_cells) * y_max / 8
 
         # concatenate the spatial coordinates
-        spatial_x = np.concatenate((region1_spatial_x, region2_spatial_x))  
+        spatial_x = np.concatenate((region1_spatial_x, region2_spatial_x))
         spatial_y = np.concatenate((region1_spatial_y, region2_spatial_y))
 
-        region = ['region1'] * n_cells + ['region2'] * n_cells 
+        region = ['region1'] * n_cells + ['region2'] * n_cells
 
         # Keep radius relatively small to avoid boundary adjustment
         radii = [0, 1, 2,  3, 4, 5]
@@ -173,16 +173,16 @@ class TestPlotRipleyL(unittest.TestCase):
 
     def test_two_phenotypes(self):
         """
-        Test plotting one region with two phenotypes 
+        Test plotting one region with two phenotypes
         """
 
         phenotype_A = ["A"]
         phenotype_B = ["B"]
         n_cells_A = 200
         n_cells_B = 100
-        n_cells = n_cells_A + n_cells_B 
+        n_cells = n_cells_A + n_cells_B
         phenotypes = phenotype_A * n_cells_A + phenotype_B * n_cells_B
-        features = np.random.rand(n_cells) 
+        features = np.random.rand(n_cells)
 
         # Generate spatial_x at random float position in the square
         x_max = 200
@@ -221,3 +221,58 @@ class TestPlotRipleyL(unittest.TestCase):
         legends = fig.get_axes()[0].get_legend().get_texts()
         text = legends[0].get_text()
         self.assertTrue("(200, 100)" in text)
+
+    def test_no_phenotypes(self):
+        """
+        Test Ripley does not has passed phenotypes
+        """
+        adata = self.create_dummy_dataset()
+        distances = [5]
+        phenotypes = ['A', 'B']
+
+        ripley_l(
+            adata=adata,
+            annotation='phenotype',
+            phenotypes=phenotypes,
+            distances=distances,
+        )
+
+        expected_error_message = (
+            'No Ripley L results found for the specified pair of phenotypes.\n'
+            'Center Phenotype: "A"\n'
+            'Neighbor Phenotype: "A"\n'
+            'Exisiting unique pairs:   center_phenotype neighbor_phenotype\n'
+            '0                A                  B'
+        )
+
+        # Check that calling plot_ripley_l raises the expected error with the exact message
+        with self.assertRaisesRegex(ValueError, expected_error_message):
+            plot_ripley_l(
+                adata,
+                phenotypes=("A", "A"),
+                regions="region",
+                sims=True
+            )
+
+    def test_no_ripley_l(self):
+        """
+        Test Ripley computation did not run
+        """
+        adata = self.create_dummy_dataset()
+
+        expected_error_message = (
+            'Ripley L results not found in the analsyis'
+        )
+
+        # Check that calling plot_ripley_l raises the expected error with the exact message
+        with self.assertRaisesRegex(ValueError, expected_error_message):
+            plot_ripley_l(
+                adata,
+                phenotypes=("A", "A"),
+                regions="region",
+                sims=True
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

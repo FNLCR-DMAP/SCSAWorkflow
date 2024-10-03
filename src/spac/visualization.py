@@ -1856,7 +1856,7 @@ def plot_ripley_l(
 
     if ripley_results is None:
         raise ValueError(
-            "Ripley L results not found in adata.uns['ripley_l']."
+            "Ripley L results not found in the analsyis."
         )
 
     if annotation:
@@ -1865,8 +1865,19 @@ def plot_ripley_l(
     # Filter the results for the specific pair of phenotypes
     filtered_results = ripley_results[
         (ripley_results['center_phenotype'] == phenotypes[0]) &
-        (ripley_results['neightbor_phenotype'] == phenotypes[1])
+        (ripley_results['neighbor_phenotype'] == phenotypes[1])
     ]
+
+    if filtered_results.empty:
+        # Generate all unique combinations of phenotype pairs
+        unique_pairs = ripley_results[
+            ['center_phenotype', 'neighbor_phenotype']].drop_duplicates()
+        raise ValueError(
+            "No Ripley L results found for the specified pair of phenotypes."
+            f'\nCenter Phenotype: "{phenotypes[0]}"'
+            f'\nNeighbor Phenotype: "{phenotypes[1]}"'
+            f"\nExisiting unique pairs: {unique_pairs}"
+        )
 
     # If specific regions are provided, filter them, otherwise plot all regions
     if annotation is not None and regions is not None:
