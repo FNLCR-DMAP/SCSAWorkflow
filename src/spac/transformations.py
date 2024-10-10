@@ -101,6 +101,99 @@ def phenograph_clustering(
     adata.uns["phenograph_features"] = features
 
 
+def knn_clustering(
+        adata,
+        features,
+        label,
+        layer=None,
+        k=50,
+        seed=None,
+        output_annotation="knn_clustering",
+        associated_table=None,
+        **kwargs):
+    """
+    Calculate automatic phenotypes using phenograph.
+
+    The function will add these two attributes to `adata`:
+    `.obs["phenograph"]`
+        The assigned int64 class by phenograph
+
+    `.uns["phenograph_features"]`
+        The features used to calculate the phenograph clusters
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+       The AnnData object.
+
+    features : list of str
+        The variables that would be included in creating the phenograph
+        clusters.
+    
+    label : str [andata.obs.label]
+        The name of the label we should be accessing within the data
+
+    layer : str, optional
+        The layer to be used in calculating the phengraph clusters.
+
+    k : int, optional
+        The number of nearest neighbor to be used in creating the graph.
+
+    seed : int, optional
+        Random seed for reproducibility.
+
+    output_annotation : str, optional
+        The name of the output layer where the clusters are stored.
+
+    associated_table : str, optional
+        If set, use the corresponding key `adata.obsm` to calcuate the
+        Phenograph. Takes priority over the layer argument.
+
+
+    Returns
+    -------
+    adata : anndata.AnnData
+        Updated AnnData object with the phenograph clusters
+        stored in `adata.obs[output_annotation]`
+    """
+
+    # 1 read in data, validate labels in the call here
+    #_validate_knn_input(adata, label)
+
+    _validate_transformation_inputs(
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table,
+        features=features,
+        label=label
+    )
+
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("`k` must be a positive integer")
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    data = _select_input_features(
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table,
+        features=features
+    )
+
+    # 2 knn_out = call KNN_thingy_from_sklearn  
+    classifier = KNeighborsClassifier(n_neighbors = k)
+    classifier.fit(data)
+    knn_predict = classifier.predict(data)
+
+    # 3 this output here needs to store the knn labels we just generated
+    adata.obs[output_annotation] = knn_predict
+   
+#def _validate_knn_inputs(struct, label_name):
+    #initializie labels we don't know to -1, will be acessing adata.obs
+    #if adata.obs[label] is not None
+
+
 def get_cluster_info(adata, annotation, features=None, layer=None):
     """
     Retrieve information about clusters based on specific annotation.
