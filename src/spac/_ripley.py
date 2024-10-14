@@ -33,8 +33,8 @@ __all__ = ["ripley"]
 # https://github.com/theislab/squidpy/blob/main/src/squidpy/external/_ripley.py
 
 
-@d.dedent
-@inject_docs(key=Key.obsm.spatial, rp=RipleyStat)
+#@d.dedent
+#@inject_docs(key=Key.obsm.spatial, rp=RipleyStat)
 def ripley(
     adata: AnnData,
     cluster_key: str,
