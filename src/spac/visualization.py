@@ -1887,10 +1887,14 @@ def plot_ripley_l(
         region = row['region']  # Region label
 
         if row['ripley_l'] is None:
-            logging.warning(
+            message = (
                f"Ripley L results not found for region: {region}"
                f"\n Message: {row['message']}"
             )
+            logging.warning(
+              message 
+            )
+            print(message)
             continue
         n_center = row['ripley_l']['n_center']
         n_neighbors = row['ripley_l']['n_neighbor']
