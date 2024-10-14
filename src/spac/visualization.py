@@ -1820,8 +1820,6 @@ def plot_ripley_l(
         AnnData object containing Ripley's L results in `adata.uns['ripley_l']`.
     phenotypes : tuple of str
         A tuple of two phenotypes: (center_phenotype, neighbor_phenotype).
-    annotation : str, optional
-        The key in `adata.obs` representing the annotation for the regions
     regions : list of str, optional
         A list of region labels to plot. If None, plot all available regions.
         Default is None.
@@ -1859,9 +1857,6 @@ def plot_ripley_l(
             "Ripley L results not found in the analsyis."
         )
 
-    if annotation:
-        check_annotation(adata, annotations=annotation)
-
     # Filter the results for the specific pair of phenotypes
     filtered_results = ripley_results[
         (ripley_results['center_phenotype'] == phenotypes[0]) &
@@ -1880,9 +1875,9 @@ def plot_ripley_l(
         )
 
     # If specific regions are provided, filter them, otherwise plot all regions
-    if annotation is not None and regions is not None:
+    if regions is not None:
         filtered_results = filtered_results[
-            filtered_results[annotation].isin(regions)]
+            filtered_results['region'].isin(regions)]
 
     # Create a figure and axes
     fig, ax = plt.subplots(figsize=(10, 10))

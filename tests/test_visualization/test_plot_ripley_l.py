@@ -131,7 +131,7 @@ class TestPlotRipleyL(unittest.TestCase):
         spatial_x = np.concatenate((region1_spatial_x, region2_spatial_x))
         spatial_y = np.concatenate((region1_spatial_y, region2_spatial_y))
 
-        region = ['region1'] * n_cells + ['region2'] * n_cells
+        region = ['day1'] * n_cells + ['day2'] * n_cells
 
         # Keep radius relatively small to avoid boundary adjustment
         radii = [0, 1, 2,  3, 4, 5]
@@ -139,37 +139,36 @@ class TestPlotRipleyL(unittest.TestCase):
         # Create a dataframe out of phenotypes, features, spatial coordinates
         dictionary = {'phenotype': phenotypes, 'feature': features,
                       'spatial_x': spatial_x, 'spatial_y': spatial_y,
-                      'region': region}
+                      'day': region}
         dataframe = pd.DataFrame(dictionary)
 
         self.adata = self.create_dummy_dataset(dataframe)
-        self.adata.obs["region"] = pd.Categorical(dataframe["region"])
+        self.adata.obs["day"] = pd.Categorical(dataframe["day"])
         ripley_l(
             self.adata,
             annotation="phenotype",
             phenotypes=["A", "A"],
             distances=radii,
             n_simulations=100,
-            regions="region"
+            regions="day"
         )
 
         # Test simulaitons is off
         fig = plot_ripley_l(
             self.adata,
             phenotypes=("A", "A"),
-            regions="region",
+            regions=["day1"],
             sims=False
         )
 
         # Check that the legend has two values
         legends = fig.get_axes()[0].get_legend().get_texts()
-        self.assertEqual(len(legends), 2)
+        self.assertEqual(len(legends), 1)
 
         # Check that one of the legend texts includes "region1"
         # and the other includes "region2"
         legend_texts = [text.get_text() for text in legends]
-        self.assertTrue(any("region1" in legend for legend in legend_texts))
-        self.assertTrue(any("region2" in legend for legend in legend_texts))
+        self.assertTrue(any("day1" in legend for legend in legend_texts))
 
     def test_two_phenotypes(self):
         """
