@@ -210,11 +210,10 @@ class TestPlotRipleyL(unittest.TestCase):
         fig = plot_ripley_l(
             self.adata,
             phenotypes=("A", "B"),
-            regions="region",
             sims=True
         )
 
-        fig.savefig("two_phenotypes.png")
+        # fig.savefig("two_phenotypes.png")
 
         # Test that one legend shows the correct number of A and B cells
         legends = fig.get_axes()[0].get_legend().get_texts()
@@ -278,10 +277,9 @@ class TestPlotRipleyL(unittest.TestCase):
             plot_ripley_l(
                 adata,
                 phenotypes=("A", "C"),
-                regions="region",
                 sims=True
             )
-       
+
         # Check that the expected warning message is in the logs
         self.assertTrue(
             any(expected_warning_message in text for text in log.output))
