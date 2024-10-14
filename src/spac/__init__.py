@@ -22,7 +22,7 @@ for module_file in module_files:
     functions.extend(module_functions)
 
 # Define the package version before using it in __all__
-__version__ = "0.7.7"
+__version__ = "0.7.8"
 
 # Define a __all__ list to specify which functions should be considered public
 __all__ = functions

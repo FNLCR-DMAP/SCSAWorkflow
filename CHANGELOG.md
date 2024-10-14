@@ -2,32 +2,32 @@
 
 
 
-## v0.7.7 (2024-10-03)
+## v0.7.8 (2024-10-14)
 
 ### Fix
 
-* fix(ripley_l): Generate write warning messages for n_observations and missing phenotypes ([`23236ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23236ab4e6577f9e86863b60e309cd17b6fff5c6))
+* fix(test_plot_ripley_l): fixed unit tests where regions was passed unecesseararly ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
+
+* fix(plot_ripley_l): Annotation does not need to be passed to plot Ripley L ([`b2c4a53`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2c4a5379a46a4c38e89000d32d9ae8fa7cf61b3))
 
 ### Unknown
 
-* Merge pull request #239 from FNLCR-DMAP/dev
+* Merge pull request #241 from FNLCR-DMAP/dev
 
-Dev ([`8ba93d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8ba93d63c65ee3185e54cfffaf92f2af6fceba03))
+Dev ([`92b9fa1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92b9fa101f23e656d4ec0701b205dc9a8c764de4))
 
-* Merge pull request #238 from FNLCR-DMAP/ripley_l
+* Merge pull request #240 from FNLCR-DMAP/ripley_l
 
-fix(ripley_l): Generate write warning messages for n_observations and… ([`4724d7b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4724d7b26b11ace1782540502681d7f59fc8dc29))
+Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b0699b924f9b6bfda32ab92ba7e0a9464))
 
-* Merge pull request #235 from FNLCR-DMAP/test_ripley_precisioin
-
-Test ripley precision ([`ad2f4d8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ad2f4d84504af8c08f38e21304afdd2c5fbbe322))
-
-* Merge branch &#39;dev&#39; into test_ripley_precisioin ([`50d888c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50d888ce4ff70534f25b4e40101cf163e0a51557))
+* doc(_ripley): Removed documentation that cause a warning ([`e46a980`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e46a980821dbd0bb2c015fb24e262b8c7784eb4b))
 
 
-## v0.7.6 (2024-10-03)
+## v0.7.7 (2024-10-03)
 
 ### Ci
+
+* ci(version): Automatic development release ([`811429e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/811429ea194ab6d5b8ea43773b298304282036e4))
 
 * ci(version): Automatic development release ([`9557d98`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9557d981b9df7e5e33a10b6290c716192d0757c9))
 
@@ -48,6 +48,8 @@ Test ripley precision ([`ad2f4d8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/co
 * feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Fix
+
+* fix(ripley_l): Generate write warning messages for n_observations and missing phenotypes ([`23236ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23236ab4e6577f9e86863b60e309cd17b6fff5c6))
 
 * fix(ripley_l): Fixed typo of neighbor_phenotype ([`f2df8f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f2df8f6cf601099e9bff8fadad454c057161da23))
 
@@ -84,6 +86,20 @@ Test ripley precision ([`ad2f4d8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/co
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #239 from FNLCR-DMAP/dev
+
+Dev ([`8ba93d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8ba93d63c65ee3185e54cfffaf92f2af6fceba03))
+
+* Merge pull request #238 from FNLCR-DMAP/ripley_l
+
+fix(ripley_l): Generate write warning messages for n_observations and… ([`4724d7b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4724d7b26b11ace1782540502681d7f59fc8dc29))
+
+* Merge pull request #235 from FNLCR-DMAP/test_ripley_precisioin
+
+Test ripley precision ([`ad2f4d8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ad2f4d84504af8c08f38e21304afdd2c5fbbe322))
+
+* Merge branch &#39;dev&#39; into test_ripley_precisioin ([`50d888c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/50d888ce4ff70534f25b4e40101cf163e0a51557))
 
 * Merge pull request #237 from FNLCR-DMAP/dev
 
