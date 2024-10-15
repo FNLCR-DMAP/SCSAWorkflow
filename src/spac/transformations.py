@@ -5,7 +5,7 @@ import anndata
 import warnings
 import logging
 import scanpy.external as sce
-from spac.utils import check_table, check_annotation, check_feature
+from spac.utils import check_table, check_annotation, check_feature, check_label
 from scipy import stats
 import umap as umap_lib
 from sklearn.neighbors import KNeighborsClassifier
@@ -161,8 +161,9 @@ def knn_clustering(
         layer=layer,
         associated_table=associated_table,
         features=features,
-        label=label
+        label=label,
     )
+
 
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
@@ -402,7 +403,8 @@ def _validate_transformation_inputs(
         adata: anndata,
         layer: Optional[str] = None,
         associated_table: Optional[str] = None,
-        features: Optional[Union[List[str], str]] = None
+        features: Optional[Union[List[str], str]] = None,
+        label: Optional[str] = None,
         ) -> None:
     """
     Validate inputs for transformation functions.
@@ -417,6 +419,8 @@ def _validate_transformation_inputs(
         Name of the key in `obsm` that contains the numpy array.
     features : list of str or str, optional
         Names of features to use for transformation.
+    label: str, optional
+        Name of label column in `obs` that contains class labels
 
     Raises
     ------
@@ -440,6 +444,9 @@ def _validate_transformation_inputs(
 
     if features is not None:
         check_feature(adata, features=features)
+    
+    if label is not None:
+        check_label(adata, label=label)
 
 
 def _select_input_features(adata: anndata,
