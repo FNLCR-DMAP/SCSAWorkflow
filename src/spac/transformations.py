@@ -8,6 +8,7 @@ import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
 import umap as umap_lib
+from sklearn.neighbors import KNeighborsClassifier
 from scipy.sparse import issparse
 from typing import List, Union, Optional
 
@@ -107,8 +108,7 @@ def knn_clustering(
         label,
         layer=None,
         k=50,
-        seed=None,
-        output_annotation="knn_clustering",
+        output_annotation="knn",
         associated_table=None,
         **kwargs):
     """
@@ -139,16 +139,12 @@ def knn_clustering(
     k : int, optional
         The number of nearest neighbor to be used in creating the graph.
 
-    seed : int, optional
-        Random seed for reproducibility.
-
     output_annotation : str, optional
         The name of the output layer where the clusters are stored.
 
     associated_table : str, optional
         If set, use the corresponding key `adata.obsm` to calcuate the
         Phenograph. Takes priority over the layer argument.
-
 
     Returns
     -------
@@ -170,10 +166,7 @@ def knn_clustering(
 
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
-
-    if seed is not None:
-        np.random.seed(seed)
-
+    
     data = _select_input_features(
         adata=adata,
         layer=layer,
@@ -181,17 +174,20 @@ def knn_clustering(
         features=features
     )
 
-    # 2 knn_out = call KNN_thingy_from_sklearn  
-    classifier = KNeighborsClassifier(n_neighbors = k)
-    classifier.fit(data)
+    # 2 we must split the labeled data from the unlabeled data
+    y = adata.obs[label]
+    y_mask = y != "no_label"
+    data_labeled = data[y_mask]
+    y_labeled = y[y_mask]
+    
+    # 3 then we make the function call to sklearn  
+    classifier = KNeighborsClassifier(n_neighbors = k, **kwargs)
+    classifier.fit(data_labeled, y_labeled)
     knn_predict = classifier.predict(data)
 
-    # 3 this output here needs to store the knn labels we just generated
+    # 4 this output stores the knn labels we just generated
     adata.obs[output_annotation] = knn_predict
-   
-#def _validate_knn_inputs(struct, label_name):
-    #initializie labels we don't know to -1, will be acessing adata.obs
-    #if adata.obs[label] is not None
+    adata.uns["knn_features"] = features
 
 
 def get_cluster_info(adata, annotation, features=None, layer=None):
