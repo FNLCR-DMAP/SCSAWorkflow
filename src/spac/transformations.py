@@ -112,14 +112,14 @@ def knn_clustering(
         associated_table=None,
         **kwargs):
     """
-    Calculate automatic phenotypes using phenograph.
+    Calculate knn clusters using sklearn KNeighborsClassifier
 
     The function will add these two attributes to `adata`:
-    `.obs["phenograph"]`
-        The assigned int64 class by phenograph
+    `.obs["knn"]`
+        The assigned int64 class labels by KNeighborsClassifier
 
-    `.uns["phenograph_features"]`
-        The features used to calculate the phenograph clusters
+    `.uns["knn_features"]`
+        The features used to calculate the knn clusters
 
     Parameters
     ----------
@@ -131,7 +131,7 @@ def knn_clustering(
         clusters.
     
     label : str [andata.obs.label]
-        The name of the label we should be accessing within the data
+        The name of the label used for classifying the data
 
     layer : str, optional
         The layer to be used in calculating the phengraph clusters.
@@ -144,18 +144,16 @@ def knn_clustering(
 
     associated_table : str, optional
         If set, use the corresponding key `adata.obsm` to calcuate the
-        Phenograph. Takes priority over the layer argument.
+        clustering. Takes priority over the layer argument.
 
     Returns
     -------
     adata : anndata.AnnData
-        Updated AnnData object with the phenograph clusters
+        Updated AnnData object with the knn clusters
         stored in `adata.obs[output_annotation]`
     """
 
     # 1 read in data, validate labels in the call here
-    #_validate_knn_input(adata, label)
-
     _validate_transformation_inputs(
         adata=adata,
         layer=layer,
