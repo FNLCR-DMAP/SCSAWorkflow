@@ -7,7 +7,9 @@ import warnings
 from sklearn.preprocessing import MinMaxScaler
 import logging
 from collections import defaultdict
-from spac.utils import regex_search_list, check_list_in_list
+from spac.utils import regex_search_list, check_list_in_list, check_annotation
+from anndata import AnnData
+
 
 
 def append_annotation(
@@ -943,3 +945,64 @@ def combine_dfs(dataframes: list):
     combined_df.reset_index(drop=True, inplace=True)
 
     return combined_df
+
+
+def combine_annotations(
+    adata: AnnData,
+    annotations: list,
+    separator: str,
+    new_annotation_name: str
+) -> AnnData:
+    """
+    Combine multiple annotations into a new annotation using a defined separator.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The input AnnData object whose .obs will be modified.
+
+    annotations : list
+        List of annotation column names to combine.
+
+    separator : str
+        Separator to use when combining annotations.
+
+    new_annotation_name : str
+        The name of the new annotation to be created.
+
+    Returns
+    -------
+    AnnData
+        The AnnData object with the combined annotation added.
+    """
+
+    # Validate input annotations using utility function
+    check_annotation(adata, annotations=annotations)
+
+    if type(annotations) is not list:
+        raise ValueError(
+            f'Annotations must be a list. Got {type(annotations)}'
+        )
+    # Ensure separator is a string
+    if not isinstance(separator, str):
+        raise ValueError(
+            f'Separator must be a string. Got {type(separator)}'
+        )
+
+    # Check if new annotation name already exists
+    if new_annotation_name in adata.obs.columns:
+        raise ValueError(
+            f"'{new_annotation_name}' already exists in adata.obs.")
+
+    # Combine annotations into the new column
+
+    # Convert selected annotations to string type
+    annotations_str = adata.obs[annotations].astype(str)
+
+    # Combine annotations using the separator
+    combined_annotation = annotations_str.agg(separator.join, axis=1)
+
+    # Assign the combined result to the new annotation column
+    adata.obs[new_annotation_name] = combined_annotation
+
+    return adata
