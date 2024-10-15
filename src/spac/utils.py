@@ -404,7 +404,7 @@ def check_label(
             )
 
     # Check for tables
-    existing_obs_vars = adata.obs_names.to_list()
+    existing_obs_vars = adata.obs.columns.tolist()
     check_list_in_list(
             input=label,
             input_name="label",

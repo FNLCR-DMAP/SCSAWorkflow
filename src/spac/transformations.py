@@ -175,7 +175,7 @@ def knn_clustering(
 
     # 2 we must split the labeled data from the unlabeled data
     y = adata.obs[label]
-    y_mask = y != "no_label"
+    y_mask = y != -1
     data_labeled = data[y_mask]
     y_labeled = y[y_mask]
     
