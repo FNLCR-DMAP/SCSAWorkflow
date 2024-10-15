@@ -2,42 +2,80 @@ import unittest
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-from sklearn.datasets import load_breast_cancer
-from spac.transformations import kNN_clustering
+from sklearn.datasets import load_iris
+from spac.transformations import knn_clustering
 
 
 class TestkNNClustering(unittest.TestCase):
     def setUp(self):
-        # This method is run before each test.
-        # It sets up a test case with an AnnData object, a list of features,
-        # and a layer name.
+        """
+        This method is run before each test.
 
-        # Using sklearn UCI ML Breast Cancer Wisconsin (Diagnostic) dataset
-        n_cells = 100
-        cancer_df = load_breast_cancer(as_frame=True)
+        It sets up a test AnnData object `syn_data` with the following attributes:
+
+        `syn_data.X`
+            A layer with 1000 rows and 2 columns generated from a normal distribution [500 rows ~ N(10, 1), 500 rows ~ N(100, 1)]
+
+        `syn_data.obs['classes']`
+            Class labels for rows: label -1 = missing, label 0 = mean 10, label 1 = mean 100
+            Approx 50% of the rows are missing label
+        """
+
+        n_rows = 1000
+
+        # Generate 1000 rows, half with mean (10, 10) and half with mean (100, 100)
+        mean_10 = np.random.normal(loc = 10, scale = 1, size=(n_rows // 2, 2))
+        mean_100 = np.random.normal(loc = 100, scale = 1, size=(n_rows // 2, 2))
+        data_rows = np.vstack((mean_10, mean_100))
+
+        # Generate class labels, label 0 = mean 10, label 1 = mean 100
+        class_labels = np.array([0] * (n_rows // 2) + [1] * (n_rows // 2))
+
+        # Replace ~50% of class labels with "missing" values
+        mask = np.random.rand(*class_labels.shape) < 0.5
+        class_labels[mask] = -1
+
+        # Combine data columns with class labels
+        self.syn_dataset = data_rows
+
+        self.syn_data = AnnData(
+                self.syn_dataset,
+                var=pd.DataFrame(index=['gene1',
+                                        'gene2'])
+                )
+        self.syn_data.layers['counts'] = self.syn_dataset
+
+        self.syn_data.obsm["derived_features"] = \
+            self.syn_dataset
+
+        self.syn_data.obs['classes'] = class_labels
+
+        # Using sklearn iris dataset
+        n_iris = 100
+        iris_df = load_iris(as_frame=True)
 
         # Set up AnnData object with 100 rows, all 30 features
-        # and each row's class in obsm
-        self.adata = AnnData(cancer_df.data.iloc[:n_cells, :],
-                             var=pd.DataFrame(index=cancer_df.data.columns))
-        self.adata.obsm["classes"]=cancer_df.target.iloc[:n_cells].to_numpy()
+        # and each row's class in obs
+        self.adata = AnnData(iris_df.data.iloc[:n_iris, :],
+                             var=pd.DataFrame(index=iris_df.data.columns))
+        self.adata.obs["classes"]=iris_df.target.iloc[:n_iris].to_numpy()
 
-        self.adata.layers['counts'] = cancer_df.data.iloc[:n_cells, :]
+        self.adata.layers['counts'] = iris_df.data.iloc[:n_iris, :]
 
-        self.features = pd.DataFrame(index=cancer_df.data.columns)
+        self.features = pd.DataFrame(index=iris_df.data.columns)
         self.layer = 'counts'
 
-        self.adata.obsm["derived_features"] = cancer_df.data.iloc[:n_cells, :]
+        self.adata.obsm["derived_features"] = iris_df.data.iloc[:n_iris, :]
         
     def test_same_cluster_assignments_with_same_seed(self):
-        # Run kNN_clustering with a specific seed
+        # Run knn_clustering with a specific seed
         # and store the cluster assignments
-        kNN_clustering(self.adata, self.features, self.layer, seed=42)
+        knn_clustering(self.adata, self.features, self.layer, seed=42)
         first_run_clusters = self.adata.obs['kNN'].copy()
 
         # Reset the kNN annotation and run again with the same seed
         del self.adata.obs['kNN']
-        kNN_clustering(self.adata, self.features, self.layer, seed=42)
+        knn_clustering(self.adata, self.features, self.layer, seed=42)
 
         # Check if the cluster assignments are the same
         self.assertTrue(
@@ -48,7 +86,7 @@ class TestkNNClustering(unittest.TestCase):
             # This test checks if the function correctly adds 'kNN' to the
             # AnnData object's obs attribute and if it correctly sets
             # 'kNN_features' in the AnnData object's uns attribute.
-            kNN_clustering(self.adata, self.features, self.layer)
+            knn_clustering(self.adata, self.features, self.layer)
             self.assertIn('kNN', self.adata.obs)
             self.assertEqual(self.adata.uns['kNN_features'],
                             self.features)
@@ -57,7 +95,7 @@ class TestkNNClustering(unittest.TestCase):
         # This test checks if the function correctly adds the "output_layer" 
         # to the # AnnData object's obs attribute 
         output_annotation_name = 'my_output_annotation'
-        kNN_clustering(self.adata,
+        knn_clustering(self.adata,
                               self.features,
                               self.layer,
                               output_annotation=output_annotation_name)
@@ -65,7 +103,7 @@ class TestkNNClustering(unittest.TestCase):
 
     def test_layer_none_case(self):
         # This test checks if the function works correctly when layer is None.
-        kNN_clustering(self.adata, self.features, None)
+        knn_clustering(self.adata, self.features, None)
         self.assertIn('kNN', self.adata.obs)
         self.assertEqual(self.adata.uns['kNN_features'],
                          self.features)
@@ -74,11 +112,11 @@ class TestkNNClustering(unittest.TestCase):
         # This test checks if the function raises a ValueError when the
         # k argument is not a positive integer.
         with self.assertRaises(ValueError):
-            kNN_clustering(self.adata, self.features, self.layer,
+            knn_clustering(self.adata, self.features, self.layer,
                                   'invalid')
 
     def test_clustering_accuracy(self):
-        kNN_clustering(self.adata,
+        knn_clustering(self.adata,
                               self.features,
                               'counts',
                               k=50,
@@ -93,7 +131,7 @@ class TestkNNClustering(unittest.TestCase):
         # Run kNN using the derived feature and generate two clusters
         output_annotation = 'derived_kNN'
         associated_table = 'derived_features'
-        kNN_clustering(
+        knn_clustering(
             adata=self.adata,
             features=None,
             layer=None,
