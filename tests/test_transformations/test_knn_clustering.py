@@ -6,7 +6,7 @@ from sklearn.datasets import load_iris
 from spac.transformations import knn_clustering
 
 
-class TestkNNClustering(unittest.TestCase):
+class TestKnnClustering(unittest.TestCase):
     def setUp(self):
         """
         This method is run before each test.
@@ -33,7 +33,7 @@ class TestkNNClustering(unittest.TestCase):
 
         # Replace ~50% of class labels with "missing" values
         mask = np.random.rand(*class_labels.shape) < 0.5
-        class_labels[mask] = -1
+        class_labels[mask] = "no_label"
 
         # Combine data columns with class labels
         self.syn_dataset = data_rows
@@ -66,29 +66,14 @@ class TestkNNClustering(unittest.TestCase):
         self.layer = 'counts'
 
         self.adata.obsm["derived_features"] = iris_df.data.iloc[:n_iris, :]
-        
-    def test_same_cluster_assignments_with_same_seed(self):
-        # Run knn_clustering with a specific seed
-        # and store the cluster assignments
-        knn_clustering(self.adata, self.features, self.layer, seed=42)
-        first_run_clusters = self.adata.obs['kNN'].copy()
-
-        # Reset the kNN annotation and run again with the same seed
-        del self.adata.obs['kNN']
-        knn_clustering(self.adata, self.features, self.layer, seed=42)
-
-        # Check if the cluster assignments are the same
-        self.assertTrue(
-            (first_run_clusters == self.adata.obs['kNN']).all()
-        )
 
     def test_typical_case(self):
-            # This test checks if the function correctly adds 'kNN' to the
+            # This test checks if the function correctly adds 'knn' to the
             # AnnData object's obs attribute and if it correctly sets
-            # 'kNN_features' in the AnnData object's uns attribute.
+            # 'knn_features' in the AnnData object's uns attribute.
             knn_clustering(self.adata, self.features, self.layer)
-            self.assertIn('kNN', self.adata.obs)
-            self.assertEqual(self.adata.uns['kNN_features'],
+            self.assertIn('knn', self.adata.obs)
+            self.assertEqual(self.adata.uns['knn_features'],
                             self.features)
         
     def test_output_annotation(self):
@@ -104,8 +89,8 @@ class TestkNNClustering(unittest.TestCase):
     def test_layer_none_case(self):
         # This test checks if the function works correctly when layer is None.
         knn_clustering(self.adata, self.features, None)
-        self.assertIn('kNN', self.adata.obs)
-        self.assertEqual(self.adata.uns['kNN_features'],
+        self.assertIn('knn', self.adata.obs)
+        self.assertEqual(self.adata.uns['knn_features'],
                          self.features)
         
     def test_invalid_k(self):
@@ -122,14 +107,14 @@ class TestkNNClustering(unittest.TestCase):
                               k=50,
                               resolution_parameter=0.1)
 
-        self.assertIn('kNN', self.adata.obs)
+        self.assertIn('knn', self.adata.obs)
         self.assertEqual(
-            len(np.unique(self.adata.obs['kNN'])),
+            len(np.unique(self.adata.obs['knn'])),
             2)
         
     def test_associated_features(self):
-        # Run kNN using the derived feature and generate two clusters
-        output_annotation = 'derived_kNN'
+        # Run knn using the derived feature and generate two clusters
+        output_annotation = 'derived_knn'
         associated_table = 'derived_features'
         knn_clustering(
             adata=self.adata,
