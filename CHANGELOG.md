@@ -2,34 +2,36 @@
 
 
 
-## v0.7.9 (2024-10-16)
+## v0.7.10 (2024-10-16)
 
-### Feature
+### Fix
 
-* feat(combine_annotations): Data utility to combine multiple annotaitons into one ([`58dfd38`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/58dfd38415c49535824e745ee56c8b80056736e6))
+* fix(ripley_l): Convert annotation to categorical before calling core function ([`1d88883`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d88883563748f2fea8175be3e946b5f3a21ca18))
 
-### Performance
+### Test
 
-* perf(plot_ripley_l): Printed the warning when phenotype is missing in addition to log ([`36da762`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36da762bdf104cd1d109f673e8acdb35b53f6e2c))
+* test(combine_annotation): Added test to check that the annotation list cannot be empty ([`8bc8f65`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bc8f6541973f125f2ed445f57646a9cd68bac08))
 
 ### Unknown
 
-* Merge pull request #244 from FNLCR-DMAP/dev
+* Merge pull request #247 from FNLCR-DMAP/dev
 
-Dev ([`b631dc6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b631dc6b801350c3ef9bec571b138c7663d6f4a5))
+Dev ([`b3f4e30`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3f4e30271e199755525fe4644d52d3f8a5873e5))
 
-* Merge pull request #242 from FNLCR-DMAP/combine_annotations
+* Merge pull request #245 from FNLCR-DMAP/combine_annotations
 
-feat(combine_annotations): Data utility to combine multiple annotaito… ([`453f335`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/453f3353b6d1af99ba632c59e372f3f49b6edf47))
+test(combine_annotation): Added test to check that the annotation lis… ([`25dbc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25dbc52e05bfeddb4104a70ecfb5623dc3902aae))
 
-* Merge pull request #243 from FNLCR-DMAP/ripley_l
+* Merge pull request #246 from FNLCR-DMAP/ripley_l
 
-perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7fc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c8c7fc1511e0f06dcdaaeecb0cfde84e153d41bb))
+fix(ripley_l): Convert annotation to categorical before calling core … ([`f0814b7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f0814b79b289679f363b46fc543e89632ec90739))
 
 
-## v0.7.8 (2024-10-14)
+## v0.7.9 (2024-10-16)
 
 ### Ci
+
+* ci(version): Automatic development release ([`5a5335a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5a5335a846b47c0a43df5b3a149304ef466b37c1))
 
 * ci(version): Automatic development release ([`f7dd745`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f7dd7457ca98b52b8c70f37ccd9ef02bc126d220))
 
@@ -48,6 +50,8 @@ perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7
 * ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
 
 ### Feature
+
+* feat(combine_annotations): Data utility to combine multiple annotaitons into one ([`58dfd38`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/58dfd38415c49535824e745ee56c8b80056736e6))
 
 * feat: add conda env setup ([`df257b8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/df257b86ba3f8e8f6e66c6c5549161c1d1c090f4))
 
@@ -77,6 +81,8 @@ perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7
 
 ### Performance
 
+* perf(plot_ripley_l): Printed the warning when phenotype is missing in addition to log ([`36da762`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36da762bdf104cd1d109f673e8acdb35b53f6e2c))
+
 * perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
 
 ### Refactor
@@ -96,6 +102,18 @@ perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #244 from FNLCR-DMAP/dev
+
+Dev ([`b631dc6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b631dc6b801350c3ef9bec571b138c7663d6f4a5))
+
+* Merge pull request #242 from FNLCR-DMAP/combine_annotations
+
+feat(combine_annotations): Data utility to combine multiple annotaito… ([`453f335`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/453f3353b6d1af99ba632c59e372f3f49b6edf47))
+
+* Merge pull request #243 from FNLCR-DMAP/ripley_l
+
+perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7fc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c8c7fc1511e0f06dcdaaeecb0cfde84e153d41bb))
 
 * Merge pull request #241 from FNLCR-DMAP/dev
 
