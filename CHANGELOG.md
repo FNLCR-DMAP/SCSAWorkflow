@@ -2,30 +2,36 @@
 
 
 
-## v0.7.8 (2024-10-14)
+## v0.7.9 (2024-10-16)
 
-### Fix
+### Feature
 
-* fix(test_plot_ripley_l): fixed unit tests where regions was passed unecesseararly ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
+* feat(combine_annotations): Data utility to combine multiple annotaitons into one ([`58dfd38`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/58dfd38415c49535824e745ee56c8b80056736e6))
 
-* fix(plot_ripley_l): Annotation does not need to be passed to plot Ripley L ([`b2c4a53`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2c4a5379a46a4c38e89000d32d9ae8fa7cf61b3))
+### Performance
+
+* perf(plot_ripley_l): Printed the warning when phenotype is missing in addition to log ([`36da762`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36da762bdf104cd1d109f673e8acdb35b53f6e2c))
 
 ### Unknown
 
-* Merge pull request #241 from FNLCR-DMAP/dev
+* Merge pull request #244 from FNLCR-DMAP/dev
 
-Dev ([`92b9fa1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92b9fa101f23e656d4ec0701b205dc9a8c764de4))
+Dev ([`b631dc6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b631dc6b801350c3ef9bec571b138c7663d6f4a5))
 
-* Merge pull request #240 from FNLCR-DMAP/ripley_l
+* Merge pull request #242 from FNLCR-DMAP/combine_annotations
 
-Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b0699b924f9b6bfda32ab92ba7e0a9464))
+feat(combine_annotations): Data utility to combine multiple annotaito… ([`453f335`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/453f3353b6d1af99ba632c59e372f3f49b6edf47))
 
-* doc(_ripley): Removed documentation that cause a warning ([`e46a980`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e46a980821dbd0bb2c015fb24e262b8c7784eb4b))
+* Merge pull request #243 from FNLCR-DMAP/ripley_l
+
+perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7fc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c8c7fc1511e0f06dcdaaeecb0cfde84e153d41bb))
 
 
-## v0.7.7 (2024-10-03)
+## v0.7.8 (2024-10-14)
 
 ### Ci
+
+* ci(version): Automatic development release ([`f7dd745`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f7dd7457ca98b52b8c70f37ccd9ef02bc126d220))
 
 * ci(version): Automatic development release ([`811429e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/811429ea194ab6d5b8ea43773b298304282036e4))
 
@@ -48,6 +54,10 @@ Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b
 * feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Fix
+
+* fix(test_plot_ripley_l): fixed unit tests where regions was passed unecesseararly ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
+
+* fix(plot_ripley_l): Annotation does not need to be passed to plot Ripley L ([`b2c4a53`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2c4a5379a46a4c38e89000d32d9ae8fa7cf61b3))
 
 * fix(ripley_l): Generate write warning messages for n_observations and missing phenotypes ([`23236ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23236ab4e6577f9e86863b60e309cd17b6fff5c6))
 
@@ -86,6 +96,16 @@ Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #241 from FNLCR-DMAP/dev
+
+Dev ([`92b9fa1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92b9fa101f23e656d4ec0701b205dc9a8c764de4))
+
+* Merge pull request #240 from FNLCR-DMAP/ripley_l
+
+Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b0699b924f9b6bfda32ab92ba7e0a9464))
+
+* doc(_ripley): Removed documentation that cause a warning ([`e46a980`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e46a980821dbd0bb2c015fb24e262b8c7784eb4b))
 
 * Merge pull request #239 from FNLCR-DMAP/dev
 
