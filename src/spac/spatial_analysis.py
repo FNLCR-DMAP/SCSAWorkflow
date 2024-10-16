@@ -471,6 +471,9 @@ def ripley_l(
     # Check that annotation and phenotypes exist in adata.obs
     check_annotation(adata, annotations=[annotation], should_exist=True)
 
+    # Convert annotations to categorical
+    adata.obs[annotation] = pd.Categorical(adata.obs[annotation])
+
     if regions is not None:
         check_annotation(adata, annotations=[regions], should_exist=True)
 
