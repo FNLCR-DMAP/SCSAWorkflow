@@ -46,7 +46,6 @@ class TestCombineAnnotations(unittest.TestCase):
             str(context.exception), 
             "Annotations must be a list. Got <class 'str'>")
 
-
     def test_existing_new_annotation_name(self):
         # Test when the new annotation name already exists in the adata.obs
         self.adata.obs['AB_combined'] = ['a1-b1', 'a2-b2', 'a3-b3']
@@ -56,6 +55,15 @@ class TestCombineAnnotations(unittest.TestCase):
         self.assertEqual(
             str(context.exception),
             "'AB_combined' already exists in adata.obs.")
+
+    def test_empty_annotations_list(self):
+        # Test if an empty list of annotations raises an error
+        with self.assertRaises(ValueError) as context:
+            combine_annotations(self.adata.copy(), [], '-', 'combined_empty')
+    
+        # Verify that the correct error message is returned
+        self.assertEqual(str(context.exception),
+                         "Annotations list cannot be empty.")
 
 
 if __name__ == '__main__':
