@@ -976,6 +976,9 @@ def combine_annotations(
         The AnnData object with the combined annotation added.
     """
 
+    # Check that the list is not emply
+    if len(annotations) == 0:
+        raise ValueError('Annotations list cannot be empty.')
     # Validate input annotations using utility function
     check_annotation(adata, annotations=annotations)
 
