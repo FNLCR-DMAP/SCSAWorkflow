@@ -21,8 +21,10 @@ logging.basicConfig(level=logging.INFO,
 
 
 def visualize_2D_scatter(
-    x, y, labels=None, point_size=None, theme=None,
-    ax=None, legend_label_size=50, annotate_centers=False, **kwargs
+    x, y, adata=None, point_size=None, theme=None,
+    ax=None, annotate_centers=False,
+    x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
+    color_representation=None,pin_color=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -31,19 +33,24 @@ def visualize_2D_scatter(
     ----------
     x, y : array-like
         Coordinates of the data.
-    labels : array-like, optional
-        Array of labels for the data points. Can be numerical or categorical.
+    adata : anndata.AnnData, optional
+        AnnData object containing data and metadata, including color mappings.
     point_size : float, optional
         Size of the points. If None, it will be automatically determined.
     theme : str, optional
-        Color theme for the plot. Defaults to 'viridis' if theme not
-        recognized. For a list of supported themes, refer to Matplotlib's
-        colormap documentation:
-        https://matplotlib.org/stable/tutorials/colors/colormaps.html
+        Color theme for the plot. Defaults to 'viridis' if theme is not recognized.
     ax : matplotlib.axes.Axes, optional (default: None)
         Matplotlib axis object. If None, a new one is created.
     annotate_centers : bool, optional (default: False)
         Annotate the centers of clusters if labels are categorical.
+    x_axis_title : str, optional
+        Title for the x-axis.
+    y_axis_title : str, optional
+        Title for the y-axis.
+    plot_title : str, optional
+        Title for the plot.
+    color_representation : str, optional
+        Description of what the colors represent.
     **kwargs
         Additional keyword arguments passed to plt.scatter.
 
@@ -60,8 +67,6 @@ def visualize_2D_scatter(
         raise ValueError("x and y must be array-like.")
     if len(x) != len(y):
         raise ValueError("x and y must have the same length.")
-    if labels is not None and len(labels) != len(x):
-        raise ValueError("Labels length should match x and y length.")
 
     # Define color themes
     themes = {
@@ -77,10 +82,9 @@ def visualize_2D_scatter(
     }
 
     if theme and theme not in themes:
-        error_msg = (
-            f"Theme '{theme}' not recognized. Please use a valid theme."
-        )
+        error_msg = f"Theme '{theme}' not recognized. Please use a valid theme."
         raise ValueError(error_msg)
+
     cmap = themes.get(theme, plt.get_cmap('viridis'))
 
     # Determine point size
@@ -88,74 +92,66 @@ def visualize_2D_scatter(
     if point_size is None:
         point_size = 5000 / num_points
 
+    # Get figure size from kwargs or set defaults
+    fig_width = kwargs.get('fig_width', 10)
+    fig_height = kwargs.get('fig_height', 8)
+    fontsize = kwargs.get('fontsize', 12)
+
     if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     else:
         fig = ax.figure
 
-    # Plotting logic
-    if labels is not None:
-        # Check if labels are categorical
-        if pd.api.types.is_categorical_dtype(labels):
+    # Color mapping logic from adata.uns
+    if adata is not None and (pin_color is not None or '_spac_colors' in adata.uns):
+        # Extract the color map from adata.uns
+        if pin_color is not None:
+            color_map = adata.uns.get(pin_color, {})
+        else:
+            color_map = adata.uns['_spac_colors']
 
-            # Determine how to access the categories based on
-            # the type of 'labels'
-            if isinstance(labels, pd.Series):
-                unique_clusters = labels.cat.categories
-            elif isinstance(labels, pd.Categorical):
-                unique_clusters = labels.categories
-            else:
-                raise TypeError(
-                    "Expected labels to be of type Series[Categorical] or "
-                    "Categorical."
-                )
+        # Check if 'broad_cell_type' exists in adata.obs
+        if 'broad_cell_type' in adata.obs:
+            broad_cell_types = adata.obs['broad_cell_type'].astype(str)  
 
-            cmap = plt.get_cmap('tab20', len(unique_clusters))
-            for idx, cluster in enumerate(unique_clusters):
-                mask = np.array(labels) == cluster
-                ax.scatter(
-                    x[mask], y[mask],
-                    color=cmap(idx),
-                    label=cluster,
-                    s=point_size
-                )
+            # Map the labels to their corresponding colors using the color map
+            colors = [color_map.get(label, 'gray') for label in broad_cell_types]
 
-                if annotate_centers:
-                    center_x = np.mean(x[mask])
-                    center_y = np.mean(y[mask])
-                    ax.text(
-                        center_x, center_y, cluster,
-                        fontsize=9, ha='center', va='center'
-                    )
-
-            # Extract current handles and labels for the legend
-            handles, labels = ax.get_legend_handles_labels()
-
-            # Adjust the size of legend items
-            for handle in handles:
-                handle.set_sizes([legend_label_size])
+            scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
 
             # Create a custom legend
-            ax.legend(
-                handles,
-                labels,
-                loc='upper right',
-                bbox_to_anchor=(1.25, 1),  # Adjusting position
-                handlelength=2,
-                handletextpad=1
-            )
-
+            unique_labels = list(color_map.keys())
+            handles = [plt.Line2D([0], [0], marker='o', color='w', label=label,
+                                   markerfacecolor=color_map[label], markersize=10)
+                       for label in unique_labels]
+            ax.legend(handles=handles, title=f"Color represents: {color_representation}", loc='best', bbox_to_anchor=(1, 1))
         else:
-            # If labels are continuous
-            scatter = ax.scatter(
-                x, y, c=labels, cmap=cmap, s=point_size, **kwargs
-            )
-            plt.colorbar(scatter, ax=ax)
+            print("⚠️ Warning: 'broad_cell_type' not found in adata.obs. Defaulting to gray.")
+            scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
     else:
+        print("⚠️ Warning: adata is None or neither pin_color nor '_spac_colors' was found. Defaulting to gray.")
         scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+
+    # If annotate_centers is True, annotate the centers of clusters
+    if annotate_centers and adata is not None:
+        unique_labels = adata.obs['broad_cell_type'].unique()
+        for label in unique_labels:
+            mask = (broad_cell_types == label)
+            if np.any(mask):
+                center_x = np.mean(x[mask])
+                center_y = np.mean(y[mask])
+                ax.text(center_x, center_y, label, fontsize=fontsize, ha='center', va='center')
 
     # Equal aspect ratio for the axes
     ax.set_aspect('equal', 'datalim')
+
+    # Set axis labels
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+
+    # Set plot title
+    if plot_title is not None:
+        ax.set_title(plot_title)
 
     return fig, ax
 
