@@ -162,7 +162,6 @@ def knn_clustering(
         label=label,
     )
 
-
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
     
@@ -175,9 +174,9 @@ def knn_clustering(
 
     # 2 we must split the labeled data from the unlabeled data
     y = adata.obs[label]
-    y_mask = y != -1
+    y_mask = y != "no_label"
     data_labeled = data[y_mask]
-    y_labeled = y[y_mask]
+    y_labeled = np.array(y[y_mask], dtype=int)
     
     # 3 then we make the function call to sklearn  
     classifier = KNeighborsClassifier(n_neighbors = k, **kwargs)

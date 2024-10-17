@@ -29,11 +29,11 @@ class TestKnnClustering(unittest.TestCase):
         data_rows = np.vstack((mean_10, mean_100))
 
         # Generate class labels, label 0 = mean 10, label 1 = mean 100
-        class_labels = np.array([0] * (n_rows // 2) + [1] * (n_rows // 2))
+        class_labels = np.array([0] * (n_rows // 2) + [1] * (n_rows // 2), dtype=object)
 
         # Replace ~50% of class labels with "missing" values
         mask = np.random.rand(*class_labels.shape) < 0.5
-        class_labels[mask] = -1
+        class_labels[mask] = "no_label"
 
         # Combine data columns with class labels
         self.syn_dataset = data_rows
@@ -110,7 +110,7 @@ class TestKnnClustering(unittest.TestCase):
                               'counts',
                               k=50)
 
-        self.assertIn('knn', self.adata.obs.columns.tolist())
+        self.assertIn('knn', self.syn_data.obs)
         self.assertEqual(
             len(np.unique(self.syn_data.obs['knn'])),
             2)
