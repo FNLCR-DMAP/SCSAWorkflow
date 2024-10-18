@@ -14,23 +14,21 @@ from typing import List, Union, Optional
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="SPAC:%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO,
+                    format='SPAC:%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger(__name__)
 
 
 def phenograph_clustering(
-    adata,
-    features,
-    layer=None,
-    k=50,
-    seed=None,
-    output_annotation="phenograph",
-    associated_table=None,
-    **kwargs,
-):
+        adata,
+        features,
+        layer=None,
+        k=50,
+        seed=None,
+        output_annotation="phenograph",
+        associated_table=None,
+        **kwargs):
     """
     Calculate automatic phenotypes using phenograph.
 
@@ -75,7 +73,10 @@ def phenograph_clustering(
     """
 
     _validate_transformation_inputs(
-        adata=adata, layer=layer, associated_table=associated_table, features=features
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table,
+        features=features
     )
 
     if not isinstance(k, int) or k <= 0:
@@ -85,27 +86,31 @@ def phenograph_clustering(
         np.random.seed(seed)
 
     data = _select_input_features(
-        adata=adata, layer=layer, associated_table=associated_table, features=features
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table,
+        features=features
     )
 
-    phenograph_out = sce.tl.phenograph(
-        data, clustering_algo="leiden", k=k, seed=seed, **kwargs
-    )
+    phenograph_out = sce.tl.phenograph(data,
+                                       clustering_algo="leiden",
+                                       k=k,
+                                       seed=seed,
+                                       **kwargs)
 
     adata.obs[output_annotation] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
 
 def knn_clustering(
-    adata,
-    features,
-    annotation,
-    layer=None,
-    k=50,
-    output_annotation="knn",
-    associated_table=None,
-    **kwargs,
-):
+        adata,
+        features,
+        annotation,
+        layer=None,
+        k=50,
+        output_annotation="knn",
+        associated_table=None,
+        **kwargs):
     """
     Calculate knn clusters using sklearn KNeighborsClassifier
 
@@ -124,8 +129,8 @@ def knn_clustering(
     features : list of str
         The variables that would be included in creating the phenograph
         clusters.
-
-    annotation : str
+    
+    annotation : str [andata.obs.label]
         The name of the annotation used for classifying the data
 
     layer : str, optional
@@ -159,9 +164,12 @@ def knn_clustering(
 
     if not isinstance(k, int) or k <= 0:
         raise ValueError("`k` must be a positive integer")
-
+    
     data = _select_input_features(
-        adata=adata, layer=layer, associated_table=associated_table, features=features
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table,
+        features=features
     )
 
     # 2 we must split the labeled data from the unlabeled data
@@ -170,24 +178,20 @@ def knn_clustering(
 
     # check if there is a mix of labeled/unlabeled cells
     if all(annotation_mask):
-        raise ValueError(
-            "All cells are labeled. Please provide a mix of labeled and unlabeled data."
-        )
-    elif not any(annotation_mask):
-        raise ValueError(
-            "No cells are labeled. Please provide a mix of labeled and unlabeled data."
-        )
-
+        raise ValueError("All cells are labeled. Please provide a mix of labeled and unlabeled data.")
+    elif not all(annotation_mask):
+        raise ValueError("No cells are labeled. Please provide a mix of labeled and unlabeled data.")
+         
     data_labeled = data[annotation_mask]
     annotation_labeled = np.array(annotation_data[annotation_mask], dtype=int)
-
-    # 3 then we make the function call to sklearn
-    classifier = KNeighborsClassifier(n_neighbors=k, **kwargs)
+    
+    # 3 then we make the function call to sklearn  
+    classifier = KNeighborsClassifier(n_neighbors = k, **kwargs)
     classifier.fit(data_labeled, annotation_labeled)
     knn_predict = classifier.predict(data)
 
     # 4 this output stores the knn labels we just generated
-    adata.obs[output_annotation] = pd.Categorical(knn_predict)
+    adata.obs[output_annotation] =  pd.Categorical(knn_predict)
     adata.uns["knn_features"] = features
 
 
@@ -236,8 +240,8 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
 
     # Calculate the percentage of cells in each cluster
     total_cells = adata.obs.shape[0]
-    cluster_counts["Percentage"] = (
-        cluster_counts["Number of Cells"] / total_cells
+    cluster_counts['Percentage'] = (
+        cluster_counts['Number of Cells'] / total_cells
     ) * 100
 
     # Initialize DataFrame for cluster metrics
@@ -248,18 +252,21 @@ def get_cluster_info(adata, annotation, features=None, layer=None):
 
     # Calculate statistics for each feature in each cluster
     for feature in features:
-        grouped = (
-            data_df.groupby(annotation)[feature].agg(["mean", "median"]).reset_index()
-        )
+        grouped = data_df.groupby(annotation)[feature]\
+                            .agg(["mean", "median"])\
+                            .reset_index()
         grouped.columns = [
             f"{col}_{feature}" if col != annotation else annotation
             for col in grouped.columns
         ]
-        cluster_metrics = cluster_metrics.merge(grouped, on=annotation, how="left")
+        cluster_metrics = cluster_metrics.merge(
+            grouped, on=annotation, how="left"
+        )
 
     # Merge cluster counts and percentage
     cluster_metrics = pd.merge(
-        cluster_metrics, cluster_counts, on=annotation, how="left"
+        cluster_metrics, cluster_counts,
+        on=annotation, how="left"
     )
 
     return cluster_metrics
@@ -305,17 +312,17 @@ def tsne(adata, layer=None, **kwargs):
 
 
 def run_umap(
-    adata,
-    n_neighbors=75,
-    min_dist=0.1,
-    n_components=2,
-    metric="euclidean",
-    random_state=0,
-    transform_seed=42,
-    layer=None,
-    output_derived_feature="X_umap",
-    associated_table=None,
-    **kwargs,
+        adata,
+        n_neighbors=75,
+        min_dist=0.1,
+        n_components=2,
+        metric='euclidean',
+        random_state=0,
+        transform_seed=42,
+        layer=None,
+        output_derived_feature='X_umap',
+        associated_table=None,
+        **kwargs
 ):
     """
     Perform UMAP analysis on the specific layer of the AnnData object
@@ -360,11 +367,15 @@ def run_umap(
     """
 
     _validate_transformation_inputs(
-        adata=adata, layer=layer, associated_table=associated_table
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table
     )
 
     data = _select_input_features(
-        adata=adata, layer=layer, associated_table=associated_table
+        adata=adata,
+        layer=layer,
+        associated_table=associated_table
     )
 
     # Convert data to pandas DataFrame for better memory handling
@@ -379,7 +390,7 @@ def run_umap(
         low_memory=True,
         random_state=random_state,
         transform_seed=transform_seed,
-        **kwargs,
+        **kwargs
     )
 
     # Fit and transform the data with the UMAP model
@@ -393,12 +404,12 @@ def run_umap(
 
 
 def _validate_transformation_inputs(
-    adata: anndata,
-    layer: Optional[str] = None,
-    associated_table: Optional[str] = None,
-    features: Optional[Union[List[str], str]] = None,
-    annotation: Optional[str] = None,
-) -> None:
+        adata: anndata,
+        layer: Optional[str] = None,
+        associated_table: Optional[str] = None,
+        features: Optional[Union[List[str], str]] = None,
+        annotation: Optional[str] = None,
+        ) -> None:
     """
     Validate inputs for transformation functions.
 
@@ -422,35 +433,32 @@ def _validate_transformation_inputs(
     """
 
     if associated_table is not None and layer is not None:
-        raise ValueError(
-            "Cannot specify both"
-            f" 'associated table':'{associated_table}'"
-            f" and 'table':'{layer}'. Please choose one."
-        )
+        raise ValueError("Cannot specify both"
+                         f" 'associated table':'{associated_table}'"
+                         f" and 'table':'{layer}'. Please choose one.")
 
     if associated_table is not None:
-        check_table(
-            adata=adata,
-            tables=associated_table,
-            should_exist=True,
-            associated_table=True,
-        )
+        check_table(adata=adata,
+                    tables=associated_table,
+                    should_exist=True,
+                    associated_table=True)
     else:
-        check_table(adata=adata, tables=layer)
+        check_table(adata=adata,
+                    tables=layer)
 
     if features is not None:
         check_feature(adata, features=features)
-
+    
     if annotation is not None:
-        check_annotation(adata, annotations=annotation)
+        check_annotation(adata, annotation=annotation)
 
 
-def _select_input_features(
-    adata: anndata,
-    layer: str = None,
-    associated_table: str = None,
-    features: Optional[Union[str, List[str]]] = None,
-) -> np.ndarray:
+def _select_input_features(adata: anndata,
+                           layer: str = None,
+                           associated_table: str = None,
+                           features: Optional[Union[str, List[str]]] = None,
+
+                           ) -> np.ndarray:
     """
     Selects the numpy array to be used as input for transformations
 
@@ -486,15 +494,14 @@ def _select_input_features(
                 features = [features]
 
             logger.info(f'Using features:"{features}"')
-            np_array = np_array[
-                :, [adata.var_names.get_loc(feature) for feature in features]
-            ]
+            np_array = np_array[:,
+                                [adata.var_names.get_loc(feature)
+                                 for feature in features]]
         return np_array
 
 
-def batch_normalize(
-    adata, annotation, output_layer, input_layer=None, method="median", log=False
-):
+def batch_normalize(adata, annotation, output_layer,
+                    input_layer=None, method="median", log=False):
     """
     Adjust the features of every marker using a normalization method.
 
@@ -536,13 +543,14 @@ def batch_normalize(
 
     # Create a copy of the input layer or '.X'
     if input_layer:
-        original = pd.DataFrame(adata.layers[input_layer], index=adata.obs.index).copy()
+        original = pd.DataFrame(adata.layers[input_layer],
+                                index=adata.obs.index).copy()
     else:
         original = pd.DataFrame(adata.X, index=adata.obs.index).copy()
 
     # Logarithmic transformation if required
     if log:
-        original = np.log2(1 + original)
+        original = np.log2(1+original)
         logger.info("Data transformed with log2")
 
     # Initialize the batch annotation values
@@ -559,14 +567,15 @@ def batch_normalize(
     # Normalize each batch
     for batch in batches:
         batch_cells = original[adata.obs[annotation] == batch]
-        logger.info(f"Processing batch: {batch}, " f"original values:\n{batch_cells}")
+        logger.info(f"Processing batch: {batch}, "
+                    f"original values:\n{batch_cells}")
 
         if method == "median":
             batch_median = batch_cells.quantile(q=0.5)
             logger.info(f"Median for {batch}: %s", batch_median)
-            original.loc[(adata.obs[annotation] == batch)] = batch_cells + (
-                all_batch_quantile - batch_median
-            )
+            original.loc[
+                (adata.obs[annotation] == batch)
+            ] = batch_cells + (all_batch_quantile - batch_median)
 
         elif method == "Q50":
             batch_50quantile = batch_cells.quantile(q=0.5)
@@ -589,7 +598,8 @@ def batch_normalize(
             logger.info(f"std for {batch}: %s", std)
             # Ensure std is not zero by using a minimal threshold (e.g., 1e-8)
             std = np.maximum(std, 1e-8)
-            original.loc[adata.obs[annotation] == batch] = (batch_cells - mean) / std
+            original.loc[adata.obs[annotation] == batch] = \
+                (batch_cells - mean) / std
 
     # Store normalized data in the specified output layer
     adata.layers[output_layer] = original
@@ -637,17 +647,19 @@ def rename_annotations(adata, src_annotation, dest_annotation, mappings):
 
     # Inform the user about the data type of the original column
     original_dtype = adata.obs[src_annotation].dtype
-    print(
-        f"The data type of the original column '{src_annotation}' is "
-        f"{original_dtype}."
-    )
+    print(f"The data type of the original column '{src_annotation}' is "
+          f"{original_dtype}.")
 
     # Convert the keys in mappings to the same data type as the unique values
     unique_values = adata.obs[src_annotation].unique()
-    mappings = {type(unique_values[0])(key): value for key, value in mappings.items()}
+    mappings = {
+        type(unique_values[0])(key): value for key, value in mappings.items()
+    }
 
     # Identify and handle unmapped labels
-    missing_mappings = [key for key in unique_values if key not in mappings.keys()]
+    missing_mappings = [
+        key for key in unique_values if key not in mappings.keys()
+    ]
 
     if missing_mappings:
         warnings.warn(
@@ -671,7 +683,7 @@ def normalize_features(
     input_layer=None,
     output_layer="normalized_feature",
     per_batch=False,
-    annotation=None,
+    annotation=None
 ):
     """
     Normalize the features stored in an AnnData object.
@@ -696,22 +708,19 @@ def normalize_features(
 
     if not isinstance(high_quantile, (int, float)):
         raise TypeError(
-            "The high quantile should be a numeric value, currently got {}".format(
-                type(high_quantile)
-            )
+            "The high quantile should be a numeric value, currently got {}"
+            .format(type(high_quantile))
         )
     if not isinstance(low_quantile, (int, float)):
         raise TypeError(
-            "The low quantile should be a numeric value, currently got {}".format(
-                type(low_quantile)
-            )
+            "The low quantile should be a numeric value, currently got {}"
+            .format(type(low_quantile))
         )
     if low_quantile >= high_quantile:
         raise ValueError(
             "The low quantile should be smaller than the high quantile, "
-            "current values are: low quantile: {}, high_quantile: {}".format(
-                low_quantile, high_quantile
-            )
+            "current values are: low quantile: {}, high_quantile: {}"
+            .format(low_quantile, high_quantile)
         )
     if high_quantile <= 0 or high_quantile > 1:
         raise ValueError(
@@ -720,9 +729,8 @@ def normalize_features(
         )
     if low_quantile < 0 or low_quantile >= 1:
         raise ValueError(
-            "The low quantile value should be within [0, 1), current value: {}".format(
-                low_quantile
-            )
+            "The low quantile value should be within [0, 1), current value: {}"
+            .format(low_quantile)
         )
     if interpolation not in ["nearest", "linear"]:
         raise ValueError(
@@ -737,42 +745,42 @@ def normalize_features(
         data_to_transform = adata.X
 
     # Ensure data is in numpy array format
-    data_to_transform = (
-        data_to_transform.toarray()
-        if issparse(data_to_transform)
-        else data_to_transform
-    )
+    data_to_transform = (data_to_transform.toarray()
+                         if issparse(data_to_transform)
+                         else data_to_transform)
 
     if per_batch:
         if annotation is None:
-            raise ValueError("annotation must be provided if per_batch is True.")
+            raise ValueError(
+                "annotation must be provided if per_batch is True."
+            )
         transformed_data = apply_per_batch(
-            data_to_transform,
-            adata.obs[annotation].values,
-            method="normalize_features",
+            data_to_transform, adata.obs[annotation].values,
+            method='normalize_features',
             low_quantile=low_quantile,
             high_quantile=high_quantile,
-            interpolation=interpolation,
+            interpolation=interpolation
         )
     else:
         transformed_data = normalize_features_core(
             data_to_transform,
             low_quantile=low_quantile,
             high_quantile=high_quantile,
-            interpolation=interpolation,
+            interpolation=interpolation
         )
 
     # Store the transformed data in the specified output_layer
     adata.layers[output_layer] = pd.DataFrame(
-        transformed_data, index=adata.obs_names, columns=adata.var_names
+        transformed_data,
+        index=adata.obs_names,
+        columns=adata.var_names
     )
 
     return adata
 
 
-def normalize_features_core(
-    data, low_quantile=0.02, high_quantile=0.98, interpolation="linear"
-):
+def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
+                            interpolation='linear'):
     """
     Normalize the features in a numpy array.
 
@@ -820,51 +828,47 @@ def normalize_features_core(
     if not isinstance(high_quantile, (int, float)):
         raise TypeError(
             "The high quantile should be a numeric value, "
-            f"currently got {str(type(high_quantile))}"
-        )
+            f"currently got {str(type(high_quantile))}")
 
     if not isinstance(low_quantile, (int, float)):
         raise TypeError(
             "The low quantile should be a numeric value, "
-            f"currently got {str(type(low_quantile))}"
-        )
+            f"currently got {str(type(low_quantile))}")
 
     if low_quantile < high_quantile:
         if high_quantile <= 0 or high_quantile > 1:
             raise ValueError(
                 "The high quantile value should be within "
-                f"(0, 1], current value: {high_quantile}"
-            )
+                f"(0, 1], current value: {high_quantile}")
         if low_quantile < 0 or low_quantile >= 1:
             raise ValueError(
                 "The low quantile value should be within "
-                f"[0, 1), current value: {low_quantile}"
-            )
+                f"[0, 1), current value: {low_quantile}")
     else:
         raise ValueError(
             "The low quantile should be smaller than "
             "the high quantile, current values are:\n"
             f"low quantile: {low_quantile}\n"
-            f"high quantile: {high_quantile}"
-        )
+            f"high quantile: {high_quantile}")
 
     if interpolation not in ["nearest", "linear"]:
         raise ValueError(
             "Interpolation must be either 'nearest' or 'linear', "
-            f"passed value is: {interpolation}"
-        )
+            f"passed value is: {interpolation}")
 
     # Version check for numpy
     numpy_version = np.__version__
-    if numpy_version >= "1.22.0":
+    if numpy_version >= '1.22.0':
         # Use 'method' argument for newer versions
         quantiles = np.quantile(
-            data, [low_quantile, high_quantile], axis=0, method=interpolation
+            data, [low_quantile, high_quantile], axis=0,
+            method=interpolation
         )
     else:
         # Use 'interpolation' argument for older versions
         quantiles = np.quantile(
-            data, [low_quantile, high_quantile], axis=0, interpolation=interpolation
+            data, [low_quantile, high_quantile], axis=0,
+            interpolation=interpolation
         )
 
     qmin = quantiles[0]
@@ -888,13 +892,8 @@ def normalize_features_core(
 
 
 def arcsinh_transformation(
-    adata,
-    input_layer=None,
-    co_factor=None,
-    percentile=None,
-    output_layer="arcsinh",
-    per_batch=False,
-    annotation=None,
+    adata, input_layer=None, co_factor=None, percentile=None,
+    output_layer="arcsinh", per_batch=False, annotation=None
 ):
     """
     Apply arcsinh transformation using a co-factor (fixed number) or a given
@@ -937,7 +936,9 @@ def arcsinh_transformation(
         )
 
     if co_factor is not None and percentile is not None:
-        raise ValueError("Please specify either co_factor or percentile, not both.")
+        raise ValueError(
+            "Please specify either co_factor or percentile, not both."
+        )
 
     if co_factor and co_factor <= 0:
         raise ValueError(
@@ -957,22 +958,21 @@ def arcsinh_transformation(
         data_to_transform = adata.X
 
     # Ensure data is in numpy array format
-    data_to_transform = (
-        data_to_transform.toarray()
-        if issparse(data_to_transform)
-        else data_to_transform
-    )
+    data_to_transform = data_to_transform.toarray() \
+        if issparse(data_to_transform) else data_to_transform
 
     if per_batch:
         if annotation is None:
-            raise ValueError("annotation must be provided if per_batch is True.")
-        check_annotation(adata, annotations=annotation, parameter_name="annotation")
+            raise ValueError(
+                "annotation must be provided if per_batch is True."
+            )
+        check_annotation(
+            adata, annotations=annotation, parameter_name="annotation"
+        )
         transformed_data = apply_per_batch(
-            data_to_transform,
-            adata.obs[annotation].values,
-            method="arcsinh_transformation",
-            co_factor=co_factor,
-            percentile=percentile,
+            data_to_transform, adata.obs[annotation].values,
+            method='arcsinh_transformation', co_factor=co_factor,
+            percentile=percentile
         )
     else:
         # Apply the arcsinh transformation using the core function
@@ -989,7 +989,9 @@ def arcsinh_transformation(
 
     # Store the transformed data in the specified output_layer
     adata.layers[output_layer] = pd.DataFrame(
-        transformed_data, index=adata.obs_names, columns=adata.var_names
+        transformed_data,
+        index=adata.obs_names,
+        columns=adata.var_names
     )
 
     return adata
@@ -1028,7 +1030,8 @@ def arcsinh_transformation_core(data, co_factor=None, percentile=None):
         raise ValueError("Either co_factor or percentile must be provided.")
 
     if co_factor is not None and percentile is not None:
-        raise ValueError("Please specify either co_factor or percentile, not both.")
+        raise ValueError(
+            "Please specify either co_factor or percentile, not both.")
 
     if co_factor is None:
         if not (0 <= percentile <= 100):
@@ -1038,9 +1041,8 @@ def arcsinh_transformation_core(data, co_factor=None, percentile=None):
     # Perform arcsinh transformation with special handling for zero co_factor
     # If co_factor > 0, apply arcsinh(data / co_factor)
     # If co_factor == 0, apply arcsinh(data) to avoid division by zero
-    transformed_data = np.where(
-        co_factor > 0, np.arcsinh(data / co_factor), np.arcsinh(data)
-    )
+    transformed_data = np.where(co_factor > 0, np.arcsinh(data / co_factor),
+                                np.arcsinh(data))
 
     return transformed_data
 
@@ -1071,25 +1073,25 @@ def z_score_normalization(adata, output_layer, input_layer=None, **kwargs):
         data_to_normalize = adata.X
 
     # Ensure data is in numpy array format
-    data_to_normalize = (
-        data_to_normalize.toarray()
-        if issparse(data_to_normalize)
-        else data_to_normalize
-    )
+    data_to_normalize = data_to_normalize.toarray() \
+        if issparse(data_to_normalize) else data_to_normalize
 
     # Compute z-scores using scipy.stats.zscore
     normalized_data = stats.zscore(
-        data_to_normalize, axis=0, nan_policy="omit", **kwargs
+        data_to_normalize, axis=0, nan_policy='omit', **kwargs
     )
 
     # Store the computed z-scores in the specified output_layer
     adata.layers[output_layer] = pd.DataFrame(
-        normalized_data, index=adata.obs_names, columns=adata.var_names
+        normalized_data,
+        index=adata.obs_names,
+        columns=adata.var_names
     )
 
     # Print a message indicating that normalization is complete
     print(
-        f"Z-score normalization completed. " f'Data stored in layer "{output_layer}".'
+        f'Z-score normalization completed. '
+        f'Data stored in layer "{output_layer}".'
     )
 
 
@@ -1116,22 +1118,23 @@ def apply_per_batch(data, annotation, method, **kwargs):
         The transformed data.
     """
     # Check data integrity
-    if not isinstance(data, np.ndarray) or not isinstance(annotation, np.ndarray):
+    if not isinstance(data, np.ndarray) or not isinstance(annotation,
+                                                          np.ndarray):
         raise ValueError("data and annotation must be numpy arrays")
     if len(data) != len(annotation):
-        raise ValueError("data and annotation must have the same number of " "rows")
+        raise ValueError("data and annotation must have the same number of "
+                         "rows")
     if data.ndim != 2:
         raise ValueError("data must be a 2D array")
 
     method_dict = {
-        "arcsinh_transformation": arcsinh_transformation_core,
-        "normalize_features": normalize_features_core,
+        'arcsinh_transformation': arcsinh_transformation_core,
+        'normalize_features': normalize_features_core
     }
 
     if method not in method_dict:
-        raise ValueError(
-            "method must be 'arcsinh_transformation' or " "'normalize_features'"
-        )
+        raise ValueError("method must be 'arcsinh_transformation' or "
+                         "'normalize_features'")
 
     transform_function = method_dict[method]
 
