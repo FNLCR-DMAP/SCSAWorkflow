@@ -46,7 +46,7 @@ class TestKnnClustering(unittest.TestCase):
         self.syn_dataset = data_rows
 
         self.syn_data = AnnData(
-            self.syn_dataset, var=pd.DataFrame(index=["gene1", "gene2"])
+            X=self.syn_dataset, var=pd.DataFrame(index=["gene1", "gene2"])
         )
 
         self.syn_data.layers["counts"] = self.syn_dataset
@@ -72,20 +72,21 @@ class TestKnnClustering(unittest.TestCase):
         # Set up AnnData object with 100 rows, all features
         # and each row's class in obs
         self.adata = AnnData(
-            iris_df.data.iloc[:n_iris, :], var=pd.DataFrame(index=iris_df.data.columns)
+            X=iris_df.data.iloc[:n_iris, :],
+            var=pd.DataFrame(index=iris_df.data.columns),
         )
 
-        # initialize three label columns
-        self.adata.obs["classes"] = iris_df.target.iloc[:n_iris].to_numpy()
-        self.adata.obs["no_missing_classes"] = iris_df.target.iloc[:n_iris].to_numpy()
-        self.adata.obs["all_missing_classes"] = iris_df.target.iloc[:n_iris].to_numpy()
-
-        # set all labels to missing
-        self.adata.obs["all_missing_classes"][:] = "no_label"
-
         # Replace ~50% of class labels with "missing" values
+        self.adata.obs["classes"] = iris_df.target.iloc[:n_iris].to_numpy()
         iris_mask = np.random.rand(*self.adata.obs["classes"].shape) < 0.5
         self.adata.obs["classes"][iris_mask] = "no_label"
+
+        # set all labels to missing
+        self.adata.obs["all_missing_classes"] = iris_df.target.iloc[:n_iris].to_numpy()
+        self.adata.obs["all_missing_classes"][:] = "no_label"
+
+        # select all data labels, none missing
+        self.adata.obs["no_missing_classes"] = iris_df.target.iloc[:n_iris].to_numpy()
 
         self.adata.layers["counts"] = iris_df.data.iloc[:n_iris, :]
 
@@ -164,8 +165,8 @@ class TestKnnClustering(unittest.TestCase):
 
     def test_clustering_accuracy(self):
         knn_clustering(
-            adata=self.adata,
-            features=self.features,
+            adata=self.syn_data,
+            features=self.syn_features,
             annotation=self.annotation,
             layer="counts",
             k=50,
