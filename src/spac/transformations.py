@@ -5,7 +5,7 @@ import anndata
 import warnings
 import logging
 import scanpy.external as sce
-from spac.utils import check_table, check_annotation, check_feature, check_label
+from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
 import umap as umap_lib
 from sklearn.neighbors import KNeighborsClassifier
@@ -105,7 +105,7 @@ def phenograph_clustering(
 def knn_clustering(
         adata,
         features,
-        label,
+        annotation,
         layer=None,
         k=50,
         output_annotation="knn",
@@ -130,8 +130,8 @@ def knn_clustering(
         The variables that would be included in creating the phenograph
         clusters.
     
-    label : str [andata.obs.label]
-        The name of the label used for classifying the data
+    annotation : str [andata.obs.label]
+        The name of the annotation used for classifying the data
 
     layer : str, optional
         The layer to be used in calculating the phengraph clusters.
@@ -159,7 +159,7 @@ def knn_clustering(
         layer=layer,
         associated_table=associated_table,
         features=features,
-        label=label,
+        annotation=annotation,
     )
 
     if not isinstance(k, int) or k <= 0:
@@ -173,18 +173,25 @@ def knn_clustering(
     )
 
     # 2 we must split the labeled data from the unlabeled data
-    y = adata.obs[label]
-    y_mask = y != "no_label"
-    data_labeled = data[y_mask]
-    y_labeled = np.array(y[y_mask], dtype=int)
+    annotation_data = adata.obs[annotation]
+    annotation_mask = annotation_data != "no_label"
+
+    # check if there is a mix of labeled/unlabeled cells
+    if all(annotation_mask):
+        raise ValueError("All cells are labeled. Please provide a mix of labeled and unlabeled data.")
+    elif not any(annotation_mask):
+        raise ValueError("No cells are labeled. Please provide a mix of labeled and unlabeled data.")
+         
+    data_labeled = data[annotation_mask]
+    annotation_labeled = np.array(annotation_data[annotation_mask], dtype=int)
     
     # 3 then we make the function call to sklearn  
     classifier = KNeighborsClassifier(n_neighbors = k, **kwargs)
-    classifier.fit(data_labeled, y_labeled)
+    classifier.fit(data_labeled, annotation_labeled)
     knn_predict = classifier.predict(data)
 
     # 4 this output stores the knn labels we just generated
-    adata.obs[output_annotation] = knn_predict
+    adata.obs[output_annotation] =  pd.Categorical(knn_predict)
     adata.uns["knn_features"] = features
 
 
@@ -401,7 +408,7 @@ def _validate_transformation_inputs(
         layer: Optional[str] = None,
         associated_table: Optional[str] = None,
         features: Optional[Union[List[str], str]] = None,
-        label: Optional[str] = None,
+        annotation: Optional[str] = None,
         ) -> None:
     """
     Validate inputs for transformation functions.
@@ -416,8 +423,8 @@ def _validate_transformation_inputs(
         Name of the key in `obsm` that contains the numpy array.
     features : list of str or str, optional
         Names of features to use for transformation.
-    label: str, optional
-        Name of label column in `obs` that contains class labels
+    annotation: str, optional
+        Name of annotation column in `obs` that contains class labels
 
     Raises
     ------
@@ -442,8 +449,8 @@ def _validate_transformation_inputs(
     if features is not None:
         check_feature(adata, features=features)
     
-    if label is not None:
-        check_label(adata, label=label)
+    if annotation is not None:
+        check_annotation(adata, annotations=annotation)
 
 
 def _select_input_features(adata: anndata,

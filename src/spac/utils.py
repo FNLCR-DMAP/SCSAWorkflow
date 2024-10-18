@@ -365,55 +365,6 @@ def check_feature(
         )
 
 
-def check_label(
-    adata,
-    label=None,
-    should_exist=True
-):
-    """
-    Perform common error checks for labels in
-    anndata related objects.
-
-    Parameters
-    ----------
-    adata : anndata.AnnData
-        The AnnData object to be checked.
-
-    label : str, optional
-        The feature(s) to check for existence in adata.var_names.
-
-    should_exist : bool, optional (default=True)
-        Determines whether to check if elements exist in the
-        target list (True), or if they should not exist (False).
-
-    Raises
-    ------
-    TypeError
-        If adata is not an instance of anndata.AnnData.
-
-    ValueError
-        If any of the specified layers, annotations, features, or label do not exist.
-
-    """
-    # Check if adata is an instance of anndata.AnnData
-    if not isinstance(adata, ad.AnnData):
-        raise TypeError(
-            "Input dataset should be "
-            "an instance of anndata.AnnData, "
-            "please check the input dataset source."
-            )
-
-    # Check for tables
-    existing_obs_vars = adata.obs.columns.tolist()
-    check_list_in_list(
-            input=label,
-            input_name="label",
-            input_type="label",
-            target_list=existing_obs_vars,
-            need_exist=should_exist
-        )
-
-
 def check_column_name(
     column_name,
     field_name,
