@@ -130,7 +130,7 @@ def knn_clustering(
         The variables that would be included in creating the phenograph
         clusters.
     
-    annotation : str [andata.obs.label]
+    annotation : str
         The name of the annotation used for classifying the data
 
     layer : str, optional
