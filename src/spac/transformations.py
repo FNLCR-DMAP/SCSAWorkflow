@@ -179,7 +179,7 @@ def knn_clustering(
     # check if there is a mix of labeled/unlabeled cells
     if all(annotation_mask):
         raise ValueError("All cells are labeled. Please provide a mix of labeled and unlabeled data.")
-    elif not all(annotation_mask):
+    elif not any(annotation_mask):
         raise ValueError("No cells are labeled. Please provide a mix of labeled and unlabeled data.")
          
     data_labeled = data[annotation_mask]
@@ -450,7 +450,7 @@ def _validate_transformation_inputs(
         check_feature(adata, features=features)
     
     if annotation is not None:
-        check_annotation(adata, annotation=annotation)
+        check_annotation(adata, annotations=annotation)
 
 
 def _select_input_features(adata: anndata,
