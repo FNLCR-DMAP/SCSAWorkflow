@@ -20,7 +20,7 @@ class TestZScoreNormalization(unittest.TestCase):
         self.adata.layers["layer1"] = layer1_data
 
     def test_z_score_normalization_main_matrix(self):
-        normalized_adata = z_score_normalization(self.adata)
+        z_score_normalization(self.adata, output_layer='z_scores')
         # Expected z-scores calculated manually
         expected_z_scores = np.array([
             [-1.22474487, -1.22474487],
@@ -28,18 +28,22 @@ class TestZScoreNormalization(unittest.TestCase):
             [1.22474487, 1.22474487]
         ])
         np.testing.assert_array_almost_equal(
-            normalized_adata.layers['z_scores'], expected_z_scores
+            self.adata.layers['z_scores'], expected_z_scores
         )
 
     def test_z_score_normalization_layer(self):
-        normalized_adata = z_score_normalization(self.adata, layer="layer1")
+        z_score_normalization(
+            self.adata,
+            output_layer='z_scores',
+            input_layer="layer1"
+        )
         expected_z_scores = np.array([
             [-0.7071, -1.3641],
             [-0.7071, 0.3590],
             [1.4142, 1.0051]
         ])
         np.testing.assert_array_almost_equal(
-            normalized_adata.layers['z_scores'], expected_z_scores, decimal=3
+            self.adata.layers['z_scores'], expected_z_scores, decimal=3
         )
 
 

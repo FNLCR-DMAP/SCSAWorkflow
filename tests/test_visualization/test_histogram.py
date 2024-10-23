@@ -51,7 +51,7 @@ class TestHistogram(unittest.TestCase):
         fig, ax = histogram(self.adata, feature='marker1', bins=bin_edges)
 
         # Check the histogram bars
-        bars = ax[0].patches
+        bars = ax.patches
         # Expecting 100 bars for 100 distinct values
         self.assertEqual(len(bars), 100)
 
@@ -66,18 +66,18 @@ class TestHistogram(unittest.TestCase):
                 bar.get_x() + bar.get_width() / 2, expected_center
             )
 
-        # Check the number of axes returned
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_annotation(self):
         fig, ax = histogram(self.adata, annotation='annotation1')
         total_annotation = len(self.adata.obs['annotation1'])
         # Assuming the y-axis of the histogram represents counts
         # (not frequencies or probabilities)
-        self.assertEqual(sum(p.get_height() for p in ax[0].patches),
+        self.assertEqual(sum(p.get_height() for p in ax.patches),
                          total_annotation)
-        # Check the number of axes returned
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_feature_group_by(self):
         fig, axs = histogram(
@@ -120,7 +120,10 @@ class TestHistogram(unittest.TestCase):
             group_by='annotation1',
             together=False
         )
-        self.assertEqual(len(axs), 1)
+        # Since only one plot is created, axs is an Axes object
+        self.assertIsInstance(axs, mpl.axes.Axes)
+        # Wrap axs in a list for consistent handling
+        axs = [axs]
 
         # Check the number of returned axes matches the unique group count
         unique_annotations = adata.obs['annotation1'].nunique()
@@ -128,7 +131,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_log_scale(self):
         fig, ax = histogram(self.adata, feature='marker1', log_scale=True)
-        self.assertTrue(ax[0].get_xscale() == 'log')
+        self.assertTrue(ax.get_xscale() == 'log')
 
     def test_overlay_options(self):
         fig, ax = histogram(
@@ -140,7 +143,7 @@ class TestHistogram(unittest.TestCase):
             element="step"
         )
         self.assertIsInstance(fig, mpl.figure.Figure)
-        self.assertIsInstance(ax[0], mpl.axes.Axes)
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_layer(self):
         # Create synthetic data with known values for a subset of the data
@@ -171,7 +174,7 @@ class TestHistogram(unittest.TestCase):
             bins=[0.5, 1.5, 2.5, 3.5])
 
         # Check the histogram bars
-        bars = ax[0].patches
+        bars = ax.patches
         self.assertEqual(len(bars), 3)  # Expecting 3 bars for synthetic data
 
         # Check the height and position of each bar to match the synthetic data
@@ -191,13 +194,13 @@ class TestHistogram(unittest.TestCase):
             ax=ax
         )
         # Check that the passed ax is the one that is returned
-        self.assertEqual(id(returned_ax[0]), id(ax))
+        self.assertEqual(id(returned_ax), id(ax))
 
         # Check that the passed fig is the one that is returned
         self.assertIs(fig, returned_fig)
 
-        # Check the number of axes returned
-        self.assertEqual(len(returned_ax), 1)
+        # Check that returned_ax is an Axes object
+        self.assertIsInstance(returned_ax, mpl.axes.Axes)
 
     def test_default_first_feature(self):
         with self.assertWarns(UserWarning) as warning:
@@ -208,10 +211,11 @@ class TestHistogram(unittest.TestCase):
                            "Defaulting to the first feature: 'marker1'.")
         self.assertEqual(str(warning.warning), warning_message)
 
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
         # Check the number of bars matches the number of cells
-        bars = ax[0].patches
+        bars = ax.patches
         self.assertEqual(len(bars), 100)
 
 

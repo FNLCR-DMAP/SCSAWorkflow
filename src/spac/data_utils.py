@@ -8,7 +8,9 @@ from sklearn.preprocessing import MinMaxScaler
 from typing import Tuple
 import logging
 from collections import defaultdict
-from spac.utils import regex_search_list, check_list_in_list
+from spac.utils import regex_search_list, check_list_in_list, check_annotation
+from anndata import AnnData
+
 
 
 def append_annotation(
@@ -768,7 +770,7 @@ def calculate_centroid(
     y_max : str
         column name with maximum y value
     new_x : str
-        the new column name of the x dimension of the centroid,
+        the new column name of the x dimension of the cientroid,
         allowing characters are alphabetic, digits and underscore
     new_y : str
         the new column name of the y dimension of the centroid,
@@ -777,7 +779,8 @@ def calculate_centroid(
     Returns
     -------
     data : pd.DataFrame
-        dataframe with two new columns names
+        dataframe with two new centroid columns addded. Note that the
+        dataframe is modified in place.
 
     """
 
@@ -800,10 +803,16 @@ def calculate_centroid(
         if col not in data.columns:
             raise ValueError(f"Column {col} does not exist in the dataframe.")
 
-    # calculate the centroids
-    data[new_x] = (data[x_min] + data[x_max]) / 2
-    data[new_y] = (data[y_min] + data[y_max]) / 2
+    # Calculate the centroids
+    x_centroid = (data[x_min] + data[x_max]) / 2
+    y_centroid = (data[y_min] + data[y_max]) / 2
 
+    # Assign new centroid columns to the DataFrame in one operation
+    data[[new_x, new_y]] = pd.concat(
+        [x_centroid, y_centroid], axis=1, keys=[new_x, new_y]
+    )
+
+    # Return the modified DataFrame
     return data
 
 
@@ -939,6 +948,7 @@ def combine_dfs(dataframes: list):
     return combined_df
 
 
+
 def add_pin_color_rules(
     adata,
     label_color_dict: dict,
@@ -1063,3 +1073,67 @@ def add_pin_color_rules(
     adata.uns[color_map_name+"_summary"] = result_str
 
     return label_matches, result_str
+
+def combine_annotations(
+    adata: AnnData,
+    annotations: list,
+    separator: str,
+    new_annotation_name: str
+) -> AnnData:
+    """
+    Combine multiple annotations into a new annotation using a defined separator.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The input AnnData object whose .obs will be modified.
+
+    annotations : list
+        List of annotation column names to combine.
+
+    separator : str
+        Separator to use when combining annotations.
+
+    new_annotation_name : str
+        The name of the new annotation to be created.
+
+    Returns
+    -------
+    AnnData
+        The AnnData object with the combined annotation added.
+    """
+
+    # Check that the list is not emply
+    if len(annotations) == 0:
+        raise ValueError('Annotations list cannot be empty.')
+    # Validate input annotations using utility function
+    check_annotation(adata, annotations=annotations)
+
+    if type(annotations) is not list:
+        raise ValueError(
+            f'Annotations must be a list. Got {type(annotations)}'
+        )
+    # Ensure separator is a string
+    if not isinstance(separator, str):
+        raise ValueError(
+            f'Separator must be a string. Got {type(separator)}'
+        )
+
+    # Check if new annotation name already exists
+    if new_annotation_name in adata.obs.columns:
+        raise ValueError(
+            f"'{new_annotation_name}' already exists in adata.obs.")
+
+    # Combine annotations into the new column
+
+    # Convert selected annotations to string type
+    annotations_str = adata.obs[annotations].astype(str)
+
+    # Combine annotations using the separator
+    combined_annotation = annotations_str.agg(separator.join, axis=1)
+
+    # Assign the combined result to the new annotation column
+    adata.obs[new_annotation_name] = combined_annotation
+
+    return adata
+

@@ -38,7 +38,7 @@ class TestGetClusterInfo(unittest.TestCase):
 
         # Manually calculate expected output
         # For Cluster1, percentage should be (2/5)*100 = 40.0
-        cluster_filter = result['Cluster'] == 'Cluster1'
+        cluster_filter = result['phenograph'] == 'Cluster1'
         percentage_value = result.loc[cluster_filter, 'Percentage']\
                                  .iloc[0]
         self.assertAlmostEqual(percentage_value, 40.0, places=1)
@@ -60,7 +60,7 @@ class TestGetClusterInfo(unittest.TestCase):
         )
 
         # For Cluster1, calculate expected mean values for custom_layer
-        cluster_filter = result['Cluster'] == 'Cluster1'
+        cluster_filter = result['phenograph'] == 'Cluster1'
         expected_mean_gene1_cluster1 = ((1.5*1 + 1.5*2) / 2)
         mean_gene1_value = result.loc[cluster_filter, 'mean_Gene1'].iloc[0]
         self.assertAlmostEqual(

@@ -14,6 +14,8 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         self.adata.obsm['X_tsne'] = np.random.rand(10, 2)
         self.adata.obsm['X_umap'] = np.random.rand(10, 2)
         self.adata.obsm['X_pca'] = np.random.rand(10, 2)
+        self.adata.obsm['sumap'] = np.random.rand(10, 2)
+        self.adata.obsm['3dsumap'] = np.random.rand(10, 3)
         self.adata.obs['annotation_column'] = np.random.choice(
             ['A', 'B', 'C'], size=10
         )
@@ -58,6 +60,21 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
+
+    def test_associated_table(self):
+        fig, ax = dimensionality_reduction_plot(
+            self.adata,
+            annotation='annotation_column',
+            associated_table='sumap'
+        )
+        self.assertIsNotNone(fig)
+        self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 'sumap 1')
+        self.assertEqual(ax.get_ylabel(), 'sumap 2')
+        self.assertEqual(ax.get_title(), 'sumap-annotation_column')
 
     def test_feature_column(self):
         fig, ax = dimensionality_reduction_plot(
@@ -65,6 +82,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsNotNone(fig)
         self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE-gene_1')
 
     def test_ax_provided(self):
         fig, ax_provided = plt.subplots()
@@ -80,6 +100,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
 
     def test_real_umap_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -87,6 +110,9 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 'UMAP 1')
+        self.assertEqual(ax.get_ylabel(), 'UMAP 2')
+        self.assertEqual(ax.get_title(), 'UMAP-gene_1')
 
     def test_real_pca_plot(self):
         fig, ax = dimensionality_reduction_plot(
@@ -94,12 +120,43 @@ class TestDimensionalityReductionPlot(unittest.TestCase):
         )
         self.assertIsInstance(fig, plt.Figure)
         self.assertIsInstance(ax, plt.Axes)
+        self.assertEqual(ax.get_xlabel(), 'PCA 1')
+        self.assertEqual(ax.get_ylabel(), 'PCA 2')
+        self.assertEqual(ax.get_title(), 'PCA-annotation_column')
 
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
             dimensionality_reduction_plot(self.adata, 'invalid_method')
-        expected_msg = "Method should be one of {'tsne', 'umap', 'pca'}."
+        expected_msg = ("Method should be one of {'tsne', 'umap', 'pca'}."
+                        ' Got:"invalid_method"')
         self.assertEqual(str(cm.exception), expected_msg)
+
+    def test_input_derived_feature_3d(self):
+        with self.assertRaises(ValueError) as cm:
+            dimensionality_reduction_plot(
+                self.adata,
+                associated_table='3dsumap')
+        expected_msg = ('The associated table:"3dsumap" does not have'
+                        ' two dimensions. It shape is:"(10, 3)"')
+
+        self.assertEqual(str(cm.exception), expected_msg)
+
+    def test_conflicting_kwargs(self):
+        # This test ensures conflicting keys are removed from kwargs
+        fig, ax = dimensionality_reduction_plot(
+            self.adata,
+            'tsne',
+            annotation='annotation_column',
+            x_axis_title='Conflict X',
+            y_axis_title='Conflict Y',
+            plot_title='Conflict Title',
+            color_representation='Conflict Color'
+        )
+        self.assertIsNotNone(fig)
+        self.assertIsNotNone(ax)
+        self.assertEqual(ax.get_xlabel(), 't-SNE 1')
+        self.assertEqual(ax.get_ylabel(), 't-SNE 2')
+        self.assertEqual(ax.get_title(), 'TSNE-annotation_column')
 
 
 if __name__ == '__main__':

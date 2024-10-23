@@ -26,7 +26,7 @@ class TestSelectFeatureInput(unittest.TestCase):
         )
 
     def test_no_input(self):
-        # Test when no layer or input_derived_feature is specified
+        # Test when no layer or associated_table is specified
         selected_array = _select_input_features(self.adata)
         self.assertTrue(np.array_equal(selected_array, self.adata.X))
 
@@ -36,11 +36,11 @@ class TestSelectFeatureInput(unittest.TestCase):
         self.assertTrue(
             np.array_equal(selected_array, self.adata.layers['layer1']))
 
-    def test_input_derived_feature(self):
-        # Test when input_derived_feature is specified
+    def test_associated_table(self):
+        # Test when associated_table is specified
         selected_array = _select_input_features(
             self.adata,
-            input_derived_feature='input_derived_feature')
+            associated_table='input_derived_feature')
         expected_array = self.adata.obsm['input_derived_feature'].reshape(3, 2)
         self.assertTrue(np.array_equal(selected_array, expected_array))
 
