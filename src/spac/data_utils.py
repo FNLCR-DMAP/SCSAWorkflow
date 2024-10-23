@@ -1024,7 +1024,7 @@ def add_pin_color_rules(
     if isinstance(adata.X, pd.DataFrame):
         col_names = adata.X.columns
     else:
-        col_names = [f'gene{i+1}' for i in range(adata.X.shape[1])]
+        col_names = [f'feature{i+1}' for i in range(adata.X.shape[1])]
         # If X is a numpy array or sparse matrix
 
     result_str += "\nRaw data table X:\n"
@@ -1059,5 +1059,7 @@ def add_pin_color_rules(
     result_str = (
         f"Pin Color Rule Labels Count for `{color_map_name}`:\n" + result_str
     )
+
+    adata.uns[color_map_name+"_summary"] = result_str
 
     return label_matches, result_str
