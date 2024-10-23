@@ -5,6 +5,7 @@ import anndata as ad
 import numpy as np
 import warnings
 from sklearn.preprocessing import MinMaxScaler
+from typing import Tuple
 import logging
 from collections import defaultdict
 from spac.utils import regex_search_list, check_list_in_list, check_annotation
@@ -947,6 +948,132 @@ def combine_dfs(dataframes: list):
     return combined_df
 
 
+
+def add_pin_color_rules(
+    adata,
+    label_color_dict: dict,
+    color_map_name: str = "_spac_colors",
+    overwrite: bool = True
+) -> Tuple[dict, str]:
+    """
+    Adds pin color rules to the AnnData object and scans for matching labels.
+
+    This function scans unique labels in each adata.obs and column names in all
+    adata tables, to find the labels defined by the pin color rule.
+
+    Parameters
+    ----------
+    adata
+        The anndata object containing upstream analysis.
+    label_color_dict : dict
+        Dictionary of pin color rules with label as key and color as value.
+    color_map_name : str
+        The name to use for storing pin color rules in `adata.uns`.
+    overwrite : bool, optional
+        Whether to overwrite existing pin color rules in `adata.uns` with the
+        same name, by default True.
+
+    Returns
+    -------
+    label_matches : dict
+        Dictionary with the matching labels in each
+        section (obs, var, X, etc.).
+    result_str : str
+        Summary string with the matching labels in each
+        section (obs, var, X, etc.).
+
+    Raises
+    ------
+    ValueError
+        If `color_map_name` already exists in `adata.uns`
+        and `overwrite` is False.
+    """
+
+    # Check if the pin color rule already exists in adata.uns
+    if color_map_name in adata.uns and not overwrite:
+        raise ValueError(
+            f"`{color_map_name}` already exists in `adata.uns` ",
+            "and `overwrite` is set to False."
+        )
+
+    # Add or overwrite pin color rules in adata.uns
+    adata.uns[color_map_name] = label_color_dict
+
+    # Initialize a dictionary to store matching labels
+    label_matches = {
+        'obs': {},
+        'var': {},
+        'X': {}
+    }
+
+    # Initialize the report string
+    result_str = "\nobs:\n"
+
+    # Scan unique labels in adata.obs
+    for col in adata.obs.columns:
+        unique_labels = adata.obs[col].unique()
+        matching_labels = [
+            label for label in unique_labels if label in label_color_dict
+        ]
+        label_matches['obs'][col] = matching_labels
+        result_str += f"Annotation {col} in obs has matching labels: "
+        result_str += f"{matching_labels}\n"
+
+    result_str += "\nvar:\n"
+    # Scan unique labels in adata.var
+    for col in adata.var.columns:
+        unique_labels = adata.var[col].unique()
+        matching_labels = [
+            label for label in unique_labels if label in label_color_dict
+        ]
+        label_matches['var'][col] = matching_labels
+        result_str += f"Column {col} in var has matching labels: "
+        result_str += f"{matching_labels}\n"
+
+    # Scan column names in adata.X
+    if isinstance(adata.X, pd.DataFrame):
+        col_names = adata.X.columns
+    else:
+        col_names = [f'feature{i+1}' for i in range(adata.X.shape[1])]
+        # If X is a numpy array or sparse matrix
+
+    result_str += "\nRaw data table X:\n"
+    matching_labels = [
+        label for label in col_names if label in label_color_dict
+    ]
+    label_matches['X']['column_names'] = matching_labels
+    result_str += "Raw data table column names have matching labels: "
+    result_str += f"{matching_labels}\n"
+
+    result_str = "\nLabels in the analysis:\n" + result_str
+
+    # Check for labels in label_color_dict that
+    # do not match any labels in label_matches
+    unmatched_labels = set(label_color_dict.keys()) - set(
+        label
+        for section in label_matches.values()
+        for col in section.values()
+        for label in col
+    )
+    # Append warning for unmatched labels
+    if unmatched_labels:
+        for label in unmatched_labels:
+            result_str = f"{label}\n" + result_str
+        result_str = (
+            "\nWARNING: The following labels do not match any labels in "
+            "the analysis:\n" + result_str
+        )
+    for label, color in label_color_dict.items():
+        result_str = f"{label}: {color}\n" + result_str
+    result_str = "Labels with color pinned:\n" + result_str
+    result_str = (
+        f"Pin Color Rule Labels Count for `{color_map_name}`:\n" + result_str
+    )
+
+    adata.uns[color_map_name+"_summary"] = result_str
+
+    return label_matches, result_str
+
 def combine_annotations(
     adata: AnnData,
     annotations: list,
@@ -1009,3 +1136,4 @@ def combine_annotations(
     adata.obs[new_annotation_name] = combined_annotation
 
     return adata
+
