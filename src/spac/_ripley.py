@@ -33,8 +33,8 @@ __all__ = ["ripley"]
 # https://github.com/theislab/squidpy/blob/main/src/squidpy/external/_ripley.py
 
 
-@d.dedent
-@inject_docs(key=Key.obsm.spatial, rp=RipleyStat)
+#@d.dedent
+#@inject_docs(key=Key.obsm.spatial, rp=RipleyStat)
 def ripley(
     adata: AnnData,
     cluster_key: str,
@@ -132,7 +132,6 @@ def ripley(
 
     # old squidpy code
     # N = coordinates.shape[#0]
-    logg.warning(f"Running the simulations with n_cells:{n_observations}")
     hull = ConvexHull(coordinates)
     # pass in the area instead of convex hull
     # This is useful when using the same area in multiple ROIs
@@ -174,9 +173,14 @@ def ripley(
     )
 
     if phenotypes is None:
+
         for i in np.arange(np.max(cluster_idx) + 1):
             coord_c = coordinates[cluster_idx == i, :]
             if mode == RipleyStat.F:
+                logg.warning(
+                    f"Running the Ripley F simulations for phenotype ID:{i} "
+                    f"with n_cells:{n_observations}"
+                )
                 random = _ppp(hull, n_simulations=1, n_observations=n_observations, seed=seed)
                 tree_c = NearestNeighbors(metric=metric, n_neighbors=n_neigh).fit(coord_c)
                 distances, _ = tree_c.kneighbors(random, n_neighbors=n_neigh)
@@ -186,6 +190,9 @@ def ripley(
                 distances, _ = tree_c.kneighbors(coordinates[cluster_idx != i, :], n_neighbors=n_neigh)
                 bins, obs_stats = _f_g_function(distances.squeeze(), support)
             elif mode == RipleyStat.L:
+
+                n_center = n_observations
+                n_neighbor = n_observations
                 distances = pdist(coord_c, metric=metric)
                 bins, obs_stats = _l_function(distances, support,
                 n_observations, area)
@@ -195,7 +202,7 @@ def ripley(
             obs_arr[i] = obs_stats
     else:
         if mode == RipleyStat.L:
-            center_phenotype =  phenotypes[0]
+            center_phenotype = phenotypes[0]
             neighbor_phenotype = phenotypes[1]
 
             # Index of center and neighbor cells
@@ -226,10 +233,14 @@ def ripley(
 
     sims = np.empty((n_simulations, len(bins)))
     pvalues = np.ones((le.classes_.shape[0], len(bins)))
+    rng = default_rng(None if seed is None else seed)
 
     if phenotypes is None:
+        logg.warning(f"Running the simulations with n_cells:{n_observations}")
         for i in range(n_simulations):
-            random_i = _ppp(hull, n_simulations=1, n_observations=n_observations, seed=seed)
+            random_i = _ppp(
+                hull, n_simulations=1,
+                n_observations=n_observations, rng=rng, seed=seed)
             if mode == RipleyStat.F:
                 tree_i = NearestNeighbors(metric=metric, n_neighbors=n_neigh).fit(random_i)
                 distances_i, _ = tree_i.kneighbors(random, n_neighbors=1)
@@ -258,6 +269,7 @@ def ripley(
                 random_i = _ppp(hull,
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
+                                rng=rng,
                                 seed=seed)
 
                 # Randomly select the frist n_center cells as center cells
@@ -299,10 +311,15 @@ def ripley(
                            index=bins,
                            var_name="simulations")
 
-    res = {f"{mode}_stat": obs_df,
-           "sims_stat": sims_df,
-           "bins": bins,
-           "pvalues": pvalues}
+    res = {
+        f"{mode}_stat": obs_df,
+        "sims_stat": sims_df,
+        "bins": bins,
+        "pvalues": pvalues,
+        "n_center": n_center,
+        "n_neighbor": n_neighbor,
+        'area': area
+        }
 
     if TYPE_CHECKING:
         assert isinstance(res, dict)
@@ -359,7 +376,12 @@ def _l_multiple_function(distances: NDArrayA,
     return support, l_estimate
 
 
-def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | None = None) -> NDArrayA:
+def _ppp(
+        hull: ConvexHull,
+        n_simulations: int,
+        n_observations: int,
+        rng: default_rng | None = None,
+        seed: int | None = None) -> NDArrayA:
     """
     Simulate Poisson Point Process on a polygon.
 
@@ -371,6 +393,8 @@ def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | 
         Number of simulated point processes.
     n_observations
         Number of observations to sample from each simulation.
+    rng
+        Random number generator, superseeds seed
     seed
         Random seed.
 
@@ -378,7 +402,9 @@ def _ppp(hull: ConvexHull, n_simulations: int, n_observations: int, seed: int | 
     -------
     An Array with shape ``(n_simulation, n_observations, 2)``.
     """
-    rng = default_rng(None if seed is None else seed)
+
+    if rng is None:
+        rng = default_rng(None if seed is None else seed)
     vxs = hull.points[hull.vertices]
     deln = Delaunay(vxs)
 

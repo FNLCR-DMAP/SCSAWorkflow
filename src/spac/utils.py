@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.cm as cm
 import logging
 import warnings
+import numbers
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -376,6 +377,38 @@ def check_column_name(
     else:
         if any(symbol in column_name for symbol in symbol_checklist):
             raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
+
+def check_distances(distances):
+    """
+    Check that the distances are valid: must be an array-like of 
+    incremental positive values.
+
+    Parameters
+    ----------
+    distances : list, tuple, or np.ndarray
+        The list of increasing distances for the neighborhood profile.
+
+    Returns
+    -------
+    None
+        Raises a ValueError or TypeError if the distances are invalid.
+
+    Notes
+    -----
+    The distances must be a list of positive real numbers and must 
+    be monotonically increasing.
+    """
+    if not isinstance(distances, (list, tuple, np.ndarray)):
+        raise TypeError("distances must be a list, tuple, or numpy array. " +
+                        f"Got {type(distances)}")
+
+    if not all(isinstance(x, numbers.Real) and x >= 0 for x in distances):
+        raise ValueError("distances must be a list of positive numbers. " +
+                         f"Got {distances}")
+
+    if not all(distances[i] < distances[i+1] for i in range(len(distances)-1)):
+        raise ValueError("distances must be monotonically increasing. " +
+                         f"Got {distances}")
 
 
 def text_to_others(
