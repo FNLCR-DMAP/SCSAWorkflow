@@ -59,6 +59,7 @@ Ready to contribute? Here's how to set up `spac` for local development.
 
 5. Commit your changes and open a pull request.
 
+
 ## Pull Request Guidelines
 
 Before you submit a pull request, check that it meets these guidelines:
@@ -68,3 +69,49 @@ Before you submit a pull request, check that it meets these guidelines:
 3. The pull request should work for all currently supported operating systems and versions of Python.
 
 
+## General Tips on Writing Code 
+
+* API: Isolate the core functionalities that works with numpy/dataframes from the high level functions that deals with adata if needed.  
+* Code should be modular, and functions should do one thing. 
+* Data are represented using the AnnData format. See anndata - https://anndata.readthedocs.io/en/latest/
+  * Rows of obs,obsm,X,etc correspond to cells. Columns of var, X, varm, etc correspond to features (usually genes but could be protein markers or any single-cell measurement). 
+* All contributed code should have unittests. These are stored in the **tests/** directories. There should be a test for each file and function. For example, the file **src/transformations.py** has tests in **tests/test_transformations/*** 
+* Functions that change adata for dataframe in place, should not return that object.
+  * There are some notable exceptions to this but the general rule is that inplace updates should be inplace  
+* Landing functions start with adata, use standard variable names for layer, annotation, associated labels, etc. 
+
+ 
+
+### Unittests 
+
+1. Start with the simplest scenario  
+   1. Use minimum number of cells, markers, observations, etc. 
+2. Check corner cases  
+   1. Test with one feature, one cell, one annotation 
+3. Trigger and test handled exceptions  
+4. Aim for comprehensive code coverage  
+5. Hard code ground truth  
+   1. Add comments explaining why the ground truth makes sense 
+6. Consider the reader  
+   1. Write clear, easily understandable tests 
+   2. Prioritize quick comprehension  
+   3. Use descriptive test names and concise setups 
+
+
+### Error Handling, Warnings, Exception Checks, and Logging:  
+
+1. Reuse utility functions for exception handling (see src/utils.py for examples) 
+2. Error messages should include enough context on what is expected, and what has been entered. All the values entered by the user should be surrounded by double quotes .  
+3. Warning and error message format (use "") to provide context. 
+4. Make sure to log error messages. 
+
+
+### Figures 
+
+1. Include axis names and titles for all figures 
+2. Use programmatic labeling:  
+   1. Fetch data labels dynamically 
+   2. Avoid hard-coded titles and axis names 
+   3. Example: For UMAP plots, reflect coordinates in labels 
+
+ 
