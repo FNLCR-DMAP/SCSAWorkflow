@@ -73,11 +73,11 @@ Before you submit a pull request, check that it meets these guidelines:
 
 SPAC adopted a general terminlogy to abstract technical terms used in AnnData object from less technical users Here is the guide: 
 
-**cells:** Rows n the X matrix in AnnData
-**Features:** Columns in the X matrix in AnnData. Can represent gene expression of antibody intensity.
-**Tables:** Originally **layers** in AnnData, to represent transformed features
-**Associated Tables:** Corresponds to .obsm in Anndata. Can store spatial coordinates, UMAP, etc.
-**Annotation:** Corrresponds to .obs in AnnData. Can store cells phenotypes, experiment name, slideID, etc.
+* **cells:** Rows n the X matrix in AnnData
+* **Features:** Columns in the X matrix in AnnData. Can represent gene expression of antibody intensity.
+* **Tables:** Originally **layers** in AnnData, to represent transformed features
+* **Associated Tables:** Corresponds to .obsm in Anndata. Can store spatial coordinates, UMAP, etc.
+* **Annotation:** Corrresponds to .obs in AnnData. Can store cells phenotypes, experiment name, slideID, etc.
 
 ## General Tips on Writing Code 
 
