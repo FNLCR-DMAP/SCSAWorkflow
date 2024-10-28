@@ -69,6 +69,16 @@ Before you submit a pull request, check that it meets these guidelines:
 3. The pull request should work for all currently supported operating systems and versions of Python.
 
 
+## SPAC terminologies:
+
+SPAC adopted a general terminlogy to abstract technical terms used in AnnData object from less technical users Here is the guide: 
+
+**cells:** Rows n the X matrix in AnnData
+**Features:** Columns in the X matrix in AnnData. Can represent gene expression of antibody intensity.
+**Tables:** Originally **layers** in AnnData, to represent transformed features
+**Associated Tables:** Corresponds to .obsm in Anndata. Can store spatial coordinates, UMAP, etc.
+**Annotation:** Corrresponds to .obs in AnnData. Can store cells phenotypes, experiment name, slideID, etc.
+
 ## General Tips on Writing Code 
 
 * API: Isolate the core functionalities that works with numpy/dataframes from the high level functions that deals with adata if needed.  
@@ -78,7 +88,8 @@ Before you submit a pull request, check that it meets these guidelines:
 * All contributed code should have unittests. These are stored in the **tests/** directories. There should be a test for each file and function. For example, the file **src/transformations.py** has tests in **tests/test_transformations/*** 
 * Functions that change adata for dataframe in place, should not return that object.
   * There are some notable exceptions to this but the general rule is that inplace updates should be inplace  
-* Landing functions start with adata, use standard variable names for layer, annotation, associated labels, etc. 
+* Landing functions start with adata, use standard variable names for layer, annotation, associated tables, etc.
+* Use the numpy style guide for documenting the code, and standard pytho PEP 8 for code style 
 
  
 
