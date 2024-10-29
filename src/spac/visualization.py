@@ -1004,8 +1004,11 @@ def spatial_plot(
     x_coords, y_coords = spatial_coords[:, 0], spatial_coords[:, 1]
 
     #Pin Colors Choosing Logic
-    if pin_color_rules: 
-        color_map = adata.uns.get(pin_color_rules, None)
+    if pin_color_rules or '_spac_colors' in adata.uns: 
+        if pin_color_rules:
+            color_map = adata.uns.get(pin_color_rules, {})
+        else:
+            color_map = adata.uns['_spac_colors']
         if color_map is None:
             raise ValueError(f"Color map '{pin_color_rules}' not found in adata.uns.")
         if annotation in adata.obs:
@@ -1031,7 +1034,6 @@ def spatial_plot(
             feature_values = adata.X[:, feature_index]
         else:
             feature_values = adata.layers[layer][:, feature_index]  
-
         if vmin == -999:
             vmin = np.min(feature_values) 
         if vmax == -999:
