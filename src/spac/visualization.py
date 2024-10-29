@@ -110,9 +110,9 @@ def visualize_2D_scatter(
         else:
             color_map = adata.uns['_spac_colors']
 
-        # Check if 'broad_cell_type' exists in adata.obs
-        if 'broad_cell_type' in adata.obs:
-            broad_cell_types = adata.obs['broad_cell_type'].astype(str)  
+        # Check if the color_representation exists in adata.obs
+        if color_representation in adata.obs:
+            broad_cell_types = adata.obs[color_representation].astype(str)  
 
             # Map the labels to their corresponding colors using the color map
             colors = [color_map.get(label, 'gray') for label in broad_cell_types]
