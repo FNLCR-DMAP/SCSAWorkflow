@@ -58,6 +58,35 @@ class TestSelectValues(unittest.TestCase):
         expected_values = ['X', 'Y']
         self.assertCountEqual(unique_values_in_result, expected_values)
 
+    def test_exclude_values_dataframe_typical_case(self):
+        """
+        Test selecting specified values from a DataFrame column.
+        """
+        result_df = select_values(self.df,
+                                  'column1',
+                                  exclude_values=['A', 'B'])
+        # Expecting 1 row where column1 is 'C'
+        self.assertEqual(len(result_df), 1)
+        # Assert that the sets of unique values in the result and expected
+        # values are identical.
+        expected_values = ['C']
+        unique_values_in_result = result_df['column1'].unique().tolist()
+        self.assertCountEqual(unique_values_in_result, expected_values)
+
+    def test_exclude_values_adata_typical_case(self):
+        """
+        Test selecting specified values from an AnnData object.
+        """
+        result_adata = select_values(
+            self.adata,
+            'column1',
+            exclude_values=['X', 'Y'])
+        # Expecting 5 rows where column1 is 'Z'
+        self.assertEqual(result_adata.n_obs, 1)
+        unique_values_in_result = result_adata.obs['column1'].unique().tolist()
+        expected_values = ['Z']
+        self.assertCountEqual(unique_values_in_result, expected_values)
+
     def test_select_values_dataframe_all_values(self):
         """
         Test returning all DataFrame rows when no specific values are given.
@@ -94,12 +123,26 @@ class TestSelectValues(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_values(self.df, 'column1', ['Nonexistent'])
 
+    def test_exclude_values_dataframe_nonexistent_values(self):
+        """
+        Test error raised for nonexistent values from a DataFrame.
+        """
+        with self.assertRaises(ValueError):
+            select_values(self.df, 'column1', exclude_values=['Nonexistent'])
+
     def test_select_values_adata_nonexistent_values(self):
         """
         Test error raised for nonexistent values from an AnnData object.
         """
         with self.assertRaises(ValueError):
             select_values(self.adata, 'column1', ['Nonexistent'])
+
+    def test_exclude_values_adata_nonexistent_values(self):
+        """
+        Test error raised for nonexistent values from an AnnData object.
+        """
+        with self.assertRaises(ValueError):
+            select_values(self.adata, 'column1', exclude_values=['Nonexistent'])
 
 
 if __name__ == '__main__':
