@@ -144,6 +144,21 @@ class TestSelectValues(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_values(self.adata, 'column1', exclude_values=['Nonexistent'])
 
+    def test_both_values_and_exclude_values(self):
+        """
+        Test error raised when both values and exclude_values are specified.
+        """
+        with self.assertRaises(ValueError) as cm:
+            select_values(
+                self.df,
+                'column1',
+                values=['A'],
+                exclude_values=['B'])
+
+        # Check that the error is raised with proper message
+        error_msg = "Only use with values to include or exclude, but not both."
+        self.assertEqual(str(cm.exception), error_msg)
+
 
 if __name__ == '__main__':
     unittest.main()
