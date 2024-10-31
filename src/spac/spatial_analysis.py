@@ -2,12 +2,11 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-from spac.utils import check_annotation, check_table
+from spac.utils import check_annotation, check_table, check_distances
 import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
-import numbers
 import logging
 
 
@@ -75,15 +74,15 @@ def spatial_interaction(
         general.
 
     n_rings : int, default 1
-        Number of rings of neighbors for grid data. 
+        Number of rings of neighbors for grid data.
         Only used when coord_type = 'grid' (Visium)
-    
+
     n_neights : int, optional
         Default is 6.
         Depending on the ``coord_type``:
         - 'grid' (Visium) - number of neighboring tiles.
         - 'generic' - number of neighborhoods for non-grid data.
-        
+
     radius : float, optional
         Default is None.
         Only available when coord_type = 'generic'. Depending on the type:
@@ -107,7 +106,7 @@ def spatial_interaction(
         "A" and "B", the axes for A can be extracted by
         result['Ax']['A'] and matrix through result['Matrix']['A'].
 
-           
+
     """
 
     # List all available methods
@@ -258,7 +257,7 @@ def spatial_interaction(
         error_text = "Input data is not an AnnData object. " + \
             f"Got {str(type(adata))}"
         raise ValueError(error_text)
-    
+
     check_annotation(
         adata,
         annotations=annotation,
@@ -313,7 +312,7 @@ def spatial_interaction(
         ax_dictionary = {}
         matrix_dictionary = {}
         unique_values = adata.obs['concatenated_obs'].unique()
-        
+
         for subset_key in unique_values:
             # Subset the original AnnData object based on the unique value
             subset_adata = adata[
@@ -382,6 +381,209 @@ def spatial_interaction(
     return results
 
 
+def ripley_l(
+    adata,
+    annotation,
+    phenotypes,
+    distances,
+    regions=None,
+    spatial_key="spatial",
+    n_simulations=1,
+    area=None,
+    seed=42
+):
+    """
+    Calculate Ripley's L statistic for spatial data in `adata`.
+
+    Ripley's L statistic is a spatial point pattern analysis metric that
+    quantifies clustering or regularity in point patterns across various
+    distances. This function calculates the statistic for each region in
+    `adata` (if provided) or for all cells if regions are not specified.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The annotated data matrix containing the spatial coordinates and
+        cell phenotypes.
+    annotation : str
+        The key in `adata.obs` representing the annotation for cell phenotypes.
+    phenotypes : list of str
+        A list containing two phenotypes for which the Ripley L statistic
+        will be calculated. If the two phenotypes are the same, the
+        calculation is done for the same type; if different, it considers
+        interactions between the two.
+    distances : array-like
+        An array of distances at which to calculate Ripley's L statistic.
+        The values must be positive and incremental.
+    regions : str or None, optional
+        The key in `adata.obs` representing regions for stratifying the
+        data. If `None`, all cells will be treated as one region.
+    spatial_key : str, optional
+        The key in `adata.obsm` representing the spatial coordinates.
+        Default is `"spatial"`.
+    n_simulations : int, optional
+        Number of simulations to perform for significance testing. Default is 100.
+    area : float or None, optional
+        The area of the spatial region of interest. If `None`, the area
+        will be inferred from the data. Default is `None`.
+    seed : int, optional
+        Random seed for simulation reproducibility. Default is 42.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the Ripley's L results for each region or
+        the entire dataset if `regions` is `None`. The DataFrame includes
+        the following columns:
+        - `region`: The region label or 'all' if no regions are specified.
+        - `center_phenotype`: The first phenotype in `phenotypes`.
+        - `neighbor_phenotype`: The second phenotype in `phenotypes`.
+        - `ripley_l`: The Ripley's L statistic calculated for the region.
+        - `config`: A dictionary with configuration settings used for the calculation.
+
+    Notes
+    -----
+    Ripley's L is an adjusted version of Ripley's K that corrects for the
+    inherent increase in point-to-point distances as the distance grows.
+    This statistic is used to evaluate spatial clustering or dispersion
+    of points (cells) in biological datasets.
+
+    The function uses pre-defined distances and performs simulations to
+    assess the significance of observed patterns. The results are stored
+    in the `.uns` attribute of `adata` under the key `'ripley_l'`, or in
+    a new DataFrame if no prior results exist.
+
+    Examples
+    --------
+    Calculate Ripley's L for two phenotypes in a single region dataset:
+
+    >>> result = ripley_l(adata, annotation='cell_type', phenotypes=['A', 'B'], distances=np.linspace(0, 500, 100))
+
+    Calculate Ripley's L for multiple regions in `adata`:
+
+    >>> result = ripley_l(adata, annotation='cell_type', phenotypes=['A', 'B'], distances=np.linspace(0, 500, 100), regions='region_key')
+
+    """
+
+    # Check that distances is array-like with incremental positive values
+    check_distances(distances)
+
+    # Check that annotation and phenotypes exist in adata.obs
+    check_annotation(adata, annotations=[annotation], should_exist=True)
+
+    # Convert annotations to categorical
+    adata.obs[annotation] = pd.Categorical(adata.obs[annotation])
+
+    if regions is not None:
+        check_annotation(adata, annotations=[regions], should_exist=True)
+
+    # Import ripley function from the spac library
+    from spac._ripley import ripley
+    from functools import partial
+
+    # Partial function for Ripley calculation
+    ripley_func = partial(
+        ripley,
+        cluster_key=annotation,
+        mode='L',
+        spatial_key=spatial_key,
+        phenotypes=phenotypes,
+        support=distances,
+        n_simulations=n_simulations,
+        seed=seed,
+        area=area,
+        copy=True
+    )
+
+    # Check if adata already has ripley_l results,
+    # else initialize a result DataFrame
+    if 'ripley_l' in adata.uns.keys():
+        results = adata.uns['ripley_l']
+    else:
+        results = None
+
+    # Function to process Ripley L calculation for a region
+    def process_region(adata_region, region_label):
+        # Calculate number of cells in the region for the phenotypes
+        # n_cells = get_ncells(adata_region, annotation, phenotypes)
+
+        region_cells = adata_region.n_obs
+        # Log the region and cell info
+        print(
+            f'Processing region:"{region_label}".\n'
+            f'Cells in region:"{region_cells}"'
+        )
+
+        cell_counts = adata_region.obs[annotation].value_counts()
+
+        if region_cells < 3:
+            message = (
+                f'WARNING, not enough cells in region "{region_label}". '
+                f'Number of cells "{region_cells}". '
+                'Skipping Ripley L.'
+            )
+            print(message)
+            ripley_result = None
+        elif not phenotypes[0] in cell_counts.index:
+            message = (
+                f'WARNING, phenotype "{phenotypes[0]}" '
+                f'not found in region "{region_label}", skipping Ripley L.'
+            )
+            print(message)
+            ripley_result = None
+        elif not phenotypes[1] in cell_counts.index:
+            message = (
+                f'WARNING, phenotype "{phenotypes[1]}" '
+                f'not found in region "{region_label}", skipping Ripley L.'
+            )
+            print(message)
+            ripley_result = None
+        else:
+            # Calculate Ripley's L statistic using the partial function
+            ripley_result = ripley_func(adata=adata_region)
+            message = "Ripley's L successfully calculated."
+
+        # Create a result entry for the region
+        new_result = {
+            'region': region_label,
+            'center_phenotype': phenotypes[0],
+            'neighbor_phenotype': phenotypes[1],
+            'ripley_l': ripley_result,
+            'region_cells': region_cells,
+            'message': message,
+            'n_simulations': n_simulations,
+            'seed': seed
+        }
+
+        return new_result
+
+    def append_results(results, new_result):
+        # Convert the new result to a DataFrame
+        new_df = pd.DataFrame([new_result])
+
+        # Check if the dataframe exists and concatenate
+        if results is not None:
+            results = pd.concat([results, new_df], ignore_index=True)
+        else:
+            results = new_df
+        return results
+
+    # If regions are provided, process each region,
+    # else process all cells as a single region
+    if regions is not None:
+        for region in adata.obs[regions].unique():
+            adata_region = adata[adata.obs[regions] == region]
+            new_result = process_region(adata_region, region)
+            results = append_results(results, new_result)
+    else:
+        new_result = process_region(adata, 'all')
+        results = append_results(results, new_result)
+
+    # Save the results in the AnnData object
+    adata.uns['ripley_l'] = results
+    return results
+
+
 def neighborhood_profile(
     adata,
     phenotypes,
@@ -413,10 +615,10 @@ def neighborhood_profile(
 
     normalize : str or None, optional
         If 'total_cells', normalize the neighborhood profile based on the
-        total number of cells in each bin. 
+        total number of cells in each bin.
         If 'bin_area', normalize the neighborhood profile based on the area
         of every bin.  Default is None.
-    
+
     associated_table_name : str, optional
         The name of the column in adata.obsm that will contain the
         neighborhood profile. Default is 'neighborhood_profile'.
@@ -447,17 +649,7 @@ def neighborhood_profile(
     """
 
     # Check that distances is array like with incremental positive values
-    if not isinstance(distances, (list, tuple, np.ndarray)):
-        raise TypeError("distances must be a list, tuple, or numpy array. " +
-                        f"Got {type(distances)}")
-
-    if not all(isinstance(x, numbers.Real) and x >= 0 for x in distances):
-        raise ValueError("distances must be a list of positive numbers. " +
-                         f"Got {distances}")
-
-    if not all(distances[i] < distances[i+1] for i in range(len(distances)-1)):
-        raise ValueError("distances must be monotonically increasing. " +
-                         f"Got {distances}")
+    check_distances(distances)
 
     # Check that phenotypes is adata.obs
     check_annotation(
@@ -471,8 +663,6 @@ def neighborhood_profile(
             adata,
             annotations=[regions],
             should_exist=True)
-
-    # TODO, check that spatial_key is in adata.obsm
 
     check_table(
         adata=adata,
@@ -552,6 +742,7 @@ def neighborhood_profile(
                        It will be overwriten")
     adata.uns[associated_table_name] = summary
 
+
 def _neighborhood_profile_core(
         coord,
         phenotypes,
@@ -608,7 +799,7 @@ def _neighborhood_profile_core(
     # cell
     indexes = kdtree.query_ball_tree(kdtree, r=max_distance)
 
-    # Create phenotype bins to include the integer equivalent of 
+    # Create phenotype bins to include the integer equivalent of
     # every phenotype to use the histogram2d function instead of
     # a for loop over every phenotype
     phenotype_bins = np.arange(-0.5, n_phenotypes + 0.5, 1)
