@@ -1,26 +1,26 @@
-name: spac
+name: spac-scimap-testing
 channels:
   - ohsu-comp-bio
   - conda-forge
   - leej3
 dependencies:
-  - python=3.8.16
+  - python=3.10.15
   - pip
-  - matplotlib=3.5.2
-  - anndata=0.8.0
-  - scikit-learn==1.1.1
-  - squidpy==1.2.2
-  - numpy=1.19.5
+  - matplotlib
+  - anndata
   - scikit-learn
-  - seaborn==0.12.2
-  - scanpy=1.8.0
-  - pandas=1.4.3
+  - squidpy
+  - numpy
+  - scikit-learn
+  - seaborn
+  - scanpy
+  - pandas
   - plotly
   - cookiecutter
   - datashader
   - numba
   - Pillow
-  - zarr=2.12.0
+  - zarr
   - pip:
     - phenograph==1.5.7
     - pylint
@@ -28,3 +28,4 @@ dependencies:
     - sphinx
     - flake8
     - gendocs
+    - scimap==2.1.3
