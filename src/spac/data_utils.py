@@ -478,7 +478,7 @@ def combine_dfs_depracated(dataframes, annotations):
     return combined_dataframe
 
 
-def select_values(data, annotation, values=None):
+def select_values(data, annotation, values=None, exclude_values=None):
     """
     Selects values from either a pandas DataFrame or an AnnData object based
     on the annotation and values.
@@ -494,6 +494,8 @@ def select_values(data, annotation, values=None):
     values : str or list of str
         List of values for the annotation to include. If None, all values are
         considered for selection.
+    exclude_values : str or list of str
+        List of values for the annotation to exclude.
 
     Returns
     -------
@@ -501,9 +503,25 @@ def select_values(data, annotation, values=None):
         The filtered DataFrame or AnnData object containing only the selected
         rows based on the annotation and values.
     """
+
+    # Make sure that either values or exclude_values is set, but not both
+    if values is not None and exclude_values is not None:
+        error_msg = "Only use with values to include or exclude, but not both."
+        logging.error(error_msg)
+        raise ValueError(error_msg)
+
+    # If values and exclude_values are both None, return the original data
+    if values is None and exclude_values is None:
+        print("No values or exclude_values provided. Returning original data.")
+        return data
+
     # Ensure values are in a list format if not None
     if values is not None and not isinstance(values, list):
         values = [values]
+
+    # Ensure exclude_values are in a list format if not None
+    if exclude_values is not None and not isinstance(exclude_values, list):
+        exclude_values = [exclude_values]
 
     # Initialize possible_annotations based on the data type
     if isinstance(data, pd.DataFrame):
@@ -528,23 +546,43 @@ def select_values(data, annotation, values=None):
     )
 
     # Validate provided values against unique ones, if not None
-    if values is not None:
+    if values is not None or exclude_values is not None:
         if isinstance(data, pd.DataFrame):
             unique_values = data[annotation].astype(str).unique().tolist()
         elif isinstance(data, ad.AnnData):
             unique_values = data.obs[annotation].astype(str).unique().tolist()
         check_list_in_list(
-            values, "values", "label", unique_values, need_exist=True
+            values,
+            "values to include",
+            "label",
+            unique_values,
+            need_exist=True
+        )
+        check_list_in_list(
+            exclude_values,
+            "values to exclude",
+            "label",
+            unique_values,
+            need_exist=True
         )
 
     # Proceed with filtering based on data type and count matching cells
+    if values is not None:
+        if isinstance(data, pd.DataFrame):
+            filtered_data = data[data[annotation].isin(values)]
+        elif isinstance(data, ad.AnnData):
+            filtered_data = data[data.obs[annotation].isin(values)]
+
+    # Proceed with exclusion based on data type and count matching cells
+    if exclude_values is not None:
+        if isinstance(data, pd.DataFrame):
+            filtered_data = data[~data[annotation].isin(exclude_values)]
+        elif isinstance(data, ad.AnnData):
+            filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+
     if isinstance(data, pd.DataFrame):
-        filtered_data = data if values is None else \
-            data[data[annotation].isin(values)]
         count = filtered_data.shape[0]
     elif isinstance(data, ad.AnnData):
-        filtered_data = data if values is None else \
-            data[data.obs[annotation].isin(values)]
         count = filtered_data.n_obs
 
     logging.info(f"Summary of returned dataset: {count} cells "
