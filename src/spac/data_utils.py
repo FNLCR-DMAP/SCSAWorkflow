@@ -523,11 +523,14 @@ def select_values(data, annotation, values=None, exclude_values=None):
     if exclude_values is not None and not isinstance(exclude_values, list):
         exclude_values = [exclude_values]
 
-    # Initialize possible_annotations based on the data type
     if isinstance(data, pd.DataFrame):
-        possible_annotations = data.columns.tolist()
+        return _select_values_dataframe(
+            data,
+            annotation,
+            values,
+            exclude_values)
     elif isinstance(data, ad.AnnData):
-        possible_annotations = data.obs.columns.tolist()
+        return _select_values_anndata(data, annotation, values, exclude_values)
     else:
         error_msg = (
             "Unsupported data type. Data must be either a pandas DataFrame"
@@ -535,6 +538,10 @@ def select_values(data, annotation, values=None, exclude_values=None):
         )
         logging.error(error_msg)
         raise TypeError(error_msg)
+
+
+def _select_values_dataframe(data, annotation, values, exclude_values):
+    possible_annotations = data.columns.tolist()
 
     # Check if the annotation exists using check_list_in_list
     check_list_in_list(
@@ -546,47 +553,76 @@ def select_values(data, annotation, values=None, exclude_values=None):
     )
 
     # Validate provided values against unique ones, if not None
-    if values is not None or exclude_values is not None:
-        if isinstance(data, pd.DataFrame):
-            unique_values = data[annotation].astype(str).unique().tolist()
-        elif isinstance(data, ad.AnnData):
-            unique_values = data.obs[annotation].astype(str).unique().tolist()
-        check_list_in_list(
-            values,
-            "values to include",
-            "label",
-            unique_values,
-            need_exist=True
-        )
-        check_list_in_list(
-            exclude_values,
-            "values to exclude",
-            "label",
-            unique_values,
-            need_exist=True
-        )
+    unique_values = data[annotation].astype(str).unique().tolist()
+    check_list_in_list(
+        values,
+        "values to include",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+    check_list_in_list(
+        exclude_values,
+        "values to exclude",
+        "label",
+        unique_values,
+        need_exist=True
+    )
 
-    # Proceed with filtering based on data type and count matching cells
+    # Proceed with filtering based on values or exclude_values
     if values is not None:
-        if isinstance(data, pd.DataFrame):
-            filtered_data = data[data[annotation].isin(values)]
-        elif isinstance(data, ad.AnnData):
-            filtered_data = data[data.obs[annotation].isin(values)]
+        filtered_data = data[data[annotation].isin(values)]
+    elif exclude_values is not None:
+        filtered_data = data[~data[annotation].isin(exclude_values)]
 
-    # Proceed with exclusion based on data type and count matching cells
-    if exclude_values is not None:
-        if isinstance(data, pd.DataFrame):
-            filtered_data = data[~data[annotation].isin(exclude_values)]
-        elif isinstance(data, ad.AnnData):
-            filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+    count = filtered_data.shape[0]
+    logging.info(
+        f"Summary of returned dataset: {count} cells match the selected labels."
+        )
 
-    if isinstance(data, pd.DataFrame):
-        count = filtered_data.shape[0]
-    elif isinstance(data, ad.AnnData):
-        count = filtered_data.n_obs
+    return filtered_data
 
-    logging.info(f"Summary of returned dataset: {count} cells "
-                 "match the selected labels.")
+
+def _select_values_anndata(data, annotation, values, exclude_values):
+    possible_annotations = data.obs.columns.tolist()
+
+    # Check if the annotation exists using check_list_in_list
+    check_list_in_list(
+        input=[annotation],
+        input_name="annotation",
+        input_type="column name/annotation key",
+        target_list=possible_annotations,
+        need_exist=True
+    )
+
+    # Validate provided values against unique ones, if not None
+    unique_values = data.obs[annotation].astype(str).unique().tolist()
+    check_list_in_list(
+        values,
+        "values to include",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+    check_list_in_list(
+        exclude_values,
+        "values to exclude",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+
+    # Proceed with filtering based on values or exclude_values
+    if values is not None:
+        filtered_data = data[data.obs[annotation].isin(values)]
+    elif exclude_values is not None:
+        filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+
+    count = filtered_data.n_obs
+    logging.info(
+        f"Summary of returned dataset: {count}"
+        " cells match the selected labels."
+        )
 
     return filtered_data
 
