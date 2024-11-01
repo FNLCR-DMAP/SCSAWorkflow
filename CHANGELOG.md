@@ -2,34 +2,101 @@
 
 
 
-## v0.7.10 (2024-10-16)
+## v0.7.11 (2024-11-01)
+
+### Feature
+
+* feat(select_values): Added option to exclude values ([`c58dc91`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c58dc91bcf23afa6d1baa6b4ea6865c070dd622d))
+
+* feat(add_pin_color_rules): Added the summary to the adata object ([`aaceb41`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aaceb411181fc2323832170b83a962eee8fad5e7))
 
 ### Fix
 
-* fix(ripley_l): Convert annotation to categorical before calling core function ([`1d88883`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d88883563748f2fea8175be3e946b5f3a21ca18))
+* fix: the formatter broke it again ([`a0b4387`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a0b4387c83e7c4928a10daa76a1f97e04e7aeba1))
+
+* fix: clean up documentation ([`fda8f49`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fda8f49bf914de9c70fa31b89dc6202fd428f7b6))
+
+* fix: undo formatting ([`2a167e5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2a167e5078b721d21f2b793f3b9ac8838cc4760d))
+
+* fix: fix incorrect dataset used for test ([`79804e3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/79804e39416791dbbeedb65d59431d5ef72c9447))
+
+* fix: addressing PR review suggestions ([`6b01296`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b01296587d8a3821be8c06d04b8b62ef91b9217))
+
+* fix: add &#34;no_label&#34; identifier for classes ([`96c5559`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/96c555948a8c2f14d1477a28fd2662b89920da7f))
+
+### Refactor
+
+* refactor(select_values): split select_values into core functions for DataFrame and AnnData ([`a67dbd1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a67dbd14e87d2a050d3d7d429bcf437413015728))
 
 ### Test
 
-* test(combine_annotation): Added test to check that the annotation list cannot be empty ([`8bc8f65`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bc8f6541973f125f2ed445f57646a9cd68bac08))
+* test(select_values): Added test to the case where both include and exclude are set ([`e29b21e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e29b21efcabe90b9c4fbdca0abe6446bd7f5ab9f))
 
 ### Unknown
 
-* Merge pull request #247 from FNLCR-DMAP/dev
+* Merge pull request #254 from FNLCR-DMAP/dev
 
-Dev ([`b3f4e30`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3f4e30271e199755525fe4644d52d3f8a5873e5))
+Dev ([`352cf2b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/352cf2b32b7ec9b6b51f0f8631f1e51ecd5ca07d))
 
-* Merge pull request #245 from FNLCR-DMAP/combine_annotations
+* Merge pull request #253 from FNLCR-DMAP/feature_exclude_values
 
-test(combine_annotation): Added test to check that the annotation lis… ([`25dbc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25dbc52e05bfeddb4104a70ecfb5623dc3902aae))
+refactor(select_values): split select_values into core functions for … ([`15a8fdd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/15a8fdd0e99cc5a7558bea04a315967fef969cb2))
 
-* Merge pull request #246 from FNLCR-DMAP/ripley_l
+* Merge pull request #252 from FNLCR-DMAP/feature_exclude_values
 
-fix(ripley_l): Convert annotation to categorical before calling core … ([`f0814b7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f0814b79b289679f363b46fc543e89632ec90739))
+test(select_values): Added test to the case where both include and ex… ([`dfb3ecb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dfb3ecb67c50ad52e2f3c309a0c16f05bffb0725))
+
+* Merge pull request #251 from FNLCR-DMAP/feature_exclude_values
+
+feat(select_values): Added option to exclude values ([`fc74ca0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fc74ca01cc4b53fb45f4039b90dccb29c964d13c))
+
+* doc(CONTRIBUTING.md): Added commit message guidelines ([`1c99e3b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1c99e3bd555ee31105e6d414ffa0224ab692221f))
+
+* doc(README): Add developer guide. ([`ad72393`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ad72393d762938ee913b97df9dbdb0b8b3c14ba0))
+
+* Merge pull request #248 from FNLCR-DMAP/feat-phenograph-annotation
+
+Added feature subsetting unit tests for raw data ([`ebc2fd9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ebc2fd96e6ffe8a93317e392cba74e83a4598370))
+
+* Merge pull request #249 from FNLCR-DMAP/documentation
+
+update to documentation ([`6f068f3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6f068f3324ab230583b1c0292a3d66ada8812812))
+
+* doc: Update CONTRIBUTING.md ([`74c571d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/74c571da5c1cd1d5d5ec028efa69ec75248db504))
+
+* doc(CONTRIBUTING.md): Add SPAC terminology ([`295ae27`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/295ae276d1a17a4e0b64e6bb42c58cb6737ad0aa))
+
+* Merge branch &#39;documentation&#39; into dev ([`d89afec`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d89afecf85bf787424ffc99789bd25dd138e7ab6))
+
+* Merge remote-tracking branch &#39;upstream/dev&#39; into dev
+
+Merging &#39;dev&#39; branch of main spac repo into &#39;dev&#39; branch of forked repo ([`7dfbd2a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7dfbd2a4821ad54b3a5467010a6d950d37b3cffa))
+
+* update CONTRIBUTING.MD with coding practicies and repo conventions ([`868bd02`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/868bd02f08f109bd7750a97c3a2829f7485a0d59))
+
+* Merge pull request #190 from FNLCR-DMAP/pin_colors
+
+feat: Adding pin color function and tests ([`6a27ae6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6a27ae6f2d0d5b367e64510735f956038c65067e))
+
+* Merge branch &#39;dev&#39; into pin_colors ([`7d955eb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7d955eb4a8e11fdd4f868afc37e3acf8cc75cd9c))
+
+* Revert &#34;Merge pull request #1 from FNLCR-DMAP/knn-clustering&#34;
+
+This reverts commit a2fd7b425fac035bdad37ee04c2facc651a0402c, reversing
+changes made to 7d6aef3a20ceb3299df69c03cc8f6ca0cead493b. ([`0af8f0c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0af8f0c64e4a337e9c116ed7a8ac631167aa518f))
+
+* Merge branch &#39;main&#39; into dev ([`dd29495`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dd29495c3c7997cf07a6f20ca633ebb9d0b50642))
+
+* Merge pull request #1 from FNLCR-DMAP/knn-clustering
+
+feat: Add KNN Clustering wrapper ([`a2fd7b4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a2fd7b425fac035bdad37ee04c2facc651a0402c))
 
 
-## v0.7.9 (2024-10-16)
+## v0.7.10 (2024-10-16)
 
 ### Ci
+
+* ci(version): Automatic development release ([`a06d429`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a06d429faaad5988b69c57aaca276acce52e0a14))
 
 * ci(version): Automatic development release ([`5a5335a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5a5335a846b47c0a43df5b3a149304ef466b37c1))
 
@@ -53,11 +120,19 @@ fix(ripley_l): Convert annotation to categorical before calling core … ([`f081
 
 * feat(combine_annotations): Data utility to combine multiple annotaitons into one ([`58dfd38`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/58dfd38415c49535824e745ee56c8b80056736e6))
 
+* feat: validation for label column in obs ([`f09ae2e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f09ae2ecc0038135111e539a6ba1e413837e479c))
+
 * feat: add conda env setup ([`df257b8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/df257b86ba3f8e8f6e66c6c5549161c1d1c090f4))
 
 * feat(assign_manual_phenotypes): Function to define and associate manual phenotypes to cells ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Fix
+
+* fix(ripley_l): Convert annotation to categorical before calling core function ([`1d88883`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d88883563748f2fea8175be3e946b5f3a21ca18))
+
+* fix: fix setup + unittests ([`e21245a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e21245a246f271cbe3438e4f7b8f6fd0de45bfe2))
+
+* fix: update knn clustering documentation ([`b47eb1f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b47eb1fc9dc56d45ab84d1f2af2b47e92d03d6fc))
 
 * fix(test_plot_ripley_l): fixed unit tests where regions was passed unecesseararly ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
 
@@ -95,6 +170,12 @@ fix(ripley_l): Convert annotation to categorical before calling core … ([`f081
 
 ### Test
 
+* test(combine_annotation): Added test to check that the annotation list cannot be empty ([`8bc8f65`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8bc8f6541973f125f2ed445f57646a9cd68bac08))
+
+* test: setup function changes + knn capitalization ([`946ea48`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/946ea48db8bf7c4594d4b51a0261d296d5e20209))
+
+* test: add knn clustering test file ([`26e839b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/26e839b5730f19f02090602ff65f0773bc57ac41))
+
 * test(plot_riley_l): added unit test to catch exception when data is missing ([`5f6cb11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f6cb117cfda2eaf149cb04c8a92a64eb47f4c98))
 
 * test(riple_l): Updated the precision calculation for complete spatial randomness tests ([`36e8090`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36e8090882c0357a7b0077f62945931933c98608))
@@ -102,6 +183,18 @@ fix(ripley_l): Convert annotation to categorical before calling core … ([`f081
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #247 from FNLCR-DMAP/dev
+
+Dev ([`b3f4e30`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3f4e30271e199755525fe4644d52d3f8a5873e5))
+
+* Merge pull request #245 from FNLCR-DMAP/combine_annotations
+
+test(combine_annotation): Added test to check that the annotation lis… ([`25dbc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25dbc52e05bfeddb4104a70ecfb5623dc3902aae))
+
+* Merge pull request #246 from FNLCR-DMAP/ripley_l
+
+fix(ripley_l): Convert annotation to categorical before calling core … ([`f0814b7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f0814b79b289679f363b46fc543e89632ec90739))
 
 * Merge pull request #244 from FNLCR-DMAP/dev
 
@@ -115,6 +208,16 @@ feat(combine_annotations): Data utility to combine multiple annotaito… ([`453f
 
 perf(plot_ripley_l): Printed the warning when phenotype is missing in… ([`c8c7fc1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c8c7fc1511e0f06dcdaaeecb0cfde84e153d41bb))
 
+* tests: update knn tests to use label param ([`4e1f92d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e1f92d25db497ac546111fd540cbf5a5d29cc8f))
+
+* Merge branch &#39;knn-clustering&#39; of https://github.com/FNLCR-DMAP/spac_datamine into knn-clustering ([`9654f25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9654f2567342b13a1e02c5345c18f2e5d03aeecd))
+
+* added mask thingy to separate labeled data from non to pass to classifier ([`9045b53`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9045b538e9c7e0c3e250fa922cd9e7813d9d1f4f))
+
+* tests: update synth data ([`76128fe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/76128fed551991890d1b482e41aa8faabc5f2917))
+
+* Added feature subsetting unit tests for raw data ([`a1ec382`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a1ec3826d5dd3f32cc1e9c00e879df0c62fe100c))
+
 * Merge pull request #241 from FNLCR-DMAP/dev
 
 Dev ([`92b9fa1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92b9fa101f23e656d4ec0701b205dc9a8c764de4))
@@ -122,6 +225,8 @@ Dev ([`92b9fa1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92b9fa101f23e
 * Merge pull request #240 from FNLCR-DMAP/ripley_l
 
 Ripley l ([`2cbaac9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2cbaac9b0699b924f9b6bfda32ab92ba7e0a9464))
+
+* knn clustering function call, still need make the function(?) to valididate the label input ([`5e26ded`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5e26ded108ca4287e71b9b85ec7f25994d9d6855))
 
 * doc(_ripley): Removed documentation that cause a warning ([`e46a980`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e46a980821dbd0bb2c015fb24e262b8c7784eb4b))
 
@@ -294,6 +399,8 @@ fix(batch_normalize): add annotation and layer checks ([`9d61140`](https://githu
 
 * feat: correct functions and unit tests based on CR ([`f97f25b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f97f25bc05be5c13ba58d351d3c54a8e39fd2484))
 
+* feat: Adding pin color function and tests ([`67d68ce`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/67d68ce63ea8ee14d7d271e657add083eca6669c))
+
 * feat(normalize_per_batch): add intra_batch normalization and unit tests ([`7ec823b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7ec823b808e0afc9928b34b8b7c7bf588754b1dc))
 
 * feat(visualization): Added the option to visualiza an associated table in dimentionality reduction plot ([`480fa58`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/480fa5801d326c5a3edb2be7fc89ac54b5765477))
@@ -403,6 +510,10 @@ for the area, and allowing callers to set the number of cells/observations ([`ad
 * fix(setup.py): Update pacakge find location ([`b3a9b3e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3a9b3ec39c9a453a55a2b6cc8639aedff0ee056))
 
 ### Performance
+
+* perf: Adding default name for color map ([`cbc6f59`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cbc6f593cf199ca51743f62e0f04bb4c1ae4962b))
+
+* perf: Added unittests ([`b469383`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b469383251abd1512ae041756c05d3477497dc6f))
 
 * perf(annot_cat_rel): update the code to handle same column input ([`d01d48d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d01d48def54140fbab5378457fd97259cbb8936b))
 
