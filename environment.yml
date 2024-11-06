@@ -1,10 +1,10 @@
-name: spac-scimap-testing
+name: spac-scimap-3913
 channels:
   - ohsu-comp-bio
   - conda-forge
   - leej3
 dependencies:
-  - python=3.10.15
+  - python=3.9.13
   - pip
   - matplotlib
   - anndata
