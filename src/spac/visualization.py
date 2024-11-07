@@ -148,10 +148,6 @@ def visualize_2D_scatter(
                         center_x, center_y, cluster,
                         fontsize=9, ha='center', va='center'
                     )
-            handles, label_texts = ax.get_legend_handles_labels()
-            for handle in handles:
-                handle.set_sizes([legend_label_size])
-            ax.legend(handles=handles, labels=label_texts, fontsize=legend_label_size)
     else:
         scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
 
