@@ -104,6 +104,7 @@ def visualize_2D_scatter(
     else:
         fig = ax.figure
 
+    labels = kwargs.pop('labels', None)
     if adata is not None and (pin_color is not None or '_spac_colors' in adata.uns):
         if pin_color is not None:
             color_map = adata.uns.get(pin_color, {})
@@ -112,44 +113,51 @@ def visualize_2D_scatter(
 
         # Check if the color_representation exists in adata.obs
         if color_representation in adata.obs:
-            broad_cell_types = adata.obs[color_representation].astype(str)  
-
-            # Map the labels to their corresponding colors using the color map
-            colors = [color_map.get(label, 'gray') for label in broad_cell_types]
-
+            annotation_colors = adata.obs[color_representation].astype(str)  
+            colors = [color_map.get(label, 'gray') for label in annotation_colors]
             scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
-
-            # Create a custom legend
-            unique_labels = list(color_map.keys())
-            handles = [plt.Line2D([0], [0], marker='o', color='w', label=label,
-                                   markerfacecolor=color_map[label], markersize=10)
-                       for label in unique_labels]
-            ax.legend(handles=handles, title=f"Color represents: {color_representation}", loc='best', bbox_to_anchor=(1, 1))
         else:
-            print("⚠️ Warning: 'broad_cell_type' not found in adata.obs. Defaulting to gray.")
             scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+    elif labels is not None:
+        # Check if labels are categorical
+        if pd.api.types.is_categorical_dtype(labels):
+            if isinstance(labels, pd.Series):
+                unique_clusters = labels.cat.categories
+            elif isinstance(labels, pd.Categorical):
+                unique_clusters = labels.categories
+            else:
+                raise TypeError(
+                    "Expected labels to be of type Series[Categorical] or "
+                    "Categorical."
+                )
+            cmap = plt.get_cmap('tab20', len(unique_clusters))
+            for idx, cluster in enumerate(unique_clusters):
+                mask = np.array(labels) == cluster
+                ax.scatter(
+                    x[mask], y[mask],
+                    color=cmap(idx),
+                    label=cluster,
+                    s=point_size
+                )
+
+                # Annotate cluster centers if required
+                if annotate_centers:
+                    center_x = np.mean(x[mask])
+                    center_y = np.mean(y[mask])
+                    ax.text(
+                        center_x, center_y, cluster,
+                        fontsize=9, ha='center', va='center'
+                    )
+            handles, label_texts = ax.get_legend_handles_labels()
+            for handle in handles:
+                handle.set_sizes([legend_label_size])
+            ax.legend(handles=handles, labels=label_texts, fontsize=legend_label_size)
     else:
-        print("Warning: adata is None or neither pin_color nor '_spac_colors' was found. Defaulting to gray.")
         scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
 
-    # If annotate_centers is True, annotate the centers of clusters
-    if annotate_centers and adata is not None:
-        unique_labels = adata.obs['broad_cell_type'].unique()
-        for label in unique_labels:
-            mask = (broad_cell_types == label)
-            if np.any(mask):
-                center_x = np.mean(x[mask])
-                center_y = np.mean(y[mask])
-                ax.text(center_x, center_y, label, fontsize=fontsize, ha='center', va='center')
-
-    # Equal aspect ratio for the axes
-    ax.set_aspect('equal', 'datalim')
-
-    # Set axis labels
+    # Set axis labels and title
     ax.set_xlabel(x_axis_title)
     ax.set_ylabel(y_axis_title)
-
-    # Set plot title
     if plot_title is not None:
         ax.set_title(plot_title)
 
@@ -873,8 +881,8 @@ def spatial_plot(
         The matplotlib Axes containing the analysis plots.
         The returned ax is the passed ax or new ax created.
         Only works if plotting a single component.
-    pin_color_rules: str
-        The name of the pin color dictionary that contains the labels
+    pin_color_rules : str, optional
+        Dictionary name in `adata.uns` for custom colors.
     **kwargs
         Arguments to pass to matplotlib.pyplot.scatter()
     Returns
@@ -982,44 +990,39 @@ def spatial_plot(
     if ax is not None and not isinstance(ax, plt.Axes):
         raise ValueError(err_msg_ax)
 
+    feature_names = adata.var_names.tolist()
+    annotation_names = adata.obs.columns.tolist()
+
     if feature is not None:
         feature_index = feature_names.index(feature)
-        feature_annotation = feature + "spatial_plot"
+        feature_values = adata.layers[layer][:, feature_index] if layer else adata.X[:, feature_index]
+        feature_annotation = feature + "_spatial_plot"
         if vmin == -999:
-            vmin = np.min(layer[:, feature_index])
+            vmin = np.min(feature_values)
         if vmax == -999:
-            vmax = np.max(layer[:, feature_index])
-        adata.obs[feature_annotation] = layer[:, feature_index]
+            vmax = np.max(feature_values)
+        adata.obs[feature_annotation] = feature_values.flatten()
         color_region = feature_annotation
     else:
         color_region = annotation
-        vmin = None
-        vmax = None
 
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-    
+
     spatial_coords = adata.obsm['spatial']
     x_coords, y_coords = spatial_coords[:, 0], spatial_coords[:, 1]
 
-    #Pin Colors Choosing Logic
-    if pin_color_rules or '_spac_colors' in adata.uns: 
-        if pin_color_rules:
-            color_map = adata.uns.get(pin_color_rules, {})
-        else:
-            color_map = adata.uns['_spac_colors']
-        if color_map is None:
-            raise ValueError(f"Color map '{pin_color_rules}' not found in adata.uns.")
-        if annotation in adata.obs:
-            colors = [color_map.get(label, 'gray') for label in adata.obs[annotation]]
-        else:
-            raise ValueError(f"Annotation '{annotation}' not found in adata.obs.")
+    # Color handling
+    if pin_color_rules:
+        color_map = adata.uns.get(pin_color_rules, {})
+    elif '_spac_colors' in adata.uns:
+        color_map = adata.uns['_spac_colors']
     else:
-        colors = None
-
-
-   # Create scatter plot
+        color_map = {}
+    
+    colors = [color_map.get(label, 'gray') for label in adata.obs[annotation]]
+    # Create scatter plot
     scatter = ax.scatter(
         x=x_coords,
         y=y_coords,
@@ -1029,19 +1032,11 @@ def spatial_plot(
         **kwargs
     )
 
+    # Set color limits for feature-based visualization
     if feature is not None:
-        if layer is None:
-            feature_values = adata.X[:, feature_index]
-        else:
-            feature_values = adata.layers[layer][:, feature_index]  
-        if vmin == -999:
-            vmin = np.min(feature_values) 
-        if vmax == -999:
-            vmax = np.max(feature_values)
-
         scatter.set_clim(vmin, vmax)
- 
-    return ax
+
+    return [ax]
 
 
 def boxplot(adata, annotation=None, second_annotation=None, layer=None,
