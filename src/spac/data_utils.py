@@ -12,7 +12,6 @@ from spac.utils import regex_search_list, check_list_in_list, check_annotation
 from anndata import AnnData
 
 
-
 def append_annotation(
     data: pd.DataFrame,
     annotation: dict
@@ -495,7 +494,8 @@ def select_values(data, annotation, values=None, exclude_values=None):
         List of values for the annotation to include. If None, all values are
         considered for selection.
     exclude_values : str or list of str
-        List of values for the annotation to exclude.
+        List of values for the annotation to exclude. Can't be combined with
+        values.
 
     Returns
     -------

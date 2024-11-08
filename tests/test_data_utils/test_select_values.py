@@ -60,7 +60,7 @@ class TestSelectValues(unittest.TestCase):
 
     def test_exclude_values_dataframe_typical_case(self):
         """
-        Test selecting specified values from a DataFrame column.
+        Test excludeing specified values from a DataFrame column.
         """
         result_df = select_values(self.df,
                                   'column1',
