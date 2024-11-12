@@ -69,6 +69,7 @@ def visualize_2D_scatter(
         raise ValueError("x and y must be array-like.")
     if len(x) != len(y):
         raise ValueError("x and y must have the same length.")
+    
 
     # Define color themes
     themes = {
@@ -105,17 +106,36 @@ def visualize_2D_scatter(
         fig = ax.figure
 
     labels = kwargs.pop('labels', None)
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("The length of labels must match the length of x and y.")
+
     if adata is not None and (pin_color is not None or '_spac_colors' in adata.uns):
         if pin_color is not None:
             color_map = adata.uns.get(pin_color, {})
         else:
             color_map = adata.uns['_spac_colors']
-
         # Check if the color_representation exists in adata.obs
         if color_representation in adata.obs:
             annotation_colors = adata.obs[color_representation].astype(str)  
             colors = [color_map.get(label, 'gray') for label in annotation_colors]
             scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
+            # Optionally, add a colorbar if needed
+            if isinstance(annotation_colors.iloc[0], (int, float)):  # Continuous data
+                cbar = plt.colorbar(scatter, ax=ax)
+                cbar.set_label(color_representation)  # Optional: label for colorbar
+
+            # Annotate cluster centers if required (for continuous data)
+            if annotate_centers:
+                # Assuming unique clusters are determined by the color representation
+                unique_clusters = annotation_colors.unique()  # This should get the unique labels for annotation
+                for cluster in unique_clusters:
+                    mask = annotation_colors == cluster
+                    center_x = np.mean(x[mask])
+                    center_y = np.mean(y[mask])
+                    ax.text(
+                        center_x, center_y, cluster,
+                        fontsize=9, ha='center', va='center'
+                    )
         else:
             scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
     elif labels is not None:
@@ -148,14 +168,20 @@ def visualize_2D_scatter(
                         center_x, center_y, cluster,
                         fontsize=9, ha='center', va='center'
                     )
-    else:
-        scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+
+            ax.legend()
+
+        else:
+            scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+
 
     # Set axis labels and title
     ax.set_xlabel(x_axis_title)
     ax.set_ylabel(y_axis_title)
     if plot_title is not None:
         ax.set_title(plot_title)
+    
+    ax.set_aspect('equal', adjustable='box')
 
     return fig, ax
 
@@ -988,10 +1014,14 @@ def spatial_plot(
 
     feature_names = adata.var_names.tolist()
     annotation_names = adata.obs.columns.tolist()
-
+    
     if feature is not None:
         feature_index = feature_names.index(feature)
-        feature_values = adata.layers[layer][:, feature_index] if layer else adata.X[:, feature_index]
+        # Ensure layer is correctly handled
+        if layer is None:
+            feature_values = adata.X[:, feature_index]
+        else:
+            feature_values = adata.layers[layer][:, feature_index]
         feature_annotation = feature + "_spatial_plot"
         if vmin == -999:
             vmin = np.min(feature_values)
@@ -999,8 +1029,7 @@ def spatial_plot(
             vmax = np.max(feature_values)
         adata.obs[feature_annotation] = feature_values.flatten()
         color_region = feature_annotation
-    else:
-        color_region = annotation
+
 
     if ax is None:
         fig = plt.figure()
