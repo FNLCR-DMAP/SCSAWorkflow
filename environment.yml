@@ -1,4 +1,4 @@
-name: spac-3913
+name: spac
 channels:
   - ohsu-comp-bio
   - conda-forge
