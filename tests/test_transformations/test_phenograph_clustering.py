@@ -42,8 +42,50 @@ class TestPhenographClustering(unittest.TestCase):
                 )
         self.syn_data.layers['counts'] = self.syn_dataset
 
-        self.syn_data.obsm["derived_features"] = \
+        self.syn_data.obsm['derived_features'] = \
             self.syn_dataset
+
+        # Larger synthetic data for feature subsetting
+        self.large_syn_dataset = np.array([
+                    np.concatenate(
+                            (
+                                np.random.normal(100, 1, 500),
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(10, 1, 500)
+                            )
+                        ),
+                    np.concatenate(
+                            (
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(100, 1, 500),
+                                np.random.normal(100, 1, 500)
+                            )
+                        ),
+                    np.concatenate(
+                            (
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(100, 1, 500),
+                                np.random.normal(10, 1, 500)
+                            )
+                        ),
+                    np.concatenate(
+                            (
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(10, 1, 500),
+                                np.random.normal(100, 1, 500)
+                            )
+                        )
+                ]).T
+
+        self.large_syn_data = AnnData(self.large_syn_dataset,
+                                      var=pd.DataFrame(index=['gene1',
+                                                              'gene2',
+                                                              'gene3',
+                                                              'gene4']))
+        self.large_syn_data.layers['counts'] = self.large_syn_dataset
+
+        self.large_syn_data.obsm['derived_features'] = \
+            self.large_syn_dataset
 
     def test_same_cluster_assignments_with_same_seed(self):
         # Run phenograph_clustering with a specific seed
@@ -108,7 +150,7 @@ class TestPhenographClustering(unittest.TestCase):
     def test_associated_features(self):
         # Run phenograph using the derived feature and generate two clusters
         output_annotation = 'derived_phenograph'
-        input_derived_feature = 'derived_features'
+        associated_table = 'derived_features'
         phenograph_clustering(
             adata=self.syn_data,
             features=None,
@@ -116,7 +158,7 @@ class TestPhenographClustering(unittest.TestCase):
             k=50,
             seed=None,
             output_annotation=output_annotation,
-            input_derived_feature=input_derived_feature,
+            associated_table=associated_table,
             resolution_parameter=0.1
         )
 
@@ -124,7 +166,44 @@ class TestPhenographClustering(unittest.TestCase):
             len(np.unique(self.syn_data.obs[output_annotation])),
             2)
 
+    def test_two_feature_subsetting_raw(self):
+        # Clustering on just 2 of 4 features using the raw data
+        selected_features = ['gene1', 'gene2']
+        phenograph_clustering(
+            adata=self.large_syn_data,
+            features=selected_features,
+            layer='counts',
+            resolution_parameter=0.1,
+            seed=42
+        )
+        # Tests that the correct features are used
+        self.assertEqual(
+            selected_features, 
+            self.large_syn_data.uns['phenograph_features'])
+        # Tests that 2 clusters are created, around points (10,100) and (100,10)
+        self.assertEqual(
+            len(np.unique(self.large_syn_data.obs['phenograph'])),
+            2)
 
+    def test_three_feature_subsetting_raw(self):
+        # Clustering on just 3 of 4 features using the raw data
+        selected_features = ['gene1', 'gene2', 'gene3']
+        phenograph_clustering(
+            adata=self.large_syn_data,
+            features=selected_features,
+            layer='counts',
+            resolution_parameter=0.1,
+            seed=42
+        )
+        # Tests that the correct features are used
+        self.assertEqual(
+            selected_features, 
+            self.large_syn_data.uns['phenograph_features'])
+        # Tests that 3 clusters are created, around points (100,10,10), 
+        # (10,100,100), and (10,100,10)
+        self.assertEqual(
+            len(np.unique(self.large_syn_data.obs['phenograph'])),
+            3)
 
 if __name__ == '__main__':
     unittest.main()

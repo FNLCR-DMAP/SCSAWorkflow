@@ -8,7 +8,8 @@ from sklearn.preprocessing import MinMaxScaler
 from typing import Tuple
 import logging
 from collections import defaultdict
-from spac.utils import regex_search_list, check_list_in_list
+from spac.utils import regex_search_list, check_list_in_list, check_annotation
+from anndata import AnnData
 
 
 def append_annotation(
@@ -476,7 +477,7 @@ def combine_dfs_depracated(dataframes, annotations):
     return combined_dataframe
 
 
-def select_values(data, annotation, values=None):
+def select_values(data, annotation, values=None, exclude_values=None):
     """
     Selects values from either a pandas DataFrame or an AnnData object based
     on the annotation and values.
@@ -492,6 +493,9 @@ def select_values(data, annotation, values=None):
     values : str or list of str
         List of values for the annotation to include. If None, all values are
         considered for selection.
+    exclude_values : str or list of str
+        List of values for the annotation to exclude. Can't be combined with
+        values.
 
     Returns
     -------
@@ -499,15 +503,34 @@ def select_values(data, annotation, values=None):
         The filtered DataFrame or AnnData object containing only the selected
         rows based on the annotation and values.
     """
+
+    # Make sure that either values or exclude_values is set, but not both
+    if values is not None and exclude_values is not None:
+        error_msg = "Only use with values to include or exclude, but not both."
+        logging.error(error_msg)
+        raise ValueError(error_msg)
+
+    # If values and exclude_values are both None, return the original data
+    if values is None and exclude_values is None:
+        print("No values or exclude_values provided. Returning original data.")
+        return data
+
     # Ensure values are in a list format if not None
     if values is not None and not isinstance(values, list):
         values = [values]
 
-    # Initialize possible_annotations based on the data type
+    # Ensure exclude_values are in a list format if not None
+    if exclude_values is not None and not isinstance(exclude_values, list):
+        exclude_values = [exclude_values]
+
     if isinstance(data, pd.DataFrame):
-        possible_annotations = data.columns.tolist()
+        return _select_values_dataframe(
+            data,
+            annotation,
+            values,
+            exclude_values)
     elif isinstance(data, ad.AnnData):
-        possible_annotations = data.obs.columns.tolist()
+        return _select_values_anndata(data, annotation, values, exclude_values)
     else:
         error_msg = (
             "Unsupported data type. Data must be either a pandas DataFrame"
@@ -515,6 +538,10 @@ def select_values(data, annotation, values=None):
         )
         logging.error(error_msg)
         raise TypeError(error_msg)
+
+
+def _select_values_dataframe(data, annotation, values, exclude_values):
+    possible_annotations = data.columns.tolist()
 
     # Check if the annotation exists using check_list_in_list
     check_list_in_list(
@@ -526,27 +553,76 @@ def select_values(data, annotation, values=None):
     )
 
     # Validate provided values against unique ones, if not None
+    unique_values = data[annotation].astype(str).unique().tolist()
+    check_list_in_list(
+        values,
+        "values to include",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+    check_list_in_list(
+        exclude_values,
+        "values to exclude",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+
+    # Proceed with filtering based on values or exclude_values
     if values is not None:
-        if isinstance(data, pd.DataFrame):
-            unique_values = data[annotation].astype(str).unique().tolist()
-        elif isinstance(data, ad.AnnData):
-            unique_values = data.obs[annotation].astype(str).unique().tolist()
-        check_list_in_list(
-            values, "values", "label", unique_values, need_exist=True
+        filtered_data = data[data[annotation].isin(values)]
+    elif exclude_values is not None:
+        filtered_data = data[~data[annotation].isin(exclude_values)]
+
+    count = filtered_data.shape[0]
+    logging.info(
+        f"Summary of returned dataset: {count} cells match the selected labels."
         )
 
-    # Proceed with filtering based on data type and count matching cells
-    if isinstance(data, pd.DataFrame):
-        filtered_data = data if values is None else \
-            data[data[annotation].isin(values)]
-        count = filtered_data.shape[0]
-    elif isinstance(data, ad.AnnData):
-        filtered_data = data if values is None else \
-            data[data.obs[annotation].isin(values)]
-        count = filtered_data.n_obs
+    return filtered_data
 
-    logging.info(f"Summary of returned dataset: {count} cells "
-                 "match the selected labels.")
+
+def _select_values_anndata(data, annotation, values, exclude_values):
+    possible_annotations = data.obs.columns.tolist()
+
+    # Check if the annotation exists using check_list_in_list
+    check_list_in_list(
+        input=[annotation],
+        input_name="annotation",
+        input_type="column name/annotation key",
+        target_list=possible_annotations,
+        need_exist=True
+    )
+
+    # Validate provided values against unique ones, if not None
+    unique_values = data.obs[annotation].astype(str).unique().tolist()
+    check_list_in_list(
+        values,
+        "values to include",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+    check_list_in_list(
+        exclude_values,
+        "values to exclude",
+        "label",
+        unique_values,
+        need_exist=True
+    )
+
+    # Proceed with filtering based on values or exclude_values
+    if values is not None:
+        filtered_data = data[data.obs[annotation].isin(values)]
+    elif exclude_values is not None:
+        filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+
+    count = filtered_data.n_obs
+    logging.info(
+        f"Summary of returned dataset: {count}"
+        " cells match the selected labels."
+        )
 
     return filtered_data
 
@@ -768,7 +844,7 @@ def calculate_centroid(
     y_max : str
         column name with maximum y value
     new_x : str
-        the new column name of the x dimension of the centroid,
+        the new column name of the x dimension of the cientroid,
         allowing characters are alphabetic, digits and underscore
     new_y : str
         the new column name of the y dimension of the centroid,
@@ -777,7 +853,8 @@ def calculate_centroid(
     Returns
     -------
     data : pd.DataFrame
-        dataframe with two new columns names
+        dataframe with two new centroid columns addded. Note that the
+        dataframe is modified in place.
 
     """
 
@@ -800,10 +877,16 @@ def calculate_centroid(
         if col not in data.columns:
             raise ValueError(f"Column {col} does not exist in the dataframe.")
 
-    # calculate the centroids
-    data[new_x] = (data[x_min] + data[x_max]) / 2
-    data[new_y] = (data[y_min] + data[y_max]) / 2
+    # Calculate the centroids
+    x_centroid = (data[x_min] + data[x_max]) / 2
+    y_centroid = (data[y_min] + data[y_max]) / 2
 
+    # Assign new centroid columns to the DataFrame in one operation
+    data[[new_x, new_y]] = pd.concat(
+        [x_centroid, y_centroid], axis=1, keys=[new_x, new_y]
+    )
+
+    # Return the modified DataFrame
     return data
 
 
@@ -939,6 +1022,7 @@ def combine_dfs(dataframes: list):
     return combined_df
 
 
+
 def add_pin_color_rules(
     adata,
     label_color_dict: dict,
@@ -1024,7 +1108,7 @@ def add_pin_color_rules(
     if isinstance(adata.X, pd.DataFrame):
         col_names = adata.X.columns
     else:
-        col_names = [f'gene{i+1}' for i in range(adata.X.shape[1])]
+        col_names = [f'feature{i+1}' for i in range(adata.X.shape[1])]
         # If X is a numpy array or sparse matrix
 
     result_str += "\nRaw data table X:\n"
@@ -1060,4 +1144,70 @@ def add_pin_color_rules(
         f"Pin Color Rule Labels Count for `{color_map_name}`:\n" + result_str
     )
 
+    adata.uns[color_map_name+"_summary"] = result_str
+
     return label_matches, result_str
+
+def combine_annotations(
+    adata: AnnData,
+    annotations: list,
+    separator: str,
+    new_annotation_name: str
+) -> AnnData:
+    """
+    Combine multiple annotations into a new annotation using a defined separator.
+
+    Parameters
+    ----------
+    adata : AnnData
+        The input AnnData object whose .obs will be modified.
+
+    annotations : list
+        List of annotation column names to combine.
+
+    separator : str
+        Separator to use when combining annotations.
+
+    new_annotation_name : str
+        The name of the new annotation to be created.
+
+    Returns
+    -------
+    AnnData
+        The AnnData object with the combined annotation added.
+    """
+
+    # Check that the list is not emply
+    if len(annotations) == 0:
+        raise ValueError('Annotations list cannot be empty.')
+    # Validate input annotations using utility function
+    check_annotation(adata, annotations=annotations)
+
+    if type(annotations) is not list:
+        raise ValueError(
+            f'Annotations must be a list. Got {type(annotations)}'
+        )
+    # Ensure separator is a string
+    if not isinstance(separator, str):
+        raise ValueError(
+            f'Separator must be a string. Got {type(separator)}'
+        )
+
+    # Check if new annotation name already exists
+    if new_annotation_name in adata.obs.columns:
+        raise ValueError(
+            f"'{new_annotation_name}' already exists in adata.obs.")
+
+    # Combine annotations into the new column
+
+    # Convert selected annotations to string type
+    annotations_str = adata.obs[annotations].astype(str)
+
+    # Combine annotations using the separator
+    combined_annotation = annotations_str.agg(separator.join, axis=1)
+
+    # Assign the combined result to the new annotation column
+    adata.obs[new_annotation_name] = combined_annotation
+
+    return adata
+

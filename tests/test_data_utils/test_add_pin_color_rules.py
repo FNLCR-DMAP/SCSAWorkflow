@@ -78,6 +78,10 @@ class TestAddPinColorRules(unittest.TestCase):
             self.label_color_dict
         )
 
+        # Test that adata.uns contains "new_color_map_summary"
+        print(self.adata.uns)
+        self.assertIn("new_color_map_summary", self.adata.uns)
+
     def test_add_pin_color_rules_empty_dict(self):
         # Test that the function handles an empty
         # label color dictionary correctly

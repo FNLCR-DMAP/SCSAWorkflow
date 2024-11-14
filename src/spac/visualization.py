@@ -8,6 +8,7 @@ import math
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
@@ -95,7 +96,9 @@ def visualize_2D_scatter(
     if point_size is None:
         point_size = 5000 / num_points
 
+
     # Get figure size from kwargs or set defaults
+
     fig_width = kwargs.get('fig_width', 10)
     fig_height = kwargs.get('fig_height', 8)
     fontsize = kwargs.get('fontsize', 12)
@@ -167,7 +170,16 @@ def visualize_2D_scatter(
                     "Expected labels to be of type Series[Categorical] or "
                     "Categorical."
                 )
-            cmap = plt.get_cmap('tab20', len(unique_clusters))
+
+            # Combine colors from multiple colormaps
+            cmap1 = plt.get_cmap('tab20')
+            cmap2 = plt.get_cmap('tab20b')
+            cmap3 = plt.get_cmap('tab20c')
+            colors = cmap1.colors + cmap2.colors + cmap3.colors
+
+            # Use the number of unique clusters to set the colormap length
+            cmap = ListedColormap(colors[:len(unique_clusters)])
+
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -176,6 +188,7 @@ def visualize_2D_scatter(
                     label=cluster,
                     s=point_size
                 )
+                print(f"Cluster: {cluster}, Points: {np.sum(mask)}")
 
                 # Annotate cluster centers if required
                 if annotate_centers:
@@ -183,7 +196,7 @@ def visualize_2D_scatter(
                     center_y = np.mean(y[mask])
                     ax.text(
                         center_x, center_y, cluster,
-                        fontsize=9, ha='center', va='center'
+                        fontsize=fontsize, ha='center', va='center'
                     )
 
             ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
@@ -191,6 +204,7 @@ def visualize_2D_scatter(
             scatter = ax.scatter(x, y, c=labels, cmap=cmap, s=point_size, **kwargs)
             cbar = plt.colorbar(scatter, ax=ax)
             cbar.set_label('Label Intensity') 
+
 
 
     # Set axis labels and title
@@ -201,20 +215,35 @@ def visualize_2D_scatter(
     
     ax.set_aspect('equal', adjustable='box')
 
+    # Set axis labels
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+
+    # Set plot title
+    if plot_title is not None:
+        ax.set_title(plot_title)
+
     return fig, ax
 
 
-def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
-                                  layer=None, ax=None, **kwargs):
+def dimensionality_reduction_plot(
+        adata,
+        method=None,
+        annotation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        associated_table=None,
+        **kwargs):
     """
-    Visualize scatter plot in PCA, t-SNE or UMAP basis.
+    Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.
 
     Parameters
     ----------
     adata : anndata.AnnData
         The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
         function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
-    method : str
+    method : str, optional (default: None)
         Dimensionality reduction method to visualize.
         Choose from {'tsne', 'umap', 'pca'}.
     annotation : str, optional
@@ -229,8 +258,12 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     ax : matplotlib.axes.Axes, optional (default: None)
         A matplotlib axes object to plot on.
         If not provided, a new figure and axes will be created.
+    associated_table : str, optional (default: None)
+        Name of the key in `obsm` that contains the numpy array. Takes
+        precedence over `method`
     **kwargs
-        Parameters passed to visualize_2D_scatter function.
+        Parameters passed to visualize_2D_scatter function,
+        including point_size.
 
     Returns
     -------
@@ -255,16 +288,36 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
         check_feature(adata, features=[feature])
 
     # Validate the method and check if the necessary data exists in adata.obsm
-    valid_methods = ['tsne', 'umap', 'pca']
-    if method not in valid_methods:
-        raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}.")
+    if associated_table is None:
+        valid_methods = ['tsne', 'umap', 'pca']
+        if method not in valid_methods:
+            raise ValueError("Method should be one of {'tsne', 'umap', 'pca'}"
+                             f'. Got:"{method}"')
 
-    key = f'X_{method}'
-    if key not in adata.obsm.keys():
-        raise ValueError(
-            f"{key} coordinates not found in adata.obsm. "
-            f"Please run {method.upper()} before calling this function."
+        key = f'X_{method}'
+        if key not in adata.obsm.keys():
+            raise ValueError(
+                f"{key} coordinates not found in adata.obsm. "
+                f"Please run {method.upper()} before calling this function."
+            )
+
+    else:
+        check_table(
+            adata=adata,
+            tables=associated_table,
+            should_exist=True,
+            associated_table=True
         )
+
+        associated_table_shape = adata.obsm[associated_table].shape
+        if associated_table_shape[1] != 2:
+            raise ValueError(
+                f'The associated table:"{associated_table}" does not have'
+                f' two dimensions. It shape is:"{associated_table_shape}"'
+            )
+        key = associated_table
+
+    print(f'Running visualization using the coordinates: "{key}"')
 
     # Extract the 2D coordinates
     x, y = adata.obsm[key].T
@@ -272,13 +325,50 @@ def dimensionality_reduction_plot(adata, method, annotation=None, feature=None,
     # Determine coloring scheme
     if annotation:
         color_values = adata.obs[annotation].astype('category').values
+        color_representation = annotation
     elif feature:
         data_source = adata.layers[layer] if layer else adata.X
         color_values = data_source[:, adata.var_names == feature].squeeze()
+        color_representation = feature
     else:
         color_values = None
+        color_representation = None
 
-    fig, ax = visualize_2D_scatter(x, y, ax=ax, labels=color_values, **kwargs)
+    # Set axis titles based on method and color representation
+    if method == 'tsne':
+        x_axis_title = 't-SNE 1'
+        y_axis_title = 't-SNE 2'
+        plot_title = f'TSNE-{color_representation}'
+    elif method == 'pca':
+        x_axis_title = 'PCA 1'
+        y_axis_title = 'PCA 2'
+        plot_title = f'PCA-{color_representation}'
+    elif method == 'umap':
+        x_axis_title = 'UMAP 1'
+        y_axis_title = 'UMAP 2'
+        plot_title = f'UMAP-{color_representation}'
+    else:
+        x_axis_title = f'{associated_table} 1'
+        y_axis_title = f'{associated_table} 2'
+        plot_title = f'{associated_table}-{color_representation}'
+
+    # Remove conflicting keys from kwargs
+    kwargs.pop('x_axis_title', None)
+    kwargs.pop('y_axis_title', None)
+    kwargs.pop('plot_title', None)
+    kwargs.pop('color_representation', None)
+
+    fig, ax = visualize_2D_scatter(
+        x=x,
+        y=y,
+        ax=ax,
+        labels=color_values,
+        x_axis_title=x_axis_title,
+        y_axis_title=y_axis_title,
+        plot_title=plot_title,
+        color_representation=color_representation,
+        **kwargs
+    )
 
     return fig, ax
 
@@ -410,8 +500,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     fig : matplotlib.figure.Figure
         The created figure for the plot.
 
-    axs : list[matplotlib.axes.Axes]
-        List of the axes of the histogram plots.
+    axs : matplotlib.axes.Axes or list of Axes
+        The Axes object(s) of the histogram plot(s). Returns a single Axes
+        if only one plot is created, otherwise returns a list of Axes.
 
     """
 
@@ -485,6 +576,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Ensure ax_array is always iterable
             if n_groups == 1:
                 ax_array = [ax_array]
+            else:
+                ax_array = ax_array.flatten()
 
             for i, ax_i in enumerate(ax_array):
                 sns.histplot(data=df[df[group_by] == groups[i]].dropna(),
@@ -495,7 +588,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         sns.histplot(data=df, x=data_column, ax=ax, **kwargs)
         axs.append(ax)
 
-    return fig, axs
+    if len(axs) == 1:
+        return fig, axs[0]
+    else:
+        return fig, axs
 
 
 def heatmap(adata, column, layer=None, **kwargs):
@@ -769,7 +865,7 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
 
 
 def threshold_heatmap(
-    adata, feature_cutoffs, annotation, layer=None, **kwargs
+    adata, feature_cutoffs, annotation, layer=None, swap_axes=False, **kwargs
 ):
     """
     Creates a heatmap for each feature, categorizing intensities into low,
@@ -789,6 +885,8 @@ def threshold_heatmap(
     layer : str, optional
         Layer name in adata.layers to use for intensities.
         If None, uses .X attribute.
+    swap_axes : bool, optional
+        If True, swaps the axes of the heatmap.
     **kwargs : keyword arguments
         Additional keyword arguments to pass to scanpy's heatmap function.
 
@@ -804,8 +902,7 @@ def threshold_heatmap(
 
     # Use utility functions for input validation
     check_table(adata, tables=layer)
-    if annotation:
-        check_annotation(adata, annotations=annotation)
+    check_annotation(adata, annotations=annotation)
     if feature_cutoffs:
         check_feature(adata, features=list(feature_cutoffs.keys()))
 
@@ -814,11 +911,6 @@ def threshold_heatmap(
         err_type = type(annotation).__name__
         err_msg = (f'Annotation should be string. Got {err_type}.')
         raise TypeError(err_msg)
-
-    # Assert annotation is a column in adata.obs DataFrame
-    if annotation not in adata.obs.columns:
-        err_msg = f"'{annotation}' not found in adata.obs DataFrame."
-        raise ValueError(err_msg)
 
     if not isinstance(feature_cutoffs, dict):
         raise TypeError("feature_cutoffs should be a dictionary.")
@@ -869,12 +961,41 @@ def threshold_heatmap(
         layer='intensity',
         cmap=cmap,
         norm=norm,
+        show=False,   # Ensure the plot is not displayed but returned
+        swap_axes=swap_axes,
         **kwargs
     )
 
-    colorbar = plt.gcf().axes[-1]
-    colorbar.set_yticks([0, 1, 2])
-    colorbar.set_yticklabels(['low', 'medium', 'high'])
+    # Print the keys of the heatmap_plot dictionary
+    print("Keys of heatmap_plot:", heatmap_plot.keys())
+
+    # Get the main heatmap axis from the available keys
+    heatmap_ax = heatmap_plot.get('heatmap_ax')
+
+    # If 'heatmap_ax' key does not exist, access the first axis available
+    if heatmap_ax is None:
+        heatmap_ax = next(iter(heatmap_plot.values()))
+    print("Heatmap Axes:", heatmap_ax)
+
+    # Find the colorbar associated with the heatmap
+    cbar = None
+    for child in heatmap_ax.get_children():
+        if hasattr(child, 'colorbar'):
+            cbar = child.colorbar
+            break
+    if cbar is None:
+        print("No colorbar found in the plot.")
+        return
+    print("Colorbar:", cbar)
+
+    new_ticks = [0, 1, 2]
+    new_labels = ['Low', 'Medium', 'High']
+    cbar.set_ticks(new_ticks)
+    cbar.set_ticklabels(new_labels)
+    pos_heatmap = heatmap_ax.get_position()
+    cbar.ax.set_position(
+        [pos_heatmap.x1 + 0.02, pos_heatmap.y0, 0.02, pos_heatmap.height]
+    )
 
     return heatmap_plot
 
@@ -1069,6 +1190,7 @@ def spatial_plot(
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
 
+
     spatial_coords = adata.obsm['spatial']
     x_coords, y_coords = spatial_coords[:, 0], spatial_coords[:, 1]
 
@@ -1168,6 +1290,7 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     """
 
     # Use utility functions to check inputs
+    print("Calculating Box Plot...")
     if layer:
         check_table(adata, tables=layer)
     if annotation:
@@ -1214,6 +1337,17 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
         ([second_annotation] if second_annotation else [])
     ]
 
+    # Check for negative values
+    if log_scale and (df[features] < 0).any().any():
+        print(
+            "There are negative values in this data, disabling the log scale."
+        )
+        log_scale = False
+
+    # Apply log1p transformation if log_scale is True
+    if log_scale:
+        df[features] = np.log1p(df[features])
+
     # Create the plot
     if ax:
         fig = ax.get_figure()
@@ -1256,27 +1390,43 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
 
     else:
         if len(features) > 1:
-            sns.boxplot(data=df[features], ax=ax, **kwargs)
+            if v_orient:
+                sns.boxplot(data=df[features], ax=ax, **kwargs)
+            else:
+                melted_data = df.melf()
+                sns.boxplot(data=melted_data, x="value", y="variable",
+                            hue=annotation,  ax=ax, **kwargs)
             ax.set_title("Multiple Features")
         else:
             if v_orient:
-                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
-            else:
                 sns.boxplot(y=df[features[0]], ax=ax, **kwargs)
+                ax.set_xticks([0])  # Set a single tick for the single feature
+                ax.set_xticklabels([features[0]])  # Set the label for the tick
+            else:
+                sns.boxplot(x=df[features[0]], ax=ax, **kwargs)
+                ax.set_yticks([0])  # Set a single tick for the single feature
+                ax.set_yticklabels([features[0]])  # Set the label for the tick
             ax.set_title("Single Boxplot")
 
-    # Check if all data points are positive and non-zero
-    all_positive = (df[features] > 0).all().all()
+    if log_scale:
+        ax.set_yscale('log') if v_orient else ax.set_xscale('log')
 
-    # If log_scale is True and all data points are positive and non-zero
-    if log_scale and all_positive:
-        plt.yscale('log')
+    # Set x and y-axis labels
+    if v_orient:
+        xlabel = annotation if annotation else 'Feature'
+        ylabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    else:
+        xlabel = 'log(Intensity)' if log_scale else 'Intensity'
+        ylabel = annotation if annotation else 'Feature'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     plt.xticks(rotation=90)
     plt.tight_layout()
-    # plt.show()
 
-    return fig, ax
+    return fig, ax, df
 
 
 def interative_spatial_plot(
@@ -1604,5 +1754,275 @@ def sankey_plot(
         r=10,
         t=sankey_font * 3,
         b=sankey_font))
+
+    return fig
+
+
+def relational_heatmap(
+        adata: anndata.AnnData,
+        source_annotation: str,
+        target_annotation: str,
+        color_map: str = "mint",
+        **kwargs
+):
+    """
+    Generates a relational heatmap from the given AnnData object.
+    The color map refers to matplotlib color maps, default is mint.
+    For more information on colormaps, see:
+    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The annotated data matrix.
+    source_annotation : str
+        The source annotation to use for the relational heatmap.
+    target_annotation : str
+        The target annotation to use for the relational heatmap.
+    color_map : str
+        The color map to use for the relational heatmap. Default is mint.
+    **kwargs : dict, optional
+        Additional keyword arguments. For example, you can pass font_size=12.0.
+
+    Returns
+    -------
+    plotly.graph_objs._figure.Figure
+        The generated relational heatmap.
+    """
+    # Default font size
+    font_size = kwargs.get('font_size', 12.0)
+    prefix = kwargs.get('prefix', True)
+
+    # Get the relationship between source and target annotations
+
+    label_relations = annotation_category_relations(
+            adata=adata,
+            source_annotation=source_annotation,
+            target_annotation=target_annotation,
+            prefix=prefix
+        )
+
+    # Pivot the data to create a matrix for the heatmap
+    heatmap_matrix = label_relations.pivot(
+        index='source',
+        columns='target',
+        values='percentage_source'
+    )
+    x = list(heatmap_matrix.columns)
+    y = list(heatmap_matrix.index)
+
+    # Create text labels for the heatmap
+    label_relations['text_label'] = [
+        '{}%'.format(val) for val in label_relations["percentage_source"]
+    ]
+
+    heatmap_matrix2 = label_relations.pivot(
+        index='source',
+        columns='target',
+        values='percentage_source'
+        )
+
+    hover_template = 'Source: %{z}%<br>Target: %{customdata}%<extra></extra>'
+    # Ensure alignment of the text data with the heatmap matrix
+    z = list()
+    iter_list = list()
+    for y_item in y:
+        iter_list.clear()
+        for x_item in x:
+            z_data_point = label_relations[
+                (
+                    label_relations['target'] == x_item
+                ) & (
+                    label_relations['source'] == y_item
+                )
+            ]['percentage_source']
+            iter_list.append(
+                0 if len(z_data_point) == 0 else z_data_point.iloc[0]
+            )
+        z.append([_ for _ in iter_list])
+
+    # Create heatmap
+    fig = ff.create_annotated_heatmap(
+        z=z,
+        colorscale=color_map,
+        customdata=heatmap_matrix2.values,
+        hovertemplate=hover_template
+    )
+
+    fig.update_layout(
+        overwrite=True,
+        xaxis=dict(
+            ticks="",
+            dtick=1,
+            side="top",
+            gridcolor="rgb(0, 0, 0)",
+            tickvals=list(range(len(x))),
+            ticktext=x
+        ),
+        yaxis=dict(
+            ticks="",
+            dtick=1,
+            ticksuffix="   ",
+            tickvals=list(range(len(y))),
+            ticktext=y
+        )
+    )
+
+    for i in range(len(fig.layout.annotations)):
+        fig.layout.annotations[i].font.size = font_size
+
+    fig.update_layout(
+        xaxis=dict(title=source_annotation),
+        yaxis=dict(title=target_annotation)
+    )
+
+    fig.update_layout(
+        margin=dict(
+            l=5,
+            r=5,
+            t=font_size * 2,
+            b=font_size * 2
+            )
+        )
+
+    fig.update_xaxes(
+        side="bottom",
+        tickangle=90
+    )
+
+    print(fig)
+
+    return fig
+
+
+def plot_ripley_l(
+        adata,
+        phenotypes,
+        annotation=None,
+        regions=None,
+        sims=False,
+        **kwargs):
+    """
+    Plot Ripley's L statistic for multiple bins and different regions
+    for a given pair of phenotypes.
+
+    Parameters
+    ----------
+    adata : AnnData
+        AnnData object containing Ripley's L results in `adata.uns['ripley_l']`.
+    phenotypes : tuple of str
+        A tuple of two phenotypes: (center_phenotype, neighbor_phenotype).
+    regions : list of str, optional
+        A list of region labels to plot. If None, plot all available regions.
+        Default is None.
+    sims : bool, optional
+        Whether to plot the simulation results. Default is False.
+    kwargs : dict, optional
+        Additional keyword arguments to pass to `seaborn.lineplot`.
+
+    Raises
+    ------
+    ValueError
+        If the Ripley L results are not found in `adata.uns['ripley_l']`.
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+        The Axes object containing the plot, which can be further modified.
+
+    Example
+    -------
+    >>> ax = plot_ripley_l(
+    ...     adata,
+    ...     phenotypes=('Phenotype1', 'Phenotype2'),
+    ...     regions=['region1', 'region2'])
+    >>> plt.show()
+
+    This returns the `Axes` object for further customization and displays the plot.
+    """
+
+    # Retrieve the results from adata.uns['ripley_l']
+    ripley_results = adata.uns.get('ripley_l')
+
+    if ripley_results is None:
+        raise ValueError(
+            "Ripley L results not found in the analsyis."
+        )
+
+    # Filter the results for the specific pair of phenotypes
+    filtered_results = ripley_results[
+        (ripley_results['center_phenotype'] == phenotypes[0]) &
+        (ripley_results['neighbor_phenotype'] == phenotypes[1])
+    ]
+
+    if filtered_results.empty:
+        # Generate all unique combinations of phenotype pairs
+        unique_pairs = ripley_results[
+            ['center_phenotype', 'neighbor_phenotype']].drop_duplicates()
+        raise ValueError(
+            "No Ripley L results found for the specified pair of phenotypes."
+            f'\nCenter Phenotype: "{phenotypes[0]}"'
+            f'\nNeighbor Phenotype: "{phenotypes[1]}"'
+            f"\nExisiting unique pairs: {unique_pairs}"
+        )
+
+    # If specific regions are provided, filter them, otherwise plot all regions
+    if regions is not None:
+        filtered_results = filtered_results[
+            filtered_results['region'].isin(regions)]
+
+    # Create a figure and axes
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Plot Ripley's L for each region
+    for _, row in filtered_results.iterrows():
+        region = row['region']  # Region label
+
+        if row['ripley_l'] is None:
+            message = (
+               f"Ripley L results not found for region: {region}"
+               f"\n Message: {row['message']}"
+            )
+            logging.warning(
+              message 
+            )
+            print(message)
+            continue
+        n_center = row['ripley_l']['n_center']
+        n_neighbors = row['ripley_l']['n_neighbor']
+        n_cells = f"({n_center}, {n_neighbors})"
+        area = row['ripley_l']['area']
+        # Plot the Ripley L statistic for the region
+        sns.lineplot(
+            data=row['ripley_l']['L_stat'],
+            x='bins',
+            y='stats',
+            label=f'{region}: {n_cells}, {int(area)}',
+            ax=ax,
+            **kwargs)
+
+        if sims:
+            errorbar = ("pi", 95)
+            n_sims = row["n_simulations"]
+            sns.lineplot(
+                x="bins",
+                y="stats",
+                data=row["ripley_l"]["sims_stat"],
+                errorbar=errorbar,
+                label=f"Simulations({region}):{n_sims} runs",
+                **kwargs
+            )
+
+    # Set labels, title, and grid
+    ax.set_title(
+        "Ripley's L Statistic for phenotypes:"
+        f"({phenotypes[0]}, {phenotypes[1]})\n"
+    )
+    ax.legend(title='Regions:(center, neighbor), area', loc='upper left')
+    ax.grid(True)
+
+    # Set the horizontal axis lable
+    ax.set_xlabel("Radii (pixles)")
+    ax.set_ylabel("Ripley's L Statistic")
 
     return fig
