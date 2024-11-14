@@ -351,10 +351,6 @@ def assign_manual_phenotypes(
         print(f"{phenotype}: {count} cell(s)")
 
     phenotypes_columns = phenotypes_dic.keys()
-    # data_df[annotation] = data_df.apply(
-    #   lambda row: combine_phenotypes(row, phenotypes_columns, multiple),
-    #    axis=1
-    # )
 
     data_df[annotation] = combine_phenotypes(
         data_df,
