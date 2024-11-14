@@ -107,8 +107,10 @@ def visualize_2D_scatter(
 
     labels = kwargs.pop('labels', None)
     if labels is not None and len(labels) != len(x):
-        raise ValueError("The length of labels must match the length of x and y.")
+        raise ValueError("Labels length should match x and y length.")
 
+    #default
+    scatter = ax.scatter(x, y, s=point_size, c='gray', **kwargs)
     if adata is not None and (pin_color is not None or '_spac_colors' in adata.uns):
         if pin_color is not None:
             color_map = adata.uns.get(pin_color, {})
@@ -119,10 +121,19 @@ def visualize_2D_scatter(
             annotation_colors = adata.obs[color_representation].astype(str)  
             colors = [color_map.get(label, 'gray') for label in annotation_colors]
             scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
-            # Optionally, add a colorbar if needed
-            if isinstance(annotation_colors.iloc[0], (int, float)):  # Continuous data
-                cbar = plt.colorbar(scatter, ax=ax)
-                cbar.set_label(color_representation)  # Optional: label for colorbar
+
+            # Create legend for pin_color mapping
+            if isinstance(annotation_colors.iloc[0], str):  # Categorical data
+                # Create legend handles for each unique label
+                handles = []
+                labels = []
+                for label in annotation_colors.unique():
+                    color = color_map.get(label, 'gray')
+                    handles.append(plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10))
+                    labels.append(label)
+                
+            # Add the legend to the plot
+            ax.legend(handles, labels, title=color_representation, bbox_to_anchor=(1.05, 1), loc='upper left')
 
             # Annotate cluster centers if required (for continuous data)
             if annotate_centers:
@@ -139,8 +150,14 @@ def visualize_2D_scatter(
         else:
             scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
     elif labels is not None:
+        # Check if labels are continuous (numeric)
+        if pd.api.types.is_numeric_dtype(labels):
+            scatter = ax.scatter(x, y, c=labels, cmap=cmap, s=point_size, **kwargs)
+            cbar = plt.colorbar(scatter, ax=ax)
+            cbar.set_label('Label Intensity') 
+
         # Check if labels are categorical
-        if pd.api.types.is_categorical_dtype(labels):
+        elif pd.api.types.is_categorical_dtype(labels):
             if isinstance(labels, pd.Series):
                 unique_clusters = labels.cat.categories
             elif isinstance(labels, pd.Categorical):
@@ -169,10 +186,11 @@ def visualize_2D_scatter(
                         fontsize=9, ha='center', va='center'
                     )
 
-            ax.legend()
-
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         else:
-            scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+            scatter = ax.scatter(x, y, c=labels, cmap=cmap, s=point_size, **kwargs)
+            cbar = plt.colorbar(scatter, ax=ax)
+            cbar.set_label('Label Intensity') 
 
 
     # Set axis labels and title
@@ -913,27 +931,27 @@ def spatial_plot(
     """
 
     err_msg_layer = "The 'layer' parameter must be a string, " + \
-        f"got {str(type(layer))}"
+        f"got {str(type(layer))}."
     err_msg_feature = "The 'feature' parameter must be a string, " + \
-        f"got {str(type(feature))}"
+        f"got {str(type(feature))}."
     err_msg_annotation = "The 'annotation' parameter must be a string, " + \
-        f"got {str(type(annotation))}"
+        f"got {str(type(annotation))}."
     err_msg_feat_annotation_coe = "Both annotation and feature are passed, " +\
-        "please provide sinle input."
+        "please provide single input."
     err_msg_feat_annotation_non = "Both annotation and feature are None, " + \
         "please provide single input."
     err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
-        f"got {str(type(spot_size))}"
+        f"got {str(type(spot_size))}."
     err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
-        f"got {str(type(alpha))}"
+        f"got {str(type(alpha))}."
     err_msg_alpha_value = "The 'alpha' parameter must be between " + \
-        f"0 and 1 (inclusive), got {str(alpha)}"
+        f"0 and 1 (inclusive), got {str(alpha)}."
     err_msg_vmin = "The 'vmin' parameter must be a float or an int, " + \
-        f"got {str(type(vmin))}"
+        f"got {str(type(vmin))}."
     err_msg_vmax = "The 'vmax' parameter must be a float or an int, " + \
-        f"got {str(type(vmax))}"
+        f"got {str(type(vmax))}."
     err_msg_ax = "The 'ax' parameter must be an instance " + \
-        f"of matplotlib.axes.Axes, got {str(type(ax))}"
+        f"of matplotlib.axes.Axes, got {str(type(ax))}."
 
     if adata is None:
         raise ValueError("The input dataset must not be None.")
@@ -947,7 +965,7 @@ def spatial_plot(
         raise ValueError(err_msg_layer)
 
     if layer is not None and layer not in adata.layers.keys():
-        err_msg_layer_exist = f"Layer {layer} does not exists, " + \
+        err_msg_layer_exist = f"Layer {layer} does not exist, " + \
             f"available layers are {str(adata.layers.keys())}"
         raise ValueError(err_msg_layer_exist)
 
@@ -973,7 +991,7 @@ def spatial_plot(
 
     if annotation is not None and annotation not in annotation_names:
         error_text = f'The annotation "{annotation}"' + \
-            'not found in the dataset.' + \
+            ' not found in the dataset.' + \
             f" Existing annotations are: {annotation_names_str}"
         raise ValueError(error_text)
 
@@ -1014,22 +1032,38 @@ def spatial_plot(
 
     feature_names = adata.var_names.tolist()
     annotation_names = adata.obs.columns.tolist()
-    
+        
     if feature is not None:
-        feature_index = feature_names.index(feature)
-        # Ensure layer is correctly handled
+        # Get the integer index of the feature
+        try:
+            feature_index = adata.var_names.get_loc(feature)  # Ensure it's an integer
+        except KeyError:
+            raise ValueError(f"Feature '{feature}' not found in the dataset.")
+
         if layer is None:
+            # If layer is None, use adata.X by default
             feature_values = adata.X[:, feature_index]
-        else:
+        elif isinstance(layer, str):
+            # If layer is a string, use it to access the correct layer in adata.layers
+            if layer not in adata.layers:
+                raise ValueError(f"Layer '{layer}' not found in adata.layers. Available layers: {adata.layers.keys()}")
             feature_values = adata.layers[layer][:, feature_index]
-        feature_annotation = feature + "_spatial_plot"
+        elif isinstance(layer, np.ndarray):
+            # If layer is a numpy.ndarray, treat it as the data for the feature
+            feature_values = layer[:, feature_index]
+        else:
+            # If layer is neither a string nor numpy.ndarray, raise an error
+            raise ValueError(f"Expected 'layer' to be a string or numpy.ndarray, but got {type(layer)}.")
+
+        # Handle vmin and vmax if not specified
         if vmin == -999:
             vmin = np.min(feature_values)
         if vmax == -999:
             vmax = np.max(feature_values)
+
+        feature_annotation = feature + "_spatial_plot"
         adata.obs[feature_annotation] = feature_values.flatten()
         color_region = feature_annotation
-
 
     if ax is None:
         fig = plt.figure()
@@ -1038,15 +1072,27 @@ def spatial_plot(
     spatial_coords = adata.obsm['spatial']
     x_coords, y_coords = spatial_coords[:, 0], spatial_coords[:, 1]
 
-    # Color handling
+    # Color handling based on the annotation
     if pin_color_rules:
         color_map = adata.uns.get(pin_color_rules, {})
     elif '_spac_colors' in adata.uns:
         color_map = adata.uns['_spac_colors']
     else:
         color_map = {}
-    
-    colors = [color_map.get(label, 'gray') for label in adata.obs[annotation]]
+
+    # Check if annotation is valid and exists in adata.obs columns
+    if annotation is not None and annotation not in adata.obs.columns:
+        error_text = f'The annotation "{annotation}"' + \
+            ' not found in the dataset.' + \
+            f" Existing annotations are: {', '.join(adata.obs.columns.tolist())}"
+        raise ValueError(error_text)
+
+    # If annotation is provided, use it for color mapping, otherwise default to gray
+    if annotation is not None:
+        colors = [color_map.get(label, 'gray') for label in adata.obs[annotation]]
+    else:
+        colors = ['gray'] * len(x_coords)  # Default color if no annotation is provided
+
     # Create scatter plot
     scatter = ax.scatter(
         x=x_coords,
@@ -1062,6 +1108,7 @@ def spatial_plot(
         scatter.set_clim(vmin, vmax)
 
     return [ax]
+
 
 
 def boxplot(adata, annotation=None, second_annotation=None, layer=None,
