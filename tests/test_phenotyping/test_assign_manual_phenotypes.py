@@ -193,7 +193,6 @@ class TestAssignManualPhenotypes(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), expect_string.strip())
 
-
     def test_prefix(self):
         """
         Test an error message where prefix is not correct
@@ -221,7 +220,38 @@ class TestAssignManualPhenotypes(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), expect_string.strip())
 
+    def test_drop_binary_column(self):
+        """
+        Test that the binary column is dropped
+        """
+        assign_manual_phenotypes(
+            self.string_df,
+            self.phenotypes_df,
+            annotation="manual",
+            prefix='',
+            suffix='_phenotype',
+            multiple=True
+        )
 
+        self.assertNotIn("cd4_cells", self.string_df.columns)
+        self.assertNotIn("cd8_cells", self.string_df.columns)
+
+    def test_not_drop_binary_column(self):
+        """
+        Test that the binary column is not dropped
+        """
+        assign_manual_phenotypes(
+            self.string_df,
+            self.phenotypes_df,
+            annotation="manual",
+            prefix='',
+            suffix='_phenotype',
+            multiple=True,
+            drop_binary_code=False
+        )
+
+        self.assertIn("cd4_cells", self.string_df.columns)
+        self.assertIn("cd8_cells", self.string_df.columns)
 
 
 
