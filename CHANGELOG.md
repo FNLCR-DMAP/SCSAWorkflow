@@ -2,26 +2,28 @@
 
 
 
-## v0.7.13 (2024-11-15)
+## v0.7.14 (2024-11-15)
 
-### Performance
+### Feature
 
-* perf(assign_manual_phenotypes): Replace apply method with vectorized operations ([`8b0f229`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b0f229d24c3834dc970da3905c3599d612e59c5))
+* feat(plot_ripley_l): Return a dataframe of the line plots ([`f466f84`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f466f842963008ff8e58f07bf0d1ec3fbe203bcc))
 
 ### Unknown
 
-* Merge pull request #259 from FNLCR-DMAP/dev
+* Merge pull request #261 from FNLCR-DMAP/dev
 
-Manual phenotype to use dot instead of apply ([`4e9ccbb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e9ccbb3cd63d3aa5e0e4f2a14450c2dc6a0b1e9))
+Dev ([`402d4ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/402d4abd1b6c1d9c07bb323c9a99440f22297a51))
 
-* Merge pull request #258 from FNLCR-DMAP/manual_phenotyping
+* Merge pull request #260 from FNLCR-DMAP/ripley_l
 
-perf(assign_manual_phenotypes): Replace apply method with vectorized … ([`31ccc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31ccc52fa749229e66eb04ce9ea05419d43415cf))
+feat(plot_ripley_l): Return a dataframe of the line plots ([`0223968`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/022396861dc515906371ccca0df36c408294e741))
 
 
-## v0.7.12 (2024-11-14)
+## v0.7.13 (2024-11-15)
 
 ### Ci
+
+* ci(version): Automatic development release ([`cd1bd93`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd1bd93b8d2fb9fa472314a1005288b34bf31d2d))
 
 * ci(version): Automatic development release ([`febc68a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/febc68a12a7490838a873ae4a81b32cf81156286))
 
@@ -103,6 +105,8 @@ perf(assign_manual_phenotypes): Replace apply method with vectorized … ([`31cc
 
 ### Performance
 
+* perf(assign_manual_phenotypes): Replace apply method with vectorized operations ([`8b0f229`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b0f229d24c3834dc970da3905c3599d612e59c5))
+
 * perf(assign_manual_phenotype): Changed the logic of the apply function in combine_phenotypes to work on bool columns ([`56a67f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/56a67f67e9f1e233dcfb5bfaafa64deac80f3806))
 
 * perf(plot_ripley_l): Printed the warning when phenotype is missing in addition to log ([`36da762`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36da762bdf104cd1d109f673e8acdb35b53f6e2c))
@@ -136,6 +140,14 @@ perf(assign_manual_phenotypes): Replace apply method with vectorized … ([`31cc
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #259 from FNLCR-DMAP/dev
+
+Manual phenotype to use dot instead of apply ([`4e9ccbb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e9ccbb3cd63d3aa5e0e4f2a14450c2dc6a0b1e9))
+
+* Merge pull request #258 from FNLCR-DMAP/manual_phenotyping
+
+perf(assign_manual_phenotypes): Replace apply method with vectorized … ([`31ccc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31ccc52fa749229e66eb04ce9ea05419d43415cf))
 
 * Merge pull request #257 from FNLCR-DMAP/dev
 
