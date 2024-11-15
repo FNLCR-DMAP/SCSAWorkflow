@@ -170,6 +170,64 @@ class TestPlotRipleyL(unittest.TestCase):
         legend_texts = [text.get_text() for text in legends]
         self.assertTrue(any("day1" in legend for legend in legend_texts))
 
+    def test_return_df_multiple_regions(self):
+        """
+        Test return_df with multiple regions 
+        """
+
+        phenotype_name = ["A"]
+        n_cells = 200
+        phenotypes = phenotype_name * n_cells * 2
+        features = np.random.rand(n_cells * 2)
+        # Generate spatial_x at random float position in the square
+        x_max = 200
+        y_max = 200
+        # Cells for region 'region1' are randomly scattered
+        region1_spatial_x = np.random.rand(n_cells) * x_max
+        region1_spatial_y = np.random.rand(n_cells) * y_max
+
+        # Cells for region 'region2' are clustered
+        region2_spatial_x = np.random.rand(n_cells) * x_max / 8
+        region2_spatial_y = np.random.rand(n_cells) * y_max / 8
+
+        # concatenate the spatial coordinates
+        spatial_x = np.concatenate((region1_spatial_x, region2_spatial_x))
+        spatial_y = np.concatenate((region1_spatial_y, region2_spatial_y))
+
+        region = ['day1'] * n_cells + ['day2'] * n_cells
+
+        # Keep radius relatively small to avoid boundary adjustment
+        radii = [0, 1, 2]
+
+        # Create a dataframe out of phenotypes, features, spatial coordinates
+        dictionary = {'phenotype': phenotypes, 'feature': features,
+                      'spatial_x': spatial_x, 'spatial_y': spatial_y,
+                      'day': region}
+        dataframe = pd.DataFrame(dictionary)
+
+        self.adata = self.create_dummy_dataset(dataframe)
+        self.adata.obs["day"] = pd.Categorical(dataframe["day"])
+        ripley_l(
+            self.adata,
+            annotation="phenotype",
+            phenotypes=["A", "A"],
+            distances=radii,
+            n_simulations=100,
+            regions="day"
+        )
+
+        # Test simulaitons is off
+        _, return_df = plot_ripley_l(
+            self.adata,
+            phenotypes=("A", "A"),
+            sims=False,
+            return_df=True
+        )
+
+        # Check that the returned dataframe has the
+        # correct number of rows (three radii times two regions)
+        self.assertEqual(return_df.shape[0], 6)
+
     def test_two_phenotypes(self):
         """
         Test plotting one region with two phenotypes
