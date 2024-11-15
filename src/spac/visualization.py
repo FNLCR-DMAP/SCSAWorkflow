@@ -1809,6 +1809,7 @@ def plot_ripley_l(
         annotation=None,
         regions=None,
         sims=False,
+        return_df=False,
         **kwargs):
     """
     Plot Ripley's L statistic for multiple bins and different regions
@@ -1825,6 +1826,8 @@ def plot_ripley_l(
         Default is None.
     sims : bool, optional
         Whether to plot the simulation results. Default is False.
+    return_df : bool, optional
+        Whether to return the DataFrame containing the Ripley's L results.
     kwargs : dict, optional
         Additional keyword arguments to pass to `seaborn.lineplot`.
 
@@ -1837,6 +1840,8 @@ def plot_ripley_l(
     -------
     ax : matplotlib.axes.Axes
         The Axes object containing the plot, which can be further modified.
+    df : pandas.DataFrame, optional
+        The DataFrame containing the Ripley's L results, if `return_df` is True.
 
     Example
     -------
@@ -1882,6 +1887,8 @@ def plot_ripley_l(
     # Create a figure and axes
     fig, ax = plt.subplots(figsize=(10, 10))
 
+    plot_data = []
+
     # Plot Ripley's L for each region
     for _, row in filtered_results.iterrows():
         region = row['region']  # Region label
@@ -1909,6 +1916,18 @@ def plot_ripley_l(
             ax=ax,
             **kwargs)
 
+        # Prepare plotted data to return if return_df is True
+        l_stat_data = row['ripley_l']['L_stat']
+        for _, stat_row in l_stat_data.iterrows():
+            plot_data.append({
+                'region': region,
+                'radius': stat_row['bins'],
+                'ripley(radius)': stat_row['stats'],
+                'region_area': area,
+                'n_center': n_center,
+                'n_neighbor': n_neighbors,
+            })
+
         if sims:
             errorbar = ("pi", 95)
             n_sims = row["n_simulations"]
@@ -1932,5 +1951,9 @@ def plot_ripley_l(
     # Set the horizontal axis lable
     ax.set_xlabel("Radii (pixles)")
     ax.set_ylabel("Ripley's L Statistic")
+
+    if return_df:
+        df = pd.DataFrame(plot_data)
+        return fig, df
 
     return fig
