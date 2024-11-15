@@ -197,14 +197,14 @@ def apply_phenotypes(data_df, phenotypes_dic):
     return return_dic
 
 
-def combine_phenotypes(row, phenotype_columns, multiple=True):
+def combine_phenotypes(data_df, phenotype_columns, multiple=True):
     """
-    Combine multiple binary phenotype columns into a new column.
+    Combine multiple binary phenotype columns into a new column in a vectorized manner.
 
     Parameters
     ----------
-    row : pandas.Series
-        A row of the DataFrame.
+    data_df : pandas.DataFrame
+        DataFrame containing the phenotype columns.
     phenotype_columns : list of str
         List of binary phenotype column names.
     multiple : bool, optional
@@ -214,27 +214,33 @@ def combine_phenotypes(row, phenotype_columns, multiple=True):
 
     Returns
     -------
-    str
-        A string representing the combined phenotype. If multiple is True,
-        phenotypes are concatenated with ', '. If False, "no_label" is
-        returned for multiple positive phenotypes.
-
-    Notes
-    -----
-    The function checks which phenotype columns have a value of 1 and
-    combines their names based on the `multiple` parameter.
+    pandas.Series
+        A Series representing the combined phenotype for each row.
     """
-    selected_phenotypes = [phenotype for phenotype in phenotype_columns if row[phenotype] == 1]
-    no_label = "no_label"
-    n_pos_phenotypes = len(selected_phenotypes)
-    if n_pos_phenotypes == 0:
-        return no_label
-    elif n_pos_phenotypes == 1:
-        return selected_phenotypes[0]
-    elif multiple:
-        return ', '.join(selected_phenotypes)
-    else:
-        return no_label
+    # Create a mask for each phenotype column where values are 1 (positive)
+    phenotype_masks = data_df[phenotype_columns].astype(bool)
+
+    # Create a series of phenotype names with a comma and space
+    # after each name. That series will be used to join names
+    # of positive phenotypes in the vectorized operation below.
+    phenotypes_series = pd.Index(phenotype_columns) + ", "
+
+    # For each row, join the names of positive phenotypes by doing
+    # a dot product between the mask and the series of phenotype names.
+    combined_phenotypes = \
+        phenotype_masks.dot(phenotypes_series).str.rstrip(", ")
+
+    # Set all with 0 positive phenotypes to "no_label"
+    counts_positive = phenotype_masks.sum(axis=1)
+    combined_phenotypes[counts_positive == 0] = "no_label"
+
+    # Handle the case when multiple is False:
+    if not multiple:
+
+        # set all with >1 positive phenotypes to "no_label"
+        combined_phenotypes[counts_positive > 1] = "no_label"
+
+    return combined_phenotypes
 
 
 def assign_manual_phenotypes(
@@ -243,7 +249,8 @@ def assign_manual_phenotypes(
         annotation="manual_phenotype",
         prefix='',
         suffix='',
-        multiple=True):
+        multiple=True,
+        drop_binary_code=True):
     """
     Assign manual phenotypes to the DataFrame and generate summaries.
 
@@ -267,6 +274,8 @@ def assign_manual_phenotypes(
     multiple : bool, optional
         Whether to concatenate the names of multiple positive phenotypes.
         Default is True.
+    drop_binary_code : bool, optional
+        Whether to drop the binary phenotype columns. Default is True.
 
     Returns
     -------
@@ -350,10 +359,11 @@ def assign_manual_phenotypes(
         print(f"{phenotype}: {count} cell(s)")
 
     phenotypes_columns = phenotypes_dic.keys()
-    data_df[annotation] = data_df.apply(
-        lambda row: combine_phenotypes(row, phenotypes_columns, multiple),
-        axis=1
-    )
+
+    data_df[annotation] = combine_phenotypes(
+        data_df,
+        phenotypes_columns,
+        multiple)
 
     number_phenotypes_columns = "num_phenotypes"
     data_df[number_phenotypes_columns] = (
@@ -386,4 +396,7 @@ def assign_manual_phenotypes(
     return_dic["multiple_phenotypes_summary"] = multiple_phenotypes_df
     return_dic["phenotypes_counts"] = phenotypes_counts
 
+    if drop_binary_code is True:
+        # Remove the columns defined by the keys of the dictionary phenotypes_counts
+        data_df.drop(columns=phenotypes_counts.keys(), inplace=True)
     return return_dic
