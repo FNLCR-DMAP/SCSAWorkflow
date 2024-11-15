@@ -20,12 +20,11 @@ import warnings
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 def visualize_2D_scatter(
-    x, y, adata=None, point_size=None, theme=None,
+    x, y,labels=None,adata=None, point_size=None, theme=None,
     ax=None, annotate_centers=False,
     x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
-    color_representation=None,pin_color=None, **kwargs
+    color_representation=None, pin_color=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -34,6 +33,8 @@ def visualize_2D_scatter(
     ----------
     x, y : array-like
         Coordinates of the data.
+    labels : array-like, optional
+        Array of labels for the data points. Can be numerical or categorical.
     adata : anndata.AnnData, optional
         AnnData object containing data and metadata, including color mappings.
     point_size : float, optional
@@ -108,7 +109,6 @@ def visualize_2D_scatter(
     else:
         fig = ax.figure
 
-    labels = kwargs.pop('labels', None)
     if labels is not None and len(labels) != len(x):
         raise ValueError("Labels length should match x and y length.")
 
@@ -170,16 +170,7 @@ def visualize_2D_scatter(
                     "Expected labels to be of type Series[Categorical] or "
                     "Categorical."
                 )
-
-            # Combine colors from multiple colormaps
-            cmap1 = plt.get_cmap('tab20')
-            cmap2 = plt.get_cmap('tab20b')
-            cmap3 = plt.get_cmap('tab20c')
-            colors = cmap1.colors + cmap2.colors + cmap3.colors
-
-            # Use the number of unique clusters to set the colormap length
-            cmap = ListedColormap(colors[:len(unique_clusters)])
-
+            cmap = plt.get_cmap('tab20', len(unique_clusters))
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 ax.scatter(
@@ -199,13 +190,11 @@ def visualize_2D_scatter(
                         fontsize=fontsize, ha='center', va='center'
                     )
 
-            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+            ax.legend(bbox_to_anchor=(1.05, 1),title=color_representation, loc='upper left', borderaxespad=0.)
         else:
             scatter = ax.scatter(x, y, c=labels, cmap=cmap, s=point_size, **kwargs)
             cbar = plt.colorbar(scatter, ax=ax)
             cbar.set_label('Label Intensity') 
-
-
 
     # Set axis labels and title
     ax.set_xlabel(x_axis_title)
