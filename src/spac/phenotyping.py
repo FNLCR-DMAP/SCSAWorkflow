@@ -220,16 +220,24 @@ def combine_phenotypes(data_df, phenotype_columns, multiple=True):
     # Create a mask for each phenotype column where values are 1 (positive)
     phenotype_masks = data_df[phenotype_columns].astype(bool)
 
-    # For each row, join the column names where the value is 1
-    combined_phenotypes = phenotype_masks.apply(
-        lambda row: ', '.join(
-            row.index[row]) if row.any() else "no_label", axis=1
-    )
+    # Create a series of phenotype names with a comma and space
+    # after each name. That series will be used to join names
+    # of positive phenotypes in the vectorized operation below.
+    phenotypes_series = pd.Index(phenotype_columns) + ", "
+
+    # For each row, join the names of positive phenotypes by doing
+    # a dot product between the mask and the series of phenotype names.
+    combined_phenotypes = \
+        phenotype_masks.dot(phenotypes_series).str.rstrip(", ")
+
+    # Set all with 0 positive phenotypes to "no_label"
+    counts_positive = phenotype_masks.sum(axis=1)
+    combined_phenotypes[counts_positive == 0] = "no_label"
 
     # Handle the case when multiple is False:
-    # set all with >1 positive phenotypes to "no_label"
     if not multiple:
-        counts_positive = phenotype_masks.sum(axis=1)
+
+        # set all with >1 positive phenotypes to "no_label"
         combined_phenotypes[counts_positive > 1] = "no_label"
 
     return combined_phenotypes
