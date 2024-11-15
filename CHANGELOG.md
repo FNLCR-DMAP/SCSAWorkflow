@@ -2,34 +2,28 @@
 
 
 
-## v0.7.12 (2024-11-14)
+## v0.7.13 (2024-11-15)
 
 ### Performance
 
-* perf(assign_manual_phenotype): Changed the logic of the apply function in combine_phenotypes to work on bool columns ([`56a67f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/56a67f67e9f1e233dcfb5bfaafa64deac80f3806))
+* perf(assign_manual_phenotypes): Replace apply method with vectorized operations ([`8b0f229`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b0f229d24c3834dc970da3905c3599d612e59c5))
 
 ### Unknown
 
-* Merge pull request #257 from FNLCR-DMAP/dev
+* Merge pull request #259 from FNLCR-DMAP/dev
 
-Dev ([`3decfe9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3decfe97cd30d91042c423aa862df660a362c06f))
+Manual phenotype to use dot instead of apply ([`4e9ccbb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e9ccbb3cd63d3aa5e0e4f2a14450c2dc6a0b1e9))
 
-* Merge pull request #256 from FNLCR-DMAP/manual_phenotyping
+* Merge pull request #258 from FNLCR-DMAP/manual_phenotyping
 
-Manual phenotyping ([`d37021f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d37021f3de085c05fb23b6c5dddb3f49d9d26476))
-
-* doc(assign_manual_phenotype): cleaned comment ([`dd0faa3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dd0faa3387ce16927f554ef7f019afc9b05f0e5d))
-
-* Merge pull request #255 from FNLCR-DMAP/feature_exclude_values
-
-doc(select_values): Updated documentation ([`5b77d2b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5b77d2b1cf98074afa7e9ca2b5bddcc3659fe33e))
-
-* doc(select_values): Updated documentation ([`5bea7b0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bea7b0075e7c24b5222b1f8540a790ac3377283))
+perf(assign_manual_phenotypes): Replace apply method with vectorized … ([`31ccc52`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/31ccc52fa749229e66eb04ce9ea05419d43415cf))
 
 
-## v0.7.11 (2024-11-01)
+## v0.7.12 (2024-11-14)
 
 ### Ci
+
+* ci(version): Automatic development release ([`febc68a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/febc68a12a7490838a873ae4a81b32cf81156286))
 
 * ci(version): Automatic development release ([`40c011b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/40c011bdb584e88f5204a27911f8ae8b7901c62d))
 
@@ -109,6 +103,8 @@ doc(select_values): Updated documentation ([`5b77d2b`](https://github.com/FNLCR-
 
 ### Performance
 
+* perf(assign_manual_phenotype): Changed the logic of the apply function in combine_phenotypes to work on bool columns ([`56a67f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/56a67f67e9f1e233dcfb5bfaafa64deac80f3806))
+
 * perf(plot_ripley_l): Printed the warning when phenotype is missing in addition to log ([`36da762`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36da762bdf104cd1d109f673e8acdb35b53f6e2c))
 
 * perf: deming CD ([`4fe198f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fe198f5835a7048d23cdfc9f21e96711b0f7012))
@@ -140,6 +136,22 @@ doc(select_values): Updated documentation ([`5b77d2b`](https://github.com/FNLCR-
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #257 from FNLCR-DMAP/dev
+
+Dev ([`3decfe9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3decfe97cd30d91042c423aa862df660a362c06f))
+
+* Merge pull request #256 from FNLCR-DMAP/manual_phenotyping
+
+Manual phenotyping ([`d37021f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d37021f3de085c05fb23b6c5dddb3f49d9d26476))
+
+* doc(assign_manual_phenotype): cleaned comment ([`dd0faa3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dd0faa3387ce16927f554ef7f019afc9b05f0e5d))
+
+* Merge pull request #255 from FNLCR-DMAP/feature_exclude_values
+
+doc(select_values): Updated documentation ([`5b77d2b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5b77d2b1cf98074afa7e9ca2b5bddcc3659fe33e))
+
+* doc(select_values): Updated documentation ([`5bea7b0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bea7b0075e7c24b5222b1f8540a790ac3377283))
 
 * Merge pull request #254 from FNLCR-DMAP/dev
 
