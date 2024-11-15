@@ -1,4 +1,4 @@
-name: spac_scimap_nidap_adaption
+name: spac
 channels:
   - ohsu-comp-bio
   - conda-forge
