@@ -22,22 +22,22 @@ requirements:
     - python=3.9.13
     - setuptools
   run:
-    - python=3.9.13              # Core Python Package
-    - numpy=1.26.4               # Core Python Package
-    - pandas=2.2.3               # Data Manipulation and Analysis
-    - anndata=0.10.9             # Single-Cell Data Manipulation and Analysis (scverse family)
-    - scanpy=1.10.3              # Single-Cell Data Manipulation and Analysis (scverse family)
-    - scimap=2.1.3_dmap          # Single-Cell Data Data Manipulation and Analysis, package available for dmap usage
-    - zarr=2.10.3                # Data Manipulation and Analysis
-    - numba=0.58.1               # Data Manipulation and Analysis
-    - phenograph=1.5.7           # Data Manipulation and Analysis
-    - scikit-learn=1.5.2         # Machine Learning and Statistics
-    - matplotlib=3.9.2           # Visualization and Plotting
-    - seaborn=0.13.2             # Visualization and Plotting
-    - datashader=0.16.3          # Visualization and Plotting
-    - plotly=5.24.1              # Visualization and Plotting
-    - squidpy=1.2.2              # Single-Cell Visualization and Plotting (scverse family)
-    - pillow=11.0.0              # Image Processing
+    - python=3.9.13               # Core Python Package
+    - numpy=1.26.4                # Core Python Package
+    - pandas=1.5.3                # Data Manipulation and Analysis
+    - anndata=0.10.9              # Single-Cell Data Manipulation and Analysis (scverse family)
+    - scanpy=1.10.3               # Single-Cell Data Manipulation and Analysis (scverse family)
+    - scimap=2.1.3_dmap_pandas153 # Single-Cell Data Data Manipulation and Analysis, package available for dmap usage
+    - zarr=2.10.3                 # Data Manipulation and Analysis
+    - numba=0.58.1                # Data Manipulation and Analysis
+    - phenograph=1.5.7            # Data Manipulation and Analysis
+    - scikit-learn=1.5.2          # Machine Learning and Statistics
+    - matplotlib=3.9.2            # Visualization and Plotting
+    - seaborn=0.13.2              # Visualization and Plotting
+    - datashader=0.16.3           # Visualization and Plotting
+    - plotly=5.24.1               # Visualization and Plotting
+    - squidpy=1.2.2               # Single-Cell Visualization and Plotting (scverse family)
+    - pillow=11.0.0               # Image Processing
 
 test:
   imports:
