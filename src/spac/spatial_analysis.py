@@ -8,6 +8,7 @@ from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
 import logging
+import scimap as sm
 
 
 def spatial_interaction(
@@ -838,3 +839,107 @@ def _neighborhood_profile_core(
         neighborhood_array = neighborhood_array / bins_areas[np.newaxis, np.newaxis, :]
 
     return neighborhood_array
+
+
+def calculate_spatial_distance(
+    adata,
+    annotation,
+    obsm_key='spatial',
+    subset=None,
+    imageid='imageid',
+    label='spatial_distance',
+    verbose=True
+):
+    """
+    Calculates spatial distances and stores the results in `adata.uns`.
+
+    Parameters:
+        adata (AnnData): Annotated data matrix with spatial information.
+        obsm_key (str): Key in `adata.obsm` where spatial coordinates are stored.
+        annotation (str): Column name in `adata.obs` containing cell annotations.
+        subset (str or list, optional): Subset of image IDs to process.
+        imageid (str): Column name in `adata.obs` containing image identifiers.
+        label (str): Key under which to store the result in `adata.uns`.
+        verbose (bool): If True, prints progress messages.
+
+    Returns:
+        AnnData: The input `adata` object with updated `adata.uns[label]`.
+    """
+
+    # Input validation
+    check_annotation(adata, annotations=annotation)
+
+    if subset is not None:
+        if isinstance(subset, str):
+            subset = [subset]
+        elif not isinstance(subset, list):
+            raise TypeError(
+                f"The 'subset' parameter must be a string or a list of strings, "
+                f"but got {type(subset)}."
+            )
+        # Check if all subset IDs are present in adata.obs[imageid]
+        missing_ids = set(subset) - set(adata.obs[imageid].unique())
+        if missing_ids:
+            raise ValueError(
+                f"The following subset IDs were not found in adata.obs['{imageid}']: {missing_ids}"
+            )
+        if verbose:
+            print(f"Processing subset of images: {subset}")
+
+    # Input validation for 'obsm_key' and coordinate extraction
+    try:
+        coords = adata.obsm[obsm_key]
+    except KeyError:
+        raise KeyError(
+            f"The key '{obsm_key}' was not found in adata.obsm."
+        )
+
+    if coords.shape[1] < 2:
+        raise ValueError(
+            f"The coordinates in adata.obsm['{obsm_key}'] must have at least two dimensions."
+        )
+
+    # Check for missing coordinates
+    if np.isnan(coords).any():
+        missing_cells = np.where(np.isnan(coords).any(axis=1))[0]
+        raise ValueError(
+            f"Missing values found in spatial coordinates for cells at indices: {missing_cells}."
+        )
+
+    if verbose:
+        print("Preparing data for spatial distance calculation...")
+
+    # Add coordinates to adata.obs temporarily
+    adata.obs['_x_coord'] = coords[:, 0]
+    adata.obs['_y_coord'] = coords[:, 1]
+    if coords.shape[1] > 2:
+        adata.obs['_z_coord'] = coords[:, 2]
+        use_z = True
+    else:
+        adata.obs['_z_coord'] = np.nan  # Fill NaN if Z-coordinate is missing
+        use_z = False
+
+    # Use scimap's spatial_distance function
+    sm.tl.spatial_distance(
+        adata=adata,
+        x_coordinate='_x_coord',
+        y_coordinate='_y_coord',
+        z_coordinate=('_z_coord' if use_z else None),
+        phenotype=annotation,
+        subset=subset,
+        imageid=imageid,
+        verbose=verbose,
+        label=label
+    )
+
+    # Remove temporary coordinates from adata.obs
+    adata.obs.drop(
+        columns=['_x_coord', '_y_coord', '_z_coord'],
+        inplace=True,
+        errors='ignore'
+    )
+
+    if verbose:
+        print(f"Spatial distances stored in adata.uns['{label}']")
+
+    return adata
