@@ -2,26 +2,28 @@
 
 
 
-## v0.7.14 (2024-11-15)
+## v0.7.15 (2024-11-16)
 
-### Feature
+### Fix
 
-* feat(plot_ripley_l): Return a dataframe of the line plots ([`f466f84`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f466f842963008ff8e58f07bf0d1ec3fbe203bcc))
+* fix: double log in boxplot and add log in histogram and update unit tests ([`23d1b06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23d1b063a0e8152a5e5c54b5119393ae9a0be94b))
 
 ### Unknown
 
-* Merge pull request #261 from FNLCR-DMAP/dev
+* Merge pull request #265 from FNLCR-DMAP/dev
 
-Dev ([`402d4ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/402d4abd1b6c1d9c07bb323c9a99440f22297a51))
+merge updated boxplot and histogram with log modification from dev to release_dev ([`2bf6588`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2bf658844df6df2fbcd4b063f09c43d0d48a5280))
 
-* Merge pull request #260 from FNLCR-DMAP/ripley_l
+* Merge pull request #264 from FNLCR-DMAP/log_debug
 
-feat(plot_ripley_l): Return a dataframe of the line plots ([`0223968`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/022396861dc515906371ccca0df36c408294e741))
+fix: double log in boxplot and add log in histogram and update unit t… ([`7caddbb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7caddbb2f777c4fb43b095fef5a82bd9b4674cf9))
 
 
-## v0.7.13 (2024-11-15)
+## v0.7.14 (2024-11-15)
 
 ### Ci
+
+* ci(version): Automatic development release ([`e7d4606`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e7d460608935c5b56dd11684023ebf40ffc5d560))
 
 * ci(version): Automatic development release ([`cd1bd93`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd1bd93b8d2fb9fa472314a1005288b34bf31d2d))
 
@@ -50,6 +52,8 @@ feat(plot_ripley_l): Return a dataframe of the line plots ([`0223968`](https://g
 * ci(version): Automatic development release ([`260fa1b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/260fa1bcfe93b1bbb47023d073653578a5fa022f))
 
 ### Feature
+
+* feat(plot_ripley_l): Return a dataframe of the line plots ([`f466f84`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f466f842963008ff8e58f07bf0d1ec3fbe203bcc))
 
 * feat(select_values): Added option to exclude values ([`c58dc91`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c58dc91bcf23afa6d1baa6b4ea6865c070dd622d))
 
@@ -140,6 +144,14 @@ feat(plot_ripley_l): Return a dataframe of the line plots ([`0223968`](https://g
 * test(assign_manual_phenotypes): added tests for prefix and suffix support ([`e4b9d96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4b9d969077e6d3f62855c1af7e5232f7a95185e))
 
 ### Unknown
+
+* Merge pull request #261 from FNLCR-DMAP/dev
+
+Dev ([`402d4ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/402d4abd1b6c1d9c07bb323c9a99440f22297a51))
+
+* Merge pull request #260 from FNLCR-DMAP/ripley_l
+
+feat(plot_ripley_l): Return a dataframe of the line plots ([`0223968`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/022396861dc515906371ccca0df36c408294e741))
 
 * Merge pull request #259 from FNLCR-DMAP/dev
 
