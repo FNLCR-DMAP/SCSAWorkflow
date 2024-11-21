@@ -21,10 +21,10 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def visualize_2D_scatter(
-    x, y,labels=None,adata=None, point_size=None, theme=None,
+    x, y,labels=None, point_size=None, theme=None,
     ax=None, annotate_centers=False,
     x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
-    color_representation=None, pin_color=None, **kwargs
+    color_representation=None, color_map=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -35,8 +35,6 @@ def visualize_2D_scatter(
         Coordinates of the data.
     labels : array-like, optional
         Array of labels for the data points. Can be numerical or categorical.
-    adata : anndata.AnnData, optional
-        AnnData object containing data and metadata, including color mappings.
     point_size : float, optional
         Size of the points. If None, it will be automatically determined.
     theme : str, optional
@@ -53,8 +51,8 @@ def visualize_2D_scatter(
         Title for the plot.
     color_representation : str, optional
         Description of what the colors represent.
-    pin_color : str, optional
-        Provides color dictionary for scatterplot, defaults to _spac_colors
+    color_map : str, optional
+        Provides color dictionary for scatterplot
     **kwargs
         Additional keyword arguments passed to plt.scatter.
 
@@ -114,44 +112,50 @@ def visualize_2D_scatter(
 
     #default
     scatter = ax.scatter(x, y, s=point_size, c='gray', **kwargs)
-    if adata is not None and (pin_color is not None or '_spac_colors' in adata.uns):
-        if pin_color is not None:
-            color_map = adata.uns.get(pin_color, {})
-        else:
-            color_map = adata.uns['_spac_colors']
+    if color_map is not None and labels is not None:
         # Check if the color_representation exists in adata.obs
-        if color_representation in adata.obs:
-            annotation_colors = adata.obs[color_representation].astype(str)  
-            colors = [color_map.get(label, 'gray') for label in annotation_colors]
-            scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
+        colors = [color_map.get(label, 'gray') for label in labels]
+        scatter = ax.scatter(x, y, c=colors, s=point_size, **kwargs)
 
-            # Create legend for pin_color mapping
-            if isinstance(annotation_colors.iloc[0], str):  # Categorical data
-                # Create legend handles for each unique label
-                handles = []
-                labels = []
-                for label in annotation_colors.unique():
-                    color = color_map.get(label, 'gray')
-                    handles.append(plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10))
-                    labels.append(label)
-                
+        # Create legend for pin_color mapping
+        if isinstance(labels[0], str):  # Categorical data
+            # Create legend handles for each unique label
+            unique_labels = set(labels)
+            handles = [
+                plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color_map.get(label, 'gray'), markersize=10)
+                for label in unique_labels
+            ]
+            legend_labels = list(unique_labels)
+
             # Add the legend to the plot
-            ax.legend(handles, labels, title=color_representation, bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax.legend(
+                handles,
+                legend_labels,
+                title="Categories",
+                bbox_to_anchor=(1.05, 1),
+                loc='upper left'
+            )
 
-            # Annotate cluster centers if required (for continuous data)
-            if annotate_centers:
-                # Assuming unique clusters are determined by the color representation
-                unique_clusters = annotation_colors.unique()  # This should get the unique labels for annotation
-                for cluster in unique_clusters:
-                    mask = annotation_colors == cluster
-                    center_x = np.mean(x[mask])
-                    center_y = np.mean(y[mask])
-                    ax.text(
-                        center_x, center_y, cluster,
-                        fontsize=9, ha='center', va='center'
-                    )
-        else:
-            scatter = ax.scatter(x, y, c='gray', s=point_size, **kwargs)
+        # Annotate cluster centers if required (for categorical data)
+        if annotate_centers:
+            unique_labels = set(labels)
+            for cluster in unique_labels:
+                # Mask the data for the current cluster
+                mask = [label == cluster for label in labels]
+                cluster_x = [x[i] for i in range(len(x)) if mask[i]]
+                cluster_y = [y[i] for i in range(len(y)) if mask[i]]
+
+                # Compute cluster center
+                center_x = np.mean(cluster_x)
+                center_y = np.mean(cluster_y)
+
+                # Annotate the center
+                ax.text(
+                    center_x, center_y, cluster,
+                    fontsize=9, ha='center', va='center',
+                    bbox=dict(boxstyle='round,pad=0.3', edgecolor='gray', facecolor='white', alpha=0.7)
+                )
+
     elif labels is not None:
         # Check if labels are continuous (numeric)
         if pd.api.types.is_numeric_dtype(labels):
