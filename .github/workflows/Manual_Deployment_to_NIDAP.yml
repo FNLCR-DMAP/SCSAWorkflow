@@ -7,7 +7,7 @@ on:
     
       image_to_use:
         required: true
-        default: ghcr.io/ruiheesi/pyscworkflow:latest
+        default: ghcr.io/fnlcr-dmap/scsaworkflow:spac_py39
         type: string
 
       package_to_deploy:
