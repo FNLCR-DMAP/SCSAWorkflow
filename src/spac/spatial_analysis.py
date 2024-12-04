@@ -881,7 +881,8 @@ def calculate_spatial_distance(
         missing_ids = set(subset) - set(adata.obs[imageid].unique())
         if missing_ids:
             raise ValueError(
-                f"The following subset IDs were not found in adata.obs['{imageid}']: {missing_ids}"
+                f"The following subset IDs were not found in "
+                f"adata.obs['{imageid}']: {missing_ids}"
             )
         if verbose:
             print(f"Processing subset of images: {subset}")
@@ -896,14 +897,16 @@ def calculate_spatial_distance(
 
     if coords.shape[1] < 2:
         raise ValueError(
-            f"The coordinates in adata.obsm['{obsm_key}'] must have at least two dimensions."
+            f"The coordinates in adata.obsm['{obsm_key}'] must "
+            f"have at least two dimensions."
         )
 
     # Check for missing coordinates
     if np.isnan(coords).any():
         missing_cells = np.where(np.isnan(coords).any(axis=1))[0]
         raise ValueError(
-            f"Missing values found in spatial coordinates for cells at indices: {missing_cells}."
+            f"Missing values found in spatial coordinates for cells "
+            f"at indices: {missing_cells}."
         )
 
     if verbose:
@@ -916,7 +919,6 @@ def calculate_spatial_distance(
         adata.obs['_z_coord'] = coords[:, 2]
         use_z = True
     else:
-        adata.obs['_z_coord'] = np.nan  # Fill NaN if Z-coordinate is missing
         use_z = False
 
     # Use scimap's spatial_distance function
@@ -934,7 +936,7 @@ def calculate_spatial_distance(
 
     # Remove temporary coordinates from adata.obs
     adata.obs.drop(
-        columns=['_x_coord', '_y_coord', '_z_coord'],
+        columns=['_x_coord', '_y_coord'] + (['_z_coord'] if use_z else []),
         inplace=True,
         errors='ignore'
     )

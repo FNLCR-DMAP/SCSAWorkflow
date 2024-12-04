@@ -115,6 +115,18 @@ class TestCalculateSpatialDistance(unittest.TestCase):
                 verbose=False
             )
 
+    def test_invalid_coordinate_dimensions(self):
+        """Test that the function raises a ValueError when coordinates have
+        insufficient dimensions."""
+        # Set spatial coordinates to have only one dimension
+        self.adata.obsm['spatial'] = np.random.rand(100, 1)
+        with self.assertRaises(ValueError):
+            calculate_spatial_distance(
+                adata=self.adata,
+                annotation='cell_type',
+                verbose=False
+            )
+
     def test_obsm_key_not_found(self):
         """Test that passing a non-existent obsm_key raises a KeyError."""
         with self.assertRaises(KeyError):
