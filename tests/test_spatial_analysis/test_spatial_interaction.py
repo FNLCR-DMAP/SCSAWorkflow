@@ -171,7 +171,7 @@ class TestSpatialInteraction(unittest.TestCase):
         # However, the information can be acquired with
         # plt.gcf -> plt. get current figure.
         axes_list = plt.gcf().get_axes()
-    
+
         current_values = [
             axes_list[2].get_title(),
             axes_list[1].get_ylabel(),
@@ -296,7 +296,7 @@ class TestSpatialInteraction(unittest.TestCase):
             # Each should be a matplotlib axis object
             self.assertIsInstance(ax_dict["Ax"][key], plt.Axes)
 
-    def test_return_matrix_and_stratify_by_combinations(self):
+    def test_return_matrix_return_table_and_stratify_by_combinations(self):
         annotation = "cluster_num"
         analysis_method = "Cluster Interaction Matrix"
         stratify_options = [None, "Analysis_Region"]
@@ -319,10 +319,11 @@ class TestSpatialInteraction(unittest.TestCase):
                     # list when return_matrix is True
                     if return_matrix:
                         self.assertIsInstance(result, dict)
-                        self.assertEqual(len(result), 2)
+                        self.assertEqual(len(result), 3)
                         # Expect two dictionaries
                         self.assertIn("Ax", result.keys())
                         self.assertIn("Matrix", result.keys())
+                        self.assertIn("Table", result.keys())
 
                         if stratify_by is not None:
                             # If stratification is used, assert that
@@ -342,6 +343,39 @@ class TestSpatialInteraction(unittest.TestCase):
                                         result["Matrix"][value],
                                         np.ndarray
                                     )
+                                self.assertIsInstance(
+                                        result["Table"],
+                                        dict
+                                    )
+
+                                for key in result["Table"]:
+                                    key_dict = result["Table"][key]
+                                    for file_name in key_dict:
+                                        self.assertIsInstance(
+                                            key_dict[file_name],
+                                            pd.DataFrame
+                                        )
+                                        self.assertTrue(
+                                            key_dict[
+                                                file_name
+                                            ].columns.is_unique
+                                        )
+                                        self.assertTrue(
+                                            key_dict[
+                                                file_name
+                                            ].columns.notnull().all()
+                                        )
+                                        self.assertTrue(
+                                            key_dict[
+                                                file_name
+                                            ].index.is_unique
+                                        )
+                                        self.assertTrue(
+                                            key_dict[
+                                                file_name
+                                            ].index.notnull().all()
+                                        )
+
                     else:
                         # When return_matrix is False, assert
                         # that the result is a dictionary

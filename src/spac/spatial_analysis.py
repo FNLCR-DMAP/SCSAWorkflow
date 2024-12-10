@@ -22,6 +22,7 @@ def spatial_interaction(
         n_rings=1,
         n_neighs=6,
         radius=None,
+        cmap="seismic",
         **kwargs):
     """
     Perform spatial analysis on the selected annotation in the dataset.
@@ -96,7 +97,8 @@ def spatial_interaction(
     -------
     ax_dictionary : dictionary
         The returned dictionary containse matplotlib.axes.Axes
-        under 'Ax' key and optional matrix under 'Matrix' key.
+        under 'Ax' key, optional matrix under 'Matrix' key, and
+        the processed table with column and row labels under 'Table' key.
         If stratify is used, the function will return dictionary
         of Axes and optional matrix with keys representing
         the stratification groups.
@@ -251,6 +253,79 @@ def spatial_interaction(
 
         return ax
 
+    def get_labels(
+        fig,
+        unique_annotations,
+        verbose=False
+    ):
+        row_labels = []
+        # Iterate over all axes to check if any contain the row labels
+        for i, ax in enumerate(fig.axes):
+            if verbose:
+                print(f"Inspecting axis {i}...")
+            # Try to extract labels from the y-axis of each axis
+            yticklabels = [tick.get_text() for tick in ax.get_yticklabels()]
+            if yticklabels:
+                if set(yticklabels) <= set(unique_annotations):
+                    if verbose:
+                        print(f"Row labels found on axis {i}: {yticklabels}")
+                    row_labels = yticklabels[::-1]
+
+            # Try extracting other possible labels (x-axis, title, etc.)
+            xticklabels = [tick.get_text() for tick in ax.get_xticklabels()]
+            if xticklabels:
+                if set(xticklabels) <= set(unique_annotations):
+                    if verbose:
+                        print(
+                            f"Column labels found on axis {i}: {xticklabels}"
+                        )
+                    row_labels = xticklabels[::-1]
+
+        return row_labels
+
+    # Use to process the output from different
+    # spatial analysis method in squidpy
+    def process_matrixs(matrixs, row_labels, plot_label=None):
+        return_dict = {}
+        if analysis_method == "Cluster Interaction Matrix":
+            if not isinstance(matrixs, pd.DataFrame):
+                matrix = pd.DataFrame(matrixs)
+            if len(row_labels) > 0:
+                matrix.index = row_labels
+                matrix.columns = row_labels
+
+            if plot_label is None:
+                file_name = f"{annotation}_{output_file_cat_list[0]}" + \
+                            "_interaction_matrix.csv"
+            else:
+                file_name = f"{annotation}_{output_file_cat_list[0]}" + \
+                            f"_{plot_label}_interaction_matrix.csv"
+
+            return_dict[file_name] = matrix
+
+        elif analysis_method == "Neighborhood Enrichment":
+            for i, matrix in enumerate(matrixs):
+                # Convert each 2D array to a DataFrame
+                if not isinstance(matrix, pd.DataFrame):
+                    matrix = pd.DataFrame(matrix)
+
+                if len(row_labels) > 0:
+                    matrix.index = row_labels
+                    matrix.columns = row_labels
+
+                if plot_label is None:
+                    file_name = f"{annotation}_{output_file_cat_list[i]}" + \
+                                "_interaction_matrix.csv"
+                else:
+                    file_name = f"{annotation}_{output_file_cat_list[i]}" + \
+                                f"_{plot_label}" + \
+                                "_interaction_matrix.csv"
+
+                return_dict[file_name] = matrix
+
+        return return_dict
+
+    # -----------------------------------------------
     # Error Check Section
     # -----------------------------------------------
     if not isinstance(adata, anndata.AnnData):
@@ -335,6 +410,7 @@ def spatial_interaction(
                             return_matrix,
                             image_title,
                             seed,
+                            cmap=cmap,
                             **kwargs
                         )
 
@@ -377,6 +453,59 @@ def spatial_interaction(
             }
         else:
             results = {"Ax": ax}
+
+    # Adding post processing methods for updating images and retrieve
+
+    # Acquire the annotation labels and acquire
+    # the column names from axes and matrixs
+
+    if return_matrix:
+        output_file_cat_grosarry = {
+            "Neighborhood Enrichment": ["z_score", "enrichment_counts"],
+            "Cluster Interaction Matrix": ["interaction_counts"]
+        }
+
+        output_file_cat_list = output_file_cat_grosarry[analysis_method]
+
+        unique_annotations = list(adata.obs[annotation].unique())
+
+        _matrixs = results['Matrix']
+        _axs = results['Ax']
+
+        def _processes_function_return(
+            matrix,
+            ax,
+            plot_label=None
+        ):
+            fig = ax.get_figure()
+            row_labels = get_labels(
+                    fig,
+                    unique_annotations
+                )
+            result_dict = process_matrixs(
+                matrix,
+                row_labels,
+                plot_label
+            )
+            return result_dict
+
+        table_results = {}
+        if stratify_by:
+            for key in _axs:
+                _ax = _axs[key]
+                _matrix = _matrixs[key]
+                table_results[key] = _processes_function_return(
+                    _matrix,
+                    _ax,
+                    key
+                )
+        else:
+            table_results['annotation'] = _processes_function_return(
+                _matrixs,
+                _axs
+            )
+
+        results['Table'] = table_results
 
     return results
 
