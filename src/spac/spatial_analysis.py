@@ -91,24 +91,51 @@ def spatial_interaction(
         - :class:`tuple` - prune the final graph to only contain
             edges in interval `[min(radius), max(radius)]`.
 
+    cmap : str, default 'seismic'
+        The colormap to use for the plot. The 'seismic' color map
+        consist of three color regions: red for positive, blue for negative,
+        and the white at the center. This color map effectively represents
+        the nature of the spatial interaction analysis results,
+        where positive values indicate clustering and
+        negative values indicate seperation. For more color maps, please visit
+        https://matplotlib.org/stable/tutorials/colors/colormaps.html
+
     **kwargs
         Keyword arguments for matplotlib.pyplot.text()
-    Returns:
+
+    Returns
     -------
-    ax_dictionary : dictionary
-        The returned dictionary containse matplotlib.axes.Axes
-        under 'Ax' key, optional matrix under 'Matrix' key, and
-        the processed table with column and row labels under 'Table' key.
-        If stratify is used, the function will return dictionary
-        of Axes and optional matrix with keys representing
-        the stratification groups.
-        For example: if stratify is not used and matrix is called,
-        the matrix can be acquired by result['Matrix'], and axes
-        from result['Ax']. If stratify is used and has two levels,
-        "A" and "B", the axes for A can be extracted by
-        result['Ax']['A'] and matrix through result['Matrix']['A'].
+    dict
+        A dictionary containing the results of the spatial interaction
+        analysis. The keys of the dictionary depend on the parameters
+        passed to the function:
 
+        Ax : dict or matplotlib.axes.Axes
+            If `stratify_by` is not used, returns a single
+            matplotlib.axes.Axes object. If `stratify_by` is used,
+            returns a dictionary of Axes objects, with keys
+            representing the stratification groups.
 
+        Matrix : dict or tuple, optional
+            Returned only if `return_matrix=True`. If `stratify_by` is
+            not used, returns:
+            - For "Neighborhood Enrichment": a tuple with the z-score
+              matrix and enrichment counts matrix.
+            - For "Cluster Interaction Matrix": the interaction
+              matrix. If `stratify_by` is used, returns a dictionary
+              of matrices, with keys representing the stratification
+              groups.
+
+        Table : dict, optional
+            Returned only if `return_matrix=True`. Contains processed
+            DataFrames of computed matrices with row and column labels
+            applied. If `stratify_by` is used, the keys represent the
+            stratification groups. For example:
+            - `results['Table']['GroupA']` for a specific
+              stratification group.
+            - If `stratify_by` is not used, the table is accessible
+              via `results['Table']['annotation']`.
+    
     """
 
     # List all available methods
