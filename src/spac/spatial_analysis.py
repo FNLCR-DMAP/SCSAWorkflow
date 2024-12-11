@@ -61,7 +61,7 @@ def spatial_interaction(
         with the z-score and the enrichment count.
         For Cluster Interaction Matrix, it will returns the
         interaction matrix.
-        If False, the function will return only the axes dictaionary.
+        If False, the function will return only the axes dictionary.
 
     seed: int, default None
         Random seed for reproducibility, used in Neighborhood Enrichment
