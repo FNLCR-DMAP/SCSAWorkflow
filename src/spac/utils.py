@@ -140,7 +140,7 @@ def check_list_in_list(
     Warns
     -----
     UserWarning
-        If the specified behavior is not present 
+        If the specified behavior is not present
         and `warning` is True.
 
 
@@ -177,6 +177,7 @@ def check_list_in_list(
                         f"The {input_type} '{item}' "
                         "exist in the provided dataset.\n"
                         f"Existing {input_type}s are:\n"
+                        f"{target_list_str}"
                     )
                     if warning is False:
                         raise ValueError(message)
@@ -221,7 +222,7 @@ def check_table(
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, annotations, obsm, 
+        If any of the specified layers, annotations, obsm,
         or features do not exist.
 
 
@@ -380,7 +381,7 @@ def check_column_name(
 
 def check_distances(distances):
     """
-    Check that the distances are valid: must be an array-like of 
+    Check that the distances are valid: must be an array-like of
     incremental positive values.
 
     Parameters
@@ -395,7 +396,7 @@ def check_distances(distances):
 
     Notes
     -----
-    The distances must be a list of positive real numbers and must 
+    The distances must be a list of positive real numbers and must
     be monotonically increasing.
     """
     if not isinstance(distances, (list, tuple, np.ndarray)):
@@ -654,3 +655,95 @@ def color_mapping(
     ]
 
     return label_colors
+
+
+def check_label(
+    adata,
+    annotation,
+    labels=None,
+    should_exist=True,
+    warning=False
+):
+    """
+    Check if specified labels exist in a given annotation column in adata.obs.
+
+    This function verifies whether all or none of the specified labels
+    exist in the provided annotation column of an AnnData object. It ensures
+    that the input labels align with the expected categories present in
+    adata.obs[annotation].
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the annotation column.
+
+    annotation : str
+        The name of the annotation column in adata.obs to check against.
+
+    labels : str or list of str, optional
+        The label or list of labels to check for existence in the specified
+        annotation column. If None, no validation will be performed.
+
+    should_exist : bool, optional (default=True)
+        Determines whether to check if elements exist in the target column
+        (True), or if they should not exist (False).
+
+    warning : bool, optional (default=False)
+        If True, generate a warning instead of raising an exception if the
+        specified condition is not met.
+
+    Raises
+    ------
+    TypeError
+        If adata is not an instance of anndata.AnnData.
+
+    ValueError
+        If the specified annotation does not exist in adata.obs.
+        If should_exist is True and any label does not exist in the
+        annotation column.
+        If should_exist is False and any label already exists in the
+        annotation column.
+
+    Warns
+    -----
+    UserWarning
+        If the specified condition is not met and warning is True.
+
+    Example
+    -------
+    >>> check_label(adata, "cell_type", "B_cell")
+    >>> check_label(
+    ...     adata, "cluster", ["Cluster1", "Cluster2"], should_exist=True
+    ... )
+    """
+
+    # Check if annotation exists in adata.obs
+    check_annotation(
+        adata=adata,
+        annotations=annotation,
+        parameter_name="annotation",
+        should_exist=True
+    )
+
+    # Convert single label to list
+    if labels is not None:
+        if isinstance(labels, str):
+            labels = [labels]
+        elif not isinstance(labels, list):
+            raise ValueError(
+                "The 'labels' parameter "
+                "should be a string or a list of strings."
+            )
+
+        # Get existing labels in the annotation column
+        existing_labels = adata.obs[annotation].unique().tolist()
+
+        # Validate the labels
+        check_list_in_list(
+            input=labels,
+            input_name="labels",
+            input_type=f"label(s) in the annotation '{annotation}'",
+            target_list=existing_labels,
+            need_exist=should_exist,
+            warning=warning
+        )
