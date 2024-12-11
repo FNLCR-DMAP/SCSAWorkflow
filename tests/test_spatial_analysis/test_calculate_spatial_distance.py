@@ -5,45 +5,67 @@ from spac.spatial_analysis import calculate_spatial_distance
 import pandas as pd
 import io
 from contextlib import redirect_stdout
+from pandas.testing import assert_frame_equal
 
 
 class TestCalculateSpatialDistance(unittest.TestCase):
 
     def setUp(self):
-        # Create a sample AnnData object
-        self.adata = anndata.AnnData(X=np.random.rand(100, 10))
-        # Add spatial coordinates to adata.obsm
-        self.adata.obsm['spatial'] = np.random.rand(100, 2)
-        # Add annotations and image IDs to adata.obs
-        self.adata.obs['cell_type'] = np.random.choice(
-            ['type1', 'type2'], size=100
-        )
-        self.adata.obs['imageid'] = np.random.choice(
-            ['image1', 'image2'], size=100
-        )
+        # Create a minimal deterministic AnnData object
+        data = np.array([[1.0, 2.0],
+                         [3.0, 4.0],
+                         [5.0, 6.0],
+                         [7.0, 8.0]])
+        spatial_coords = np.array([
+            [0.0, 0.0],
+            [0.0, 1.0],
+            [1.0, 0.0],
+            [1.0, 1.0]
+        ])
+        obs = pd.DataFrame({
+            'cell_type': ['type1', 'type1', 'type2', 'type2'],
+            'imageid': ['image1', 'image1', 'image2', 'image2']
+        }, index=['Cell1', 'Cell2', 'Cell3', 'Cell4'])
 
-    def test_typical_case(self):
-        """Test the function with default parameters."""
+        self.adata = anndata.AnnData(X=data, obs=obs)
+        self.adata.obsm['spatial'] = spatial_coords
+
+    def test_typical_case_with_output(self):
+        """Test typical case with default label and a custom label."""
+        # Default label
         calculate_spatial_distance(
             adata=self.adata,
             annotation='cell_type',
             verbose=False
         )
+
+        # Check if the result is stored under the default label
         self.assertIn('spatial_distance', self.adata.uns)
 
-    def test_output_structure(self):
-        """Test that the output is stored as a pandas DataFrame."""
-        calculate_spatial_distance(
-            adata=self.adata,
-            annotation='cell_type',
-            verbose=False
-        )
+        # Check if the output is a DataFrame
         result = self.adata.uns['spatial_distance']
         self.assertIsInstance(result, pd.DataFrame)
 
+        # Expect columns to be all phenotypes found
+        self.assertIn('type1', result.columns)
+        self.assertIn('type2', result.columns)
+        self.assertEqual(len(result), 4)  # 4 cells total
+
+        # Test custom label
+        calculate_spatial_distance(
+            adata=self.adata,
+            annotation='cell_type',
+            label='custom_label',
+            verbose=False
+        )
+
+        # Check if the result is stored under the custom label
+        self.assertIn('custom_label', self.adata.uns)
+        custom_result = self.adata.uns['custom_label']
+        self.assertIsInstance(custom_result, pd.DataFrame)
+
     def test_subset_processing(self):
-        """Test that the function correctly processes a subset of images."""
-        # Run the function with subset=['image1']
+        """Test subset processing with minimal deterministic data."""
         calculate_spatial_distance(
             adata=self.adata,
             annotation='cell_type',
@@ -51,38 +73,34 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             imageid='imageid',
             verbose=False
         )
+
+        # Verify the DataFrame only includes cells from image1
         result = self.adata.uns['spatial_distance']
-
-        # Get all cell IDs in 'image1' as strings
-        image1_cell_indices = self.adata.obs[
-            self.adata.obs['imageid'] == 'image1'
-        ].index.astype(str)
-
-        # Get the cell indices in the result
-        result_cell_indices = result.index.astype(str)
-
-        # Check that all cell IDs in result are from 'image1'
+        self.assertIsInstance(result, pd.DataFrame)
         self.assertTrue(
-            set(result_cell_indices).issubset(set(image1_cell_indices))
+            all(cell in ['Cell1', 'Cell2'] for cell in result.index)
         )
+        self.assertEqual(len(result), 2)
 
     def test_invalid_subset_type(self):
-        """Test that passing an invalid subset type raises a TypeError."""
-        # Pass an integer as subset, which should raise TypeError
-        with self.assertRaises(TypeError):
+        """Test that passing an invalid subset type raises a ValueError."""
+        with self.assertRaises(ValueError) as context:
             calculate_spatial_distance(
                 adata=self.adata,
                 annotation='cell_type',
-                subset=123,  # Invalid subset type
+                subset=123,  # not string or list of strings
                 imageid='imageid',
                 verbose=False
             )
+        expected_msg = (
+            "The 'labels' parameter should be a string or a list of strings."
+        )
+        self.assertEqual(str(context.exception), expected_msg)
 
     def test_subset_imageid_not_found(self):
-        """Test that passing a subset with non-existent image IDs
-        raises a ValueError."""
-        # Pass a subset with an image ID not present in the data
-        with self.assertRaises(ValueError):
+        """Test that passing a subset with non-existent image IDs raises
+        a ValueError."""
+        with self.assertRaises(ValueError) as context:
             calculate_spatial_distance(
                 adata=self.adata,
                 annotation='cell_type',
@@ -90,89 +108,91 @@ class TestCalculateSpatialDistance(unittest.TestCase):
                 imageid='imageid',
                 verbose=False
             )
-
-    def test_missing_coordinates(self):
-        """Test that the function raises a KeyError
-        when spatial coordinates are missing."""
-        # Remove the spatial coordinates
-        del self.adata.obsm['spatial']
-        with self.assertRaises(KeyError):
-            calculate_spatial_distance(
-                adata=self.adata,
-                annotation='cell_type',
-                verbose=False
-            )
+        expected_msg = (
+            "The label(s) in the annotation 'imageid' 'nonexistent_image' "
+            "does not exist in the provided dataset.\n"
+            "Existing label(s) in the annotation 'imageid's are:\n"
+            "image1\nimage2"
+        )
+        self.assertEqual(str(context.exception), expected_msg)
 
     def test_missing_coordinate_values(self):
-        """Test that the function raises a ValueError
-        when coordinate values are missing."""
-        # Set first cell's x-coordinate to NaN
+        """Test ValueError when coordinate values are missing."""
         self.adata.obsm['spatial'][0, 0] = np.nan
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             calculate_spatial_distance(
                 adata=self.adata,
                 annotation='cell_type',
                 verbose=False
             )
+        expected_msg = (
+            "Missing values found in spatial coordinates for cells at "
+            "indices: [0]."
+        )
+        self.assertEqual(str(context.exception), expected_msg)
 
     def test_invalid_coordinate_dimensions(self):
-        """Test that the function raises a ValueError when coordinates have
-        insufficient dimensions."""
-        # Set spatial coordinates to have only one dimension
-        self.adata.obsm['spatial'] = np.random.rand(100, 1)
-        with self.assertRaises(ValueError):
+        """Test ValueError when coordinates have insufficient dimensions."""
+        self.adata.obsm['spatial'] = np.random.rand(4, 1)  # Only one dimension
+        with self.assertRaises(ValueError) as context:
             calculate_spatial_distance(
                 adata=self.adata,
                 annotation='cell_type',
                 verbose=False
             )
+        expected_msg = (
+            "The input data must include coordinates with at least "
+            "two dimensions, such as X and Y positions."
+        )
+        self.assertEqual(str(context.exception), expected_msg)
 
     def test_obsm_key_not_found(self):
-        """Test that passing a non-existent obsm_key raises a KeyError."""
-        with self.assertRaises(KeyError):
+        """Test ValueError when obsm_key is not found."""
+        with self.assertRaises(ValueError) as context:
             calculate_spatial_distance(
                 adata=self.adata,
                 annotation='cell_type',
                 obsm_key='nonexistent_obsm',
                 verbose=False
             )
-
-    def test_custom_obsm_key(self):
-        """Test that the function works with a custom obsm_key."""
-        # Rename spatial coordinates
-        self.adata.obsm['custom_spatial'] = self.adata.obsm.pop('spatial')
-        calculate_spatial_distance(
-            adata=self.adata,
-            obsm_key='custom_spatial',
-            annotation='cell_type',
-            verbose=False
+        print("test_obsm_key_not_found", str(context.exception))
+        expected_msg = (
+            "The associated table 'nonexistent_obsm' "
+            "does not exist in the provided dataset.\n"
+            "Existing associated tables are:\nspatial"
         )
-        self.assertIn('spatial_distance', self.adata.uns)
+        self.assertEqual(str(context.exception), expected_msg)
 
     def test_z_coordinate_handling(self):
         """Test that the function correctly handles Z-coordinate data."""
-        # Add a Z-coordinate
-        self.adata.obsm['spatial'] = np.random.rand(100, 3)
-        calculate_spatial_distance(
-            adata=self.adata,
-            annotation='cell_type',
-            verbose=False
+        # Use a minimal dataset with Z-coordinates
+        adata = anndata.AnnData(
+            X=np.array([[1.0, 2.0], [3.0, 4.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type2']}, index=['C1', 'C2']
+            ),
+            obsm={
+                'spatial': np.array([
+                    [0.0, 0.0, 0.5],
+                    [1.0, 1.0, 0.5]
+                ])
+            }
         )
-        result = self.adata.uns['spatial_distance']
-        self.assertIsInstance(result, pd.DataFrame)
 
-    def test_label_parameter(self):
-        """Test that the label parameter correctly stores the result."""
         calculate_spatial_distance(
-            adata=self.adata,
+            adata=adata,
             annotation='cell_type',
-            label='custom_label',
             verbose=False
         )
-        self.assertIn('custom_label', self.adata.uns)
+
+        result = adata.uns['spatial_distance']
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertIn('type1', result.columns)
+        self.assertIn('type2', result.columns)
+        self.assertEqual(len(result), 2)
 
     def test_verbose_output(self):
-        # Capture the print output
+        """Test verbose output for progress messages."""
         f = io.StringIO()
         with redirect_stdout(f):
             calculate_spatial_distance(
@@ -186,14 +206,170 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             output
         )
 
-    def test_return_type(self):
-        """Test that the function returns the original AnnData object."""
-        result = calculate_spatial_distance(
-            adata=self.adata,
+    def test_output_with_different_setups(self):
+        """
+        Test output for different setups with hardcoded expectations
+        as DataFrames.
+
+        Scenarios:
+        1) One slide, one phenotype
+        2) One slide, two phenotypes
+        3) Two slides, one phenotype
+
+        Explanation for 0.00 distance:
+        A cell measuring distance to the nearest cell of a phenotype of
+        which it is the only member will have a distance of 0.00,
+        since the nearest cell is itself.
+        """
+
+        # 1) One slide, one phenotype
+        adata1 = anndata.AnnData(
+            X=np.array([[1.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1'], 'imageid': ['image1']},
+                index=['CellA']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata1,
             annotation='cell_type',
             verbose=False
         )
-        self.assertIs(result, self.adata)
+        result1 = adata1.uns['spatial_distance']
+        self.assertIsInstance(result1, pd.DataFrame)
+
+        # Expected: One cell, one phenotype, distance=0.0
+        expected_df_1 = pd.DataFrame(
+            data=[[0.0]],
+            index=['CellA'],
+            columns=['type1']
+        )
+        assert_frame_equal(result1, expected_df_1)
+
+        # 2) One slide, two phenotypes
+        adata2 = anndata.AnnData(
+            X=np.array([[1.0], [2.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type2'],
+                 'imageid': ['image1', 'image1']},
+                index=['CellA', 'CellB']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata2,
+            annotation='cell_type',
+            imageid='imageid',
+            verbose=False
+        )
+
+        result2 = adata2.uns['spatial_distance']
+        self.assertIsInstance(result2, pd.DataFrame)
+
+        # Distances:
+        # CellA to type1 = 0.0 (itself), CellA to type2 = sqrt(2)
+        # CellB to type1 = sqrt(2), CellB to type2 = 0.0 (itself)
+        dist = np.sqrt(2)
+        expected_df_2 = pd.DataFrame(
+            data=[[0.0, dist],
+                  [dist, 0.0]],
+            index=['CellA', 'CellB'],
+            columns=['type1', 'type2']
+        )
+        assert_frame_equal(result2, expected_df_2)
+
+        # 3) Two slides, one phenotype
+        adata3 = anndata.AnnData(
+            X=np.array([[1.0], [2.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type1'],
+                 'imageid': ['image1', 'image2']},
+                index=['CellA', 'CellB']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata3,
+            annotation='cell_type',
+            imageid='imageid',
+            verbose=False
+        )
+
+        result3 = adata3.uns['spatial_distance']
+        self.assertIsInstance(result3, pd.DataFrame)
+
+        # Each slide processed separately, each slide has only one cell of
+        # type1. Thus, each cell's distance to type1 is 0.0.
+        expected_df_3 = pd.DataFrame(
+            data=[[0.0],
+                  [0.0]],
+            index=['CellA', 'CellB'],
+            columns=['type1']
+        )
+        assert_frame_equal(result3, expected_df_3)
+
+    def test_no_imageid_scenario(self):
+        """
+        Test behavior when `imageid` is None.
+
+        Without an `imageid` column, a dummy image column is created internally
+        so that scimap can run. After computation, this dummy column should be
+        removed.
+
+        Setup:
+        - Two cells, both of the same phenotype ("type1") at coordinates:
+            CellA: (0.0, 0.0)
+            CellB: (1.0, 1.0)
+
+        Since there are two cells of the same phenotype, the zero-distance to
+        self is replaced by the distance to the other cell.
+        Both cells should show a distance of sqrt(2).
+
+        Expected:
+        - `adata.uns['spatial_distance']` is a DataFrame with one column
+          ("type1").
+        - Distances:
+            CellA: sqrt(2)
+            CellB: sqrt(2)
+        """
+        adata_no_imageid = anndata.AnnData(
+            X=np.array([[1.0], [2.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type1']}, index=['CellA', 'CellB']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0],
+                                       [1.0, 1.0]])}
+        )
+
+        # Run the calculation with no imageid specified
+        calculate_spatial_distance(
+            adata=adata_no_imageid,
+            annotation='cell_type',
+            imageid=None,  # No imageid
+            verbose=False
+        )
+
+        # Check if results are stored
+        self.assertIn('spatial_distance', adata_no_imageid.uns)
+        result = adata_no_imageid.uns['spatial_distance']
+        self.assertIsInstance(result, pd.DataFrame)
+
+        dist = np.sqrt(2)
+        expected_df = pd.DataFrame(
+            data=[[dist],
+                  [dist]],
+            index=['CellA', 'CellB'],
+            columns=['type1']
+        )
+
+        # Assert the result matches the expected DataFrame
+        assert_frame_equal(
+            result, expected_df, check_exact=False, rtol=1e-5, atol=1e-5
+        )
+
+        # Check that the dummy column is removed
+        self.assertNotIn('_dummy_imageid', adata_no_imageid.obs.columns)
 
 
 if __name__ == '__main__':

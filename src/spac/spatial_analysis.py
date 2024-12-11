@@ -2,7 +2,12 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-from spac.utils import check_annotation, check_table, check_distances
+from spac.utils import (
+    check_annotation,
+    check_table,
+    check_distances,
+    check_label,
+)
 import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
@@ -846,59 +851,104 @@ def calculate_spatial_distance(
     annotation,
     obsm_key='spatial',
     subset=None,
-    imageid='imageid',
+    imageid=None,
     label='spatial_distance',
     verbose=True
 ):
     """
-    Calculates spatial distances and stores the results in `adata.uns`.
+    This function uses `scimap.tl.spatial_distance` to compute the shortest
+    distance from each cell to the nearest cell of each phenotype. The results
+    are stored as a DataFrame in `adata.uns[label]` where:
 
-    Parameters:
-        adata (AnnData): Annotated data matrix with spatial information.
-        obsm_key (str): Key in `adata.obsm` where spatial coordinates are stored.
-        annotation (str): Column name in `adata.obs` containing cell annotations.
-        subset (str or list, optional): Subset of image IDs to process.
-        imageid (str): Column name in `adata.obs` containing image identifiers.
-        label (str): Key under which to store the result in `adata.uns`.
-        verbose (bool): If True, prints progress messages.
+    - Rows represent cells, indexed by `adata.obs.index`.
+    - Columns represent unique phenotypes found in `adata.obs[annotation]`.
+    - Each value is the shortest distance from a cell to the closest cell of
+      that phenotype.
 
-    Returns:
-        AnnData: The input `adata` object with updated `adata.uns[label]`.
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix with spatial information.
+    annotation : str
+        Column name in `adata.obs` containing cell annotations.
+    obsm_key : str, optional
+        Key in `adata.obsm` where spatial coordinates are stored. Default is
+        'spatial'.
+    subset : str or list of str, optional
+        Subset of image IDs to process. If None, all images are processed.
+    imageid : str, optional
+        The column in `adata.obs` specifying image IDs. If None,
+        a dummy image column is created temporarily. Spatial distances are
+        computed across the entire dataset.
+    label : str, optional
+        The key under which results are stored  in `adata.uns`. Default is
+        'spatial_distance'.
+    verbose : bool, optional
+        If True, prints progress messages. Default is True.
+
+    Returns
+    -------
+    None
+        Modifies `adata` in place by storing a DaatFrame of
+        spatial distances in `adata.uns[label]`.
+
+    Example
+    -------
+    For a dataset with two cells (CellA, CellB) both of the same phenotype
+    "type1", the output might look like:
+
+    >>> adata.uns['spatial_distance']
+           type1
+    CellA    0.0
+    CellB    0.0
+
+    For a dataset with two phenotypes "type1" and "type2", the output might
+    look like:
+
+    >>> adata.uns['spatial_distance']
+           type1     type2
+    CellA   0.00  1.414214
+    CellB  1.414214  0.00
+
+    Input:
+        adata.obs:
+            cell_type   imageid
+            type1       image1
+            type1       image1
+            type2       image1
+
+        adata.obsm['spatial']:
+            [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+
+    Output stored in adata.uns['spatial_distance']:
+            type1   type2
+        0    0.0    1.414
+        1    1.414  0.0
+        2    2.236  1.0
+
+    Raises
+    ------
+    ValueError
+        If `obsm_key` is not found in `adata.obsm`.
+        If spatial coordinates are missing or invalid.
     """
 
-    # Input validation
+    # Input validation for annotation
     check_annotation(adata, annotations=annotation)
 
-    if subset is not None:
-        if isinstance(subset, str):
-            subset = [subset]
-        elif not isinstance(subset, list):
-            raise TypeError(
-                f"The 'subset' parameter must be a string or a list of strings, "
-                f"but got {type(subset)}."
-            )
-        # Check if all subset IDs are present in adata.obs[imageid]
-        missing_ids = set(subset) - set(adata.obs[imageid].unique())
-        if missing_ids:
-            raise ValueError(
-                f"The following subset IDs were not found in "
-                f"adata.obs['{imageid}']: {missing_ids}"
-            )
-        if verbose:
-            print(f"Processing subset of images: {subset}")
-
-    # Input validation for 'obsm_key' and coordinate extraction
-    try:
-        coords = adata.obsm[obsm_key]
-    except KeyError:
-        raise KeyError(
-            f"The key '{obsm_key}' was not found in adata.obsm."
-        )
+    # Validate and extract spatial coordinates
+    check_table(
+        adata,
+        tables=obsm_key,
+        associated_table=True,
+        should_exist=True
+    )
+    coords = adata.obsm[obsm_key]
 
     if coords.shape[1] < 2:
         raise ValueError(
-            f"The coordinates in adata.obsm['{obsm_key}'] must "
-            f"have at least two dimensions."
+            "The input data must include coordinates with at least "
+            "two dimensions, such as X and Y positions."
         )
 
     # Check for missing coordinates
@@ -915,13 +965,36 @@ def calculate_spatial_distance(
     # Add coordinates to adata.obs temporarily
     adata.obs['_x_coord'] = coords[:, 0]
     adata.obs['_y_coord'] = coords[:, 1]
+
     if coords.shape[1] > 2:
         adata.obs['_z_coord'] = coords[:, 2]
         use_z = True
     else:
         use_z = False
 
-    # Use scimap's spatial_distance function
+    # Handle imageid and subset logic
+    # If imageid is None, we will not split by image, but scimap requires an
+    # image column. Create a dummy image column in that case.
+    dummy_column_created = False
+    original_imageid = imageid
+    if imageid is None:
+        dummy_column_created = True
+        imageid = '_dummy_imageid'
+        adata.obs[imageid] = 'dummy_image'  # All cells belong to one 'image'
+    else:
+        # If subset is provided, ensure all subset labels exist
+        # in adata.obs[imageid].
+        if subset is not None:
+            check_label(
+                adata,
+                annotation=imageid,
+                labels=subset,
+                should_exist=True
+            )
+            if verbose:
+                print(f"Processing subset of images: {subset}")
+
+    # Run scimap's spatial_distance function
     sm.tl.spatial_distance(
         adata=adata,
         x_coordinate='_x_coord',
@@ -935,13 +1008,16 @@ def calculate_spatial_distance(
     )
 
     # Remove temporary coordinates from adata.obs
-    adata.obs.drop(
-        columns=['_x_coord', '_y_coord'] + (['_z_coord'] if use_z else []),
-        inplace=True,
-        errors='ignore'
-    )
+    drop_cols = ['_x_coord', '_y_coord']
+    if use_z:
+        drop_cols.append('_z_coord')
+    adata.obs.drop(columns=drop_cols, inplace=True, errors='ignore')
+
+    # If a dummy image column was created, remove it after calculation
+    if dummy_column_created:
+        adata.obs.drop(columns=[imageid], inplace=True, errors='ignore')
+        # Restore imageid to None to reflect the input
+        imageid = original_imageid
 
     if verbose:
         print(f"Spatial distances stored in adata.uns['{label}']")
-
-    return adata
