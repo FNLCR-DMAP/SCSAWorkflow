@@ -15,6 +15,7 @@ from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping
 import logging
 import warnings
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1412,11 +1413,13 @@ def interative_spatial_plot(
     dot_size=1.5,
     dot_transparancy=0.75,
     colorscale='Viridis',
-    figure_width=12,
-    figure_height=8,
+    figure_width=6,
+    figure_height=4,
     figure_dpi=200,
-    font_size=12
-
+    font_size=12,
+    stratify_by=None,
+    defined_color_map=None,
+    **kwargs
 ):
 
     """
@@ -1447,18 +1450,25 @@ def interative_spatial_plot(
         DPI (dots per inch) for the figure. Default is 200.
     font_size : int, optional
         Font size for text in the plot. Default is 12.
+    stratify_by : str, optional
+        Column in `adata.obs` to stratify the plot. Default is None.
+    defined_color_map : dict, optional
+        Predefined color mapping for specific labels. Default is None.
+    **kwargs
+        Additional keyword arguments for customization.
 
     Returns
     -------
-    plotly.graph_objs._figure.Figure
-        A plotly figure object containing the spatial plot.
+    list of dict
+        A list of dictionaries, each containing the following keys:
+        - "image_name": str, the name of the generated image.
+        - "image_object": Plotly Figure object.
 
     Notes
     -----
-    This function is specifically tailored for
-    spatial single-cell data and expects the input AnnData object
-    to have spatial coordinates stored in its .obsm attribute
-    under the 'spatial' key.
+    This function is tailored for spatial single-cell data and expects the
+    AnnData object to have spatial coordinates in its `.obsm` attribute under
+    the 'spatial' key.
     """
 
     if not isinstance(annotations, list):
@@ -1480,127 +1490,426 @@ def interative_spatial_plot(
             "missing spatial coordniates. Please check."
         raise ValueError(error_msg)
 
-    spatial_coords = adata.obsm['spatial']
+    def main_figure_generation(
+        adata
+    ):
+        """
+        Create the core interactive plot for downstream processing.
 
-    extract_columns_raw = []
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix containing either the full dataset
+            or a subset of the data.
 
-    for item in annotations:
-        extract_columns_raw.append(adata.obs[item])
+        Returns
+        -------
+        plotly.graph_objs._figure.Figure
 
-    extract_columns = []
+        """   
 
-    for i, item in enumerate(extract_columns_raw):
-        extract_columns.append(
-            [annotations[i] + "_" + str(value) for value in item]
+        spatial_coords = adata.obsm['spatial']
+
+        extract_columns_raw = []
+
+        for item in annotations:
+            extract_columns_raw.append(adata.obs[item])
+
+        extract_columns = []
+
+        for i, item in enumerate(extract_columns_raw):
+            extract_columns.append(
+                [annotations[i] + "_" + str(value) for value in item]
+            )
+
+        xcoord = [coord[0] for coord in spatial_coords]
+        ycoord = [coord[1] for coord in spatial_coords]
+
+        data = {'X': xcoord, 'Y': ycoord}
+
+        # Add the extract_columns data as columns in the dictionary
+        for i, column in enumerate(extract_columns):
+            column_name = annotations[i]
+            data[column_name] = column
+
+        # Create the DataFrame
+        df = pd.DataFrame(data)
+
+        max_x_range = max(xcoord) * 1.1
+        min_x_range = min(xcoord) * 0.9
+        max_y_range = max(ycoord) * 1.1
+        min_y_range = min(ycoord) * 0.9
+
+        width_px = int(figure_width * figure_dpi)
+        height_px = int(figure_height * figure_dpi)
+
+        main_fig = px.scatter(
+            df,
+            x='X',
+            y='Y',
+            color=annotations[0],
+            hover_data=[annotations[0]]
         )
 
-    xcoord = [coord[0] for coord in spatial_coords]
-    ycoord = [coord[1] for coord in spatial_coords]
+        # If annotation is more than 1, we would first call px.scatter
+        # to create plotly object, than append the data to main figure
+        # with add_trace for a centralized view.
+        if len(annotations) > 1:
+            for obs in annotations[1:]:
+                scatter_fig = px.scatter(
+                                    df,
+                                    x='X',
+                                    y='Y',
+                                    color=obs,
+                                    hover_data=[obs]
+                                )
 
-    data = {'X': xcoord, 'Y': ycoord}
+                main_fig.add_traces(scatter_fig.data)
 
-    # Add the extract_columns data as columns in the dictionary
-    for i, column in enumerate(extract_columns):
-        column_name = annotations[i]
-        data[column_name] = column
+        # Reset the color attribute of the traces in combined_fig
+        for trace in main_fig.data:
+            trace.marker.color = None
 
-    # Create the DataFrame
-    df = pd.DataFrame(data)
+        main_fig.update_traces(
+            mode='markers',
+            marker=dict(
+                size=dot_size,
+                colorscale=colorscale,
+                opacity=dot_transparancy
+            ),
+            hovertemplate="%{customdata[0]}<extra></extra>"
+        )
 
-    max_x_range = max(xcoord) * 1.1
-    min_x_range = min(xcoord) * 0.9
-    max_y_range = max(ycoord) * 1.1
-    min_y_range = min(ycoord) * 0.9
+        main_fig.update_layout(
+            width=width_px,
+            height=height_px,
+            plot_bgcolor='white',
+            font=dict(size=font_size),
+            margin=dict(l=10, r=10, t=10, b=10),
+            legend=dict(
+                orientation='v',
+                yanchor='middle',
+                y=0.5,
+                xanchor='right',
+                x=1.15,
+                title='',
+                itemwidth=30,
+                bgcolor="rgba(0, 0, 0, 0)",
+                traceorder='normal',
+                entrywidth=50
+            ),
+            xaxis=dict(
+                        range=[min_x_range, max_x_range],
+                        showgrid=False,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            yaxis=dict(
+                        range=[max_y_range, min_y_range],
+                        showgrid=False,
+                        scaleanchor="x",
+                        scaleratio=1,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            shapes=[
+                go.layout.Shape(
+                    type="rect",
+                    xref="x",
+                    yref="y",
+                    x0=min_x_range,
+                    y0=min_y_range,
+                    x1=max_x_range,
+                    y1=max_y_range,
+                    line=dict(color="black", width=1),
+                    fillcolor="rgba(0,0,0,0)",
+                )
+            ]
+        )
 
-    width_px = int(figure_width * figure_dpi)
-    height_px = int(figure_height * figure_dpi)
+        return main_fig
 
-    main_fig = px.scatter(
-        df,
-        x='X',
-        y='Y',
-        color=annotations[0],
-        hover_data=[annotations[0]]
-    )
+    def assign_colors_for_labels(adata, stratify_by, color_map):
+        """
+        Assign colors to each label using the Plotly color scale.
 
-    # If annotation is more than 1, we would first call px.scatter
-    # to create plotly object, than append the data to main figure
-    # with add_trace for a centralized view.
-    if len(annotations) > 1:
-        for obs in annotations[1:]:
-            scatter_fig = px.scatter(
-                                df,
-                                x='X',
-                                y='Y',
-                                color=obs,
-                                hover_data=[obs]
-                            )
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix.
+        stratify_by : str
+            Column in `adata.obs` to stratify the data.
+        color_map : str
+            Name of the Plotly color scale.
 
-            main_fig.add_traces(scatter_fig.data)
+        Returns
+        -------
+        dict
+            A dictionary mapping labels to their assigned colors.
+        """
+        unique_values = np.unique(adata.obs[stratify_by].values)
+        n_colors = len(unique_values)
+        colorscale = pc.get_colorscale(color_map)
+        interpolated_colors = pc.sample_colorscale(colorscale, np.linspace(0, 1, n_colors))
+        return {value: interpolated_colors[i] for i, value in enumerate(unique_values)}
 
-    # Reset the color attribute of the traces in combined_fig
-    for trace in main_fig.data:
-        trace.marker.color = None
+    def subset_adata(adata, stratify_by, highlight_value):
+        """
+        Subset the AnnData object by a specific value in the stratify_by column.
 
-    main_fig.update_traces(
-        mode='markers',
-        marker=dict(
-            size=dot_size,
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix.
+        stratify_by : str
+            Column in `adata.obs` to subset by.
+        highlight_value : str
+            Value to subset on.
+
+        Returns
+        -------
+        AnnData
+            A subset of the input AnnData object.
+        """
+        subset_mask = adata.obs[stratify_by] == highlight_value
+        return adata[subset_mask].copy()
+
+    def create_core_plot_and_update(
+        adata,
+        stratify_by=None,
+        color_mapping=None,
+    ):
+        """
+        Creates the core plot and updates the plot with customization.
+
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix containing either the full dataset
+            or a subset of the data.
+        title : str
+            Title for the plot.
+        stratify_by : str, optional
+            Column to stratify the plot. Default is None.
+        color_mapping : dict, optional
+            Color mapping for specific labels. Default is None.
+
+        Returns
+        -------
+        dict
+            A dictionary with "image_name" and "image_object" keys.
+        """
+        main_fig_parent = main_figure_generation(
+            adata,
+            annotations=annotations,
+            dot_size=dot_size,
+            dot_transparancy=dot_transparancy,
             colorscale=colorscale,
-            opacity=dot_transparancy
-        ),
-        hovertemplate="%{customdata[0]}<extra></extra>"
-    )
+            figure_width=figure_width,
+            figure_height=figure_height,
+            figure_dpi=figure_dpi,
+            font_size=font_size
+        )
 
-    main_fig.update_layout(
-        width=width_px,
-        height=height_px,
-        plot_bgcolor='white',
-        font=dict(size=font_size),
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='right',
-            x=1.15,
-            title='',
-            itemwidth=30,
-            bgcolor="rgba(0, 0, 0, 0)",
-            traceorder='normal',
-            entrywidth=50
-        ),
-        xaxis=dict(
-                    range=[min_x_range, max_x_range],
-                    showgrid=False,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        yaxis=dict(
-                    range=[max_y_range, min_y_range],
-                    showgrid=False,
-                    scaleanchor="x",
-                    scaleratio=1,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        shapes=[
-            go.layout.Shape(
-                type="rect",
-                xref="x",
-                yref="y",
-                x0=min_x_range,
-                y0=min_y_range,
-                x1=max_x_range,
-                y1=max_y_range,
-                line=dict(color="black", width=1),
-                fillcolor="rgba(0,0,0,0)",
+        main_fig_copy = copy.copy(main_fig_parent)
+        datas = main_fig_copy.data
+        main_fig_parent.data = []
+
+        updated_index = []
+        legend_list = [f"legend{i+1}" if i > 0 else "legend" for i in range(len(annotations))]
+        previous_group = None
+
+        indices = list(range(len(datas)))
+
+        for item in indices:
+            cat_label = datas[item]['customdata'][0][0]
+            cat_dataset = pd.DataFrame({'X': datas[item]['x'], 'Y': datas[item]['y']})
+
+            for i, legend_group in enumerate(annotations):
+                if cat_label.startswith(legend_group):
+                    cat_leg_group = f"<b>{legend_group}</b>"
+                    cat_label = cat_label[len(legend_group) + 1:]
+                    cat_group = legend_list[i]
+
+            if previous_group is None or cat_group != previous_group:
+                main_fig_parent.add_trace(go.Scattergl(
+                    x=[datas[item]['x'][0]],
+                    y=[datas[item]['y'][0]],
+                    name=cat_leg_group,
+                    mode="markers",
+                    showlegend=True,
+                    marker=dict(color="white", colorscale=None, size=0, opacity=0)
+                ))
+                previous_group = cat_group
+
+            cat_dataset['label'] = cat_label
+
+            main_fig_parent.add_trace(go.Scattergl(
+                x=cat_dataset['X'],
+                y=cat_dataset['Y'],
+                name=cat_label,
+                mode="markers",
+                showlegend=True,
+                marker=dict(colorscale=colorscale, size=dot_size, opacity=dot_transparancy)
+            ))
+
+            updated_index.append(cat_label)
+
+        if stratify_by is not None or color_mapping is not None:
+            main_fig_copy = copy.copy(main_fig_parent)
+            datas = main_fig_copy.data
+            main_fig_parent.data = []
+
+            for trace in datas:
+                trace_name = trace["name"]
+                if color_mapping is not None and trace_name in color_mapping.keys():
+                    trace['marker']['color'] = color_mapping[trace_name]
+                main_fig_parent.add_trace(trace)
+
+            main_fig_parent.update_layout(
+                title={
+                    'text': title,
+                    'font': {'size': font_size},
+                    'xanchor': 'center',
+                    'yanchor': 'top',
+                    'x': 0.5,
+                    'y': 0.99
+                },
+                legend={
+                    'x': 1.05,
+                    'y': 0.5,
+                    'xanchor': 'left',
+                    'yanchor': 'middle'
+                },
+                margin=dict(l=5, r=5, t=font_size*2, b=5)
             )
-        ]
-    )
-    return main_fig
+
+        return {
+            "image_name": f"{title}.html",
+            "image_object": main_fig_parent
+        }
+
+    def spell_out_special_characters(text):
+
+        """
+        Convert special characters in a string to comply with NIDAP regulation.
+
+        Parameters
+        ----------
+        text : str
+            The input string to be processed.
+
+        Returns
+        -------
+        str
+            A string with special characters replaced or removed.
+
+        Notes
+        -----
+        - Spaces are replaced with underscores.
+        - Special substrings (e.g., 'µm²', '+', '-') are mapped to readable
+          equivalents.
+        - Remaining disallowed characters are removed, and multiple
+          underscores are consolidated.
+        """
+
+        # Replace spaces with underscores
+        text = text.replace(' ', '_')
+
+        # Replace specific substrings for units
+        text = text.replace('µm²', 'um2')
+        text = text.replace('µm', 'um')
+
+        # Replace hyphens between letters with '_'
+        text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)
+
+        # Replace '+' with '_pos_' and '-' with '_neg_'
+        text = text.replace('+', '_pos_')
+        text = text.replace('-', '_neg_')
+
+        # Mapping for specific characters
+        special_char_map = {
+            'µ': 'u',       # Micro symbol replaced with 'u'
+            '²': '2',       # Superscript two replaced with '2'
+            '@': 'at',
+            '#': 'hash',
+            '$': 'dollar',
+            '%': 'percent',
+            '&': 'and',
+            '*': 'asterisk',
+            '/': 'slash',
+            '\\': 'backslash',
+            '=': 'equals',
+            '^': 'caret',
+            '!': 'exclamation',
+            '?': 'question',
+            '~': 'tilde',
+            # '(': 'open_parenthesis',
+            # ')': 'close_parenthesis',
+            # '{': 'open_brace',
+            # '}': 'close_brace',
+            # '[': 'open_bracket',
+            # ']': 'close_bracket',
+            '|': 'pipe',
+        }
+
+        # Replace special characters using special_char_map
+        for char, replacement in special_char_map.items():
+            text = text.replace(char, replacement)
+
+        # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
+        text = re.sub(r'[^a-zA-Z0-9_]', '', text)
+                    
+        # Remove multiple underscores and strip leading/trailing underscores
+        text = re.sub(r'_+', '_', text)
+        text = text.strip('_')
+
+        return text
+
+    #####################
+    ## Main Code Block ##
+    #####################
+
+    results = []
+
+    if stratify_by is not None:
+        unique_stratification_values = adata.obs[stratify_by].unique()
+        color_dict = defined_color_map or assign_colors_for_labels(
+            adata,
+            stratify_by,
+            colorscale
+        )
+
+        for strat_value in unique_stratification_values:
+            condition = adata.obs[stratify_by] == strat_value
+            title = f"Highlighting {stratify_by}: {strat_value}"
+            indices = np.where(condition)[0]
+            selected_spatial = adata.obsm['spatial'][indices]
+            print(f"number of cells in the region: {len(selected_spatial)}")
+
+            adata_subset = subset_adata(adata, stratify_by, strat_value)
+
+            result = create_and_show_plot(
+                adata_subset,
+                title,
+                stratify_by=stratify_by,
+                color_mapping=color_dict
+            )
+            results.append(result)
+    else:
+        color_dict = defined_color_map
+        title = "Interactive Spatial Plot"
+        result = create_and_show_plot(
+            adata,
+            title,
+            stratify_by=None,
+            color_mapping=color_dict
+        )
+        results.append(result)
+
+    return results
 
 
 def sankey_plot(
