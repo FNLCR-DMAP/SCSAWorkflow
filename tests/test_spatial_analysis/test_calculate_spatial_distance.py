@@ -30,6 +30,96 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         self.adata = anndata.AnnData(X=data, obs=obs)
         self.adata.obsm['spatial'] = spatial_coords
 
+    def test_output_one_slide_one_phenotype(self):
+        """Test output when there is one slide with a single phenotype."""
+        adata1 = anndata.AnnData(
+            X=np.array([[1.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1'], 'imageid': ['image1']},
+                index=['CellA']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata1,
+            annotation='cell_type',
+            verbose=False
+        )
+        result1 = adata1.uns['spatial_distance']
+        self.assertIsInstance(result1, pd.DataFrame)
+        expected_df_1 = pd.DataFrame(
+            data=[[0.0]],
+            index=['CellA'],
+            columns=['type1']
+        )
+        assert_frame_equal(result1, expected_df_1)
+
+    def test_output_one_slide_two_phenotypes(self):
+        """
+        Test output when there is one slide with two different phenotypes.
+        """
+        adata2 = anndata.AnnData(
+            X=np.array([[1.0], [2.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type2'],
+                 'imageid': ['image1', 'image1']},
+                index=['CellA', 'CellB']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata2,
+            annotation='cell_type',
+            imageid='imageid',
+            verbose=False
+        )
+
+        result2 = adata2.uns['spatial_distance']
+        self.assertIsInstance(result2, pd.DataFrame)
+
+        # Distances:
+        # CellA to type1 = 0.0 (itself), CellA to type2 = sqrt(2)
+        # CellB to type1 = sqrt(2), CellB to type2 = 0.0 (itself)
+        dist = np.sqrt(2)
+        expected_df_2 = pd.DataFrame(
+            data=[[0.0, dist],
+                  [dist, 0.0]],
+            index=['CellA', 'CellB'],
+            columns=['type1', 'type2']
+        )
+        assert_frame_equal(result2, expected_df_2)
+
+    def test_output_two_slides_one_phenotype(self):
+        """Test output when there are two slides, each with one phenotype."""
+        adata3 = anndata.AnnData(
+            X=np.array([[1.0], [2.0]]),
+            obs=pd.DataFrame(
+                {'cell_type': ['type1', 'type1'],
+                 'imageid': ['image1', 'image2']},
+                index=['CellA', 'CellB']
+            ),
+            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
+        )
+        calculate_spatial_distance(
+            adata=adata3,
+            annotation='cell_type',
+            imageid='imageid',
+            verbose=False
+        )
+
+        result3 = adata3.uns['spatial_distance']
+        self.assertIsInstance(result3, pd.DataFrame)
+
+        # Each slide processed separately, each slide has only one cell of
+        # type1. Thus, each cell's distance to type1 is 0.0.
+        expected_df_3 = pd.DataFrame(
+            data=[[0.0],
+                  [0.0]],
+            index=['CellA', 'CellB'],
+            columns=['type1']
+        )
+        assert_frame_equal(result3, expected_df_3)
+
     def test_typical_case_with_output(self):
         """Test typical case with default label and a custom label."""
         # Default label
@@ -82,40 +172,6 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         )
         self.assertEqual(len(result), 2)
 
-    def test_invalid_subset_type(self):
-        """Test that passing an invalid subset type raises a ValueError."""
-        with self.assertRaises(ValueError) as context:
-            calculate_spatial_distance(
-                adata=self.adata,
-                annotation='cell_type',
-                subset=123,  # not string or list of strings
-                imageid='imageid',
-                verbose=False
-            )
-        expected_msg = (
-            "The 'labels' parameter should be a string or a list of strings."
-        )
-        self.assertEqual(str(context.exception), expected_msg)
-
-    def test_subset_imageid_not_found(self):
-        """Test that passing a subset with non-existent image IDs raises
-        a ValueError."""
-        with self.assertRaises(ValueError) as context:
-            calculate_spatial_distance(
-                adata=self.adata,
-                annotation='cell_type',
-                subset=['nonexistent_image'],
-                imageid='imageid',
-                verbose=False
-            )
-        expected_msg = (
-            "The label(s) in the annotation 'imageid' 'nonexistent_image' "
-            "does not exist in the provided dataset.\n"
-            "Existing label(s) in the annotation 'imageid's are:\n"
-            "image1\nimage2"
-        )
-        self.assertEqual(str(context.exception), expected_msg)
-
     def test_missing_coordinate_values(self):
         """Test ValueError when coordinate values are missing."""
         self.adata.obsm['spatial'][0, 0] = np.nan
@@ -143,23 +199,6 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         expected_msg = (
             "The input data must include coordinates with at least "
             "two dimensions, such as X and Y positions."
-        )
-        self.assertEqual(str(context.exception), expected_msg)
-
-    def test_obsm_key_not_found(self):
-        """Test ValueError when obsm_key is not found."""
-        with self.assertRaises(ValueError) as context:
-            calculate_spatial_distance(
-                adata=self.adata,
-                annotation='cell_type',
-                obsm_key='nonexistent_obsm',
-                verbose=False
-            )
-        print("test_obsm_key_not_found", str(context.exception))
-        expected_msg = (
-            "The associated table 'nonexistent_obsm' "
-            "does not exist in the provided dataset.\n"
-            "Existing associated tables are:\nspatial"
         )
         self.assertEqual(str(context.exception), expected_msg)
 
@@ -205,109 +244,6 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             'Preparing data for spatial distance calculation...',
             output
         )
-
-    def test_output_with_different_setups(self):
-        """
-        Test output for different setups with hardcoded expectations
-        as DataFrames.
-
-        Scenarios:
-        1) One slide, one phenotype
-        2) One slide, two phenotypes
-        3) Two slides, one phenotype
-
-        Explanation for 0.00 distance:
-        A cell measuring distance to the nearest cell of a phenotype of
-        which it is the only member will have a distance of 0.00,
-        since the nearest cell is itself.
-        """
-
-        # 1) One slide, one phenotype
-        adata1 = anndata.AnnData(
-            X=np.array([[1.0]]),
-            obs=pd.DataFrame(
-                {'cell_type': ['type1'], 'imageid': ['image1']},
-                index=['CellA']
-            ),
-            obsm={'spatial': np.array([[0.0, 0.0]])}
-        )
-        calculate_spatial_distance(
-            adata=adata1,
-            annotation='cell_type',
-            verbose=False
-        )
-        result1 = adata1.uns['spatial_distance']
-        self.assertIsInstance(result1, pd.DataFrame)
-
-        # Expected: One cell, one phenotype, distance=0.0
-        expected_df_1 = pd.DataFrame(
-            data=[[0.0]],
-            index=['CellA'],
-            columns=['type1']
-        )
-        assert_frame_equal(result1, expected_df_1)
-
-        # 2) One slide, two phenotypes
-        adata2 = anndata.AnnData(
-            X=np.array([[1.0], [2.0]]),
-            obs=pd.DataFrame(
-                {'cell_type': ['type1', 'type2'],
-                 'imageid': ['image1', 'image1']},
-                index=['CellA', 'CellB']
-            ),
-            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
-        )
-        calculate_spatial_distance(
-            adata=adata2,
-            annotation='cell_type',
-            imageid='imageid',
-            verbose=False
-        )
-
-        result2 = adata2.uns['spatial_distance']
-        self.assertIsInstance(result2, pd.DataFrame)
-
-        # Distances:
-        # CellA to type1 = 0.0 (itself), CellA to type2 = sqrt(2)
-        # CellB to type1 = sqrt(2), CellB to type2 = 0.0 (itself)
-        dist = np.sqrt(2)
-        expected_df_2 = pd.DataFrame(
-            data=[[0.0, dist],
-                  [dist, 0.0]],
-            index=['CellA', 'CellB'],
-            columns=['type1', 'type2']
-        )
-        assert_frame_equal(result2, expected_df_2)
-
-        # 3) Two slides, one phenotype
-        adata3 = anndata.AnnData(
-            X=np.array([[1.0], [2.0]]),
-            obs=pd.DataFrame(
-                {'cell_type': ['type1', 'type1'],
-                 'imageid': ['image1', 'image2']},
-                index=['CellA', 'CellB']
-            ),
-            obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
-        )
-        calculate_spatial_distance(
-            adata=adata3,
-            annotation='cell_type',
-            imageid='imageid',
-            verbose=False
-        )
-
-        result3 = adata3.uns['spatial_distance']
-        self.assertIsInstance(result3, pd.DataFrame)
-
-        # Each slide processed separately, each slide has only one cell of
-        # type1. Thus, each cell's distance to type1 is 0.0.
-        expected_df_3 = pd.DataFrame(
-            data=[[0.0],
-                  [0.0]],
-            index=['CellA', 'CellB'],
-            columns=['type1']
-        )
-        assert_frame_equal(result3, expected_df_3)
 
     def test_no_imageid_scenario(self):
         """

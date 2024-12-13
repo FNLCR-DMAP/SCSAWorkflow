@@ -849,7 +849,7 @@ def _neighborhood_profile_core(
 def calculate_spatial_distance(
     adata,
     annotation,
-    obsm_key='spatial',
+    spatial_associated_table='spatial',
     subset=None,
     imageid=None,
     label='spatial_distance',
@@ -871,7 +871,7 @@ def calculate_spatial_distance(
         Annotated data matrix with spatial information.
     annotation : str
         Column name in `adata.obs` containing cell annotations.
-    obsm_key : str, optional
+    spatial_associated_table : str, optional
         Key in `adata.obsm` where spatial coordinates are stored. Default is
         'spatial'.
     subset : str or list of str, optional
@@ -939,11 +939,11 @@ def calculate_spatial_distance(
     # Validate and extract spatial coordinates
     check_table(
         adata,
-        tables=obsm_key,
+        tables=spatial_associated_table,
         associated_table=True,
         should_exist=True
     )
-    coords = adata.obsm[obsm_key]
+    coords = adata.obsm[spatial_associated_table]
 
     if coords.shape[1] < 2:
         raise ValueError(
