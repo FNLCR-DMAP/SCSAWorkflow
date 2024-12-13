@@ -2,7 +2,12 @@ import squidpy as sq
 import matplotlib.pyplot as plt
 import pandas as pd
 import anndata
-from spac.utils import check_annotation, check_table, check_distances
+from spac.utils import (
+    check_annotation,
+    check_table,
+    check_distances,
+    check_label,
+)
 import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
@@ -924,7 +929,7 @@ def calculate_spatial_distance(
     Raises
     ------
     ValueError
-        If `obsm_key` is not found in `adata.obsm`.
+        If `spatial_associated_table` is not found in `adata.obsm`.
         If spatial coordinates are missing or invalid.
     """
 

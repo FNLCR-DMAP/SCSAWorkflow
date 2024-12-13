@@ -177,6 +177,7 @@ def check_list_in_list(
                         f"The {input_type} '{item}' "
                         "exist in the provided dataset.\n"
                         f"Existing {input_type}s are:\n"
+                        f"{target_list_str}"
                     )
                     if warning is False:
                         raise ValueError(message)
