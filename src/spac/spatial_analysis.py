@@ -116,25 +116,14 @@ def spatial_interaction(
             returns a dictionary of Axes objects, with keys
             representing the stratification groups.
 
-        Matrix : dict or tuple, optional
-            Returned only if `return_matrix=True`. If `stratify_by` is
-            not used, returns:
-            - For "Neighborhood Enrichment": a tuple with the z-score
-              matrix and enrichment counts matrix.
-            - For "Cluster Interaction Matrix": the interaction
-              matrix. If `stratify_by` is used, returns a dictionary
-              of matrices, with keys representing the stratification
-              groups.
+        Matrix : dict, optional
+            Contains processed DataFrames of computed matrices with row and 
+            column labels applied. If `stratify_by` is used, the keys represent 
+            the stratification groups. For example:
+            - `results['Matrix']['GroupA']` for a specific stratification group.
+            - If `stratify_by` is not used, the table is accessible via 
+            `results['Matrix']['annotation']`.
 
-        Table : dict, optional
-            Returned only if `return_matrix=True`. Contains processed
-            DataFrames of computed matrices with row and column labels
-            applied. If `stratify_by` is used, the keys represent the
-            stratification groups. For example:
-            - `results['Table']['GroupA']` for a specific
-              stratification group.
-            - If `stratify_by` is not used, the table is accessible
-              via `results['Table']['annotation']`.
     
     """
 
@@ -147,7 +136,7 @@ def spatial_interaction(
 
     # pacakge each methods into a function to allow
     # centralized control and improve flexibility
-    def Neighborhood_Enrichment_Analysis(
+    def _Neighborhood_Enrichment_Analysis(
                 adata,
                 new_annotation_name,
                 ax,
@@ -156,7 +145,39 @@ def spatial_interaction(
                 seed=None,
                 **kwargs
             ):
+        """
+        Perform Neighborhood Enrichment analysis.
 
+        Parameters
+        ----------
+        adata : anndata.AnnData
+            The AnnData object.
+
+        new_annotation_name : str
+            Name of the annotation column to analyze. It is named as "new"
+            to indicate this is a new column created for plotting in the
+            governing spatial_interaction function.
+
+        ax : matplotlib.axes.Axes
+            Axes to plot the enrichment results.
+
+        return_matrix : bool
+            If True, returns the enrichment matrix.
+
+        title : str, optional
+            Title of the plot.
+
+        seed : int, optional
+            Random seed for reproducibility.
+
+        **kwargs : dict
+            Additional keyword arguments for the plot.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and enrichment matrix.
+        """
         # Calculate Neighborhood_Enrichment
         if return_matrix:
             matrix = sq.gr.nhood_enrichment(
@@ -192,7 +213,7 @@ def spatial_interaction(
         else:
             return ax
 
-    def Cluster_Interaction_Matrix_Analysis(
+    def _Cluster_Interaction_Matrix_Analysis(
                 adata,
                 new_annotation_name,
                 ax,
@@ -200,7 +221,36 @@ def spatial_interaction(
                 title=None,
                 **kwargs
             ):
+        """
+        Perform Cluster Interaction Matrix analysis.
 
+        Parameters
+        ----------
+        adata : anndata.AnnData
+            The AnnData object.
+
+        new_annotation_name : str
+            Name of the annotation column to analyze. It is named as "new"
+            to indicate this is a new column created for plotting in the
+            governing spatial_interaction function.
+
+        ax : matplotlib.axes.Axes
+            Axes to plot the interaction matrix.
+
+        return_matrix : bool
+            If True, returns the interaction matrix.
+
+        title : str, optional
+            Title of the plot.
+
+        **kwargs : dict
+            Additional keyword arguments for the plot.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and interaction matrix.
+        """
         # Calculate Cluster_Interaction_Matrix
 
         if return_matrix:
@@ -236,7 +286,7 @@ def spatial_interaction(
 
     # Perfrom the actual analysis, first call sq.gr.spatial_neighbors
     # to calculate neighboring graph, then do different analysis.
-    def perform_analysis(
+    def _perform_analysis(
             adata,
             analysis_method,
             new_annotation_name,
@@ -250,7 +300,18 @@ def spatial_interaction(
             seed=None,
             **kwargs
     ):
+        """
+        Perform the specified spatial analysis method.
 
+        Parameters
+        ----------
+        Same as parent function.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and matrix results.
+        """
         sq.gr.spatial_neighbors(
             adata,
             coord_type=coord_type,
@@ -260,7 +321,7 @@ def spatial_interaction(
         )
 
         if analysis_method == "Neighborhood Enrichment":
-            ax = Neighborhood_Enrichment_Analysis(
+            ax = _Neighborhood_Enrichment_Analysis(
                     adata,
                     new_annotation_name,
                     ax,
@@ -270,7 +331,7 @@ def spatial_interaction(
                     **kwargs)
 
         elif analysis_method == "Cluster Interaction Matrix":
-            ax = Cluster_Interaction_Matrix_Analysis(
+            ax = _Cluster_Interaction_Matrix_Analysis(
                     adata,
                     new_annotation_name,
                     ax,
@@ -280,11 +341,30 @@ def spatial_interaction(
 
         return ax
 
-    def get_labels(
+    def _get_labels(
         fig,
         unique_annotations,
         verbose=False
     ):
+        """
+        Extract row and column labels from plot axes.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure containing the plots.
+
+        unique_annotations : list
+            List of unique annotation labels.
+
+        verbose : bool, default False
+            If True, print debugging information.
+
+        Returns
+        -------
+        list
+            List of row labels.
+        """
         row_labels = []
         # Iterate over all axes to check if any contain the row labels
         for i, ax in enumerate(fig.axes):
@@ -312,7 +392,46 @@ def spatial_interaction(
 
     # Use to process the output from different
     # spatial analysis method in squidpy
-    def process_matrixs(matrixs, row_labels, plot_label=None):
+    def _process_matrixs(
+        matrixs,
+        row_labels,
+        plot_label=None
+    ):
+        """
+        Process the output matrices for saving and visualization.
+
+        This function organizes matrices produced during the spatial analysis,
+        adding appropriate labels and creating a dictionary for easy access.
+        The processed matrices are returned in a labeled format suitable
+        for saving or further analysis.
+
+        Parameters
+        ----------
+        matrixs : dict
+            Dictionary of raw matrices generated from spatial analyses.
+
+        row_labels : list
+            List of row and column labels for the matrices, used to annotate
+            the resulting DataFrames.
+
+        plot_label : str, optional
+            Additional label to append to the matrix file names, useful for
+            distinguishing between different stratification groups or analysis
+            scenarios.
+
+        Returns
+        -------
+        dict
+            A dictionary of labeled matrices, where the keys are the file names
+            (including the annotation and analysis method) and the values are
+            pandas DataFrames representing the matrices.
+
+        Notes
+        -----
+        For "Cluster Interaction Matrix", a single matrix is processed.
+        For "Neighborhood Enrichment", multiple matrices (e.g., z-score and
+        enrichment counts) are processed separately.
+        """
         return_dict = {}
         if analysis_method == "Cluster Interaction Matrix":
             if not isinstance(matrixs, pd.DataFrame):
@@ -349,7 +468,6 @@ def spatial_interaction(
                                 "_interaction_matrix.csv"
 
                 return_dict[file_name] = matrix
-
         return return_dict
 
     # -----------------------------------------------
@@ -425,7 +543,7 @@ def spatial_interaction(
 
             image_title = f"Group: {subset_key}"
 
-            ax = perform_analysis(
+            ax = _perform_analysis(
                             subset_adata,
                             analysis_method,
                             new_annotation_name,
@@ -459,7 +577,7 @@ def spatial_interaction(
             results = {"Ax": ax_dictionary}
 
     else:
-        ax = perform_analysis(
+        ax = _perform_analysis(
                 adata,
                 analysis_method,
                 new_annotation_name,
@@ -505,11 +623,11 @@ def spatial_interaction(
             plot_label=None
         ):
             fig = ax.get_figure()
-            row_labels = get_labels(
+            row_labels = _get_labels(
                     fig,
                     unique_annotations
                 )
-            result_dict = process_matrixs(
+            result_dict = _process_matrixs(
                 matrix,
                 row_labels,
                 plot_label
@@ -521,18 +639,20 @@ def spatial_interaction(
             for key in _axs:
                 _ax = _axs[key]
                 _matrix = _matrixs[key]
-                table_results[key] = _processes_function_return(
+                result_dict = _processes_function_return(
                     _matrix,
                     _ax,
                     key
                 )
+                table_results[key] = result_dict
+
         else:
             table_results['annotation'] = _processes_function_return(
                 _matrixs,
                 _axs
             )
 
-        results['Table'] = table_results
+        results['Matrix'] = table_results
 
     return results
 

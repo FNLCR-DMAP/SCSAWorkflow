@@ -296,7 +296,7 @@ class TestSpatialInteraction(unittest.TestCase):
             # Each should be a matplotlib axis object
             self.assertIsInstance(ax_dict["Ax"][key], plt.Axes)
 
-    def test_return_matrix_return_table_and_stratify_by_combinations(self):
+    def test_return_matrix_and_stratify_by_combinations(self):
         annotation = "cluster_num"
         analysis_method = "Cluster Interaction Matrix"
         stratify_options = [None, "Analysis_Region"]
@@ -319,11 +319,10 @@ class TestSpatialInteraction(unittest.TestCase):
                     # list when return_matrix is True
                     if return_matrix:
                         self.assertIsInstance(result, dict)
-                        self.assertEqual(len(result), 3)
+                        self.assertEqual(len(result), 2)
                         # Expect two dictionaries
                         self.assertIn("Ax", result.keys())
                         self.assertIn("Matrix", result.keys())
-                        self.assertIn("Table", result.keys())
 
                         if stratify_by is not None:
                             # If stratification is used, assert that
@@ -341,15 +340,11 @@ class TestSpatialInteraction(unittest.TestCase):
                                     )
                                 self.assertIsInstance(
                                         result["Matrix"][value],
-                                        np.ndarray
-                                    )
-                                self.assertIsInstance(
-                                        result["Table"],
                                         dict
                                     )
 
-                                for key in result["Table"]:
-                                    key_dict = result["Table"][key]
+                                for key in result["Matrix"]:
+                                    key_dict = result["Matrix"][key]
                                     for file_name in key_dict:
                                         self.assertIsInstance(
                                             key_dict[file_name],
@@ -434,9 +429,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[20., 10.],
              [10., 2.]])
 
+        for key in ax_dict['Matrix']['Region_A']:
+            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_A'],
+                nparray_result,
                 region_a_ground_truth
             )
         )
@@ -445,9 +443,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[6., 12.],
              [12., 12.]])
 
+        for key in ax_dict['Matrix']['Region_B']:
+            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_B'],
+                nparray_result,
                 region_b_ground_truth 
             )
         )
@@ -465,10 +466,12 @@ class TestSpatialInteraction(unittest.TestCase):
         # ground truth matrix is:
         all_regions_ground_truth = \
             region_a_ground_truth + region_b_ground_truth
+        for key in ax_dict['Matrix']['annotation']:
+            nparray_result = ax_dict['Matrix']['annotation'][key].to_numpy()
 
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix'],
+                nparray_result,
                 all_regions_ground_truth
             )
         )
@@ -493,9 +496,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[6., 4.],
              [4., 0.]])
 
+        for key in ax_dict['Matrix']['Region_A']:
+            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_A'],
+                nparray_result,
                 region_a_ground_truth
             )
         )
@@ -504,9 +510,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[0., 6.],
              [6., 2.]])
 
+        for key in ax_dict['Matrix']['Region_B']:
+            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_B'],
+                nparray_result,
                 region_b_ground_truth 
             )
         )
@@ -531,9 +540,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[4., 4.],
              [4., 0.]])
 
+        for key in ax_dict['Matrix']['Region_A']:
+            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_A'],
+                nparray_result,
                 region_a_ground_truth
             )
         )
@@ -542,9 +554,12 @@ class TestSpatialInteraction(unittest.TestCase):
             [[0., 6.],
              [6., 0.]])
 
+        for key in ax_dict['Matrix']['Region_B']:
+            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+
         self.assertTrue(
             np.array_equal(
-                ax_dict['Matrix']['Region_B'],
+                nparray_result,
                 region_b_ground_truth 
             )
         )
