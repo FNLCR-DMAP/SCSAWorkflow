@@ -7,6 +7,7 @@ import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
+from functools import partial
 import logging
 
 
@@ -138,7 +139,7 @@ def spatial_interaction(
     # centralized control and improve flexibility
     def _Neighborhood_Enrichment_Analysis(
                 adata,
-                new_annotation_name,
+                categorical_annotation,
                 ax,
                 return_matrix=False,
                 title=None,
@@ -153,7 +154,7 @@ def spatial_interaction(
         adata : anndata.AnnData
             The AnnData object.
 
-        new_annotation_name : str
+        categorical_annotation : str
             Name of the annotation column to analyze. It is named as "new"
             to indicate this is a new column created for plotting in the
             governing spatial_interaction function.
@@ -184,25 +185,25 @@ def spatial_interaction(
                         adata,
                         copy=True,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
 
             sq.gr.nhood_enrichment(
                         adata,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
         else:
             sq.gr.nhood_enrichment(
                         adata,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
 
         # Plot Neighborhood_Enrichment
         sq.pl.nhood_enrichment(
                     adata,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     title=title,
                     ax=ax,
                     **kwargs
@@ -215,7 +216,7 @@ def spatial_interaction(
 
     def _Cluster_Interaction_Matrix_Analysis(
                 adata,
-                new_annotation_name,
+                categorical_annotation,
                 ax,
                 return_matrix=False,
                 title=None,
@@ -229,7 +230,7 @@ def spatial_interaction(
         adata : anndata.AnnData
             The AnnData object.
 
-        new_annotation_name : str
+        categorical_annotation : str
             Name of the annotation column to analyze. It is named as "new"
             to indicate this is a new column created for plotting in the
             governing spatial_interaction function.
@@ -256,25 +257,25 @@ def spatial_interaction(
         if return_matrix:
             matrix = sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     copy=True
             )
 
             sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name
+                    cluster_key=categorical_annotation
             )
 
         else:
             sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name
+                    cluster_key=categorical_annotation
             )
 
         sq.pl.interaction_matrix(
                     adata,
                     title=title,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     ax=ax,
                     **kwargs
             )
@@ -289,7 +290,7 @@ def spatial_interaction(
     def _perform_analysis(
             adata,
             analysis_method,
-            new_annotation_name,
+            categorical_annotation,
             ax,
             coord_type,
             n_rings,
@@ -323,7 +324,7 @@ def spatial_interaction(
         if analysis_method == "Neighborhood Enrichment":
             ax = _Neighborhood_Enrichment_Analysis(
                     adata,
-                    new_annotation_name,
+                    categorical_annotation,
                     ax,
                     return_matrix,
                     title,
@@ -333,7 +334,7 @@ def spatial_interaction(
         elif analysis_method == "Cluster Interaction Matrix":
             ax = _Cluster_Interaction_Matrix_Analysis(
                     adata,
-                    new_annotation_name,
+                    categorical_annotation,
                     ax,
                     return_matrix,
                     title,
@@ -372,21 +373,32 @@ def spatial_interaction(
                 print(f"Inspecting axis {i}...")
             # Try to extract labels from the y-axis of each axis
             yticklabels = [tick.get_text() for tick in ax.get_yticklabels()]
-            if yticklabels:
+            xticklabels = [tick.get_text() for tick in ax.get_xticklabels()]
+
+            if yticklabels and xticklabels:
+                raise ValueError(
+                    "Both x- and y-axis labels found on axis. "
+                    "Unable to determine row labels."
+                )
+
+            elif yticklabels and not xticklabels:
                 if set(yticklabels) <= set(unique_annotations):
                     if verbose:
                         print(f"Row labels found on axis {i}: {yticklabels}")
                     row_labels = yticklabels[::-1]
 
             # Try extracting other possible labels (x-axis, title, etc.)
-            xticklabels = [tick.get_text() for tick in ax.get_xticklabels()]
-            if xticklabels:
+            elif xticklabels and not yticklabels:
                 if set(xticklabels) <= set(unique_annotations):
                     if verbose:
                         print(
                             f"Column labels found on axis {i}: {xticklabels}"
                         )
                     row_labels = xticklabels[::-1]
+            else:
+                print(
+                    "No labels found on axis. Unable to determine row labels."
+                )
 
         return row_labels
 
@@ -513,49 +525,59 @@ def spatial_interaction(
     # Operational Section
     # -----------------------------------------------
 
-    # Create a categorical column data for plotting
-    new_annotation_name = annotation + "_plot"
+    # Create a categorical column data for plotting\
+    # This is to avoid modifying the original annotation to comply with
+    # the squidpy function requirements
 
-    adata.obs[new_annotation_name] = pd.Categorical(
+    categorical_annotation = annotation + "_plot"
+
+    adata.obs[categorical_annotation] = pd.Categorical(
         adata.obs[annotation])
 
     if stratify_by:
         if isinstance(stratify_by, list):
-            adata.obs['concatenated_obs'] = \
+            adata.obs['_spac_utils_concat_obs'] = \
                 adata.obs[stratify_by].astype(str).agg('_'.join, axis=1)
         else:
-            adata.obs['concatenated_obs'] = \
+            adata.obs['_spac_utils_concat_obs'] = \
                 adata.obs[stratify_by]
+    
+    # Partial function for the _perform_analysis function
+    # to allow for uniform parameter passing for both stratified
+    # and non-stratified analysis
+    perform_analysis_prefilled = partial(
+        _perform_analysis,
+        analysis_method=analysis_method,
+        categorical_annotation=categorical_annotation,
+        coord_type=coord_type,
+        n_rings=n_rings,
+        n_neighs=n_neighs,
+        radius=radius,
+        return_matrix=return_matrix,
+        seed=seed,
+        cmap=cmap
+    )
 
     # Compute a connectivity matrix from spatial coordinates
     if stratify_by:
         ax_dictionary = {}
         matrix_dictionary = {}
-        unique_values = adata.obs['concatenated_obs'].unique()
+        unique_values = adata.obs['_spac_utils_concat_obs'].unique()
 
         for subset_key in unique_values:
             # Subset the original AnnData object based on the unique value
             subset_adata = adata[
-                adata.obs['concatenated_obs'] == subset_key
+                adata.obs['_spac_utils_concat_obs'] == subset_key
             ].copy()
 
             fig, ax = plt.subplots()
 
             image_title = f"Group: {subset_key}"
 
-            ax = _perform_analysis(
-                            subset_adata,
-                            analysis_method,
-                            new_annotation_name,
-                            ax,
-                            coord_type,
-                            n_rings,
-                            n_neighs,
-                            radius,
-                            return_matrix,
-                            image_title,
-                            seed,
-                            cmap=cmap,
+            ax = perform_analysis_prefilled(
+                            adata=subset_adata,
+                            ax=ax,
+                            title=image_title,
                             **kwargs
                         )
 
@@ -577,17 +599,9 @@ def spatial_interaction(
             results = {"Ax": ax_dictionary}
 
     else:
-        ax = _perform_analysis(
-                adata,
-                analysis_method,
-                new_annotation_name,
-                ax,
-                coord_type,
-                n_rings,
-                n_neighs,
-                radius,
-                return_matrix,
-                seed=seed,
+        ax = perform_analysis_prefilled(
+                adata=adata,
+                ax=ax,
                 **kwargs
             )
 
@@ -653,6 +667,11 @@ def spatial_interaction(
             )
 
         results['Matrix'] = table_results
+    
+    # Clean up the temporary columns
+    adata.obs.drop(categorical_annotation, axis=1, inplace=True)
+    if stratify_by:
+        adata.obs.drop('_spac_utils_concat_obs', axis=1, inplace=True)
 
     return results
 

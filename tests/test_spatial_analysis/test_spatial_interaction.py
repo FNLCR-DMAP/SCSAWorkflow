@@ -108,10 +108,7 @@ class TestSpatialInteraction(unittest.TestCase):
             ax=ax)
 
         # Verify that Neighborhood Enrichment analysis is performed and plotted
-        # Assertion 1: Check if Neighborhood Enrichment analysis is performed
-        self.assertTrue("cluster_num_plot" in self.adata.obs)
-
-        # Assertion 2: Check if the resulting plot is displayed
+        # Assertion: Check if the resulting plot is displayed
         self.assertTrue(plt.gcf().get_axes())
 
     def test_custom_axes_provided(self):
@@ -421,6 +418,78 @@ class TestSpatialInteraction(unittest.TestCase):
             return_matrix=True
             )
 
+        def correction_cheks(
+            ground_truth_array,
+            ground_truth_column,
+            ground_truth_index,
+            result_dataframe
+        ):
+            """
+            Validates that the structure and contents of a result DataFrame match the
+            expected ground truth values.
+
+            Parameters
+            ----------
+            ground_truth_array : numpy.ndarray
+                The expected 2D array of data values for the DataFrame.
+
+            ground_truth_column : array-like
+                The expected column names of the DataFrame.
+
+            ground_truth_index : array-like
+                The expected index labels of the DataFrame.
+
+            result_dataframe : pandas.DataFrame
+                The DataFrame whose contents, column names, and index labels
+                are to be validated.
+
+            Raises
+            ------
+            AssertionError
+                If the data values, column names, or index labels
+                in `result_dataframe`
+                do not match the respective expected values.
+
+            Notes
+            -----
+            This function performs the following validations:
+            1. Compares the data in `result_dataframe` to `ground_truth_array`
+            using `numpy.array_equal`.
+            2. Compares the column names of
+            `result_dataframe` to `ground_truth_column`.
+            3. Compares the index labels of
+            `result_dataframe` to `ground_truth_index`.
+
+            This function is typically used in unit tests
+            to ensure that a computation
+            produces the correct DataFrame structure and content.
+            """
+
+            nparray_result = result_dataframe.to_numpy()
+            column_names = result_dataframe.columns
+            index_names = result_dataframe.index
+
+            self.assertTrue(
+                np.array_equal(
+                    nparray_result,
+                    ground_truth_array
+                )
+            )
+
+            self.assertTrue(
+                np.array_equal(
+                    column_names,
+                    ground_truth_column
+                )
+            )
+
+            self.assertTrue(
+                np.array_equal(
+                    index_names,
+                    ground_truth_index
+                )
+            )   
+
         # The first 7 cells are in Region_A are on a row and
         # not connected to the last 7 cells in Region_B.
         # Given the default squidpy using KNN to make the graph
@@ -428,15 +497,17 @@ class TestSpatialInteraction(unittest.TestCase):
         region_a_ground_truth = array(
             [[20., 10.],
              [10., 2.]])
+        column_truth = ["A", "B"]
+        index_truth = ["A", "B"]
 
         for key in ax_dict['Matrix']['Region_A']:
-            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+            result_dataframe = ax_dict['Matrix']['Region_A'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_a_ground_truth
-            )
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
 
         region_b_ground_truth = array(
@@ -444,13 +515,13 @@ class TestSpatialInteraction(unittest.TestCase):
              [12., 12.]])
 
         for key in ax_dict['Matrix']['Region_B']:
-            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+            result_dataframe = ax_dict['Matrix']['Region_B'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_b_ground_truth 
-            )
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
 
         # Check if stratify=None works
@@ -495,15 +566,17 @@ class TestSpatialInteraction(unittest.TestCase):
         region_a_ground_truth = array(
             [[6., 4.],
              [4., 0.]])
+        column_truth = ["A", "B"]
+        index_truth = ["A", "B"]
 
         for key in ax_dict['Matrix']['Region_A']:
-            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+            result_dataframe = ax_dict['Matrix']['Region_A'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_a_ground_truth
-            )
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
 
         region_b_ground_truth = array(
@@ -511,13 +584,13 @@ class TestSpatialInteraction(unittest.TestCase):
              [6., 2.]])
 
         for key in ax_dict['Matrix']['Region_B']:
-            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+            result_dataframe = ax_dict['Matrix']['Region_B'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_b_ground_truth 
-            )
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
 
     def test_radius_function(self):
@@ -540,14 +613,18 @@ class TestSpatialInteraction(unittest.TestCase):
             [[4., 4.],
              [4., 0.]])
 
+        column_truth = ["A", "B"]
+        index_truth = ["A", "B"]
+    
         for key in ax_dict['Matrix']['Region_A']:
-            nparray_result = ax_dict['Matrix']['Region_A'][key].to_numpy()
+            nparray_result = ax_dict['Matrix']['Region_A'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_a_ground_truth
-            )
+
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
 
         region_b_ground_truth = array(
@@ -555,14 +632,16 @@ class TestSpatialInteraction(unittest.TestCase):
              [6., 0.]])
 
         for key in ax_dict['Matrix']['Region_B']:
-            nparray_result = ax_dict['Matrix']['Region_B'][key].to_numpy()
+            nparray_result = ax_dict['Matrix']['Region_B'][key]
 
-        self.assertTrue(
-            np.array_equal(
-                nparray_result,
-                region_b_ground_truth 
-            )
+
+        correction_cheks(
+            ground_truth_array=region_a_ground_truth,
+            ground_truth_column=column_truth,
+            ground_truth_index=index_truth,
+            result_dataframe=result_dataframe
         )
+
 
 
     def tearDown(self):
