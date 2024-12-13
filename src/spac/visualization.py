@@ -12,9 +12,11 @@ import plotly.figure_factory as ff
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import color_mapping
+from spac.utils import color_mapping, check_label
 import logging
 import warnings
+import scimap as sm
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1899,7 +1901,7 @@ def plot_ripley_l(
                f"\n Message: {row['message']}"
             )
             logging.warning(
-              message 
+              message
             )
             print(message)
             continue
@@ -1957,3 +1959,240 @@ def plot_ripley_l(
         return fig, df
 
     return fig
+
+
+def plot_spatial_distance(
+    adata,
+    annotation,
+    imageid=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    x_axis=None,
+    y_axis=None,
+    facet_by=None,
+    plot_type=None,
+    log=False,
+    return_df=False,
+    method=None,
+    **kwargs
+):
+    """
+    Visualize the spatial distances between groups of cells.
+
+    This function leverages spatial distances stored in
+    'adata.uns[spatial_distance]` typically computed via
+    `calculate_spatial_distance`.
+
+    Two visualization methods are available:
+
+    1. Numeric Method (method='numeric'):
+       Generates summary plots (e.g., box, violin, boxen) that display
+       aggregated statistics (sucah as medians or quartiles) of distances.
+       These plots are well-suited for:
+       - Comparing how close or far certain phenotypes (distance_to)
+         are relative to a reference phenotype (`distance_from`).
+       - Evaluating differences in distances across different samples,
+         images, or experimental conditions.
+
+    2. Distribution Method (method='distribution'):
+       Produces plots (e.g., histograms or KDE plots) illustratng the full
+       distribution of distance values. These are useful for:
+       - Understanding the overall spread and shape of the distance data.
+       - Identifying patterns, multimodality, or outliers in spatial
+         arrangements within and across different groups or images.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix with computed spatial distances in
+        adata.uns[spatial_distance]. Ensure that calculate_spatial_distance
+        was run beforehand.
+
+    annotation : str
+        Column in 'adata.obs' containing cell phenotypes or annotations.
+
+    imageid : str, optional
+        Column in 'adata.obs' identifying images or samples. If None,
+        a dummy image column is created and all cells are considered as
+        belonging to a single "dummy_image".
+
+    spatial_distance : str, optional
+        Key in 'adata.uns' where the spatial distance DataFrame is stored.
+        Default is 'spatial_distance'.
+
+    distance_from : str
+        Reference phenotype from which distances are measured. It is required
+        and must match a phenotypes present in 'adata.uns[spatial_distance]'.
+
+    distance_to : str or list of str, optional
+        Target phenotype(s) to measure distance to. If not provided, distances
+        to all other phenotypes are shown.
+
+    x_axis : str, optional
+        Column name to use for the x-axis in numeric plots.
+
+    y_axis : str, optional
+        Column name to use for the y-axis in numeric plots.
+
+    facet_by : str, optional
+        Column for facetting (creating subplots by category).
+
+    plot_type : str, optional
+        Specific type of plot. For method='numeric', options include
+        'box', 'violin', etc. For method='distribution', options include
+        'hist', 'kde'.
+
+    log : bool, optional
+        If True, applies a log1p transformation to the distance values
+        before plotting. Default is False.
+
+    return_df : bool, optional
+        If True, returns the DataFrame used for plotting; otherwise, returns
+        None. Default is False.
+
+    method : str
+        Plotting method: 'numeric' or  'distribution'.
+
+    **kwargs : dict
+        Additional keyword arguments passed to the underlying
+        plotting function.
+
+    Returns
+    -------
+    df : pandas.DataFrame or None
+        The DataFrame used for plotting if 'return_df=True', else None.
+
+    fig : matplotlib.figure.Figure
+        The Matplotlib Figure object containing the plot.
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing, invalid, or if requested
+        phenotypes are not found in the computed distances.
+
+    Notes
+    -----
+    If `calculate_spatial_distance` was run on a subset of the data,
+    ensure that the chosen phenotypes (`distance_from` or `distance_to`)
+    are present in that subset.
+
+    Examples
+    --------
+    Example numeric plot (box) with aggregated data:
+    >>> df, fig = plot_spatial_distance(
+    ...     adata=adata,
+    ...     annotation='cell_type',
+    ...     imageid='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     plot_type='box',
+    ...     method='numeric',
+    ...     return_df=True
+    ... )
+    # df might look like aggregated statistics per group and image:
+    #     group     imageid    distance    phenotype
+    # 0   Stroma    sample1    20.0        Tumor
+    # 1   Immune    sample1    35.5        Tumor
+
+    Example distribution plot (kde):
+    >>> df, fig = plot_spatial_distance(
+    ...     adata=adata,
+    ...     annotation='cell_type',
+    ...     imageid='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to='Stroma',
+    ...     plot_type='kde',
+    ...     method='distribution',
+    ...     return_df=True
+    ... )
+
+    """
+
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. "
+            "This indicates the reference group from which distances "
+            "are measured."
+        )
+
+    if method is None or method not in ['numeric', 'distribution']:
+        raise ValueError(
+            "Invalid 'method'. Please choose 'numeric' or 'distribution'."
+        )
+
+    check_annotation(adata, annotations=annotation)
+
+    # Directly check if 'spatial_distance' exists in adata.uns
+    if spatial_distance not in adata.uns:
+        raise ValueError(
+            f"'{spatial_distance}' does not exist in the provided dataset. "
+            f"Available keys: {list(adata.uns.keys())}"
+        )
+
+    # Validate that'distance_from is in the annotation
+    check_label(
+        adata,
+        annotation=annotation,
+        labels=distance_from,
+        should_exist=True
+    )
+
+    # Retrieve the spatial distance DataFrame
+    distance_df = adata.uns[spatial_distance]
+
+    # Check if distance_from exists in the distance DataFrame
+    if distance_from not in distance_df.columns:
+        raise ValueError(
+            f"'{distance_from}' not found in spatial distances."
+        )
+
+    # Validate distance_to if provided
+    if distance_to:
+        distance_to = (
+            [distance_to] if isinstance(distance_to, str) else distance_to
+        )
+        missing_targets = [
+            pheno for pheno in distance_to
+            if pheno not in distance_df.columns
+        ]
+        if missing_targets:
+            raise ValueError(
+                f"Phenotypes {missing_targets} not found in spatial distances."
+            )
+
+    # Handle imageid=None by creating a dummy image column
+    dummy_column_created = False
+    if imageid is None:
+        dummy_column_created = True
+        imageid = '_dummy_imageid'
+        adata.obs[imageid] = 'dummy_image'
+
+    # Generate the plot using scimap
+    df = sm.pl.spatial_distance(
+        adata=adata,
+        spatial_distance=spatial_distance,
+        phenotype=annotation,
+        imageid=imageid,
+        log=log,
+        method=method,
+        distance_from=distance_from,
+        distance_to=distance_to,
+        x_axis=x_axis,
+        y_axis=y_axis,
+        facet_by=facet_by,
+        plot_type=plot_type,
+        return_data=return_df,
+        **kwargs
+    )
+
+    fig = plt.gcf()
+
+    # If a dummy image column wsa created, remove it after plotting
+    if dummy_column_created:
+        adata.obs.drop(columns=[imageid], inplace=True, errors='ignore')
+
+    return (df if return_df else None, fig)
