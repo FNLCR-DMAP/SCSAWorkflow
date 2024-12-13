@@ -1146,9 +1146,9 @@ def spatial_plot(
 
     # Extract feature name
     if layer is None:
-        layer = adata.X
+        layer_process = adata.X
     else:
-        layer = adata.layers[layer]
+        layer_process = adata.layers[layer]
 
     feature_names = adata.var_names.tolist()
 
@@ -1184,10 +1184,10 @@ def spatial_plot(
         feature_index = feature_names.index(feature)
         feature_annotation = feature + "spatial_plot"
         if vmin == -999:
-            vmin = np.min(layer[:, feature_index])
+            vmin = np.min(layer_process[:, feature_index])
         if vmax == -999:
-            vmax = np.max(layer[:, feature_index])
-        adata.obs[feature_annotation] = layer[:, feature_index]
+            vmax = np.max(layer_process[:, feature_index])
+        adata.obs[feature_annotation] = layer_process[:, feature_index]
         color_region = feature_annotation
     else:
         color_region = annotation

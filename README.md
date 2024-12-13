@@ -10,6 +10,9 @@ cd <home directory of SCSAWorkflow folder>
 # If conda is not activate
 conda activate
 
+# Adding constumized scimap conda pacakge channel supported by DMAP
+conda config --add channels https://fnlcr-dmap.github.io/scimap/
+
 # Create the Conda environment from environment.yml
 conda env create -f environment.yml
 
@@ -17,6 +20,15 @@ conda env create -f environment.yml
 conda activate spac
 ```
 The envrionment works for Linux and noarc, if your are working on amd processor (commonly seen for latest Mac users), please replace the ` - numpy=1.19.5` with `numpy>=1.19.5,<2.0.0`
+
+If error occurs suggesting SSL certificate not found for our scimap channel, please run the following command before the environment creation:
+```
+conda config --set ssl_verify false
+```
+Then set the verification to True after the installation:
+```
+conda config --set ssl_verify true
+```
 
 ## Contirbuting to SPAC:
 Review the [developer guide](CONTRIBUTING.md)
