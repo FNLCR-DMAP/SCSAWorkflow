@@ -889,7 +889,7 @@ def calculate_spatial_distance(
     Returns
     -------
     None
-        Modifies `adata` in place by storing a DaatFrame of
+        Modifies `adata` in place by storing a DataFrame of
         spatial distances in `adata.uns[label]`.
 
     Example
@@ -929,7 +929,7 @@ def calculate_spatial_distance(
     Raises
     ------
     ValueError
-        If `obsm_key` is not found in `adata.obsm`.
+        If `spatial_associated_table` is not found in `adata.obsm`.
         If spatial coordinates are missing or invalid.
     """
 
