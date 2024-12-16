@@ -1510,8 +1510,27 @@ def interative_spatial_plot(
         Parameters
         ----------
         adata : AnnData
-            Annotated data matrix containing either the full dataset
-            or a subset of the data.
+            Annotated data matrix object,
+            must have a .obsm attribute with 'spatial' key.
+        annotations : list of str or str
+            Column(s) in `adata.obs` that contain the annotations to plot.
+            If a single string is provided, it will be converted to a list.
+            The interactive plot will show all the labels in the annotation
+            columns passed.
+        dot_size : float, optional
+            Size of the scatter dots in the plot. Default is 1.5.
+        dot_transparancy : float, optional
+            Transparancy level of the scatter dots. Default is 0.75.
+        colorscale : str, optional
+            Name of the color scale to use for the dots. Default is 'Viridis'.
+        figure_width : int, optional
+            Width of the figure in inches. Default is 12.
+        figure_height : int, optional
+            Height of the figure in inches. Default is 8.
+        figure_dpi : int, optional
+            DPI (dots per inch) for the figure. Default is 200.
+        font_size : int, optional
+            Font size for text in the plot. Default is 12.
 
         Returns
         -------
@@ -1663,8 +1682,13 @@ def interative_spatial_plot(
         unique_values = np.unique(adata.obs[stratify_by].values)
         n_colors = len(unique_values)
         colorscale = pc.get_colorscale(color_map)
-        interpolated_colors = pc.sample_colorscale(colorscale, np.linspace(0, 1, n_colors))
-        return {value: interpolated_colors[i] for i, value in enumerate(unique_values)}
+        interpolated_colors = pc.sample_colorscale(
+            colorscale, np.linspace(0, 1, n_colors)
+        )
+        return {
+            value: interpolated_colors[i]
+            for i, value in enumerate(unique_values)
+        }
 
     def subset_adata(adata, stratify_by, highlight_value):
         """
