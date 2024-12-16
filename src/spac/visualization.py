@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
@@ -16,6 +17,7 @@ from spac.utils import color_mapping
 import logging
 import warnings
 import re
+import copy
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1491,7 +1493,16 @@ def interative_spatial_plot(
         raise ValueError(error_msg)
 
     def main_figure_generation(
-        adata
+        adata,
+        annotations=annotations,
+        dot_size=dot_size,
+        dot_transparancy=dot_transparancy,
+        colorscale=colorscale,
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        font_size=font_size,
+        **kwargs
     ):
         """
         Create the core interactive plot for downstream processing.
@@ -1678,8 +1689,10 @@ def interative_spatial_plot(
 
     def create_core_plot_and_update(
         adata,
+        title,
         stratify_by=None,
         color_mapping=None,
+        **kwargs
     ):
         """
         Creates the core plot and updates the plot with customization.
@@ -1710,7 +1723,8 @@ def interative_spatial_plot(
             figure_width=figure_width,
             figure_height=figure_height,
             figure_dpi=figure_dpi,
-            font_size=font_size
+            font_size=font_size,
+            **kwargs
         )
 
         main_fig_copy = copy.copy(main_fig_parent)
@@ -1718,14 +1732,19 @@ def interative_spatial_plot(
         main_fig_parent.data = []
 
         updated_index = []
-        legend_list = [f"legend{i+1}" if i > 0 else "legend" for i in range(len(annotations))]
+        legend_list = [
+            f"legend{i+1}" if i > 0 else "legend"
+            for i in range(len(annotations))
+        ]
         previous_group = None
 
         indices = list(range(len(datas)))
 
         for item in indices:
             cat_label = datas[item]['customdata'][0][0]
-            cat_dataset = pd.DataFrame({'X': datas[item]['x'], 'Y': datas[item]['y']})
+            cat_dataset = pd.DataFrame(
+                {'X': datas[item]['x'], 'Y': datas[item]['y']}
+            )
 
             for i, legend_group in enumerate(annotations):
                 if cat_label.startswith(legend_group):
@@ -1740,7 +1759,12 @@ def interative_spatial_plot(
                     name=cat_leg_group,
                     mode="markers",
                     showlegend=True,
-                    marker=dict(color="white", colorscale=None, size=0, opacity=0)
+                    marker=dict(
+                        color="white",
+                        colorscale=None,
+                        size=0,
+                        opacity=0
+                    )
                 ))
                 previous_group = cat_group
 
@@ -1787,7 +1811,7 @@ def interative_spatial_plot(
             )
 
         return {
-            "image_name": f"{title}.html",
+            "image_name": f"{spell_out_special_characters(title)}.html",
             "image_object": main_fig_parent
         }
 
@@ -1891,21 +1915,23 @@ def interative_spatial_plot(
 
             adata_subset = subset_adata(adata, stratify_by, strat_value)
 
-            result = create_and_show_plot(
-                adata_subset,
-                title,
+            result = create_core_plot_and_update(
+                adata=adata_subset,
+                title=title,
                 stratify_by=stratify_by,
-                color_mapping=color_dict
+                color_mapping=color_dict,
+                **kwargs
             )
             results.append(result)
     else:
         color_dict = defined_color_map
         title = "Interactive Spatial Plot"
-        result = create_and_show_plot(
-            adata,
-            title,
+        result = create_core_plot_and_update(
+            adata=adata,
+            title=title,
             stratify_by=None,
-            color_mapping=color_dict
+            color_mapping=color_dict,
+            **kwargs
         )
         results.append(result)
 
