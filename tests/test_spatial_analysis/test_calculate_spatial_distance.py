@@ -31,7 +31,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         self.adata.obsm['spatial'] = spatial_coords
 
     def test_output_one_slide_one_phenotype(self):
-        """Test output when there is one slide with a single phenotype."""
+        """Test output for one slide with a single phenotype."""
         adata1 = anndata.AnnData(
             X=np.array([[1.0]]),
             obs=pd.DataFrame(
@@ -45,7 +45,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             annotation='cell_type',
             verbose=False
         )
-        result1 = adata1.uns['spatial_distance']
+        result1 = adata1.obsm['spatial_distance']
         self.assertIsInstance(result1, pd.DataFrame)
         expected_df_1 = pd.DataFrame(
             data=[[0.0]],
@@ -56,7 +56,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
 
     def test_output_one_slide_two_phenotypes(self):
         """
-        Test output when there is one slide with two different phenotypes.
+        Test output for one slide with two different phenotypes.
         """
         adata2 = anndata.AnnData(
             X=np.array([[1.0], [2.0]]),
@@ -74,7 +74,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             verbose=False
         )
 
-        result2 = adata2.uns['spatial_distance']
+        result2 = adata2.obsm['spatial_distance']
         self.assertIsInstance(result2, pd.DataFrame)
 
         # Distances:
@@ -90,7 +90,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         assert_frame_equal(result2, expected_df_2)
 
     def test_output_two_slides_one_phenotype(self):
-        """Test output when there are two slides, each with one phenotype."""
+        """Test output for two slides, each with one phenotype."""
         adata3 = anndata.AnnData(
             X=np.array([[1.0], [2.0]]),
             obs=pd.DataFrame(
@@ -107,7 +107,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             verbose=False
         )
 
-        result3 = adata3.uns['spatial_distance']
+        result3 = adata3.obsm['spatial_distance']
         self.assertIsInstance(result3, pd.DataFrame)
 
         # Each slide processed separately, each slide has only one cell of
@@ -130,13 +130,13 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         )
 
         # Check if the result is stored under the default label
-        self.assertIn('spatial_distance', self.adata.uns)
+        self.assertIn('spatial_distance', self.adata.obsm)
 
         # Check if the output is a DataFrame
-        result = self.adata.uns['spatial_distance']
+        result = self.adata.obsm['spatial_distance']
         self.assertIsInstance(result, pd.DataFrame)
 
-        # Expect columns to be all phenotypes found
+        # Expect columns to have all phenotypes found
         self.assertIn('type1', result.columns)
         self.assertIn('type2', result.columns)
         self.assertEqual(len(result), 4)  # 4 cells total
@@ -150,27 +150,9 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         )
 
         # Check if the result is stored under the custom label
-        self.assertIn('custom_label', self.adata.uns)
-        custom_result = self.adata.uns['custom_label']
+        self.assertIn('custom_label', self.adata.obsm)
+        custom_result = self.adata.obsm['custom_label']
         self.assertIsInstance(custom_result, pd.DataFrame)
-
-    def test_subset_processing(self):
-        """Test subset processing with minimal deterministic data."""
-        calculate_spatial_distance(
-            adata=self.adata,
-            annotation='cell_type',
-            subset=['image1'],
-            imageid='imageid',
-            verbose=False
-        )
-
-        # Verify the DataFrame only includes cells from image1
-        result = self.adata.uns['spatial_distance']
-        self.assertIsInstance(result, pd.DataFrame)
-        self.assertTrue(
-            all(cell in ['Cell1', 'Cell2'] for cell in result.index)
-        )
-        self.assertEqual(len(result), 2)
 
     def test_missing_coordinate_values(self):
         """Test ValueError when coordinate values are missing."""
@@ -224,7 +206,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             verbose=False
         )
 
-        result = adata.uns['spatial_distance']
+        result = adata.obsm['spatial_distance']
         self.assertIsInstance(result, pd.DataFrame)
         self.assertIn('type1', result.columns)
         self.assertIn('type2', result.columns)
@@ -254,16 +236,12 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         removed.
 
         Setup:
-        - Two cells, both of the same phenotype ("type1") at coordinates:
-            CellA: (0.0, 0.0)
-            CellB: (1.0, 1.0)
-
-        Since there are two cells of the same phenotype, the zero-distance to
-        self is replaced by the distance to the other cell.
-        Both cells should show a distance of sqrt(2).
+        - Two cells, both "type1" at coordinates (0.0, 0.0) and (1.0, 1.0).
+        Both are the same phenotype, so the zero-distance is replaced by
+        sqrt(2).
 
         Expected:
-        - `adata.uns['spatial_distance']` is a DataFrame with one column
+        - `adata.obsm['spatial_distance']` is a DataFrame with one column
           ("type1").
         - Distances:
             CellA: sqrt(2)
@@ -287,8 +265,8 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         )
 
         # Check if results are stored
-        self.assertIn('spatial_distance', adata_no_imageid.uns)
-        result = adata_no_imageid.uns['spatial_distance']
+        self.assertIn('spatial_distance', adata_no_imageid.obsm)
+        result = adata_no_imageid.obsm['spatial_distance']
         self.assertIsInstance(result, pd.DataFrame)
 
         dist = np.sqrt(2)
