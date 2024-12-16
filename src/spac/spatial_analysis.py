@@ -118,14 +118,14 @@ def spatial_interaction(
             representing the stratification groups.
 
         Matrix : dict, optional
-            Contains processed DataFrames of computed matrices with row and 
-            column labels applied. If `stratify_by` is used, the keys represent 
+            Contains processed DataFrames of computed matrices with row and
+            column labels applied. If `stratify_by` is used, the keys represent
             the stratification groups. For example:
             - `results['Matrix']['GroupA']` for a specific stratification group.
-            - If `stratify_by` is not used, the table is accessible via 
+            - If `stratify_by` is not used, the table is accessible via
             `results['Matrix']['annotation']`.
 
-    
+
     """
 
     # List all available methods
@@ -155,9 +155,7 @@ def spatial_interaction(
             The AnnData object.
 
         categorical_annotation : str
-            Name of the annotation column to analyze. It is named as "new"
-            to indicate this is a new column created for plotting in the
-            governing spatial_interaction function.
+            Name of the annotation column to analyze.
 
         ax : matplotlib.axes.Axes
             Axes to plot the enrichment results.
@@ -231,9 +229,7 @@ def spatial_interaction(
             The AnnData object.
 
         categorical_annotation : str
-            Name of the annotation column to analyze. It is named as "new"
-            to indicate this is a new column created for plotting in the
-            governing spatial_interaction function.
+            Name of the annotation column to analyze.
 
         ax : matplotlib.axes.Axes
             Axes to plot the interaction matrix.
@@ -541,7 +537,7 @@ def spatial_interaction(
         else:
             adata.obs['_spac_utils_concat_obs'] = \
                 adata.obs[stratify_by]
-    
+
     # Partial function for the _perform_analysis function
     # to allow for uniform parameter passing for both stratified
     # and non-stratified analysis
@@ -667,7 +663,7 @@ def spatial_interaction(
             )
 
         results['Matrix'] = table_results
-    
+
     # Clean up the temporary columns
     adata.obs.drop(categorical_annotation, axis=1, inplace=True)
     if stratify_by:
