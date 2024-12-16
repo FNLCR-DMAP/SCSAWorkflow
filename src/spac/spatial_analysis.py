@@ -12,6 +12,7 @@ import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
+from functools import partial
 import logging
 import scimap as sm
 
@@ -28,6 +29,7 @@ def spatial_interaction(
         n_rings=1,
         n_neighs=6,
         radius=None,
+        cmap="seismic",
         **kwargs):
     """
     Perform spatial analysis on the selected annotation in the dataset.
@@ -66,7 +68,7 @@ def spatial_interaction(
         with the z-score and the enrichment count.
         For Cluster Interaction Matrix, it will returns the
         interaction matrix.
-        If False, the function will return only the axes dictaionary.
+        If False, the function will return only the axes dictionary.
 
     seed: int, default None
         Random seed for reproducibility, used in Neighborhood Enrichment
@@ -96,21 +98,38 @@ def spatial_interaction(
         - :class:`tuple` - prune the final graph to only contain
             edges in interval `[min(radius), max(radius)]`.
 
+    cmap : str, default 'seismic'
+        The colormap to use for the plot. The 'seismic' color map
+        consist of three color regions: red for positive, blue for negative,
+        and the white at the center. This color map effectively represents
+        the nature of the spatial interaction analysis results,
+        where positive values indicate clustering and
+        negative values indicate seperation. For more color maps, please visit
+        https://matplotlib.org/stable/tutorials/colors/colormaps.html
+
     **kwargs
         Keyword arguments for matplotlib.pyplot.text()
-    Returns:
+
+    Returns
     -------
-    ax_dictionary : dictionary
-        The returned dictionary containse matplotlib.axes.Axes
-        under 'Ax' key and optional matrix under 'Matrix' key.
-        If stratify is used, the function will return dictionary
-        of Axes and optional matrix with keys representing
-        the stratification groups.
-        For example: if stratify is not used and matrix is called,
-        the matrix can be acquired by result['Matrix'], and axes
-        from result['Ax']. If stratify is used and has two levels,
-        "A" and "B", the axes for A can be extracted by
-        result['Ax']['A'] and matrix through result['Matrix']['A'].
+    dict
+        A dictionary containing the results of the spatial interaction
+        analysis. The keys of the dictionary depend on the parameters
+        passed to the function:
+
+        Ax : dict or matplotlib.axes.Axes
+            If `stratify_by` is not used, returns a single
+            matplotlib.axes.Axes object. If `stratify_by` is used,
+            returns a dictionary of Axes objects, with keys
+            representing the stratification groups.
+
+        Matrix : dict, optional
+            Contains processed DataFrames of computed matrices with row and
+            column labels applied. If `stratify_by` is used, the keys represent
+            the stratification groups. For example:
+            - `results['Matrix']['GroupA']` for a specific stratification group.
+            - If `stratify_by` is not used, the table is accessible via
+            `results['Matrix']['annotation']`.
 
 
     """
@@ -124,41 +143,71 @@ def spatial_interaction(
 
     # pacakge each methods into a function to allow
     # centralized control and improve flexibility
-    def Neighborhood_Enrichment_Analysis(
+    def _Neighborhood_Enrichment_Analysis(
                 adata,
-                new_annotation_name,
+                categorical_annotation,
                 ax,
                 return_matrix=False,
                 title=None,
                 seed=None,
                 **kwargs
             ):
+        """
+        Perform Neighborhood Enrichment analysis.
 
+        Parameters
+        ----------
+        adata : anndata.AnnData
+            The AnnData object.
+
+        categorical_annotation : str
+            Name of the annotation column to analyze.
+
+        ax : matplotlib.axes.Axes
+            Axes to plot the enrichment results.
+
+        return_matrix : bool
+            If True, returns the enrichment matrix.
+
+        title : str, optional
+            Title of the plot.
+
+        seed : int, optional
+            Random seed for reproducibility.
+
+        **kwargs : dict
+            Additional keyword arguments for the plot.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and enrichment matrix.
+        """
         # Calculate Neighborhood_Enrichment
         if return_matrix:
             matrix = sq.gr.nhood_enrichment(
                         adata,
                         copy=True,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
 
             sq.gr.nhood_enrichment(
                         adata,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
         else:
             sq.gr.nhood_enrichment(
                         adata,
                         seed=seed,
-                        cluster_key=new_annotation_name
+                        cluster_key=categorical_annotation
                 )
 
         # Plot Neighborhood_Enrichment
         sq.pl.nhood_enrichment(
                     adata,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     title=title,
                     ax=ax,
                     **kwargs
@@ -169,39 +218,66 @@ def spatial_interaction(
         else:
             return ax
 
-    def Cluster_Interaction_Matrix_Analysis(
+    def _Cluster_Interaction_Matrix_Analysis(
                 adata,
-                new_annotation_name,
+                categorical_annotation,
                 ax,
                 return_matrix=False,
                 title=None,
                 **kwargs
             ):
+        """
+        Perform Cluster Interaction Matrix analysis.
 
+        Parameters
+        ----------
+        adata : anndata.AnnData
+            The AnnData object.
+
+        categorical_annotation : str
+            Name of the annotation column to analyze.
+
+        ax : matplotlib.axes.Axes
+            Axes to plot the interaction matrix.
+
+        return_matrix : bool
+            If True, returns the interaction matrix.
+
+        title : str, optional
+            Title of the plot.
+
+        **kwargs : dict
+            Additional keyword arguments for the plot.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and interaction matrix.
+        """
         # Calculate Cluster_Interaction_Matrix
 
         if return_matrix:
             matrix = sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     copy=True
             )
 
             sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name
+                    cluster_key=categorical_annotation
             )
 
         else:
             sq.gr.interaction_matrix(
                     adata,
-                    cluster_key=new_annotation_name
+                    cluster_key=categorical_annotation
             )
 
         sq.pl.interaction_matrix(
                     adata,
                     title=title,
-                    cluster_key=new_annotation_name,
+                    cluster_key=categorical_annotation,
                     ax=ax,
                     **kwargs
             )
@@ -213,10 +289,10 @@ def spatial_interaction(
 
     # Perfrom the actual analysis, first call sq.gr.spatial_neighbors
     # to calculate neighboring graph, then do different analysis.
-    def perform_analysis(
+    def _perform_analysis(
             adata,
             analysis_method,
-            new_annotation_name,
+            categorical_annotation,
             ax,
             coord_type,
             n_rings,
@@ -227,7 +303,18 @@ def spatial_interaction(
             seed=None,
             **kwargs
     ):
+        """
+        Perform the specified spatial analysis method.
 
+        Parameters
+        ----------
+        Same as parent function.
+
+        Returns
+        -------
+        ax or [ax, matrix]
+            The plot axes or axes and matrix results.
+        """
         sq.gr.spatial_neighbors(
             adata,
             coord_type=coord_type,
@@ -237,9 +324,9 @@ def spatial_interaction(
         )
 
         if analysis_method == "Neighborhood Enrichment":
-            ax = Neighborhood_Enrichment_Analysis(
+            ax = _Neighborhood_Enrichment_Analysis(
                     adata,
-                    new_annotation_name,
+                    categorical_annotation,
                     ax,
                     return_matrix,
                     title,
@@ -247,9 +334,9 @@ def spatial_interaction(
                     **kwargs)
 
         elif analysis_method == "Cluster Interaction Matrix":
-            ax = Cluster_Interaction_Matrix_Analysis(
+            ax = _Cluster_Interaction_Matrix_Analysis(
                     adata,
-                    new_annotation_name,
+                    categorical_annotation,
                     ax,
                     return_matrix,
                     title,
@@ -257,6 +344,147 @@ def spatial_interaction(
 
         return ax
 
+    def _get_labels(
+        fig,
+        unique_annotations,
+        verbose=False
+    ):
+        """
+        Extract row and column labels from plot axes.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure containing the plots.
+
+        unique_annotations : list
+            List of unique annotation labels.
+
+        verbose : bool, default False
+            If True, print debugging information.
+
+        Returns
+        -------
+        list
+            List of row labels.
+        """
+        row_labels = []
+        # Iterate over all axes to check if any contain the row labels
+        for i, ax in enumerate(fig.axes):
+            if verbose:
+                print(f"Inspecting axis {i}...")
+            # Try to extract labels from the y-axis of each axis
+            yticklabels = [tick.get_text() for tick in ax.get_yticklabels()]
+            xticklabels = [tick.get_text() for tick in ax.get_xticklabels()]
+
+            if yticklabels and xticklabels:
+                raise ValueError(
+                    "Both x- and y-axis labels found on axis. "
+                    "Unable to determine row labels."
+                )
+
+            elif yticklabels and not xticklabels:
+                if set(yticklabels) <= set(unique_annotations):
+                    if verbose:
+                        print(f"Row labels found on axis {i}: {yticklabels}")
+                    row_labels = yticklabels[::-1]
+
+            # Try extracting other possible labels (x-axis, title, etc.)
+            elif xticklabels and not yticklabels:
+                if set(xticklabels) <= set(unique_annotations):
+                    if verbose:
+                        print(
+                            f"Column labels found on axis {i}: {xticklabels}"
+                        )
+                    row_labels = xticklabels[::-1]
+            else:
+                print(
+                    "No labels found on axis. Unable to determine row labels."
+                )
+
+        return row_labels
+
+    # Use to process the output from different
+    # spatial analysis method in squidpy
+    def _process_matrixs(
+        matrixs,
+        row_labels,
+        plot_label=None
+    ):
+        """
+        Process the output matrices for saving and visualization.
+
+        This function organizes matrices produced during the spatial analysis,
+        adding appropriate labels and creating a dictionary for easy access.
+        The processed matrices are returned in a labeled format suitable
+        for saving or further analysis.
+
+        Parameters
+        ----------
+        matrixs : dict
+            Dictionary of raw matrices generated from spatial analyses.
+
+        row_labels : list
+            List of row and column labels for the matrices, used to annotate
+            the resulting DataFrames.
+
+        plot_label : str, optional
+            Additional label to append to the matrix file names, useful for
+            distinguishing between different stratification groups or analysis
+            scenarios.
+
+        Returns
+        -------
+        dict
+            A dictionary of labeled matrices, where the keys are the file names
+            (including the annotation and analysis method) and the values are
+            pandas DataFrames representing the matrices.
+
+        Notes
+        -----
+        For "Cluster Interaction Matrix", a single matrix is processed.
+        For "Neighborhood Enrichment", multiple matrices (e.g., z-score and
+        enrichment counts) are processed separately.
+        """
+        return_dict = {}
+        if analysis_method == "Cluster Interaction Matrix":
+            if not isinstance(matrixs, pd.DataFrame):
+                matrix = pd.DataFrame(matrixs)
+            if len(row_labels) > 0:
+                matrix.index = row_labels
+                matrix.columns = row_labels
+
+            if plot_label is None:
+                file_name = f"{annotation}_{output_file_cat_list[0]}" + \
+                            "_interaction_matrix.csv"
+            else:
+                file_name = f"{annotation}_{output_file_cat_list[0]}" + \
+                            f"_{plot_label}_interaction_matrix.csv"
+
+            return_dict[file_name] = matrix
+
+        elif analysis_method == "Neighborhood Enrichment":
+            for i, matrix in enumerate(matrixs):
+                # Convert each 2D array to a DataFrame
+                if not isinstance(matrix, pd.DataFrame):
+                    matrix = pd.DataFrame(matrix)
+
+                if len(row_labels) > 0:
+                    matrix.index = row_labels
+                    matrix.columns = row_labels
+
+                if plot_label is None:
+                    file_name = f"{annotation}_{output_file_cat_list[i]}" + \
+                                "_interaction_matrix.csv"
+                else:
+                    file_name = f"{annotation}_{output_file_cat_list[i]}" + \
+                                f"_{plot_label}" + \
+                                "_interaction_matrix.csv"
+
+                return_dict[file_name] = matrix
+        return return_dict
+
+    # -----------------------------------------------
     # Error Check Section
     # -----------------------------------------------
     if not isinstance(adata, anndata.AnnData):
@@ -299,48 +527,59 @@ def spatial_interaction(
     # Operational Section
     # -----------------------------------------------
 
-    # Create a categorical column data for plotting
-    new_annotation_name = annotation + "_plot"
+    # Create a categorical column data for plotting\
+    # This is to avoid modifying the original annotation to comply with
+    # the squidpy function requirements
 
-    adata.obs[new_annotation_name] = pd.Categorical(
+    categorical_annotation = annotation + "_plot"
+
+    adata.obs[categorical_annotation] = pd.Categorical(
         adata.obs[annotation])
 
     if stratify_by:
         if isinstance(stratify_by, list):
-            adata.obs['concatenated_obs'] = \
+            adata.obs['_spac_utils_concat_obs'] = \
                 adata.obs[stratify_by].astype(str).agg('_'.join, axis=1)
         else:
-            adata.obs['concatenated_obs'] = \
+            adata.obs['_spac_utils_concat_obs'] = \
                 adata.obs[stratify_by]
+
+    # Partial function for the _perform_analysis function
+    # to allow for uniform parameter passing for both stratified
+    # and non-stratified analysis
+    perform_analysis_prefilled = partial(
+        _perform_analysis,
+        analysis_method=analysis_method,
+        categorical_annotation=categorical_annotation,
+        coord_type=coord_type,
+        n_rings=n_rings,
+        n_neighs=n_neighs,
+        radius=radius,
+        return_matrix=return_matrix,
+        seed=seed,
+        cmap=cmap
+    )
 
     # Compute a connectivity matrix from spatial coordinates
     if stratify_by:
         ax_dictionary = {}
         matrix_dictionary = {}
-        unique_values = adata.obs['concatenated_obs'].unique()
+        unique_values = adata.obs['_spac_utils_concat_obs'].unique()
 
         for subset_key in unique_values:
             # Subset the original AnnData object based on the unique value
             subset_adata = adata[
-                adata.obs['concatenated_obs'] == subset_key
+                adata.obs['_spac_utils_concat_obs'] == subset_key
             ].copy()
 
             fig, ax = plt.subplots()
 
             image_title = f"Group: {subset_key}"
 
-            ax = perform_analysis(
-                            subset_adata,
-                            analysis_method,
-                            new_annotation_name,
-                            ax,
-                            coord_type,
-                            n_rings,
-                            n_neighs,
-                            radius,
-                            return_matrix,
-                            image_title,
-                            seed,
+            ax = perform_analysis_prefilled(
+                            adata=subset_adata,
+                            ax=ax,
+                            title=image_title,
                             **kwargs
                         )
 
@@ -362,17 +601,9 @@ def spatial_interaction(
             results = {"Ax": ax_dictionary}
 
     else:
-        ax = perform_analysis(
-                adata,
-                analysis_method,
-                new_annotation_name,
-                ax,
-                coord_type,
-                n_rings,
-                n_neighs,
-                radius,
-                return_matrix,
-                seed=seed,
+        ax = perform_analysis_prefilled(
+                adata=adata,
+                ax=ax,
                 **kwargs
             )
 
@@ -383,6 +614,66 @@ def spatial_interaction(
             }
         else:
             results = {"Ax": ax}
+
+    # Adding post processing methods for updating images and retrieve
+
+    # Acquire the annotation labels and acquire
+    # the column names from axes and matrixs
+
+    if return_matrix:
+        output_file_cat_grosarry = {
+            "Neighborhood Enrichment": ["z_score", "enrichment_counts"],
+            "Cluster Interaction Matrix": ["interaction_counts"]
+        }
+
+        output_file_cat_list = output_file_cat_grosarry[analysis_method]
+
+        unique_annotations = list(adata.obs[annotation].unique())
+
+        _matrixs = results['Matrix']
+        _axs = results['Ax']
+
+        def _processes_function_return(
+            matrix,
+            ax,
+            plot_label=None
+        ):
+            fig = ax.get_figure()
+            row_labels = _get_labels(
+                    fig,
+                    unique_annotations
+                )
+            result_dict = _process_matrixs(
+                matrix,
+                row_labels,
+                plot_label
+            )
+            return result_dict
+
+        table_results = {}
+        if stratify_by:
+            for key in _axs:
+                _ax = _axs[key]
+                _matrix = _matrixs[key]
+                result_dict = _processes_function_return(
+                    _matrix,
+                    _ax,
+                    key
+                )
+                table_results[key] = result_dict
+
+        else:
+            table_results['annotation'] = _processes_function_return(
+                _matrixs,
+                _axs
+            )
+
+        results['Matrix'] = table_results
+
+    # Clean up the temporary columns
+    adata.obs.drop(categorical_annotation, axis=1, inplace=True)
+    if stratify_by:
+        adata.obs.drop('_spac_utils_concat_obs', axis=1, inplace=True)
 
     return results
 
