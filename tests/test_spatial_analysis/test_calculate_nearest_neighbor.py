@@ -1,14 +1,14 @@
 import unittest
 import anndata
 import numpy as np
-from spac.spatial_analysis import calculate_spatial_distance
+from spac.spatial_analysis import calculate_nearest_neighbor
 import pandas as pd
 import io
 from contextlib import redirect_stdout
 from pandas.testing import assert_frame_equal
 
 
-class TestCalculateSpatialDistance(unittest.TestCase):
+class TestCalculateNearestNeighbor(unittest.TestCase):
 
     def setUp(self):
         # Create a minimal deterministic AnnData object
@@ -40,7 +40,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             ),
             obsm={'spatial': np.array([[0.0, 0.0]])}
         )
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=adata1,
             annotation='cell_type',
             verbose=False
@@ -67,7 +67,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             ),
             obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
         )
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=adata2,
             annotation='cell_type',
             imageid='imageid',
@@ -100,7 +100,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             ),
             obsm={'spatial': np.array([[0.0, 0.0], [1.0, 1.0]])}
         )
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=adata3,
             annotation='cell_type',
             imageid='imageid',
@@ -123,7 +123,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
     def test_typical_case_with_output(self):
         """Test typical case with default label and a custom label."""
         # Default label
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
             verbose=False
@@ -142,7 +142,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         self.assertEqual(len(result), 4)  # 4 cells total
 
         # Test custom label
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
             label='custom_label',
@@ -158,7 +158,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         """Test ValueError when coordinate values are missing."""
         self.adata.obsm['spatial'][0, 0] = np.nan
         with self.assertRaises(ValueError) as context:
-            calculate_spatial_distance(
+            calculate_nearest_neighbor(
                 adata=self.adata,
                 annotation='cell_type',
                 verbose=False
@@ -173,7 +173,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         """Test ValueError when coordinates have insufficient dimensions."""
         self.adata.obsm['spatial'] = np.random.rand(4, 1)  # Only one dimension
         with self.assertRaises(ValueError) as context:
-            calculate_spatial_distance(
+            calculate_nearest_neighbor(
                 adata=self.adata,
                 annotation='cell_type',
                 verbose=False
@@ -200,7 +200,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
             }
         )
 
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=adata,
             annotation='cell_type',
             verbose=False
@@ -216,7 +216,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         """Test verbose output for progress messages."""
         f = io.StringIO()
         with redirect_stdout(f):
-            calculate_spatial_distance(
+            calculate_nearest_neighbor(
                 adata=self.adata,
                 annotation='cell_type',
                 verbose=True
@@ -257,7 +257,7 @@ class TestCalculateSpatialDistance(unittest.TestCase):
         )
 
         # Run the calculation with no imageid specified
-        calculate_spatial_distance(
+        calculate_nearest_neighbor(
             adata=adata_no_imageid,
             annotation='cell_type',
             imageid=None,  # No imageid
