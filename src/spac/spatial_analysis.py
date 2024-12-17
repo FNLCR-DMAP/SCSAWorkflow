@@ -1137,7 +1137,7 @@ def _neighborhood_profile_core(
     return neighborhood_array
 
 
-def calculate_spatial_distance(
+def calculate_nearest_neighbor(
     adata,
     annotation,
     spatial_associated_table='spatial',
