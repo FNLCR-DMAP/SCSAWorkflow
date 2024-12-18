@@ -9,7 +9,6 @@ dependencies:
   - numpy=1.26.4                # Core Python Package
   - pandas=1.5.3                # Data Manipulation and Analysis
   - anndata=0.10.9              # Single-Cell Data Manipulation and Analysis (scverse family)
-  - scimap=2.1.3_dmap_pandas153 # Single-Cell Data Data Manipulation and Analysis
   - scanpy=1.10.3               # Single-Cell Data Manipulation and Analysis (scverse family)
   - zarr=2.10.3                 # Data Manipulation and Analysis
   - numba=0.58.1                # Data Manipulation and Analysis
@@ -27,3 +26,4 @@ dependencies:
     - sphinx
     - flake8
     - gendocs
+    - parmap==1.7.0
