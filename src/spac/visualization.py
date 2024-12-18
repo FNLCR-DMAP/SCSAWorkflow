@@ -12,7 +12,7 @@ import plotly.figure_factory as ff
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import color_mapping
+from spac.utils import color_mapping, check_label
 import logging
 import warnings
 
@@ -2026,3 +2026,186 @@ def plot_ripley_l(
         return fig, df
 
     return fig
+
+
+def _prepare_spatial_distance_data(
+    adata,
+    annotation,
+    stratify_by=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    log=False
+):
+    """
+    Prepares a tidy DataFrame for nearest-neighbor (spatial distance) plotting.
+
+    This function:
+      1) Validates required parameters (annotation, distance_from).
+      2) Retrieves the spatial distance matrix from `adata.obsm[spatial_distance]`.
+      3) Merges annotation (and optional stratify column).
+      4) Filters rows to the reference phenotype (`distance_from`).
+      5) Subsets columns if `distance_to` is given; otherwise keeps all distances.
+      6) Reshapes (stacks) into long-form data: columns -> [cellid, group, distance].
+      7) Applies optional log1p transform.
+
+    The resulting DataFrame is suitable for plotting with seaborn.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix, containing distances in `adata.obsm[spatial_distance]`.
+    annotation : str
+        Column in `adata.obs` indicating cell phenotype or annotation.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group/stratify data (e.g., image or sample).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame.
+        Default 'spatial_distance'.
+    distance_from : str
+        Reference phenotype from which distances are measured. Required.
+    distance_to : str or list of str, optional
+        Target phenotype(s). If None, use all available phenotype distances.
+    log : bool, optional
+        If True, applies np.log1p transform to the 'distance' column.
+
+    Returns
+    -------
+    pd.DataFrame
+        Tidy DataFrame with columns:
+            - 'cellid': index of the cell (from adata.obs).
+            - 'group': the target phenotype column previously stored in distance_map.
+            - 'distance': the numeric distance value.
+            - 'phenotype': the reference phenotype (distance_from).
+            - 'stratify_by': optional grouping column (if provided).
+
+    Raises
+    ------
+    ValueError
+        If required parameters or columns are missing.
+
+    Examples
+    --------
+    >>> df_long = _prepare_spatial_distance_data(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     stratify_by='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     log=True
+    ... )
+    """
+
+    # Validate 'distance_from' and check 'annotation'
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. This indicates "
+            "the reference group from which distances are measured."
+        )
+    check_annotation(adata, annotations=annotation)
+
+    # Convert distance_to to list if needed
+    if distance_to is not None and isinstance(distance_to, str):
+        distance_to = [distance_to]
+
+    phenotypes_to_check = [distance_from]
+    if distance_to:
+        phenotypes_to_check.extend(distance_to)
+
+    # Ensure distance_from and distance_to exist in adata.obs[annotation]
+    check_label(
+        adata,
+        annotation=annotation,
+        labels=phenotypes_to_check,
+        should_exist=True
+    )
+
+    # Retrieve the spatial distance matrix from adata.obsm
+    if spatial_distance not in adata.obsm:
+        raise ValueError(
+            f"'{spatial_distance}' does not exist in the provided dataset. "
+            "Please run 'calculate_nearest_neighbor' first to compute and "
+            "store spatial distance. "
+            f"Available keys: {list(adata.obsm.keys())}"
+        )
+    distance_map = adata.obsm[spatial_distance].copy()
+
+    # Verify that requested phenotypes exist in the distance_map columns
+    missing_cols = [
+        p for p in phenotypes_to_check if p not in distance_map.columns
+    ]
+    if missing_cols:
+        raise ValueError(
+            f"Phenotypes {missing_cols} not found in columns of "
+            f"'{spatial_distance}'. Columns present: "
+            f"{list(distance_map.columns)}"
+        )
+
+    # Ensure 'stratify_by' column is valid if stratify
+    if stratify_by is not None:
+        check_annotation(adata, annotations=stratify_by)
+
+    # Build a meta DataFrame with phenotype & optional stratify column
+    meta_data = pd.DataFrame({'phenotype': adata.obs[annotation]},
+                             index=adata.obs.index)
+    if stratify_by:
+        meta_data[stratify_by] = adata.obs[stratify_by]
+
+    # Merge distance_map with meta_data, filtering to 'distance_from' rows
+    df_merged = meta_data.join(distance_map, how='left')
+    df_merged = df_merged[df_merged['phenotype'] == distance_from]
+    if df_merged.empty:
+        raise ValueError(
+            f"No cells found with phenotype == '{distance_from}'."
+        )
+
+    # Subset columns if distance_to is provided, else keep everything
+    if distance_to:
+        keep_cols = distance_to
+        meta_cols = ['phenotype']
+        if stratify_by:
+            meta_cols.append(stratify_by)
+        df_merged = df_merged[meta_cols + keep_cols]
+    else:
+        drop_cols = ['phenotype']
+        if stratify_by:
+            drop_cols.append(stratify_by)
+        df_merged = df_merged.drop(columns=drop_cols, errors='ignore')
+
+    # Reshape wide -> long. 'group' will be the column representing phenotype
+    # targets
+    df_long = df_merged.stack().reset_index()
+    df_long.columns = ['cellid', 'group', 'distance']
+
+    # Merge back 'phenotype' and optional 'stratify_by'
+    meta_cols = ['phenotype']
+    if stratify_by:
+        meta_cols.append(stratify_by)
+    df_long = df_long.merge(
+        meta_data[meta_cols],
+        left_on='cellid',
+        right_index=True,
+        how='left'
+    )
+
+    # Filter rows if distance_to is given, so that only those groups remain
+    if distance_to:
+        df_long = df_long[df_long['group'].isin(distance_to)]
+
+    # Convert relevant columns to categorical and reorder
+    # if distance_to is provided
+    for col in ['group', 'phenotype', stratify_by]:
+        if col and col in df_long.columns:
+            df_long[col] = df_long[col].astype(str).astype('category')
+
+    if distance_to:
+        # Now, reorder categories exactly matching distance_to
+        df_long['group'] = df_long['group'].cat.reorder_categories(distance_to)
+        df_long.sort_values('group', inplace=True)
+
+    # Optional log transform
+    if log:
+        df_long['distance'] = np.log1p(df_long['distance'])
+
+    return df_long
