@@ -102,8 +102,8 @@ class TestRelationalHeatmap(unittest.TestCase):
 
         # Define the expected DataFrame
         expected_df = pd.DataFrame({
-            'target_target1': [100.0, None],
-            'target_target2': [None, 100.0],
+            'target_target1': [100.0, 0],
+            'target_target2': [0, 100.0],
             'total': [100.0, 100.0]
         }, index=['source_source1', 'source_source2'])
 

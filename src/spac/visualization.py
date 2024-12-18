@@ -1879,6 +1879,8 @@ def relational_heatmap(
     matrix.index=layout['yaxis']['ticktext']
     matrix.columns=layout['xaxis']['ticktext']
     matrix["total"] = matrix.sum(axis=1)
+    matrix = matrix.fillna(0)
+
     # Display the DataFrame
     file_name = f"{source_annotation}_to_{target_annotation}" + \
                 "_relation_matrix.csv"
