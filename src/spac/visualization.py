@@ -1763,8 +1763,18 @@ def relational_heatmap(
 
     Returns
     -------
-    plotly.graph_objs._figure.Figure
-        The generated relational heatmap.
+    dict
+        A dictionary containing:
+        - "figure" (plotly.graph_objs._figure.Figure): 
+            The generated relational heatmap as a Plotly figure.
+        - "file_name" (str): 
+            The name of the file where the relational matrix can be saved.
+        - "data" (pandas.DataFrame): 
+            A relational matrix DataFrame with percentage values.
+            Rows represent source annotations,
+            columns represent target annotations,
+            and an additional "total" column sums
+            the percentages for each source.
     """
     # Default font size
     font_size = kwargs.get('font_size', 12.0)
@@ -1829,6 +1839,7 @@ def relational_heatmap(
     fig.update_layout(
         overwrite=True,
         xaxis=dict(
+            title=source_annotation,
             ticks="",
             dtick=1,
             side="top",
@@ -1837,39 +1848,44 @@ def relational_heatmap(
             ticktext=x
         ),
         yaxis=dict(
+            title=target_annotation,
             ticks="",
             dtick=1,
             ticksuffix="   ",
             tickvals=list(range(len(y))),
             ticktext=y
+        ),
+        margin=dict(
+            l=5,
+            r=5,
+            t=font_size * 2,
+            b=font_size * 2
         )
     )
 
     for i in range(len(fig.layout.annotations)):
         fig.layout.annotations[i].font.size = font_size
 
-    fig.update_layout(
-        xaxis=dict(title=source_annotation),
-        yaxis=dict(title=target_annotation)
-    )
-
-    fig.update_layout(
-        margin=dict(
-            l=5,
-            r=5,
-            t=font_size * 2,
-            b=font_size * 2
-            )
-        )
-
     fig.update_xaxes(
         side="bottom",
         tickangle=90
     )
 
-    print(fig)
+    # Data output section
+    data = fig.data[0]
+    layout = fig.layout
+    # Create a DataFrame
+    matrix = pd.DataFrame(data['customdata'])
+    matrix.index=layout['yaxis']['ticktext']
+    matrix.columns=layout['xaxis']['ticktext']
+    matrix["total"] = matrix.sum(axis=1)
+    matrix = matrix.fillna(0)
 
-    return fig
+    # Display the DataFrame
+    file_name = f"{source_annotation}_to_{target_annotation}" + \
+                "_relation_matrix.csv"
+
+    return {"figure": fig, "file_name": file_name, "data": matrix}
 
 
 def plot_ripley_l(
