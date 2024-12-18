@@ -14,6 +14,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping
+from spac.data_utils import select_values
 import logging
 import warnings
 import re
@@ -1482,15 +1483,7 @@ def interative_spatial_plot(
             annotations=annotation
         )
 
-    if not hasattr(adata, 'obsm'):
-        error_msg = ".obsm attribute (Spatial Coordinate) does not exist " + \
-            "in the input AnnData object. Please check."
-        raise ValueError(error_msg)
-
-    if 'spatial' not in adata.obsm:
-        error_msg = 'The key "spatial" is missing from .obsm field, hence ' + \
-            "missing spatial coordniates. Please check."
-        raise ValueError(error_msg)
+    check_table(adata, tables='spatial', associated_table=True)
 
     def main_figure_generation(
         adata,
@@ -1506,6 +1499,9 @@ def interative_spatial_plot(
     ):
         """
         Create the core interactive plot for downstream processing.
+        This function generates the main interactive plot using Plotly
+        that contains the spatial scatter plot with annotations and
+        image configuration.
 
         Parameters
         ----------
@@ -1546,6 +1542,15 @@ def interative_spatial_plot(
             extract_columns_raw.append(adata.obs[item])
 
         extract_columns = []
+
+        # The `extract_columns` list is needed for generating Plotly images
+        # because it stores transformed annotation data. These annotations
+        # are added as columns in the DataFrame (`df`) and are used as inputs
+        # for the `color` and `hover_data` parameters in the Plotly scatter
+        # plot. This enables the plot to visually encode annotations, providing
+        # better insights into the spatial data. Without `extract_columns`, the
+        # plot would lack essential annotation-based differentiation and
+        # interactivity.
 
         for i, item in enumerate(extract_columns_raw):
             extract_columns.append(
@@ -1597,6 +1602,8 @@ def interative_spatial_plot(
                 main_fig.add_traces(scatter_fig.data)
 
         # Reset the color attribute of the traces in combined_fig
+        # This is necessary to ensure that the color attribute
+        # does not interfere with subsequent plots
         for trace in main_fig.data:
             trace.marker.color = None
 
@@ -1690,36 +1697,17 @@ def interative_spatial_plot(
             for i, value in enumerate(unique_values)
         }
 
-    def subset_adata(adata, stratify_by, highlight_value):
-        """
-        Subset the AnnData object by a specific value in the stratify_by column.
-
-        Parameters
-        ----------
-        adata : AnnData
-            Annotated data matrix.
-        stratify_by : str
-            Column in `adata.obs` to subset by.
-        highlight_value : str
-            Value to subset on.
-
-        Returns
-        -------
-        AnnData
-            A subset of the input AnnData object.
-        """
-        subset_mask = adata.obs[stratify_by] == highlight_value
-        return adata[subset_mask].copy()
-
-    def create_core_plot_and_update(
+    def generate_and_update_image(
         adata,
         title,
-        stratify_by=None,
         color_mapping=None,
         **kwargs
     ):
         """
-        Creates the core plot and updates the plot with customization.
+        This function generates the main figure with annotations and
+        optional stratifications or color mappings, providing flexibility
+        for detailed visualizations. It processes data, groups it by
+        annotations, and enables advanced legend handling and styling.
 
         Parameters
         ----------
@@ -1751,10 +1739,12 @@ def interative_spatial_plot(
             **kwargs
         )
 
+        # Create a copy of the figure for non-destructive updates
         main_fig_copy = copy.copy(main_fig_parent)
-        datas = main_fig_copy.data
+        data = main_fig_copy.data
         main_fig_parent.data = []
 
+        # Prepare to track updates and manage grouped annotations
         updated_index = []
         legend_list = [
             f"legend{i+1}" if i > 0 else "legend"
@@ -1762,24 +1752,26 @@ def interative_spatial_plot(
         ]
         previous_group = None
 
-        indices = list(range(len(datas)))
-
+        # Process each trace in the figure for grouping and legends
+        indices = list(range(len(data)))
         for item in indices:
-            cat_label = datas[item]['customdata'][0][0]
+            cat_label = data[item]['customdata'][0][0]
             cat_dataset = pd.DataFrame(
-                {'X': datas[item]['x'], 'Y': datas[item]['y']}
+                {'X': data[item]['x'], 'Y': data[item]['y']}
             )
 
+            # Assign the label to the appropriate legend group
             for i, legend_group in enumerate(annotations):
                 if cat_label.startswith(legend_group):
                     cat_leg_group = f"<b>{legend_group}</b>"
                     cat_label = cat_label[len(legend_group) + 1:]
                     cat_group = legend_list[i]
 
+            # Add a new legend entry if this group hasn't been encountered
             if previous_group is None or cat_group != previous_group:
                 main_fig_parent.add_trace(go.Scattergl(
-                    x=[datas[item]['x'][0]],
-                    y=[datas[item]['y'][0]],
+                    x=[data[item]['x'][0]],
+                    y=[data[item]['y'][0]],
                     name=cat_leg_group,
                     mode="markers",
                     showlegend=True,
@@ -1792,6 +1784,7 @@ def interative_spatial_plot(
                 ))
                 previous_group = cat_group
 
+            # Add the category label to the dataset for grouping
             cat_dataset['label'] = cat_label
 
             main_fig_parent.add_trace(go.Scattergl(
@@ -1800,39 +1793,44 @@ def interative_spatial_plot(
                 name=cat_label,
                 mode="markers",
                 showlegend=True,
-                marker=dict(colorscale=colorscale, size=dot_size, opacity=dot_transparancy)
+                marker=dict(
+                    colorscale=colorscale,
+                    size=dot_size,
+                    opacity=dot_transparancy
+                )
             ))
 
             updated_index.append(cat_label)
 
-        if stratify_by is not None or color_mapping is not None:
+        if color_mapping is not None:
             main_fig_copy = copy.copy(main_fig_parent)
-            datas = main_fig_copy.data
+            data = main_fig_copy.data
             main_fig_parent.data = []
 
-            for trace in datas:
+            for trace in data:
                 trace_name = trace["name"]
-                if color_mapping is not None and trace_name in color_mapping.keys():
-                    trace['marker']['color'] = color_mapping[trace_name]
+                if color_mapping is not None:
+                    if trace_name in color_mapping.keys():
+                        trace['marker']['color'] = color_mapping[trace_name]
                 main_fig_parent.add_trace(trace)
 
-            main_fig_parent.update_layout(
-                title={
-                    'text': title,
-                    'font': {'size': font_size},
-                    'xanchor': 'center',
-                    'yanchor': 'top',
-                    'x': 0.5,
-                    'y': 0.99
-                },
-                legend={
-                    'x': 1.05,
-                    'y': 0.5,
-                    'xanchor': 'left',
-                    'yanchor': 'middle'
-                },
-                margin=dict(l=5, r=5, t=font_size*2, b=5)
-            )
+        main_fig_parent.update_layout(
+            title={
+                'text': title,
+                'font': {'size': font_size},
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'x': 0.5,
+                'y': 0.99
+            },
+            legend={
+                'x': 1.05,
+                'y': 0.5,
+                'xanchor': 'left',
+                'yanchor': 'middle'
+            },
+            margin=dict(l=5, r=5, t=font_size*2, b=5)
+        )
 
         return {
             "image_name": f"{spell_out_special_characters(title)}.html",
@@ -1937,9 +1935,13 @@ def interative_spatial_plot(
             selected_spatial = adata.obsm['spatial'][indices]
             print(f"number of cells in the region: {len(selected_spatial)}")
 
-            adata_subset = subset_adata(adata, stratify_by, strat_value)
+            adata_subset = select_values(
+                data=adata,
+                annotation=stratify_by,
+                values=strat_value
+            )
 
-            result = create_core_plot_and_update(
+            result = generate_and_update_image(
                 adata=adata_subset,
                 title=title,
                 stratify_by=stratify_by,
@@ -1950,7 +1952,7 @@ def interative_spatial_plot(
     else:
         color_dict = defined_color_map
         title = "Interactive Spatial Plot"
-        result = create_core_plot_and_update(
+        result = generate_and_update_image(
             adata=adata,
             title=title,
             stratify_by=None,
