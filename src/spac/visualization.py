@@ -13,12 +13,15 @@ import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
+from spac.utils import check_label
+from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
 import re
 import copy
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -2334,3 +2337,463 @@ def plot_ripley_l(
         return fig, df
 
     return fig
+
+
+def _prepare_spatial_distance_data(
+    adata,
+    annotation,
+    stratify_by=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    log=False
+):
+    """
+    Prepares a tidy DataFrame for nearest-neighbor (spatial distance) plotting.
+
+    This function:
+      1) Validates required parameters (annotation, distance_from).
+      2) Retrieves the spatial distance matrix from
+         `adata.obsm[spatial_distance]`.
+      3) Merges annotation (and optional stratify column).
+      4) Filters rows to the reference phenotype (`distance_from`).
+      5) Subsets columns if `distance_to` is given;
+         otherwise keeps all distances.
+      6) Reshapes (melts) into long-form data:
+         columns -> [cellid, group, distance].
+      7) Applies optional log1p transform.
+
+    The resulting DataFrame is suitable for plotting with tool like Seaborn.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix, containing distances in
+        `adata.obsm[spatial_distance]`.
+    annotation : str
+        Column in `adata.obs` indicating cell phenotype or annotation.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group/stratify data
+        (e.g., image or sample).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame.
+        Default 'spatial_distance'.
+    distance_from : str
+        Reference phenotype from which distances are measured. Required.
+    distance_to : str or list of str, optional
+        Target phenotype(s). If None, use all available phenotype distances.
+    log : bool, optional
+        If True, applies np.log1p transform to the 'distance' column, which is
+        renamed to 'log_distance'.
+
+    Returns
+    -------
+    pd.DataFrame
+        Tidy DataFrame with columns:
+            - 'cellid': index of the cell from 'adata.obs'.
+            - 'group': the target phenotype (column names of 'distance_map'.
+            - 'distance': the numeric distance value.
+            - 'phenotype': the reference phenotype ('distance_from').
+            - 'stratify_by': optional grouping column, if provided.
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing, if phenotypes are not found in
+        `adata.obs`, or if the spatial distance matrix is not available in
+        `adata.obsm`.
+
+    Examples
+    --------
+    >>> df_long = _prepare_spatial_distance_data(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     stratify_by='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     log=True
+    ... )
+    >>> df_long.head()
+    """
+
+    # Validate required parameters
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. This indicates "
+            "the reference group from which distances are measured."
+        )
+    check_annotation(adata, annotations=annotation)
+
+    # Convert distance_to to list if needed
+    if distance_to is not None and isinstance(distance_to, str):
+        distance_to = [distance_to]
+
+    phenotypes_to_check = [distance_from] + (
+        distance_to if distance_to else []
+    )
+
+    # Ensure distance_from and distance_to exist in adata.obs[annotation]
+    check_label(
+        adata,
+        annotation=annotation,
+        labels=phenotypes_to_check,
+        should_exist=True
+    )
+
+    # Retrieve the spatial distance matrix from adata.obsm
+    if spatial_distance not in adata.obsm:
+        raise ValueError(
+            f"'{spatial_distance}' does not exist in the provided dataset. "
+            "Please run 'calculate_nearest_neighbor' first to compute and "
+            "store spatial distance. "
+            f"Available keys: {list(adata.obsm.keys())}"
+        )
+    distance_map = adata.obsm[spatial_distance].copy()
+
+    # Verify requested phenotypes exist in the distance_map columns
+    missing_cols = [
+        p for p in phenotypes_to_check if p not in distance_map.columns
+    ]
+    if missing_cols:
+        raise ValueError(
+            f"Phenotypes {missing_cols} not found in columns of "
+            f"'{spatial_distance}'. Columns present: "
+            f"{list(distance_map.columns)}"
+        )
+
+    # Validate 'stratify_by' column if provided
+    if stratify_by is not None:
+        check_annotation(adata, annotations=stratify_by)
+
+    # Build a meta DataFrame with phenotype & optional stratify column
+    meta_data = pd.DataFrame({'phenotype': adata.obs[annotation]},
+                             index=adata.obs.index)
+    if stratify_by:
+        meta_data[stratify_by] = adata.obs[stratify_by]
+
+    # Merge metadata with distance_map and filter for 'distance_from'
+    df_merged = meta_data.join(distance_map, how='left')
+    df_merged = df_merged[df_merged['phenotype'] == distance_from]
+    if df_merged.empty:
+        raise ValueError(
+            f"No cells found with phenotype == '{distance_from}'."
+        )
+
+    # Reset index to ensure cell names are in a column called 'cellid'
+    df_merged = df_merged.reset_index().rename(columns={'index': 'cellid'})
+
+    # Prepare the list of metadata columns
+    meta_cols = ['phenotype']
+    if stratify_by:
+        meta_cols.append(stratify_by)
+
+    # Determine distance columns
+    if distance_to:
+        keep_cols = ['cellid'] + meta_cols + distance_to
+    else:
+        non_distance_cols = ['cellid', 'phenotype']
+        if stratify_by:
+            non_distance_cols.append(stratify_by)
+        distance_columns = [
+            c for c in df_merged.columns if c not in non_distance_cols
+        ]
+        keep_cols = ['cellid'] + meta_cols + distance_columns
+
+    df_merged = df_merged[keep_cols]
+
+    # Melt the DataFrame from wide to long format
+    df_long = df_merged.melt(
+        id_vars=['cellid'] + meta_cols,
+        var_name='group',
+        value_name='distance'
+    )
+
+    # Convert columns to categorical for consistency
+    for col in ['group', 'phenotype', stratify_by]:
+        if col and col in df_long.columns:
+            df_long[col] = df_long[col].astype(str).astype('category')
+
+    # Reorder categories for 'group' if 'distance_to' is provided
+    if distance_to:
+        df_long['group'] = df_long['group'].cat.reorder_categories(distance_to)
+        df_long.sort_values('group', inplace=True)
+
+    # Ensure 'distance' is numeric and apply log transform if requested
+    df_long['distance'] = pd.to_numeric(df_long['distance'], errors='coerce')
+    if log:
+        df_long['distance'] = np.log1p(df_long['distance'])
+        df_long.rename(columns={'distance': 'log_distance'}, inplace=True)
+
+    # Reorder columns dynamically based on the presence of 'log'
+    distance_col = 'log_distance' if log else 'distance'
+    final_cols = ['cellid', 'group', distance_col, 'phenotype']
+    if stratify_by is not None:
+        final_cols.append(stratify_by)
+    df_long = df_long[final_cols]
+
+    return df_long
+
+
+def _plot_spatial_distance_dispatch(
+    df_long,
+    method,
+    plot_type,
+    stratify_by=None,
+    facet_plot=False,
+    **kwargs
+):
+    """
+    Decides the figure layout based on 'stratify_by' and 'facet_plot'
+    and dispatches actual plotting calls.
+
+    Logic:
+      1) If stratify_by and facet_plot => single figure with subplots (faceted)
+      2) If stratify_by and not facet_plot => multiple figures, one per group
+      3) If stratify_by is None => single figure (no subplots)
+
+    This function calls seaborn figure-level functions (catplot or displot).
+
+    Parameters
+    ----------
+    df_long : pd.DataFrame
+        Tidy DataFrame with columns ['cellid', 'group', 'distance',
+        'phenotype', 'stratify_by'].
+    method : {'numeric', 'distribution'}
+        Determines which seaborn function is used (catplot or displot).
+    plot_type : str
+        For method='numeric': 'box', 'violin', 'boxen', etc.
+        For method='distribution': 'hist', 'kde', 'ecdf', etc.
+    stratify_by : str or None
+        Column name for grouping. If None, no grouping is done.
+    facet_plot : bool
+        If True, subplots in a single figure (faceted).
+        If False, separate figures (one per group) or a single figure.
+    **kwargs
+        Additional seaborn plotting arguments (e.g., col_wrap=2).
+
+    Returns
+    -------
+    dict
+        Dictionary with two keys:
+            - "data": the DataFrame (df_long)
+            - "fig": a Matplotlib Figure or a list of Figures
+
+    Raises
+    ------
+    ValueError
+        If 'method' is invalid (not 'numeric' or 'distribution').
+
+    Examples
+    --------
+    Called internally by 'visualize_nearest_neighbor'. Typically not used
+    directly by end users.
+    """
+
+    distance_col = kwargs.pop('distance_col', 'distance')
+    hue_axis = kwargs.pop('hue_axis', None)
+
+    if method not in ['numeric', 'distribution']:
+        raise ValueError("`method` must be 'numeric' or 'distribution'.")
+
+    # Set up the plotting function using partial
+    if method == 'numeric':
+        plot_func = partial(
+            sns.catplot,
+            data=None,
+            x=distance_col,
+            y='group',
+            kind=plot_type
+        )
+    else:  # distribution
+        plot_func = partial(
+            sns.displot,
+            data=None,
+            x=distance_col,
+            hue=hue_axis if hue_axis else None,
+            kind=plot_type
+        )
+
+    # Helper to plot a single figure or faceted figure
+    def _make_figure(data, **kws):
+        g = plot_func(data=data, **kws)
+        if distance_col == 'log_distance':
+            x_label = "Log(Nearest Neighbor Distance)"
+        else:
+            x_label = "Nearest Neighbor Distance"
+
+        # Set axis label based on whether log transform was applied
+        if hasattr(g, 'set_axis_labels'):
+            g.set_axis_labels(x_label, None)
+        else:
+            # Fallback if 'set_axis_labels' is unavailable
+            plt.xlabel(x_label)
+
+        return g.fig
+
+    figures = []
+
+    # Branching logic for figure creation
+    if stratify_by and facet_plot:
+        # Single figure with faceted subplots (col=stratify_by)
+        fig = _make_figure(df_long, col=stratify_by, **kwargs)
+        figures.append(fig)
+
+    elif stratify_by and not facet_plot:
+        # Multiple separate figures, one per unique value in stratify_by
+        categories = df_long[stratify_by].unique()
+        for cat in categories:
+            subset = df_long[df_long[stratify_by] == cat]
+            fig = _make_figure(subset, **kwargs)
+            figures.append(fig)
+    else:
+        # Single figure (no subplots)
+        fig = _make_figure(df_long, **kwargs)
+        figures.append(fig)
+
+    # Return dictionary: { 'data': DataFrame, 'fig': Figure(s) }
+    result = {"data": df_long}
+    if len(figures) == 1:
+        result["fig"] = figures[0]
+    else:
+        result["fig"] = figures
+    return result
+
+
+def visualize_nearest_neighbor(
+    adata,
+    annotation,
+    stratify_by=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    facet_plot=False,
+    plot_type=None,
+    log=False,
+    method=None,
+    **kwargs
+):
+    """
+    Visualize nearest-neighbor (spatial distance) data between groups of cells
+    as numeric or distribution plots.
+
+    This user-facing function assembles the data by calling
+    `_prepare_spatial_distance_data` and then creates plots through
+    `_plot_spatial_distance_dispatch`.
+
+    Plot arrangement logic:
+      1) If stratify_by is not None and facet_plot=True => single figure
+         with subplots (faceted).
+      2) If stratify_by is not None and facet_plot=False => multiple separate
+         figures, one per group.
+      3) If stratify_by is None => a single figure with one plot.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix with distances in `adata.obsm[spatial_distance]`.
+    annotation : str
+        Column in `adata.obs` containing cell phenotypes or annotations.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group or stratify data (e.g. imageid).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame. Default is
+        'spatial_distance'.
+    distance_from : str
+        Reference phenotype from which distances are measured. Required.
+    distance_to : str or list of str, optional
+        Target phenotype(s) to measure distance to. If None, uses all
+        available phenotypes.
+    facet_plot : bool, optional
+        If True (and stratify_by is not None), subplots in a single figure.
+        Else, multiple or single figure(s).
+    plot_type : str, optional
+        For method='numeric': 'box', 'violin', 'boxen', etc.
+        For method='distribution': 'hist', 'kde', 'ecdf', etc.
+    log : bool, optional
+        If True, applies np.log1p transform to the distance values.
+    method : {'numeric', 'distribution'}
+        Determines the plotting style (catplot vs displot).
+    **kwargs : dict
+        Additional arguments for seaborn figure-level functions.
+
+    Returns
+    -------
+    dict
+        {
+            "data": pd.DataFrame,  # Tidy DataFrame used for plotting
+            "fig": Figure or list[Figure]  # Single or multiple figures
+        }
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing or invalid.
+
+    Examples
+    --------
+    >>> # Numeric box plot comparing Tumor distances to multiple targets
+    >>> res = visualize_nearest_neighbor(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     stratify_by='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     facet_plot=True,
+    ...     plot_type='box',
+    ...     method='numeric'
+    ... )
+    >>> df_long, fig = res["data"], res["fig"]
+
+    >>> # Distribution plot (kde) for a single target, single figure
+    >>> res2 = visualize_nearest_neighbor(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     distance_from='Tumor',
+    ...     distance_to='Stroma',
+    ...     method='distribution',
+    ...     plot_type='kde'
+    ... )
+    >>> df_dist, fig2 = res2["data"], res2["fig"]
+    """
+
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. It indicates "
+            "the reference group from which distances are measured."
+        )
+    if method not in ['numeric', 'distribution']:
+        raise ValueError(
+            "Invalid 'method'. Please choose 'numeric' or 'distribution'."
+        )
+
+    df_long = _prepare_spatial_distance_data(
+        adata=adata,
+        annotation=annotation,
+        stratify_by=stratify_by,
+        spatial_distance=spatial_distance,
+        distance_from=distance_from,
+        distance_to=distance_to,
+        log=log
+    )
+
+    # Determine plot_type if not provided
+    if plot_type is None:
+        plot_type = 'boxen' if method == 'numeric' else 'kde'
+
+    # If log=True, the column name is 'log_distance', else 'distance'
+    distance_col = 'log_distance' if log else 'distance'
+
+    # Dispatch to the plot logic
+    result_dict = _plot_spatial_distance_dispatch(
+        df_long=df_long,
+        method=method,
+        plot_type=plot_type,
+        stratify_by=stratify_by,
+        facet_plot=facet_plot,
+        distance_col=distance_col,
+        **kwargs
+    )
+
+    return result_dict
