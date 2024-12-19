@@ -1455,8 +1455,9 @@ def interative_spatial_plot(
         Font size for text in the plot. Default is 12.
     stratify_by : str, optional
         Column in `adata.obs` to stratify the plot. Default is None.
-    defined_color_map : dict, optional
-        Predefined color mapping for specific labels. Default is None.
+    defined_color_map : str, optional
+        Predefined color mapping stored in adata.uns for specific labels.
+        Default is None, which will generate the color mapping automatically.
     **kwargs
         Additional keyword arguments for customization.
 
@@ -1483,7 +1484,38 @@ def interative_spatial_plot(
             annotations=annotation
         )
 
-    check_table(adata, tables='spatial', associated_table=True)
+    check_table(
+        adata,
+        tables='spatial',
+        associated_table=True
+    )
+
+    if defined_color_map is not None:
+        if not isinstance(defined_color_map, str):
+            raise TypeError(
+                'The "degfined_color_map" should be a string ' + \
+                f'getting {type(defined_color_map)}.'
+            )
+        uns_keys = list(adata.uns.keys())
+        if len(uns_keys) == 0:
+            raise ValueError(
+                "No existing color map found, please" + \
+                " make sure the Append Pin Color Rules " + \
+                "template had been ran prior to the "+ \
+                "current visualization node.")
+
+        if defined_color_map not in uns_keys:
+            raise ValueError(
+                f'The given color map name: {defined_color_map} ' + \
+                "is not found in current analysis, " + \
+                f'available items are: {uns_keys}'
+            )
+        defined_color_map_dict = adata.uns[defined_color_map]
+        print(
+            f'Selected color mapping "{defined_color_map}":\n' + \
+            f'{defined_color_map_dict}'
+        )
+
 
     def main_figure_generation(
         adata,
@@ -1814,20 +1846,20 @@ def interative_spatial_plot(
     #####################
 
     results = []
+    if defined_color_map:
+        color_dict = adata.uns[defined_color_map]
+    else:
+        unique_ann_labels = np.unique(adata.obs[annotations].values)
+        color_dict = color_mapping(
+            unique_ann_labels,
+            color_map=colorscale,
+            rgba_mode=False,
+            return_dict=True
+        )
 
     if stratify_by is not None:
         unique_stratification_values = adata.obs[stratify_by].unique()
-        unique_labels = np.unique(adata.obs[annotations].values)
-        if defined_color_map:
-            color_dict = defined_color_map 
-        else:
-            color_dict = color_mapping(
-                unique_labels,
-                color_map=colorscale,
-                rgba_mode=False,
-                return_dict=True
-            )
-
+    
         for strat_value in unique_stratification_values:
             condition = adata.obs[stratify_by] == strat_value
             title = f"Highlighting {stratify_by}: {strat_value}"
@@ -1850,7 +1882,6 @@ def interative_spatial_plot(
             )
             results.append(result)
     else:
-        color_dict = defined_color_map
         title = "Interactive Spatial Plot"
         result = generate_and_update_image(
             adata=adata,

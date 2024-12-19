@@ -111,17 +111,32 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                         expected_colors[trace.name]
                     )
 
-    def test_color_mapping(self):
+    def test_color_mapping_type_check(self):
+        defined_color_map={
+                'a': 'red',
+                'b': 'blue',
+                'c': 'green'
+        }
+        err_msg = 'The "degfined_color_map" should be ' + \
+                "a string getting <class 'dict'>."
+        with self.assertRaisesRegex(TypeError, err_msg):
+            interative_spatial_plot(
+                self.adata,
+                'annotation_1',
+                defined_color_map=defined_color_map
+            )
 
+    def test_color_mapping(self):
         defined_color_map={
                 'a': 'red',
                 'b': 'blue',
                 'c': 'green'
             }
+        self.adata.uns['test_color_mapping'] = defined_color_map
         fig_list = interative_spatial_plot(
             self.adata,
             'annotation_1',
-            defined_color_map=defined_color_map
+            defined_color_map='test_color_mapping'
         )
         fig = fig_list[0]['image_object']
         for trace in fig.data:
