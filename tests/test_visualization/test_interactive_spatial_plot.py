@@ -87,19 +87,29 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             'Highlighting_annotation_2_z.html'
         ]
 
-        expected_colors = [
+        expected_labels = [
                 ["<b>annotation_1</b>", "a"],
                 ["<b>annotation_1</b>", "b"],
                 ["<b>annotation_1</b>", "c"]
         ]
+        expected_colors = {
+            'a': 'rgb(68,1,84)',
+            'b': 'rgb(32,144,140)',
+            'c': 'rgb(253,231,36)'
+        }
         for i, itr_fig in enumerate(fig_list):
+            
             fig_name = itr_fig['image_name']
             self.assertEqual(fig_name, figure_name_list[i])
 
             fig = itr_fig['image_object']
-
             for idx, trace in enumerate(fig.data):
-                self.assertEqual(trace.name, expected_colors[i][idx])
+                self.assertEqual(trace.name, expected_labels[i][idx])
+                if trace.name in expected_colors.keys():
+                    self.assertEqual(
+                        trace.marker.color,
+                        expected_colors[trace.name]
+                    )
 
     def test_color_mapping(self):
 

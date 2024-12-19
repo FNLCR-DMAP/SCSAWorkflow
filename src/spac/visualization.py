@@ -13,7 +13,7 @@ import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import color_mapping
+from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
@@ -1415,7 +1415,7 @@ def interative_spatial_plot(
     annotations,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='Viridis',
+    colorscale='viridis',
     figure_width=6,
     figure_height=4,
     figure_dpi=200,
@@ -1668,35 +1668,6 @@ def interative_spatial_plot(
 
         return main_fig
 
-    def assign_colors_for_labels(adata, annotations, color_map):
-        """
-        Assign colors to each label using the Plotly color scale.
-
-        Parameters
-        ----------
-        adata : AnnData
-            Annotated data matrix.
-        annotataions : str
-            Column in `adata.obs` to color the data.
-        color_map : str
-            Name of the Plotly color scale.
-
-        Returns
-        -------
-        dict
-            A dictionary mapping labels to their assigned colors.
-        """
-        unique_values = np.unique(adata.obs[annotations].values)
-        n_colors = len(unique_values)
-        colorscale = pc.get_colorscale(color_map)
-        interpolated_colors = pc.sample_colorscale(
-            colorscale, np.linspace(0, 1, n_colors)
-        )
-        return {
-            value: interpolated_colors[i]
-            for i, value in enumerate(unique_values)
-        }
-
     def generate_and_update_image(
         adata,
         title,
@@ -1837,82 +1808,6 @@ def interative_spatial_plot(
             "image_object": main_fig_parent
         }
 
-    def spell_out_special_characters(text):
-
-        """
-        Convert special characters in a string to comply with NIDAP regulation.
-
-        Parameters
-        ----------
-        text : str
-            The input string to be processed.
-
-        Returns
-        -------
-        str
-            A string with special characters replaced or removed.
-
-        Notes
-        -----
-        - Spaces are replaced with underscores.
-        - Special substrings (e.g., 'µm²', '+', '-') are mapped to readable
-          equivalents.
-        - Remaining disallowed characters are removed, and multiple
-          underscores are consolidated.
-        """
-
-        # Replace spaces with underscores
-        text = text.replace(' ', '_')
-
-        # Replace specific substrings for units
-        text = text.replace('µm²', 'um2')
-        text = text.replace('µm', 'um')
-
-        # Replace hyphens between letters with '_'
-        text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)
-
-        # Replace '+' with '_pos_' and '-' with '_neg_'
-        text = text.replace('+', '_pos_')
-        text = text.replace('-', '_neg_')
-
-        # Mapping for specific characters
-        special_char_map = {
-            'µ': 'u',       # Micro symbol replaced with 'u'
-            '²': '2',       # Superscript two replaced with '2'
-            '@': 'at',
-            '#': 'hash',
-            '$': 'dollar',
-            '%': 'percent',
-            '&': 'and',
-            '*': 'asterisk',
-            '/': 'slash',
-            '\\': 'backslash',
-            '=': 'equals',
-            '^': 'caret',
-            '!': 'exclamation',
-            '?': 'question',
-            '~': 'tilde',
-            # '(': 'open_parenthesis',
-            # ')': 'close_parenthesis',
-            # '{': 'open_brace',
-            # '}': 'close_brace',
-            # '[': 'open_bracket',
-            # ']': 'close_bracket',
-            '|': 'pipe',
-        }
-
-        # Replace special characters using special_char_map
-        for char, replacement in special_char_map.items():
-            text = text.replace(char, replacement)
-
-        # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
-        text = re.sub(r'[^a-zA-Z0-9_]', '', text)
-                    
-        # Remove multiple underscores and strip leading/trailing underscores
-        text = re.sub(r'_+', '_', text)
-        text = text.strip('_')
-
-        return text
 
     #####################
     ## Main Code Block ##
@@ -1922,11 +1817,16 @@ def interative_spatial_plot(
 
     if stratify_by is not None:
         unique_stratification_values = adata.obs[stratify_by].unique()
-        color_dict = defined_color_map or assign_colors_for_labels(
-            adata,
-            annotations,
-            colorscale
-        )
+        unique_labels = np.unique(adata.obs[annotations].values)
+        if defined_color_map:
+            color_dict = defined_color_map 
+        else:
+            color_dict = color_mapping(
+                unique_labels,
+                color_map=colorscale,
+                rgba_mode=False,
+                return_dict=True
+            )
 
         for strat_value in unique_stratification_values:
             condition = adata.obs[stratify_by] == strat_value
