@@ -589,24 +589,24 @@ def color_mapping(
         labels,
         color_map='viridis',
         opacity=1.0,
-        rgba_mode=True
+        rgba_mode=True,
+        return_dict=False
 ):
     """
     Map a list of labels to colors using a Matplotlib colormap and opacity.
 
-    This function assigns a unique color to each label in the provided
-    list using a specified colormap from Matplotlib. The generated
-    colors can be returned in either `rgba` or `rgb` format, suitable
-    for visualization in libraries like Plotly.
+    This function assigns a unique color to each label in the provided list
+    using a specified colormap from Matplotlib. The generated colors can be
+    returned in either `rgba` or `rgb` format, suitable for visualization in
+    libraries like Plotly.
 
     The function supports both continuous and discrete colormaps:
-    - Continuous colormaps interpolate smoothly between colors across
-      a range.
-    - Discrete colormaps have a fixed number of distinct colors, and
-      labels are distributed evenly across these colors.
+    - Continuous colormaps interpolate smoothly between colors across a range.
+    - Discrete colormaps have a fixed number of distinct colors, and labels are
+      distributed evenly across these colors.
 
-    Opacity can be set with a value between 0 (fully transparent) and
-    1 (fully opaque). The resulting colors are CSS-compatible strings.
+    Opacity can be set with a value between 0 (fully transparent) and 1 (fully
+    opaque). The resulting colors are CSS-compatible strings.
 
     Parameters
     ----------
@@ -614,21 +614,26 @@ def color_mapping(
         A list of unique labels to map to colors. The number of labels
         determines how the colormap is sampled.
     color_map : str, optional
-        The colormap name (e.g., 'viridis', 'plasma', 'inferno'). It
-        must be a valid Matplotlib colormap. Default is 'viridis'.
+        The colormap name (e.g., 'viridis', 'plasma', 'inferno'). It must be a
+        valid Matplotlib colormap. Default is 'viridis'.
     opacity : float, optional
-        Opacity (alpha channel) for colors, between 0 (transparent)
-        and 1 (opaque). Default is 1.0.
+        Opacity (alpha channel) for colors, between 0 (transparent) and 1
+        (opaque). Default is 1.0.
     rgba_mode : bool, optional
-        If True, returns colors in `rgba` format (e.g.,
-        `rgba(255, 0, 0, 0.5)`). If False, returns `rgb` format (e.g.,
-        `rgb(255, 0, 0)`). Default is True.
+        If True, returns colors in `rgba` format (e.g., `rgba(255, 0, 0, 0.5)`).
+        If False, returns `rgb` format (e.g., `rgb(255, 0, 0)`).
+        Default is True.
+    return_dict : bool, optional
+        If True, returns a dictionary where keys are labels, and values are the
+        corresponding colors. Default is False.
 
     Returns
     -------
-    label_colors : list[str]
-        A list of color strings, one for each label. The format of the
-        colors depends on the `rgba_mode` parameter.
+    label_colors : list[str] or dict
+        If `return_dict` is False, returns a list of color strings, one for
+        each label. If `return_dict` is True, returns a dictionary with label
+        keys and color values. The format of the colors depends on the
+        `rgba_mode` parameter.
 
     Raises
     ------
@@ -656,12 +661,18 @@ def color_mapping(
     >>> color_mapping(labels, rgba_mode=False)
     ['rgb(68, 1, 84)', 'rgb(58, 82, 139)', 'rgb(33, 145, 140)']
 
+    Return a dictionary of labels and colors:
+
+    >>> color_mapping(labels, return_dict=True)
+    {'A': 'rgba(68, 1, 84, 1.0)', 'B': 'rgba(58, 82, 139, 1.0)',
+     'C': 'rgba(33, 145, 140, 1.0)'}
+
     Notes
     -----
-    - Continuous colormaps interpolate colors evenly across the range
-      based on the number of labels.
+    - Continuous colormaps interpolate colors evenly based on the number of
+      labels.
     - Discrete colormaps divide labels evenly across available colors.
-    - More about Matplotlib colormaps:
+    - For more information on Matplotlib colormaps:
       https://matplotlib.org/stable/users/explain/colors/colormaps.html
     """
 
@@ -701,8 +712,15 @@ def color_mapping(
             f'{int(color[2]*255)})'
             for color in label_colors
         ]
+    
+    if return_dict:
+        returning = {}
+        for i, color in enumerate(label_colors):
+            returning[label_colors[i]] = color
+    else:
+        returning = label_colors
 
-    return label_colors
+    return returning
 
 
 def check_label(
