@@ -103,7 +103,7 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
         self.assertTrue(len(fig.axes) > 0)
         # Verifies axis labels
         ax = fig.axes[0]
-        self.assertIn('distance', ax.get_xlabel())
+        self.assertEqual(ax.get_xlabel(), "Nearest Neighbor Distance")
         self.assertIn('group', ax.get_ylabel())
 
     def test_visualize_with_log_distance(self):
@@ -128,9 +128,9 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
         self.assertIn('log_distance', df_long.columns)
         self.assertNotIn('distance', df_long.columns)
 
-        # Validate the plot uses the log_distance column
+        # Validate the plot uses the correct label for log-transformed distance
         ax = fig.axes[0]
-        self.assertIn('log_distance', ax.get_xlabel())
+        self.assertEqual(ax.get_xlabel(), "Log(Nearest Neighbor Distance)")
 
 
 if __name__ == '__main__':

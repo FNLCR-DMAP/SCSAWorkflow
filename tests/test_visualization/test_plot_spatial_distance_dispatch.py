@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
 import matplotlib
@@ -47,7 +50,7 @@ class TestPlotSpatialDistanceDispatch(unittest.TestCase):
 
         # Check axis labels
         ax = fig.axes[0]
-        self.assertIn('distance', ax.get_xlabel())
+        self.assertEqual(ax.get_xlabel(), "Nearest Neighbor Distance")
         self.assertIn('group', ax.get_ylabel())
 
     def test_distribution_scenario_with_hue(self):

@@ -2307,8 +2307,18 @@ def _plot_spatial_distance_dispatch(
     # Helper to plot a single figure or faceted figure
     def _make_figure(data, **kws):
         g = plot_func(data=data, **kws)
-        # sns.catplot and sns.displot return a FacetGrid
-        # or Facet object with `.fig`
+        if distance_col == 'log_distance':
+            x_label = "Log(Nearest Neighbor Distance)"
+        else:
+            x_label = "Nearest Neighbor Distance"
+
+        # Set axis label based on whether log transform was applied
+        if hasattr(g, 'set_axis_labels'):
+            g.set_axis_labels(x_label, None)
+        else:
+            # Fallback if 'set_axis_labels' is unavailable
+            plt.xlabel(x_label)
+
         return g.fig
 
     figures = []
