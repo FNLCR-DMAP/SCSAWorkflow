@@ -716,7 +716,7 @@ def color_mapping(
     if return_dict:
         returning = {}
         for i, color in enumerate(label_colors):
-            returning[label_colors[i]] = color
+            returning[labels[i]] = color
     else:
         returning = label_colors
 
