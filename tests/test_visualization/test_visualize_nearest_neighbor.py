@@ -1,3 +1,6 @@
+import unittest
+import pandas as pd
+import numpy as np
 import anndata
 import matplotlib
 matplotlib.use('Agg')  # Uses a non-interactive backend for tests
