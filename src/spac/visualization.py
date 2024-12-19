@@ -9,12 +9,16 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import color_mapping
+from spac.utils import color_mapping, spell_out_special_characters
+from spac.data_utils import select_values
 import logging
 import warnings
+import re
+import copy
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1411,12 +1415,14 @@ def interative_spatial_plot(
     annotations,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='Viridis',
-    figure_width=12,
-    figure_height=8,
+    colorscale='viridis',
+    figure_width=6,
+    figure_height=4,
     figure_dpi=200,
-    font_size=12
-
+    font_size=12,
+    stratify_by=None,
+    defined_color_map=None,
+    **kwargs
 ):
 
     """
@@ -1447,18 +1453,26 @@ def interative_spatial_plot(
         DPI (dots per inch) for the figure. Default is 200.
     font_size : int, optional
         Font size for text in the plot. Default is 12.
+    stratify_by : str, optional
+        Column in `adata.obs` to stratify the plot. Default is None.
+    defined_color_map : str, optional
+        Predefined color mapping stored in adata.uns for specific labels.
+        Default is None, which will generate the color mapping automatically.
+    **kwargs
+        Additional keyword arguments for customization.
 
     Returns
     -------
-    plotly.graph_objs._figure.Figure
-        A plotly figure object containing the spatial plot.
+    list of dict
+        A list of dictionaries, each containing the following keys:
+        - "image_name": str, the name of the generated image.
+        - "image_object": Plotly Figure object.
 
     Notes
     -----
-    This function is specifically tailored for
-    spatial single-cell data and expects the input AnnData object
-    to have spatial coordinates stored in its .obsm attribute
-    under the 'spatial' key.
+    This function is tailored for spatial single-cell data and expects the
+    AnnData object to have spatial coordinates in its `.obsm` attribute under
+    the 'spatial' key.
     """
 
     if not isinstance(annotations, list):
@@ -1470,137 +1484,415 @@ def interative_spatial_plot(
             annotations=annotation
         )
 
-    if not hasattr(adata, 'obsm'):
-        error_msg = ".obsm attribute (Spatial Coordinate) does not exist " + \
-            "in the input AnnData object. Please check."
-        raise ValueError(error_msg)
+    check_table(
+        adata,
+        tables='spatial',
+        associated_table=True
+    )
 
-    if 'spatial' not in adata.obsm:
-        error_msg = 'The key "spatial" is missing from .obsm field, hence ' + \
-            "missing spatial coordniates. Please check."
-        raise ValueError(error_msg)
+    if defined_color_map is not None:
+        if not isinstance(defined_color_map, str):
+            raise TypeError(
+                'The "degfined_color_map" should be a string ' + \
+                f'getting {type(defined_color_map)}.'
+            )
+        uns_keys = list(adata.uns.keys())
+        if len(uns_keys) == 0:
+            raise ValueError(
+                "No existing color map found, please" + \
+                " make sure the Append Pin Color Rules " + \
+                "template had been ran prior to the "+ \
+                "current visualization node.")
 
-    spatial_coords = adata.obsm['spatial']
-
-    extract_columns_raw = []
-
-    for item in annotations:
-        extract_columns_raw.append(adata.obs[item])
-
-    extract_columns = []
-
-    for i, item in enumerate(extract_columns_raw):
-        extract_columns.append(
-            [annotations[i] + "_" + str(value) for value in item]
+        if defined_color_map not in uns_keys:
+            raise ValueError(
+                f'The given color map name: {defined_color_map} ' + \
+                "is not found in current analysis, " + \
+                f'available items are: {uns_keys}'
+            )
+        defined_color_map_dict = adata.uns[defined_color_map]
+        print(
+            f'Selected color mapping "{defined_color_map}":\n' + \
+            f'{defined_color_map_dict}'
         )
 
-    xcoord = [coord[0] for coord in spatial_coords]
-    ycoord = [coord[1] for coord in spatial_coords]
 
-    data = {'X': xcoord, 'Y': ycoord}
+    def main_figure_generation(
+        adata,
+        annotations=annotations,
+        dot_size=dot_size,
+        dot_transparancy=dot_transparancy,
+        colorscale=colorscale,
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        font_size=font_size,
+        **kwargs
+    ):
+        """
+        Create the core interactive plot for downstream processing.
+        This function generates the main interactive plot using Plotly
+        that contains the spatial scatter plot with annotations and
+        image configuration.
 
-    # Add the extract_columns data as columns in the dictionary
-    for i, column in enumerate(extract_columns):
-        column_name = annotations[i]
-        data[column_name] = column
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix object,
+            must have a .obsm attribute with 'spatial' key.
+        annotations : list of str or str
+            Column(s) in `adata.obs` that contain the annotations to plot.
+            If a single string is provided, it will be converted to a list.
+            The interactive plot will show all the labels in the annotation
+            columns passed.
+        dot_size : float, optional
+            Size of the scatter dots in the plot. Default is 1.5.
+        dot_transparancy : float, optional
+            Transparancy level of the scatter dots. Default is 0.75.
+        colorscale : str, optional
+            Name of the color scale to use for the dots. Default is 'Viridis'.
+        figure_width : int, optional
+            Width of the figure in inches. Default is 12.
+        figure_height : int, optional
+            Height of the figure in inches. Default is 8.
+        figure_dpi : int, optional
+            DPI (dots per inch) for the figure. Default is 200.
+        font_size : int, optional
+            Font size for text in the plot. Default is 12.
 
-    # Create the DataFrame
-    df = pd.DataFrame(data)
+        Returns
+        -------
+        plotly.graph_objs._figure.Figure
 
-    max_x_range = max(xcoord) * 1.1
-    min_x_range = min(xcoord) * 0.9
-    max_y_range = max(ycoord) * 1.1
-    min_y_range = min(ycoord) * 0.9
+        """   
 
-    width_px = int(figure_width * figure_dpi)
-    height_px = int(figure_height * figure_dpi)
+        spatial_coords = adata.obsm['spatial']
 
-    main_fig = px.scatter(
-        df,
-        x='X',
-        y='Y',
-        color=annotations[0],
-        hover_data=[annotations[0]]
-    )
+        extract_columns_raw = []
 
-    # If annotation is more than 1, we would first call px.scatter
-    # to create plotly object, than append the data to main figure
-    # with add_trace for a centralized view.
-    if len(annotations) > 1:
-        for obs in annotations[1:]:
-            scatter_fig = px.scatter(
-                                df,
-                                x='X',
-                                y='Y',
-                                color=obs,
-                                hover_data=[obs]
-                            )
+        for item in annotations:
+            extract_columns_raw.append(adata.obs[item])
 
-            main_fig.add_traces(scatter_fig.data)
+        extract_columns = []
 
-    # Reset the color attribute of the traces in combined_fig
-    for trace in main_fig.data:
-        trace.marker.color = None
+        # The `extract_columns` list is needed for generating Plotly images
+        # because it stores transformed annotation data. These annotations
+        # are added as columns in the DataFrame (`df`) and are used as inputs
+        # for the `color` and `hover_data` parameters in the Plotly scatter
+        # plot. This enables the plot to visually encode annotations, providing
+        # better insights into the spatial data. Without `extract_columns`, the
+        # plot would lack essential annotation-based differentiation and
+        # interactivity.
 
-    main_fig.update_traces(
-        mode='markers',
-        marker=dict(
-            size=dot_size,
-            colorscale=colorscale,
-            opacity=dot_transparancy
-        ),
-        hovertemplate="%{customdata[0]}<extra></extra>"
-    )
-
-    main_fig.update_layout(
-        width=width_px,
-        height=height_px,
-        plot_bgcolor='white',
-        font=dict(size=font_size),
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='right',
-            x=1.15,
-            title='',
-            itemwidth=30,
-            bgcolor="rgba(0, 0, 0, 0)",
-            traceorder='normal',
-            entrywidth=50
-        ),
-        xaxis=dict(
-                    range=[min_x_range, max_x_range],
-                    showgrid=False,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        yaxis=dict(
-                    range=[max_y_range, min_y_range],
-                    showgrid=False,
-                    scaleanchor="x",
-                    scaleratio=1,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        shapes=[
-            go.layout.Shape(
-                type="rect",
-                xref="x",
-                yref="y",
-                x0=min_x_range,
-                y0=min_y_range,
-                x1=max_x_range,
-                y1=max_y_range,
-                line=dict(color="black", width=1),
-                fillcolor="rgba(0,0,0,0)",
+        for i, item in enumerate(extract_columns_raw):
+            extract_columns.append(
+                [annotations[i] + "_" + str(value) for value in item]
             )
+
+        xcoord = [coord[0] for coord in spatial_coords]
+        ycoord = [coord[1] for coord in spatial_coords]
+
+        data = {'X': xcoord, 'Y': ycoord}
+
+        # Add the extract_columns data as columns in the dictionary
+        for i, column in enumerate(extract_columns):
+            column_name = annotations[i]
+            data[column_name] = column
+
+        # Create the DataFrame
+        df = pd.DataFrame(data)
+
+        max_x_range = max(xcoord) * 1.1
+        min_x_range = min(xcoord) * 0.9
+        max_y_range = max(ycoord) * 1.1
+        min_y_range = min(ycoord) * 0.9
+
+        width_px = int(figure_width * figure_dpi)
+        height_px = int(figure_height * figure_dpi)
+
+        main_fig = px.scatter(
+            df,
+            x='X',
+            y='Y',
+            color=annotations[0],
+            hover_data=[annotations[0]]
+        )
+
+        # If annotation is more than 1, we would first call px.scatter
+        # to create plotly object, than append the data to main figure
+        # with add_trace for a centralized view.
+        if len(annotations) > 1:
+            for obs in annotations[1:]:
+                scatter_fig = px.scatter(
+                                    df,
+                                    x='X',
+                                    y='Y',
+                                    color=obs,
+                                    hover_data=[obs]
+                                )
+
+                main_fig.add_traces(scatter_fig.data)
+
+        # Reset the color attribute of the traces in combined_fig
+        # This is necessary to ensure that the color attribute
+        # does not interfere with subsequent plots
+        for trace in main_fig.data:
+            trace.marker.color = None
+
+        main_fig.update_traces(
+            mode='markers',
+            marker=dict(
+                size=dot_size,
+                colorscale=colorscale,
+                opacity=dot_transparancy
+            ),
+            hovertemplate="%{customdata[0]}<extra></extra>"
+        )
+
+        main_fig.update_layout(
+            width=width_px,
+            height=height_px,
+            plot_bgcolor='white',
+            font=dict(size=font_size),
+            margin=dict(l=10, r=10, t=10, b=10),
+            legend=dict(
+                orientation='v',
+                yanchor='middle',
+                y=0.5,
+                xanchor='right',
+                x=1.15,
+                title='',
+                itemwidth=30,
+                bgcolor="rgba(0, 0, 0, 0)",
+                traceorder='normal',
+                entrywidth=50
+            ),
+            xaxis=dict(
+                        range=[min_x_range, max_x_range],
+                        showgrid=False,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            yaxis=dict(
+                        range=[max_y_range, min_y_range],
+                        showgrid=False,
+                        scaleanchor="x",
+                        scaleratio=1,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            shapes=[
+                go.layout.Shape(
+                    type="rect",
+                    xref="x",
+                    yref="y",
+                    x0=min_x_range,
+                    y0=min_y_range,
+                    x1=max_x_range,
+                    y1=max_y_range,
+                    line=dict(color="black", width=1),
+                    fillcolor="rgba(0,0,0,0)",
+                )
+            ]
+        )
+
+        return main_fig
+
+    def generate_and_update_image(
+        adata,
+        title,
+        color_mapping=None,
+        **kwargs
+    ):
+        """
+        This function generates the main figure with annotations and
+        optional stratifications or color mappings, providing flexibility
+        for detailed visualizations. It processes data, groups it by
+        annotations, and enables advanced legend handling and styling.
+
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix containing either the full dataset
+            or a subset of the data.
+        title : str
+            Title for the plot.
+        stratify_by : str, optional
+            Column to stratify the plot. Default is None.
+        color_mapping : dict, optional
+            Color mapping for specific labels. Default is None.
+
+        Returns
+        -------
+        dict
+            A dictionary with "image_name" and "image_object" keys.
+        """
+        main_fig_parent = main_figure_generation(
+            adata,
+            annotations=annotations,
+            dot_size=dot_size,
+            dot_transparancy=dot_transparancy,
+            colorscale=colorscale,
+            figure_width=figure_width,
+            figure_height=figure_height,
+            figure_dpi=figure_dpi,
+            font_size=font_size,
+            **kwargs
+        )
+
+        # Create a copy of the figure for non-destructive updates
+        main_fig_copy = copy.copy(main_fig_parent)
+        data = main_fig_copy.data
+        main_fig_parent.data = []
+
+        # Prepare to track updates and manage grouped annotations
+        updated_index = []
+        legend_list = [
+            f"legend{i+1}" if i > 0 else "legend"
+            for i in range(len(annotations))
         ]
-    )
-    return main_fig
+        previous_group = None
+
+        # Process each trace in the figure for grouping and legends
+        indices = list(range(len(data)))
+        for item in indices:
+            cat_label = data[item]['customdata'][0][0]
+            cat_dataset = pd.DataFrame(
+                {'X': data[item]['x'], 'Y': data[item]['y']}
+            )
+
+            # Assign the label to the appropriate legend group
+            for i, legend_group in enumerate(annotations):
+                if cat_label.startswith(legend_group):
+                    cat_leg_group = f"<b>{legend_group}</b>"
+                    cat_label = cat_label[len(legend_group) + 1:]
+                    cat_group = legend_list[i]
+
+            # Add a new legend entry if this group hasn't been encountered
+            if previous_group is None or cat_group != previous_group:
+                main_fig_parent.add_trace(go.Scattergl(
+                    x=[data[item]['x'][0]],
+                    y=[data[item]['y'][0]],
+                    name=cat_leg_group,
+                    mode="markers",
+                    showlegend=True,
+                    marker=dict(
+                        color="white",
+                        colorscale=None,
+                        size=0,
+                        opacity=0
+                    )
+                ))
+                previous_group = cat_group
+
+            # Add the category label to the dataset for grouping
+            cat_dataset['label'] = cat_label
+
+            main_fig_parent.add_trace(go.Scattergl(
+                x=cat_dataset['X'],
+                y=cat_dataset['Y'],
+                name=cat_label,
+                mode="markers",
+                showlegend=True,
+                marker=dict(
+                    colorscale=colorscale,
+                    size=dot_size,
+                    opacity=dot_transparancy
+                )
+            ))
+
+            updated_index.append(cat_label)
+
+        if color_mapping is not None:
+            main_fig_copy = copy.copy(main_fig_parent)
+            data = main_fig_copy.data
+            main_fig_parent.data = []
+
+            for trace in data:
+                trace_name = trace["name"]
+                if color_mapping is not None:
+                    if trace_name in color_mapping.keys():
+                        trace['marker']['color'] = color_mapping[trace_name]
+                main_fig_parent.add_trace(trace)
+
+        main_fig_parent.update_layout(
+            title={
+                'text': title,
+                'font': {'size': font_size},
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'x': 0.5,
+                'y': 0.99
+            },
+            legend={
+                'x': 1.05,
+                'y': 0.5,
+                'xanchor': 'left',
+                'yanchor': 'middle'
+            },
+            margin=dict(l=5, r=5, t=font_size*2, b=5)
+        )
+
+        return {
+            "image_name": f"{spell_out_special_characters(title)}.html",
+            "image_object": main_fig_parent
+        }
+
+
+    #####################
+    ## Main Code Block ##
+    #####################
+
+    results = []
+    if defined_color_map:
+        color_dict = adata.uns[defined_color_map]
+    else:
+        unique_ann_labels = np.unique(adata.obs[annotations].values)
+        color_dict = color_mapping(
+            unique_ann_labels,
+            color_map=colorscale,
+            rgba_mode=False,
+            return_dict=True
+        )
+
+    if stratify_by is not None:
+        unique_stratification_values = adata.obs[stratify_by].unique()
+    
+        for strat_value in unique_stratification_values:
+            condition = adata.obs[stratify_by] == strat_value
+            title = f"Highlighting {stratify_by}: {strat_value}"
+            indices = np.where(condition)[0]
+            selected_spatial = adata.obsm['spatial'][indices]
+            print(f"number of cells in the region: {len(selected_spatial)}")
+
+            adata_subset = select_values(
+                data=adata,
+                annotation=stratify_by,
+                values=strat_value
+            )
+
+            result = generate_and_update_image(
+                adata=adata_subset,
+                title=title,
+                stratify_by=stratify_by,
+                color_mapping=color_dict,
+                **kwargs
+            )
+            results.append(result)
+    else:
+        title = "Interactive Spatial Plot"
+        result = generate_and_update_image(
+            adata=adata,
+            title=title,
+            stratify_by=None,
+            color_mapping=color_dict,
+            **kwargs
+        )
+        results.append(result)
+
+    return results
 
 
 def sankey_plot(
