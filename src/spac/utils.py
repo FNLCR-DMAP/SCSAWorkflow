@@ -588,40 +588,81 @@ def annotation_category_relations(
 def color_mapping(
         labels,
         color_map='viridis',
-        opacity=1.0
+        opacity=1.0,
+        rgba_mode=True
 ):
     """
-    Map a list of labels to colors using a specified
-    matplotlib colormap and opacity.
+    Map a list of labels to colors using a Matplotlib colormap and opacity.
 
-    This function takes a list of labels and maps each one to a color from the
-    specified colormap. If the colormap is continuous, it linearly interpolates
-    between the colors. For discrete colormap, it calculates the number of
-    categories per color and interpolates between the colors.
+    This function assigns a unique color to each label in the provided
+    list using a specified colormap from Matplotlib. The generated
+    colors can be returned in either `rgba` or `rgb` format, suitable
+    for visualization in libraries like Plotly.
 
-    For more information on colormaps, see:
-    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+    The function supports both continuous and discrete colormaps:
+    - Continuous colormaps interpolate smoothly between colors across
+      a range.
+    - Discrete colormaps have a fixed number of distinct colors, and
+      labels are distributed evenly across these colors.
+
+    Opacity can be set with a value between 0 (fully transparent) and
+    1 (fully opaque). The resulting colors are CSS-compatible strings.
 
     Parameters
     ----------
     labels : list
-        The list of labels to map to colors.
+        A list of unique labels to map to colors. The number of labels
+        determines how the colormap is sampled.
     color_map : str, optional
-        The name of the colormap to use. Default is 'viridis'.
+        The colormap name (e.g., 'viridis', 'plasma', 'inferno'). It
+        must be a valid Matplotlib colormap. Default is 'viridis'.
     opacity : float, optional
-        The opacity of the colors. Must be between 0 and 1. Default is 1.0.
+        Opacity (alpha channel) for colors, between 0 (transparent)
+        and 1 (opaque). Default is 1.0.
+    rgba_mode : bool, optional
+        If True, returns colors in `rgba` format (e.g.,
+        `rgba(255, 0, 0, 0.5)`). If False, returns `rgb` format (e.g.,
+        `rgb(255, 0, 0)`). Default is True.
 
     Returns
     -------
     label_colors : list[str]
-        A list of strings, each representing an rgba color in CSS format.
-        The opacity of each color is set to the provided `opacity` value.
+        A list of color strings, one for each label. The format of the
+        colors depends on the `rgba_mode` parameter.
 
     Raises
     ------
     ValueError
-        If the opacity is not between 0 and 1,
-        or if the colormap name is invalid.
+        - If `opacity` is not in the range [0, 1].
+        - If `color_map` is not a valid Matplotlib colormap name.
+
+    Examples
+    --------
+    Assign colors to labels with default settings:
+
+    >>> labels = ['A', 'B', 'C']
+    >>> color_mapping(labels)
+    ['rgba(68, 1, 84, 1.0)', 'rgba(58, 82, 139, 1.0)',
+     'rgba(33, 145, 140, 1.0)']
+
+    Use a different colormap with reduced opacity:
+
+    >>> color_mapping(labels, color_map='plasma', opacity=0.5)
+    ['rgba(13, 8, 135, 0.5)', 'rgba(126, 3, 167, 0.5)',
+     'rgba(240, 249, 33, 0.5)']
+
+    Generate colors in `rgb` format:
+
+    >>> color_mapping(labels, rgba_mode=False)
+    ['rgb(68, 1, 84)', 'rgb(58, 82, 139)', 'rgb(33, 145, 140)']
+
+    Notes
+    -----
+    - Continuous colormaps interpolate colors evenly across the range
+      based on the number of labels.
+    - Discrete colormaps divide labels evenly across available colors.
+    - More about Matplotlib colormaps:
+      https://matplotlib.org/stable/users/explain/colors/colormaps.html
     """
 
     if not 0 <= opacity <= 1:
@@ -646,13 +687,20 @@ def color_mapping(
             cmap(i / (categories_per_color * cmap.N - 1))
             for i in range(len(labels))
         ]
-
-    label_colors = [
-        f'rgba({int(color[0]*255)},'
-        f'{int(color[1]*255)},'
-        f'{int(color[2]*255)},{opacity})'
-        for color in label_colors
-    ]
+    if rgba_mode:
+        label_colors = [
+            f'rgba({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)},{opacity})'
+            for color in label_colors
+        ]
+    else:
+        label_colors = [
+            f'rgb({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)})'
+            for color in label_colors
+        ]
 
     return label_colors
 
