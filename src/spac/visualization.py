@@ -1668,7 +1668,7 @@ def interative_spatial_plot(
 
         return main_fig
 
-    def assign_colors_for_labels(adata, stratify_by, color_map):
+    def assign_colors_for_labels(adata, annotations, color_map):
         """
         Assign colors to each label using the Plotly color scale.
 
@@ -1676,8 +1676,8 @@ def interative_spatial_plot(
         ----------
         adata : AnnData
             Annotated data matrix.
-        stratify_by : str
-            Column in `adata.obs` to stratify the data.
+        annotataions : str
+            Column in `adata.obs` to color the data.
         color_map : str
             Name of the Plotly color scale.
 
@@ -1686,7 +1686,7 @@ def interative_spatial_plot(
         dict
             A dictionary mapping labels to their assigned colors.
         """
-        unique_values = np.unique(adata.obs[stratify_by].values)
+        unique_values = np.unique(adata.obs[annotations].values)
         n_colors = len(unique_values)
         colorscale = pc.get_colorscale(color_map)
         interpolated_colors = pc.sample_colorscale(
@@ -1924,7 +1924,7 @@ def interative_spatial_plot(
         unique_stratification_values = adata.obs[stratify_by].unique()
         color_dict = defined_color_map or assign_colors_for_labels(
             adata,
-            stratify_by,
+            annotations,
             colorscale
         )
 

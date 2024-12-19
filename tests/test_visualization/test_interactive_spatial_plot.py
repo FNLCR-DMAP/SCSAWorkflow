@@ -49,7 +49,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
 
         # Check that all plots are scatter plots
         for trace in fig.data:
-            print(trace)
             self.assertEqual(trace.type, 'scattergl')
         # Check the x and y data
         expected_x = self.adata.obsm['spatial'][:, 0]
@@ -73,23 +72,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         ]
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.name, expected_colors[idx])
-
-    def test_stratify_by(self):
-        fig_list = interative_spatial_plot(
-            self.adata,
-            'annotation_1',
-            stratify_by='annotation_2'
-        )
-
-        self.assertEqual(len(fig_list), 3)
-        figure_name_list = [
-            'Highlighting_annotation_2_x.html',
-            'Highlighting_annotation_2_y.html',
-            'Highlighting_annotation_2_z.html'
-        ]
-        for i, itr_fig in enumerate(fig_list):
-            fig_name = itr_fig['image_name']
-            self.assertEqual(fig_name, figure_name_list[i])
 
     def test_stratify_by(self):
         fig_list = interative_spatial_plot(
@@ -132,7 +114,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             defined_color_map=defined_color_map
         )
         fig = fig_list[0]['image_object']
-        print(fig.data)
         for trace in fig.data:
             if trace.name in defined_color_map.keys():
                 self.assertEqual(
