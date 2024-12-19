@@ -1,6 +1,3 @@
-import unittest
-import pandas as pd
-import numpy as np
 import anndata
 import matplotlib
 matplotlib.use('Agg')  # Uses a non-interactive backend for tests
@@ -105,6 +102,32 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
         ax = fig.axes[0]
         self.assertIn('distance', ax.get_xlabel())
         self.assertIn('group', ax.get_ylabel())
+
+    def test_visualize_with_log_distance(self):
+        """
+        Test that visualize_nearest_neighbor correctly handles log-transformed
+        distances and uses the 'log_distance' column in the output.
+        """
+        result = visualize_nearest_neighbor(
+            adata=self.adata,
+            annotation='cell_type',
+            distance_from='type1',
+            spatial_distance='spatial_distance',
+            log=True,
+            method='numeric',
+            plot_type='box'
+        )
+
+        df_long = result['data']
+        fig = result['fig']
+
+        # Ensure 'log_distance' is used
+        self.assertIn('log_distance', df_long.columns)
+        self.assertNotIn('distance', df_long.columns)
+
+        # Validate the plot uses the log_distance column
+        ax = fig.axes[0]
+        self.assertIn('log_distance', ax.get_xlabel())
 
 
 if __name__ == '__main__':

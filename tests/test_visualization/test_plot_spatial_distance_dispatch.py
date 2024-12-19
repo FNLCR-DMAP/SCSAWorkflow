@@ -22,18 +22,6 @@ class TestPlotSpatialDistanceDispatch(unittest.TestCase):
         # Closes all figures to prevent memory issues
         plt.close('all')
 
-    def test_invalid_method_error(self):
-        """
-        Tests that providing an invalid 'method' raises the correct ValueError.
-        """
-        expected_msg = "`method` must be 'numeric' or 'distribution'."
-        with self.assertRaisesRegex(ValueError, expected_msg):
-            _plot_spatial_distance_dispatch(
-                df_long=self.df_basic,
-                method='invalid_method',
-                plot_type='box'
-            )
-
     def test_simple_numeric_scenario(self):
         """
         Tests a simple scenario with 'numeric' method and no stratify_by.

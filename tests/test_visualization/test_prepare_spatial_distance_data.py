@@ -55,19 +55,22 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
             log=False
         )
 
+        # Expecting a 'distance' column (since log=False)
+        distance_col = 'distance'
+
         # Expected DataFrame after filtering (distance_from='A')
         # Cell1: A=0.0, B=1.0
         # Cell3: A=0.5, B=0.5
         # Long form:
-        # cellid | group | distance | phenotype
-        # Cell1  | A     | 0.0      | A
-        # Cell1  | B     | 1.0      | A
-        # Cell3  | A     | 0.5      | A
-        # Cell3  | B     | 0.5      | A
+        # cellid | group | distance_col | phenotype
+        # Cell1  | A     | 0.0          | A
+        # Cell1  | B     | 1.0          | A
+        # Cell3  | A     | 0.5          | A
+        # Cell3  | B     | 0.5          | A
         expected = pd.DataFrame({
             'cellid': ['Cell1', 'Cell1', 'Cell3', 'Cell3'],
             'group': ['A', 'B', 'A', 'B'],
-            'distance': [0.0, 1.0, 0.5, 0.5],
+            distance_col: [0.0, 1.0, 0.5, 0.5],
             'phenotype': ['A', 'A', 'A', 'A']
         })
         expected = self._convert_expected_to_categorical(expected)
@@ -94,6 +97,7 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
             log=False
         )
 
+        distance_col = 'distance'
         # Phenotype A cells: Cell1, Cell3
         # Distances to B only:
         # Cell1: B=1.0
@@ -101,7 +105,7 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
         expected = pd.DataFrame({
             'cellid': ['Cell1', 'Cell3'],
             'group': ['B', 'B'],
-            'distance': [1.0, 0.5],
+            distance_col: [1.0, 0.5],
             'phenotype': ['A', 'A']
         })
         expected = self._convert_expected_to_categorical(expected)
@@ -132,6 +136,7 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
             log=False
         )
 
+        distance_col = 'distance'
         # Phenotype A cells: Cell1(S1), Cell3(S2)
         # Distances:
         # Cell1: A=0.0, B=1.0, sample_id=S1
@@ -139,7 +144,7 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
         expected = pd.DataFrame({
             'cellid': ['Cell1', 'Cell1', 'Cell3', 'Cell3'],
             'group': ['A', 'B', 'A', 'B'],
-            'distance': [0.0, 1.0, 0.5, 0.5],
+            distance_col: [0.0, 1.0, 0.5, 0.5],
             'phenotype': ['A', 'A', 'A', 'A'],
             'sample_id': ['S1', 'S1', 'S2', 'S2']
         })
@@ -167,10 +172,17 @@ class TestPrepareSpatialDistanceData(unittest.TestCase):
             log=True
         )
 
+        # Expecting a 'log_distance' column
+        self.assertIn('log_distance', df_result.columns)
+        self.assertNotIn('distance', df_result.columns)
+
+        # validate log-transformed values
+        log_distance_col = 'log_distance'
+        df_sub = df_result.set_index(['cellid', 'group'])[log_distance_col]
+
         # Original distances for A-phenotype cells:
         # Cell1: A=0.0 -> log1p(0.0)=0.0, B=1.0 -> log1p(1.0)=~0.693147
         # Cell3: A=0.5 -> log1p(0.5)=~0.405465, B=0.5 -> ~0.405465
-        df_sub = df_result.set_index(['cellid', 'group'])['distance']
         self.assertAlmostEqual(df_sub.loc[('Cell1', 'A')], 0.0, places=5)
         self.assertAlmostEqual(df_sub.loc[('Cell1', 'B')],
                                np.log1p(1.0), places=5)

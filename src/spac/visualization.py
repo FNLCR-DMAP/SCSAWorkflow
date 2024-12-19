@@ -15,6 +15,7 @@ from spac.utils import check_feature, annotation_category_relations
 from spac.utils import color_mapping, check_label
 import logging
 import warnings
+from functools import partial
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -2042,7 +2043,8 @@ def _prepare_spatial_distance_data(
 
     This function:
       1) Validates required parameters (annotation, distance_from).
-      2) Retrieves the spatial distance matrix from `adata.obsm[spatial_distance]`.
+      2) Retrieves the spatial distance matrix from
+         `adata.obsm[spatial_distance]`.
       3) Merges annotation (and optional stratify column).
       4) Filters rows to the reference phenotype (`distance_from`).
       5) Subsets columns if `distance_to` is given;
@@ -2071,7 +2073,8 @@ def _prepare_spatial_distance_data(
     distance_to : str or list of str, optional
         Target phenotype(s). If None, use all available phenotype distances.
     log : bool, optional
-        If True, applies np.log1p transform to the 'distance' column.
+        If True, applies np.log1p transform to the 'distance' column, which is
+        renamed to 'log_distance'.
 
     Returns
     -------
@@ -2175,9 +2178,9 @@ def _prepare_spatial_distance_data(
     if stratify_by:
         meta_cols.append(stratify_by)
 
-    # Determine which distance columns to keep
+    # Determine distance columns
     if distance_to:
-        df_merged = df_merged[['cellid'] + meta_cols + distance_to]
+        keep_cols = ['cellid'] + meta_cols + distance_to
     else:
         non_distance_cols = ['cellid', 'phenotype']
         if stratify_by:
@@ -2185,7 +2188,9 @@ def _prepare_spatial_distance_data(
         distance_columns = [
             c for c in df_merged.columns if c not in non_distance_cols
         ]
-        df_merged = df_merged[['cellid'] + meta_cols + distance_columns]
+        keep_cols = ['cellid'] + meta_cols + distance_columns
+
+    df_merged = df_merged[keep_cols]
 
     # Melt the DataFrame from wide to long format
     df_long = df_merged.melt(
@@ -2208,9 +2213,11 @@ def _prepare_spatial_distance_data(
     df_long['distance'] = pd.to_numeric(df_long['distance'], errors='coerce')
     if log:
         df_long['distance'] = np.log1p(df_long['distance'])
+        df_long.rename(columns={'distance': 'log_distance'}, inplace=True)
 
-    # Reorder columns as specified
-    final_cols = ['cellid', 'group', 'distance', 'phenotype']
+    # Reorder columns dynamically based on the presence of 'log'
+    distance_col = 'log_distance' if log else 'distance'
+    final_cols = ['cellid', 'group', distance_col, 'phenotype']
     if stratify_by is not None:
         final_cols.append(stratify_by)
     df_long = df_long[final_cols]
@@ -2273,70 +2280,58 @@ def _plot_spatial_distance_dispatch(
     directly by end users.
     """
 
-    x_axis = kwargs.pop('x_axis', 'distance')
+    distance_col = kwargs.pop('distance_col', 'distance')
     hue_axis = kwargs.pop('hue_axis', None)
 
-    def _plot_single(data, method, ptype, **kws):
-        """
-        Helper function to create a single figure from a subset of data.
+    if method not in ['numeric', 'distribution']:
+        raise ValueError("`method` must be 'numeric' or 'distribution'.")
 
-        Uses seaborn.catplot if method='numeric',
-        or seaborn.displot if method='distribution'.
-        """
-        if method == 'numeric':
-            g = sns.catplot(data=data, x=x_axis, y='group', kind=ptype, **kws)
-            return g.fig
-        elif method == 'distribution':
-            g = sns.displot(
-                data=data,
-                x=x_axis,
-                hue=(hue_axis if hue_axis else None),
-                kind=ptype,
-                **kws
-            )
-            return g.fig
-        else:
-            raise ValueError("`method` must be 'numeric' or 'distribution'.")
+    # Set up the plotting function using partial
+    if method == 'numeric':
+        plot_func = partial(
+            sns.catplot,
+            data=None,
+            x=distance_col,
+            y='group',
+            kind=plot_type
+        )
+    else:  # distribution
+        plot_func = partial(
+            sns.displot,
+            data=None,
+            x=distance_col,
+            hue=hue_axis if hue_axis else None,
+            kind=plot_type
+        )
+
+    # Helper to plot a single figure or faceted figure
+    def _make_figure(data, **kws):
+        g = plot_func(data=data, **kws)
+        # sns.catplot and sns.displot return a FacetGrid
+        # or Facet object with `.fig`
+        return g.fig
 
     figures = []
 
     # Branching logic for figure creation
     if stratify_by and facet_plot:
         # Single figure with faceted subplots (col=stratify_by)
-        if method == 'numeric':
-            g = sns.catplot(
-                data=df_long,
-                x=x_axis,
-                y='group',
-                col=stratify_by,
-                kind=plot_type,
-                **kwargs
-            )
-            figures.append(g.fig)
-        else:  # distribution
-            g = sns.displot(
-                data=df_long,
-                x=x_axis,
-                hue=(hue_axis if hue_axis else None),
-                col=stratify_by,
-                kind=plot_type,
-                **kwargs
-            )
-            figures.append(g.fig)
+        fig = _make_figure(df_long, col=stratify_by, **kwargs)
+        figures.append(fig)
 
     elif stratify_by and not facet_plot:
         # Multiple separate figures, one per unique value in stratify_by
         categories = df_long[stratify_by].unique()
         for cat in categories:
             subset = df_long[df_long[stratify_by] == cat]
-            fig = _plot_single(subset, method, plot_type, **kwargs)
+            fig = _make_figure(subset, **kwargs)
             figures.append(fig)
     else:
         # Single figure (no subplots)
-        fig = _plot_single(df_long, method, plot_type, **kwargs)
+        fig = _make_figure(df_long, **kwargs)
         figures.append(fig)
 
-    # Always return dictionary: { 'data': DataFrame, 'fig': Figure(s) }
+    # Return dictionary: { 'data': DataFrame, 'fig': Figure(s) }
     result = {"data": df_long}
     if len(figures) == 1:
         result["fig"] = figures[0]
@@ -2453,7 +2448,6 @@ def visualize_nearest_neighbor(
             "Invalid 'method'. Please choose 'numeric' or 'distribution'."
         )
 
-    # Prepare the DataFrame using internal helper
     df_long = _prepare_spatial_distance_data(
         adata=adata,
         annotation=annotation,
@@ -2464,9 +2458,12 @@ def visualize_nearest_neighbor(
         log=log
     )
 
-    # Choose default plot_type if none provided
+    # Determine plot_type if not provided
     if plot_type is None:
         plot_type = 'boxen' if method == 'numeric' else 'kde'
+
+    # If log=True, the column name is 'log_distance', else 'distance'
+    distance_col = 'log_distance' if log else 'distance'
 
     # Dispatch to the plot logic
     result_dict = _plot_spatial_distance_dispatch(
@@ -2475,6 +2472,7 @@ def visualize_nearest_neighbor(
         plot_type=plot_type,
         stratify_by=stratify_by,
         facet_plot=facet_plot,
+        distance_col=distance_col,
         **kwargs
     )
 
