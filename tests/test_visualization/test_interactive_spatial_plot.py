@@ -112,7 +112,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                     )
 
     def test_color_mapping_type_check(self):
-        defined_color_map={
+        defined_color_map = {
                 'a': 'red',
                 'b': 'blue',
                 'c': 'green'
@@ -126,8 +126,49 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 defined_color_map=defined_color_map
             )
 
+    def test_color_mapping_value_error(self):
+        # Test correct error message is generated when
+        # the anndata object does not cotain uns attribute
+        defined_color_map = 'test_color_mapping'
+        err_msg = (
+            "The given color map name: test_color_mapping is not found "
+            "in current analysis, available items are: ['example_key']"
+        )
+
+        self.adata.uns['example_key'] = 'example_value'
+
+        with self.assertRaises(ValueError) as cm:
+            interative_spatial_plot(
+                self.adata,
+                'annotation_1',
+                defined_color_map=defined_color_map
+            )
+        self.assertEqual(str(cm.exception), err_msg)
+
+    def test_color_mapping_key_error(self):
+        # Test correct error message is generated when defined_color_map 
+        # does not exist in adata.uns
+        defined_color_map = 'test_color_mapping'
+        err_msg = (
+            'No existing color map found, '
+            'please make sure the Append Pin '
+            'Color Rules template had been ran '
+            'prior to the current visualization node.'
+        )
+
+
+        # Check that 1- the exception is reaised and 2- the error message is correct
+        with self.assertRaisesRegex(ValueError, err_msg):
+            interative_spatial_plot(
+                self.adata,
+                'annotation_1',
+                defined_color_map=defined_color_map
+            )
+
+
+
     def test_color_mapping(self):
-        defined_color_map={
+        defined_color_map = {
                 'a': 'red',
                 'b': 'blue',
                 'c': 'green'
