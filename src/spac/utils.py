@@ -813,3 +813,116 @@ def check_label(
             need_exist=should_exist,
             warning=warning
         )
+
+def spell_out_special_characters(text):
+    """
+    Convert special characters in a string to comply with NIDAP naming rules.
+
+    This function processes a string by replacing or removing disallowed
+    characters to ensure compatibility with NIDAP. Spaces, special symbols,
+    and certain substrings are replaced or transformed into readable and
+    regulation-compliant equivalents.
+
+    Parameters
+    ----------
+    text : str
+        The input string to be processed and converted.
+
+    Returns
+    -------
+    str
+        A sanitized string with special characters replaced or removed,
+        adhering to NIDAP naming conventions.
+
+    Processing Steps
+    ----------------
+    1. Spaces are replaced with underscores (`_`).
+    2. Substrings related to units (e.g., 'µm²') are replaced with text
+       equivalents:
+       - 'µm²' -> 'um2'
+       - 'µm' -> 'um'
+    3. Hyphens (`-`) between letters are replaced with underscores (`_`).
+    4. Certain special symbols are mapped to readable equivalents:
+       - `+` -> `_pos_`
+       - `-` -> `_neg_`
+       - `@` -> `at`
+       - `#` -> `hash`
+       - `&` -> `and`
+       - And more (see Notes section for a full mapping).
+    5. Remaining disallowed characters are removed (non-alphanumeric and
+       non-underscore characters).
+    6. Consecutive underscores are consolidated into a single underscore.
+    7. Leading and trailing underscores are stripped.
+
+    Notes
+    -----
+    The following special character mappings are used:
+    - `µ` -> `u`
+    - `²` -> `2`
+    - `/` -> `slash`
+    - `=` -> `equals`
+    - `!` -> `exclamation`
+    - `|` -> `pipe`
+    - For a complete list, refer to the `special_char_map` in the code.
+
+    Example
+    -------
+    >>> spell_out_special_characters("Data µm²+Analysis #1-2")
+    'Data_um2_pos_Analysis_hash1_neg_2'
+
+    >>> spell_out_special_characters("Invalid!Char@Format")
+    'Invalid_exclamation_Char_at_Format'
+
+    """
+    # Replace spaces with underscores
+    text = text.replace(' ', '_')
+
+    # Replace specific substrings for units
+    text = text.replace('µm²', 'um2')
+    text = text.replace('µm', 'um')
+
+    # Replace hyphens between letters with '_'
+    text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)
+
+    # Replace '+' with '_pos_' and '-' with '_neg_'
+    text = text.replace('+', '_pos_')
+    text = text.replace('-', '_neg_')
+
+    # Mapping for specific characters
+    special_char_map = {
+        'µ': 'u',       # Micro symbol replaced with 'u'
+        '²': '2',       # Superscript two replaced with '2'
+        '@': 'at',
+        '#': 'hash',
+        '$': 'dollar',
+        '%': 'percent',
+        '&': 'and',
+        '*': 'asterisk',
+        '/': 'slash',
+        '\\': 'backslash',
+        '=': 'equals',
+        '^': 'caret',
+        '!': 'exclamation',
+        '?': 'question',
+        '~': 'tilde',
+        # '(': 'open_parenthesis',
+        # ')': 'close_parenthesis',
+        # '{': 'open_brace',
+        # '}': 'close_brace',
+        # '[': 'open_bracket',
+        # ']': 'close_bracket',
+        '|': 'pipe',
+    }
+
+    # Replace special characters using special_char_map
+    for char, replacement in special_char_map.items():
+        text = text.replace(char, replacement)
+
+    # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
+    text = re.sub(r'[^a-zA-Z0-9_]', '', text)
+                
+    # Remove multiple underscores and strip leading/trailing underscores
+    text = re.sub(r'_+', '_', text)
+    text = text.strip('_')
+
+    return text
