@@ -6,7 +6,7 @@ on:
     branches: ['*', '!dev', '!main', '!github_page', '!Conda_Package']    
   pull_request:
     types: ['opened', 'closed']
-    branches: ['main', 'release*', 'dev', 'master', 'test_utag_docker']
+    branches: ['main', 'release*', 'dev', 'master', 'test_utag_docker', 'test_utag_pull']
 jobs:
   Activating_Parser:
     uses: fnlcr-dmap/gitflow-py/.github/workflows/parser.yml@main
