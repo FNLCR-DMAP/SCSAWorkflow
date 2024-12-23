@@ -103,10 +103,10 @@ class TestBoxplot(unittest.TestCase):
 
     def test_log_scale(self):
         """Test for the log_scale parameter."""
-        # Store the original data for feature1
-        original_values = self.adata.X[
-            :, self.adata.var_names == 'feature1'
-        ].flatten()
+        # Hard-coded expected values after np.log1p transformation
+        expected_values = np.array(
+            [0.693147, 1.386294, 1.791759, 2.079441], dtype=np.float64
+        )
 
         fig, ax, df = boxplot(
             self.adata, features=['feature1'], log_scale=True
@@ -117,18 +117,20 @@ class TestBoxplot(unittest.TestCase):
 
         # Check that the data has been transformed via np.log1p
         transformed_values = df['feature1'].values
-        expected_values = np.log1p(original_values)
-
-        np.testing.assert_allclose(transformed_values, expected_values)
+        np.testing.assert_allclose(
+            transformed_values, expected_values, rtol=1e-5
+        )
 
         # Check that the y-axis scale is 'linear'
         self.assertEqual(ax.get_yscale(), 'linear')
 
         # Test with zero values
         self.adata.X[0, 0] = 0  # Introduce a zero value
-        original_values = self.adata.X[
-            :, self.adata.var_names == 'feature1'
-        ].flatten()
+
+        # Hard-coded expected values after np.log1p transformation with zero
+        expected_values_zero = np.array(
+            [0.0, 1.386294, 1.791759, 2.079441], dtype=np.float64
+        )
 
         fig, ax, df = boxplot(
             self.adata, features=['feature1'], log_scale=True
@@ -139,9 +141,9 @@ class TestBoxplot(unittest.TestCase):
 
         # Check that the data has been transformed via np.log1p
         transformed_values = df['feature1'].values
-        expected_values = np.log1p(original_values)
-
-        np.testing.assert_allclose(transformed_values, expected_values)
+        np.testing.assert_allclose(
+            transformed_values, expected_values_zero, rtol=1e-5
+        )
 
         # The y-axis scale should still be 'linear'
         self.assertEqual(ax.get_yscale(), 'linear')
@@ -220,10 +222,14 @@ class TestBoxplot(unittest.TestCase):
         # Ensure the y-axis label is 'Intensity'
         self.assertEqual(ax.get_ylabel(), 'Intensity')
 
+        # Expected values (should be the same as input
+        # since loig_scale is disabled)
+        expected_values = np.array([-1.0, 0.0, 1.0, 2.0], dtype=np.float32)
+
         # Check that the data has not been transformed
         np.testing.assert_array_equal(
             df['feature1'].values,
-            X['feature1'].values
+            expected_values
         )
 
     def test_single_feature_orientation(self):

@@ -2,3 +2,5 @@
 *.pyc
 .vscode/launch.json
 test/__pychache__
+build/
+src/spac.egg-info/

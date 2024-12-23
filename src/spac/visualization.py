@@ -9,12 +9,19 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import color_mapping
+from spac.utils import check_label
+from functools import partial
+from spac.utils import color_mapping, spell_out_special_characters
+from spac.data_utils import select_values
 import logging
 import warnings
+import re
+import copy
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1146,9 +1153,9 @@ def spatial_plot(
 
     # Extract feature name
     if layer is None:
-        layer = adata.X
+        layer_process = adata.X
     else:
-        layer = adata.layers[layer]
+        layer_process = adata.layers[layer]
 
     feature_names = adata.var_names.tolist()
 
@@ -1184,10 +1191,10 @@ def spatial_plot(
         feature_index = feature_names.index(feature)
         feature_annotation = feature + "spatial_plot"
         if vmin == -999:
-            vmin = np.min(layer[:, feature_index])
+            vmin = np.min(layer_process[:, feature_index])
         if vmax == -999:
-            vmax = np.max(layer[:, feature_index])
-        adata.obs[feature_annotation] = layer[:, feature_index]
+            vmax = np.max(layer_process[:, feature_index])
+        adata.obs[feature_annotation] = layer_process[:, feature_index]
         color_region = feature_annotation
     else:
         color_region = annotation
@@ -1411,12 +1418,14 @@ def interative_spatial_plot(
     annotations,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='Viridis',
-    figure_width=12,
-    figure_height=8,
+    colorscale='viridis',
+    figure_width=6,
+    figure_height=4,
     figure_dpi=200,
-    font_size=12
-
+    font_size=12,
+    stratify_by=None,
+    defined_color_map=None,
+    **kwargs
 ):
 
     """
@@ -1447,18 +1456,26 @@ def interative_spatial_plot(
         DPI (dots per inch) for the figure. Default is 200.
     font_size : int, optional
         Font size for text in the plot. Default is 12.
+    stratify_by : str, optional
+        Column in `adata.obs` to stratify the plot. Default is None.
+    defined_color_map : str, optional
+        Predefined color mapping stored in adata.uns for specific labels.
+        Default is None, which will generate the color mapping automatically.
+    **kwargs
+        Additional keyword arguments for customization.
 
     Returns
     -------
-    plotly.graph_objs._figure.Figure
-        A plotly figure object containing the spatial plot.
+    list of dict
+        A list of dictionaries, each containing the following keys:
+        - "image_name": str, the name of the generated image.
+        - "image_object": Plotly Figure object.
 
     Notes
     -----
-    This function is specifically tailored for
-    spatial single-cell data and expects the input AnnData object
-    to have spatial coordinates stored in its .obsm attribute
-    under the 'spatial' key.
+    This function is tailored for spatial single-cell data and expects the
+    AnnData object to have spatial coordinates in its `.obsm` attribute under
+    the 'spatial' key.
     """
 
     if not isinstance(annotations, list):
@@ -1470,137 +1487,415 @@ def interative_spatial_plot(
             annotations=annotation
         )
 
-    if not hasattr(adata, 'obsm'):
-        error_msg = ".obsm attribute (Spatial Coordinate) does not exist " + \
-            "in the input AnnData object. Please check."
-        raise ValueError(error_msg)
+    check_table(
+        adata,
+        tables='spatial',
+        associated_table=True
+    )
 
-    if 'spatial' not in adata.obsm:
-        error_msg = 'The key "spatial" is missing from .obsm field, hence ' + \
-            "missing spatial coordniates. Please check."
-        raise ValueError(error_msg)
+    if defined_color_map is not None:
+        if not isinstance(defined_color_map, str):
+            raise TypeError(
+                'The "degfined_color_map" should be a string ' + \
+                f'getting {type(defined_color_map)}.'
+            )
+        uns_keys = list(adata.uns.keys())
+        if len(uns_keys) == 0:
+            raise ValueError(
+                "No existing color map found, please" + \
+                " make sure the Append Pin Color Rules " + \
+                "template had been ran prior to the "+ \
+                "current visualization node.")
 
-    spatial_coords = adata.obsm['spatial']
-
-    extract_columns_raw = []
-
-    for item in annotations:
-        extract_columns_raw.append(adata.obs[item])
-
-    extract_columns = []
-
-    for i, item in enumerate(extract_columns_raw):
-        extract_columns.append(
-            [annotations[i] + "_" + str(value) for value in item]
+        if defined_color_map not in uns_keys:
+            raise ValueError(
+                f'The given color map name: {defined_color_map} ' + \
+                "is not found in current analysis, " + \
+                f'available items are: {uns_keys}'
+            )
+        defined_color_map_dict = adata.uns[defined_color_map]
+        print(
+            f'Selected color mapping "{defined_color_map}":\n' + \
+            f'{defined_color_map_dict}'
         )
 
-    xcoord = [coord[0] for coord in spatial_coords]
-    ycoord = [coord[1] for coord in spatial_coords]
 
-    data = {'X': xcoord, 'Y': ycoord}
+    def main_figure_generation(
+        adata,
+        annotations=annotations,
+        dot_size=dot_size,
+        dot_transparancy=dot_transparancy,
+        colorscale=colorscale,
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        font_size=font_size,
+        **kwargs
+    ):
+        """
+        Create the core interactive plot for downstream processing.
+        This function generates the main interactive plot using Plotly
+        that contains the spatial scatter plot with annotations and
+        image configuration.
 
-    # Add the extract_columns data as columns in the dictionary
-    for i, column in enumerate(extract_columns):
-        column_name = annotations[i]
-        data[column_name] = column
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix object,
+            must have a .obsm attribute with 'spatial' key.
+        annotations : list of str or str
+            Column(s) in `adata.obs` that contain the annotations to plot.
+            If a single string is provided, it will be converted to a list.
+            The interactive plot will show all the labels in the annotation
+            columns passed.
+        dot_size : float, optional
+            Size of the scatter dots in the plot. Default is 1.5.
+        dot_transparancy : float, optional
+            Transparancy level of the scatter dots. Default is 0.75.
+        colorscale : str, optional
+            Name of the color scale to use for the dots. Default is 'Viridis'.
+        figure_width : int, optional
+            Width of the figure in inches. Default is 12.
+        figure_height : int, optional
+            Height of the figure in inches. Default is 8.
+        figure_dpi : int, optional
+            DPI (dots per inch) for the figure. Default is 200.
+        font_size : int, optional
+            Font size for text in the plot. Default is 12.
 
-    # Create the DataFrame
-    df = pd.DataFrame(data)
+        Returns
+        -------
+        plotly.graph_objs._figure.Figure
 
-    max_x_range = max(xcoord) * 1.1
-    min_x_range = min(xcoord) * 0.9
-    max_y_range = max(ycoord) * 1.1
-    min_y_range = min(ycoord) * 0.9
+        """   
 
-    width_px = int(figure_width * figure_dpi)
-    height_px = int(figure_height * figure_dpi)
+        spatial_coords = adata.obsm['spatial']
 
-    main_fig = px.scatter(
-        df,
-        x='X',
-        y='Y',
-        color=annotations[0],
-        hover_data=[annotations[0]]
-    )
+        extract_columns_raw = []
 
-    # If annotation is more than 1, we would first call px.scatter
-    # to create plotly object, than append the data to main figure
-    # with add_trace for a centralized view.
-    if len(annotations) > 1:
-        for obs in annotations[1:]:
-            scatter_fig = px.scatter(
-                                df,
-                                x='X',
-                                y='Y',
-                                color=obs,
-                                hover_data=[obs]
-                            )
+        for item in annotations:
+            extract_columns_raw.append(adata.obs[item])
 
-            main_fig.add_traces(scatter_fig.data)
+        extract_columns = []
 
-    # Reset the color attribute of the traces in combined_fig
-    for trace in main_fig.data:
-        trace.marker.color = None
+        # The `extract_columns` list is needed for generating Plotly images
+        # because it stores transformed annotation data. These annotations
+        # are added as columns in the DataFrame (`df`) and are used as inputs
+        # for the `color` and `hover_data` parameters in the Plotly scatter
+        # plot. This enables the plot to visually encode annotations, providing
+        # better insights into the spatial data. Without `extract_columns`, the
+        # plot would lack essential annotation-based differentiation and
+        # interactivity.
 
-    main_fig.update_traces(
-        mode='markers',
-        marker=dict(
-            size=dot_size,
-            colorscale=colorscale,
-            opacity=dot_transparancy
-        ),
-        hovertemplate="%{customdata[0]}<extra></extra>"
-    )
-
-    main_fig.update_layout(
-        width=width_px,
-        height=height_px,
-        plot_bgcolor='white',
-        font=dict(size=font_size),
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='right',
-            x=1.15,
-            title='',
-            itemwidth=30,
-            bgcolor="rgba(0, 0, 0, 0)",
-            traceorder='normal',
-            entrywidth=50
-        ),
-        xaxis=dict(
-                    range=[min_x_range, max_x_range],
-                    showgrid=False,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        yaxis=dict(
-                    range=[max_y_range, min_y_range],
-                    showgrid=False,
-                    scaleanchor="x",
-                    scaleratio=1,
-                    showticklabels=False,
-                    title_standoff=5,
-                    constrain="domain"
-                ),
-        shapes=[
-            go.layout.Shape(
-                type="rect",
-                xref="x",
-                yref="y",
-                x0=min_x_range,
-                y0=min_y_range,
-                x1=max_x_range,
-                y1=max_y_range,
-                line=dict(color="black", width=1),
-                fillcolor="rgba(0,0,0,0)",
+        for i, item in enumerate(extract_columns_raw):
+            extract_columns.append(
+                [annotations[i] + "_" + str(value) for value in item]
             )
+
+        xcoord = [coord[0] for coord in spatial_coords]
+        ycoord = [coord[1] for coord in spatial_coords]
+
+        data = {'X': xcoord, 'Y': ycoord}
+
+        # Add the extract_columns data as columns in the dictionary
+        for i, column in enumerate(extract_columns):
+            column_name = annotations[i]
+            data[column_name] = column
+
+        # Create the DataFrame
+        df = pd.DataFrame(data)
+
+        max_x_range = max(xcoord) * 1.1
+        min_x_range = min(xcoord) * 0.9
+        max_y_range = max(ycoord) * 1.1
+        min_y_range = min(ycoord) * 0.9
+
+        width_px = int(figure_width * figure_dpi)
+        height_px = int(figure_height * figure_dpi)
+
+        main_fig = px.scatter(
+            df,
+            x='X',
+            y='Y',
+            color=annotations[0],
+            hover_data=[annotations[0]]
+        )
+
+        # If annotation is more than 1, we would first call px.scatter
+        # to create plotly object, than append the data to main figure
+        # with add_trace for a centralized view.
+        if len(annotations) > 1:
+            for obs in annotations[1:]:
+                scatter_fig = px.scatter(
+                                    df,
+                                    x='X',
+                                    y='Y',
+                                    color=obs,
+                                    hover_data=[obs]
+                                )
+
+                main_fig.add_traces(scatter_fig.data)
+
+        # Reset the color attribute of the traces in combined_fig
+        # This is necessary to ensure that the color attribute
+        # does not interfere with subsequent plots
+        for trace in main_fig.data:
+            trace.marker.color = None
+
+        main_fig.update_traces(
+            mode='markers',
+            marker=dict(
+                size=dot_size,
+                colorscale=colorscale,
+                opacity=dot_transparancy
+            ),
+            hovertemplate="%{customdata[0]}<extra></extra>"
+        )
+
+        main_fig.update_layout(
+            width=width_px,
+            height=height_px,
+            plot_bgcolor='white',
+            font=dict(size=font_size),
+            margin=dict(l=10, r=10, t=10, b=10),
+            legend=dict(
+                orientation='v',
+                yanchor='middle',
+                y=0.5,
+                xanchor='right',
+                x=1.15,
+                title='',
+                itemwidth=30,
+                bgcolor="rgba(0, 0, 0, 0)",
+                traceorder='normal',
+                entrywidth=50
+            ),
+            xaxis=dict(
+                        range=[min_x_range, max_x_range],
+                        showgrid=False,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            yaxis=dict(
+                        range=[max_y_range, min_y_range],
+                        showgrid=False,
+                        scaleanchor="x",
+                        scaleratio=1,
+                        showticklabels=False,
+                        title_standoff=5,
+                        constrain="domain"
+                    ),
+            shapes=[
+                go.layout.Shape(
+                    type="rect",
+                    xref="x",
+                    yref="y",
+                    x0=min_x_range,
+                    y0=min_y_range,
+                    x1=max_x_range,
+                    y1=max_y_range,
+                    line=dict(color="black", width=1),
+                    fillcolor="rgba(0,0,0,0)",
+                )
+            ]
+        )
+
+        return main_fig
+
+    def generate_and_update_image(
+        adata,
+        title,
+        color_mapping=None,
+        **kwargs
+    ):
+        """
+        This function generates the main figure with annotations and
+        optional stratifications or color mappings, providing flexibility
+        for detailed visualizations. It processes data, groups it by
+        annotations, and enables advanced legend handling and styling.
+
+        Parameters
+        ----------
+        adata : AnnData
+            Annotated data matrix containing either the full dataset
+            or a subset of the data.
+        title : str
+            Title for the plot.
+        stratify_by : str, optional
+            Column to stratify the plot. Default is None.
+        color_mapping : dict, optional
+            Color mapping for specific labels. Default is None.
+
+        Returns
+        -------
+        dict
+            A dictionary with "image_name" and "image_object" keys.
+        """
+        main_fig_parent = main_figure_generation(
+            adata,
+            annotations=annotations,
+            dot_size=dot_size,
+            dot_transparancy=dot_transparancy,
+            colorscale=colorscale,
+            figure_width=figure_width,
+            figure_height=figure_height,
+            figure_dpi=figure_dpi,
+            font_size=font_size,
+            **kwargs
+        )
+
+        # Create a copy of the figure for non-destructive updates
+        main_fig_copy = copy.copy(main_fig_parent)
+        data = main_fig_copy.data
+        main_fig_parent.data = []
+
+        # Prepare to track updates and manage grouped annotations
+        updated_index = []
+        legend_list = [
+            f"legend{i+1}" if i > 0 else "legend"
+            for i in range(len(annotations))
         ]
-    )
-    return main_fig
+        previous_group = None
+
+        # Process each trace in the figure for grouping and legends
+        indices = list(range(len(data)))
+        for item in indices:
+            cat_label = data[item]['customdata'][0][0]
+            cat_dataset = pd.DataFrame(
+                {'X': data[item]['x'], 'Y': data[item]['y']}
+            )
+
+            # Assign the label to the appropriate legend group
+            for i, legend_group in enumerate(annotations):
+                if cat_label.startswith(legend_group):
+                    cat_leg_group = f"<b>{legend_group}</b>"
+                    cat_label = cat_label[len(legend_group) + 1:]
+                    cat_group = legend_list[i]
+
+            # Add a new legend entry if this group hasn't been encountered
+            if previous_group is None or cat_group != previous_group:
+                main_fig_parent.add_trace(go.Scattergl(
+                    x=[data[item]['x'][0]],
+                    y=[data[item]['y'][0]],
+                    name=cat_leg_group,
+                    mode="markers",
+                    showlegend=True,
+                    marker=dict(
+                        color="white",
+                        colorscale=None,
+                        size=0,
+                        opacity=0
+                    )
+                ))
+                previous_group = cat_group
+
+            # Add the category label to the dataset for grouping
+            cat_dataset['label'] = cat_label
+
+            main_fig_parent.add_trace(go.Scattergl(
+                x=cat_dataset['X'],
+                y=cat_dataset['Y'],
+                name=cat_label,
+                mode="markers",
+                showlegend=True,
+                marker=dict(
+                    colorscale=colorscale,
+                    size=dot_size,
+                    opacity=dot_transparancy
+                )
+            ))
+
+            updated_index.append(cat_label)
+
+        if color_mapping is not None:
+            main_fig_copy = copy.copy(main_fig_parent)
+            data = main_fig_copy.data
+            main_fig_parent.data = []
+
+            for trace in data:
+                trace_name = trace["name"]
+                if color_mapping is not None:
+                    if trace_name in color_mapping.keys():
+                        trace['marker']['color'] = color_mapping[trace_name]
+                main_fig_parent.add_trace(trace)
+
+        main_fig_parent.update_layout(
+            title={
+                'text': title,
+                'font': {'size': font_size},
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'x': 0.5,
+                'y': 0.99
+            },
+            legend={
+                'x': 1.05,
+                'y': 0.5,
+                'xanchor': 'left',
+                'yanchor': 'middle'
+            },
+            margin=dict(l=5, r=5, t=font_size*2, b=5)
+        )
+
+        return {
+            "image_name": f"{spell_out_special_characters(title)}.html",
+            "image_object": main_fig_parent
+        }
+
+
+    #####################
+    ## Main Code Block ##
+    #####################
+
+    results = []
+    if defined_color_map:
+        color_dict = adata.uns[defined_color_map]
+    else:
+        unique_ann_labels = np.unique(adata.obs[annotations].values)
+        color_dict = color_mapping(
+            unique_ann_labels,
+            color_map=colorscale,
+            rgba_mode=False,
+            return_dict=True
+        )
+
+    if stratify_by is not None:
+        unique_stratification_values = adata.obs[stratify_by].unique()
+    
+        for strat_value in unique_stratification_values:
+            condition = adata.obs[stratify_by] == strat_value
+            title = f"Highlighting {stratify_by}: {strat_value}"
+            indices = np.where(condition)[0]
+            selected_spatial = adata.obsm['spatial'][indices]
+            print(f"number of cells in the region: {len(selected_spatial)}")
+
+            adata_subset = select_values(
+                data=adata,
+                annotation=stratify_by,
+                values=strat_value
+            )
+
+            result = generate_and_update_image(
+                adata=adata_subset,
+                title=title,
+                stratify_by=stratify_by,
+                color_mapping=color_dict,
+                **kwargs
+            )
+            results.append(result)
+    else:
+        title = "Interactive Spatial Plot"
+        result = generate_and_update_image(
+            adata=adata,
+            title=title,
+            stratify_by=None,
+            color_mapping=color_dict,
+            **kwargs
+        )
+        results.append(result)
+
+    return results
 
 
 def sankey_plot(
@@ -1763,8 +2058,18 @@ def relational_heatmap(
 
     Returns
     -------
-    plotly.graph_objs._figure.Figure
-        The generated relational heatmap.
+    dict
+        A dictionary containing:
+        - "figure" (plotly.graph_objs._figure.Figure): 
+            The generated relational heatmap as a Plotly figure.
+        - "file_name" (str): 
+            The name of the file where the relational matrix can be saved.
+        - "data" (pandas.DataFrame): 
+            A relational matrix DataFrame with percentage values.
+            Rows represent source annotations,
+            columns represent target annotations,
+            and an additional "total" column sums
+            the percentages for each source.
     """
     # Default font size
     font_size = kwargs.get('font_size', 12.0)
@@ -1829,6 +2134,7 @@ def relational_heatmap(
     fig.update_layout(
         overwrite=True,
         xaxis=dict(
+            title=source_annotation,
             ticks="",
             dtick=1,
             side="top",
@@ -1837,39 +2143,44 @@ def relational_heatmap(
             ticktext=x
         ),
         yaxis=dict(
+            title=target_annotation,
             ticks="",
             dtick=1,
             ticksuffix="   ",
             tickvals=list(range(len(y))),
             ticktext=y
+        ),
+        margin=dict(
+            l=5,
+            r=5,
+            t=font_size * 2,
+            b=font_size * 2
         )
     )
 
     for i in range(len(fig.layout.annotations)):
         fig.layout.annotations[i].font.size = font_size
 
-    fig.update_layout(
-        xaxis=dict(title=source_annotation),
-        yaxis=dict(title=target_annotation)
-    )
-
-    fig.update_layout(
-        margin=dict(
-            l=5,
-            r=5,
-            t=font_size * 2,
-            b=font_size * 2
-            )
-        )
-
     fig.update_xaxes(
         side="bottom",
         tickangle=90
     )
 
-    print(fig)
+    # Data output section
+    data = fig.data[0]
+    layout = fig.layout
+    # Create a DataFrame
+    matrix = pd.DataFrame(data['customdata'])
+    matrix.index=layout['yaxis']['ticktext']
+    matrix.columns=layout['xaxis']['ticktext']
+    matrix["total"] = matrix.sum(axis=1)
+    matrix = matrix.fillna(0)
 
-    return fig
+    # Display the DataFrame
+    file_name = f"{source_annotation}_to_{target_annotation}" + \
+                "_relation_matrix.csv"
+
+    return {"figure": fig, "file_name": file_name, "data": matrix}
 
 
 def plot_ripley_l(
@@ -2026,3 +2337,463 @@ def plot_ripley_l(
         return fig, df
 
     return fig
+
+
+def _prepare_spatial_distance_data(
+    adata,
+    annotation,
+    stratify_by=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    log=False
+):
+    """
+    Prepares a tidy DataFrame for nearest-neighbor (spatial distance) plotting.
+
+    This function:
+      1) Validates required parameters (annotation, distance_from).
+      2) Retrieves the spatial distance matrix from
+         `adata.obsm[spatial_distance]`.
+      3) Merges annotation (and optional stratify column).
+      4) Filters rows to the reference phenotype (`distance_from`).
+      5) Subsets columns if `distance_to` is given;
+         otherwise keeps all distances.
+      6) Reshapes (melts) into long-form data:
+         columns -> [cellid, group, distance].
+      7) Applies optional log1p transform.
+
+    The resulting DataFrame is suitable for plotting with tool like Seaborn.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix, containing distances in
+        `adata.obsm[spatial_distance]`.
+    annotation : str
+        Column in `adata.obs` indicating cell phenotype or annotation.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group/stratify data
+        (e.g., image or sample).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame.
+        Default 'spatial_distance'.
+    distance_from : str
+        Reference phenotype from which distances are measured. Required.
+    distance_to : str or list of str, optional
+        Target phenotype(s). If None, use all available phenotype distances.
+    log : bool, optional
+        If True, applies np.log1p transform to the 'distance' column, which is
+        renamed to 'log_distance'.
+
+    Returns
+    -------
+    pd.DataFrame
+        Tidy DataFrame with columns:
+            - 'cellid': index of the cell from 'adata.obs'.
+            - 'group': the target phenotype (column names of 'distance_map'.
+            - 'distance': the numeric distance value.
+            - 'phenotype': the reference phenotype ('distance_from').
+            - 'stratify_by': optional grouping column, if provided.
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing, if phenotypes are not found in
+        `adata.obs`, or if the spatial distance matrix is not available in
+        `adata.obsm`.
+
+    Examples
+    --------
+    >>> df_long = _prepare_spatial_distance_data(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     stratify_by='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     log=True
+    ... )
+    >>> df_long.head()
+    """
+
+    # Validate required parameters
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. This indicates "
+            "the reference group from which distances are measured."
+        )
+    check_annotation(adata, annotations=annotation)
+
+    # Convert distance_to to list if needed
+    if distance_to is not None and isinstance(distance_to, str):
+        distance_to = [distance_to]
+
+    phenotypes_to_check = [distance_from] + (
+        distance_to if distance_to else []
+    )
+
+    # Ensure distance_from and distance_to exist in adata.obs[annotation]
+    check_label(
+        adata,
+        annotation=annotation,
+        labels=phenotypes_to_check,
+        should_exist=True
+    )
+
+    # Retrieve the spatial distance matrix from adata.obsm
+    if spatial_distance not in adata.obsm:
+        raise ValueError(
+            f"'{spatial_distance}' does not exist in the provided dataset. "
+            "Please run 'calculate_nearest_neighbor' first to compute and "
+            "store spatial distance. "
+            f"Available keys: {list(adata.obsm.keys())}"
+        )
+    distance_map = adata.obsm[spatial_distance].copy()
+
+    # Verify requested phenotypes exist in the distance_map columns
+    missing_cols = [
+        p for p in phenotypes_to_check if p not in distance_map.columns
+    ]
+    if missing_cols:
+        raise ValueError(
+            f"Phenotypes {missing_cols} not found in columns of "
+            f"'{spatial_distance}'. Columns present: "
+            f"{list(distance_map.columns)}"
+        )
+
+    # Validate 'stratify_by' column if provided
+    if stratify_by is not None:
+        check_annotation(adata, annotations=stratify_by)
+
+    # Build a meta DataFrame with phenotype & optional stratify column
+    meta_data = pd.DataFrame({'phenotype': adata.obs[annotation]},
+                             index=adata.obs.index)
+    if stratify_by:
+        meta_data[stratify_by] = adata.obs[stratify_by]
+
+    # Merge metadata with distance_map and filter for 'distance_from'
+    df_merged = meta_data.join(distance_map, how='left')
+    df_merged = df_merged[df_merged['phenotype'] == distance_from]
+    if df_merged.empty:
+        raise ValueError(
+            f"No cells found with phenotype == '{distance_from}'."
+        )
+
+    # Reset index to ensure cell names are in a column called 'cellid'
+    df_merged = df_merged.reset_index().rename(columns={'index': 'cellid'})
+
+    # Prepare the list of metadata columns
+    meta_cols = ['phenotype']
+    if stratify_by:
+        meta_cols.append(stratify_by)
+
+    # Determine distance columns
+    if distance_to:
+        keep_cols = ['cellid'] + meta_cols + distance_to
+    else:
+        non_distance_cols = ['cellid', 'phenotype']
+        if stratify_by:
+            non_distance_cols.append(stratify_by)
+        distance_columns = [
+            c for c in df_merged.columns if c not in non_distance_cols
+        ]
+        keep_cols = ['cellid'] + meta_cols + distance_columns
+
+    df_merged = df_merged[keep_cols]
+
+    # Melt the DataFrame from wide to long format
+    df_long = df_merged.melt(
+        id_vars=['cellid'] + meta_cols,
+        var_name='group',
+        value_name='distance'
+    )
+
+    # Convert columns to categorical for consistency
+    for col in ['group', 'phenotype', stratify_by]:
+        if col and col in df_long.columns:
+            df_long[col] = df_long[col].astype(str).astype('category')
+
+    # Reorder categories for 'group' if 'distance_to' is provided
+    if distance_to:
+        df_long['group'] = df_long['group'].cat.reorder_categories(distance_to)
+        df_long.sort_values('group', inplace=True)
+
+    # Ensure 'distance' is numeric and apply log transform if requested
+    df_long['distance'] = pd.to_numeric(df_long['distance'], errors='coerce')
+    if log:
+        df_long['distance'] = np.log1p(df_long['distance'])
+        df_long.rename(columns={'distance': 'log_distance'}, inplace=True)
+
+    # Reorder columns dynamically based on the presence of 'log'
+    distance_col = 'log_distance' if log else 'distance'
+    final_cols = ['cellid', 'group', distance_col, 'phenotype']
+    if stratify_by is not None:
+        final_cols.append(stratify_by)
+    df_long = df_long[final_cols]
+
+    return df_long
+
+
+def _plot_spatial_distance_dispatch(
+    df_long,
+    method,
+    plot_type,
+    stratify_by=None,
+    facet_plot=False,
+    **kwargs
+):
+    """
+    Decides the figure layout based on 'stratify_by' and 'facet_plot'
+    and dispatches actual plotting calls.
+
+    Logic:
+      1) If stratify_by and facet_plot => single figure with subplots (faceted)
+      2) If stratify_by and not facet_plot => multiple figures, one per group
+      3) If stratify_by is None => single figure (no subplots)
+
+    This function calls seaborn figure-level functions (catplot or displot).
+
+    Parameters
+    ----------
+    df_long : pd.DataFrame
+        Tidy DataFrame with columns ['cellid', 'group', 'distance',
+        'phenotype', 'stratify_by'].
+    method : {'numeric', 'distribution'}
+        Determines which seaborn function is used (catplot or displot).
+    plot_type : str
+        For method='numeric': 'box', 'violin', 'boxen', etc.
+        For method='distribution': 'hist', 'kde', 'ecdf', etc.
+    stratify_by : str or None
+        Column name for grouping. If None, no grouping is done.
+    facet_plot : bool
+        If True, subplots in a single figure (faceted).
+        If False, separate figures (one per group) or a single figure.
+    **kwargs
+        Additional seaborn plotting arguments (e.g., col_wrap=2).
+
+    Returns
+    -------
+    dict
+        Dictionary with two keys:
+            - "data": the DataFrame (df_long)
+            - "fig": a Matplotlib Figure or a list of Figures
+
+    Raises
+    ------
+    ValueError
+        If 'method' is invalid (not 'numeric' or 'distribution').
+
+    Examples
+    --------
+    Called internally by 'visualize_nearest_neighbor'. Typically not used
+    directly by end users.
+    """
+
+    distance_col = kwargs.pop('distance_col', 'distance')
+    hue_axis = kwargs.pop('hue_axis', None)
+
+    if method not in ['numeric', 'distribution']:
+        raise ValueError("`method` must be 'numeric' or 'distribution'.")
+
+    # Set up the plotting function using partial
+    if method == 'numeric':
+        plot_func = partial(
+            sns.catplot,
+            data=None,
+            x=distance_col,
+            y='group',
+            kind=plot_type
+        )
+    else:  # distribution
+        plot_func = partial(
+            sns.displot,
+            data=None,
+            x=distance_col,
+            hue=hue_axis if hue_axis else None,
+            kind=plot_type
+        )
+
+    # Helper to plot a single figure or faceted figure
+    def _make_figure(data, **kws):
+        g = plot_func(data=data, **kws)
+        if distance_col == 'log_distance':
+            x_label = "Log(Nearest Neighbor Distance)"
+        else:
+            x_label = "Nearest Neighbor Distance"
+
+        # Set axis label based on whether log transform was applied
+        if hasattr(g, 'set_axis_labels'):
+            g.set_axis_labels(x_label, None)
+        else:
+            # Fallback if 'set_axis_labels' is unavailable
+            plt.xlabel(x_label)
+
+        return g.fig
+
+    figures = []
+
+    # Branching logic for figure creation
+    if stratify_by and facet_plot:
+        # Single figure with faceted subplots (col=stratify_by)
+        fig = _make_figure(df_long, col=stratify_by, **kwargs)
+        figures.append(fig)
+
+    elif stratify_by and not facet_plot:
+        # Multiple separate figures, one per unique value in stratify_by
+        categories = df_long[stratify_by].unique()
+        for cat in categories:
+            subset = df_long[df_long[stratify_by] == cat]
+            fig = _make_figure(subset, **kwargs)
+            figures.append(fig)
+    else:
+        # Single figure (no subplots)
+        fig = _make_figure(df_long, **kwargs)
+        figures.append(fig)
+
+    # Return dictionary: { 'data': DataFrame, 'fig': Figure(s) }
+    result = {"data": df_long}
+    if len(figures) == 1:
+        result["fig"] = figures[0]
+    else:
+        result["fig"] = figures
+    return result
+
+
+def visualize_nearest_neighbor(
+    adata,
+    annotation,
+    stratify_by=None,
+    spatial_distance='spatial_distance',
+    distance_from=None,
+    distance_to=None,
+    facet_plot=False,
+    plot_type=None,
+    log=False,
+    method=None,
+    **kwargs
+):
+    """
+    Visualize nearest-neighbor (spatial distance) data between groups of cells
+    as numeric or distribution plots.
+
+    This user-facing function assembles the data by calling
+    `_prepare_spatial_distance_data` and then creates plots through
+    `_plot_spatial_distance_dispatch`.
+
+    Plot arrangement logic:
+      1) If stratify_by is not None and facet_plot=True => single figure
+         with subplots (faceted).
+      2) If stratify_by is not None and facet_plot=False => multiple separate
+         figures, one per group.
+      3) If stratify_by is None => a single figure with one plot.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix with distances in `adata.obsm[spatial_distance]`.
+    annotation : str
+        Column in `adata.obs` containing cell phenotypes or annotations.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group or stratify data (e.g. imageid).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame. Default is
+        'spatial_distance'.
+    distance_from : str
+        Reference phenotype from which distances are measured. Required.
+    distance_to : str or list of str, optional
+        Target phenotype(s) to measure distance to. If None, uses all
+        available phenotypes.
+    facet_plot : bool, optional
+        If True (and stratify_by is not None), subplots in a single figure.
+        Else, multiple or single figure(s).
+    plot_type : str, optional
+        For method='numeric': 'box', 'violin', 'boxen', etc.
+        For method='distribution': 'hist', 'kde', 'ecdf', etc.
+    log : bool, optional
+        If True, applies np.log1p transform to the distance values.
+    method : {'numeric', 'distribution'}
+        Determines the plotting style (catplot vs displot).
+    **kwargs : dict
+        Additional arguments for seaborn figure-level functions.
+
+    Returns
+    -------
+    dict
+        {
+            "data": pd.DataFrame,  # Tidy DataFrame used for plotting
+            "fig": Figure or list[Figure]  # Single or multiple figures
+        }
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing or invalid.
+
+    Examples
+    --------
+    >>> # Numeric box plot comparing Tumor distances to multiple targets
+    >>> res = visualize_nearest_neighbor(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     stratify_by='sample_id',
+    ...     spatial_distance='spatial_distance',
+    ...     distance_from='Tumor',
+    ...     distance_to=['Stroma', 'Immune'],
+    ...     facet_plot=True,
+    ...     plot_type='box',
+    ...     method='numeric'
+    ... )
+    >>> df_long, fig = res["data"], res["fig"]
+
+    >>> # Distribution plot (kde) for a single target, single figure
+    >>> res2 = visualize_nearest_neighbor(
+    ...     adata=my_adata,
+    ...     annotation='cell_type',
+    ...     distance_from='Tumor',
+    ...     distance_to='Stroma',
+    ...     method='distribution',
+    ...     plot_type='kde'
+    ... )
+    >>> df_dist, fig2 = res2["data"], res2["fig"]
+    """
+
+    if distance_from is None:
+        raise ValueError(
+            "Please specify the 'distance_from' phenotype. It indicates "
+            "the reference group from which distances are measured."
+        )
+    if method not in ['numeric', 'distribution']:
+        raise ValueError(
+            "Invalid 'method'. Please choose 'numeric' or 'distribution'."
+        )
+
+    df_long = _prepare_spatial_distance_data(
+        adata=adata,
+        annotation=annotation,
+        stratify_by=stratify_by,
+        spatial_distance=spatial_distance,
+        distance_from=distance_from,
+        distance_to=distance_to,
+        log=log
+    )
+
+    # Determine plot_type if not provided
+    if plot_type is None:
+        plot_type = 'boxen' if method == 'numeric' else 'kde'
+
+    # If log=True, the column name is 'log_distance', else 'distance'
+    distance_col = 'log_distance' if log else 'distance'
+
+    # Dispatch to the plot logic
+    result_dict = _plot_spatial_distance_dispatch(
+        df_long=df_long,
+        method=method,
+        plot_type=plot_type,
+        stratify_by=stratify_by,
+        facet_plot=facet_plot,
+        distance_col=distance_col,
+        **kwargs
+    )
+
+    return result_dict

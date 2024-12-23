@@ -64,7 +64,7 @@ class TestHierarchicalHeatmap(unittest.TestCase):
             'feature3': [4.0, 8.0, 12.5, 17.5]
         }, index=pd.Categorical([
             'phenotype1', 'phenotype2', 'phenotype3', 'phenotype4'
-        ]), dtype='float32')
+        ]), dtype='float64')
 
         # Set the name of the index for the expected_mean_intensity DataFrame
         expected_mean_intensity.index.name = 'phenotype'
