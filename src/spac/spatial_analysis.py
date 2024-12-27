@@ -398,9 +398,10 @@ def spatial_interaction(
                         )
                     row_labels = xticklabels[::-1]
             else:
-                print(
-                    "No labels found on axis. Unable to determine row labels."
-                )
+                    if verbose:
+                        print(
+                            "No labels found on axis. Unable to determine row labels."
+                        )
 
         return row_labels
 
