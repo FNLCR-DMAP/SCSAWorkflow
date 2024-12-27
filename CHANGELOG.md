@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.17 (2024-12-27)
+
+### Performance Improvements
+
+- Add verbose for default get label method
+  ([`238b50c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/238b50c85ae6565df1b4afbbfed07b3f43da8284))
+
+
 ## v0.7.16 (2024-12-23)
 
 ### Bug Fixes
@@ -52,116 +60,6 @@
 
 - **boxplot**: Replace the calculation of expected_values with hard-coded values
   ([`821cc91`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/821cc916c5801489e0620aa95500890a1e5abf12))
-
-### Documentation
-
-- Updating docstring
-  ([`00ae0c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00ae0c917aaa2093a0d25d917c9ed58012083126))
-
-- Adding doc string to internal functions and prepend _ to internal function names to provide
-  clarity
-  ([`65fb259`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65fb259018dfe93312344c181beebae52719517e))
-
-- Fixing grammer errors in docstrings
-  ([`4b67734`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b6773472a9813c81502c105363ca503964789f4))
-
-- Updating the docstring of spatial interaction function to include latest table returns
-  ([`f6d53eb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f6d53ebc227a6872c1a5b8eb7a5f22f7e50ca1f2))
-
-- Updating the readme and name of the conda environment
-  ([`655c144`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/655c1443c4ba26af0f373571c59a2e3443dbf775))
-
-### Features
-
-- Adding the support for string calling the stored mapping in uns
-  ([`73f0cee`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73f0ceeafd0115cd60ffdce4a6f4ded47a593101))
-
-- Adding the spell converting for NIDAP
-  ([`d93b002`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d93b002fe5b27af7e8520626da093fe70e9f0b5d))
-
-- Adding dictionary return option
-  ([`1b81314`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b81314fc22ae87ad2c2e797e032c142aac0c54c))
-
-- Adding rgba/rgb mode switch, and add more explaination)
-  ([`24e619b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/24e619b61ca8e0fdd1ba62e01da4967286efdc37))
-
-- Updating NIDAP features into package
-  ([`28cac8b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28cac8b1a61b70c7ebcbf43161871e081be2e6dd))
-
-- Initial update of the plot
-  ([`67f870b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/67f870b11bf459424a5ffd9570e15fd0f2703893))
-
-- Update return to dict to provide matrix return
-  ([`a0da420`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a0da4204616a9d5d1c68cd014209034f8defbb72))
-
-- Create visualize nearest neighbor related functions and tests
-  ([`1cc23bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cc23bb6463947c6b343cdb343c0f39b6cd0d029))
-
-- Updating proccessed matrix output for save to file
-  ([`998136c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/998136caa7e1dab6df645d4fe5f916a1b326d08d))
-
-- Update calculate_spatial_distance and unit tests
-  ([`789f72e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/789f72e3f079231843a322b55e39d33732add833))
-
-- Adding scimap to environment
-  ([`5cc098b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5cc098b2b30b6f99dd0777288d99e44f99d30c7e))
-
-- Updating the recipe for pandas 1.5.3
-  ([`49f9f56`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/49f9f564ec838fde5e52508379f4c70eae5934c0))
-
-- Adding the github conda package repo for customized conda build
-  ([`d6c84b4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6c84b438060b77ceee044e4cc765abb11d4ed72))
-
-- Removing the depracated combine_dfs_depracated function and corresponding tests
-  ([`7d02be4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7d02be45e3e587f3c1d91a4a3e7e33ff7a299f2c))
-
-- Add calculate spatial distance feature and coresponding unit tests
-  ([`3e4bc21`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e4bc212f1edd2e7d4154937728947de8f48c5bf))
-
-- **check_label**: Add a new utils function check_label and corresponding unit tests
-  ([`d0e4597`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d0e45972e38e5a98604df4fae8c907b8230c43e3))
-
-### Performance Improvements
-
-- Reducing interactive plot code length
-  ([`294b9be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/294b9be673fcb746f6beeef5b570c8e9fcb0f8c4))
-
-- Updates per code review on dec 18 24
-  ([`c3ddaa4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c3ddaa4afd6f0c33560196eb1bee30ebc63ee791))
-
-- Replacing None as 0
-  ([`9503585`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9503585b734f2de8d2fb63cdfb2db8c386c3277e))
-
-- Updating per code review
-  ([`b92e6d4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b92e6d4ced773fdbb3aff95920f8e5bdbb7d562f))
-
-- Updated the test for umap to use float since np.float is deprecated
-  ([`6655a06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6655a06cbaf2bcb22049b1a5d207b73c5a1fcd0d))
-
-- Updated the test and the source code to process in python 3.9.13 env
-  ([`8fa7f57`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fa7f57370fb6fa0f0188a3f16ac76fa9287c149))
-
-- Update hierarchical heatmap test for new python env
-  ([`556cd30`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/556cd302c79e52dd95944db5e087793a784e288b))
-
-- Updating the environment limitation for scimap and python update
-  ([`90b6938`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/90b6938af89479a306862374bb96c1b2dca5064b))
-
-- Updating git ignore to include conda build items
-  ([`0410f2d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0410f2ddaf7c3abb6a427378776b32f9daa02264))
-
-- Loosen version constrains
-  ([`0e09e8c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e09e8ca0976b1fbaed9c8ff4e4011bac0c112d8))
-
-### Testing
-
-- **interactive_spatial_plot**: Added test to check that pinned color is defined correctly
-  ([`ce41fb1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce41fb14479e0d01998170f14b89a6375f90c74c))
-
-
-## v0.7.15 (2024-11-16)
-
-### Bug Fixes
 
 - Double log in boxplot and add log in histogram and update unit tests
   ([`23d1b06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23d1b063a0e8152a5e5c54b5119393ae9a0be94b))
@@ -235,6 +133,9 @@
 ### Continuous Integration
 
 - **version**: Automatic development release
+  ([`485f2f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/485f2f1b08dfcf0354f8c7566551c33c81cbd15f))
+
+- **version**: Automatic development release
   ([`d3f8827`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d3f88278a44b53582bc84716b6d9c24bb3f1d53c))
 
 - **version**: Automatic development release
@@ -281,10 +182,74 @@
 
 ### Documentation
 
+- Updating docstring
+  ([`00ae0c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/00ae0c917aaa2093a0d25d917c9ed58012083126))
+
+- Adding doc string to internal functions and prepend _ to internal function names to provide
+  clarity
+  ([`65fb259`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/65fb259018dfe93312344c181beebae52719517e))
+
+- Fixing grammer errors in docstrings
+  ([`4b67734`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b6773472a9813c81502c105363ca503964789f4))
+
+- Updating the docstring of spatial interaction function to include latest table returns
+  ([`f6d53eb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f6d53ebc227a6872c1a5b8eb7a5f22f7e50ca1f2))
+
+- Updating the readme and name of the conda environment
+  ([`655c144`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/655c1443c4ba26af0f373571c59a2e3443dbf775))
+
 - Fixed typo
   ([`b33fb1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b33fb1e7fe56b7fa76b8e8b3f68adb8444aa89c1))
 
 ### Features
+
+- Adding the support for string calling the stored mapping in uns
+  ([`73f0cee`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/73f0ceeafd0115cd60ffdce4a6f4ded47a593101))
+
+- Adding the spell converting for NIDAP
+  ([`d93b002`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d93b002fe5b27af7e8520626da093fe70e9f0b5d))
+
+- Adding dictionary return option
+  ([`1b81314`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1b81314fc22ae87ad2c2e797e032c142aac0c54c))
+
+- Adding rgba/rgb mode switch, and add more explaination)
+  ([`24e619b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/24e619b61ca8e0fdd1ba62e01da4967286efdc37))
+
+- Updating NIDAP features into package
+  ([`28cac8b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/28cac8b1a61b70c7ebcbf43161871e081be2e6dd))
+
+- Initial update of the plot
+  ([`67f870b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/67f870b11bf459424a5ffd9570e15fd0f2703893))
+
+- Update return to dict to provide matrix return
+  ([`a0da420`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a0da4204616a9d5d1c68cd014209034f8defbb72))
+
+- Create visualize nearest neighbor related functions and tests
+  ([`1cc23bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cc23bb6463947c6b343cdb343c0f39b6cd0d029))
+
+- Updating proccessed matrix output for save to file
+  ([`998136c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/998136caa7e1dab6df645d4fe5f916a1b326d08d))
+
+- Update calculate_spatial_distance and unit tests
+  ([`789f72e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/789f72e3f079231843a322b55e39d33732add833))
+
+- Adding scimap to environment
+  ([`5cc098b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5cc098b2b30b6f99dd0777288d99e44f99d30c7e))
+
+- Updating the recipe for pandas 1.5.3
+  ([`49f9f56`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/49f9f564ec838fde5e52508379f4c70eae5934c0))
+
+- Adding the github conda package repo for customized conda build
+  ([`d6c84b4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d6c84b438060b77ceee044e4cc765abb11d4ed72))
+
+- Removing the depracated combine_dfs_depracated function and corresponding tests
+  ([`7d02be4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7d02be45e3e587f3c1d91a4a3e7e33ff7a299f2c))
+
+- Add calculate spatial distance feature and coresponding unit tests
+  ([`3e4bc21`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e4bc212f1edd2e7d4154937728947de8f48c5bf))
+
+- **check_label**: Add a new utils function check_label and corresponding unit tests
+  ([`d0e4597`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d0e45972e38e5a98604df4fae8c907b8230c43e3))
 
 - **plot_ripley_l**: Return a dataframe of the line plots
   ([`f466f84`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f466f842963008ff8e58f07bf0d1ec3fbe203bcc))
@@ -321,6 +286,36 @@ This commit introduces changes to the Squidpy Ripley function to enhance its fun
 
 ### Performance Improvements
 
+- Reducing interactive plot code length
+  ([`294b9be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/294b9be673fcb746f6beeef5b570c8e9fcb0f8c4))
+
+- Updates per code review on dec 18 24
+  ([`c3ddaa4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c3ddaa4afd6f0c33560196eb1bee30ebc63ee791))
+
+- Replacing None as 0
+  ([`9503585`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9503585b734f2de8d2fb63cdfb2db8c386c3277e))
+
+- Updating per code review
+  ([`b92e6d4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b92e6d4ced773fdbb3aff95920f8e5bdbb7d562f))
+
+- Updated the test for umap to use float since np.float is deprecated
+  ([`6655a06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6655a06cbaf2bcb22049b1a5d207b73c5a1fcd0d))
+
+- Updated the test and the source code to process in python 3.9.13 env
+  ([`8fa7f57`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8fa7f57370fb6fa0f0188a3f16ac76fa9287c149))
+
+- Update hierarchical heatmap test for new python env
+  ([`556cd30`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/556cd302c79e52dd95944db5e087793a784e288b))
+
+- Updating the environment limitation for scimap and python update
+  ([`90b6938`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/90b6938af89479a306862374bb96c1b2dca5064b))
+
+- Updating git ignore to include conda build items
+  ([`0410f2d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0410f2ddaf7c3abb6a427378776b32f9daa02264))
+
+- Loosen version constrains
+  ([`0e09e8c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e09e8ca0976b1fbaed9c8ff4e4011bac0c112d8))
+
 - **assign_manual_phenotypes**: Replace apply method with vectorized operations
   ([`8b0f229`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8b0f229d24c3834dc970da3905c3599d612e59c5))
 
@@ -349,6 +344,9 @@ This commit introduces changes to the Squidpy Ripley function to enhance its fun
   ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
 
 ### Testing
+
+- **interactive_spatial_plot**: Added test to check that pinned color is defined correctly
+  ([`ce41fb1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ce41fb14479e0d01998170f14b89a6375f90c74c))
 
 - **select_values**: Added test to the case where both include and exclude are set
   ([`e29b21e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e29b21efcabe90b9c4fbdca0abe6446bd7f5ab9f))
