@@ -769,6 +769,8 @@ def ripley_l(
     # Check that annotation and phenotypes exist in adata.obs
     check_annotation(adata, annotations=[annotation], should_exist=True)
 
+    check_label(adata, annotation, phenotypes)
+
     # Convert annotations to categorical
     adata.obs[annotation] = pd.Categorical(adata.obs[annotation])
 
