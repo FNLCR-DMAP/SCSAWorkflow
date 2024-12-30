@@ -172,7 +172,7 @@ class TestPlotRipleyL(unittest.TestCase):
 
     def test_return_df_multiple_regions(self):
         """
-        Test return_df with multiple regions 
+        Test return_df with multiple regions
         """
 
         phenotype_name = ["A"]
@@ -306,9 +306,44 @@ class TestPlotRipleyL(unittest.TestCase):
             plot_ripley_l(
                 adata,
                 phenotypes=("A", "A"),
-                regions="region",
+                regions=["region"],
                 sims=True
             )
+
+
+    def test_no_phenotypes_within_region(self):
+        """
+        Test Ripley does not has passed phenotypes
+        """
+        adata = self.create_dummy_dataset()
+        distances = [5]
+        phenotypes = ['A', 'B']
+
+        ripley_l(
+            adata=adata,
+            annotation='phenotype',
+            phenotypes=phenotypes,
+            distances=distances,
+        )
+
+        expected_error_message = (
+            "No data available for the specified regions: "
+            "['non_exisiting_region']. "
+            "Available regions: ['all']."
+        )
+
+        # Refactor the code below to NOT use RaisesRegex, instead
+        # Capture the exception and check the message
+
+        with self.assertRaises(ValueError) as context:
+            plot_ripley_l(
+                adata,
+                phenotypes=("A", "B"),
+                regions=["non_exisiting_region"],
+                sims=True
+            )
+
+        self.assertIn(expected_error_message, str(context.exception))
 
     def test_warning_no_region_phenotypes(self):
         """
