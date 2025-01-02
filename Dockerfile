@@ -100,17 +100,12 @@ RUN conda index --verbose /local_channel \
 # Initiate Conda bash terminal and create conda environment using environment.yml file
 COPY environment.yml .
 
-RUN export ENV_NAME=$(grep -E '^name:' environment.yml | sed 's/name: *//') \
-    && echo "Environment Name: $ENV_NAME"
-
-RUN conda env create -f environment.yml --prefix /conda/envs/spac \
-    && conda install -p /conda/envs/spac -c conda-forge python-semantic-release \
-    && conda install -p /conda/envs/spac -c conda-forge flake8 \
+RUN conda env create -f environment.yml --prefix /conda/envs/SCSAWorkflow_NIDAP \
+    && conda install -p /conda/envs/SCSAWorkflow_NIDAP -c conda-forge python-semantic-release \
+    && conda install -p /conda/envs/SCSAWorkflow_NIDAP -c conda-forge flake8 \
     && conda clean --all \
     && conda config --add channels https://fnlcr-dmap.github.io/scimap/
 
-RUN conda env list \
-    && ls -l /conda/envs
 
 # Ask conda to activate the built environment when starting
 RUN ENV_NAME=$(grep -E '^name:' environment.yml | sed 's/name: *//') \
