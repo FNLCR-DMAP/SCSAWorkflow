@@ -218,7 +218,7 @@ class TestRunUtagClustering(unittest.TestCase):
         run_utag_clustering(adata=self.syn_data,
                             features=None,
                             k=15,
-                            resolution=1,
+                            resolution=0.5,
                             max_dist=20,
                             n_pcs=None,
                             random_state=42,
