@@ -10,6 +10,7 @@ from scipy import stats
 import umap as umap_lib
 from scipy.sparse import issparse
 from typing import List, Union, Optional
+from numpy.lib import NumpyVersion
 
 
 # Configure logging
@@ -430,6 +431,11 @@ def batch_normalize(adata, annotation, output_layer,
         If True, take the log2 of features before normalization.
         Ensure this is boolean.
     """
+    # Use utility functions for input validation
+    check_annotation(adata, annotations=annotation)
+    if input_layer:
+        check_table(adata, tables=input_layer)
+
     if not isinstance(log, bool):
         logger.error("Argument 'log' must be of type bool.")
         raise ValueError("Argument 'log' must be of type bool.")
@@ -685,7 +691,7 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
     Normalize the features in a numpy array.
 
     Any entry lower than the value corresponding to low_quantile of the column
-    will be assigned a value of low_quantile, and entry that are greater than
+    will be assigned a value of low_quantile, and entries that are greater than
     high_quantile value will be assigned as value of high_quantile.
     Other entries will be normalized with
     (values - quantile min)/(quantile max - quantile min).
@@ -723,7 +729,7 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
         If low_quantile is not less than high_quantile, or if they are
         out of the range [0, 1] and (0, 1], respectively.
     ValueError
-        If method is not one of the allowed values.
+        If interpolation is not one of the allowed values.
     """
     if not isinstance(high_quantile, (int, float)):
         raise TypeError(
@@ -756,9 +762,9 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
             "Interpolation must be either 'nearest' or 'linear', "
             f"passed value is: {interpolation}")
 
-    # Version check for numpy
+    # Version check for numpy using NumpyVersion
     numpy_version = np.__version__
-    if numpy_version >= '1.22.0':
+    if NumpyVersion(numpy_version) >= NumpyVersion('1.22.0'):
         # Use 'method' argument for newer versions
         quantiles = np.quantile(
             data, [low_quantile, high_quantile], axis=0,
@@ -774,10 +780,13 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
     qmin = quantiles[0]
     qmax = quantiles[1]
 
-    # Prevent division by zero in case qmax equals qmin
+    # Calculate range_values and identify zero ranges
     range_values = qmax - qmin
+    zero_range_mask = range_values == 0
+
+    # Prevent division by zero by setting zero ranges to 1 temporarily
     range_values = range_values.astype(float)
-    range_values[range_values == 0] = 1
+    range_values[zero_range_mask] = 1.0
 
     # Clip raw values to the quantile range before normalization
     clipped_data = np.clip(data, qmin, qmax)
@@ -785,8 +794,8 @@ def normalize_features_core(data, low_quantile=0.02, high_quantile=0.98,
     # Normalize the clipped values
     normalized_data = (clipped_data - qmin) / range_values
 
-    # Handle columns where qmax equals qmin
-    normalized_data[:, qmax == qmin] = 0
+    # Correct normalized data for zero ranges
+    normalized_data[:, zero_range_mask] = 0.0
 
     return normalized_data
 

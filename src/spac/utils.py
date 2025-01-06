@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.cm as cm
 import logging
 import warnings
+import numbers
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -139,7 +140,7 @@ def check_list_in_list(
     Warns
     -----
     UserWarning
-        If the specified behavior is not present 
+        If the specified behavior is not present
         and `warning` is True.
 
 
@@ -176,6 +177,7 @@ def check_list_in_list(
                         f"The {input_type} '{item}' "
                         "exist in the provided dataset.\n"
                         f"Existing {input_type}s are:\n"
+                        f"{target_list_str}"
                     )
                     if warning is False:
                         raise ValueError(message)
@@ -220,7 +222,7 @@ def check_table(
         If adata is not an instance of anndata.AnnData.
 
     ValueError
-        If any of the specified layers, annotations, obsm, 
+        If any of the specified layers, annotations, obsm,
         or features do not exist.
 
 
@@ -376,6 +378,38 @@ def check_column_name(
     else:
         if any(symbol in column_name for symbol in symbol_checklist):
             raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
+
+def check_distances(distances):
+    """
+    Check that the distances are valid: must be an array-like of
+    incremental positive values.
+
+    Parameters
+    ----------
+    distances : list, tuple, or np.ndarray
+        The list of increasing distances for the neighborhood profile.
+
+    Returns
+    -------
+    None
+        Raises a ValueError or TypeError if the distances are invalid.
+
+    Notes
+    -----
+    The distances must be a list of positive real numbers and must
+    be monotonically increasing.
+    """
+    if not isinstance(distances, (list, tuple, np.ndarray)):
+        raise TypeError("distances must be a list, tuple, or numpy array. " +
+                        f"Got {type(distances)}")
+
+    if not all(isinstance(x, numbers.Real) and x >= 0 for x in distances):
+        raise ValueError("distances must be a list of positive numbers. " +
+                         f"Got {distances}")
+
+    if not all(distances[i] < distances[i+1] for i in range(len(distances)-1)):
+        raise ValueError("distances must be monotonically increasing. " +
+                         f"Got {distances}")
 
 
 def text_to_others(
@@ -554,40 +588,92 @@ def annotation_category_relations(
 def color_mapping(
         labels,
         color_map='viridis',
-        opacity=1.0
+        opacity=1.0,
+        rgba_mode=True,
+        return_dict=False
 ):
     """
-    Map a list of labels to colors using a specified
-    matplotlib colormap and opacity.
+    Map a list of labels to colors using a Matplotlib colormap and opacity.
 
-    This function takes a list of labels and maps each one to a color from the
-    specified colormap. If the colormap is continuous, it linearly interpolates
-    between the colors. For discrete colormap, it calculates the number of
-    categories per color and interpolates between the colors.
+    This function assigns a unique color to each label in the provided list
+    using a specified colormap from Matplotlib. The generated colors can be
+    returned in either `rgba` or `rgb` format, suitable for visualization in
+    libraries like Plotly.
 
-    For more information on colormaps, see:
-    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+    The function supports both continuous and discrete colormaps:
+    - Continuous colormaps interpolate smoothly between colors across a range.
+    - Discrete colormaps have a fixed number of distinct colors, and labels are
+      distributed evenly across these colors.
+
+    Opacity can be set with a value between 0 (fully transparent) and 1 (fully
+    opaque). The resulting colors are CSS-compatible strings.
 
     Parameters
     ----------
     labels : list
-        The list of labels to map to colors.
+        A list of unique labels to map to colors. The number of labels
+        determines how the colormap is sampled.
     color_map : str, optional
-        The name of the colormap to use. Default is 'viridis'.
+        The colormap name (e.g., 'viridis', 'plasma', 'inferno'). It must be a
+        valid Matplotlib colormap. Default is 'viridis'.
     opacity : float, optional
-        The opacity of the colors. Must be between 0 and 1. Default is 1.0.
+        Opacity (alpha channel) for colors, between 0 (transparent) and 1
+        (opaque). Default is 1.0.
+    rgba_mode : bool, optional
+        If True, returns colors in `rgba` format (e.g., `rgba(255, 0, 0, 0.5)`).
+        If False, returns `rgb` format (e.g., `rgb(255, 0, 0)`).
+        Default is True.
+    return_dict : bool, optional
+        If True, returns a dictionary where keys are labels, and values are the
+        corresponding colors. Default is False.
 
     Returns
     -------
-    label_colors : list[str]
-        A list of strings, each representing an rgba color in CSS format.
-        The opacity of each color is set to the provided `opacity` value.
+    label_colors : list[str] or dict
+        If `return_dict` is False, returns a list of color strings, one for
+        each label. If `return_dict` is True, returns a dictionary with label
+        keys and color values. The format of the colors depends on the
+        `rgba_mode` parameter.
 
     Raises
     ------
     ValueError
-        If the opacity is not between 0 and 1,
-        or if the colormap name is invalid.
+        - If `opacity` is not in the range [0, 1].
+        - If `color_map` is not a valid Matplotlib colormap name.
+
+    Examples
+    --------
+    Assign colors to labels with default settings:
+
+    >>> labels = ['A', 'B', 'C']
+    >>> color_mapping(labels)
+    ['rgba(68, 1, 84, 1.0)', 'rgba(58, 82, 139, 1.0)',
+     'rgba(33, 145, 140, 1.0)']
+
+    Use a different colormap with reduced opacity:
+
+    >>> color_mapping(labels, color_map='plasma', opacity=0.5)
+    ['rgba(13, 8, 135, 0.5)', 'rgba(126, 3, 167, 0.5)',
+     'rgba(240, 249, 33, 0.5)']
+
+    Generate colors in `rgb` format:
+
+    >>> color_mapping(labels, rgba_mode=False)
+    ['rgb(68, 1, 84)', 'rgb(58, 82, 139)', 'rgb(33, 145, 140)']
+
+    Return a dictionary of labels and colors:
+
+    >>> color_mapping(labels, return_dict=True)
+    {'A': 'rgba(68, 1, 84, 1.0)', 'B': 'rgba(58, 82, 139, 1.0)',
+     'C': 'rgba(33, 145, 140, 1.0)'}
+
+    Notes
+    -----
+    - Continuous colormaps interpolate colors evenly based on the number of
+      labels.
+    - Discrete colormaps divide labels evenly across available colors.
+    - For more information on Matplotlib colormaps:
+      https://matplotlib.org/stable/users/explain/colors/colormaps.html
     """
 
     if not 0 <= opacity <= 1:
@@ -612,12 +698,231 @@ def color_mapping(
             cmap(i / (categories_per_color * cmap.N - 1))
             for i in range(len(labels))
         ]
+    if rgba_mode:
+        label_colors = [
+            f'rgba({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)},{opacity})'
+            for color in label_colors
+        ]
+    else:
+        label_colors = [
+            f'rgb({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)})'
+            for color in label_colors
+        ]
+    
+    if return_dict:
+        returning = {}
+        for i, color in enumerate(label_colors):
+            returning[labels[i]] = color
+    else:
+        returning = label_colors
 
-    label_colors = [
-        f'rgba({int(color[0]*255)},'
-        f'{int(color[1]*255)},'
-        f'{int(color[2]*255)},{opacity})'
-        for color in label_colors
-    ]
+    return returning
 
-    return label_colors
+
+def check_label(
+    adata,
+    annotation,
+    labels=None,
+    should_exist=True,
+    warning=False
+):
+    """
+    Check if specified labels exist in a given annotation column in adata.obs.
+
+    This function verifies whether all or none of the specified labels
+    exist in the provided annotation column of an AnnData object. It ensures
+    that the input labels align with the expected categories present in
+    adata.obs[annotation].
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object containing the annotation column.
+
+    annotation : str
+        The name of the annotation column in adata.obs to check against.
+
+    labels : str or list of str, optional
+        The label or list of labels to check for existence in the specified
+        annotation column. If None, no validation will be performed.
+
+    should_exist : bool, optional (default=True)
+        Determines whether to check if elements exist in the target column
+        (True), or if they should not exist (False).
+
+    warning : bool, optional (default=False)
+        If True, generate a warning instead of raising an exception if the
+        specified condition is not met.
+
+    Raises
+    ------
+    TypeError
+        If adata is not an instance of anndata.AnnData.
+
+    ValueError
+        If the specified annotation does not exist in adata.obs.
+        If should_exist is True and any label does not exist in the
+        annotation column.
+        If should_exist is False and any label already exists in the
+        annotation column.
+
+    Warns
+    -----
+    UserWarning
+        If the specified condition is not met and warning is True.
+
+    Example
+    -------
+    >>> check_label(adata, "cell_type", "B_cell")
+    >>> check_label(
+    ...     adata, "cluster", ["Cluster1", "Cluster2"], should_exist=True
+    ... )
+    """
+
+    # Check if annotation exists in adata.obs
+    check_annotation(
+        adata=adata,
+        annotations=annotation,
+        parameter_name="annotation",
+        should_exist=True
+    )
+
+    # Convert single label to list
+    if labels is not None:
+        if isinstance(labels, str):
+            labels = [labels]
+        elif not isinstance(labels, list):
+            raise ValueError(
+                "The 'labels' parameter "
+                "should be a string or a list of strings."
+            )
+
+        # Get existing labels in the annotation column
+        existing_labels = adata.obs[annotation].unique().tolist()
+
+        # Validate the labels
+        check_list_in_list(
+            input=labels,
+            input_name="labels",
+            input_type=f"label(s) in the annotation '{annotation}'",
+            target_list=existing_labels,
+            need_exist=should_exist,
+            warning=warning
+        )
+
+def spell_out_special_characters(text):
+    """
+    Convert special characters in a string to comply with NIDAP naming rules.
+
+    This function processes a string by replacing or removing disallowed
+    characters to ensure compatibility with NIDAP. Spaces, special symbols,
+    and certain substrings are replaced or transformed into readable and
+    regulation-compliant equivalents.
+
+    Parameters
+    ----------
+    text : str
+        The input string to be processed and converted.
+
+    Returns
+    -------
+    str
+        A sanitized string with special characters replaced or removed,
+        adhering to NIDAP naming conventions.
+
+    Processing Steps
+    ----------------
+    1. Spaces are replaced with underscores (`_`).
+    2. Substrings related to units (e.g., 'µm²') are replaced with text
+       equivalents:
+       - 'µm²' -> 'um2'
+       - 'µm' -> 'um'
+    3. Hyphens (`-`) between letters are replaced with underscores (`_`).
+    4. Certain special symbols are mapped to readable equivalents:
+       - `+` -> `_pos_`
+       - `-` -> `_neg_`
+       - `@` -> `at`
+       - `#` -> `hash`
+       - `&` -> `and`
+       - And more (see Notes section for a full mapping).
+    5. Remaining disallowed characters are removed (non-alphanumeric and
+       non-underscore characters).
+    6. Consecutive underscores are consolidated into a single underscore.
+    7. Leading and trailing underscores are stripped.
+
+    Notes
+    -----
+    The following special character mappings are used:
+    - `µ` -> `u`
+    - `²` -> `2`
+    - `/` -> `slash`
+    - `=` -> `equals`
+    - `!` -> `exclamation`
+    - `|` -> `pipe`
+    - For a complete list, refer to the `special_char_map` in the code.
+
+    Example
+    -------
+    >>> spell_out_special_characters("Data µm²+Analysis #1-2")
+    'Data_um2_pos_Analysis_hash1_neg_2'
+
+    >>> spell_out_special_characters("Invalid!Char@Format")
+    'Invalid_exclamation_Char_at_Format'
+
+    """
+    # Replace spaces with underscores
+    text = text.replace(' ', '_')
+
+    # Replace specific substrings for units
+    text = text.replace('µm²', 'um2')
+    text = text.replace('µm', 'um')
+
+    # Replace hyphens between letters with '_'
+    text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)
+
+    # Replace '+' with '_pos_' and '-' with '_neg_'
+    text = text.replace('+', '_pos_')
+    text = text.replace('-', '_neg_')
+
+    # Mapping for specific characters
+    special_char_map = {
+        'µ': 'u',       # Micro symbol replaced with 'u'
+        '²': '2',       # Superscript two replaced with '2'
+        '@': 'at',
+        '#': 'hash',
+        '$': 'dollar',
+        '%': 'percent',
+        '&': 'and',
+        '*': 'asterisk',
+        '/': 'slash',
+        '\\': 'backslash',
+        '=': 'equals',
+        '^': 'caret',
+        '!': 'exclamation',
+        '?': 'question',
+        '~': 'tilde',
+        # '(': 'open_parenthesis',
+        # ')': 'close_parenthesis',
+        # '{': 'open_brace',
+        # '}': 'close_brace',
+        # '[': 'open_bracket',
+        # ']': 'close_bracket',
+        '|': 'pipe',
+    }
+
+    # Replace special characters using special_char_map
+    for char, replacement in special_char_map.items():
+        text = text.replace(char, replacement)
+
+    # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
+    text = re.sub(r'[^a-zA-Z0-9_]', '', text)
+                
+    # Remove multiple underscores and strip leading/trailing underscores
+    text = re.sub(r'_+', '_', text)
+    text = text.strip('_')
+
+    return text

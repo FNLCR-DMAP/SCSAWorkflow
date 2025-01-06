@@ -6,6 +6,7 @@ import pandas as pd
 import anndata
 from spac.visualization import histogram
 mpl.use('Agg')  # Set the backend to 'Agg' to suppress plot window
+from unittest import mock
 
 
 class TestHistogram(unittest.TestCase):
@@ -51,7 +52,7 @@ class TestHistogram(unittest.TestCase):
         fig, ax = histogram(self.adata, feature='marker1', bins=bin_edges)
 
         # Check the histogram bars
-        bars = ax[0].patches
+        bars = ax.patches
         # Expecting 100 bars for 100 distinct values
         self.assertEqual(len(bars), 100)
 
@@ -66,18 +67,18 @@ class TestHistogram(unittest.TestCase):
                 bar.get_x() + bar.get_width() / 2, expected_center
             )
 
-        # Check the number of axes returned
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_annotation(self):
         fig, ax = histogram(self.adata, annotation='annotation1')
         total_annotation = len(self.adata.obs['annotation1'])
         # Assuming the y-axis of the histogram represents counts
         # (not frequencies or probabilities)
-        self.assertEqual(sum(p.get_height() for p in ax[0].patches),
+        self.assertEqual(sum(p.get_height() for p in ax.patches),
                          total_annotation)
-        # Check the number of axes returned
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_feature_group_by(self):
         fig, axs = histogram(
@@ -120,15 +121,119 @@ class TestHistogram(unittest.TestCase):
             group_by='annotation1',
             together=False
         )
-        self.assertEqual(len(axs), 1)
+        # Since only one plot is created, axs is an Axes object
+        self.assertIsInstance(axs, mpl.axes.Axes)
+        # Wrap axs in a list for consistent handling
+        axs = [axs]
 
         # Check the number of returned axes matches the unique group count
         unique_annotations = adata.obs['annotation1'].nunique()
         self.assertEqual(len(axs), unique_annotations)
 
-    def test_log_scale(self):
-        fig, ax = histogram(self.adata, feature='marker1', log_scale=True)
-        self.assertTrue(ax[0].get_xscale() == 'log')
+    def test_x_log_scale_transformation(self):
+        """Test that x_log_scale applies log1p transformation."""
+        original_values = self.adata.X[
+            :, self.adata.var_names.get_loc('marker1')
+        ].flatten()
+
+        fig, ax = histogram(self.adata, feature='marker1', x_log_scale=True)
+
+        # Check that x-axis label is updated
+        self.assertEqual(ax.get_xlabel(), 'log(marker1)')
+
+        # Since seaborn's histplot does not expose the data directly,
+        # check that the x-axis limits encompass the transformed data
+        x_min, x_max = ax.get_xlim()
+        transformed_values = np.log1p(original_values)
+        expected_min = transformed_values.min()
+        expected_max = transformed_values.max()
+
+        # Check that x-axis limits include the transformed data range
+        self.assertLessEqual(x_min, expected_min)
+        self.assertGreaterEqual(x_max, expected_max)
+
+    @mock.patch('builtins.print')
+    def test_negative_values_x_log_scale(self, mock_print):
+        """Test that negative values disable x_log_scale
+        and print a message."""
+        # Introduce negative values
+        self.adata.X[0, self.adata.var_names.get_loc('marker1')] = -1
+
+        fig, ax = histogram(self.adata, feature='marker1', x_log_scale=True)
+
+        # Check that x-axis label is not changed
+        self.assertEqual(ax.get_xlabel(), 'marker1')
+
+        # Check that a message was printed
+        print_calls = [call.args[0] for call in mock_print.call_args_list]
+        expected_msg = (
+            "There are negative values in the data, disabling x_log_scale."
+        )
+        self.assertIn(expected_msg, print_calls)
+
+    def test_y_log_scale_axis(self):
+        """Test that y_log_scale sets y-axis to log scale."""
+        fig, ax = histogram(self.adata, feature='marker1', y_log_scale=True)
+        self.assertEqual(ax.get_yscale(), 'log')
+
+    def test_y_log_scale_label(self):
+        """Test that y-axis label is updated when y_log_scale is True."""
+        fig, ax = histogram(self.adata, feature='marker1', y_log_scale=True)
+        self.assertEqual(ax.get_ylabel(), 'log(Count)')
+
+    def test_y_axis_label_based_on_stat(self):
+        """Test that y-axis label changes based on the 'stat' parameter."""
+        # Test default stat ('count')
+        fig, ax = histogram(self.adata, feature='marker1')
+        self.assertEqual(ax.get_ylabel(), 'Count')
+
+        # Test 'frequency' stat
+        fig, ax = histogram(self.adata, feature='marker1', stat='frequency')
+        self.assertEqual(ax.get_ylabel(), 'Frequency')
+
+        # Test 'density' stat
+        fig, ax = histogram(self.adata, feature='marker1', stat='density')
+        self.assertEqual(ax.get_ylabel(), 'Density')
+
+        # Test 'probability' stat
+        fig, ax = histogram(self.adata, feature='marker1', stat='probability')
+        self.assertEqual(ax.get_ylabel(), 'Probability')
+
+    def test_y_log_scale_with_different_stats(self):
+        """Test y-axis label when y_log_scale is True
+        and different stats are used."""
+        fig, ax = histogram(
+            self.adata, feature='marker1', y_log_scale=True, stat='density'
+        )
+        self.assertEqual(ax.get_ylabel(), 'log(Density)')
+
+    def test_group_by_together_with_y_log_scale(self):
+        """Test that group_by and y_log_scale work together."""
+        fig, ax = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            together=True,
+            y_log_scale=True
+        )
+        self.assertEqual(ax.get_yscale(), 'log')
+        self.assertEqual(ax.get_ylabel(), 'log(Count)')
+
+    def test_group_by_separate_with_y_log_scale(self):
+        """Test that group_by creates separate plots with y_log_scale."""
+        fig, axs = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            together=False,
+            y_log_scale=True
+        )
+        # Ensure axs is iterable
+        if not isinstance(axs, list):
+            axs = [axs]
+        for ax in axs:
+            self.assertEqual(ax.get_yscale(), 'log')
+            self.assertEqual(ax.get_ylabel(), 'log(Count)')
 
     def test_overlay_options(self):
         fig, ax = histogram(
@@ -140,7 +245,7 @@ class TestHistogram(unittest.TestCase):
             element="step"
         )
         self.assertIsInstance(fig, mpl.figure.Figure)
-        self.assertIsInstance(ax[0], mpl.axes.Axes)
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_layer(self):
         # Create synthetic data with known values for a subset of the data
@@ -171,7 +276,7 @@ class TestHistogram(unittest.TestCase):
             bins=[0.5, 1.5, 2.5, 3.5])
 
         # Check the histogram bars
-        bars = ax[0].patches
+        bars = ax.patches
         self.assertEqual(len(bars), 3)  # Expecting 3 bars for synthetic data
 
         # Check the height and position of each bar to match the synthetic data
@@ -191,13 +296,13 @@ class TestHistogram(unittest.TestCase):
             ax=ax
         )
         # Check that the passed ax is the one that is returned
-        self.assertEqual(id(returned_ax[0]), id(ax))
+        self.assertEqual(id(returned_ax), id(ax))
 
         # Check that the passed fig is the one that is returned
         self.assertIs(fig, returned_fig)
 
-        # Check the number of axes returned
-        self.assertEqual(len(returned_ax), 1)
+        # Check that returned_ax is an Axes object
+        self.assertIsInstance(returned_ax, mpl.axes.Axes)
 
     def test_default_first_feature(self):
         with self.assertWarns(UserWarning) as warning:
@@ -208,10 +313,11 @@ class TestHistogram(unittest.TestCase):
                            "Defaulting to the first feature: 'marker1'.")
         self.assertEqual(str(warning.warning), warning_message)
 
-        self.assertEqual(len(ax), 1)
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
 
         # Check the number of bars matches the number of cells
-        bars = ax[0].patches
+        bars = ax.patches
         self.assertEqual(len(bars), 100)
 
 

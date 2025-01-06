@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 import anndata
 import numpy as np
 import matplotlib.pyplot as plt
@@ -137,22 +138,24 @@ class SpatialPlotTestCase(unittest.TestCase):
         # inputs passed to it match the expected values.
         def mock_spatial(
                 adata,
-                layer,
-                annotation,
+                color,
                 spot_size,
                 alpha,
-                vmin,
-                vmax,
                 ax,
                 show,
+                layer,
+                vmin,
+                vmax,
                 **kwargs):
             # Assert that the inputs match the expected values
-            self.assertEqual(layer, None)
-            self.assertEqual(annotation, 'annotation1')
+            assert layer is None
+            self.assertEqual(color, 'annotation1')
             self.assertEqual(spot_size, self.spot_size)
             self.assertEqual(alpha, self.alpha)
-            self.assertEqual(vmin, None)
-            self.assertEqual(vmax, None)
+            # self.assertEqual(vmin, None)
+            assert vmax is None
+            assert vmin is None
+            # self.assertEqual(vmax, None)
             self.assertIsInstance(ax, plt.Axes)
             self.assertFalse(show)
             # Return a list containing the ax object to mimic
@@ -160,22 +163,24 @@ class SpatialPlotTestCase(unittest.TestCase):
             return [ax]
 
         # Mock the spatial function with the mock_spatial function
-        spatial_plot.__globals__['sc.pl.spatial'] = mock_spatial
-
-        # Create an instance of Axes
-        ax = plt.Axes(
-            plt.figure(),
-            rect=[0, 0, 1, 1]
-        )
-
-        # Call the spatial_plot function with the ax object
-        returned_ax_list = spatial_plot(
-            adata=self.adata,
-            spot_size=self.spot_size,
-            alpha=self.alpha,
-            annotation='annotation1',
-            ax=ax
-        )
+        # spatial_plot.__globals__['sc.pl.spatial'] = mock_spatial
+        
+        with patch('scanpy.pl.spatial', new=mock_spatial):
+            # Create an instance of Axes
+            ax = plt.Axes(
+                plt.figure(),
+                rect=[0, 0, 1, 1]
+            )
+            
+            # Call the spatial_plot function with the ax object
+            returned_ax_list = spatial_plot(
+                adata=self.adata,
+                layer=None,
+                annotation='annotation1',
+                spot_size=self.spot_size,
+                alpha=self.alpha,
+                ax=ax
+            )
 
         # Assert that the spatial_plot function returned a list
         # containing an Axes object with the same properties
@@ -185,14 +190,14 @@ class SpatialPlotTestCase(unittest.TestCase):
         self.assertEqual(returned_ax.get_ylabel(), ax.get_ylabel())
 
         # Restore the original spatial function
-        del spatial_plot.__globals__['sc.pl.spatial']
+        # del spatial_plot.__globals__['sc.pl.spatial']
 
     def test_spatial_plot_feature(self):
         # Mock the spatial function
         def mock_spatial(
                 adata,
                 layer,
-                feature,
+                color,
                 spot_size,
                 alpha,
                 vmin,
@@ -201,8 +206,8 @@ class SpatialPlotTestCase(unittest.TestCase):
                 show,
                 **kwargs):
             # Assert that the inputs match the expected values
-            self.assertEqual(layer, None)
-            self.assertEqual(feature, 'Intensity_10')
+            assert layer is None
+            self.assertEqual(color, 'Intensity_10spatial_plot')
             self.assertEqual(spot_size, self.spot_size)
             self.assertEqual(alpha, self.alpha)
             self.assertEqual(vmin, 0)
@@ -214,24 +219,25 @@ class SpatialPlotTestCase(unittest.TestCase):
             return [ax]
 
         # Mock the spatial function with the mock_spatial function
-        spatial_plot.__globals__['sc.pl.spatial'] = mock_spatial
+        # spatial_plot.__globals__['sc.pl.spatial'] = mock_spatial
+        with patch('scanpy.pl.spatial', new=mock_spatial):
 
-        # Create an instance of Axes
-        ax = plt.Axes(
-            plt.figure(),
-            rect=[0, 0, 1, 1]
-        )
+            # Create an instance of Axes
+            ax = plt.Axes(
+                plt.figure(),
+                rect=[0, 0, 1, 1]
+            )
 
-        # Call the spatial_plot function with the ax object
-        returned_ax_list = spatial_plot(
-            adata=self.adata,
-            spot_size=self.spot_size,
-            alpha=self.alpha,
-            feature='Intensity_10',
-            vmin=0,
-            vmax=100,
-            ax=ax
-        )
+            # Call the spatial_plot function with the ax object
+            returned_ax_list = spatial_plot(
+                adata=self.adata,
+                spot_size=self.spot_size,
+                alpha=self.alpha,
+                feature='Intensity_10',
+                vmin=0,
+                vmax=100,
+                ax=ax
+            )
 
         # Assert that the spatial_plot function returned a list
         # containing an Axes object with the same properties
@@ -241,7 +247,7 @@ class SpatialPlotTestCase(unittest.TestCase):
         self.assertEqual(returned_ax.get_ylabel(), ax.get_ylabel())
 
         # Restore the original spatial function
-        del spatial_plot.__globals__['sc.pl.spatial']
+        # del spatial_plot.__globals__['sc.pl.spatial']
 
     def test_spatial_plot_combos_feature(self):
         # Define the parameter combinations to test
@@ -267,6 +273,7 @@ class SpatialPlotTestCase(unittest.TestCase):
 
         for params in parameter_combinations:
             spot_size, alpha, vmin, vmax, feature, layer = params
+            print(layer)
             # Test the spatial_plot function with the
             # given parameter combination
 
