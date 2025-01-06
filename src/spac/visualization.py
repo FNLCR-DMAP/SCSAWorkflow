@@ -1567,7 +1567,7 @@ def interative_spatial_plot(
         -------
         plotly.graph_objs._figure.Figure
 
-        """   
+        """
 
         spatial_coords = adata.obsm['spatial']
 
@@ -1862,7 +1862,7 @@ def interative_spatial_plot(
 
     if stratify_by is not None:
         unique_stratification_values = adata.obs[stratify_by].unique()
-    
+
         for strat_value in unique_stratification_values:
             condition = adata.obs[stratify_by] == strat_value
             title = f"Highlighting {stratify_by}: {strat_value}"
@@ -2060,11 +2060,11 @@ def relational_heatmap(
     -------
     dict
         A dictionary containing:
-        - "figure" (plotly.graph_objs._figure.Figure): 
+        - "figure" (plotly.graph_objs._figure.Figure):
             The generated relational heatmap as a Plotly figure.
-        - "file_name" (str): 
+        - "file_name" (str):
             The name of the file where the relational matrix can be saved.
-        - "data" (pandas.DataFrame): 
+        - "data" (pandas.DataFrame):
             A relational matrix DataFrame with percentage values.
             Rows represent source annotations,
             columns represent target annotations,
@@ -2264,6 +2264,14 @@ def plot_ripley_l(
         filtered_results = filtered_results[
             filtered_results['region'].isin(regions)]
 
+    # Check if the results are emply after subsetting the regions
+    if filtered_results.empty:
+        available_regions = ripley_results['region'].unique()
+        raise ValueError(
+            f"No data available for the specified regions: {regions}. "
+            f"Available regions: {available_regions}."
+        )
+
     # Create a figure and axes
     fig, ax = plt.subplots(figsize=(10, 10))
 
@@ -2309,7 +2317,8 @@ def plot_ripley_l(
             })
 
         if sims:
-            errorbar = ("pi", 95)
+            confidence_level = 95
+            errorbar = ("pi", confidence_level)
             n_sims = row["n_simulations"]
             sns.lineplot(
                 x="bins",
@@ -2329,7 +2338,7 @@ def plot_ripley_l(
     ax.grid(True)
 
     # Set the horizontal axis lable
-    ax.set_xlabel("Radii (pixles)")
+    ax.set_xlabel("Radii (pixels)")
     ax.set_ylabel("Ripley's L Statistic")
 
     if return_df:

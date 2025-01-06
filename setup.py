@@ -16,6 +16,7 @@ setup(
         'SPAC enables user-friendly web interfaces and offers insights into '
         'cell interactions in diverse environments, benefiting studies of '
         'cancer microenvironments, stem cell niches, and drug responses.'
+        'Latest release on Jan 6th, 2025'
     ),
     author='Fang Liu, Rui He, and George Zaki',
     url='https://github.com/FNLCR-DMAP/SCSAWorkflow',
