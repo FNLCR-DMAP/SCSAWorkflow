@@ -1,15 +1,25 @@
 # CHANGELOG
 
 
+## v0.8.0 (2025-01-06)
+
+### Refactoring
+
+- **Ripley L**: Use check_label to validate passed phenotypes
+  ([`5f51d4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f51d4e5ef63dbf7128ab777013199c9b052371d))
+
+- **plot_ripley_l**: Added appropriate error messages and fixed typos
+  ([`a2fea46`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a2fea46d5c6a9eb0629084a38917d19210380db8))
+
+### Step
+
+- Version 0.8.0 release
+  ([`afa6548`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/afa6548945c8f2fc192f5558b7174e3c3000d46c))
+
+This commit is to trigger the minor version increase through the step flag in commit message.
+
+
 ## v0.7.17 (2024-12-27)
-
-### Performance Improvements
-
-- Add verbose for default get label method
-  ([`238b50c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/238b50c85ae6565df1b4afbbfed07b3f43da8284))
-
-
-## v0.7.16 (2024-12-23)
 
 ### Bug Fixes
 
@@ -131,6 +141,9 @@
   ([`cf97301`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf9730111e12b9a4a47427c79e15028e88e17fee))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`489596e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/489596e6bb6a998a67fe587c9d9dfd828e4b6f60))
 
 - **version**: Automatic development release
   ([`485f2f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/485f2f1b08dfcf0354f8c7566551c33c81cbd15f))
@@ -285,6 +298,9 @@ This commit introduces changes to the Squidpy Ripley function to enhance its fun
   ([`5f8cf9a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f8cf9a3473bd2077b8e2989b59072f40da0e29a))
 
 ### Performance Improvements
+
+- Add verbose for default get label method
+  ([`238b50c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/238b50c85ae6565df1b4afbbfed07b3f43da8284))
 
 - Reducing interactive plot code length
   ([`294b9be`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/294b9be673fcb746f6beeef5b570c8e9fcb0f8c4))
