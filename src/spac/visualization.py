@@ -2092,6 +2092,7 @@ def relational_heatmap(
     )
 
     heatmap_matrix = heatmap_matrix.fillna(0)
+    print(heatmap_matrix)
 
     x = list(heatmap_matrix.columns)
     y = list(heatmap_matrix.index)

@@ -582,6 +582,8 @@ def annotation_category_relations(
             "target"
         ].apply(lambda x: "target_" + x)
 
+
+    relationships.fillna(0, inplace=True)
     return relationships
 
 
