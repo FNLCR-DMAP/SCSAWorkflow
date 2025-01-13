@@ -2090,6 +2090,9 @@ def relational_heatmap(
         columns='target',
         values='percentage_source'
     )
+
+    heatmap_matrix = heatmap_matrix.fillna(0)
+
     x = list(heatmap_matrix.columns)
     y = list(heatmap_matrix.index)
 
