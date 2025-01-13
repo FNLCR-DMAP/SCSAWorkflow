@@ -2108,6 +2108,8 @@ def relational_heatmap(
         values='percentage_source'
         )
 
+    heatmap_matrix2 = heatmap_matrix2.fillna(0)
+
     hover_template = 'Source: %{z}%<br>Target: %{customdata}%<extra></extra>'
     # Ensure alignment of the text data with the heatmap matrix
     z = list()
