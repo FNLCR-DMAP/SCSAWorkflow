@@ -583,7 +583,6 @@ def annotation_category_relations(
         ].apply(lambda x: "target_" + x)
 
 
-    relationships.fillna(0, inplace=True)
     return relationships
 
 
