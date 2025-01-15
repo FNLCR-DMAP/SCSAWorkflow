@@ -687,9 +687,14 @@ def color_mapping(
         raise ValueError(f"Invalid color map name: {color_map}")
 
     if cmap.N > 50:  # This is a continuous colormap
-        label_colors = [
-            cmap(i / (len(labels))) for i in range(len(labels))
-        ]
+        if len(labels) == 1:
+            label_colors = [
+                cmap(i / (len(labels))) for i in range(len(labels))
+            ]
+        else:
+            label_colors = [
+                cmap(i / (len(labels) - 1)) for i in range(len(labels))
+            ]
     else:  # This is a discrete colormap
         # Calculate the number of categories per color
         categories_per_color = np.ceil(len(labels) / cmap.N)
