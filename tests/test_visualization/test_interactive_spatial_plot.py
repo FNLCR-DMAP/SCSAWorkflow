@@ -165,8 +165,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 defined_color_map=defined_color_map
             )
 
-
-
     def test_color_mapping(self):
         defined_color_map = {
                 'a': 'red',

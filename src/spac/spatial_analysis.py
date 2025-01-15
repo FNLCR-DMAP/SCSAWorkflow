@@ -14,7 +14,6 @@ from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
 from functools import partial
 import logging
-import scimap as sm
 
 
 def spatial_interaction(
@@ -1219,6 +1218,8 @@ def calculate_nearest_neighbor(
         If `spatial_associated_table` is not found in `adata.obsm`.
         If spatial coordinates are missing or invalid.
     """
+
+    import scimap as sm
 
     # Input validation for annotation
     check_annotation(adata, annotations=annotation)
