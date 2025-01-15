@@ -379,6 +379,7 @@ def check_column_name(
         if any(symbol in column_name for symbol in symbol_checklist):
             raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
 
+
 def check_distances(distances):
     """
     Check that the distances are valid: must be an array-like of
