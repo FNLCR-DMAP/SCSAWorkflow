@@ -876,7 +876,6 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         metric='euclidean',
         row_cluster=row_cluster,
         col_cluster=col_cluster,
-        cmap="viridis",
         **kwargs
     )
 
