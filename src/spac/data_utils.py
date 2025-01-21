@@ -487,7 +487,8 @@ def _select_values_dataframe(data, annotation, values, exclude_values):
 
     count = filtered_data.shape[0]
     logging.info(
-        f"Summary of returned dataset: {count} cells match the selected labels."
+        f"Summary of returned dataset: {count} cells",
+        " match the selected labels."
         )
 
     return filtered_data
