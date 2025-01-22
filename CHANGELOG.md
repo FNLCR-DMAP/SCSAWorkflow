@@ -1,58 +1,18 @@
 # CHANGELOG
 
 
-## v0.8.1 (2025-01-21)
+## v0.8.2 (2025-01-22)
 
 ### Bug Fixes
 
-- **color_map**: Put special case when labels == 1
-  ([`d1f4c64`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1f4c64fde785bfeed832ea4edd37ae5dac1c3ee))
+- **calculate_nearest_neighbor**: Reindex to match adata.obs and unit test
+  ([`aadca8c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aadca8c230fe488f90073777ab1bbcb062073d91))
 
-- **color_mapping**: Fixed the case where one label exist in the dataset
-  ([`bb84792`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bb8479264d84b392062bb18a9460b56185b5ff5b))
-
-### Chores
-
-- **deps**: Add parmap in environment.yml file
-  ([`e4bbaa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4bbaa0c052d4c12eaae56ba2d1b59e158517350))
-
-### Code Style
-
-- Break long lines
-  ([`71f6478`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71f6478aaad10e55cde89af4d1c4938c8ad8f502))
-
-### Features
-
-- **core**: Add utag clustering method and tests for it
-  ([`3422625`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/34226250d08d3fd7788ae37a24b9e8c3083f0564))
-
-### Refactoring
-
-- **hierarchical_heatmap**: Removed hard coded cmap
-  ([`5bfd769`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bfd7691545591db3eb3d79a200e3120527e5f34))
-
-- **nearest_neighbor**: Moved the scimap import to the function
-  ([`44d2166`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/44d216668c00572029872002b5f253562f840e62))
-
-- **relation_heatmap**: Replace NaN with absolute zero
-  ([`7c57508`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7c575086a5551919101bf754a4094e32c4e13cca))
-
-- **relation_heatmap**: Replace NaN with absolute zero in utils too
-  ([`aff1eb4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aff1eb446d0cd33c04ad564c3128ec592e0ea84c))
-
-- **relational_heatmap**: Filled NaN with the second heatmap matrix
-  ([`b55eade`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b55eade3df3db59b76f2839386b2d7aeb9e08c11))
-
-- **relational_heatmap**: Remove print statement
-  ([`fe35fbe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe35fbec989e2bbcd05dae133fdd6832802d32d4))
-
-### Testing
-
-- **resol**: Lower resolution for UTAG clustering
-  ([`197b00b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/197b00bd0f75b625091e4da323a397f3d45b4915))
+- **select_values**: Adata.obsm remain numpy arrays
+  ([`af593e1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/af593e164a0c97312d45a2b3d13b4bb4662db5bb))
 
 
-## v0.8.0 (2025-01-06)
+## v0.8.1 (2025-01-21)
 
 ### Bug Fixes
 
@@ -146,6 +106,12 @@
 - **calculate_spatial_distance**: Fix typo
   ([`cfaf204`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cfaf204f814098db9095a1e0a04dc48810e2055f))
 
+- **color_map**: Put special case when labels == 1
+  ([`d1f4c64`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1f4c64fde785bfeed832ea4edd37ae5dac1c3ee))
+
+- **color_mapping**: Fixed the case where one label exist in the dataset
+  ([`bb84792`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bb8479264d84b392062bb18a9460b56185b5ff5b))
+
 - **histogram**: Return a single Axes and fix corner case of normalize features core function and
   unit tests
   ([`080b4f1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/080b4f1c09840a3a340d55a31bedb68a5cda3c8c))
@@ -165,7 +131,15 @@
 - **test_plot_ripley_l**: Fixed unit tests where regions was passed unecesseararly
   ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
 
+### Chores
+
+- **deps**: Add parmap in environment.yml file
+  ([`e4bbaa0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4bbaa0c052d4c12eaae56ba2d1b59e158517350))
+
 ### Code Style
+
+- Break long lines
+  ([`71f6478`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/71f6478aaad10e55cde89af4d1c4938c8ad8f502))
 
 - Fix minor flake8 formatting
   ([`cf97301`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf9730111e12b9a4a47427c79e15028e88e17fee))
@@ -174,6 +148,9 @@
   ([`cf44261`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf442610df7e5a4bca7d761248767c14ddd33dcc))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`05d67fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05d67fd841d9725cec6b8979c1d0b9f8ae395345))
 
 - **version**: Automatic development release
   ([`c502eae`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c502eaee44af59343ea91c0c4ee020da147f2a47))
@@ -318,6 +295,9 @@
 - **combine_annotations**: Data utility to combine multiple annotaitons into one
   ([`58dfd38`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/58dfd38415c49535824e745ee56c8b80056736e6))
 
+- **core**: Add utag clustering method and tests for it
+  ([`3422625`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/34226250d08d3fd7788ae37a24b9e8c3083f0564))
+
 - **plot_ripley_l**: Return a dataframe of the line plots
   ([`f466f84`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f466f842963008ff8e58f07bf0d1ec3fbe203bcc))
 
@@ -389,8 +369,26 @@ This commit introduces changes to the Squidpy Ripley function to enhance its fun
 
 ### Refactoring
 
+- **hierarchical_heatmap**: Removed hard coded cmap
+  ([`5bfd769`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5bfd7691545591db3eb3d79a200e3120527e5f34))
+
+- **nearest_neighbor**: Moved the scimap import to the function
+  ([`44d2166`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/44d216668c00572029872002b5f253562f840e62))
+
 - **plot_ripley_l**: Added appropriate error messages and fixed typos
   ([`a2fea46`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a2fea46d5c6a9eb0629084a38917d19210380db8))
+
+- **relation_heatmap**: Replace NaN with absolute zero
+  ([`7c57508`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7c575086a5551919101bf754a4094e32c4e13cca))
+
+- **relation_heatmap**: Replace NaN with absolute zero in utils too
+  ([`aff1eb4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aff1eb446d0cd33c04ad564c3128ec592e0ea84c))
+
+- **relational_heatmap**: Filled NaN with the second heatmap matrix
+  ([`b55eade`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b55eade3df3db59b76f2839386b2d7aeb9e08c11))
+
+- **relational_heatmap**: Remove print statement
+  ([`fe35fbe`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fe35fbec989e2bbcd05dae133fdd6832802d32d4))
 
 - **ripley**: Changed variable names
   ([`aa788c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aa788c979f557ffbd41c2ee6cec255e688f53527))
@@ -427,6 +425,9 @@ This commit is to trigger the minor version increase through the step flag in co
 
 - **plot_riley_l**: Added unit test to catch exception when data is missing
   ([`5f6cb11`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5f6cb117cfda2eaf149cb04c8a92a64eb47f4c98))
+
+- **resol**: Lower resolution for UTAG clustering
+  ([`197b00b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/197b00bd0f75b625091e4da323a397f3d45b4915))
 
 - **riple_l**: Updated the precision calculation for complete spatial randomness tests
   ([`36e8090`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/36e8090882c0357a7b0077f62945931933c98608))
