@@ -285,6 +285,52 @@ class TestCalculateNearestNeighbor(unittest.TestCase):
         # Check that the dummy column is removed
         self.assertNotIn('_dummy_imageid', adata_no_imageid.obs.columns)
 
+    def test_reindexed_result_matches_obs_names(self):
+        """
+        Test that if `adata.obs` has a shuffled index or multiple images,
+        the final result in `adata.obsm[label]` still aligns exactly with
+        `adata.obs_names`.
+        """
+        # Create an AnnData with 2 images, each having 1 cell, but shuffle
+        # the index
+        data = np.array([[10.0], [20.0]])
+        spatial = np.array([[1.0, 1.0], [2.0, 2.0]])
+        obs = pd.DataFrame(
+            {
+                'cell_type': ['typeA', 'typeB'],
+                'imageid': ['img2', 'img1']
+            },
+            index=['Cell2', 'Cell1']
+        )
+        adata_test = anndata.AnnData(X=data, obs=obs)
+        adata_test.obsm['spatial'] = spatial
+
+        calculate_nearest_neighbor(
+            adata=adata_test,
+            annotation='cell_type',
+            imageid='imageid',
+            verbose=False
+        )
+
+        # Verify that the result index matches the original obs_names
+        self.assertIn('spatial_distance', adata_test.obsm)
+        result_df = adata_test.obsm['spatial_distance']
+        self.assertIsInstance(result_df, pd.DataFrame)
+        self.assertListEqual(list(result_df.index), list(adata_test.obs_names))
+
+        # Confirm each cell's distance to its own phenotype is 0.0.
+        dist_cell2_typeA = None
+        if 'typeA' in result_df.columns:
+            dist_cell2_typeA = result_df.loc['Cell2', 'typeA']
+        dist_cell1_typeB = None
+        if 'typeB' in result_df.columns:
+            dist_cell1_typeB = result_df.loc['Cell1', 'typeB']
+
+        self.assertIsNotNone(dist_cell2_typeA)
+        self.assertIsNotNone(dist_cell1_typeB)
+        self.assertAlmostEqual(dist_cell2_typeA, 0.0)
+        self.assertAlmostEqual(dist_cell1_typeB, 0.0)
+
 
 if __name__ == '__main__':
     unittest.main()
