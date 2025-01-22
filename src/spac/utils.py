@@ -379,6 +379,7 @@ def check_column_name(
         if any(symbol in column_name for symbol in symbol_checklist):
             raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
 
+
 def check_distances(distances):
     """
     Check that the distances are valid: must be an array-like of
@@ -582,6 +583,7 @@ def annotation_category_relations(
             "target"
         ].apply(lambda x: "target_" + x)
 
+
     return relationships
 
 
@@ -685,9 +687,14 @@ def color_mapping(
         raise ValueError(f"Invalid color map name: {color_map}")
 
     if cmap.N > 50:  # This is a continuous colormap
-        label_colors = [
-            cmap(i / (len(labels) - 1)) for i in range(len(labels))
-        ]
+        if len(labels) == 1:
+            label_colors = [
+                cmap(i / (len(labels))) for i in range(len(labels))
+            ]
+        else:
+            label_colors = [
+                cmap(i / (len(labels) - 1)) for i in range(len(labels))
+            ]
     else:  # This is a discrete colormap
         # Calculate the number of categories per color
         categories_per_color = np.ceil(len(labels) / cmap.N)
@@ -712,7 +719,7 @@ def color_mapping(
             f'{int(color[2]*255)})'
             for color in label_colors
         ]
-    
+
     if return_dict:
         returning = {}
         for i, color in enumerate(label_colors):
@@ -920,7 +927,7 @@ def spell_out_special_characters(text):
 
     # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
     text = re.sub(r'[^a-zA-Z0-9_]', '', text)
-                
+
     # Remove multiple underscores and strip leading/trailing underscores
     text = re.sub(r'_+', '_', text)
     text = text.strip('_')

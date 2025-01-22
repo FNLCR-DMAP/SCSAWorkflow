@@ -487,7 +487,8 @@ def _select_values_dataframe(data, annotation, values, exclude_values):
 
     count = filtered_data.shape[0]
     logging.info(
-        f"Summary of returned dataset: {count} cells match the selected labels."
+        f"Summary of returned dataset: {count} cells",
+        " match the selected labels."
         )
 
     return filtered_data
@@ -524,9 +525,9 @@ def _select_values_anndata(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data.obs[annotation].isin(values)]
+        filtered_data = data[data.obs[annotation].isin(values)].copy()
     elif exclude_values is not None:
-        filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+        filtered_data = data[~data.obs[annotation].isin(exclude_values)].copy()
 
     count = filtered_data.n_obs
     logging.info(
