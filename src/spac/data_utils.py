@@ -525,9 +525,9 @@ def _select_values_anndata(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data.obs[annotation].isin(values)]
+        filtered_data = data[data.obs[annotation].isin(values)].copy()
     elif exclude_values is not None:
-        filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+        filtered_data = data[~data.obs[annotation].isin(exclude_values)].copy()
 
     count = filtered_data.n_obs
     logging.info(
