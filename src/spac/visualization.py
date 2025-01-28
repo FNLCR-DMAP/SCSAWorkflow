@@ -540,6 +540,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Prepare the data for plotting
     plot_data = df.dropna(subset=[data_column])
 
+    # Bin calculation section
+    # The default bin calculation used by sns.histo take quite
+    # some time to compute for large number of points,
+    # DMAP implemented the Rice rule for bin computation
+
+    def cal_bin_num(
+        num_rows
+    ):
+        bins = max(int(2*(num_rows ** (1/3))), 1)
+        print(f'Automatically calculated number of bins is: {bins}')
+        return(bins)
+
+    num_rows = plot_data.shape[0]
+
+    # Check if bins is being passed
+    # If not, the in house algorithm will compute the number of bins 
+    if 'bins' not in kwargs:
+        kwargs['bins'] = cal_bin_num(num_rows)
+
     # Plotting with or without grouping
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
