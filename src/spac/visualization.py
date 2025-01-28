@@ -1417,7 +1417,7 @@ def interative_spatial_plot(
     annotations,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='viridis',
+    colorscale='rainbow',
     figure_width=6,
     figure_height=4,
     figure_dpi=200,
