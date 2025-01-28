@@ -320,6 +320,31 @@ class TestHistogram(unittest.TestCase):
         bars = ax.patches
         self.assertEqual(len(bars), 100)
 
+    def test_histogram_feature_integer_bins(self):
+        custom_bins = 10  # Specify number of bins as an integer
+
+        fig, ax = histogram(self.adata, feature='marker1', bins=custom_bins)
+
+        # Check the number of bins used
+        bars = ax.patches
+        self.assertEqual(len(bars), custom_bins)
+
+        # Check that ax is an Axes object
+        self.assertIsInstance(ax, mpl.axes.Axes)
+
+    def test_default_bins_calculation(self):
+        # No bins parameter passed
+        fig, ax = histogram(self.adata, feature='marker1')
+
+        # Count the number of bins
+        bars = ax.patches
+        n_bins = len(bars)
+
+        # Validate the number of bins based on default bin calculation logic
+        # Using 2 * (n ** 1/3) heuristic for default bins
+        expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
+        self.assertEqual(n_bins, expected_bins)
+
 
 if __name__ == '__main__':
     unittest.main()
