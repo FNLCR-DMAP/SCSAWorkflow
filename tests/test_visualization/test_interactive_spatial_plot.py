@@ -93,9 +93,9 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 ["<b>annotation_1</b>", "c"]
         ]
         expected_colors = {
-            'a': 'rgb(68,1,84)',
-            'b': 'rgb(32,144,140)',
-            'c': 'rgb(253,231,36)'
+            'a': 'rgb(127,0,255)',
+            'b': 'rgb(128,254,179)',
+            'c': 'rgb(255,0,0)'
         }
         for i, itr_fig in enumerate(fig_list):
             
@@ -164,8 +164,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 'annotation_1',
                 defined_color_map=defined_color_map
             )
-
-
 
     def test_color_mapping(self):
         defined_color_map = {

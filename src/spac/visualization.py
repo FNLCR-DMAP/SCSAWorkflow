@@ -540,6 +540,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Prepare the data for plotting
     plot_data = df.dropna(subset=[data_column])
 
+    # Bin calculation section
+    # The default bin calculation used by sns.histo take quite
+    # some time to compute for large number of points,
+    # DMAP implemented the Rice rule for bin computation
+
+    def cal_bin_num(
+        num_rows
+    ):
+        bins = max(int(2*(num_rows ** (1/3))), 1)
+        print(f'Automatically calculated number of bins is: {bins}')
+        return(bins)
+
+    num_rows = plot_data.shape[0]
+
+    # Check if bins is being passed
+    # If not, the in house algorithm will compute the number of bins 
+    if 'bins' not in kwargs:
+        kwargs['bins'] = cal_bin_num(num_rows)
+
     # Plotting with or without grouping
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
@@ -876,7 +895,6 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         metric='euclidean',
         row_cluster=row_cluster,
         col_cluster=col_cluster,
-        cmap="viridis",
         **kwargs
     )
 
@@ -1418,7 +1436,7 @@ def interative_spatial_plot(
     annotations,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='viridis',
+    colorscale='rainbow',
     figure_width=6,
     figure_height=4,
     figure_dpi=200,
@@ -2090,6 +2108,9 @@ def relational_heatmap(
         columns='target',
         values='percentage_source'
     )
+
+    heatmap_matrix = heatmap_matrix.fillna(0)
+
     x = list(heatmap_matrix.columns)
     y = list(heatmap_matrix.index)
 
@@ -2103,6 +2124,8 @@ def relational_heatmap(
         columns='target',
         values='percentage_source'
         )
+
+    heatmap_matrix2 = heatmap_matrix2.fillna(0)
 
     hover_template = 'Source: %{z}%<br>Target: %{customdata}%<extra></extra>'
     # Ensure alignment of the text data with the heatmap matrix
