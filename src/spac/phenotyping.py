@@ -298,7 +298,7 @@ def assign_manual_phenotypes(
 
     Examples
     --------
-    Suppose `data_df` is a DataFrame with binary phenotype columns and 
+    Suppose `data_df` is a DataFrame with binary phenotype columns and
     `phenotypes_df` contains the following definitions:
 
     >>> data_df = pd.DataFrame({
@@ -354,7 +354,11 @@ def assign_manual_phenotypes(
     phenotypes_counts = apply_phenotypes(data_df, phenotypes_dic)
 
     print("\n#####################################\n")
-    # Print the counts of cells in every phenotype
+    # Print a note that the number of cells below
+    # shows the cells that matched each phenotype
+    # Cells count have matched other phenotypes as well
+    print("Summary of cells that matched each phenotype:")
+    print("NB: Cells count have matched other phenotypes as well")
     for phenotype, count in phenotypes_counts.items():
         print(f"{phenotype}: {count} cell(s)")
 
