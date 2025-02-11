@@ -555,6 +555,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
             sns.histplot(data=df.dropna(), x=data_column, hue=group_by,
                          ax=ax, **kwargs)
+            # If plotting feature specify which layer
+            if feature:
+                ax.set_title(f'Layer {layer}')
             axs.append(ax)
         else:
             fig, ax_array = plt.subplots(
@@ -572,7 +575,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 group_data = plot_data[plot_data[group_by] == groups[i]]
 
                 sns.histplot(data=group_data, x=data_column, ax=ax_i, **kwargs)
-                ax_i.set_title(groups[i])
+                # If plotting feature specify which layer
+                if feature:
+                    ax_i.set_title(f'{groups[i]} with layer {layer}')
+                else:
+                    ax_i.set_title(f'{groups[i]}')
 
                 # Set axis scales if y_log_scale is True
                 if y_log_scale:
@@ -601,6 +608,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 axs.append(ax_i)
     else:
         sns.histplot(data=plot_data, x=data_column, ax=ax, **kwargs)
+        # If plotting feature specify which layer
+        if feature:
+            ax.set_title(f'Layer {layer}')
         axs.append(ax)
 
     # Set axis scales if y_log_scale is True
