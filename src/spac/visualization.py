@@ -511,6 +511,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         df = pd.DataFrame(
              adata.X, index=adata.obs.index, columns=adata.var_names
         )
+        layer = 'Original'
 
     df = pd.concat([df, adata.obs], axis=1)
 
@@ -557,7 +558,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                          ax=ax, **kwargs)
             # If plotting feature specify which layer
             if feature:
-                ax.set_title(f'Layer {layer}')
+                ax.set_title(f'Layer: {layer}')
             axs.append(ax)
         else:
             fig, ax_array = plt.subplots(
@@ -577,7 +578,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 sns.histplot(data=group_data, x=data_column, ax=ax_i, **kwargs)
                 # If plotting feature specify which layer
                 if feature:
-                    ax_i.set_title(f'{groups[i]} with layer {layer}')
+                    ax_i.set_title(f'{groups[i]} with Layer: {layer}')
                 else:
                     ax_i.set_title(f'{groups[i]}')
 
@@ -610,7 +611,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         sns.histplot(data=plot_data, x=data_column, ax=ax, **kwargs)
         # If plotting feature specify which layer
         if feature:
-            ax.set_title(f'Layer {layer}')
+            ax.set_title(f'Layer: {layer}')
         axs.append(ax)
 
     # Set axis scales if y_log_scale is True

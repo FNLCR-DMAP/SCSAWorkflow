@@ -177,10 +177,10 @@ class TestHistogram(unittest.TestCase):
     def test_title(self):
         """Test that title changes based on 'layer' information"""
         fig, ax = histogram(self.adata, feature='marker1')
-        self.assertEqual(ax.get_title(), 'Layer None')
+        self.assertEqual(ax.get_title(), 'Layer: Original')
 
         fig, ax = histogram(self.adata, feature='marker1', layer='Default')
-        self.assertEqual(ax.get_title(), f'Layer Default')
+        self.assertEqual(ax.get_title(), f'Layer: Default')
 
         fig, ax =  histogram(self.adata, annotation='annotation1', layer='Default')
         self.assertEqual(ax.get_title(), '')
