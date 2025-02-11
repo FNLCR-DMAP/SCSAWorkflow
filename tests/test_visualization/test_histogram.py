@@ -35,6 +35,9 @@ class TestHistogram(unittest.TestCase):
             X.astype(np.float32), obs=annotation, var=var
         )
 
+        # Create default layer
+        self.adata.layers['Default'] = X.astype(np.float32)
+
     def test_both_feature_and_annotation(self):
         err_msg = ("Cannot pass both feature and annotation,"
                    " choose one.")
@@ -170,6 +173,17 @@ class TestHistogram(unittest.TestCase):
             "There are negative values in the data, disabling x_log_scale."
         )
         self.assertIn(expected_msg, print_calls)
+
+    def test_title(self):
+        """Test that title changes based on 'layer' information"""
+        fig, ax = histogram(self.adata, feature='marker1')
+        self.assertEqual(ax.get_title(), 'Layer: Original')
+
+        fig, ax = histogram(self.adata, feature='marker1', layer='Default')
+        self.assertEqual(ax.get_title(), f'Layer: Default')
+
+        fig, ax =  histogram(self.adata, annotation='annotation1', layer='Default')
+        self.assertEqual(ax.get_title(), '')
 
     def test_y_log_scale_axis(self):
         """Test that y_log_scale sets y-axis to log scale."""
