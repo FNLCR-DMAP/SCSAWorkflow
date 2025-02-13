@@ -1548,13 +1548,13 @@ def interative_spatial_plot(
             f'{defined_color_map_dict}'
         )
 
-
     def main_figure_generation(
         adata,
         annotations=annotations,
         dot_size=dot_size,
         dot_transparancy=dot_transparancy,
         colorscale=colorscale,
+        color_mapping=None,
         figure_width=figure_width,
         figure_height=figure_height,
         figure_dpi=figure_dpi,
@@ -1583,6 +1583,8 @@ def interative_spatial_plot(
             Transparancy level of the scatter dots. Default is 0.75.
         colorscale : str, optional
             Name of the color scale to use for the dots. Default is 'Viridis'.
+        color_mapping : dict, optional
+            A dictionary mapping annotation labels to colors.
         figure_width : int, optional
             Width of the figure in inches. Default is 12.
         figure_height : int, optional
@@ -1602,24 +1604,36 @@ def interative_spatial_plot(
 
         extract_columns_raw = []
 
-        for item in annotations:
-            extract_columns_raw.append(adata.obs[item])
+        for annotation in annotations:
+            
+            # Append to every cell label the corresponding annotation that it
+            # belongs to. This is done to make sure we generate a unique entry
+            # for the
+            # legend for every label. Othersise, if the same label appears in
+            # different annotations, it will be considered as the same label.
+            extract_columns_raw.append(adata.obs[annotation])
 
-        extract_columns = []
+        labeled_annotation = []
 
-        # The `extract_columns` list is needed for generating Plotly images
-        # because it stores transformed annotation data. These annotations
-        # are added as columns in the DataFrame (`df`) and are used as inputs
-        # for the `color` and `hover_data` parameters in the Plotly scatter
-        # plot. This enables the plot to visually encode annotations, providing
-        # better insights into the spatial data. Without `extract_columns`, the
-        # plot would lack essential annotation-based differentiation and
-        # interactivity.
+        all_annotations_color_map = {}
 
-        for i, item in enumerate(extract_columns_raw):
-            extract_columns.append(
-                [annotations[i] + "_" + str(value) for value in item]
+        for annotation_id, labels in enumerate(extract_columns_raw):
+            annotation_name = annotations[annotation_id]
+            labeled_annotation.append(
+                [
+                    annotation_name + "_" + str(label)
+                    for label in labels
+                ]
             )
+
+            # Now the cells has annotation name and labels, adjust the colormap
+            # accordingly
+            if color_mapping is not None:
+                annotation_color_mapping = {
+                    annotation_name + "_" + str(label): color
+                    for label, color in color_mapping.items()
+                }
+                all_annotations_color_map.update(annotation_color_mapping)
 
         xcoord = [coord[0] for coord in spatial_coords]
         ycoord = [coord[1] for coord in spatial_coords]
@@ -1627,9 +1641,9 @@ def interative_spatial_plot(
         data = {'X': xcoord, 'Y': ycoord}
 
         # Add the extract_columns data as columns in the dictionary
-        for i, column in enumerate(extract_columns):
-            column_name = annotations[i]
-            data[column_name] = column
+        for annotation_id, expanded_labels in enumerate(labeled_annotation):
+            annotation_name = annotations[annotation_id]
+            data[annotation_name] = expanded_labels
 
         # Create the DataFrame
         df = pd.DataFrame(data)
@@ -1642,40 +1656,37 @@ def interative_spatial_plot(
         width_px = int(figure_width * figure_dpi)
         height_px = int(figure_height * figure_dpi)
 
-        main_fig = px.scatter(
-            df,
+        color_discrete_map = None
+        if color_mapping is not None:
+            color_discrete_map = all_annotations_color_map
+            colorscale = None
+
+        scatter_partial = partial(
+            px.scatter,
             x='X',
             y='Y',
+            color_discrete_map=color_discrete_map,
+            color_continuous_scale=colorscale,
+            render_mode="webgl"
+        )
+
+        # Create the main figure with the first annotation
+        main_fig = scatter_partial(
+            df,
             color=annotations[0],
             hover_data=[annotations[0]]
         )
 
-        # If annotation is more than 1, we would first call px.scatter
-        # to create plotly object, than append the data to main figure
-        # with add_trace for a centralized view.
+        # If there are more annotations, append traces
         if len(annotations) > 1:
             for obs in annotations[1:]:
-                scatter_fig = px.scatter(
-                                    df,
-                                    x='X',
-                                    y='Y',
-                                    color=obs,
-                                    hover_data=[obs]
-                                )
-
+                scatter_fig = scatter_partial(df, color=obs, hover_data=[obs])
                 main_fig.add_traces(scatter_fig.data)
-
-        # Reset the color attribute of the traces in combined_fig
-        # This is necessary to ensure that the color attribute
-        # does not interfere with subsequent plots
-        for trace in main_fig.data:
-            trace.marker.color = None
 
         main_fig.update_traces(
             mode='markers',
             marker=dict(
                 size=dot_size,
-                colorscale=colorscale,
                 opacity=dot_transparancy
             ),
             hovertemplate="%{customdata[0]}<extra></extra>"
@@ -1767,6 +1778,7 @@ def interative_spatial_plot(
             dot_size=dot_size,
             dot_transparancy=dot_transparancy,
             colorscale=colorscale,
+            color_mapping=color_mapping,
             figure_width=figure_width,
             figure_height=figure_height,
             figure_dpi=figure_dpi,
@@ -1774,13 +1786,9 @@ def interative_spatial_plot(
             **kwargs
         )
 
-        # Create a copy of the figure for non-destructive updates
-        main_fig_copy = copy.copy(main_fig_parent)
-        data = main_fig_copy.data
-        main_fig_parent.data = []
+        data = main_fig_parent.data
 
         # Prepare to track updates and manage grouped annotations
-        updated_index = []
         legend_list = [
             f"legend{i+1}" if i > 0 else "legend"
             for i in range(len(annotations))
@@ -1791,10 +1799,7 @@ def interative_spatial_plot(
         indices = list(range(len(data)))
         for item in indices:
             cat_label = data[item]['customdata'][0][0]
-            cat_dataset = pd.DataFrame(
-                {'X': data[item]['x'], 'Y': data[item]['y']}
-            )
-
+           
             # Assign the label to the appropriate legend group
             for i, legend_group in enumerate(annotations):
                 if cat_label.startswith(legend_group):
@@ -1802,7 +1807,8 @@ def interative_spatial_plot(
                     cat_label = cat_label[len(legend_group) + 1:]
                     cat_group = legend_list[i]
 
-            # Add a new legend entry if this group hasn't been encountered
+            # Add a new legend as a a point in the plot
+            # if this group hasn't been encountered
             if previous_group is None or cat_group != previous_group:
                 main_fig_parent.add_trace(go.Scattergl(
                     x=[data[item]['x'][0]],
@@ -1819,35 +1825,8 @@ def interative_spatial_plot(
                 ))
                 previous_group = cat_group
 
-            # Add the category label to the dataset for grouping
-            cat_dataset['label'] = cat_label
-
-            main_fig_parent.add_trace(go.Scattergl(
-                x=cat_dataset['X'],
-                y=cat_dataset['Y'],
-                name=cat_label,
-                mode="markers",
-                showlegend=True,
-                marker=dict(
-                    colorscale=colorscale,
-                    size=dot_size,
-                    opacity=dot_transparancy
-                )
-            ))
-
-            updated_index.append(cat_label)
-
-        if color_mapping is not None:
-            main_fig_copy = copy.copy(main_fig_parent)
-            data = main_fig_copy.data
-            main_fig_parent.data = []
-
-            for trace in data:
-                trace_name = trace["name"]
-                if color_mapping is not None:
-                    if trace_name in color_mapping.keys():
-                        trace['marker']['color'] = color_mapping[trace_name]
-                main_fig_parent.add_trace(trace)
+            # Reset the name for this point after adding to the legend
+            data[item]['name'] = cat_label
 
         main_fig_parent.update_layout(
             title={
@@ -1871,7 +1850,6 @@ def interative_spatial_plot(
             "image_name": f"{spell_out_special_characters(title)}.html",
             "image_object": main_fig_parent
         }
-
 
     #####################
     ## Main Code Block ##

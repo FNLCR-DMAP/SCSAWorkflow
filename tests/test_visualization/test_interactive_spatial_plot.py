@@ -53,25 +53,27 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         # Check the x and y data
         expected_x = self.adata.obsm['spatial'][:, 0]
         expected_y = self.adata.obsm['spatial'][:, 1]
-        for idx, trace in enumerate(fig.data):
-            if idx == 0:
-                continue
-                # The first trace is the group label, data is the following
-            else:
-                self.assertEqual(trace.x[0], expected_x[idx - 1])
-                self.assertEqual(trace.y[0], expected_y[idx - 1])
 
-        # Check the annotations/colors
-        # Assuming 'annotation_1' in your adata has unique colors
-        # that are represented in the plot
-        expected_colors = [
-            "<b>annotation_1</b>",
+        for idx, trace in enumerate(fig.data):
+            if idx == len(fig.data) - 1:
+                continue
+                # The last trace is the group label
+            else:
+                self.assertEqual(trace.x[0], expected_x[idx])
+                self.assertEqual(trace.y[0], expected_y[idx])
+
+        # Every plot has a "hiddnen" point for the group label
+        # Here it is called "annotation_1"
+        # and it is appended to the end of the points
+
+        expected_names = [
             "a",
             "b",
-            "c"      
+            "c",      
+            "<b>annotation_1</b>"
         ]
         for idx, trace in enumerate(fig.data):
-            self.assertEqual(trace.name, expected_colors[idx])
+            self.assertEqual(trace.name, expected_names[idx])
 
     def test_stratify_by(self):
         fig_list = interative_spatial_plot(
@@ -87,10 +89,13 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             'Highlighting_annotation_2_z.html'
         ]
 
+        # Every plot has a "hiddnen" point for the group label
+        # Here it is called "annotation_1"
+        # and it is appended to the end of the points
         expected_labels = [
-                ["<b>annotation_1</b>", "a"],
-                ["<b>annotation_1</b>", "b"],
-                ["<b>annotation_1</b>", "c"]
+                ["a", "<b>annotation_1</b>"],
+                ["b", "<b>annotation_1</b>"],
+                ["c", "<b>annotation_1</b>"]
         ]
         expected_colors = {
             'a': 'rgb(127,0,255)',
