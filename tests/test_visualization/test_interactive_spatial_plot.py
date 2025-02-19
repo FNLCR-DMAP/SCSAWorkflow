@@ -189,6 +189,54 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                     trace.marker.color,
                     defined_color_map[trace.name]
                 )
+    
+    def test_multiple_annotations_legend_order(self):
+        defined_color_map = {
+                'a': 'red',
+                'b': 'blue',
+                'c': 'green',
+                'x': 'yellow',
+                'y': 'pink',
+                'z': 'black'
+            }
+        fig_list = interative_spatial_plot(
+            self.adata,W
+            ['annotation_1','annotation_2']
+        )
+        legend_order = [
+            'annotation_1',
+            'a',
+            'b',
+            'c',
+            'annotation_2',
+            'x',
+            'y',
+            'z'
+        ]
+        color_order = [
+            'white',
+            'red',
+            'blue',
+            'green',
+            'white',
+            'yellow',
+            'pink',
+            'black'
+        ]
+        fig = fig_list[0]['image_object']
+
+        # The order of trace is the order of legend
+        # Thus the trace name should follow the designed
+        # legend order
+        for i, trace in enumerate(fig.data):
+            self.assertEqual(
+                trace.name,
+                legend_order[i]
+            )
+            self.assertEqual(
+                trace.marker.color,
+                color_order[i]
+            )
 
 if __name__ == "__main__":
     unittest.main()
