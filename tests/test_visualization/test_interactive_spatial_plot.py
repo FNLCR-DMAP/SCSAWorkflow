@@ -55,22 +55,23 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         expected_y = self.adata.obsm['spatial'][:, 1]
 
         for idx, trace in enumerate(fig.data):
-            if idx == len(fig.data) - 1:
+
+            if idx == 0:
                 continue
-                # The last trace is the group label
+                # The first trace is the group label
             else:
-                self.assertEqual(trace.x[0], expected_x[idx])
-                self.assertEqual(trace.y[0], expected_y[idx])
+                self.assertEqual(trace.x[0], expected_x[idx - 1])
+                self.assertEqual(trace.y[0], expected_y[idx - 1])
 
         # Every plot has a "hiddnen" point for the group label
         # Here it is called "annotation_1"
         # and it is appended to the end of the points
 
         expected_names = [
+            "<b>annotation_1</b>",
             "a",
             "b",
-            "c",      
-            "<b>annotation_1</b>"
+            "c"            
         ]
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.name, expected_names[idx])
@@ -109,12 +110,13 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
 
             fig = itr_fig['image_object']
             for idx, trace in enumerate(fig.data):
-                self.assertEqual(trace.name, expected_labels[i][idx])
-                if trace.name in expected_colors.keys():
-                    self.assertEqual(
-                        trace.marker.color,
-                        expected_colors[trace.name]
-                    )
+                if idx != 0:
+                    self.assertEqual(trace.name, expected_labels[i][idx - 1])
+                    if trace.name in expected_colors.keys():
+                        self.assertEqual(
+                            trace.marker.color,
+                            expected_colors[trace.name]
+                        )
 
     def test_color_mapping_type_check(self):
         defined_color_map = {
@@ -206,11 +208,11 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             defined_color_map='test_color_mapping'
         )
         legend_order = [
-            'annotation_1',
+            "<b>annotation_1</b>",
             'a',
             'b',
             'c',
-            'annotation_2',
+            "<b>annotation_2</b>",
             'x',
             'y',
             'z'

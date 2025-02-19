@@ -1559,6 +1559,7 @@ def interative_spatial_plot(
         figure_height=figure_height,
         figure_dpi=figure_dpi,
         font_size=font_size,
+        title="interactive_spatial_plot",
         **kwargs
     ):
         """
@@ -1593,6 +1594,8 @@ def interative_spatial_plot(
             DPI (dots per inch) for the figure. Default is 200.
         font_size : int, optional
             Font size for text in the plot. Default is 12.
+        title : string, optional
+            Title of the image
 
         Returns
         -------
@@ -1602,7 +1605,10 @@ def interative_spatial_plot(
 
         spatial_coords = adata.obsm['spatial']
 
-        extract_columns_raw = []
+        xcoord = [coord[0] for coord in spatial_coords]
+        ycoord = [coord[1] for coord in spatial_coords]
+
+        data = {'X': xcoord, 'Y': ycoord}
 
         for annotation in annotations:
             
@@ -1611,39 +1617,7 @@ def interative_spatial_plot(
             # for the
             # legend for every label. Othersise, if the same label appears in
             # different annotations, it will be considered as the same label.
-            extract_columns_raw.append(adata.obs[annotation])
-
-        labeled_annotation = []
-
-        all_annotations_color_map = {}
-
-        for annotation_id, labels in enumerate(extract_columns_raw):
-            annotation_name = annotations[annotation_id]
-            labeled_annotation.append(
-                [
-                    annotation_name + "_" + str(label)
-                    for label in labels
-                ]
-            )
-
-            # Now the cells has annotation name and labels, adjust the colormap
-            # accordingly
-            if color_mapping is not None:
-                annotation_color_mapping = {
-                    annotation_name + "_" + str(label): color
-                    for label, color in color_mapping.items()
-                }
-                all_annotations_color_map.update(annotation_color_mapping)
-
-        xcoord = [coord[0] for coord in spatial_coords]
-        ycoord = [coord[1] for coord in spatial_coords]
-
-        data = {'X': xcoord, 'Y': ycoord}
-
-        # Add the extract_columns data as columns in the dictionary
-        for annotation_id, expanded_labels in enumerate(labeled_annotation):
-            annotation_name = annotations[annotation_id]
-            data[annotation_name] = expanded_labels
+            data[annotation] = adata.obs[annotation]
 
         # Create the DataFrame
         df = pd.DataFrame(data)
@@ -1658,7 +1632,7 @@ def interative_spatial_plot(
 
         color_discrete_map = None
         if color_mapping is not None:
-            color_discrete_map = all_annotations_color_map
+            color_discrete_map = color_mapping
             colorscale = None
 
         scatter_partial = partial(
@@ -1670,18 +1644,36 @@ def interative_spatial_plot(
             render_mode="webgl"
         )
 
-        # Create the main figure with the first annotation
-        main_fig = scatter_partial(
-            df,
-            color=annotations[0],
-            hover_data=[annotations[0]]
-        )
+        main_fig = main_fig = go.Figure()
 
         # If there are more annotations, append traces
-        if len(annotations) > 1:
-            for obs in annotations[1:]:
-                scatter_fig = scatter_partial(df, color=obs, hover_data=[obs])
-                main_fig.add_traces(scatter_fig.data)
+
+        for obs in annotations:
+            filtered = df.loc[(df[obs].notna())]
+            annotation_trace = px.scatter(
+                x=[filtered['X'].iloc[0]],
+                y=[filtered['Y'].iloc[0]],
+                render_mode="webgl"
+            )
+            annotation_trace.update_traces(
+                mode='markers',
+                showlegend=True,
+                marker=dict(
+                    color="white",
+                    colorscale=None,
+                    size=0,
+                    opacity=0
+                ),
+                name=f'<b>{obs}</b>'
+            )
+
+            main_fig.add_traces(annotation_trace.data)
+            scatter_fig = scatter_partial(
+                df,
+                color=obs,
+                hover_data=[obs]
+            )
+            main_fig.add_traces(scatter_fig.data)
 
         main_fig.update_traces(
             mode='markers',
@@ -1697,13 +1689,12 @@ def interative_spatial_plot(
             height=height_px,
             plot_bgcolor='white',
             font=dict(size=font_size),
-            margin=dict(l=10, r=10, t=10, b=10),
             legend=dict(
                 orientation='v',
                 yanchor='middle',
                 y=0.5,
-                xanchor='right',
-                x=1.15,
+                xanchor='left',
+                x=1.05,
                 title='',
                 itemwidth=30,
                 bgcolor="rgba(0, 0, 0, 0)",
@@ -1738,97 +1729,7 @@ def interative_spatial_plot(
                     line=dict(color="black", width=1),
                     fillcolor="rgba(0,0,0,0)",
                 )
-            ]
-        )
-
-        return main_fig
-
-    def generate_and_update_image(
-        adata,
-        title,
-        color_mapping=None,
-        **kwargs
-    ):
-        """
-        This function generates the main figure with annotations and
-        optional stratifications or color mappings, providing flexibility
-        for detailed visualizations. It processes data, groups it by
-        annotations, and enables advanced legend handling and styling.
-
-        Parameters
-        ----------
-        adata : AnnData
-            Annotated data matrix containing either the full dataset
-            or a subset of the data.
-        title : str
-            Title for the plot.
-        stratify_by : str, optional
-            Column to stratify the plot. Default is None.
-        color_mapping : dict, optional
-            Color mapping for specific labels. Default is None.
-
-        Returns
-        -------
-        dict
-            A dictionary with "image_name" and "image_object" keys.
-        """
-        main_fig_parent = main_figure_generation(
-            adata,
-            annotations=annotations,
-            dot_size=dot_size,
-            dot_transparancy=dot_transparancy,
-            colorscale=colorscale,
-            color_mapping=color_mapping,
-            figure_width=figure_width,
-            figure_height=figure_height,
-            figure_dpi=figure_dpi,
-            font_size=font_size,
-            **kwargs
-        )
-
-        data = main_fig_parent.data
-
-        # Prepare to track updates and manage grouped annotations
-        legend_list = [
-            f"legend{i+1}" if i > 0 else "legend"
-            for i in range(len(annotations))
-        ]
-        previous_group = None
-
-        # Process each trace in the figure for grouping and legends
-        indices = list(range(len(data)))
-        for item in indices:
-            cat_label = data[item]['customdata'][0][0]
-           
-            # Assign the label to the appropriate legend group
-            for i, legend_group in enumerate(annotations):
-                if cat_label.startswith(legend_group):
-                    cat_leg_group = f"<b>{legend_group}</b>"
-                    cat_label = cat_label[len(legend_group) + 1:]
-                    cat_group = legend_list[i]
-
-            # Add a new legend as a a point in the plot
-            # if this group hasn't been encountered
-            if previous_group is None or cat_group != previous_group:
-                main_fig_parent.add_trace(go.Scattergl(
-                    x=[data[item]['x'][0]],
-                    y=[data[item]['y'][0]],
-                    name=cat_leg_group,
-                    mode="markers",
-                    showlegend=True,
-                    marker=dict(
-                        color="white",
-                        colorscale=None,
-                        size=0,
-                        opacity=0
-                    )
-                ))
-                previous_group = cat_group
-
-            # Reset the name for this point after adding to the legend
-            data[item]['name'] = cat_label
-
-        main_fig_parent.update_layout(
+            ],
             title={
                 'text': title,
                 'font': {'size': font_size},
@@ -1837,18 +1738,12 @@ def interative_spatial_plot(
                 'x': 0.5,
                 'y': 0.99
             },
-            legend={
-                'x': 1.05,
-                'y': 0.5,
-                'xanchor': 'left',
-                'yanchor': 'middle'
-            },
             margin=dict(l=5, r=5, t=font_size*2, b=5)
         )
 
         return {
             "image_name": f"{spell_out_special_characters(title)}.html",
-            "image_object": main_fig_parent
+            "image_object": main_fig
         }
 
     #####################
@@ -1883,7 +1778,7 @@ def interative_spatial_plot(
                 values=strat_value
             )
 
-            result = generate_and_update_image(
+            result = main_figure_generation(
                 adata=adata_subset,
                 title=title,
                 stratify_by=stratify_by,
@@ -1893,7 +1788,7 @@ def interative_spatial_plot(
             results.append(result)
     else:
         title = "Interactive Spatial Plot"
-        result = generate_and_update_image(
+        result = main_figure_generation(
             adata=adata,
             title=title,
             stratify_by=None,
