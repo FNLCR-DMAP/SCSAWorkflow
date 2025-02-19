@@ -190,7 +190,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                     defined_color_map[trace.name]
                 )
     
-    def test_multiple_annotations_legend_order(self):
+    def test_multiple_annotations_legend_and_color_order(self):
         defined_color_map = {
                 'a': 'red',
                 'b': 'blue',
@@ -199,9 +199,11 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 'y': 'pink',
                 'z': 'black'
             }
+        self.adata.uns['test_color_mapping'] = defined_color_map
         fig_list = interative_spatial_plot(
-            self.adata,W
-            ['annotation_1','annotation_2']
+            self.adata,
+            ['annotation_1','annotation_2'],
+            defined_color_map='test_color_mapping'
         )
         legend_order = [
             'annotation_1',
