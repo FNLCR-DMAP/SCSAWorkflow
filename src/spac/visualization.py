@@ -556,7 +556,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     num_rows = plot_data.shape[0]
 
     # Check if bins is being passed
-    # If not, the in house algorithm will compute the number of bins 
+    # If not, the in house algorithm will compute the number of bins
     if 'bins' not in kwargs:
         kwargs['bins'] = cal_bin_num(num_rows)
 
@@ -1650,7 +1650,7 @@ def interative_spatial_plot(
             render_mode="webgl"
         )
 
-        # Helper function to create an annotation trace for a given annotation 
+        # Helper function to create an annotation trace for a given annotation
         # name and filtered DataFrame
         def create_annotation_trace(filtered, obs):
             trace = annotation_partial(
@@ -1673,9 +1673,11 @@ def interative_spatial_plot(
         main_fig = go.Figure()
 
         # Loop over all annotation and add annotation dummy point
-        # and data points to the figure 
+        # and data points to the figure
         for obs in annotations:
-            filtered = df.loc[df[obs].notna()]
+
+            df[obs].fillna("no_label", inplace=True)
+            filtered = df
             # Create and add annotation trace using the helper function
             main_fig.add_traces(create_annotation_trace(filtered, obs).data)
             # Create and add the scatter trace for the annotation
