@@ -1611,12 +1611,7 @@ def interative_spatial_plot(
         data = {'X': xcoord, 'Y': ycoord}
 
         for annotation in annotations:
-            
-            # Append to every cell label the corresponding annotation that it
-            # belongs to. This is done to make sure we generate a unique entry
-            # for the
-            # legend for every label. Othersise, if the same label appears in
-            # different annotations, it will be considered as the same label.
+            # Add the annotation as column in the Dictionary/DataFrame
             data[annotation] = adata.obs[annotation]
 
         # Create the DataFrame
@@ -1635,6 +1630,7 @@ def interative_spatial_plot(
             color_discrete_map = color_mapping
             colorscale = None
 
+        # Define partial for scatter traces with common parameters
         scatter_partial = partial(
             px.scatter,
             x='X',
@@ -1644,18 +1640,24 @@ def interative_spatial_plot(
             render_mode="webgl"
         )
 
-        main_fig = main_fig = go.Figure()
+        # The annotation trace creates a dummy point
+        # so that the label of that annotion is shown in the legend
 
-        # If there are more annotations, append traces
+        # Define a helper partial for annotation traces
+        # (with render_mode fixed)
+        annotation_partial = partial(
+            px.scatter,
+            render_mode="webgl"
+        )
 
-        for obs in annotations:
-            filtered = df.loc[(df[obs].notna())]
-            annotation_trace = px.scatter(
+        # Helper function to create an annotation trace for a given annotation 
+        # name and filtered DataFrame
+        def create_annotation_trace(filtered, obs):
+            trace = annotation_partial(
                 x=[filtered['X'].iloc[0]],
-                y=[filtered['Y'].iloc[0]],
-                render_mode="webgl"
+                y=[filtered['Y'].iloc[0]]
             )
-            annotation_trace.update_traces(
+            trace.update_traces(
                 mode='markers',
                 showlegend=True,
                 marker=dict(
@@ -1666,14 +1668,18 @@ def interative_spatial_plot(
                 ),
                 name=f'<b>{obs}</b>'
             )
+            return trace
 
-            main_fig.add_traces(annotation_trace.data)
-            scatter_fig = scatter_partial(
-                df,
-                color=obs,
-                hover_data=[obs]
-            )
-            main_fig.add_traces(scatter_fig.data)
+        main_fig = go.Figure()
+
+        # Loop over all annotation and add annotation dummy point
+        # and data points to the figure 
+        for obs in annotations:
+            filtered = df.loc[df[obs].notna()]
+            # Create and add annotation trace using the helper function
+            main_fig.add_traces(create_annotation_trace(filtered, obs).data)
+            # Create and add the scatter trace for the annotation
+            main_fig.add_traces(scatter_partial(df, color=obs, hover_data=[obs]).data)
 
         main_fig.update_traces(
             mode='markers',
@@ -1763,6 +1769,8 @@ def interative_spatial_plot(
         )
 
     if stratify_by is not None:
+        # Check if the stratification column exists in the data
+        check_annotation(adata, annotations=stratify_by)
         unique_stratification_values = adata.obs[stratify_by].unique()
 
         for strat_value in unique_stratification_values:
