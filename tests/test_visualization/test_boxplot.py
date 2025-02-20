@@ -32,9 +32,10 @@ class TestBoxplot(unittest.TestCase):
     def test_returns_correct_types(self):
         """Test if correct types are returned."""
         # Test non-interactive mode
-        fig, df = boxplot(self.adata, interactive=False)
+        fig, df, metrics = boxplot(self.adata, interactive=False, return_metrics=True)
         self.assertIsInstance(fig, str)
         self.assertIsInstance(df, pd.DataFrame)
+        self.assertIsInstance(metrics, pd.DataFrame)
 
         # Test interactive mode
         fig, df = boxplot(self.adata, interactive=True)
