@@ -140,21 +140,21 @@ class TestBoxplot(unittest.TestCase):
             [0.0, 1.386294, 1.791759, 2.079441], dtype=np.float64
         )
 
-        fig, ax, df = boxplot(
-            self.adata, features=['feature1'], log_scale=True
+        fig, df = boxplot(
+            self.adata, 
+            features=['feature1'], 
+            log_scale=True,
+            interactive=True
         )
 
         # Check that the y-axis label is still 'log(Intensity)'
-        self.assertEqual(ax.get_ylabel(), 'log(Intensity)')
+        self.assertEqual(fig.layout.yaxis.title.text, 'log(Intensity)')
 
         # Check that the data has been transformed via np.log1p
         transformed_values = df['feature1'].values
         np.testing.assert_allclose(
             transformed_values, expected_values_zero, rtol=1e-5
         )
-
-        # The y-axis scale should still be 'linear'
-        self.assertEqual(ax.get_yscale(), 'linear')
 
     def test_log1p_transformation(self):
         """Test if np.log1p transformation is applied correctly."""
@@ -180,12 +180,12 @@ class TestBoxplot(unittest.TestCase):
         )
 
         # Create a boxplot and capture the transformed DataFrame
-        fig, ax, transformed_df = boxplot(
+        fig, df = boxplot(
             adata, features=['feature1'], log_scale=True
         )
 
         # Extract the log1p transformed values from the DataFrame for plotting
-        transformed_values = transformed_df['feature1'].values.flatten()
+        transformed_values = df['feature1'].values.flatten()
 
         # Debugging: print DataFrame after transformation
         print("DataFrame after log1p transformation:\n", transformed_values)
@@ -215,7 +215,12 @@ class TestBoxplot(unittest.TestCase):
         adata = anndata.AnnData(X=X.astype(np.float32), obs=annotation)
 
         # Create a boxplot and capture the print output
-        fig, df = boxplot(adata, features=['feature1'], log_scale=True)
+        fig, df = boxplot(
+            adata, 
+            features=['feature1'], 
+            log_scale=True,
+            interactive=True
+        )
 
         # Extract the printed messages
         print_calls = [call.args[0] for call in mock_print.call_args_list]

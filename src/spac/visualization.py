@@ -1255,7 +1255,8 @@ def boxplot(
         figure_width=3.2,
         figure_height=1.8,
         figure_dpi=200,
-        interactive=False,
+        interactive=True,
+        return_metrics=False,
         **kwargs
 ):
     """
@@ -1302,6 +1303,9 @@ def boxplot(
         
     interactive : bool, optional, default=False
         If True, the plot is interactive, allowing for zooming and panning. If False, the plot is static.
+    
+    return_metrics: bool, optional, default=False
+        If True, the function returns the computed boxplot metrics.
         
     **kwargs : additional keyword arguments
         Any other keyword arguments passed to the underlying plotting function.
@@ -1313,8 +1317,11 @@ def boxplot(
             - If not `interactive`: A base64-encoded PNG image string
             - If `interactive`: A Plotly figure object
         
-    data : pd.DataFrame
-        A DataFrame containing the summary statistics used to create the boxplot.
+    df: pd.DataFrame
+        A DataFrame containing the features and their corresponding values.
+
+    metrics : pd.DataFrame
+        A DataFrame containing the computed boxplot metrics (if `return_metrics` is True).
     """
 
     def compute_boxplot_metrics(data: pd.DataFrame, annotation=None, showfliers: bool = None):
@@ -1363,6 +1370,11 @@ def boxplot(
 
                     # Sample 10% from each quantile group
                     outliers_sampled = outlier_series.groupby(bins).apply(lambda x: x.sample(frac=0.05))
+
+                    # Ensure the maximum and minimum outliers are included
+                    max_outlier = outlier_series.max()
+                    min_outlier = outlier_series.min()
+                    outliers_sampled = outliers_sampled.append(pd.Series([max_outlier, min_outlier]))
 
                     # Convert the sampled values back to a list
                     outliers = outliers_sampled.reset_index(drop=True).tolist()
@@ -1644,14 +1656,18 @@ def boxplot(
         figure_dpi=figure_dpi,
     )
 
-    if not interactive:
-        img_bytes = pio.to_image(fig, format="png")  # Convert Plotly to PNG
-        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-        # Return the image and underlying data used to generate the plot
-        return img_base64, metrics
+    # Prepare the base image or figure return value
+    if interactive:
+        plot = fig
     else:
-        # Return the figure and the underlying data used to generate the plot
-        return fig, metrics
+        img_bytes = pio.to_image(fig, format="png")  # Convert Plotly to PNG
+        plot = base64.b64encode(img_bytes).decode('utf-8')
+
+    # Determine the return values based on the return_metrics flag
+    if return_metrics:
+        return plot, df, metrics
+    else:
+        return plot, df
 
 
 def boxplot_mid(
