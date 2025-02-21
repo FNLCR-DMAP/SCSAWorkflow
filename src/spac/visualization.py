@@ -1477,8 +1477,8 @@ def interative_spatial_plot(
         The interactive plot will show all the labels in the annotation
         columns passed.
     feature : str, optional
-        If annotation is None, the name of the gene or feature 
-        in `adata.var_names` to use for coloring the scatter plot points 
+        If annotation is None, the name of the gene or feature
+        in `adata.var_names` to use for coloring the scatter plot points
         based on feature expression.
     layer : str, optional
         If feature is not None, the name of the data layer in `adata.layers`
@@ -1492,7 +1492,7 @@ def interative_spatial_plot(
         Name of the color scale to use for the dots when annotation
         is used. Default is 'Viridis'.
     feature_colorscale: srt, optional
-        Name of the color scale to use for the dots when feature 
+        Name of the color scale to use for the dots when feature
         is used. Default is 'seismic'.
     figure_width : int, optional
         Width of the figure in inches. Default is 12.
@@ -1573,13 +1573,13 @@ def interative_spatial_plot(
             layer=None):
         """
         Prepare a DataFrame for spatial plotting from an AnnData object.
-    
-        If 'annotations' is provided (a string or list of strings), the 
-        returned DataFrame will contain the X,Y coordinates and one column 
+
+        If 'annotations' is provided (a string or list of strings), the
+        returned DataFrame will contain the X,Y coordinates and one column
         per annotation.
         If 'feature' is provided (and annotations is None), a single 'color'
         column is created from adata.layers[layer] (if provided) or adata.X.
-    
+
         Parameters
         ----------
         adata : anndata.AnnData
@@ -1590,13 +1590,13 @@ def interative_spatial_plot(
             Continuous feature name in adata.var_names for coloring.
         layer : str, optional
             Layer to use for feature values if feature is provided.
-    
+
         Returns
         -------
         df : pandas.DataFrame
             DataFrame with columns 'X', 'Y' and each annotation column (or a
             'color' column for continuous feature).
-    
+
         Raises
         ------
         ValueError
@@ -1606,7 +1606,7 @@ def interative_spatial_plot(
         xcoord = [coord[0] for coord in spatial]
         ycoord = [coord[1] for coord in spatial]
         df = pd.DataFrame({'X': xcoord, 'Y': ycoord})
-       
+
         if annotations is not None:
             if isinstance(annotations, str):
                 annotations = [annotations]
@@ -1639,7 +1639,7 @@ def interative_spatial_plot(
         """
         Create the core interactive plot for downstream processing.
         This function generates the main interactive plot using Plotly
-        that contains the spatial scatter plot with annotations and 
+        that contains the spatial scatter plot with annotations and
         image configuration.
 
         Parameters
@@ -1678,12 +1678,12 @@ def interative_spatial_plot(
         """
 
         xcoord = spatial_df['X']
-        ycoord = spatial_df['Y'] 
+        ycoord = spatial_df['Y']
 
         min_x, max_x = min(xcoord), max(xcoord)
         min_y, max_y = min(ycoord), max(ycoord)
         dx = max_x - min_x
-    
+
         dy = max_y - min_y
 
         min_x_range = min_x - 0.05 * dx
@@ -1706,7 +1706,7 @@ def interative_spatial_plot(
         # Helper function to create a scatter trace for features
         # as it needs a continuous color scale.
         # in my experience, px.scatter does not work well with
-        # continuous color scales color_continuous_scale, 
+        # continuous color scales color_continuous_scale,
         # so I use go.Scattergl instead.
         def create_scatter_trace(df, feature, colorscale):
             print(colorscale)
@@ -1718,7 +1718,7 @@ def interative_spatial_plot(
                     color=df[feature],
                     colorscale=colorscale,
                     colorbar=dict(title=feature),
-                    showscale=True,   
+                    showscale=True,
                     cmin=cmin,
                     cmax=cmax
                 ),
@@ -1734,7 +1734,7 @@ def interative_spatial_plot(
             # add one extra point just close to the first point
             trace = px.scatter(
                 x=[filtered['X'].iloc[0]-0.1],
-                y=[filtered['Y'].iloc[0]-0.1], 
+                y=[filtered['Y'].iloc[0]-0.1],
                 render_mode="webgl"
             )
             trace.update_traces(
@@ -1756,7 +1756,7 @@ def interative_spatial_plot(
             # Loop over all annotation and add annotation dummy point
             # and data points to the figure
             for obs in annotations:
- 
+
                 spatial_df[obs].fillna("no_label", inplace=True)
                 filtered = spatial_df
                 # Create and add annotation trace using the helper function
@@ -1776,7 +1776,7 @@ def interative_spatial_plot(
             main_fig.add_trace(
                 create_scatter_trace(spatial_df, feature, colorscale)
             )
-   
+
         else:
             raise ValueError(
                 "No plot is generated."
@@ -1791,7 +1791,7 @@ def interative_spatial_plot(
         elif feature is not None:
             # it is already set in the create_scatter_trace function
             hovertemplate = None
-            
+
         main_fig.update_traces(
             mode='markers',
             marker=dict(
@@ -1871,7 +1871,7 @@ def interative_spatial_plot(
     #####################
 
     from functools import partial
-    
+
     # Set the discrete or continuous color parameters
     color_dict = None
     colorscale = None
@@ -1884,7 +1884,7 @@ def interative_spatial_plot(
         )
     elif feature is not None:
         colorscale = feature_colorscale
-    
+
     # Create the partial function with the common keyword arguments directly
     plot_main = partial(
         main_figure_generation,
@@ -1902,31 +1902,31 @@ def interative_spatial_plot(
     )
 
     results = []
-    
+
     if stratify_by is not None:
         # Check if the stratification column exists in the data
         check_annotation(adata, annotations=stratify_by)
         unique_stratification_values = adata.obs[stratify_by].unique()
-    
+
         for strat_value in unique_stratification_values:
             condition = adata.obs[stratify_by] == strat_value
             title_str = f"Highlighting {stratify_by}: {strat_value}"
             indices = np.where(condition)[0]
             print(f"number of cells in the region: {len(adata.obsm['spatial'][indices])}")
-    
+
             adata_subset = select_values(
                 data=adata,
                 annotation=stratify_by,
                 values=strat_value
             )
-    
+
             spatial_df = prepare_spatial_dataframe(
                 adata_subset,
                 annotations=annotations,
                 feature=feature,
                 layer=layer
             )
-    
+
             # Call the partial function with additional arguments
             result = plot_main(
                 spatial_df,
@@ -1941,14 +1941,14 @@ def interative_spatial_plot(
             feature=feature,
             layer=layer
         )
-    
+
         # For non-stratified case, pass extra parameters if needed
         result = plot_main(
             spatial_df,
             title=title_str
         )
         results.append(result)
-    
+
     return results
 
 

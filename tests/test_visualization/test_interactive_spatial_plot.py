@@ -91,7 +91,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         ]
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.name, expected_names[idx])
-    
+
     def test_feature_plot(self):
         # Create a mock adata for continuous feature plots.
         X = np.array([[5], [15], [25]])
@@ -116,8 +116,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         for val in trace.marker.color:
             self.assertIsInstance(val, numbers.Number)
 
-        # Save the figure as HTML
-        fig.write_html("test_feature_plot.html")
 
     def test_stratify_feature_plot(self):
         # Create a mock adata with continuous feature and a stratification column.
@@ -266,9 +264,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 trace.marker.color,
                 color_order[i]
             )
-        # Save the figure as HTML
-        fig.write_html("test_multiple_annotations_legend_and_color_order.html")
-    
+
 
 if __name__ == "__main__":
     unittest.main()
