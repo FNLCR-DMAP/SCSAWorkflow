@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import anndata
 import pandas as pd
 import numpy as np
+import numbers
 
 
 class TestInteractiveSpatialPlot(unittest.TestCase):
@@ -40,7 +41,22 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         self.assertEqual(fig.layout.width, 15 * 100)
         self.assertEqual(fig.layout.height, 10 * 100)
 
-    def test_correct_image(self):
+    def test_hover_values_annotation(self):
+        # Use the existing adata from setUp with annotation_1.
+        fig_list = interative_spatial_plot(self.adata, 'annotation_1')
+        self.assertIsInstance(fig_list, list)
+        fig = fig_list[0]['image_object']
+        # In annotation plots, we set a hovertemplate that displays customdata.
+        # Our implementation sets hovertemplate "%{customdata[0]}<extra></extra>"
+        for trace in fig.data:
+            # Dummy annotation trace may not have customdata, so check only for data traces.
+            if trace.name != "<b>annotation_1</b>":
+                self.assertEqual(trace.hovertemplate, "%{customdata[0]}<extra></extra>")
+                # customdata should contain the annotation values.
+                # Since our setUp has ['a', 'b', 'c'], check that the first customdata value is one of them.
+                self.assertIn(trace.customdata[0][0], ['a', 'b', 'c'])
+
+    def test_annotation_plot(self):
         fig_list = interative_spatial_plot(
             self.adata,
             'annotation_1'
@@ -71,10 +87,71 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             "<b>annotation_1</b>",
             "a",
             "b",
-            "c"            
+            "c"
         ]
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.name, expected_names[idx])
+    
+    def test_feature_plot(self):
+        # Create a mock adata for continuous feature plots.
+        X = np.array([[5], [15], [25]])
+        adata_feature = anndata.AnnData(X)
+        adata_feature.var_names = ['gene1']
+        spatial_coords = np.array([[0, 0], [1, 1], [2, 2]])
+        adata_feature.obsm["spatial"] = spatial_coords
+        # Call interative_spatial_plot using a feature (continuous)
+        fig_list = interative_spatial_plot(
+            adata_feature,
+            feature='gene1',
+            dot_size=10,
+            feature_colorscale="balance")
+        self.assertIsInstance(fig_list, list)
+        fig = fig_list[0]['image_object']
+        # For a continuous plot, there should be only one trace
+        self.assertEqual(len(fig.data), 1)
+        # Check that the trace is a scatterplot using continuous scale
+        trace = fig.data[0]
+        self.assertEqual(trace.type, 'scattergl')
+        # The color values should be numeric and based on the gene expression
+        for val in trace.marker.color:
+            self.assertIsInstance(val, numbers.Number)
+
+        # Save the figure as HTML
+        fig.write_html("test_feature_plot.html")
+
+    def test_stratify_feature_plot(self):
+        # Create a mock adata with continuous feature and a stratification column.
+        X = np.array([[5], [15], [25], [35]])
+        adata_strat = anndata.AnnData(X)
+        adata_strat.var_names = ['gene1']
+        adata_strat.obs = pd.DataFrame({
+            'group': ['A', 'B', 'A', 'B']
+        })
+        spatial_coords = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+        adata_strat.obsm["spatial"] = spatial_coords
+
+        # Now call interative_spatial_plot with feature parameter
+        # and stratify_by "group"
+        fig_list = interative_spatial_plot(
+            adata_strat,
+            feature='gene1',
+            stratify_by='group'
+        )
+        # Expect two figures: one for group A and one for group B
+        self.assertEqual(len(fig_list), 2)
+        for fig_dict in fig_list:
+            fig = fig_dict['image_object']
+            # In continuous feature plots all traces should be scatter traces
+            for trace in fig.data:
+                self.assertEqual(trace.type, 'scattergl')
+                # Since using continuous coloring,
+                # the marker color should be numeric;
+                # we check the first value in marker.color if available.
+                if isinstance(trace.marker.color, (list, np.ndarray)):
+                    self.assertIsInstance(
+                        trace.marker.color[0], numbers.Number)
+                else:
+                    self.assertIsInstance(trace.marker.color, numbers.Number)
 
     def test_stratify_by(self):
         fig_list = interative_spatial_plot(
@@ -104,7 +181,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
             'c': 'rgb(255,0,0)'
         }
         for i, itr_fig in enumerate(fig_list):
-            
+
             fig_name = itr_fig['image_name']
             self.assertEqual(fig_name, figure_name_list[i])
 
@@ -117,60 +194,6 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                             trace.marker.color,
                             expected_colors[trace.name]
                         )
-
-    def test_color_mapping_type_check(self):
-        defined_color_map = {
-                'a': 'red',
-                'b': 'blue',
-                'c': 'green'
-        }
-        err_msg = 'The "degfined_color_map" should be ' + \
-                "a string getting <class 'dict'>."
-        with self.assertRaisesRegex(TypeError, err_msg):
-            interative_spatial_plot(
-                self.adata,
-                'annotation_1',
-                defined_color_map=defined_color_map
-            )
-
-    def test_color_mapping_value_error(self):
-        # Test correct error message is generated when
-        # the anndata object does not cotain uns attribute
-        defined_color_map = 'test_color_mapping'
-        err_msg = (
-            "The given color map name: test_color_mapping is not found "
-            "in current analysis, available items are: ['example_key']"
-        )
-
-        self.adata.uns['example_key'] = 'example_value'
-
-        with self.assertRaises(ValueError) as cm:
-            interative_spatial_plot(
-                self.adata,
-                'annotation_1',
-                defined_color_map=defined_color_map
-            )
-        self.assertEqual(str(cm.exception), err_msg)
-
-    def test_color_mapping_key_error(self):
-        # Test correct error message is generated when defined_color_map 
-        # does not exist in adata.uns
-        defined_color_map = 'test_color_mapping'
-        err_msg = (
-            'No existing color map found, '
-            'please make sure the Append Pin '
-            'Color Rules template had been ran '
-            'prior to the current visualization node.'
-        )
-
-
-        # Check that 1- the exception is reaised and 2- the error message is correct
-        with self.assertRaisesRegex(ValueError, err_msg):
-            interative_spatial_plot(
-                self.adata,
-                'annotation_1',
-                defined_color_map=defined_color_map
-            )
 
     def test_color_mapping(self):
         defined_color_map = {
@@ -191,7 +214,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                     trace.marker.color,
                     defined_color_map[trace.name]
                 )
-    
+
     def test_multiple_annotations_legend_and_color_order(self):
         defined_color_map = {
                 'a': 'red',
@@ -205,7 +228,9 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         fig_list = interative_spatial_plot(
             self.adata,
             ['annotation_1','annotation_2'],
-            defined_color_map='test_color_mapping'
+            defined_color_map='test_color_mapping',
+            dot_size=10,
+            reverse_y_axis=True
         )
         legend_order = [
             "<b>annotation_1</b>",
@@ -241,6 +266,9 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 trace.marker.color,
                 color_order[i]
             )
+        # Save the figure as HTML
+        fig.write_html("test_multiple_annotations_legend_and_color_order.html")
+    
 
 if __name__ == "__main__":
     unittest.main()

@@ -933,3 +933,83 @@ def spell_out_special_characters(text):
     text = text.strip('_')
 
     return text
+
+
+def get_defined_color_map(adata, defined_color_map=None, annotations=None, 
+                          colorscale='viridis'):
+    """
+    Retrieve or generate a predefined color mapping dictionary from an AnnData
+    object.
+
+    If `defined_color_map` is provided and found within `adata.uns`, the
+    corresponding dictionary is returned. Otherwise, if it is not provided, a
+    color mapping is generated using the unique values of the annotation column
+    specified by `annotations` and the given `colorscale`.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix object that should contain a color mapping in its
+        `uns` attribute if a predefined mapping is desired.
+    defined_color_map : str, optional
+        The key in `adata.uns` that holds the predefined color mapping.
+        If None, a new mapping is generated using `annotations`.
+    annotations : str, optional
+        The annotation column name in adata.obs from which to obtain unique
+        labels if `defined_color_map` is not provided.
+    colorscale : str, optional
+        The Matplotlib colormap name to use when generating a color mapping if
+        `defined_color_map` is not provided. Default is 'viridis'.
+
+    Returns
+    -------
+    dict
+        A dictionary mapping unique labels to colors.
+
+    Raises
+    ------
+    TypeError
+        If `defined_color_map` is provided but is not a string.
+    ValueError
+        If a predefined mapping is requested but not found, or if neither
+        `defined_color_map` nor `annotations` is provided.
+    """
+    if defined_color_map is not None:
+        if not isinstance(defined_color_map, str):
+            raise TypeError(
+                'The "defined_color_map" should be a string, '
+                f'getting {type(defined_color_map)}.'
+            )
+        uns_keys = list(adata.uns.keys())
+        if len(uns_keys) == 0:
+            raise ValueError(
+                "No existing color map found. Please make sure the "
+                "Append Pin Color Rules template has been run prior to "
+                "the current visualization node."
+            )
+        if defined_color_map not in uns_keys:
+            raise ValueError(
+                f'The given color map name: {defined_color_map} is not found '
+                f'in current analysis. Available items are: {uns_keys}'
+            )
+        defined_color_map_dict = adata.uns[defined_color_map]
+        print(
+            (f'Selected color mapping "{defined_color_map}":\n'
+             f'{defined_color_map_dict}')
+        )
+        return defined_color_map_dict
+
+    else:
+        if annotations is None:
+            raise ValueError(
+                "Either a defined color map must be provided, or "
+                "an annotation column must be specified."
+            )
+        # Generate a color mapping based on unique values in the annotation
+        unique_labels = np.unique(adata.obs[annotations].values)
+        return color_mapping(
+            unique_labels,
+            color_map=colorscale,
+            rgba_mode=False,
+            return_dict=True
+        )

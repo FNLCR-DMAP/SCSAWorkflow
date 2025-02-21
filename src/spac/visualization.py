@@ -9,18 +9,16 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
-import plotly.colors as pc
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import check_label
+from spac.utils import get_defined_color_map
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
-import re
-import copy
 
 
 # Configure logging
@@ -216,6 +214,7 @@ def dimensionality_reduction_plot(
     annotation : str, optional
         The name of the column in `adata.obs` to use for coloring
         the scatter plot points based on cell annotations.
+        Takes precedence over `feature`.
     feature : str, optional
         The name of the gene or feature in `adata.var_names` to use
         for coloring the scatter plot points based on feature expression.
@@ -1444,16 +1443,22 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
 
 def interative_spatial_plot(
     adata,
-    annotations,
+    annotations=None,
+    feature=None,
+    layer=None,
     dot_size=1.5,
     dot_transparancy=0.75,
-    colorscale='rainbow',
+    annotation_colorscale='rainbow',
+    feature_colorscale='balance',
     figure_width=6,
     figure_height=4,
     figure_dpi=200,
     font_size=12,
     stratify_by=None,
     defined_color_map=None,
+    reverse_y_axis=False,
+    cmin=None,
+    cmax=None,
     **kwargs
 ):
 
@@ -1466,17 +1471,29 @@ def interative_spatial_plot(
     adata : AnnData
         Annotated data matrix object,
         must have a .obsm attribute with 'spatial' key.
-    annotations : list of str or str
+    annotations : list of str or str, optional
         Column(s) in `adata.obs` that contain the annotations to plot.
         If a single string is provided, it will be converted to a list.
         The interactive plot will show all the labels in the annotation
         columns passed.
+    feature : str, optional
+        If annotation is None, the name of the gene or feature 
+        in `adata.var_names` to use for coloring the scatter plot points 
+        based on feature expression.
+    layer : str, optional
+        If feature is not None, the name of the data layer in `adata.layers`
+        to use for visualization. If None, the main data matrix `adata.X` is
+        used.
     dot_size : float, optional
         Size of the scatter dots in the plot. Default is 1.5.
     dot_transparancy : float, optional
         Transparancy level of the scatter dots. Default is 0.75.
-    colorscale : str, optional
-        Name of the color scale to use for the dots. Default is 'Viridis'.
+    annotation_colorscale : str, optional
+        Name of the color scale to use for the dots when annotation
+        is used. Default is 'Viridis'.
+    feature_colorscale: srt, optional
+        Name of the color scale to use for the dots when feature 
+        is used. Default is 'seismic'.
     figure_width : int, optional
         Width of the figure in inches. Default is 12.
     figure_height : int, optional
@@ -1490,6 +1507,14 @@ def interative_spatial_plot(
     defined_color_map : str, optional
         Predefined color mapping stored in adata.uns for specific labels.
         Default is None, which will generate the color mapping automatically.
+    reverse_y_axis : bool, optional
+        If True, reverse the Y-axis of the plot. Default is False.
+    cmin : float, optional
+        Minimum value for the color scale when using features.
+        Default is None.
+    cmax : float, optional
+        Maximum value for the color scale when using features.
+        Default is None.
     **kwargs
         Additional keyword arguments for customization.
 
@@ -1507,13 +1532,32 @@ def interative_spatial_plot(
     the 'spatial' key.
     """
 
-    if not isinstance(annotations, list):
-        annotations = [annotations]
+    if annotations is None and feature is None:
+        raise ValueError(
+            "At least one of the 'annotations' or 'feature' parameters " + \
+            "must be provided."
+        )
 
-    for annotation in annotations:
-        check_annotation(
+    if annotations is not None:
+        if not isinstance(annotations, list):
+            annotations = [annotations]
+
+        for annotation in annotations:
+            check_annotation(
+                adata,
+                annotations=annotation
+            )
+
+    if feature is not None:
+        check_feature(
             adata,
-            annotations=annotation
+            features=feature
+        )
+
+    if layer is not None:
+        check_table(
+            adata,
+            tables=layer
         )
 
     check_table(
@@ -1522,38 +1566,68 @@ def interative_spatial_plot(
         associated_table=True
     )
 
-    if defined_color_map is not None:
-        if not isinstance(defined_color_map, str):
-            raise TypeError(
-                'The "degfined_color_map" should be a string ' + \
-                f'getting {type(defined_color_map)}.'
-            )
-        uns_keys = list(adata.uns.keys())
-        if len(uns_keys) == 0:
+    def prepare_spatial_dataframe(
+            adata,
+            annotations=None,
+            feature=None,
+            layer=None):
+        """
+        Prepare a DataFrame for spatial plotting from an AnnData object.
+    
+        If 'annotations' is provided (a string or list of strings), the 
+        returned DataFrame will contain the X,Y coordinates and one column 
+        per annotation.
+        If 'feature' is provided (and annotations is None), a single 'color'
+        column is created from adata.layers[layer] (if provided) or adata.X.
+    
+        Parameters
+        ----------
+        adata : anndata.AnnData
+            AnnData object with spatial coordinates in adata.obsm['spatial'].
+        annotations : str or list of str, optional
+            Annotation column(s) in adata.obs to include.
+        feature : str, optional
+            Continuous feature name in adata.var_names for coloring.
+        layer : str, optional
+            Layer to use for feature values if feature is provided.
+    
+        Returns
+        -------
+        df : pandas.DataFrame
+            DataFrame with columns 'X', 'Y' and each annotation column (or a
+            'color' column for continuous feature).
+    
+        Raises
+        ------
+        ValueError
+            If neither annotations nor feature is provided.
+        """
+        spatial = adata.obsm['spatial']
+        xcoord = [coord[0] for coord in spatial]
+        ycoord = [coord[1] for coord in spatial]
+        df = pd.DataFrame({'X': xcoord, 'Y': ycoord})
+       
+        if annotations is not None:
+            if isinstance(annotations, str):
+                annotations = [annotations]
+            for ann in annotations:
+                df[ann] = adata.obs[ann].values
+        elif feature is not None:
+            data_source = adata.layers[layer] if layer else adata.X
+            color_values = data_source[:, adata.var_names == feature].squeeze()
+            df[feature] = color_values
+        else:
             raise ValueError(
-                "No existing color map found, please" + \
-                " make sure the Append Pin Color Rules " + \
-                "template had been ran prior to the "+ \
-                "current visualization node.")
-
-        if defined_color_map not in uns_keys:
-            raise ValueError(
-                f'The given color map name: {defined_color_map} ' + \
-                "is not found in current analysis, " + \
-                f'available items are: {uns_keys}'
-            )
-        defined_color_map_dict = adata.uns[defined_color_map]
-        print(
-            f'Selected color mapping "{defined_color_map}":\n' + \
-            f'{defined_color_map_dict}'
-        )
+                "Either 'annotations' or 'feature' must be provided.")
+        return df
 
     def main_figure_generation(
-        adata,
-        annotations=annotations,
+        spatial_df,
+        annotations=None,
+        feature=None,
         dot_size=dot_size,
         dot_transparancy=dot_transparancy,
-        colorscale=colorscale,
+        colorscale=None,
         color_mapping=None,
         figure_width=figure_width,
         figure_height=figure_height,
@@ -1565,27 +1639,27 @@ def interative_spatial_plot(
         """
         Create the core interactive plot for downstream processing.
         This function generates the main interactive plot using Plotly
-        that contains the spatial scatter plot with annotations and
+        that contains the spatial scatter plot with annotations and 
         image configuration.
 
         Parameters
         ----------
-        adata : AnnData
-            Annotated data matrix object,
-            must have a .obsm attribute with 'spatial' key.
-        annotations : list of str or str
-            Column(s) in `adata.obs` that contain the annotations to plot.
-            If a single string is provided, it will be converted to a list.
+        spatial_df : pandas.DataFrame
+            Annotated dataframe
+        annotations : Union[list[str], str], optional
+            Column(s) in `spatial_df` that contain the annotations to plot.
             The interactive plot will show all the labels in the annotation
-            columns passed.
+            columns passed as unique traces.
+        feature : str, optional
+            The column name in `spatial_df` for the continuous color mapping
         dot_size : float, optional
             Size of the scatter dots in the plot. Default is 1.5.
         dot_transparancy : float, optional
-            Transparancy level of the scatter dots. Default is 0.75.
-        colorscale : str, optional
-            Name of the color scale to use for the dots. Default is 'Viridis'.
-        color_mapping : dict, optional
-            A dictionary mapping annotation labels to colors.
+            Transparency level of the scatter dots. Default is 0.75.
+        colorscale : Optional[str], optional
+            Name of the color scale to use for the dots if features is passed.
+        color_mapping : Optional[dict], optional
+            A dictionary mapping annotation labels to colors for annotations.
         figure_width : int, optional
             Width of the figure in inches. Default is 12.
         figure_height : int, optional
@@ -1594,68 +1668,74 @@ def interative_spatial_plot(
             DPI (dots per inch) for the figure. Default is 200.
         font_size : int, optional
             Font size for text in the plot. Default is 12.
-        title : string, optional
-            Title of the image
+        title : str, optional
+            Title of the image. Default is "interactive_spatial_plot".
 
         Returns
         -------
         plotly.graph_objs._figure.Figure
-
+            The generated interactive Plotly figure.
         """
 
-        spatial_coords = adata.obsm['spatial']
+        xcoord = spatial_df['X']
+        ycoord = spatial_df['Y'] 
 
-        xcoord = [coord[0] for coord in spatial_coords]
-        ycoord = [coord[1] for coord in spatial_coords]
+        min_x, max_x = min(xcoord), max(xcoord)
+        min_y, max_y = min(ycoord), max(ycoord)
+        dx = max_x - min_x
+    
+        dy = max_y - min_y
 
-        data = {'X': xcoord, 'Y': ycoord}
-
-        for annotation in annotations:
-            # Add the annotation as column in the Dictionary/DataFrame
-            data[annotation] = adata.obs[annotation]
-
-        # Create the DataFrame
-        df = pd.DataFrame(data)
-
-        max_x_range = max(xcoord) * 1.1
-        min_x_range = min(xcoord) * 0.9
-        max_y_range = max(ycoord) * 1.1
-        min_y_range = min(ycoord) * 0.9
+        min_x_range = min_x - 0.05 * dx
+        max_x_range = max_x + 0.05 * dx
+        min_y_range = min_y - 0.05 * dy
+        max_y_range = max_y + 0.05 * dy
 
         width_px = int(figure_width * figure_dpi)
         height_px = int(figure_height * figure_dpi)
-
-        color_discrete_map = None
-        if color_mapping is not None:
-            color_discrete_map = color_mapping
-            colorscale = None
 
         # Define partial for scatter traces with common parameters
         scatter_partial = partial(
             px.scatter,
             x='X',
             y='Y',
-            color_discrete_map=color_discrete_map,
-            color_continuous_scale=colorscale,
-            render_mode="webgl"
+            render_mode="webgl",
+            **kwargs
         )
+
+        # Helper function to create a scatter trace for features
+        # as it needs a continuous color scale.
+        # in my experience, px.scatter does not work well with
+        # continuous color scales color_continuous_scale, 
+        # so I use go.Scattergl instead.
+        def create_scatter_trace(df, feature, colorscale):
+            print(colorscale)
+            return go.Scattergl(
+                x=df['X'],
+                y=df['Y'],
+                mode="markers",
+                marker=dict(
+                    color=df[feature],
+                    colorscale=colorscale,
+                    colorbar=dict(title=feature),
+                    showscale=True,   
+                    cmin=cmin,
+                    cmax=cmax
+                ),
+                hoverinfo="x+y+text",
+                text=df[feature],
+                **kwargs
+            )
 
         # The annotation trace creates a dummy point
         # so that the label of that annotion is shown in the legend
-
-        # Define a helper partial for annotation traces
-        # (with render_mode fixed)
-        annotation_partial = partial(
-            px.scatter,
-            render_mode="webgl"
-        )
-
-        # Helper function to create an annotation trace for a given annotation
-        # name and filtered DataFrame
         def create_annotation_trace(filtered, obs):
-            trace = annotation_partial(
-                x=[filtered['X'].iloc[0]],
-                y=[filtered['Y'].iloc[0]]
+
+            # add one extra point just close to the first point
+            trace = px.scatter(
+                x=[filtered['X'].iloc[0]-0.1],
+                y=[filtered['Y'].iloc[0]-0.1], 
+                render_mode="webgl"
             )
             trace.update_traces(
                 mode='markers',
@@ -1672,24 +1752,53 @@ def interative_spatial_plot(
 
         main_fig = go.Figure()
 
-        # Loop over all annotation and add annotation dummy point
-        # and data points to the figure
-        for obs in annotations:
+        if annotations is not None:
+            # Loop over all annotation and add annotation dummy point
+            # and data points to the figure
+            for obs in annotations:
+ 
+                spatial_df[obs].fillna("no_label", inplace=True)
+                filtered = spatial_df
+                # Create and add annotation trace using the helper function
+                main_fig.add_traces(
+                    create_annotation_trace(filtered, obs).data)
+                # Create and add the scatter trace for the annotation
+                main_fig.add_traces(
+                    scatter_partial(
+                        filtered,
+                        color=obs,
+                        hover_data=[obs],
+                        color_discrete_map=color_mapping,
+                    ).data)
 
-            df[obs].fillna("no_label", inplace=True)
-            filtered = df
-            # Create and add annotation trace using the helper function
-            main_fig.add_traces(create_annotation_trace(filtered, obs).data)
-            # Create and add the scatter trace for the annotation
-            main_fig.add_traces(scatter_partial(df, color=obs, hover_data=[obs]).data)
+        elif feature is not None:
 
+            main_fig.add_trace(
+                create_scatter_trace(spatial_df, feature, colorscale)
+            )
+   
+        else:
+            raise ValueError(
+                "No plot is generated."
+                " Either 'annotations' or 'feature' must be provided."
+            )
+
+        if annotations is not None:
+            # Set the hover template to show x, y and annotation
+            # This is needed to show the correct label when
+            # multiple annotations are present
+            hovertemplate = "%{customdata[0]}<extra></extra>"
+        elif feature is not None:
+            # it is already set in the create_scatter_trace function
+            hovertemplate = None
+            
         main_fig.update_traces(
             mode='markers',
             marker=dict(
                 size=dot_size,
                 opacity=dot_transparancy
             ),
-            hovertemplate="%{customdata[0]}<extra></extra>"
+            hovertemplate=hovertemplate
         )
 
         main_fig.update_layout(
@@ -1712,16 +1821,16 @@ def interative_spatial_plot(
             xaxis=dict(
                         range=[min_x_range, max_x_range],
                         showgrid=False,
-                        showticklabels=False,
+                        # showticklabels=False,
                         title_standoff=5,
                         constrain="domain"
                     ),
             yaxis=dict(
-                        range=[max_y_range, min_y_range],
+                        range=[min_y_range, max_y_range],
                         showgrid=False,
                         scaleanchor="x",
                         scaleratio=1,
-                        showticklabels=False,
+                        # showticklabels=False,
                         title_standoff=5,
                         constrain="domain"
                     ),
@@ -1749,64 +1858,97 @@ def interative_spatial_plot(
             margin=dict(l=5, r=5, t=font_size*2, b=5)
         )
 
+        if reverse_y_axis:
+            main_fig.update_layout(yaxis=dict(autorange="reversed"))
+
         return {
             "image_name": f"{spell_out_special_characters(title)}.html",
             "image_object": main_fig
         }
 
     #####################
-    ## Main Code Block ##
+    # Main Code Block ##
     #####################
 
-    results = []
-    if defined_color_map:
-        color_dict = adata.uns[defined_color_map]
-    else:
-        unique_ann_labels = np.unique(adata.obs[annotations].values)
-        color_dict = color_mapping(
-            unique_ann_labels,
-            color_map=colorscale,
-            rgba_mode=False,
-            return_dict=True
+    from functools import partial
+    
+    # Set the discrete or continuous color parameters
+    color_dict = None
+    colorscale = None
+    if annotations is not None:
+        color_dict = get_defined_color_map(
+            adata,
+            defined_color_map=defined_color_map,
+            annotations=annotations,
+            colorscale=annotation_colorscale
         )
+    elif feature is not None:
+        colorscale = feature_colorscale
+    
+    # Create the partial function with the common keyword arguments directly
+    plot_main = partial(
+        main_figure_generation,
+        feature=feature,
+        annotations=annotations,
+        color_mapping=color_dict,
+        colorscale=colorscale,
+        dot_size=dot_size,
+        dot_transparancy=dot_transparancy,
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        font_size=font_size,
+        **kwargs
+    )
 
+    results = []
+    
     if stratify_by is not None:
         # Check if the stratification column exists in the data
         check_annotation(adata, annotations=stratify_by)
         unique_stratification_values = adata.obs[stratify_by].unique()
-
+    
         for strat_value in unique_stratification_values:
             condition = adata.obs[stratify_by] == strat_value
-            title = f"Highlighting {stratify_by}: {strat_value}"
+            title_str = f"Highlighting {stratify_by}: {strat_value}"
             indices = np.where(condition)[0]
-            selected_spatial = adata.obsm['spatial'][indices]
-            print(f"number of cells in the region: {len(selected_spatial)}")
-
+            print(f"number of cells in the region: {len(adata.obsm['spatial'][indices])}")
+    
             adata_subset = select_values(
                 data=adata,
                 annotation=stratify_by,
                 values=strat_value
             )
-
-            result = main_figure_generation(
-                adata=adata_subset,
-                title=title,
-                stratify_by=stratify_by,
-                color_mapping=color_dict,
-                **kwargs
+    
+            spatial_df = prepare_spatial_dataframe(
+                adata_subset,
+                annotations=annotations,
+                feature=feature,
+                layer=layer
+            )
+    
+            # Call the partial function with additional arguments
+            result = plot_main(
+                spatial_df,
+                title=title_str
             )
             results.append(result)
     else:
-        title = "Interactive Spatial Plot"
-        result = main_figure_generation(
-            adata=adata,
-            title=title,
-            stratify_by=None,
-            color_mapping=color_dict,
-            **kwargs
+        title_str = "Interactive Spatial Plot"
+        spatial_df = prepare_spatial_dataframe(
+            adata,
+            annotations=annotations,
+            feature=feature,
+            layer=layer
+        )
+    
+        # For non-stratified case, pass extra parameters if needed
+        result = plot_main(
+            spatial_df,
+            title=title_str
         )
         results.append(result)
-
+    
     return results
 
 
