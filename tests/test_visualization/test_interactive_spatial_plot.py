@@ -92,6 +92,11 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         for idx, trace in enumerate(fig.data):
             self.assertEqual(trace.name, expected_names[idx])
 
+        expected_title = \
+            'Interactive Spatial Plot\nHighlighted by annotation_1'
+        # Check the title of the figure is as expected
+        self.assertEqual(fig.layout.title.text, expected_title)
+
     def test_feature_plot(self):
         # Create a mock adata for continuous feature plots.
         X = np.array([[5], [15], [25]])
@@ -116,6 +121,10 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         for val in trace.marker.color:
             self.assertIsInstance(val, numbers.Number)
 
+        expected_title = \
+            'Interactive Spatial Plot\nColored by "gene1", table: "Original"'
+        # Check the title of the figure is as expected
+        self.assertEqual(fig.layout.title.text, expected_title)
 
     def test_stratify_feature_plot(self):
         # Create a mock adata with continuous feature and a stratification column.
@@ -160,9 +169,9 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
 
         self.assertEqual(len(fig_list), 3)
         figure_name_list = [
-            'Highlighting_annotation_2_x.html',
-            'Highlighting_annotation_2_y.html',
-            'Highlighting_annotation_2_z.html'
+            'Subsetting_annotation_2_xHighlighted_by_annotation_1.html',
+            'Subsetting_annotation_2_yHighlighted_by_annotation_1.html',
+            'Subsetting_annotation_2_zHighlighted_by_annotation_1.html'
         ]
 
         # Every plot has a "hiddnen" point for the group label
