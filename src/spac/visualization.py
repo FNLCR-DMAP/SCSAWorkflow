@@ -23,9 +23,146 @@ import re
 import copy
 
 
+import xarray as xr
+import datashader as ds
+import datashader.colors as dc
+import datashader.transfer_functions as tf
+import datashader.utils as du
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+def datashader_2D_scatter(x, y, point_size=None, ax=None, labels=None, theme=None,
+                          x_axis_title="Component 1", y_axis_title="Component 2",
+                          plot_title=None,  **kwargs):
+    """
+    Generates a density scatter plot using Datashader and returns a Matplotlib figure and axes.
+    
+    Parameters:
+    - x: array-like, x coordinates.
+    - y: array-like, y coordinates.
+    - point_size: int or None, if set then spreads each point by this many pixels (default: None).
+    - ax: Matplotlib Axes object or None. If provided, the plot will be drawn on this Axes.
+    - theme: str or None, color theme for the plot. If provided, must be one of the supported themes.
+             Supported themes: 'Elevation', 'viridis', 'Hot', 'Set1', 'Set2', 'Set3', 'Sets1to3',
+             'inferno', 'color_lookup'. Defaults to 'viridis' if not recognized or not provided.
+    - x_axis_title: str, label for the x-axis (default: "Component 1").
+    - y_axis_title: str, label for the y-axis (default: "Component 2").
+    - plot_title: str, title of the plot (default: None).
+    - labels: array-like, optional. Array of labels for the data points. Can be numerical or categorical.
+    - **kwargs: additional keyword arguments passed to tf.shade and/or used for figure size:
+                - fig_width: width of the Datashader canvas in pixels (default: 600)
+                - fig_height: height of the Datashader canvas in pixels (default: 400)
+    
+    Returns:
+    - fig: Matplotlib Figure object.
+    - ax: Matplotlib Axes object.
+    """
+    # Input validation
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define available themes
+    themes = {
+        'Elevation': ds.colors.Elevation,
+        'viridis': ds.colors.viridis,
+        'Hot': ds.colors.Hot,
+        'Set1': ds.colors.Set1,
+        'Set2': ds.colors.Set2,
+        'Set3': ds.colors.Set3,
+        'Sets1to3': ds.colors.Sets1to3,
+        'inferno': ds.colors.inferno,
+        'color_lookup': ds.colors.color_lookup,
+    }
+
+    if theme and theme not in themes:
+        error_msg = f"Theme '{theme}' not recognized. Please use a valid theme."
+        raise ValueError(error_msg)
+    cmap = themes.get(theme, ds.colors.viridis)
+
+    # Create a DataFrame with the coordinates
+    coords = pd.DataFrame({"x": x, "y": y})
+    
+    # If labels are provided, add them to the DataFrame
+    if labels is not None:
+        coords["labels"] = labels
+
+    # Determine the ranges for x and y
+    x_min, x_max = coords["x"].min(), coords["x"].max()
+    y_min, y_max = coords["y"].min(), coords["y"].max()
+
+    # Get figure dimensions from kwargs, with defaults
+    plot_width = kwargs.get('fig_width', 600)
+    plot_height = kwargs.get('fig_height', 400)
+
+    # Create a Datashader canvas
+    canvas = ds.Canvas(
+        plot_width=plot_width,
+        plot_height=plot_height,
+        x_range=(x_min, x_max),
+        y_range=(y_min, y_max)
+    )
+    
+    # Aggregate points into bins
+    if labels is not None:
+        # If labels are not categorical, convert them
+        if not pd.api.types.is_categorical_dtype(coords["labels"]):
+            coords["labels"] = pd.Categorical(coords["labels"])
+        # Aggregate by category
+        agg = canvas.points(coords, x="x", y="y", agg=ds.count_cat("labels"))
+    else:
+        agg = canvas.points(coords, x="x", y="y", agg=ds.count())
+    
+    # Shading
+    if labels is not None:
+        # Determine categories from labels
+        if pd.api.types.is_categorical_dtype(coords["labels"]):
+            categories = (coords["labels"].categories 
+                        if isinstance(coords["labels"], pd.Categorical) 
+                        else coords["labels"].cat.categories)
+        else:
+            raise TypeError("Expected labels to be of type Series[Categorical] or Categorical.")
+
+        n = len(categories)
+        # Build a color_key dictionary.
+        if isinstance(cmap, (list, tuple)):
+            color_key = {cat: cmap[i % len(cmap)] for i, cat in enumerate(categories)}
+        else:
+            color_palette = ds.colors.colormap_select(cmap, start=0, end=1.0, reverse=False)
+            color_key = {cat: color_palette[i % len(color_palette)] for i, cat in enumerate(categories)}
+
+        img = tf.shade(agg, color_key=color_key, **kwargs)
+    else:
+        img = tf.shade(agg, cmap=cmap, **kwargs)
+
+    
+    # Customize point size by spreading if provided
+    if point_size is not None:
+        img = tf.spread(img, px=point_size)
+        
+    # Convert the image to a PIL image
+    img = img.to_pil()
+    
+    # Create a Matplotlib figure and axes (or use the provided ax)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(plot_width / 100, plot_height / 100))
+    else:
+        fig = ax.figure
+
+    ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+
+    if plot_title is not None:
+        ax.set_title(plot_title)
+    
+    return fig, ax
 
 
 def visualize_2D_scatter(
@@ -650,7 +787,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         return fig, axs[0]
     else:
         return fig, axs
-
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
