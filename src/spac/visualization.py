@@ -1253,7 +1253,7 @@ def boxplot(
         log_scale=False, 
         orient="v", 
         figure_width=3.2,
-        figure_height=1.8,
+        figure_height=2,
         figure_dpi=200,
         interactive=True,
         return_metrics=False,
@@ -1296,7 +1296,7 @@ def boxplot(
         Width of the figure in inches. Default is 3.2.
 
     figure_height : int, optional
-        Height of the figure in inches. Default is 1.8.
+        Height of the figure in inches. Default is 2.
 
     figure_dpi : int, optional
         DPI (dots per inch) for the figure. Default is 200.
@@ -1358,9 +1358,10 @@ def boxplot(
             mean = np.mean(x)
 
             if showfliers == 'downsample':
-                # Downsample outliers for large datasets
+                # Identify outliers outside 1.5 IQR from Q1 and Q3
                 outliers = x[(x < (q1 - 1.5 * iqr)) | (x > (q3 + 1.5 * iqr))]
 
+                # Downsample outliers for large datasets
                 if len(outliers) > 10000:
                     # Convert outliers list to a pandas Series
                     outlier_series = pd.Series(outliers)
@@ -1369,7 +1370,7 @@ def boxplot(
                     bins = pd.qcut(outlier_series, q=10, labels=False)
 
                     # Sample 10% from each quantile group
-                    outliers_sampled = outlier_series.groupby(bins).apply(lambda x: x.sample(frac=0.05))
+                    outliers_sampled = outlier_series.groupby(bins).apply(lambda x: x.sample(frac=0.10))
 
                     # Ensure the maximum and minimum outliers are included
                     max_outlier = outlier_series.max()
@@ -1378,9 +1379,12 @@ def boxplot(
 
                     # Convert the sampled values back to a list
                     outliers = outliers_sampled.reset_index(drop=True).tolist()
+                
                 metrics = [lower_whisker, q1, median, mean, q3, upper_whisker, outliers]
             elif showfliers == 'all':
+                # Identify outliers outside 1.5 IQR from Q1 and Q3
                 outliers = x[(x < (q1 - 1.5 * iqr)) | (x > (q3 + 1.5 * iqr))].tolist()
+
                 metrics = [lower_whisker, q1, median, mean, q3, upper_whisker, outliers]
             else:
                 metrics = lower_whisker, q1, median, mean, q3, upper_whisker
@@ -1393,9 +1397,11 @@ def boxplot(
         if showfliers:
             metric_names.append('fliers')
 
-        # Apply efficient groupby aggregation
         if annotation:
+            # Calculate metrics for each group defined by the annotation
             metrics = data.groupby(annotation).agg(lambda x: compute_metrics(x.to_numpy()))
+
+            # Reshape the DataFrame for easier plotting
             metrics = (metrics
                     .reset_index()
                     .melt(id_vars=[annotation], var_name="marker", value_name="stats"))
@@ -1403,13 +1409,16 @@ def boxplot(
             stats_df.columns = metric_names
             metrics = pd.concat([metrics.drop(columns=["stats"]), stats_df], axis=1)
         else:
+            # Calculate metrics for the entire dataset
             metrics = data.apply(lambda col: compute_metrics(col.to_numpy()), axis=0)
+
+            # Reshape the DataFrame for easier plotting
             metrics = metrics.T
             metrics.columns = metric_names
             metrics.reset_index(names="marker", inplace=True)
             return metrics
 
-        print("Time taken to compute boxplot metrics (optimal):", time.time() - start_time)
+        logging.info(f"Time taken to compute boxplot metrics: {time.time() - start_time} seconds")
         return metrics
 
 
@@ -1460,7 +1469,7 @@ def boxplot(
             Width of the figure in inches. Default is 3.2.
 
         figure_height : int, optional
-            Height of the figure in inches. Default is 1.8.
+            Height of the figure in inches. Default is 2.
 
         figure_dpi : int, optional
             DPI (dots per inch) for the figure. Default is 200.
@@ -1488,9 +1497,11 @@ def boxplot(
 
         # Get unique features (markers) from the summary statistics
         unique_features = summary_stats['marker'].unique()
+
+        # Create comma seperated list for features in the plot title
+        # If there are more than 3 unique features, use 'Multiple Features' in the title
         plot_title = f"{', '.join(unique_features[0:]) if len(unique_features) < 4 else 'Multiple Features'}"
 
-        # If an annotation is provided, group the data by the annotation
         if annotation:
             unique_annotations = summary_stats[annotation].unique()
             
@@ -1503,13 +1514,16 @@ def boxplot(
             # If no annotation, assign a color to each feature
             color_map = [colors[i % len(colors)] for i, value in enumerate(unique_features)]
         
-        # Set up the orientation of the plot
+        # Empty outlier lists cause issues with plotly, so replace them with [None]
+        if showfliers:
+            summary_stats['fliers'] = summary_stats['fliers'].apply(lambda x: [None] if len(x) == 0 else x)
+        
+        # Set up the orientation of the plot data & axis-labels
         if orient == "h":
             X_data = "fliers"
             Y_data = "marker"
             X_axis_label = "log(Intensity)" if log_scale else "Intensity"
             Y_axis_label = annotation if annotation else "feature value"
-
         elif orient == "v":
             X_data = "marker"
             Y_data = "fliers"
@@ -1520,6 +1534,7 @@ def boxplot(
         if annotation:
             grouped_data = dict()
             for annotation_value in summary_stats[annotation].unique():
+                # Transform the summary statistics to a dictionary for each annotation value
                 grouped_data[annotation_value] = summary_stats[
                     summary_stats[annotation] == annotation_value
                 ].to_dict(orient='list')
@@ -1531,7 +1546,7 @@ def boxplot(
                     x = data[X_data] if showfliers else None
                 else:
                     y = data[Y_data] if showfliers else None
-                    x = data[X_data] 
+                    x = data[X_data]
                 
                 fig.add_trace(go.Box(
                     name=annotation_value,
@@ -1568,6 +1583,7 @@ def boxplot(
                     y = [stats_dict[Y_data][i], [None]] if showfliers else None
                     x = [stats_dict[X_data][i]]
 
+                # Note: adding None to the x or y data to ensure the outliers are displayed correctly
                 fig.add_trace(go.Box(
                     name=marker_value,
                     q1=[stats_dict['q1'][i], None],
@@ -1577,20 +1593,15 @@ def boxplot(
                     upperfence=[stats_dict['whishi'][i], None],
                     mean=[stats_dict['mean'][i], None],
                     y=y,
-                    x=x,  # Use the individual marker value for x-axis
+                    x=x,
                     boxpoints='all',
                     jitter=0,
                     pointpos=0,
                     marker=dict(color=color_map[i]),  # Assign a unique color to each feature
                     showlegend=True,
                 ))
-            
-            # Set axis labels for the non-grouped case
-            fig.update_layout(
-                xaxis_title = "feature value",
-            )
 
-        # Final layout adjustments for the plot title and axis labels
+        # Final layout adjustments for the plot title, axis labels, and size
         fig.update_layout(
             title=plot_title, 
             yaxis_title=Y_axis_label,
@@ -1599,12 +1610,26 @@ def boxplot(
             width=int(figure_width * figure_dpi),
         )
 
-        # Return the figure and the summary statistics used for the boxplot
         return fig
 
 
+    #####################
+    #  Main Code Block  #
+    #####################
+
+    logging.info("Calculating Box Plot...")
+    if layer:
+        check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if features:
+        check_feature(adata, features=features)
+
     if ax and not isinstance(ax, plt.Figure):
         raise TypeError("Input 'ax' must be a plotly.Figure object.")
+    
+    if showfliers not in ('all', 'downsample', None):
+        raise ValueError("showfliers must be one of 'all', 'downsample', or None.")
     
     # Extract data from the specified layer or the default matrix (adata.X)
     if layer:
@@ -1643,6 +1668,7 @@ def boxplot(
     # Compute the summary statistics required for the boxplot
     metrics = compute_boxplot_metrics(df, annotation=annotation, showfliers=showfliers)
 
+    start_time = time.time()
     # Generate the boxplot figure from the summary statistics
     fig = boxplot_from_statistics(
         summary_stats=metrics, 
@@ -1660,8 +1686,11 @@ def boxplot(
     if interactive:
         plot = fig
     else:
-        img_bytes = pio.to_image(fig, format="png")  # Convert Plotly to PNG
+        # Convert Plotly to PNG encoded to base64
+        img_bytes = pio.to_image(fig, format="png")
         plot = base64.b64encode(img_bytes).decode('utf-8')
+
+    logging.info(f"Time taken to generate boxplot: {time.time() - start_time} seconds")
 
     # Determine the return values based on the return_metrics flag
     if return_metrics:
