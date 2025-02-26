@@ -1492,18 +1492,18 @@ def boxplot_interactive(
         The list of features (genes) to plot. If `None`, all features are
         included.
 
-    showfliers : {"downsample", "all", None}, optional, default=False
+    showfliers : {None, "downsample", "all"}, default = None
         If 'all', all outliers are displayed in the boxplot.
         If 'downsample', when num outliers is >10k, they are downsampled to
         10% of the original count.
         If None, outliers are hidden.
 
-    log_scale : bool, optional, default=False
+    log_scale : bool, default=False
         If True, the log1p transformation is applied to the features before
         plotting. This option is disabled if negative values are found in the
         features.
 
-    orient : {"v", "h"}, optional, default="v"
+    orient : {"v", "h"}, default="v"
         The orientation of the boxplots: "v" for vertical, "h" for horizontal.
 
     figure_width : int, optional
@@ -1515,11 +1515,11 @@ def boxplot_interactive(
     figure_dpi : int, optional
         DPI (dots per inch) for the figure. Default is 200.
 
-    interactive : bool, optional, default=False
+    interactive : bool, default = False
         If True, the plot is interactive, allowing for zooming and panning.
         If False, the plot is static.
 
-    return_metrics: bool, optional, default=False
+    return_metrics: bool, default = False
         If True, the function returns the computed boxplot metrics.
 
     **kwargs : additional keyword arguments
@@ -1527,12 +1527,12 @@ def boxplot_interactive(
 
     Returns
     -------
-    fig: plotly.graph_objects.Figure or str
+    fig : plotly.graph_objects.Figure or str
         The generated boxplot figure, which can be either:
             - If not `interactive`: A base64-encoded PNG image string
             - If `interactive`: A Plotly figure object
 
-    df: pd.DataFrame
+    df : pd.DataFrame
         A DataFrame containing the features and their corresponding values.
 
     metrics : pd.DataFrame
@@ -1548,49 +1548,68 @@ def boxplot_interactive(
         efficiently.
 
         Statistics include:
-            - Lower and upper whiskers,
-            - First quartile (Q1),
-            - Median,
-            - Third quartile (Q3),
-            - Mean for each numerical column
+            - Lower and upper whiskers (`whislo`, `whishi`),
+            - First quartile (`q1`),
+            - Median (`median`),
+            - Third quartile (`q3`),
+            - Mean (`mean`)
+            - Outliers (`fliers`) [If `showfliers` is not None]
+
         It can identify outliers based on the 'showfliers' parameter, and
         supports efficient handling of large datasets by downsampling outliers
         when specified.
 
-        Args:
-            data (pd.DataFrame): A pandas DataFrame containing the numerical
-            data for which the boxplot statistics are to be computed.
-            annotation (optional): Additional annotation data (currently not
-            used).
-            showfliers (bool or str, optional): Defines how outliers are
-            handled:
-                - None: No outliers are included in the output.
-                - 'downsample': Downsample the outliers when their count
-                exceeds 10,000 for large datasets.
-                - 'all': Include all outliers in the output.
+        Parameters
+        -----------
+        data : pd.DataFrame
+            A pandas DataFrame containing the numerical data for which
+            the boxplot statistics are to be computed.
 
-        Returns:
-            dict: A dictionary where the keys are the column names of the
-            input dataframe and the values are lists of computed boxplot
-            statistics. The statistics include the lower whisker ('whislo'),
-            first quartile ('q1'), median ('med'), mean ('mean'), third
-            quartile ('q3'), upper whisker ('whishi'), and outliers ('fliers')
-            (if applicable).
+        annotation: str, optional:
+            The annotation used to group the features
+
+        showfliers: {None, "downsample", "all"}, default = None
+            Defines how outliers are handled
+            If 'all', all outliers are displayed in the boxplot.
+            If 'downsample', when num outliers is >10k, they are downsampled to
+            10% of the original count.
+            If None, outliers are hidden.
+
+        Returns
+        -------
+        metrics : pd.DataFrame
+            A dataframe with one row per feature/annotation grouping and
+            columns representing the calculated features
         """
 
-        def compute_metrics(x):
-            """Computes all relevant boxplot statistics in a single pass."""
-            q1, median, q3 = np.percentile(x, [25, 50, 75])
+        def compute_metrics(data):
+            """
+            Computes all relevant boxplot statistics in a single pass.
+
+            Parameters
+            -----------
+            data : pd.DataFrame
+                A pandas DataFrame containing the numerical data for which
+                the boxplot statistics are to be computed.
+
+            Returns
+            --------
+            metrics : List[float or List[float]]
+                A list containing the computed boxplot statistics.
+            """
+            q1, median, q3 = np.percentile(data, [25, 50, 75])
             iqr = q3 - q1
             # Min within whisker range
-            lower_whisker = np.min(x[x >= (q1 - 1.5 * iqr)])
+            lower_whisker = np.min(data[data >= (q1 - 1.5 * iqr)])
             # Max within whisker range
-            upper_whisker = np.max(x[x <= (q3 + 1.5 * iqr)])
-            mean = np.mean(x)
+            upper_whisker = np.max(data[data <= (q3 + 1.5 * iqr)])
+            mean = np.mean(data)
 
             if showfliers == "downsample":
                 # Identify outliers outside 1.5 IQR from Q1 and Q3
-                outliers = x[(x < (q1 - 1.5 * iqr)) | (x > (q3 + 1.5 * iqr))]
+                outliers = data[
+                    (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
+                ]
 
                 # Downsample outliers for large datasets
                 if len(outliers) > 10000:
@@ -1626,8 +1645,8 @@ def boxplot_interactive(
                 ]
             elif showfliers == "all":
                 # Identify outliers outside 1.5 IQR from Q1 and Q3
-                outliers = x[
-                    (x < (q1 - 1.5 * iqr)) | (x > (q3 + 1.5 * iqr))
+                outliers = data[
+                    (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
                 ].tolist()
 
                 metrics = [
@@ -1719,7 +1738,7 @@ def boxplot_interactive(
             A figure or axes to plot onto. If None, a new Plotly figure is
             created.
 
-        showfliers : {"downsample", "all", None}, optional, default=False
+        showfliers : {None, "downsample", "all"}, default = None
             If 'all', all outliers are displayed in the boxplot.
             If 'downsample', when num outliers is >10k, they are downsampled
             to 10% of the original count.
@@ -1730,7 +1749,7 @@ def boxplot_interactive(
             before plotting. This option is disabled if negative values are
             found in the features.
 
-        orient : {"v", "h"}, optional, default="v"
+        orient : {"v", "h"}, default="v"
             The orientation of the boxplot: 'v' for vertical and 'h' for
             horizontal.
 
