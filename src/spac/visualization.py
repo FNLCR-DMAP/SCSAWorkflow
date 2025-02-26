@@ -20,7 +20,6 @@ from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
-import copy
 import base64
 import time
 
@@ -1573,7 +1572,7 @@ def boxplot_interactive(
         Returns:
             dict: A dictionary where the keys are the column names of the
             input dataframe and the values are lists of computed boxplot
-            statistics. The statistics include the lower whisker ('whislo'), 
+            statistics. The statistics include the lower whisker ('whislo'),
             first quartile ('q1'), median ('med'), mean ('mean'), third
             quartile ('q3'), upper whisker ('whishi'), and outliers ('fliers')
             (if applicable).
@@ -1679,7 +1678,8 @@ def boxplot_interactive(
             return metrics
 
         logging.info(
-            f"Time taken to compute boxplot metrics: {time.time() - start_time} seconds"
+            "Time taken to compute boxplot metrics: %f seconds",
+            time.time() - start_time
         )
         return metrics
 
@@ -1758,13 +1758,15 @@ def boxplot_interactive(
         are controlled by the `showfliers` parameter.
         """
 
-        # Initialize the figure: if 'ax' is provided, use it, otherwise create a new Plotly figure
+        # Initialize the figure: if 'ax' is provided, use it, otherwise create
+        # a new Plotly figure
         if ax:
             fig = ax
         else:
             fig = go.Figure()
 
-        # Define a colormap for the annotations (up to 20 colors from tab20 colormap)
+        # Define a colormap for the annotations (up to 20 colors from tab20
+        # colormap)
         colors = [
             f"rgb{tuple(int(x * 255) for x in tpl)}"
             for tpl in plt.cm.tab20.colors
@@ -1775,12 +1777,15 @@ def boxplot_interactive(
 
         # Create comma seperated list for features in the plot title
         # If there are >3 unique features, use 'Multiple Features' in the title
-        plot_title = f"{', '.join(unique_features[0:]) if len(unique_features) < 4 else 'Multiple Features'}"
+        if len(unique_features) < 4:
+            plot_title = f"{', '.join(unique_features[0:])}"
+        else:
+            plot_title = 'Multiple Features'
 
         if annotation:
             unique_annotations = summary_stats[annotation].unique()
 
-            # Create a color map for the annotation values 
+            # Create a color map for the annotation values
             # (unique annotations to unique colors)
             color_map = {
                 value: colors[i % len(colors)]
@@ -1796,7 +1801,7 @@ def boxplot_interactive(
                 for i, value in enumerate(unique_features)
             ]
 
-        # Empty outlier lists cause issues with plotly, 
+        # Empty outlier lists cause issues with plotly,
         # so replace them with [None]
         if showfliers:
             summary_stats["fliers"] = summary_stats["fliers"].apply(
@@ -1805,22 +1810,22 @@ def boxplot_interactive(
 
         # Set up the orientation of the plot data & axis-labels
         if orient == "h":
-            X_data = "fliers"
-            Y_data = "marker"
-            X_axis_label = "log(Intensity)" if log_scale else "Intensity"
-            Y_axis_label = annotation if annotation else "feature value"
+            x_data = "fliers"
+            y_data = "marker"
+            x_axis_label = "log(Intensity)" if log_scale else "Intensity"
+            y_axis_label = annotation if annotation else "feature value"
         elif orient == "v":
-            X_data = "marker"
-            Y_data = "fliers"
-            X_axis_label = annotation if annotation else "feature value"
-            Y_axis_label = "log(Intensity)" if log_scale else "Intensity"
+            x_data = "marker"
+            y_data = "fliers"
+            x_axis_label = annotation if annotation else "feature value"
+            y_axis_label = "log(Intensity)" if log_scale else "Intensity"
 
-        # If annotation is provided, group the data 
+        # If annotation is provided, group the data
         # and create boxplots for each group
         if annotation:
             grouped_data = dict()
             for annotation_value in summary_stats[annotation].unique():
-                # Transform the summary statistics to a dictionary 
+                # Transform the summary statistics to a dictionary
                 # for each annotation value
                 grouped_data[annotation_value] = summary_stats[
                     summary_stats[annotation] == annotation_value
@@ -1829,11 +1834,11 @@ def boxplot_interactive(
             # Add a boxplot trace for each annotation value
             for annotation_value, data in grouped_data.items():
                 if orient == "h":
-                    y = data[Y_data]
-                    x = data[X_data] if showfliers else None
+                    y = data[y_data]
+                    x = data[x_data] if showfliers else None
                 else:
-                    y = data[Y_data] if showfliers else None
-                    x = data[X_data]
+                    y = data[y_data] if showfliers else None
+                    x = data[x_data]
 
                 fig.add_trace(
                     go.Box(
@@ -1865,19 +1870,19 @@ def boxplot_interactive(
             # Adjust layout to group the boxplots by annotation
             fig.update_layout(boxmode="group")
         else:
-            # If no annotation, create a boxplot 
+            # If no annotation, create a boxplot
             # for each unique feature (marker)
             stats_dict = summary_stats.to_dict(orient="list")
 
             for i, marker_value in enumerate(stats_dict["marker"]):
                 if orient == "h":
-                    y = [stats_dict[Y_data][i]]
-                    x = [stats_dict[X_data][i], [None]] if showfliers else None
+                    y = [stats_dict[y_data][i]]
+                    x = [stats_dict[x_data][i], [None]] if showfliers else None
                 else:
-                    y = [stats_dict[Y_data][i], [None]] if showfliers else None
-                    x = [stats_dict[X_data][i]]
+                    y = [stats_dict[y_data][i], [None]] if showfliers else None
+                    x = [stats_dict[x_data][i]]
 
-                # Note: adding None to the x or y data to ensure 
+                # Note: adding None to the x or y data to ensure
                 # the outliers are displayed correctly
                 fig.add_trace(
                     go.Box(
@@ -1903,8 +1908,8 @@ def boxplot_interactive(
         # Final layout adjustments for the plot title, axis labels, and size
         fig.update_layout(
             title=plot_title,
-            yaxis_title=Y_axis_label,
-            xaxis_title=X_axis_label,
+            yaxis_title=y_axis_label,
+            xaxis_title=x_axis_label,
             height=int(figure_height * figure_dpi),
             width=int(figure_width * figure_dpi),
         )
@@ -1937,7 +1942,7 @@ def boxplot_interactive(
     else:
         data_matrix = adata.X
 
-    # Convert the data matrix into a DataFrame with 
+    # Convert the data matrix into a DataFrame with
     # appropriate column names (features)
     df = pd.DataFrame(data_matrix, columns=adata.var_names)
 
@@ -1949,7 +1954,7 @@ def boxplot_interactive(
     if features is None:
         features = adata.var_names.tolist()
 
-    # Filter the DataFrame to include only the 
+    # Filter the DataFrame to include only the
     # selected features and the annotation
     df = df[features + ([annotation] if annotation else [])]
 
@@ -1992,7 +1997,8 @@ def boxplot_interactive(
         plot = base64.b64encode(img_bytes).decode("utf-8")
 
     logging.info(
-        f"Time taken to generate boxplot: {time.time() - start_time} seconds"
+        "Time taken to generate boxplot: %f seconds",
+        time.time() - start_time
     )
 
     # Determine the return values based on the return_metrics flag
