@@ -1457,6 +1457,9 @@ def boxplot_interactive(
     figure_width=3.2,
     figure_height=2,
     figure_dpi=200,
+    defined_color_map=None,
+    annotation_colorscale="viridis",
+    feature_colorscale="seismic",
     interactive=True,
     return_metrics=False,
     **kwargs,
@@ -1516,6 +1519,18 @@ def boxplot_interactive(
     figure_dpi : int, optional
         DPI (dots per inch) for the figure. Default is 200.
 
+    defined_color_map : str, optional
+        Predefined color mapping stored in adata.uns for specific labels.
+        Default is None, which will generate the color mapping automatically.
+
+    annotation_colorscale : str, default='viridis'
+        Name of the color scale to use for the dots when annotation
+        is used.
+
+    feature_colorscale: str, default='seismic'
+        Name of the color scale to use for the dots when feature
+        is used.
+
     interactive : bool, default = False
         If True, the plot is interactive, allowing for zooming and panning.
         If False, the plot is static.
@@ -1543,6 +1558,7 @@ def boxplot_interactive(
 
     def boxplot_from_statistics(
         summary_stats: pd.DataFrame,
+        cmap: dict,
         annotation: str = None,
         ax=None,
         showfliers=None,
@@ -1568,6 +1584,10 @@ def boxplot_interactive(
             plot. It should include columns like 'marker', 'q1', 'med', 'q3',
             'whislo', 'whishi', and 'mean'. Optionally, it may also contain an
             annotation column used for grouping.
+
+        cmap : dict
+            A dictionary mapping annotation/feature values to color strings 
+            (hex, rgb/rgba, hsl/hsla, hsv/hsva, or CSS).
 
         annotation : str, optional
             The column name in `summary_stats` used to group the data by
@@ -1624,13 +1644,6 @@ def boxplot_interactive(
         else:
             fig = go.Figure()
 
-        # Define a colormap for the annotations (up to 20 colors from tab20
-        # colormap)
-        colors = [
-            f"rgb{tuple(int(x * 255) for x in tpl)}"
-            for tpl in plt.cm.tab20.colors
-        ]
-
         # Get unique features (markers) from the summary statistics
         unique_features = summary_stats["marker"].unique()
 
@@ -1644,21 +1657,7 @@ def boxplot_interactive(
         if annotation:
             unique_annotations = summary_stats[annotation].unique()
 
-            # Create a color map for the annotation values
-            # (unique annotations to unique colors)
-            color_map = {
-                value: colors[i % len(colors)]
-                for i, value in enumerate(unique_annotations)
-            }
-
             plot_title += f" grouped by {annotation}"
-
-        else:
-            # If no annotation, assign a color to each feature
-            color_map = [
-                colors[i % len(colors)]
-                for i, value in enumerate(unique_features)
-            ]
 
         # Empty outlier lists cause issues with plotly,
         # so replace them with [None]
@@ -1714,7 +1713,7 @@ def boxplot_interactive(
                         jitter=0,
                         pointpos=0,
                         marker=dict(
-                            color=color_map[annotation_value]
+                            color=cmap[annotation_value]
                         ),  # Assign color based on annotation
                         legendgroup=annotation_value,
                         showlegend=annotation_value
@@ -1759,7 +1758,7 @@ def boxplot_interactive(
                         jitter=0,
                         pointpos=0,
                         marker=dict(
-                            color=color_map[i]
+                            color=cmap[marker_value]
                         ),
                         showlegend=True,
                         **kwargs
@@ -1840,10 +1839,29 @@ def boxplot_interactive(
         time.time() - start_time
     )
 
+    # Get the colormap for the annotation
+    if defined_color_map:
+        cmap = get_defined_color_map(adata)
+    elif annotation:
+        cmap = get_defined_color_map(
+            adata, 
+            annotations=annotation, 
+            colorscale=annotation_colorscale,
+        )
+    else:
+        # Create a color mapping for the features
+        unique_features = metrics["marker"].unique()
+        cmap = color_mapping(
+            unique_features, 
+            color_map=feature_colorscale,
+            return_dict=True,
+        )
+
     start_time = time.time()
     # Generate the boxplot figure from the summary statistics
     fig = boxplot_from_statistics(
         summary_stats=metrics,
+        cmap=cmap,
         annotation=annotation,
         showfliers=showfliers,
         log_scale=log_scale,
