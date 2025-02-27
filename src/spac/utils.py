@@ -936,7 +936,7 @@ def spell_out_special_characters(text):
     return text
 
 
-def get_defined_color_map(adata, defined_color_map=None, annotations=None, 
+def get_defined_color_map(adata, defined_color_map=None, annotations=None,
                           colorscale='viridis'):
     """
     Retrieve or generate a predefined color mapping dictionary from an AnnData
@@ -1014,6 +1014,7 @@ def get_defined_color_map(adata, defined_color_map=None, annotations=None,
             rgba_mode=False,
             return_dict=True
         )
+
 
 def compute_boxplot_metrics(
     data: pd.DataFrame, annotation=None, showfliers: bool = None
@@ -1144,12 +1145,13 @@ def compute_boxplot_metrics(
             f"The provided annotation '{annotation}' is not found in the data."
         )
 
-    # Validate showfliers parameter 
+    # Validate showfliers parameter
     if showfliers and showfliers not in ("all", "downsample", None):
         raise ValueError(
-            "showfliers must be one of 'all', 'downsample', or None."
+            'showfliers must be one of "all", "downsample", or None. '
+            f'Got: "{showfliers}".'
         )
-    
+
     # Define metric names
     metric_names = ["whislo", "q1", "med", "mean", "q3", "whishi"]
     if showfliers:

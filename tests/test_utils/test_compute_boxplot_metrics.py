@@ -70,12 +70,10 @@ class TestComputeBoxplotMetrics(unittest.TestCase):
         }
 
         # Extract the dictionaries for each marker
-        marker1_result = result[result["marker"] == "Marker 1"].to_dict(
-            orient="row"
-        )[0]
-        marker2_result = result[result["marker"] == "Marker 2"].to_dict(
-            orient="row"
-        )[0]
+        marker1_result = \
+            result[result["marker"] == "Marker 1"].iloc[0].to_dict()
+        marker2_result = \
+            result[result["marker"] == "Marker 2"].iloc[0].to_dict()
 
         # Compare the expected and result dictionaries
         self.assertEqual(marker1_expected_stats, marker1_result)
@@ -114,10 +112,10 @@ class TestComputeBoxplotMetrics(unittest.TestCase):
         # For marker 1
         phenotypeA_result = result[
             (result["marker"] == "Marker 1") & (result["Phenotype"] == "A")
-        ].to_dict(orient="row")[0]
+        ].iloc[0].to_dict()
         phenotypeB_result = result[
             (result["marker"] == "Marker 1") & (result["Phenotype"] == "B")
-        ].to_dict(orient="row")[0]
+        ].iloc[0].to_dict()
 
         # Compare the expected and result dictionaries
         self.assertEqual(phenotypeA_expected_stats, phenotypeA_result)
@@ -130,34 +128,36 @@ class TestComputeBoxplotMetrics(unittest.TestCase):
         )
 
         # Extract the fliers for Marker 1
-        fliers_result = result[result["marker"] == "Marker 1"].to_dict(
-            orient="row"
-        )[0]['fliers']
+        fliers_result = result[
+            result["marker"] == "Marker 1"].iloc[0].to_dict()['fliers']
 
         # Get the min and max outliers
         min_outlier = np.min(self.flier_data['Marker 1'])
         max_outlier = np.max(self.flier_data['Marker 1'])
 
-       # Check if the returned result contains the max and min outliers
+        # Check if the returned result contains the max and min outliers
         self.assertIn(min_outlier, fliers_result)
         self.assertIn(max_outlier, fliers_result)
-    
-    def test_invalid_options(self):
-        # Test invalid options for showfliers
-        with self.assertRaises(ValueError):
+
+    def test_invalid_options_showfliers_message(self):
+        expected_msg = (
+            'showfliers must be one of "all", "downsample", or None. '
+            'Got: "invalid_option"'
+        )
+        with self.assertRaisesRegex(ValueError, expected_msg):
             compute_boxplot_metrics(
                 self.data,
                 showfliers="invalid_option",
             )
-        
+
+    def test_invalid_annotation(self):
+
         # Test invalid annotation
         with self.assertRaises(ValueError):
             compute_boxplot_metrics(
                 self.annotated_data,
                 annotation="invalid_annotation",
             )
-
-
 
 
 if __name__ == "__main__":

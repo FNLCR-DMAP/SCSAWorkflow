@@ -40,12 +40,11 @@ class TestBoxplotInteractive(unittest.TestCase):
         self.assertIsInstance(fig, go.Figure)
         self.assertIsInstance(df, pd.DataFrame)
 
-
     def test_single_annotation_single_feature(self):
         """Test if annotation mode works as expected with a single feature."""
         fig, df = boxplot_interactive(
             self.adata, features=['feature1'],
-            annotation='phenotype', 
+            annotation='phenotype',
             orient='v',
             interactive=True
         )
@@ -58,13 +57,12 @@ class TestBoxplotInteractive(unittest.TestCase):
         for label in expected_unique_labels:
             self.assertIn(label, box_name_data)
 
-
     def test_single_annotation_multiple_features(self):
         """Test when only one annotation but multiple features."""
         fig, df = boxplot_interactive(
             self.adata,
             features=['feature1', 'feature2'],
-            annotation='phenotype', 
+            annotation='phenotype',
             orient='v',
             interactive=True,
         )
@@ -97,7 +95,7 @@ class TestBoxplotInteractive(unittest.TestCase):
         """Test for the orient parameter."""
         fig, df = boxplot_interactive(
             self.adata, features=['feature1'],
-            annotation='phenotype', 
+            annotation='phenotype',
             orient='h',
             interactive=True,
         )
@@ -116,7 +114,7 @@ class TestBoxplotInteractive(unittest.TestCase):
         )
 
         fig, df = boxplot_interactive(
-            self.adata, 
+            self.adata,
             features=['feature1'],
             log_scale=True,
             interactive=True
@@ -140,8 +138,8 @@ class TestBoxplotInteractive(unittest.TestCase):
         )
 
         fig, df = boxplot_interactive(
-            self.adata, 
-            features=['feature1'], 
+            self.adata,
+            features=['feature1'],
             log_scale=True,
             interactive=True
         )
@@ -215,8 +213,8 @@ class TestBoxplotInteractive(unittest.TestCase):
 
         # Create a boxplot and capture the print output
         fig, df = boxplot_interactive(
-            adata, 
-            features=['feature1'], 
+            adata,
+            features=['feature1'],
             log_scale=True,
             interactive=True
         )
@@ -251,9 +249,9 @@ class TestBoxplotInteractive(unittest.TestCase):
         """
         # Test for vertical orientation
         fig, df = boxplot_interactive(
-            self.adata, 
-            features=['feature1'], 
-            orient='v', 
+            self.adata,
+            features=['feature1'],
+            orient='v',
             interactive=True
         )
         self.assertEqual(fig.layout.yaxis.title.text, 'Intensity')
@@ -313,8 +311,8 @@ class TestBoxplotInteractive(unittest.TestCase):
     def test_single_feature_labeling(self):
         """Test if single feature name is displayed correctly on the x-axis."""
         fig, df = boxplot_interactive(
-            self.adata, 
-            features=['feature1'], 
+            self.adata,
+            features=['feature1'],
             orient='v',
             interactive=True,
         )
@@ -322,8 +320,8 @@ class TestBoxplotInteractive(unittest.TestCase):
         self.assertEqual(x_labels, ['feature1'])
 
         fig, df = boxplot_interactive(
-            self.adata, 
-            features=['feature1'], 
+            self.adata,
+            features=['feature1'],
             orient='h',
             interactive=True,
         )

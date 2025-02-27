@@ -1467,7 +1467,7 @@ def boxplot_interactive(
     """
     Generate a boxplot for given features from an AnnData object.
 
-    This function visualizes the distribution of gene expression 
+    This function visualizes the distribution of gene expression
     (or other features) across different annotations in the provided data.
     It can handle various options such as log-transformation, feature
     selection, and handling of outliers.
@@ -1586,7 +1586,7 @@ def boxplot_interactive(
             annotation column used for grouping.
 
         cmap : dict
-            A dictionary mapping annotation/feature values to color strings 
+            A dictionary mapping annotation/feature values to color strings
             (hex, rgb/rgba, hsl/hsla, hsv/hsva, or CSS).
 
         annotation : str, optional
@@ -1793,7 +1793,8 @@ def boxplot_interactive(
 
     if showfliers not in ("all", "downsample", None):
         raise ValueError(
-            "showfliers must be one of 'all', 'downsample', or None."
+            ("showfliers must be one of 'all', 'downsample', or None."),
+            ("Got {showfliers}."),
         )
 
     # Extract data from the specified layer or the default matrix (adata.X)
@@ -1844,15 +1845,15 @@ def boxplot_interactive(
         cmap = get_defined_color_map(adata)
     elif annotation:
         cmap = get_defined_color_map(
-            adata, 
-            annotations=annotation, 
+            adata,
+            annotations=annotation,
             colorscale=annotation_colorscale,
         )
     else:
         # Create a color mapping for the features
         unique_features = metrics["marker"].unique()
         cmap = color_mapping(
-            unique_features, 
+            unique_features,
             color_map=feature_colorscale,
             return_dict=True,
         )
