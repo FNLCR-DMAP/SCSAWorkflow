@@ -15,6 +15,7 @@ from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import check_label
 from spac.utils import get_defined_color_map
+from spac.utils import compute_boxplot_metrics
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
@@ -1540,168 +1541,6 @@ def boxplot_interactive(
         `return_metrics` is True).
     """
 
-    def compute_boxplot_metrics(
-        data: pd.DataFrame, annotation=None, showfliers: bool = None
-    ):
-        """
-        Compute boxplot-related statistical metrics for a given dataset
-        efficiently.
-
-        Statistics include:
-            - Lower and upper whiskers (`whislo`, `whishi`),
-            - First quartile (`q1`),
-            - Median (`median`),
-            - Third quartile (`q3`),
-            - Mean (`mean`)
-            - Outliers (`fliers`) [If `showfliers` is not None]
-
-        It can identify outliers based on the 'showfliers' parameter, and
-        supports efficient handling of large datasets by downsampling outliers
-        when specified.
-
-        Parameters
-        -----------
-        data : pd.DataFrame
-            A pandas DataFrame containing the numerical data for which
-            the boxplot statistics are to be computed.
-
-        annotation: str, optional:
-            The annotation used to group the features
-
-        showfliers: {None, "downsample", "all"}, default = None
-            Defines how outliers are handled
-            If 'all', all outliers are displayed in the boxplot.
-            If 'downsample', when num outliers is >10k, they are downsampled to
-            10% of the original count.
-            If None, outliers are hidden.
-
-        Returns
-        -------
-        metrics : pd.DataFrame
-            A dataframe with one row per feature/annotation grouping and
-            columns representing the calculated features
-        """
-
-        def compute_metrics(data):
-            """
-            Computes all relevant boxplot statistics in a single pass.
-
-            Parameters
-            -----------
-            data : pd.DataFrame
-                A pandas DataFrame containing the numerical data for which
-                the boxplot statistics are to be computed.
-
-            Returns
-            --------
-            metrics : List[float or List[float]]
-                A list containing the computed boxplot statistics.
-            """
-            q1, median, q3 = np.percentile(data, [25, 50, 75])
-            iqr = q3 - q1
-            # Min within whisker range
-            lower_whisker = np.min(data[data >= (q1 - 1.5 * iqr)])
-            # Max within whisker range
-            upper_whisker = np.max(data[data <= (q3 + 1.5 * iqr)])
-            mean = np.mean(data)
-
-            if showfliers == "downsample":
-                # Identify outliers outside 1.5 IQR from Q1 and Q3
-                outliers = data[
-                    (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
-                ]
-
-                # Downsample outliers for large datasets
-                if len(outliers) > 10000:
-                    # Convert outliers list to a pandas Series
-                    outlier_series = pd.Series(outliers)
-
-                    # Get the quantile-based bins
-                    bins = pd.qcut(outlier_series, q=10, labels=False)
-
-                    # Sample 10% from each quantile group
-                    outliers_sampled = outlier_series.groupby(bins).apply(
-                        lambda x: x.sample(frac=0.10)
-                    )
-
-                    # Ensure the maximum and minimum outliers are included
-                    max_outlier = outlier_series.max()
-                    min_outlier = outlier_series.min()
-                    outliers_sampled = outliers_sampled.append(
-                        pd.Series([max_outlier, min_outlier])
-                    )
-
-                    # Convert the sampled values back to a list
-                    outliers = outliers_sampled.reset_index(drop=True).tolist()
-
-                metrics = [
-                    lower_whisker,
-                    q1,
-                    median,
-                    mean,
-                    q3,
-                    upper_whisker,
-                    outliers,
-                ]
-            elif showfliers == "all":
-                # Identify outliers outside 1.5 IQR from Q1 and Q3
-                outliers = data[
-                    (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
-                ].tolist()
-
-                metrics = [
-                    lower_whisker,
-                    q1,
-                    median,
-                    mean,
-                    q3,
-                    upper_whisker,
-                    outliers,
-                ]
-            else:
-                metrics = lower_whisker, q1, median, mean, q3, upper_whisker
-
-            return metrics
-
-        start_time = time.time()
-        # Define metric names
-        metric_names = ["whislo", "q1", "med", "mean", "q3", "whishi"]
-        if showfliers:
-            metric_names.append("fliers")
-
-        if annotation:
-            # Calculate metrics for each group defined by the annotation
-            metrics = data.groupby(annotation).agg(
-                lambda x: compute_metrics(x.to_numpy())
-            )
-
-            # Reshape the DataFrame for easier plotting
-            metrics = metrics.reset_index().melt(
-                id_vars=[annotation], var_name="marker", value_name="stats"
-            )
-            stats_df = metrics["stats"].apply(pd.Series)
-            stats_df.columns = metric_names
-            metrics = pd.concat(
-                [metrics.drop(columns=["stats"]), stats_df], axis=1
-            )
-        else:
-            # Calculate metrics for the entire dataset
-            metrics = data.apply(
-                lambda col: compute_metrics(col.to_numpy()), axis=0
-            )
-
-            # Reshape the DataFrame for easier plotting
-            metrics = metrics.T
-            metrics.columns = metric_names
-            metrics.reset_index(names="marker", inplace=True)
-            return metrics
-
-        logging.info(
-            "Time taken to compute boxplot metrics: %f seconds",
-            time.time() - start_time
-        )
-        return metrics
-
     def boxplot_from_statistics(
         summary_stats: pd.DataFrame,
         annotation: str = None,
@@ -1991,9 +1830,14 @@ def boxplot_interactive(
     if log_scale:
         df[features] = np.log1p(df[features])
 
+    start_time = time.time()
     # Compute the summary statistics required for the boxplot
     metrics = compute_boxplot_metrics(
         df, annotation=annotation, showfliers=showfliers
+    )
+    logging.info(
+        "Time taken to compute boxplot metrics: %f seconds",
+        time.time() - start_time
     )
 
     start_time = time.time()
