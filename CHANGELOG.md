@@ -1,18 +1,43 @@
 # CHANGELOG
 
 
+## v0.8.3 (2025-02-26)
+
+### Features
+
+- Adding automated bin cal to histogram
+  ([`10d824c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/10d824c5001f5737c42cac01b8ef71586c03882e))
+
+- Adding unittest for coloring
+  ([`34b2a24`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/34b2a24878a789e1477a6eb27fb44bc6f7932104))
+
+- Adding unittest for multiple annotations
+  ([`5e1140b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5e1140bf0f3a7179cfda7d5210b57402479aaae7))
+
+### Performance Improvements
+
+- Updating the default colormap for interactive spatial to rainbow
+  ([`537d7ba`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/537d7bad45f6e14f19b05516ec7e827f4b60742f))
+
+### Refactoring
+
+- Condensed interactive spatial plot code
+  ([`c8726ca`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c8726ca85376a8c20edb34cb3992d4f009b24d84))
+
+- **interactive_spatial_plot**: Added a verbose title
+  ([`499db75`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/499db757219adc346af59e164e9f29f9539f6f17))
+
+- **interactive_spatial_plot**: Assigned color map during creating of traces
+  ([`fcdcd65`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fcdcd6585125e893c2383b078ba31a6205c53814))
+
+- **interactive_spatial_plot**: Replaced NA with no_label
+  ([`d5a606a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d5a606aae1c190e28cac33bd38240d6b38ba0cbe))
+
+- **interactive_spatial_plot**: Used partial for better readability
+  ([`60283bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60283bd7671d2f2a65b52d77f4792b7461a8e407))
+
+
 ## v0.8.2 (2025-01-22)
-
-### Bug Fixes
-
-- **calculate_nearest_neighbor**: Reindex to match adata.obs and unit test
-  ([`aadca8c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aadca8c230fe488f90073777ab1bbcb062073d91))
-
-- **select_values**: Adata.obsm remain numpy arrays
-  ([`af593e1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/af593e164a0c97312d45a2b3d13b4bb4662db5bb))
-
-
-## v0.8.1 (2025-01-21)
 
 ### Bug Fixes
 
@@ -103,6 +128,9 @@
 - **calculate_centroid**: Return data
   ([`d1cca74`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d1cca74ea9fe4d74f278de684ebd4f9c1776e1b0))
 
+- **calculate_nearest_neighbor**: Reindex to match adata.obs and unit test
+  ([`aadca8c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aadca8c230fe488f90073777ab1bbcb062073d91))
+
 - **calculate_spatial_distance**: Fix typo
   ([`cfaf204`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cfaf204f814098db9095a1e0a04dc48810e2055f))
 
@@ -128,6 +156,9 @@
 - **ripley_l**: Generate write warning messages for n_observations and missing phenotypes
   ([`23236ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/23236ab4e6577f9e86863b60e309cd17b6fff5c6))
 
+- **select_values**: Adata.obsm remain numpy arrays
+  ([`af593e1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/af593e164a0c97312d45a2b3d13b4bb4662db5bb))
+
 - **test_plot_ripley_l**: Fixed unit tests where regions was passed unecesseararly
   ([`1cba03f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cba03ff9d6ca5fb22619b62e302a34339395451))
 
@@ -148,6 +179,9 @@
   ([`cf44261`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cf442610df7e5a4bca7d761248767c14ddd33dcc))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`6e30bf4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e30bf499e0a81d25f2b2cc9363f9523ecbad974))
 
 - **version**: Automatic development release
   ([`05d67fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/05d67fd841d9725cec6b8979c1d0b9f8ae395345))
