@@ -1,5 +1,5 @@
 import unittest
-from spac.visualization import interative_spatial_plot
+from spac.visualization import interactive_spatial_plot
 import plotly.graph_objs as go
 import anndata
 import pandas as pd
@@ -22,7 +22,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
 
     def test_return_object(self):
         # Test if the return object is of the correct type
-        fig_list = interative_spatial_plot(self.adata, 'annotation_1')
+        fig_list = interactive_spatial_plot(self.adata, 'annotation_1')
         self.assertIsInstance(fig_list, list)
         self.assertIsInstance(fig_list[0], dict)
         self.assertIsInstance(fig_list[0]['image_name'], str)
@@ -31,7 +31,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
     def test_image_configuration(self):
         # Assuming you expect certain configurations
         # like a specific width and height
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             self.adata,
             ['annotation_1','annotation_2'],
             figure_width=15,
@@ -43,7 +43,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
 
     def test_hover_values_annotation(self):
         # Use the existing adata from setUp with annotation_1.
-        fig_list = interative_spatial_plot(self.adata, 'annotation_1')
+        fig_list = interactive_spatial_plot(self.adata, 'annotation_1')
         self.assertIsInstance(fig_list, list)
         fig = fig_list[0]['image_object']
         # In annotation plots, we set a hovertemplate that displays customdata.
@@ -57,7 +57,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 self.assertIn(trace.customdata[0][0], ['a', 'b', 'c'])
 
     def test_annotation_plot(self):
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             self.adata,
             'annotation_1'
         )
@@ -104,8 +104,8 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         adata_feature.var_names = ['gene1']
         spatial_coords = np.array([[0, 0], [1, 1], [2, 2]])
         adata_feature.obsm["spatial"] = spatial_coords
-        # Call interative_spatial_plot using a feature (continuous)
-        fig_list = interative_spatial_plot(
+        # Call interactive_spatial_plot using a feature (continuous)
+        fig_list = interactive_spatial_plot(
             adata_feature,
             feature='gene1',
             dot_size=10,
@@ -137,9 +137,9 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
         spatial_coords = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         adata_strat.obsm["spatial"] = spatial_coords
 
-        # Now call interative_spatial_plot with feature parameter
+        # Now call interactive_spatial_plot with feature parameter
         # and stratify_by "group"
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             adata_strat,
             feature='gene1',
             stratify_by='group'
@@ -161,7 +161,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                     self.assertIsInstance(trace.marker.color, numbers.Number)
 
     def test_stratify_by(self):
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             self.adata,
             'annotation_1',
             stratify_by='annotation_2'
@@ -209,7 +209,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 'c': 'green'
             }
         self.adata.uns['test_color_mapping'] = defined_color_map
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             self.adata,
             'annotation_1',
             defined_color_map='test_color_mapping'
@@ -232,7 +232,7 @@ class TestInteractiveSpatialPlot(unittest.TestCase):
                 'z': 'black'
             }
         self.adata.uns['test_color_mapping'] = defined_color_map
-        fig_list = interative_spatial_plot(
+        fig_list = interactive_spatial_plot(
             self.adata,
             ['annotation_1','annotation_2'],
             defined_color_map='test_color_mapping',
