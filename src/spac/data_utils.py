@@ -1121,6 +1121,7 @@ def combine_annotations(
 
     return adata
 
+
 def summarize_dataframe(
     df: pd.DataFrame,
     columns,

@@ -23,6 +23,7 @@ import logging
 import warnings
 import base64
 import time
+import json
 
 
 # Configure logging
@@ -3325,3 +3326,129 @@ def visualize_nearest_neighbor(
     )
 
     return result_dict
+
+import json
+import plotly.graph_objects as go
+
+
+def present_summary_as_html(summary_dict: dict) -> str:
+    """
+    Build an HTML string that presents the summary information
+    intuitively.
+
+    For each specified column, the HTML includes:
+      - Column name and data type
+      - Count and list of missing indices
+      - Summary details presented in a table (for numeric: stats; 
+        categorical: unique values and counts)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned by summarize_dataframe.
+
+    Returns
+    -------
+    str
+        HTML string representing the summary.
+    """
+    html = (
+        "<html><head><title>Data Summary</title>"
+        "<style>"
+        "body { font-family: Arial, sans-serif; margin: 20px; }"
+        "table { border-collapse: collapse; width: 100%; "
+        "margin-bottom: 20px; }"
+        "th, td { border: 1px solid #dddddd; text-align: left; "
+        "padding: 8px; }"
+        "th { background-color: #f2f2f2; }"
+        ".section { margin-bottom: 40px; }"
+        "</style></head><body>"
+        "<h1>Data Summary</h1>"
+    )
+
+    for col, info in summary_dict.items():
+        html += (
+            f"<div class='section'><h2>Column: {col}</h2>"
+            f"<p><strong>Data Type:</strong> {info['data_type']}</p>"
+            f"<p><strong>Missing Indices:</strong> "
+            f"{info['missing_indices']} (Count: "
+            f"{info['count_missing_indices']})</p>"
+            "<h3>Summary Details:</h3>"
+            "<table><thead><tr><th>Metric</th><th>Value</th></tr></thead>"
+            "<tbody>"
+        )
+        for key, val in info['summary'].items():
+            html += f"<tr><td>{key}</td><td>{val}</td></tr>"
+        html += "</tbody></table></div>"
+
+    html += "</body></html>"
+    return html
+
+
+def present_summary_as_figure(summary_dict: dict) -> go.Figure:
+    """
+    Build a static Plotly figure (using a table) to depict the
+    summary dictionary.
+
+    The figure includes columns:
+      - Column name
+      - Data type
+      - Count of missing values
+      - Missing indices (as a string)
+      - Summary details (formatted as JSON for readability)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned from summarize_dataframe.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        A static Plotly table figure representing the summary.
+    """
+    col_names = []
+    data_types = []
+    missing_counts = []
+    missing_indices = []
+    summaries = []
+
+    for col, info in summary_dict.items():
+        col_names.append(col)
+        data_types.append(info['data_type'])
+        missing_counts.append(info['count_missing_indices'])
+        missing_indices.append(str(info['missing_indices']))
+        summaries.append(json.dumps(info['summary'], indent=2))
+
+    fig = go.Figure(
+        data=[go.Table(
+            header=dict(
+                values=[
+                    "Column",
+                    "Data Type",
+                    "Missing Count",
+                    "Missing Indices",
+                    "Summary"
+                ],
+                fill_color='paleturquoise',
+                align='left'
+            ),
+            cells=dict(
+                values=[
+                    col_names,
+                    data_types,
+                    missing_counts,
+                    missing_indices,
+                    summaries
+                ],
+                fill_color='lavender',
+                align='left'
+            )
+        )]
+    )
+    fig.update_layout(
+        width=1000,
+        height=300 + 50 * len(col_names),
+        title="Data Summary"
+    )
+    return fig
