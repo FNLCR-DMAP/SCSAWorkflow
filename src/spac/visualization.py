@@ -9,16 +9,21 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.io as pio
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
 from spac.utils import check_label
 from spac.utils import get_defined_color_map
+from spac.utils import compute_boxplot_metrics
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
+import base64
+import time
+import json
 
 
 # Configure logging
@@ -1441,13 +1446,462 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     return fig, ax, df
 
 
-def interative_spatial_plot(
+def boxplot_interactive(
+    adata,
+    annotation=None,
+    layer=None,
+    ax=None,
+    features=None,
+    showfliers=None,
+    log_scale=False,
+    orient="v",
+    figure_width=3.2,
+    figure_height=2,
+    figure_dpi=200,
+    defined_color_map=None,
+    annotation_colorscale="viridis",
+    feature_colorscale="seismic",
+    interactive=True,
+    return_metrics=False,
+    **kwargs,
+):
+    """
+    Generate a boxplot for given features from an AnnData object.
+
+    This function visualizes the distribution of gene expression
+    (or other features) across different annotations in the provided data.
+    It can handle various options such as log-transformation, feature
+    selection, and handling of outliers.
+
+    Parameters
+    -----------
+    adata : AnnData
+        An AnnData object containing the data to plot. The expression matrix
+        is accessed via `adata.X` or `adata.layers[layer]`, and annotations
+        are taken from `adata.obs`.
+
+    annotation : str, optional
+        The name of the annotation column (e.g., cell type or sample
+        condition) from `adata.obs` used to group the features. If `None`, no
+        grouping is applied.
+
+    layer : str, optional
+        The name of the layer from `adata.layers` to use. If `None`, `adata.X`
+        is used.
+
+    ax : plotly.graph_objects.Figure, optional
+        The figure to plot the boxplot onto. If `None`, a new figure is
+        created.
+
+    features : list of str, optional
+        The list of features (genes) to plot. If `None`, all features are
+        included.
+
+    showfliers : {None, "downsample", "all"}, default = None
+        If 'all', all outliers are displayed in the boxplot.
+        If 'downsample', when num outliers is >10k, they are downsampled to
+        10% of the original count.
+        If None, outliers are hidden.
+
+    log_scale : bool, default=False
+        If True, the log1p transformation is applied to the features before
+        plotting. This option is disabled if negative values are found in the
+        features.
+
+    orient : {"v", "h"}, default="v"
+        The orientation of the boxplots: "v" for vertical, "h" for horizontal.
+
+    figure_width : int, optional
+        Width of the figure in inches. Default is 3.2.
+
+    figure_height : int, optional
+        Height of the figure in inches. Default is 2.
+
+    figure_dpi : int, optional
+        DPI (dots per inch) for the figure. Default is 200.
+
+    defined_color_map : str, optional
+        Predefined color mapping stored in adata.uns for specific labels.
+        Default is None, which will generate the color mapping automatically.
+
+    annotation_colorscale : str, default='viridis'
+        Name of the color scale to use for the dots when annotation
+        is used.
+
+    feature_colorscale: str, default='seismic'
+        Name of the color scale to use for the dots when feature
+        is used.
+
+    interactive : bool, default = False
+        If True, the plot is interactive, allowing for zooming and panning.
+        If False, the plot is static.
+
+    return_metrics: bool, default = False
+        If True, the function returns the computed boxplot metrics.
+
+    **kwargs : additional keyword arguments
+        Any other keyword arguments passed to the underlying plotting function.
+
+    Returns
+    -------
+    fig : plotly.graph_objects.Figure or str
+        The generated boxplot figure, which can be either:
+            - If not `interactive`: A base64-encoded PNG image string
+            - If `interactive`: A Plotly figure object
+
+    df : pd.DataFrame
+        A DataFrame containing the features and their corresponding values.
+
+    metrics : pd.DataFrame
+        A DataFrame containing the computed boxplot metrics (if
+        `return_metrics` is True).
+    """
+
+    def boxplot_from_statistics(
+        summary_stats: pd.DataFrame,
+        cmap: dict,
+        annotation: str = None,
+        ax=None,
+        showfliers=None,
+        log_scale=False,
+        orient="v",
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        **kwargs,
+    ):
+        """
+        Generate a boxplot from the provided summary statistics DataFrame.
+
+        This function visualizes a set of summary statistics (e.g., quartiles,
+        mean) as a boxplot. It supports grouping the data by a given
+        annotation and allows customization of orientation, displaying
+        outliers, and interactive plotting.
+
+        Parameters
+        ----------
+        summary_stats : pd.DataFrame
+            A DataFrame containing the summary statistics of the features to
+            plot. It should include columns like 'marker', 'q1', 'med', 'q3',
+            'whislo', 'whishi', and 'mean'. Optionally, it may also contain an
+            annotation column used for grouping.
+
+        cmap : dict
+            A dictionary mapping annotation/feature values to color strings
+            (hex, rgb/rgba, hsl/hsla, hsv/hsva, or CSS).
+
+        annotation : str, optional
+            The column name in `summary_stats` used to group the data by
+            specific categories (e.g., cell type, condition). If `None`, no
+            grouping is applied.
+
+        ax : matplotlib.axes.Axes or plotly.graph_objects.Figure, optional
+            A figure or axes to plot onto. If None, a new Plotly figure is
+            created.
+
+        showfliers : {None, "downsample", "all"}, default = None
+            If 'all', all outliers are displayed in the boxplot.
+            If 'downsample', when num outliers is >10k, they are downsampled
+            to 10% of the original count.
+            If None, outliers are hidden.
+
+        log_scale : bool, optional, default=False
+            If True, the log1p transformation is applied to the features
+            before plotting. This option is disabled if negative values are
+            found in the features.
+
+        orient : {"v", "h"}, default="v"
+            The orientation of the boxplot: 'v' for vertical and 'h' for
+            horizontal.
+
+        figure_width : int, optional
+            Width of the figure in inches. Default is 3.2.
+
+        figure_height : int, optional
+            Height of the figure in inches. Default is 2.
+
+        figure_dpi : int, optional
+            DPI (dots per inch) for the figure. Default is 200.
+
+        Returns
+        -------
+        fig : plotly.graph_objects.Figure
+            The Plotly figure containing the generated boxplot.
+
+        Notes
+        -----
+        - The function uses the `plotly` library for visualization, allowing
+        interactive plotting.
+        - If grouping by an annotation, each group will be assigned a unique
+        color from a predefined colormap.
+        - The boxplot will display whiskers, quartiles, and the mean. Outliers
+        are controlled by the `showfliers` parameter.
+        """
+
+        # Initialize the figure: if 'ax' is provided, use it, otherwise create
+        # a new Plotly figure
+        if ax:
+            fig = ax
+        else:
+            fig = go.Figure()
+
+        # Get unique features (markers) from the summary statistics
+        unique_features = summary_stats["marker"].unique()
+
+        # Create comma seperated list for features in the plot title
+        # If there are >3 unique features, use 'Multiple Features' in the title
+        if len(unique_features) < 4:
+            plot_title = f"{', '.join(unique_features[0:])}"
+        else:
+            plot_title = 'Multiple Features'
+
+        if annotation:
+            unique_annotations = summary_stats[annotation].unique()
+
+            plot_title += f" grouped by {annotation}"
+
+        # Empty outlier lists cause issues with plotly,
+        # so replace them with [None]
+        if showfliers:
+            summary_stats["fliers"] = summary_stats["fliers"].apply(
+                lambda x: [None] if len(x) == 0 else x
+            )
+
+        # Set up the orientation of the plot data & axis-labels
+        if orient == "h":
+            x_data = "fliers"
+            y_data = "marker"
+            x_axis_label = "log(Intensity)" if log_scale else "Intensity"
+            y_axis_label = annotation if annotation else "feature value"
+        elif orient == "v":
+            x_data = "marker"
+            y_data = "fliers"
+            x_axis_label = annotation if annotation else "feature value"
+            y_axis_label = "log(Intensity)" if log_scale else "Intensity"
+
+        # If annotation is provided, group the data
+        # and create boxplots for each group
+        if annotation:
+            grouped_data = dict()
+            for annotation_value in summary_stats[annotation].unique():
+                # Transform the summary statistics to a dictionary
+                # for each annotation value
+                grouped_data[annotation_value] = summary_stats[
+                    summary_stats[annotation] == annotation_value
+                ].to_dict(orient="list")
+
+            # Add a boxplot trace for each annotation value
+            for annotation_value, data in grouped_data.items():
+                if orient == "h":
+                    y = data[y_data]
+                    x = data[x_data] if showfliers else None
+                else:
+                    y = data[y_data] if showfliers else None
+                    x = data[x_data]
+
+                fig.add_trace(
+                    go.Box(
+                        name=annotation_value,
+                        q1=data["q1"],
+                        median=data["med"],
+                        q3=data["q3"],
+                        lowerfence=data["whislo"],
+                        upperfence=data["whishi"],
+                        mean=data["mean"],
+                        y=y,
+                        x=x,
+                        boxpoints="all",
+                        jitter=0,
+                        pointpos=0,
+                        marker=dict(
+                            color=cmap[annotation_value]
+                        ),  # Assign color based on annotation
+                        legendgroup=annotation_value,
+                        showlegend=annotation_value
+                        in unique_annotations,
+                        **kwargs,
+                    )
+                )
+                # used to only show legend once per annotation group
+                unique_annotations = unique_annotations[
+                    unique_annotations != annotation_value
+                ]
+
+            # Adjust layout to group the boxplots by annotation
+            fig.update_layout(boxmode="group")
+        else:
+            # If no annotation, create a boxplot
+            # for each unique feature (marker)
+            stats_dict = summary_stats.to_dict(orient="list")
+
+            for i, marker_value in enumerate(stats_dict["marker"]):
+                if orient == "h":
+                    y = [stats_dict[y_data][i]]
+                    x = [stats_dict[x_data][i], [None]] if showfliers else None
+                else:
+                    y = [stats_dict[y_data][i], [None]] if showfliers else None
+                    x = [stats_dict[x_data][i]]
+
+                # Note: adding None to the x or y data to ensure
+                # the outliers are displayed correctly
+                fig.add_trace(
+                    go.Box(
+                        name=marker_value,
+                        q1=[stats_dict["q1"][i], None],
+                        median=[stats_dict["med"][i], None],
+                        q3=[stats_dict["q3"][i], None],
+                        lowerfence=[stats_dict["whislo"][i], None],
+                        upperfence=[stats_dict["whishi"][i], None],
+                        mean=[stats_dict["mean"][i], None],
+                        y=y,
+                        x=x,
+                        boxpoints="all",
+                        jitter=0,
+                        pointpos=0,
+                        marker=dict(
+                            color=cmap[marker_value]
+                        ),
+                        showlegend=True,
+                        **kwargs
+                    )
+                )
+
+        # Final layout adjustments for the plot title, axis labels, and size
+        fig.update_layout(
+            title=plot_title,
+            yaxis_title=y_axis_label,
+            xaxis_title=x_axis_label,
+            height=int(figure_height * figure_dpi),
+            width=int(figure_width * figure_dpi),
+        )
+
+        return fig
+
+    #####################
+    #  Main Code Block  #
+    #####################
+
+    logging.info("Calculating Box Plot...")
+    if layer:
+        check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if features:
+        check_feature(adata, features=features)
+
+    if ax and not isinstance(ax, plt.Figure):
+        raise TypeError("Input 'ax' must be a plotly.Figure object.")
+
+    if showfliers not in ("all", "downsample", None):
+        raise ValueError(
+            ("showfliers must be one of 'all', 'downsample', or None."),
+            ("Got {showfliers}."),
+        )
+
+    # Extract data from the specified layer or the default matrix (adata.X)
+    if layer:
+        data_matrix = adata.layers[layer]
+    else:
+        data_matrix = adata.X
+
+    # Convert the data matrix into a DataFrame with
+    # appropriate column names (features)
+    df = pd.DataFrame(data_matrix, columns=adata.var_names)
+
+    # Add annotation column to the DataFrame if provided
+    if annotation:
+        df[annotation] = adata.obs[annotation].values
+
+    # If no specific features are provided, use all available features
+    if features is None:
+        features = adata.var_names.tolist()
+
+    # Filter the DataFrame to include only the
+    # selected features and the annotation
+    df = df[features + ([annotation] if annotation else [])]
+
+    # Check for negative values if log scale is requested
+    if log_scale and (df[features] < 0).any().any():
+        print(
+            "There are negative values in this data, disabling the log scale."
+        )
+        log_scale = False
+
+    # Apply log1p transformation if log_scale is True
+    if log_scale:
+        df[features] = np.log1p(df[features])
+
+    start_time = time.time()
+    # Compute the summary statistics required for the boxplot
+    metrics = compute_boxplot_metrics(
+        df, annotation=annotation, showfliers=showfliers
+    )
+    logging.info(
+        "Time taken to compute boxplot metrics: %f seconds",
+        time.time() - start_time
+    )
+
+    # Get the colormap for the annotation
+    if defined_color_map:
+        cmap = get_defined_color_map(adata)
+    elif annotation:
+        cmap = get_defined_color_map(
+            adata,
+            annotations=annotation,
+            colorscale=annotation_colorscale,
+        )
+    else:
+        # Create a color mapping for the features
+        unique_features = metrics["marker"].unique()
+        cmap = color_mapping(
+            unique_features,
+            color_map=feature_colorscale,
+            return_dict=True,
+        )
+
+    start_time = time.time()
+    # Generate the boxplot figure from the summary statistics
+    fig = boxplot_from_statistics(
+        summary_stats=metrics,
+        cmap=cmap,
+        annotation=annotation,
+        showfliers=showfliers,
+        log_scale=log_scale,
+        orient=orient,
+        ax=ax,
+        figure_width=figure_width,
+        figure_height=figure_height,
+        figure_dpi=figure_dpi,
+        **kwargs,
+    )
+
+    # Prepare the base image or figure return value
+    if interactive:
+        plot = fig
+    else:
+        # Convert Plotly to PNG encoded to base64
+        img_bytes = pio.to_image(fig, format="png")
+        plot = base64.b64encode(img_bytes).decode("utf-8")
+
+    logging.info(
+        "Time taken to generate boxplot: %f seconds",
+        time.time() - start_time
+    )
+
+    # Determine the return values based on the return_metrics flag
+    if return_metrics:
+        return plot, df, metrics
+    else:
+        return plot, df
+
+
+def interactive_spatial_plot(
     adata,
     annotations=None,
     feature=None,
     layer=None,
     dot_size=1.5,
-    dot_transparancy=0.75,
+    dot_transparency=0.75,
     annotation_colorscale='rainbow',
     feature_colorscale='balance',
     figure_width=6,
@@ -1486,7 +1940,7 @@ def interative_spatial_plot(
         used.
     dot_size : float, optional
         Size of the scatter dots in the plot. Default is 1.5.
-    dot_transparancy : float, optional
+    dot_transparency : float, optional
         Transparancy level of the scatter dots. Default is 0.75.
     annotation_colorscale : str, optional
         Name of the color scale to use for the dots when annotation
@@ -1626,7 +2080,7 @@ def interative_spatial_plot(
         annotations=None,
         feature=None,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         colorscale=None,
         color_mapping=None,
         figure_width=figure_width,
@@ -1654,7 +2108,7 @@ def interative_spatial_plot(
             The column name in `spatial_df` for the continuous color mapping
         dot_size : float, optional
             Size of the scatter dots in the plot. Default is 1.5.
-        dot_transparancy : float, optional
+        dot_transparency : float, optional
             Transparency level of the scatter dots. Default is 0.75.
         colorscale : Optional[str], optional
             Name of the color scale to use for the dots if features is passed.
@@ -1796,7 +2250,7 @@ def interative_spatial_plot(
             mode='markers',
             marker=dict(
                 size=dot_size,
-                opacity=dot_transparancy
+                opacity=dot_transparency
             ),
             hovertemplate=hovertemplate
         )
@@ -1899,7 +2353,7 @@ def interative_spatial_plot(
         color_mapping=color_dict,
         colorscale=colorscale,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         figure_width=figure_width,
         figure_height=figure_height,
         figure_dpi=figure_dpi,
@@ -2872,3 +3326,129 @@ def visualize_nearest_neighbor(
     )
 
     return result_dict
+
+import json
+import plotly.graph_objects as go
+
+
+def present_summary_as_html(summary_dict: dict) -> str:
+    """
+    Build an HTML string that presents the summary information
+    intuitively.
+
+    For each specified column, the HTML includes:
+      - Column name and data type
+      - Count and list of missing indices
+      - Summary details presented in a table (for numeric: stats; 
+        categorical: unique values and counts)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned by summarize_dataframe.
+
+    Returns
+    -------
+    str
+        HTML string representing the summary.
+    """
+    html = (
+        "<html><head><title>Data Summary</title>"
+        "<style>"
+        "body { font-family: Arial, sans-serif; margin: 20px; }"
+        "table { border-collapse: collapse; width: 100%; "
+        "margin-bottom: 20px; }"
+        "th, td { border: 1px solid #dddddd; text-align: left; "
+        "padding: 8px; }"
+        "th { background-color: #f2f2f2; }"
+        ".section { margin-bottom: 40px; }"
+        "</style></head><body>"
+        "<h1>Data Summary</h1>"
+    )
+
+    for col, info in summary_dict.items():
+        html += (
+            f"<div class='section'><h2>Column: {col}</h2>"
+            f"<p><strong>Data Type:</strong> {info['data_type']}</p>"
+            f"<p><strong>Missing Indices:</strong> "
+            f"{info['missing_indices']} (Count: "
+            f"{info['count_missing_indices']})</p>"
+            "<h3>Summary Details:</h3>"
+            "<table><thead><tr><th>Metric</th><th>Value</th></tr></thead>"
+            "<tbody>"
+        )
+        for key, val in info['summary'].items():
+            html += f"<tr><td>{key}</td><td>{val}</td></tr>"
+        html += "</tbody></table></div>"
+
+    html += "</body></html>"
+    return html
+
+
+def present_summary_as_figure(summary_dict: dict) -> go.Figure:
+    """
+    Build a static Plotly figure (using a table) to depict the
+    summary dictionary.
+
+    The figure includes columns:
+      - Column name
+      - Data type
+      - Count of missing values
+      - Missing indices (as a string)
+      - Summary details (formatted as JSON for readability)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned from summarize_dataframe.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        A static Plotly table figure representing the summary.
+    """
+    col_names = []
+    data_types = []
+    missing_counts = []
+    missing_indices = []
+    summaries = []
+
+    for col, info in summary_dict.items():
+        col_names.append(col)
+        data_types.append(info['data_type'])
+        missing_counts.append(info['count_missing_indices'])
+        missing_indices.append(str(info['missing_indices']))
+        summaries.append(json.dumps(info['summary'], indent=2))
+
+    fig = go.Figure(
+        data=[go.Table(
+            header=dict(
+                values=[
+                    "Column",
+                    "Data Type",
+                    "Missing Count",
+                    "Missing Indices",
+                    "Summary"
+                ],
+                fill_color='paleturquoise',
+                align='left'
+            ),
+            cells=dict(
+                values=[
+                    col_names,
+                    data_types,
+                    missing_counts,
+                    missing_indices,
+                    summaries
+                ],
+                fill_color='lavender',
+                align='left'
+            )
+        )]
+    )
+    fig.update_layout(
+        width=1000,
+        height=300 + 50 * len(col_names),
+        title="Data Summary"
+    )
+    return fig
