@@ -1,7 +1,35 @@
 # CHANGELOG
 
 
+## v0.8.4 (2025-02-28)
+
+### Build System
+
+- Restored docker file to FNLCR organization
+  ([`739b4b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/739b4b3221efec4af2e9228aa8b3260f74a541bf))
+
+### Features
+
+- **summarize dataframe**: Added two visualization functions for the summary
+  ([`66fdd4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/66fdd4e4e7c136d4aec3e4c7b49958a5af020858))
+
+### Testing
+
+- **compute_box_plot_metric**: Added verbose error message and check
+  ([`fb3a372`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fb3a372d9f0cb2613ab77bda8e3c2407a6dd0e4c))
+
+
 ## v0.8.3 (2025-02-26)
+
+### Bug Fixes
+
+- **interactive_spatial_plot**: Fixed typos in api name and arguments
+  ([`b833123`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b833123dc9f124abf34e539be553a8388048ee1b))
+
+### Continuous Integration
+
+- **version**: Automatic development release
+  ([`87aaa25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/87aaa25908291e9dd0675c2ea031d8c874771c9a))
 
 ### Features
 
