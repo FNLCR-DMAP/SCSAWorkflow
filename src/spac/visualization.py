@@ -1441,13 +1441,13 @@ def boxplot(adata, annotation=None, second_annotation=None, layer=None,
     return fig, ax, df
 
 
-def interative_spatial_plot(
+def interactive_spatial_plot(
     adata,
     annotations=None,
     feature=None,
     layer=None,
     dot_size=1.5,
-    dot_transparancy=0.75,
+    dot_transparency=0.75,
     annotation_colorscale='rainbow',
     feature_colorscale='balance',
     figure_width=6,
@@ -1486,7 +1486,7 @@ def interative_spatial_plot(
         used.
     dot_size : float, optional
         Size of the scatter dots in the plot. Default is 1.5.
-    dot_transparancy : float, optional
+    dot_transparency : float, optional
         Transparancy level of the scatter dots. Default is 0.75.
     annotation_colorscale : str, optional
         Name of the color scale to use for the dots when annotation
@@ -1626,7 +1626,7 @@ def interative_spatial_plot(
         annotations=None,
         feature=None,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         colorscale=None,
         color_mapping=None,
         figure_width=figure_width,
@@ -1654,7 +1654,7 @@ def interative_spatial_plot(
             The column name in `spatial_df` for the continuous color mapping
         dot_size : float, optional
             Size of the scatter dots in the plot. Default is 1.5.
-        dot_transparancy : float, optional
+        dot_transparency : float, optional
             Transparency level of the scatter dots. Default is 0.75.
         colorscale : Optional[str], optional
             Name of the color scale to use for the dots if features is passed.
@@ -1796,7 +1796,7 @@ def interative_spatial_plot(
             mode='markers',
             marker=dict(
                 size=dot_size,
-                opacity=dot_transparancy
+                opacity=dot_transparency
             ),
             hovertemplate=hovertemplate
         )
@@ -1899,7 +1899,7 @@ def interative_spatial_plot(
         color_mapping=color_dict,
         colorscale=colorscale,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         figure_width=figure_width,
         figure_height=figure_height,
         figure_dpi=figure_dpi,
