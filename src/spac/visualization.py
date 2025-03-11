@@ -1461,7 +1461,7 @@ def boxplot_interactive(
     defined_color_map=None,
     annotation_colorscale="viridis",
     feature_colorscale="seismic",
-    interactive=True,
+    figure_type="interactive",
     return_metrics=False,
     **kwargs,
 ):
@@ -1532,9 +1532,11 @@ def boxplot_interactive(
         Name of the color scale to use for the dots when feature
         is used.
 
-    interactive : bool, default = False
-        If True, the plot is interactive, allowing for zooming and panning.
-        If False, the plot is static.
+    figure_type : {"interactive", "static", "png"}, default = "interactive"
+        If "interactive", the plot is interactive, allowing for zooming 
+        and panning.
+        If "static", the plot is static.
+        If "png", the plot is returned as a PNG image.
 
     return_metrics: bool, default = False
         If True, the function returns the computed boxplot metrics.
@@ -1544,8 +1546,10 @@ def boxplot_interactive(
 
     Returns
     -------
-    fig : plotly.graph_objects.Figure
-        The generated boxplot figure
+    fig : plotly.graph_objects.Figure or str
+        The generated boxplot figure, which can be either:
+            - If `figure_type` is "static": A base64-encoded PNG image string
+            - If `figure_type` is "interactive": A Plotly figure object
 
     df : pd.DataFrame
         A DataFrame containing the features and their corresponding values.
@@ -1796,6 +1800,11 @@ def boxplot_interactive(
             ("Got {showfliers}."),
         )
 
+    if figure_type not in ("interactive", "static", "png"):
+        raise ValueError(
+            "figure_type must be one of 'interactive', 'static', or 'png'."
+        )
+
     # Extract data from the specified layer or the default matrix (adata.X)
     if layer:
         data_matrix = adata.layers[layer]
@@ -1874,9 +1883,13 @@ def boxplot_interactive(
     )
 
     # Prepare the base image or figure return value
-    if interactive:
+    if figure_type == "interactive":
         plot = fig
-    else:
+    elif figure_type == "png":
+        # Convert Plotly to PNG encoded to base64
+        img_bytes = pio.to_image(fig, format="png")
+        plot = base64.b64encode(img_bytes).decode("utf-8")
+    elif figure_type == "static":
         # Disable interactive components
         config = {
             'dragmode': False,
