@@ -31,7 +31,7 @@ class TestBoxplotInteractive(unittest.TestCase):
         """Test if correct types are returned."""
         # Test non-interactive mode
         fig, df, metrics = boxplot_interactive(self.adata, interactive=False, return_metrics=True)
-        self.assertIsInstance(fig, str)
+        self.assertIsInstance(fig, go.Figure)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertIsInstance(metrics, pd.DataFrame)
 
