@@ -1544,10 +1544,8 @@ def boxplot_interactive(
 
     Returns
     -------
-    fig : plotly.graph_objects.Figure or str
-        The generated boxplot figure, which can be either:
-            - If not `interactive`: A base64-encoded PNG image string
-            - If `interactive`: A Plotly figure object
+    fig : plotly.graph_objects.Figure
+        The generated boxplot figure
 
     df : pd.DataFrame
         A DataFrame containing the features and their corresponding values.
@@ -1879,9 +1877,26 @@ def boxplot_interactive(
     if interactive:
         plot = fig
     else:
-        # Convert Plotly to PNG encoded to base64
-        img_bytes = pio.to_image(fig, format="png")
-        plot = base64.b64encode(img_bytes).decode("utf-8")
+        # Disable interactive components
+        config = {
+            'dragmode': False,
+            'hovermode': False,
+            'clickmode': 'none',
+            'modebar_remove': [
+                'toimage', 
+                'zoom', 
+                'zoomin', 
+                'zoomout',
+                'select', 
+                'pan', 
+                'lasso', 
+                'autoscale', 
+                'resetscale'
+            ],
+            'legend_itemclick': False,
+            'legend_itemdoubleclick': False
+        }
+        plot = fig.update_layout(**config)
 
     logging.info(
         "Time taken to generate boxplot: %f seconds",
