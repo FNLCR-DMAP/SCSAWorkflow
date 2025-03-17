@@ -50,7 +50,8 @@ def ripley(
     seed: int | None = None,
     area: float | None = None,
     copy: bool = False,
-    phenotypes: Tuple[str, str] | None = None
+    phenotypes: Tuple[str, str] | None = None,
+    edge_correction: bool = False
 ) -> dict[str, pd.DataFrame | NDArrayA]:
     r"""
     Calculate various Ripley's statistics for point processes.
@@ -90,26 +91,36 @@ def ripley(
     %(spatial_key)s
     metric
         Which metric to use for computing distances.
-        For available metrics, check out :class:`sklearn.neighbors.DistanceMetric`.
+        For available metrics, check out:
+        class:`sklearn.neighbors.DistanceMetric`.
     n_neigh
         Number of neighbors to consider for the KNN graph.
     n_simulations
         How many simulations to run for computing p-values.
     n_observations
-        How many observations to generate for the Spatial Poisson Point Process.
+        How many observations to generate for the Spatial Poisson Point
+        Process.
     max_dist
-        Maximum distances for the support. If `None`, `max_dist=`:math:`\sqrt{{area \over 2}}`.
+        Maximum distances for the support.
+        If `None`, `max_dist=`:math:`\sqrt{{area \over 2}}`.
     n_steps
         Number of steps for the support.
     support
-        list of bins (radiis) for the support. Overrides `max_dist` and `n_steps`.
-    phenotypes
-        For Ripley L, calculate the function for the cells of these two phenotypes.
+        list of bins (radiis) for the support. Overrides `max_dist` and
+        `n_steps`.
     %(seed)s
         The seed for the random number generator.
     %(area)s
         Use passed value for area instead of the area of the convex hull.
     %(copy)s
+        Return the resutls as a df, or save it on disk
+    phenotypes
+        For Ripley L, calculate the function for the cells of these two
+        phenotypes.
+    edge_correction
+        If True, remove center cells that are too close than
+        a radius from the calculation. These cells are identified
+        for every radius in the support.
 
     Returns
     -------
@@ -221,17 +232,29 @@ def ripley(
 
             distances = cdist(center_coord, neighbor_coord)
 
-            bins, obs_stats = _l_multiple_function(distances,
-                                                   support,
-                                                   n_center,
-                                                   n_neighbor,
-                                                   area,
-                                                   remove_diagonal)
+            returned_dic = _l_multiple_function(
+                distances,
+                support,
+                n_center,
+                n_neighbor,
+                area,
+                remove_diagonal,
+                center_coord,
+                hull,
+                edge_correction=edge_correction,
+                return_mask=False
+            )
+            bins = returned_dic["support"]
+            obs_stats = returned_dic["l_estimate"]
+            n_used_center_cells = returned_dic["used_center_points"]
             obs_arr[0] = obs_stats
         else:
-            raise NotImplementedError(f"Mode `{mode.s!r}` is not yet implemented.")
+            raise NotImplementedError(
+                f"Mode `{mode.s!r}` is not yet implemented."
+            )
 
     sims = np.empty((n_simulations, len(bins)))
+    sim_n_center_cells = np.empty((n_simulations, len(bins)))
     pvalues = np.ones((le.classes_.shape[0], len(bins)))
     rng = default_rng(None if seed is None else seed)
 
@@ -266,6 +289,18 @@ def ripley(
     else:
         for i in range(n_simulations):
             if mode == RipleyStat.L:
+                # The Poisson Point Process will put n_center points
+                # in the polygon irrespective on how many n_center were
+                # actually used in the Ripley L calculation if edge correction
+                # is enabled.
+                # This is becasue if we are doing the analysis for multiple
+                # support (e.g., Radii), I have to generate many
+                # PPP for every radii if I want to match the exact number
+                # of center points that were used in the Ripley L calucaiton
+                # for a given ROI.
+                # The thought is on average, the Poisson Point Process
+                # will simulate how many exact points gets picked given
+                # the radii.
                 random_i = _ppp(hull,
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
@@ -279,13 +314,32 @@ def ripley(
                 else:
                     neighbor_coord = random_i[n_center:]
                 distances_i = cdist(center_coord, neighbor_coord)
+<<<<<<< HEAD
                 _, stats_i = _l_multiple_function(distances_i,
                                                   support,
                                                   n_center,
                                                   n_neighbor,
                                                   area,
                                                   remove_diagonal)
+=======
+
+                returned_dic = _l_multiple_function(
+                    distances_i,
+                    support,
+                    n_center,
+                    n_neighbor,
+                    area,
+                    remove_diagonal,
+                    center_coord,
+                    hull,
+                    edge_correction=edge_correction,
+                    return_mask=False
+                )
+
+                stats_i = returned_dic["l_estimate"]
+>>>>>>> c070fa6 (feat:(ripley_l and visualization): Added option to consider edge correction for simulations and visualization)
                 sims[i] = stats_i
+                sim_n_center_cells[i] = returned_dic["used_center_points"]
 
             else:
                 raise NotImplementedError(f"Mode `{mode.s!r}` is not yet "
@@ -301,15 +355,23 @@ def ripley(
                               index=bins,
                               var_name=cluster_key)
     else:
-        obs_df = _reshape_res(obs_arr.T,
-                              columns=[f"{phenotypes[0]}_{phenotypes[1]}"],
-                              index=bins,
-                              var_name=cluster_key)
+        obs_df = _reshape_res(
+            obs_arr.T,
+            columns=[f"{phenotypes[0]}_{phenotypes[1]}"],
+            index=bins,
+            var_name=cluster_key
+        )
 
-    sims_df = _reshape_res(sims.T,
-                           columns=np.arange(n_simulations),
-                           index=bins,
-                           var_name="simulations")
+        # Append the used center cells
+        obs_df["used_center_cells"] = n_used_center_cells
+
+    sims_df = _reshape_res(
+        sims.T,
+        columns=np.arange(n_simulations),
+        index=bins,
+        var_name="simulations"
+    )
+    sims_df["used_center_cells"] = sim_n_center_cells.reshape(-1)
 
     res = {
         f"{mode}_stat": obs_df,
@@ -334,10 +396,15 @@ def ripley(
                time=start)
 
 
-def _reshape_res(results: NDArrayA, columns: NDArrayA | list[str], index: NDArrayA, var_name: str) -> pd.DataFrame:
+def _reshape_res(
+        results: NDArrayA,
+        columns: NDArrayA | list[str],
+        index: NDArrayA,
+        var_name: str,
+        value_name: str = "stats") -> pd.DataFrame:
     df = pd.DataFrame(results, columns=columns, index=index)
     df.index.set_names(["bins"], inplace=True)
-    df = df.melt(var_name=var_name, value_name="stats", ignore_index=False)
+    df = df.melt(var_name=var_name, value_name=value_name, ignore_index=False)
     df[var_name] = df[var_name].astype("category", copy=True)
     df.reset_index(inplace=True)
     return df

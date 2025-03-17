@@ -259,11 +259,85 @@ class TestRipleyL(unittest.TestCase):
                 msg="The ground truth L statistics should match the returned statistics"
             )
 
-
-    def test_csr_two_phenotype(self):
+    def test_csr_two_phenotype_with_edge_correction(self):
         """
         Test the L statitic under complete spatial randomness
-        while using the same phenotype
+        while using the same phenotype with edget correction
+        """
+
+        center_phenotype = ["A"]
+        n_center_cells = 1000
+        neighbor_phenotype = ["B"]
+        n_neighbor_cells = 1000
+
+        # As the cells are randomly placed, assign them
+        # random phenotypes
+        phenotypes = center_phenotype * n_center_cells + \
+            neighbor_phenotype * n_neighbor_cells
+
+        features = np.random.rand(n_center_cells + n_neighbor_cells)
+
+        # Generate spatial_x at random float position in the square
+        x_max = 200
+        y_max = 200
+        total_cells = n_center_cells + n_neighbor_cells
+        spatial_x = np.random.rand(total_cells) * x_max
+        spatial_y = np.random.rand(total_cells) * y_max
+
+        # Use large Raddi 
+        radii = [0, 10, 20,  30, 40, 50]
+
+        # Create a dataframe out of phenotypes, features, spatial coordinates
+        dictionary = {'phenotype': phenotypes, 'feature': features,
+                      'spatial_x': spatial_x, 'spatial_y': spatial_y}
+        dataframe = pd.DataFrame(dictionary)
+
+        self.adata = self.create_dummy_dataset(dataframe)
+
+        phenotypes = (center_phenotype, neighbor_phenotype)
+        result = ripley(self.adata,
+                        cluster_key="phenotype",
+                        mode="L",
+                        n_simulations=100,
+                        support=radii,
+                        area=x_max*y_max,
+                        phenotypes=phenotypes,
+                        copy=True,
+                        edge_correction=True)
+
+        # Get the L statistics
+        sim_stats_mean = result["sims_stat"].groupby("bins")["stats"].mean()
+
+        print(sim_stats_mean)
+
+        # Loop over all raddi and ground truth L statistics
+        # L(R) = R under complete spatial randomness ignoring boundry
+        # conditions
+        for r, gt_l_stat_mean in zip(radii, sim_stats_mean):
+            difference = abs(r-gt_l_stat_mean)
+            self.assertLess(
+                difference,
+                0.3,
+                msg="The ground truth L statistics should match the returned statistics"
+            )
+
+        # Check that the used center cells decreases:
+        sims_used_center_cells = \
+            result["sims_stat"].groupby("bins")["used_center_cells"] \
+                .mean().values
+
+        # Check that the used center cells decreases
+        for i in range(1, len(sims_used_center_cells)):
+            self.assertLess(
+                sims_used_center_cells[i],
+                sims_used_center_cells[i-1],
+                msg="The number of used center cells should decrease"
+            )
+
+    def test_csr_two_phenotype_no_edge_correction(self):
+        """
+        Test the L statitic under complete spatial randomness
+        while using the same phenotype without edget correction
         """
 
         center_phenotype = ["A"]
@@ -303,10 +377,13 @@ class TestRipleyL(unittest.TestCase):
                         support=radii,
                         area=x_max*y_max,
                         phenotypes=phenotypes,
-                        copy=True)
+                        copy=True,
+                        edge_correction=False)
 
         # Get the L statistics
         sim_stats_mean = result["sims_stat"].groupby("bins")["stats"].mean()
+
+        print(sim_stats_mean)
 
         # Loop over all raddi and ground truth L statistics
         # L(R) = R under complete spatial randomness ignoring boundry
@@ -319,10 +396,12 @@ class TestRipleyL(unittest.TestCase):
                 msg="The ground truth L statistics should match the returned statistics"
             )
 
-
     def test_n_cells_returned(self):
         """
-        Make sure n_center and n_neighbor cells are returned
+        Make sure n_center, n_neighbor, n_center_used_cells,
+        and sims_n_center_used_cells
+        are returned
+
         """
 
         # Add four points to form a rectangle that is 1 * 2
@@ -340,15 +419,41 @@ class TestRipleyL(unittest.TestCase):
         center_phenotype = "A"
         neighbor_phenotype = "B"
 
+        bins = [0, 0.5, 1]
+
         phenotypes = (center_phenotype, neighbor_phenotype)
         result = ripley(self.adata,
                         cluster_key="phenotype",
                         mode="L",
-                        n_simulations=0,
+                        n_simulations=1,
                         phenotypes=phenotypes,
-                        copy=True)
+                        copy=True,
+                        support=bins)
 
         # Check that the correct number of cells are returned
         self.assertEqual(result["n_center"], 2)
         self.assertEqual(result["n_neighbor"], 3)
+
+        expected_n_center_used_cells = np.array([2] * len(bins))
+
+        # Compare the expected number of cells used in the center
+        # to the returned number of cells used in the center
+        # Compare the expected number of cells used in the center
+        # to the returned number of cells used in the center
+        np.testing.assert_array_equal(
+            result['L_stat']['used_center_cells'],
+            expected_n_center_used_cells
+        )
+
+        expected_sims_n_center_used_cells = pd.Series(
+            [2.0] * len(bins),
+            name="used_center_cells"
+        )
+
+        # Compare the expected simulated number of center cells
+        # to the returned simulated number of center cells
+        pd.testing.assert_series_equal(
+            expected_sims_n_center_used_cells,
+            result["sims_stat"]["used_center_cells"]
+        )
 

@@ -221,13 +221,23 @@ class TestPlotRipleyL(unittest.TestCase):
         _, return_df = plot_ripley_l(
             self.adata,
             phenotypes=("A", "A"),
-            sims=False,
+            sims=True,
             return_df=True
         )
 
         # Check that the returned dataframe has the
         # correct number of rows (three radii times two regions)
         self.assertEqual(return_df.shape[0], 6)
+
+        expected_columns = [
+            'ripley(radius)',
+            'used_center_cells',
+            'avg_sim_ripley(radius)',
+            'avg_sim_used_center_cells'
+        ]
+
+        for column in expected_columns:
+            self.assertIn(column, return_df.columns)
 
     def test_two_phenotypes(self):
         """

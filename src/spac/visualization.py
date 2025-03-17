@@ -2186,7 +2186,6 @@ def relational_heatmap(
 def plot_ripley_l(
         adata,
         phenotypes,
-        annotation=None,
         regions=None,
         sims=False,
         return_df=False,
@@ -2304,17 +2303,34 @@ def plot_ripley_l(
             ax=ax,
             **kwargs)
 
+        # Calculate averages for simulations if enabled
+        if sims:
+            sims_stat_df = row["ripley_l"]["sims_stat"]
+            avg_stats = sims_stat_df.groupby("bins")["stats"].mean()
+            avg_used_center_cells = \
+                sims_stat_df.groupby("bins")["used_center_cells"].mean()
+
         # Prepare plotted data to return if return_df is True
         l_stat_data = row['ripley_l']['L_stat']
         for _, stat_row in l_stat_data.iterrows():
-            plot_data.append({
+
+            entry = {
                 'region': region,
                 'radius': stat_row['bins'],
                 'ripley(radius)': stat_row['stats'],
                 'region_area': area,
                 'n_center': n_center,
                 'n_neighbor': n_neighbors,
-            })
+                'used_center_cells': stat_row['used_center_cells']
+            }
+
+            if sims:
+                entry['avg_sim_ripley(radius)'] = \
+                    avg_stats.get(stat_row['bins'], None)
+                entry['avg_sim_used_center_cells'] = \
+                    avg_used_center_cells.get(stat_row['bins'], None)
+
+            plot_data.append(entry)
 
         if sims:
             confidence_level = 95
