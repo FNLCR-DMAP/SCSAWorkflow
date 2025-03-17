@@ -320,17 +320,12 @@ def ripley(
                 else:
                     neighbor_coord = random_i[n_center:]
                 distances_i = cdist(center_coord, neighbor_coord)
-<<<<<<< HEAD
-<<<<<<< HEAD
                 _, stats_i = _l_multiple_function(distances_i,
                                                   support,
                                                   n_center,
                                                   n_neighbor,
                                                   area,
                                                   remove_diagonal)
-=======
-=======
->>>>>>> 4a566ca (feat(_ripley_l_multiple): Enabled edget correction to remove center cell near border)
 
                 returned_dic = _l_multiple_function(
                     distances_i,
@@ -341,19 +336,11 @@ def ripley(
                     remove_diagonal,
                     center_coord,
                     hull,
-<<<<<<< HEAD
                     edge_correction=edge_correction,
-=======
-                    edge_correction=False,
->>>>>>> 4a566ca (feat(_ripley_l_multiple): Enabled edget correction to remove center cell near border)
                     return_mask=False
                 )
 
                 stats_i = returned_dic["l_estimate"]
-<<<<<<< HEAD
->>>>>>> c070fa6 (feat:(ripley_l and visualization): Added option to consider edge correction for simulations and visualization)
-=======
->>>>>>> 4a566ca (feat(_ripley_l_multiple): Enabled edget correction to remove center cell near border)
                 sims[i] = stats_i
                 sim_n_center_cells[i] = returned_dic["used_center_points"]
 
