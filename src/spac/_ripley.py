@@ -320,13 +320,6 @@ def ripley(
                 else:
                     neighbor_coord = random_i[n_center:]
                 distances_i = cdist(center_coord, neighbor_coord)
-                _, stats_i = _l_multiple_function(distances_i,
-                                                  support,
-                                                  n_center,
-                                                  n_neighbor,
-                                                  area,
-                                                  remove_diagonal)
-
                 returned_dic = _l_multiple_function(
                     distances_i,
                     support,
