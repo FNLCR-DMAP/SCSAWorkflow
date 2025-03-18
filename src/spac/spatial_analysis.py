@@ -688,7 +688,8 @@ def ripley_l(
     spatial_key="spatial",
     n_simulations=1,
     area=None,
-    seed=42
+    seed=42,
+    edge_correction=True
 ):
     """
     Calculate Ripley's L statistic for spatial data in `adata`.
@@ -726,6 +727,9 @@ def ripley_l(
         will be inferred from the data. Default is `None`.
     seed : int, optional
         Random seed for simulation reproducibility. Default is 42.
+    edge_correction: boo, optional
+        If True, apply edge correction to the Ripley's L calculation.
+
 
     Returns
     -------
@@ -792,7 +796,8 @@ def ripley_l(
         n_simulations=n_simulations,
         seed=seed,
         area=area,
-        copy=True
+        copy=True,
+        edge_correction=edge_correction
     )
 
     # Check if adata already has ripley_l results,
