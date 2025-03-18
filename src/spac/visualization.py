@@ -1797,12 +1797,13 @@ def boxplot_interactive(
     if showfliers not in ("all", "downsample", None):
         raise ValueError(
             ("showfliers must be one of 'all', 'downsample', or None."),
-            ("Got {showfliers}."),
+            (f" Got {showfliers}."),
         )
 
     if figure_type not in ("interactive", "static", "png"):
         raise ValueError(
-            "figure_type must be one of 'interactive', 'static', or 'png'."
+            (f"figure_type must be one of 'interactive', 'static', or 'png'."),
+            (f" Got {figure_type}."),
         )
 
     # Extract data from the specified layer or the default matrix (adata.X)

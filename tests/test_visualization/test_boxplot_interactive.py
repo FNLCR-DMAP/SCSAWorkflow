@@ -4,6 +4,7 @@ import pandas as pd
 import anndata
 import numpy as np
 import plotly.graph_objects as go
+import re
 from spac.visualization import boxplot_interactive
 
 
@@ -231,7 +232,7 @@ class TestBoxplotInteractive(unittest.TestCase):
         self.assertEqual(fig.layout.yaxis.title.text, 'Intensity')
 
         # Expected values (should be the same as input
-        # since loig_scale is disabled)
+        # since log_scale is disabled)
         expected_values = np.array([-1.0, 0.0, 1.0, 2.0], dtype=np.float32)
 
         # Check that the data has not been transformed
@@ -320,6 +321,39 @@ class TestBoxplotInteractive(unittest.TestCase):
         )
         y_labels = [y_data for boxplot in fig.data for y_data in boxplot.y]
         self.assertEqual(y_labels, ['feature1'])
+
+    def test_invalid_showfliers(self):
+        """Test if an error is raised for invalid showfliers parameter."""
+        invalid_showfliers = "invalid_type"
+        expected_msg = (
+            f"(\"showfliers must be one of 'all', 'downsample', or None.\","
+            f" ' Got {invalid_showfliers}.')"
+        )
+
+        # Use assertRaisesRegex to check the pattern in the exception message
+        with self.assertRaisesRegex(ValueError, expected_msg):
+            boxplot_interactive(
+                self.adata,
+                features=['feature1'],
+                showfliers=invalid_showfliers
+            )
+    
+    def test_invalid_figure_type(self):
+        """Test if an error is raised for invalid figure types."""
+        invalid_figure_type = "invalid_type"
+        expected_msg = (
+            f"(\"figure_type must be one of 'interactive', 'static', or 'png'"
+            f".\", ' Got {invalid_figure_type}.')"
+        )
+
+        # Use assertRaisesRegex to check the pattern in the exception message
+        with self.assertRaisesRegex(ValueError, expected_msg):
+            boxplot_interactive(
+                self.adata,
+                features=['feature1'],
+                figure_type=invalid_figure_type
+            )
+                
 
 
 if __name__ == '__main__':
