@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.8.6 (2025-03-18)
+
+### Features
+
+- **ripley_l**: Added edge correction parameter to the high level function
+  ([`9a54f15`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9a54f150c88cd4e86c0559d22ecf3f663bc6afd9))
+
+
 ## v0.8.5 (2025-03-18)
 
 ### Bug Fixes
@@ -11,26 +19,11 @@
 - **_ripley**: Removed old call
   ([`e89835b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e89835b339034d6c543bd4b6231508811828c26d))
 
-- **present_summary_as_figure**: Fixed json conversion when non python types are used
-  ([`61c8480`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61c848051cf86f6cf1cff5fe9bf012bb1c12c9d2))
-
-### Features
-
-- **_ripley_l_multiple**: Enabled edget correction to remove center cell near border
-  ([`87324fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/87324fd1f168df6a809cf94321d10c632d2b9448))
-
-### Testing
-
-- **ripley**: Reduced the precision for csr
-  ([`026166b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/026166b534be2ce671c48ade6b209d3319c7cbb9))
-
-
-## v0.8.4 (2025-02-28)
-
-### Bug Fixes
-
 - **interactive_spatial_plot**: Fixed typos in api name and arguments
   ([`b833123`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b833123dc9f124abf34e539be553a8388048ee1b))
+
+- **present_summary_as_figure**: Fixed json conversion when non python types are used
+  ([`61c8480`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61c848051cf86f6cf1cff5fe9bf012bb1c12c9d2))
 
 ### Build System
 
@@ -38,6 +31,9 @@
   ([`739b4b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/739b4b3221efec4af2e9228aa8b3260f74a541bf))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`55bd610`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/55bd610ec3e5b906e5f5eb9c248835b7bdbf6ce2))
 
 - **version**: Automatic development release
   ([`3ae696f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ae696f881ff082a7e5b6cd1449eba799417dab1))
@@ -55,6 +51,9 @@
 
 - Adding unittest for multiple annotations
   ([`5e1140b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5e1140bf0f3a7179cfda7d5210b57402479aaae7))
+
+- **_ripley_l_multiple**: Enabled edget correction to remove center cell near border
+  ([`87324fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/87324fd1f168df6a809cf94321d10c632d2b9448))
 
 - **summarize dataframe**: Added two visualization functions for the summary
   ([`66fdd4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/66fdd4e4e7c136d4aec3e4c7b49958a5af020858))
@@ -85,6 +84,9 @@
 
 - **compute_box_plot_metric**: Added verbose error message and check
   ([`fb3a372`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fb3a372d9f0cb2613ab77bda8e3c2407a6dd0e4c))
+
+- **ripley**: Reduced the precision for csr
+  ([`026166b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/026166b534be2ce671c48ade6b209d3319c7cbb9))
 
 
 ## v0.8.2 (2025-01-22)
