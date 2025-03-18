@@ -12,8 +12,13 @@ class TestIntegrationSummaryToFigure(unittest.TestCase):
         # column.
         self.df = pd.DataFrame({
             'num_col': [5, 15, None, 25, 35],
-            'cat_col': ['X', 'Y', 'X', 'Z', 'Y']
+            'cat_col': ['X', 'Y', 'X', 'Z', 'Y'],
+            "float_col": [1.5, 2.5, None, 4.5, 5.5],
         })
+
+        # Convert the float_col to float32 to test out
+        # the float32 data type handling.
+        self.df['float_col'] = self.df['float_col'].astype('float32')
 
     def test_full_figure_workflow(self):
         # Generate the summary from the DataFrame.
