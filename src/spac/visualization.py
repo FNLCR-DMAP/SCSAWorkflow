@@ -3418,7 +3418,22 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
         data_types.append(info['data_type'])
         missing_counts.append(info['count_missing_indices'])
         missing_indices.append(str(info['missing_indices']))
-        summaries.append(json.dumps(info['summary'], indent=2))
+
+        # need to convert nmpy int64 and float64 to native int and float
+        # so that I can dump them as json
+        clean_data = {}
+        for k, v in info['summary'].items():
+            # Check if the value is a NumPy integer
+            if isinstance(v, np.integer):  
+                clean_data[k] = int(v)  
+            # Check if the value is a NumPy float
+            elif isinstance(v, np.floating): 
+                clean_data[k] = float(v)  
+            else:
+                # Keep the value as is if it's already a standard type
+                clean_data[k] = v
+
+        summaries.append(json.dumps(clean_data, indent=2))
 
     fig = go.Figure(
         data=[go.Table(
@@ -3447,7 +3462,7 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
         )]
     )
     fig.update_layout(
-        width=1000,
+        width=1500,
         height=300 + 50 * len(col_names),
         title="Data Summary"
     )
