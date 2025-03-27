@@ -396,7 +396,6 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
-
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
               x_log_scale=False, y_log_scale=False, **kwargs):
@@ -564,6 +563,55 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if 'bins' not in kwargs:
         kwargs['bins'] = cal_bin_num(num_rows)
 
+    # Function to calculate histogram data
+    def calculate_histogram(data, bins, bin_edges=None):
+        """
+        Compute histogram data for numeric or categorical input.
+
+        Parameters:
+        - data (pd.Series): The input data to be binned.
+        - bins (int or sequence): Number of bins (if numeric) or unique categories 
+            (if categorical).
+        - bin_edges (array-like, optional): Predefined bin edges for numeric data. 
+        If None, automatic binning is used.
+
+        Returns:
+        - pd.DataFrame: A DataFrame containing the following columns:
+            - `count`: 
+                Frequency of values in each bin.
+            - `bin_left`: 
+                Left edge of each bin (for numeric data).
+            - `bin_right`: 
+                Right edge of each bin (for numeric data).
+            - `bin_center`: 
+                Center of each bin (for numeric data) or category labels 
+                (for categorical data).
+            
+        """
+        
+        # Check if the data is numeric or categorical
+        if pd.api.types.is_numeric_dtype(data):
+            if bin_edges is None:
+                # Compute histogram using automatic binning
+                hist, bin_edges = np.histogram(data, bins=bins)
+            else:
+                # Compute histogram using predefined bin edges
+                hist, _ = np.histogram(data, bins=bin_edges)
+            return pd.DataFrame({
+                'count': hist,
+                'bin_left': bin_edges[:-1],
+                'bin_right': bin_edges[1:],
+                'bin_center': (bin_edges[:-1] + bin_edges[1:]) / 2
+            })
+        else:
+            counts = data.value_counts().sort_index()
+            return pd.DataFrame({
+                'bin_center': counts.index, 
+                'bin_left': counts.index,
+                'bin_right': counts.index,
+                'count': counts.values
+            })
+
     # Plotting with or without grouping
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
@@ -573,12 +621,33 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                              " histogram.")
 
         if together:
+            # Compute global bin edges based on the entire dataset
+            if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                global_bin_edges = np.histogram_bin_edges(
+                    plot_data[data_column], bins=kwargs['bins']
+                )
+            else:
+                global_bin_edges = plot_data[data_column].unique()
+
+            hist_data = []
+            # Compute histograms for each group separately and combine them
+            for group in groups:
+                group_data = plot_data[
+                    plot_data[group_by] == group
+                ][data_column]
+                group_hist = calculate_histogram(group_data, kwargs['bins'], 
+                                                 bin_edges=global_bin_edges)
+                group_hist[group_by] = group
+                hist_data.append(group_hist)
+            hist_data = pd.concat(hist_data, ignore_index=True)
+
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
-            sns.histplot(data=df.dropna(), x=data_column, hue=group_by,
-                         ax=ax, **kwargs)
+            
+            sns.histplot(data=hist_data, x='bin_center', weights='count', 
+                         hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
@@ -596,9 +665,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 ax_array = ax_array.flatten()
 
             for i, ax_i in enumerate(ax_array):
-                group_data = plot_data[plot_data[group_by] == groups[i]]
+                group_data = plot_data[plot_data[group_by] == 
+                             groups[i]][data_column]
+                hist_data = calculate_histogram(group_data, kwargs['bins'])
 
-                sns.histplot(data=group_data, x=data_column, ax=ax_i, **kwargs)
+                sns.histplot(data=hist_data, x="bin_center", ax=ax_i, **kwargs)
                 # If plotting feature specify which layer
                 if feature:
                     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -631,7 +702,16 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 axs.append(ax_i)
     else:
-        sns.histplot(data=plot_data, x=data_column, ax=ax, **kwargs)
+        # Precompute histogram data for single plot
+        hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
+        plot_kwargs = kwargs.copy()
+        if not pd.api.types.is_numeric_dtype(plot_data[data_column]):
+            plot_kwargs["weights"] = "count"
+        else:
+            ax.set_xlim(hist_data['bin_left'].min(), 
+            hist_data['bin_right'].max())
+        sns.histplot(data=hist_data, x='bin_center', ax=ax, **plot_kwargs)
+        
         # If plotting feature specify which layer
         if feature:
             ax.set_title(f'Layer: {layer}')
@@ -665,7 +745,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         return fig, axs[0]
     else:
         return fig, axs
-
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
