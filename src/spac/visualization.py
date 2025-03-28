@@ -482,6 +482,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     axs : matplotlib.axes.Axes or list of Axes
         The Axes object(s) of the histogram plot(s). Returns a single Axes
         if only one plot is created, otherwise returns a list of Axes.
+    
+    plot_data : pandas.DataFrame
+        DataFrame containing the data used for plotting the histogram.
 
     """
 
