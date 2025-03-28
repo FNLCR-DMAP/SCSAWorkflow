@@ -472,6 +472,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             (indicating bin edges). For example, `bins=10` will create 10 bins,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
             If not provided, the binning will be determined automatically.
+            Note, don't pass a numpy array, only python lists or strs/numbers.
 
     Returns
     -------
@@ -669,7 +670,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                              groups[i]][data_column]
                 hist_data = calculate_histogram(group_data, kwargs['bins'])
 
-                sns.histplot(data=hist_data, x="bin_center", ax=ax_i, **kwargs)
+                sns.histplot(data=hist_data, x="bin_center", ax=ax_i, 
+                    weights='count', **kwargs)
                 # If plotting feature specify which layer
                 if feature:
                     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -704,13 +706,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     else:
         # Precompute histogram data for single plot
         hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
-        plot_kwargs = kwargs.copy()
-        if not pd.api.types.is_numeric_dtype(plot_data[data_column]):
-            plot_kwargs["weights"] = "count"
-        else:
+        if pd.api.types.is_numeric_dtype(plot_data[data_column]):
             ax.set_xlim(hist_data['bin_left'].min(), 
             hist_data['bin_right'].max())
-        sns.histplot(data=hist_data, x='bin_center', ax=ax, **plot_kwargs)
+        
+        sns.histplot(data=hist_data, x='bin_center', weights="count", ax=ax, **kwargs)
         
         # If plotting feature specify which layer
         if feature:
@@ -742,9 +742,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return fig, axs[0]
+        return fig, axs[0], plot_data
     else:
-        return fig, axs
+        return fig, axs, plot_data
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
