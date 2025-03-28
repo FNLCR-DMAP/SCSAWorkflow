@@ -50,9 +50,9 @@ class TestHistogram(unittest.TestCase):
 
     def test_histogram_feature(self):
         # Define bin edges so that each bin covers exactly one integer value
-        bin_edges = np.linspace(0.5, 100.5, 101)
+        bin_edges = list(np.linspace(0.5, 100.5, 101))
 
-        fig, ax = histogram(self.adata, feature='marker1', bins=bin_edges)
+        fig, ax, df = histogram(self.adata, feature='marker1', bins=bin_edges)
 
         # Check the histogram bars
         bars = ax.patches
@@ -74,7 +74,7 @@ class TestHistogram(unittest.TestCase):
         self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_annotation(self):
-        fig, ax = histogram(self.adata, annotation='annotation1')
+        fig, ax, df = histogram(self.adata, annotation='annotation1')
         total_annotation = len(self.adata.obs['annotation1'])
         # Assuming the y-axis of the histogram represents counts
         # (not frequencies or probabilities)
@@ -84,7 +84,7 @@ class TestHistogram(unittest.TestCase):
         self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_histogram_feature_group_by(self):
-        fig, axs = histogram(
+        fig, axs, df = histogram(
             self.adata,
             feature='marker1',
             group_by='annotation2',
@@ -118,7 +118,7 @@ class TestHistogram(unittest.TestCase):
             X.astype(np.float32), obs=annotation, var=var
         )
 
-        fig, axs = histogram(
+        fig, axs, df = histogram(
             adata,
             feature='marker1',
             group_by='annotation1',
@@ -139,7 +139,7 @@ class TestHistogram(unittest.TestCase):
             :, self.adata.var_names.get_loc('marker1')
         ].flatten()
 
-        fig, ax = histogram(self.adata, feature='marker1', x_log_scale=True)
+        fig, ax, df = histogram(self.adata, feature='marker1', x_log_scale=True)
 
         # Check that x-axis label is updated
         self.assertEqual(ax.get_xlabel(), 'log(marker1)')
@@ -162,7 +162,7 @@ class TestHistogram(unittest.TestCase):
         # Introduce negative values
         self.adata.X[0, self.adata.var_names.get_loc('marker1')] = -1
 
-        fig, ax = histogram(self.adata, feature='marker1', x_log_scale=True)
+        fig, ax, df = histogram(self.adata, feature='marker1', x_log_scale=True)
 
         # Check that x-axis label is not changed
         self.assertEqual(ax.get_xlabel(), 'marker1')
@@ -176,54 +176,54 @@ class TestHistogram(unittest.TestCase):
 
     def test_title(self):
         """Test that title changes based on 'layer' information"""
-        fig, ax = histogram(self.adata, feature='marker1')
+        fig, ax, df = histogram(self.adata, feature='marker1')
         self.assertEqual(ax.get_title(), 'Layer: Original')
 
-        fig, ax = histogram(self.adata, feature='marker1', layer='Default')
+        fig, ax, df = histogram(self.adata, feature='marker1', layer='Default')
         self.assertEqual(ax.get_title(), f'Layer: Default')
 
-        fig, ax =  histogram(self.adata, annotation='annotation1', layer='Default')
+        fig, ax, df =  histogram(self.adata, annotation='annotation1', layer='Default')
         self.assertEqual(ax.get_title(), '')
 
     def test_y_log_scale_axis(self):
         """Test that y_log_scale sets y-axis to log scale."""
-        fig, ax = histogram(self.adata, feature='marker1', y_log_scale=True)
+        fig, ax, df = histogram(self.adata, feature='marker1', y_log_scale=True)
         self.assertEqual(ax.get_yscale(), 'log')
 
     def test_y_log_scale_label(self):
         """Test that y-axis label is updated when y_log_scale is True."""
-        fig, ax = histogram(self.adata, feature='marker1', y_log_scale=True)
+        fig, ax, dfd = histogram(self.adata, feature='marker1', y_log_scale=True)
         self.assertEqual(ax.get_ylabel(), 'log(Count)')
 
     def test_y_axis_label_based_on_stat(self):
         """Test that y-axis label changes based on the 'stat' parameter."""
         # Test default stat ('count')
-        fig, ax = histogram(self.adata, feature='marker1')
+        fig, ax, df = histogram(self.adata, feature='marker1')
         self.assertEqual(ax.get_ylabel(), 'Count')
 
         # Test 'frequency' stat
-        fig, ax = histogram(self.adata, feature='marker1', stat='frequency')
+        fig, ax, df = histogram(self.adata, feature='marker1', stat='frequency')
         self.assertEqual(ax.get_ylabel(), 'Frequency')
 
         # Test 'density' stat
-        fig, ax = histogram(self.adata, feature='marker1', stat='density')
+        fig, ax, df = histogram(self.adata, feature='marker1', stat='density')
         self.assertEqual(ax.get_ylabel(), 'Density')
 
         # Test 'probability' stat
-        fig, ax = histogram(self.adata, feature='marker1', stat='probability')
+        fig, ax, df = histogram(self.adata, feature='marker1', stat='probability')
         self.assertEqual(ax.get_ylabel(), 'Probability')
 
     def test_y_log_scale_with_different_stats(self):
         """Test y-axis label when y_log_scale is True
         and different stats are used."""
-        fig, ax = histogram(
+        fig, ax, df = histogram(
             self.adata, feature='marker1', y_log_scale=True, stat='density'
         )
         self.assertEqual(ax.get_ylabel(), 'log(Density)')
 
     def test_group_by_together_with_y_log_scale(self):
         """Test that group_by and y_log_scale work together."""
-        fig, ax = histogram(
+        fig, ax, df = histogram(
             self.adata,
             feature='marker1',
             group_by='annotation2',
@@ -235,7 +235,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_group_by_separate_with_y_log_scale(self):
         """Test that group_by creates separate plots with y_log_scale."""
-        fig, axs = histogram(
+        fig, axs, df = histogram(
             self.adata,
             feature='marker1',
             group_by='annotation2',
@@ -250,7 +250,7 @@ class TestHistogram(unittest.TestCase):
             self.assertEqual(ax.get_ylabel(), 'log(Count)')
 
     def test_overlay_options(self):
-        fig, ax = histogram(
+        fig, ax, df = histogram(
             self.adata,
             feature='marker1',
             group_by='annotation2',
@@ -283,7 +283,7 @@ class TestHistogram(unittest.TestCase):
         self.adata.layers['layer1'][:subset_size, :] = synthetic_data
 
         # Plot the histogram using the layer data for the subset
-        fig, ax = histogram(
+        fig, ax, df = histogram(
             self.adata[:subset_size],
             feature='marker1',
             layer='layer1',
@@ -304,7 +304,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_ax_passed_as_argument(self):
         fig, ax = plt.subplots()
-        returned_fig, returned_ax = histogram(
+        returned_fig, returned_ax, df = histogram(
             self.adata,
             feature='marker1',
             ax=ax
@@ -320,8 +320,8 @@ class TestHistogram(unittest.TestCase):
 
     def test_default_first_feature(self):
         with self.assertWarns(UserWarning) as warning:
-            bin_edges = np.linspace(0.5, 100.5, 101)
-            fig, ax = histogram(self.adata, bins=bin_edges)
+            bin_edges = list(np.linspace(0.5, 100.5, 101))
+            fig, ax, df = histogram(self.adata, bins=bin_edges)
 
         warning_message = ("No feature or annotation specified. "
                            "Defaulting to the first feature: 'marker1'.")
@@ -337,7 +337,7 @@ class TestHistogram(unittest.TestCase):
     def test_histogram_feature_integer_bins(self):
         custom_bins = 10  # Specify number of bins as an integer
 
-        fig, ax = histogram(self.adata, feature='marker1', bins=custom_bins)
+        fig, ax, df = histogram(self.adata, feature='marker1', bins=custom_bins)
 
         # Check the number of bins used
         bars = ax.patches
@@ -348,7 +348,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_default_bins_calculation(self):
         # No bins parameter passed
-        fig, ax = histogram(self.adata, feature='marker1')
+        fig, ax, df = histogram(self.adata, feature='marker1')
 
         # Count the number of bins
         bars = ax.patches
