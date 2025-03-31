@@ -106,11 +106,11 @@ class TestGetDefinedColorMap(unittest.TestCase):
         Test handling of list-based annotations,
         raises a NotImplementedError.
         """
-        with self.assertRaises(NotImplementedError):
-            get_defined_color_map(
-                self.dummy_adata,
-                annotations=['cell_type', 'status'],
-            )
+        obs = {'my_ann': pd.Series(['a', 'b', 'a']), 'my_ann_2': pd.Series(['a', 'b', 'a'])}
+        dummy = DummyAnnData(uns={'dummy': {}}, obs=obs)
+        result = get_defined_color_map(dummy,
+                annotations=list(('my_ann', 'my_ann_2')))
+        self.assertIsNotNone(result)
 
 if __name__ == '__main__':
     unittest.main()
