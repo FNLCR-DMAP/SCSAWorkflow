@@ -101,6 +101,16 @@ class TestGetDefinedColorMap(unittest.TestCase):
         ):
             get_defined_color_map(dummy, defined_color_map=None)
 
+    def test_generate_color_map_multiple_annotations(self):
+        """
+        Test handling of list-based annotations,
+        raises a NotImplementedError.
+        """
+        with self.assertRaises(NotImplementedError):
+            get_defined_color_map(
+                self.dummy_adata,
+                annotations=['cell_type', 'status'],
+            )
 
 if __name__ == '__main__':
     unittest.main()
