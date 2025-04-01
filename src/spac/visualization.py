@@ -47,7 +47,7 @@ def heatmap_datashader(x, y, labels=None, theme=None,
     Returns:
     matplotlib.figure.Figure: A Matplotlib figure containing the heatmap visualization.
     """
-    
+
     # Ensure x and y are iterable
     if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
         raise ValueError("x and y must be array-like.")
@@ -91,7 +91,7 @@ def heatmap_datashader(x, y, labels=None, theme=None,
         # Arrange subplots in rows of 3
         rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
         fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
-        axes = axes.flatten()
+        axes = axe`s.flatten()
 
         for i, cat in enumerate(categories):
             subset = coords[coords["labels"] == cat]
@@ -651,6 +651,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Bin calculation section
     # The default bin calculation used by sns.histo take quite
     # some time to compute for large number of points,
+
     # DMAP implemented the Rice rule for bin computation
 
     def cal_bin_num(
