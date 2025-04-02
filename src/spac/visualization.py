@@ -651,7 +651,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 hist.set_titles("{col_name}")
 
                 # Ajust top margin
-                hist.figure.subplots_adjust(left=.1, top=0.85, bottom=0.15, hspace=0.3)
+                hist.figure.subplots_adjust(left=.1,
+                 top=0.85, bottom=0.15, hspace=0.3)
 
                 fig = hist.figure
                 axs.extend(hist.axes.flat)
