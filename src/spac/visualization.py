@@ -476,15 +476,16 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
-        The created figure for the plot.
+    A dictionary containing the following:
+        fig : matplotlib.figure.Figure
+            The created figure for the plot.
 
-    axs : matplotlib.axes.Axes or list of Axes
-        The Axes object(s) of the histogram plot(s). Returns a single Axes
-        if only one plot is created, otherwise returns a list of Axes.
-    
-    plot_data : pandas.DataFrame
-        DataFrame containing the data used for plotting the histogram.
+        axs : matplotlib.axes.Axes or list of Axes
+            The Axes object(s) of the histogram plot(s). Returns a single Axes
+            if only one plot is created, otherwise returns a list of Axes.
+        
+        df : pandas.DataFrame
+            DataFrame containing the data used for plotting the histogram.
 
     """
 
@@ -528,7 +529,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     data_column = feature if feature else annotation
 
-    # Check for negative values and apply log1p transformation if x_log_scale is True
+    # Check for negative values and apply log1p transformation if 
+    # x_log_scale is True
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
@@ -713,7 +715,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_xlim(hist_data['bin_left'].min(), 
             hist_data['bin_right'].max())
         
-        sns.histplot(data=hist_data, x='bin_center', weights="count", ax=ax, **kwargs)
+        sns.histplot(
+            data=hist_data, 
+            x='bin_center',
+            weights="count", 
+            ax=ax, 
+            **kwargs
+        )
         
         # If plotting feature specify which layer
         if feature:
@@ -745,9 +753,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return fig, axs[0], plot_data
+        return {"fig": fig, "axs": axs[0], "df": plot_data}
     else:
-        return fig, axs, plot_data
+        return {"fig": fig, "axs": axs, "df": plot_data}
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
@@ -1621,24 +1629,26 @@ def boxplot_interactive(
         If "png", the plot is returned as a PNG image.
 
     return_metrics: bool, default = False
-        If True, the function returns the computed boxplot metrics.
+        If True, the function also returns the computed boxplot metrics.
 
     **kwargs : additional keyword arguments
         Any other keyword arguments passed to the underlying plotting function.
 
     Returns
     -------
-    fig : plotly.graph_objects.Figure or str
-        The generated boxplot figure, which can be either:
-            - If `figure_type` is "static": A base64-encoded PNG image string
-            - If `figure_type` is "interactive": A Plotly figure object
+    A dictionary containing the following keys:
+        fig : plotly.graph_objects.Figure or str
+            The generated boxplot figure, which can be either:
+                - If `figure_type` is "static": A base64-encoded PNG 
+                image string
+                - If `figure_type` is "interactive": A Plotly figure object
 
-    df : pd.DataFrame
-        A DataFrame containing the features and their corresponding values.
+        df : pd.DataFrame
+            A DataFrame containing the features and their corresponding values.
 
-    metrics : pd.DataFrame
-        A DataFrame containing the computed boxplot metrics (if
-        `return_metrics` is True).
+        metrics : pd.DataFrame
+            A DataFrame containing the computed boxplot metrics (if
+            `return_metrics` is True).
     """
 
     def boxplot_from_statistics(
@@ -1999,11 +2009,12 @@ def boxplot_interactive(
         time.time() - start_time
     )
 
-    # Determine the return values based on the return_metrics flag
+    result = {"fig": plot, "df": df}
+     # Determine if metrics included based on return_metrics flag
     if return_metrics:
-        return plot, df, metrics
-    else:
-        return plot, df
+       result["metrics"] = metrics
+
+    return result
 
 
 def interactive_spatial_plot(
