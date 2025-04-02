@@ -412,6 +412,18 @@ class TestHistogram(unittest.TestCase):
         # Using 2 * (n ** 1/3) heuristic for default bins
         expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
         self.assertEqual(n_bins, expected_bins)
+    
+    def test_facet_plot(self):
+        """Test that facet plot works."""
+        fig, ax = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+        )
+        
+        # Check if axs is a collection (list/array of Axes)
+        self.assertIsInstance(ax, (list, np.ndarray), "Output is not a multi-axis grid")
 
     def test_facet_plot(self):
         """Test that facet plot works."""
