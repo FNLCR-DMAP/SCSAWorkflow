@@ -528,7 +528,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     data_column = feature if feature else annotation
 
-    # Check for negative values and apply log1p transformation if x_log_scale is True
+    # Check for negative values
+    # apply log transformation if x_log_scale is True
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
@@ -558,7 +559,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ):
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
-        return(bins)
+
+        return (bins)
 
     num_rows = plot_data.shape[0]
 
@@ -571,6 +573,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
         n_groups = len(groups)
+
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
@@ -586,6 +589,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             if feature:
                 ax.set_title(f'Layer: {layer}')
             axs.append(ax)
+
         else:
             if not facet:
                 fig, ax_array = plt.subplots(
@@ -632,25 +636,24 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     if y_log_scale:
                         ylabel = f'log({ylabel})'
                     ax_i.set_ylabel(ylabel)
-                    
                     axs.append(ax_i)
 
-                else:
-                    hist = sns.FacetGrid(plot_data, col=group_by)
-                    # Map the histogram function to the grid
-                    hist.map(sns.histplot, data_column, **kwargs)
+            else:
+                hist = sns.FacetGrid(plot_data, col=group_by)
+                # Map the histogram function to the grid
+                hist.map(sns.histplot, data_column, **kwargs)
 
-                    #set rotation of label
-                    hist.set_xticklabels(rotation=20, ha='right')
+                # Set rotation of label
+                hist.set_xticklabels(rotation=20, ha='right')
 
-                    #titles for each facet
-                    hist.set_titles("{col_name}")
+                # Titles for each facet
+                hist.set_titles("{col_name}")
 
-                    #ajust top margin
-                    hist.fig.subplots_adjust(left=.1, top=0.85, bottom=0.15, hspace=0.3)
+                # Ajust top margin
+                hist.fig.subplots_adjust(left=.1, top=0.85, bottom=0.15, hspace=0.3)
 
-                    fig = hist.fig
-                    axs.extend(hist.axes.flat)
+                fig = hist.fig
+                axs.extend(hist.axes.flat)
 
     else:
         sns.histplot(data=plot_data, x=data_column, ax=ax, **kwargs)
