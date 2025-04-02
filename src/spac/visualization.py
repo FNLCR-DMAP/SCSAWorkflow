@@ -681,13 +681,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                                            groups[i]][data_column]
                     hist_data = calculate_histogram(group_data, kwargs['bins'])
 
-<<<<<<< HEAD
                     sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
                                  weights='count', **kwargs)
-=======
-                    sns.histplot(data=group_data, x=data_column,
-                     ax=ax_i, **kwargs)
->>>>>>> 11127cf (formatting of facet plot, and unittest)
                     # If plotting feature specify which layer
                     if feature:
                         ax_i.set_title(f'{groups[i]} with Layer: {layer}')
