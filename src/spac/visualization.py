@@ -563,7 +563,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ):
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
-        return(bins)
+
+        return (bins)
 
     num_rows = plot_data.shape[0]
 
@@ -625,6 +626,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
         n_groups = len(groups)
+
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
@@ -660,6 +662,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             if feature:
                 ax.set_title(f'Layer: {layer}')
             axs.append(ax)
+
         else:
             if not facet:
                 fig, ax_array = plt.subplots(
@@ -709,7 +712,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     if y_log_scale:
                         ylabel = f'log({ylabel})'
                     ax_i.set_ylabel(ylabel)
-
                     axs.append(ax_i)
             else:
                 hist = sns.FacetGrid(plot_data, col=group_by)
