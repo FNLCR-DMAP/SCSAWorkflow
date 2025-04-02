@@ -369,7 +369,8 @@ class TestHistogram(unittest.TestCase):
         )
         
         # Check if axs is a collection (list/array of Axes)
-        self.assertIsInstance(ax, (list, np.ndarray), "Output is not a multi-axis grid")
+        self.assertIsInstance(ax, (list, np.ndarray),
+         "Output is not a multi-axis grid")
 
 
 if __name__ == '__main__':
