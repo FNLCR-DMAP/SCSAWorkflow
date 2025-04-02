@@ -31,18 +31,25 @@ class TestBoxplotInteractive(unittest.TestCase):
     def test_returns_correct_types(self):
         """Test if correct types are returned."""
         # Test interactive mode
-        fig, df, metrics = boxplot_interactive(self.adata, figure_type="interactive", return_metrics=True)
+        fig, df, metrics = boxplot_interactive(
+            self.adata, figure_type="interactive", return_metrics=True
+        ).values()
         self.assertIsInstance(fig, go.Figure)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertIsInstance(metrics, pd.DataFrame)
 
         # Test non-interactive mode
-        fig, df = boxplot_interactive(self.adata, figure_type="static")
+        fig, df = boxplot_interactive(
+            self.adata, figure_type="static"
+        ).values()
         self.assertIsInstance(fig, go.Figure)
         self.assertIsInstance(df, pd.DataFrame)
 
         # Test png mode
-        fig, df = boxplot_interactive(self.adata, figure_type="png")
+        fig, df = boxplot_interactive(
+            self.adata, 
+            figure_type="png"
+        ).values()
         self.assertIsInstance(fig, str)
         self.assertIsInstance(df, pd.DataFrame)
 
@@ -52,7 +59,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata, features=['feature1'],
             annotation='phenotype',
             orient='v'
-        )
+        ).values()
 
         # Get boxplot names from figure
         box_name_data = [box.name for box in fig.data]
@@ -69,7 +76,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             features=['feature1', 'feature2'],
             annotation='phenotype',
             orient='v'
-        )
+        ).values()
 
         # Get x-axis labels from figure
         x_labels = fig.data[0].x
@@ -85,7 +92,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata,
             features=['feature1', 'feature2'],
             orient='v'
-        )
+        ).values()
 
         #  Get x-axis labels from figure
         x_labels = [x_data for boxplot in fig.data for x_data in boxplot.x]
@@ -100,7 +107,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata, features=['feature1'],
             annotation='phenotype',
             orient='h',
-        )
+        ).values()
         # Get y-axis labels from figure
         y_labels = [y_data for boxplot in fig.data for y_data in boxplot.y]
 
@@ -119,7 +126,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata,
             features=['feature1'],
             log_scale=True,
-        )
+        ).values()
 
         # Check that the y-axis label is 'log(Intensity)'
         self.assertEqual(fig.layout.yaxis.title.text, 'log(Intensity)')
@@ -142,7 +149,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata,
             features=['feature1'],
             log_scale=True
-        )
+        ).values()
 
         # Check that the y-axis label is still 'log(Intensity)'
         self.assertEqual(fig.layout.yaxis.title.text, 'log(Intensity)')
@@ -179,7 +186,7 @@ class TestBoxplotInteractive(unittest.TestCase):
         # Create a boxplot and capture the transformed DataFrame
         fig, df = boxplot_interactive(
             adata, features=['feature1'], log_scale=True
-        )
+        ).values()
 
         # Extract the log1p transformed values from the DataFrame for plotting
         transformed_values = df['feature1'].values.flatten()
@@ -216,7 +223,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             adata,
             features=['feature1'],
             log_scale=True
-        )
+        ).values()
 
         # Extract the printed messages
         print_calls = [call.args[0] for call in mock_print.call_args_list]
@@ -252,11 +259,16 @@ class TestBoxplotInteractive(unittest.TestCase):
             features=['feature1'],
             orient='v',
             figure_type="interactive"
-        )
+        ).values()
         self.assertEqual(fig.layout.yaxis.title.text, 'Intensity')
 
         # Test for horizontal orientation
-        fig, df = boxplot_interactive(self.adata, features=['feature1'], orient='h', figure_type="interactive")
+        fig, df = boxplot_interactive(
+            self.adata, 
+            features=['feature1'], 
+            orient='h', 
+            figure_type="interactive"
+        ).values()
         self.assertEqual(fig.layout.xaxis.title.text, 'Intensity')
 
     def test_axis_labels(self):
@@ -268,7 +280,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             annotation='phenotype',
             orient='v',
             figure_type="interactive"
-        )
+        ).values()
         self.assertEqual(fig.layout.xaxis.title.text, 'phenotype')
         self.assertEqual(fig.layout.yaxis.title.text, 'Intensity')
 
@@ -279,7 +291,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             annotation='phenotype',
             orient='v',
             log_scale=True,
-        )
+        ).values()
         self.assertEqual(fig.layout.xaxis.title.text, 'phenotype')
         self.assertEqual(fig.layout.yaxis.title.text, 'log(Intensity)')
 
@@ -289,7 +301,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             features=['feature1'],
             annotation='phenotype',
             orient='h',
-        )
+        ).values()
         self.assertEqual(fig.layout.xaxis.title.text, 'Intensity')
         self.assertEqual(fig.layout.yaxis.title.text, 'phenotype')
 
@@ -300,7 +312,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             annotation='phenotype',
             orient='h',
             log_scale=True,
-        )
+        ).values()
         self.assertEqual(fig.layout.xaxis.title.text, 'log(Intensity)')
         self.assertEqual(fig.layout.yaxis.title.text, 'phenotype')
 
@@ -310,7 +322,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata,
             features=['feature1'],
             orient='v',
-        )
+        ).values()
         x_labels = [x_data for boxplot in fig.data for x_data in boxplot.x]
         self.assertEqual(x_labels, ['feature1'])
 
@@ -318,7 +330,7 @@ class TestBoxplotInteractive(unittest.TestCase):
             self.adata,
             features=['feature1'],
             orient='h',
-        )
+        ).values()
         y_labels = [y_data for boxplot in fig.data for y_data in boxplot.y]
         self.assertEqual(y_labels, ['feature1'])
 
