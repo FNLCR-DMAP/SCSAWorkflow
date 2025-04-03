@@ -1,15 +1,50 @@
 # CHANGELOG
 
 
-## v0.8.6 (2025-03-18)
+## v0.8.7 (2025-04-03)
+
+### Bug Fixes
+
+- **core**: Specify weights for all histplot calls
+  ([`b661495`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b66149509fa4aa2280d14dfa6e83567c95c87cf8))
+
+- **docstring**: Add returned df to doctstring
+  ([`9caddca`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9caddca51e69e2213da866d9f74c6abe9ab7c181))
+
+- **relational_heatmap**: Adjusted the flipped axis labels
+  ([`5d950bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d950bb0bb3dd2f45e32d4bd7c4aa15f939922ac))
+
+- **tests**: Add tests for figure_type and showfliers params
+  ([`3488a59`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3488a597ead551285f8791d4028fe800a3c822d4))
+
+- **tests**: Adjust tests to match new return type
+  ([`4e7a81c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e7a81c8f5cf3f30e684dc0a9e3240446384a34c))
+
+- **tests**: Capture df return value and fix bins parameter
+  ([`daa16de`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/daa16de4dca24ed6424344fc5b84a40b45830897))
+
+- **tests**: Fix boxplot tests to match new non-interactive figure
+  ([`b3fc445`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b3fc44504868d5fbf646646dc7b0b877cbc20751))
+
+- **tests**: Update tests to match new return param
+  ([`da83e3d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/da83e3dcef1b7ccb7de6e6854613f63bef7e8780))
 
 ### Features
 
-- **ripley_l**: Added edge correction parameter to the high level function
-  ([`9a54f15`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9a54f150c88cd4e86c0559d22ecf3f663bc6afd9))
+- **core**: Change histogram/boxplot return types to dicts
+  ([`bf160c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bf160c24c8fca82ad9057fb2be049b200f4f7139))
+
+- **core**: Changed histogram to precompute data.
+  ([`0201c6f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0201c6f153b440c7b93494fc5355dcf1fe446c28))
+
+- **core**: Changed how boxplot return type is handled
+  ([`714bf98`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/714bf98e2acf8b42b39588ec866f87ac38979dd0))
+
+- **core**: Use plotly figure for static plot instead of png
+  ([`5738234`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5738234fc7e16cc8f9c1e421343028976f73ecc2))
 
 
-## v0.8.5 (2025-03-18)
+## v0.8.6 (2025-03-18)
 
 ### Bug Fixes
 
@@ -33,6 +68,9 @@
 ### Continuous Integration
 
 - **version**: Automatic development release
+  ([`627b384`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/627b3846a0d913318c846fc73f11d6141fc6a64e))
+
+- **version**: Automatic development release
   ([`55bd610`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/55bd610ec3e5b906e5f5eb9c248835b7bdbf6ce2))
 
 - **version**: Automatic development release
@@ -54,6 +92,9 @@
 
 - **_ripley_l_multiple**: Enabled edget correction to remove center cell near border
   ([`87324fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/87324fd1f168df6a809cf94321d10c632d2b9448))
+
+- **ripley_l**: Added edge correction parameter to the high level function
+  ([`9a54f15`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9a54f150c88cd4e86c0559d22ecf3f663bc6afd9))
 
 - **summarize dataframe**: Added two visualization functions for the summary
   ([`66fdd4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/66fdd4e4e7c136d4aec3e4c7b49958a5af020858))
