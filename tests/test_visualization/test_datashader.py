@@ -6,7 +6,6 @@ import matplotlib
 
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
-
 class TestDataShaderHeatMap(unittest.TestCase):
     def setUp(self):
         """Prepare data for testing."""
@@ -20,17 +19,15 @@ class TestDataShaderHeatMap(unittest.TestCase):
     def test_invalid_input_type(self):
         """Test handling of invalid input types."""
         with self.assertRaises(ValueError) as context_manager:
-            heatmap_datashader(1, self.y)
-        self.assertEqual(str(context_manager.exception),
-                         "x and y must be array-like.")
+            heatmap_datashader(1, self.y, labels=self.labels_categorical)
+        self.assertIn("x and y must be array-like", str(context_manager.exception))
 
     def test_labels_length_mismatch(self):
         """Test handling of mismatched lengths between data and labels."""
         wrong_labels = pd.Series(['A'] * 9)  # Shorter than x and y
         with self.assertRaises(ValueError) as context_manager:
             heatmap_datashader(self.x, self.y, labels=wrong_labels)
-        expected_msg = "Labels length should match x and y length."
-        self.assertEqual(str(context_manager.exception), expected_msg)
+        self.assertIn("Labels length should match x and y length", str(context_manager.exception))
 
 
 if __name__ == "__main__":

@@ -91,7 +91,7 @@ def heatmap_datashader(x, y, labels=None, theme=None,
         # Arrange subplots in rows of 3
         rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
         fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
-        axes = axe`s.flatten()
+        axes = axes.flatten()
 
         for i, cat in enumerate(categories):
             subset = coords[coords["labels"] == cat]
