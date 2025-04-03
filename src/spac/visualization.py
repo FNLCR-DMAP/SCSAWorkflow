@@ -2653,7 +2653,7 @@ def relational_heatmap(
     fig.update_layout(
         overwrite=True,
         xaxis=dict(
-            title=source_annotation,
+            title=target_annotation,
             ticks="",
             dtick=1,
             side="top",
@@ -2662,7 +2662,7 @@ def relational_heatmap(
             ticktext=x
         ),
         yaxis=dict(
-            title=target_annotation,
+            title=source_annotation,
             ticks="",
             dtick=1,
             ticksuffix="   ",
