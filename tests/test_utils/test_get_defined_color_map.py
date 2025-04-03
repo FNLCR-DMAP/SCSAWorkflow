@@ -86,7 +86,8 @@ class TestGetDefinedColorMap(unittest.TestCase):
         self.assertIn('a', result)
         self.assertIn('b', result)
         # Check that the colors are correctly generated.
-        self.assertTrue(all(isinstance(color, str) for color in result.values()))
+        self.assertTrue(all(isinstance(color, str) for color
+                        in result.values()))
 
     def test_missing_annotations(self):
         """
@@ -106,10 +107,12 @@ class TestGetDefinedColorMap(unittest.TestCase):
         Test handling of list-based annotations,
         raises a NotImplementedError.
         """
-        obs = {'my_ann': pd.Series(['a', 'b', 'a']), 'my_ann_2': pd.Series(['a', 'b', 'a'])}
+        obs = {'my_ann': pd.Series(['a', 'b', 'a']),
+               'my_ann_2': pd.Series(['a', 'b', 'a'])}
         dummy = DummyAnnData(uns={'dummy': {}}, obs=obs)
+        annos_list = list(('my_ann', 'my_ann_2'))
         result = get_defined_color_map(dummy,
-                annotations=list(('my_ann', 'my_ann_2')))
+                                       annotations=annos_list)
         self.assertIsNotNone(result)
 
 if __name__ == '__main__':
