@@ -109,7 +109,6 @@ class TestRelationalHeatmap(unittest.TestCase):
 
         assert_frame_equal(expected_df, df)
 
-
     def test_invalid_source_annotation(self):
         # Test the function with an invalid source_annotation
         with self.assertRaises(ValueError):
@@ -129,6 +128,27 @@ class TestRelationalHeatmap(unittest.TestCase):
                 'invalid_target_annotation',
                 'Blues'
             )
+
+    def test_axis_labels(self):
+        """
+        Test that the x-axis and y-axis labels are correct in the relational heatmap.
+        """
+        # Generate the relational heatmap
+        result_dict = relational_heatmap(
+            self.adata,
+            'source_annotation',
+            'target_annotation',
+            'Blues'
+        )
+
+        # Extract the figure from the result
+        fig = result_dict["figure"]
+
+        # Check the x-axis label
+        self.assertEqual(fig.layout.yaxis.title.text, "source_annotation")
+
+        # Check the y-axis label
+        self.assertEqual(fig.layout.xaxis.title.text, "target_annotation")
 
 
 if __name__ == '__main__':
