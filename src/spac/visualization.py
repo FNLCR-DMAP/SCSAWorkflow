@@ -753,9 +753,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return {"fig": fig, "axs": axs[0], "df": plot_data}
+        return {"fig": fig, "axs": axs[0], "df": hist_data}
     else:
-        return {"fig": fig, "axs": axs, "df": plot_data}
+        return {"fig": fig, "axs": axs, "df": hist_data}
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
