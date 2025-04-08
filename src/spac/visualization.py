@@ -778,7 +778,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if y_log_scale:
             ylabel = f'log({ylabel})'
         ax.set_ylabel(ylabel)
-        ax.tick_params(axis='x', rotation=90, labelsize=10)
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": plot_data}
