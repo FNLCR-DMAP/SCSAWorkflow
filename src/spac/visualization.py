@@ -607,7 +607,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     group_data = plot_data[plot_data[group_by] == groups[i]]
 
                     sns.histplot(data=group_data, x=data_column,
-                     ax=ax_i, **kwargs)
+                                 ax=ax_i, **kwargs)
                     # If plotting feature specify which layer
                     if feature:
                         ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -652,7 +652,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 # Ajust top margin
                 hist.figure.subplots_adjust(left=.1,
-                 top=0.85, bottom=0.15, hspace=0.3)
+                                            top=0.85,
+                                            bottom=0.15,
+                                            hspace=0.3)
 
                 fig = hist.figure
                 axs.extend(hist.axes.flat)
@@ -689,7 +691,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if y_log_scale:
             ylabel = f'log({ylabel})'
         ax.set_ylabel(ylabel)
-        ax.tick_params(axis='x', rotation=90, labelsize=10)
 
     if len(axs) == 1:
         return fig, axs[0]
