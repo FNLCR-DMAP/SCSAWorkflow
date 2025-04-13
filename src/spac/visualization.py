@@ -23,6 +23,7 @@ import logging
 import warnings
 import base64
 import time
+import json
 
 
 # Configure logging
@@ -395,7 +396,6 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
-
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
               x_log_scale=False, y_log_scale=False, **kwargs):
@@ -472,15 +472,20 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             (indicating bin edges). For example, `bins=10` will create 10 bins,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
             If not provided, the binning will be determined automatically.
+            Note, don't pass a numpy array, only python lists or strs/numbers.
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
-        The created figure for the plot.
+    A dictionary containing the following:
+        fig : matplotlib.figure.Figure
+            The created figure for the plot.
 
-    axs : matplotlib.axes.Axes or list of Axes
-        The Axes object(s) of the histogram plot(s). Returns a single Axes
-        if only one plot is created, otherwise returns a list of Axes.
+        axs : matplotlib.axes.Axes or list of Axes
+            The Axes object(s) of the histogram plot(s). Returns a single Axes
+            if only one plot is created, otherwise returns a list of Axes.
+        
+        df : pandas.DataFrame
+            DataFrame containing the data used for plotting the histogram.
 
     """
 
@@ -524,7 +529,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     data_column = feature if feature else annotation
 
-    # Check for negative values and apply log1p transformation if x_log_scale is True
+    # Check for negative values and apply log1p transformation if 
+    # x_log_scale is True
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
@@ -563,6 +569,55 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if 'bins' not in kwargs:
         kwargs['bins'] = cal_bin_num(num_rows)
 
+    # Function to calculate histogram data
+    def calculate_histogram(data, bins, bin_edges=None):
+        """
+        Compute histogram data for numeric or categorical input.
+
+        Parameters:
+        - data (pd.Series): The input data to be binned.
+        - bins (int or sequence): Number of bins (if numeric) or unique categories 
+            (if categorical).
+        - bin_edges (array-like, optional): Predefined bin edges for numeric data. 
+        If None, automatic binning is used.
+
+        Returns:
+        - pd.DataFrame: A DataFrame containing the following columns:
+            - `count`: 
+                Frequency of values in each bin.
+            - `bin_left`: 
+                Left edge of each bin (for numeric data).
+            - `bin_right`: 
+                Right edge of each bin (for numeric data).
+            - `bin_center`: 
+                Center of each bin (for numeric data) or category labels 
+                (for categorical data).
+            
+        """
+        
+        # Check if the data is numeric or categorical
+        if pd.api.types.is_numeric_dtype(data):
+            if bin_edges is None:
+                # Compute histogram using automatic binning
+                hist, bin_edges = np.histogram(data, bins=bins)
+            else:
+                # Compute histogram using predefined bin edges
+                hist, _ = np.histogram(data, bins=bin_edges)
+            return pd.DataFrame({
+                'count': hist,
+                'bin_left': bin_edges[:-1],
+                'bin_right': bin_edges[1:],
+                'bin_center': (bin_edges[:-1] + bin_edges[1:]) / 2
+            })
+        else:
+            counts = data.value_counts().sort_index()
+            return pd.DataFrame({
+                'bin_center': counts.index, 
+                'bin_left': counts.index,
+                'bin_right': counts.index,
+                'count': counts.values
+            })
+
     # Plotting with or without grouping
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
@@ -572,12 +627,33 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                              " histogram.")
 
         if together:
+            # Compute global bin edges based on the entire dataset
+            if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                global_bin_edges = np.histogram_bin_edges(
+                    plot_data[data_column], bins=kwargs['bins']
+                )
+            else:
+                global_bin_edges = plot_data[data_column].unique()
+
+            hist_data = []
+            # Compute histograms for each group separately and combine them
+            for group in groups:
+                group_data = plot_data[
+                    plot_data[group_by] == group
+                ][data_column]
+                group_hist = calculate_histogram(group_data, kwargs['bins'], 
+                                                 bin_edges=global_bin_edges)
+                group_hist[group_by] = group
+                hist_data.append(group_hist)
+            hist_data = pd.concat(hist_data, ignore_index=True)
+
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
-            sns.histplot(data=df.dropna(), x=data_column, hue=group_by,
-                         ax=ax, **kwargs)
+            
+            sns.histplot(data=hist_data, x='bin_center', weights='count', 
+                         hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
@@ -595,9 +671,12 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 ax_array = ax_array.flatten()
 
             for i, ax_i in enumerate(ax_array):
-                group_data = plot_data[plot_data[group_by] == groups[i]]
+                group_data = plot_data[plot_data[group_by] == 
+                             groups[i]][data_column]
+                hist_data = calculate_histogram(group_data, kwargs['bins'])
 
-                sns.histplot(data=group_data, x=data_column, ax=ax_i, **kwargs)
+                sns.histplot(data=hist_data, x="bin_center", ax=ax_i, 
+                    weights='count', **kwargs)
                 # If plotting feature specify which layer
                 if feature:
                     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -630,7 +709,20 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 axs.append(ax_i)
     else:
-        sns.histplot(data=plot_data, x=data_column, ax=ax, **kwargs)
+        # Precompute histogram data for single plot
+        hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
+        if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+            ax.set_xlim(hist_data['bin_left'].min(), 
+            hist_data['bin_right'].max())
+        
+        sns.histplot(
+            data=hist_data, 
+            x='bin_center',
+            weights="count", 
+            ax=ax, 
+            **kwargs
+        )
+        
         # If plotting feature specify which layer
         if feature:
             ax.set_title(f'Layer: {layer}')
@@ -661,10 +753,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return fig, axs[0]
+        return {"fig": fig, "axs": axs[0], "df": plot_data}
     else:
-        return fig, axs
-
+        return {"fig": fig, "axs": axs, "df": plot_data}
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
@@ -1460,7 +1551,7 @@ def boxplot_interactive(
     defined_color_map=None,
     annotation_colorscale="viridis",
     feature_colorscale="seismic",
-    interactive=True,
+    figure_type="interactive",
     return_metrics=False,
     **kwargs,
 ):
@@ -1531,29 +1622,33 @@ def boxplot_interactive(
         Name of the color scale to use for the dots when feature
         is used.
 
-    interactive : bool, default = False
-        If True, the plot is interactive, allowing for zooming and panning.
-        If False, the plot is static.
+    figure_type : {"interactive", "static", "png"}, default = "interactive"
+        If "interactive", the plot is interactive, allowing for zooming 
+        and panning.
+        If "static", the plot is static.
+        If "png", the plot is returned as a PNG image.
 
     return_metrics: bool, default = False
-        If True, the function returns the computed boxplot metrics.
+        If True, the function also returns the computed boxplot metrics.
 
     **kwargs : additional keyword arguments
         Any other keyword arguments passed to the underlying plotting function.
 
     Returns
     -------
-    fig : plotly.graph_objects.Figure or str
-        The generated boxplot figure, which can be either:
-            - If not `interactive`: A base64-encoded PNG image string
-            - If `interactive`: A Plotly figure object
+    A dictionary containing the following keys:
+        fig : plotly.graph_objects.Figure or str
+            The generated boxplot figure, which can be either:
+                - If `figure_type` is "static": A base64-encoded PNG 
+                image string
+                - If `figure_type` is "interactive": A Plotly figure object
 
-    df : pd.DataFrame
-        A DataFrame containing the features and their corresponding values.
+        df : pd.DataFrame
+            A DataFrame containing the features and their corresponding values.
 
-    metrics : pd.DataFrame
-        A DataFrame containing the computed boxplot metrics (if
-        `return_metrics` is True).
+        metrics : pd.DataFrame
+            A DataFrame containing the computed boxplot metrics (if
+            `return_metrics` is True).
     """
 
     def boxplot_from_statistics(
@@ -1794,7 +1889,13 @@ def boxplot_interactive(
     if showfliers not in ("all", "downsample", None):
         raise ValueError(
             ("showfliers must be one of 'all', 'downsample', or None."),
-            ("Got {showfliers}."),
+            (f" Got {showfliers}."),
+        )
+
+    if figure_type not in ("interactive", "static", "png"):
+        raise ValueError(
+            (f"figure_type must be one of 'interactive', 'static', or 'png'."),
+            (f" Got {figure_type}."),
         )
 
     # Extract data from the specified layer or the default matrix (adata.X)
@@ -1875,32 +1976,54 @@ def boxplot_interactive(
     )
 
     # Prepare the base image or figure return value
-    if interactive:
+    if figure_type == "interactive":
         plot = fig
-    else:
+    elif figure_type == "png":
         # Convert Plotly to PNG encoded to base64
         img_bytes = pio.to_image(fig, format="png")
         plot = base64.b64encode(img_bytes).decode("utf-8")
+    elif figure_type == "static":
+        # Disable interactive components
+        config = {
+            'dragmode': False,
+            'hovermode': False,
+            'clickmode': 'none',
+            'modebar_remove': [
+                'toimage', 
+                'zoom', 
+                'zoomin', 
+                'zoomout',
+                'select', 
+                'pan', 
+                'lasso', 
+                'autoscale', 
+                'resetscale'
+            ],
+            'legend_itemclick': False,
+            'legend_itemdoubleclick': False
+        }
+        plot = fig.update_layout(**config)
 
     logging.info(
         "Time taken to generate boxplot: %f seconds",
         time.time() - start_time
     )
 
-    # Determine the return values based on the return_metrics flag
+    result = {"fig": plot, "df": df}
+     # Determine if metrics included based on return_metrics flag
     if return_metrics:
-        return plot, df, metrics
-    else:
-        return plot, df
+       result["metrics"] = metrics
+
+    return result
 
 
-def interative_spatial_plot(
+def interactive_spatial_plot(
     adata,
     annotations=None,
     feature=None,
     layer=None,
     dot_size=1.5,
-    dot_transparancy=0.75,
+    dot_transparency=0.75,
     annotation_colorscale='rainbow',
     feature_colorscale='balance',
     figure_width=6,
@@ -1939,7 +2062,7 @@ def interative_spatial_plot(
         used.
     dot_size : float, optional
         Size of the scatter dots in the plot. Default is 1.5.
-    dot_transparancy : float, optional
+    dot_transparency : float, optional
         Transparancy level of the scatter dots. Default is 0.75.
     annotation_colorscale : str, optional
         Name of the color scale to use for the dots when annotation
@@ -2079,7 +2202,7 @@ def interative_spatial_plot(
         annotations=None,
         feature=None,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         colorscale=None,
         color_mapping=None,
         figure_width=figure_width,
@@ -2107,7 +2230,7 @@ def interative_spatial_plot(
             The column name in `spatial_df` for the continuous color mapping
         dot_size : float, optional
             Size of the scatter dots in the plot. Default is 1.5.
-        dot_transparancy : float, optional
+        dot_transparency : float, optional
             Transparency level of the scatter dots. Default is 0.75.
         colorscale : Optional[str], optional
             Name of the color scale to use for the dots if features is passed.
@@ -2249,7 +2372,7 @@ def interative_spatial_plot(
             mode='markers',
             marker=dict(
                 size=dot_size,
-                opacity=dot_transparancy
+                opacity=dot_transparency
             ),
             hovertemplate=hovertemplate
         )
@@ -2352,7 +2475,7 @@ def interative_spatial_plot(
         color_mapping=color_dict,
         colorscale=colorscale,
         dot_size=dot_size,
-        dot_transparancy=dot_transparancy,
+        dot_transparency=dot_transparency,
         figure_width=figure_width,
         figure_height=figure_height,
         figure_dpi=figure_dpi,
@@ -2653,7 +2776,7 @@ def relational_heatmap(
     fig.update_layout(
         overwrite=True,
         xaxis=dict(
-            title=source_annotation,
+            title=target_annotation,
             ticks="",
             dtick=1,
             side="top",
@@ -2662,7 +2785,7 @@ def relational_heatmap(
             ticktext=x
         ),
         yaxis=dict(
-            title=target_annotation,
+            title=source_annotation,
             ticks="",
             dtick=1,
             ticksuffix="   ",
@@ -2705,7 +2828,6 @@ def relational_heatmap(
 def plot_ripley_l(
         adata,
         phenotypes,
-        annotation=None,
         regions=None,
         sims=False,
         return_df=False,
@@ -2823,17 +2945,34 @@ def plot_ripley_l(
             ax=ax,
             **kwargs)
 
+        # Calculate averages for simulations if enabled
+        if sims:
+            sims_stat_df = row["ripley_l"]["sims_stat"]
+            avg_stats = sims_stat_df.groupby("bins")["stats"].mean()
+            avg_used_center_cells = \
+                sims_stat_df.groupby("bins")["used_center_cells"].mean()
+
         # Prepare plotted data to return if return_df is True
         l_stat_data = row['ripley_l']['L_stat']
         for _, stat_row in l_stat_data.iterrows():
-            plot_data.append({
+
+            entry = {
                 'region': region,
                 'radius': stat_row['bins'],
                 'ripley(radius)': stat_row['stats'],
                 'region_area': area,
                 'n_center': n_center,
                 'n_neighbor': n_neighbors,
-            })
+                'used_center_cells': stat_row['used_center_cells']
+            }
+
+            if sims:
+                entry['avg_sim_ripley(radius)'] = \
+                    avg_stats.get(stat_row['bins'], None)
+                entry['avg_sim_used_center_cells'] = \
+                    avg_used_center_cells.get(stat_row['bins'], None)
+
+            plot_data.append(entry)
 
         if sims:
             confidence_level = 95
@@ -3325,3 +3464,144 @@ def visualize_nearest_neighbor(
     )
 
     return result_dict
+
+import json
+import plotly.graph_objects as go
+
+
+def present_summary_as_html(summary_dict: dict) -> str:
+    """
+    Build an HTML string that presents the summary information
+    intuitively.
+
+    For each specified column, the HTML includes:
+      - Column name and data type
+      - Count and list of missing indices
+      - Summary details presented in a table (for numeric: stats; 
+        categorical: unique values and counts)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned by summarize_dataframe.
+
+    Returns
+    -------
+    str
+        HTML string representing the summary.
+    """
+    html = (
+        "<html><head><title>Data Summary</title>"
+        "<style>"
+        "body { font-family: Arial, sans-serif; margin: 20px; }"
+        "table { border-collapse: collapse; width: 100%; "
+        "margin-bottom: 20px; }"
+        "th, td { border: 1px solid #dddddd; text-align: left; "
+        "padding: 8px; }"
+        "th { background-color: #f2f2f2; }"
+        ".section { margin-bottom: 40px; }"
+        "</style></head><body>"
+        "<h1>Data Summary</h1>"
+    )
+
+    for col, info in summary_dict.items():
+        html += (
+            f"<div class='section'><h2>Column: {col}</h2>"
+            f"<p><strong>Data Type:</strong> {info['data_type']}</p>"
+            f"<p><strong>Missing Indices:</strong> "
+            f"{info['missing_indices']} (Count: "
+            f"{info['count_missing_indices']})</p>"
+            "<h3>Summary Details:</h3>"
+            "<table><thead><tr><th>Metric</th><th>Value</th></tr></thead>"
+            "<tbody>"
+        )
+        for key, val in info['summary'].items():
+            html += f"<tr><td>{key}</td><td>{val}</td></tr>"
+        html += "</tbody></table></div>"
+
+    html += "</body></html>"
+    return html
+
+
+def present_summary_as_figure(summary_dict: dict) -> go.Figure:
+    """
+    Build a static Plotly figure (using a table) to depict the
+    summary dictionary.
+
+    The figure includes columns:
+      - Column name
+      - Data type
+      - Count of missing values
+      - Missing indices (as a string)
+      - Summary details (formatted as JSON for readability)
+
+    Parameters
+    ----------
+    summary_dict : dict
+        The summary dictionary returned from summarize_dataframe.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        A static Plotly table figure representing the summary.
+    """
+    col_names = []
+    data_types = []
+    missing_counts = []
+    missing_indices = []
+    summaries = []
+
+    for col, info in summary_dict.items():
+        col_names.append(col)
+        data_types.append(info['data_type'])
+        missing_counts.append(info['count_missing_indices'])
+        missing_indices.append(str(info['missing_indices']))
+
+        # need to convert nmpy int64 and float64 to native int and float
+        # so that I can dump them as json
+        clean_data = {}
+        for k, v in info['summary'].items():
+            # Check if the value is a NumPy integer
+            if isinstance(v, np.integer):  
+                clean_data[k] = int(v)  
+            # Check if the value is a NumPy float
+            elif isinstance(v, np.floating): 
+                clean_data[k] = float(v)  
+            else:
+                # Keep the value as is if it's already a standard type
+                clean_data[k] = v
+
+        summaries.append(json.dumps(clean_data, indent=2))
+
+    fig = go.Figure(
+        data=[go.Table(
+            header=dict(
+                values=[
+                    "Column",
+                    "Data Type",
+                    "Missing Count",
+                    "Missing Indices",
+                    "Summary"
+                ],
+                fill_color='paleturquoise',
+                align='left'
+            ),
+            cells=dict(
+                values=[
+                    col_names,
+                    data_types,
+                    missing_counts,
+                    missing_indices,
+                    summaries
+                ],
+                fill_color='lavender',
+                align='left'
+            )
+        )]
+    )
+    fig.update_layout(
+        width=1500,
+        height=300 + 50 * len(col_names),
+        title="Data Summary"
+    )
+    return fig
