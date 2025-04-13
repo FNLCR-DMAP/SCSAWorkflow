@@ -39,19 +39,30 @@ def heatmap_datashader(x, y, labels=None, theme=None,
                         plot_title=None, **kwargs):
     """
     Generates a heatmap using Datashader for large-scale scatter data.
-    
-    Parameters:
-    x (iterable): X-axis coordinates.
-    y (iterable): Y-axis coordinates.
-    labels (iterable, optional): Categorical labels for subgrouping data.
-    theme (str, optional): Colormap theme for visualization. Defaults to 'viridis'.
-    x_axis_title (str, optional): Label for the x-axis. Default is "Component 1".
-    y_axis_title (str, optional): Label for the y-axis. Default is "Component 2".
-    plot_title (str, optional): Title of the plot.
-    **kwargs: Additional keyword arguments (e.g., 'fig_width', 'fig_height').
-    
-    Returns:
-    matplotlib.figure.Figure: A Matplotlib figure containing the heatmap visualization.
+
+    Parameters
+    ----------
+    x : iterable
+        X-axis coordinates.
+    y : iterable
+        Y-axis coordinates.
+    labels : iterable, optional
+        Categorical labels for subgrouping data.
+    theme : str, optional, default='viridis'
+        Colormap theme for visualization.
+    x_axis_title : str, optional, default='Component 1'
+        Label for the x-axis.
+    y_axis_title : str, optional, default='Component 2'
+        Label for the y-axis.
+    plot_title : str, optional
+        Title of the plot.
+    **kwargs : dict, optional
+        Additional keyword arguments (e.g., 'fig_width', 'fig_height').
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A Matplotlib figure containing the heatmap visualization.
     """
 
     # Ensure x and y are iterable

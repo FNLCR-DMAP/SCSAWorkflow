@@ -29,6 +29,16 @@ class TestDataShaderHeatMap(unittest.TestCase):
             heatmap_datashader(self.x, self.y, labels=wrong_labels)
         self.assertIn("Labels length should match x and y length", str(context_manager.exception))
 
+    def test_valid_input_returns_figure(self):
+        """Test that valid input returns a matplotlib figure with expected subplots."""
+        fig = heatmap_datashader(self.x, self.y, labels=self.labels_categorical)
+        self.assertIsInstance(fig, matplotlib.figure.Figure)
+
+        # There should be as many subplots as unique labels (3 in this case)
+        num_axes = len(fig.axes)
+        expected_axes = self.labels_categorical.nunique()
+        self.assertEqual(num_axes, expected_axes)
+
 
 if __name__ == "__main__":
     unittest.main()
