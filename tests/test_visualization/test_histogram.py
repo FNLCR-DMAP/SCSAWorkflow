@@ -415,44 +415,6 @@ class TestHistogram(unittest.TestCase):
 
     def test_facet_plot(self):
         """Test that facet plot works."""
-        fig, ax = histogram(
-            self.adata,
-            feature='marker1',
-            group_by='annotation2',
-            facet=True,
-        )
-
-        # Check if axs is a collection (list/array of Axes)
-        self.assertIsInstance(ax, (list, np.ndarray),
-                              "Output is not a multi-axis grid")
-
-        # Check number of facets equals number of unique groups
-        unique_groups = self.adata.obs['annotation2'].dropna().unique()
-        self.assertEqual(len(ax), len(unique_groups),
-                         f"Expected {len(unique_groups)}"
-                         f" facet plots, got {len(ax)}.")
-
-        # Validate each axis: title, xlabel, and ylabel
-        for i, axis in enumerate(ax):
-            # Check that title is set and matches the group
-            title = axis.get_title()
-            self.assertTrue(title, f"Facet {i} is missing a title.")
-            self.assertTrue(any(str(group) in title
-                            for group in unique_groups),
-                            f"Title '{title}' does not contain"
-                            f"any expected group names.")
-
-            # Check X and Y labels
-            self.assertIn('marker1', axis.get_xlabel(),
-                          f"Facet {i} X-axis label"
-                          f" '{axis.get_xlabel()}' is incorrect.")
-            self.assertIn(axis.get_ylabel(),
-                          ['Count', 'Frequency', 'Density', 'Probability'],
-                          f"Facet {i} Y-axis label"
-                          f" '{axis.get_ylabel()}' is not a valid stat.")
-
-    def test_facet_plot(self):
-        """Test that facet plot works."""
         fig, ax, df = histogram(
             self.adata,
             feature='marker1',
