@@ -16,7 +16,7 @@ class TestRunUMAP(unittest.TestCase):
         )
 
         self.adata.obsm["derived_features"] = \
-            np.random.rand(10, 3, 2).astype(np.float)
+            np.random.rand(10, 3, 2).astype(float)
 
     def test_typical_case(self):
         run_umap(self.adata, n_neighbors=5, min_dist=0.1, n_components=2,

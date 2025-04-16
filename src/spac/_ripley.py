@@ -17,11 +17,12 @@ from scipy.spatial.distance import cdist
 import numpy as np
 import pandas as pd
 
-from squidpy._docs import d, inject_docs
 from squidpy._utils import NDArrayA
 from squidpy.gr._utils import _save_data, _assert_spatial_basis, _assert_categorical_obs
 from squidpy._constants._constants import RipleyStat
 from squidpy._constants._pkg_constants import Key
+
+from shapely.geometry import Point, Polygon
 
 __all__ = ["ripley"]
 
@@ -30,6 +31,7 @@ __all__ = ["ripley"]
 # Calculate Ripley L for two phenotypes
 # Pass in the precalculated area
 # Pass in the number of observations used in the simulation
+# Add an option to ignore cells near the border of the area
 # https://github.com/theislab/squidpy/blob/main/src/squidpy/external/_ripley.py
 
 
@@ -50,7 +52,8 @@ def ripley(
     seed: int | None = None,
     area: float | None = None,
     copy: bool = False,
-    phenotypes: Tuple[str, str] | None = None
+    phenotypes: Tuple[str, str] | None = None,
+    edge_correction: bool = False
 ) -> dict[str, pd.DataFrame | NDArrayA]:
     r"""
     Calculate various Ripley's statistics for point processes.
@@ -90,26 +93,36 @@ def ripley(
     %(spatial_key)s
     metric
         Which metric to use for computing distances.
-        For available metrics, check out :class:`sklearn.neighbors.DistanceMetric`.
+        For available metrics, check out:
+        class:`sklearn.neighbors.DistanceMetric`.
     n_neigh
         Number of neighbors to consider for the KNN graph.
     n_simulations
         How many simulations to run for computing p-values.
     n_observations
-        How many observations to generate for the Spatial Poisson Point Process.
+        How many observations to generate for the Spatial Poisson Point
+        Process.
     max_dist
-        Maximum distances for the support. If `None`, `max_dist=`:math:`\sqrt{{area \over 2}}`.
+        Maximum distances for the support.
+        If `None`, `max_dist=`:math:`\sqrt{{area \over 2}}`.
     n_steps
         Number of steps for the support.
     support
-        list of bins (radiis) for the support. Overrides `max_dist` and `n_steps`.
-    phenotypes
-        For Ripley L, calculate the function for the cells of these two phenotypes.
+        list of bins (radiis) for the support. Overrides `max_dist` and
+        `n_steps`.
     %(seed)s
         The seed for the random number generator.
     %(area)s
         Use passed value for area instead of the area of the convex hull.
     %(copy)s
+        Return the resutls as a df, or save it on disk
+    phenotypes
+        For Ripley L, calculate the function for the cells of these two
+        phenotypes.
+    edge_correction
+        If True, remove center cells that are too close than
+        a radius from the calculation. These cells are identified
+        for every radius in the support.
 
     Returns
     -------
@@ -143,6 +156,8 @@ def ripley(
     if support is None:
         support = np.linspace(0, max_dist, n_steps)
     else:
+
+        # Check that support is a list of floats
         if not isinstance(support, list) or not all(
                 isinstance(x, (int, float)) for x in support
         ):
@@ -152,7 +167,9 @@ def ripley(
         support = np.array(support)
         n_steps = len(support)
 
-    # Check that support is a list of floats
+    # For every support value, identify the cells that are
+    # within the distance of the support value from the border
+
 
     # prepare labels
     le = LabelEncoder().fit(clusters)
@@ -221,17 +238,29 @@ def ripley(
 
             distances = cdist(center_coord, neighbor_coord)
 
-            bins, obs_stats = _l_multiple_function(distances,
-                                                   support,
-                                                   n_center,
-                                                   n_neighbor,
-                                                   area,
-                                                   remove_diagonal)
+            returned_dic = _l_multiple_function(
+                distances,
+                support,
+                n_center,
+                n_neighbor,
+                area,
+                remove_diagonal,
+                center_coord,
+                hull,
+                edge_correction=edge_correction,
+                return_mask=False
+            )
+            bins = returned_dic["support"]
+            obs_stats = returned_dic["l_estimate"]
+            n_used_center_cells = returned_dic["used_center_points"]
             obs_arr[0] = obs_stats
         else:
-            raise NotImplementedError(f"Mode `{mode.s!r}` is not yet implemented.")
+            raise NotImplementedError(
+                f"Mode `{mode.s!r}` is not yet implemented."
+            )
 
     sims = np.empty((n_simulations, len(bins)))
+    sim_n_center_cells = np.empty((n_simulations, len(bins)))
     pvalues = np.ones((le.classes_.shape[0], len(bins)))
     rng = default_rng(None if seed is None else seed)
 
@@ -266,6 +295,18 @@ def ripley(
     else:
         for i in range(n_simulations):
             if mode == RipleyStat.L:
+                # The Poisson Point Process will put n_center points
+                # in the polygon irrespective on how many n_center were
+                # actually used in the Ripley L calculation if edge correction
+                # is enabled.
+                # This is becasue if we are doing the analysis for multiple
+                # support (e.g., Radii), I have to generate many
+                # PPP for every radii if I want to match the exact number
+                # of center points that were used in the Ripley L calucaiton
+                # for a given ROI.
+                # The thought is on average, the Poisson Point Process
+                # will simulate how many exact points gets picked given
+                # the radii.
                 random_i = _ppp(hull,
                                 n_simulations=1,
                                 n_observations=n_center+n_neighbor,
@@ -279,13 +320,22 @@ def ripley(
                 else:
                     neighbor_coord = random_i[n_center:]
                 distances_i = cdist(center_coord, neighbor_coord)
-                _, stats_i = _l_multiple_function(distances_i,
-                                                  support,
-                                                  n_center,
-                                                  n_neighbor,
-                                                  area,
-                                                  remove_diagonal)
+                returned_dic = _l_multiple_function(
+                    distances_i,
+                    support,
+                    n_center,
+                    n_neighbor,
+                    area,
+                    remove_diagonal,
+                    center_coord,
+                    hull,
+                    edge_correction=edge_correction,
+                    return_mask=False
+                )
+
+                stats_i = returned_dic["l_estimate"]
                 sims[i] = stats_i
+                sim_n_center_cells[i] = returned_dic["used_center_points"]
 
             else:
                 raise NotImplementedError(f"Mode `{mode.s!r}` is not yet "
@@ -301,15 +351,23 @@ def ripley(
                               index=bins,
                               var_name=cluster_key)
     else:
-        obs_df = _reshape_res(obs_arr.T,
-                              columns=[f"{phenotypes[0]}_{phenotypes[1]}"],
-                              index=bins,
-                              var_name=cluster_key)
+        obs_df = _reshape_res(
+            obs_arr.T,
+            columns=[f"{phenotypes[0]}_{phenotypes[1]}"],
+            index=bins,
+            var_name=cluster_key
+        )
 
-    sims_df = _reshape_res(sims.T,
-                           columns=np.arange(n_simulations),
-                           index=bins,
-                           var_name="simulations")
+        # Append the used center cells
+        obs_df["used_center_cells"] = n_used_center_cells
+
+    sims_df = _reshape_res(
+        sims.T,
+        columns=np.arange(n_simulations),
+        index=bins,
+        var_name="simulations"
+    )
+    sims_df["used_center_cells"] = sim_n_center_cells.reshape(-1)
 
     res = {
         f"{mode}_stat": obs_df,
@@ -334,10 +392,15 @@ def ripley(
                time=start)
 
 
-def _reshape_res(results: NDArrayA, columns: NDArrayA | list[str], index: NDArrayA, var_name: str) -> pd.DataFrame:
+def _reshape_res(
+        results: NDArrayA,
+        columns: NDArrayA | list[str],
+        index: NDArrayA,
+        var_name: str,
+        value_name: str = "stats") -> pd.DataFrame:
     df = pd.DataFrame(results, columns=columns, index=index)
     df.index.set_names(["bins"], inplace=True)
-    df = df.melt(var_name=var_name, value_name="stats", ignore_index=False)
+    df = df.melt(var_name=var_name, value_name=value_name, ignore_index=False)
     df[var_name] = df[var_name].astype("category", copy=True)
     df.reset_index(inplace=True)
     return df
@@ -357,23 +420,91 @@ def _l_function(distances: NDArrayA, support: NDArrayA, n: int, area: float) -> 
     return support, l_estimate
 
 
-def _l_multiple_function(distances: NDArrayA,
-                         support: NDArrayA,
-                         n_center: int,
-                         n_neighbor: int,
-                         area: float,
-                         remove_diagonal: bool) -> tuple[NDArrayA, NDArrayA]:
+def _l_multiple_function(
+        distances,
+        support,
+        n_center,
+        n_neighbor,
+        area,
+        remove_diagonal,
+        center_coord,
+        hull,
+        edge_correction=False,
+        return_mask=False
+        ):
 
-    # break the line below less than 80  characters
-    distances = distances.flatten()
-    n_pairs_less_than_d = (distances < support.reshape(-1, 1)).sum(axis=1)
+    hull_polygon = Polygon(hull.points[hull.vertices])  # Now Polygon is correctly imported
+    hull_boundary = hull_polygon.boundary
+
+    # Compute distance of each center point to the convex hull boundary
+    if edge_correction:
+        center_dist_to_hull = np.array(
+            [Point(p).distance(hull_boundary) for p in center_coord]
+        )
+    else:
+        # If edge correction is disabled, set the distance to infinity
+        center_dist_to_hull = np.inf * np.ones(n_center)
+
+    # Create a mask for each support level (shape: (num_support, num_center))
+    valid_mask = center_dist_to_hull[None, :] >= support[:, None]
+
+    # Number of valid center points per support level
+    # Convert to float before assigning NaN
+    used_center_points = valid_mask.sum(axis=1).astype(float)
+    # Prevent division by zero
+    used_center_points[used_center_points == 0] = np.nan
+
+    # Mask distances matrix to only include valid center points
+    # masked distances shape: (num_support, num_center, num_neighbor)
+    # https://numpy.org/doc/stable/user/basics.broadcasting.html
+    masked_distances = np.where(valid_mask[:, :, None], distances, np.inf)
+
+    # Count how many distances are below each support level
+    # Broadcast support to the shape of masked_distances
+    n_pairs_less_than_d = (
+        masked_distances < support[:, None, None]
+    ).sum(axis=(1, 2)).astype(float)
+
     if remove_diagonal:
-        # Remove diagona except for when Radius = 0
-        n_pairs_less_than_d = n_pairs_less_than_d - n_center
+        # Remove self-counts
+        n_pairs_less_than_d -= used_center_points
         n_pairs_less_than_d[n_pairs_less_than_d < 0] = 0
-    k_estimate = n_pairs_less_than_d * area / n_center / n_neighbor
+
+    # Compute K-function estimate
+    k_estimate = (n_pairs_less_than_d * area) / used_center_points / n_neighbor
+
+    # Compute L-function estimate
     l_estimate = np.sqrt(k_estimate / np.pi)
-    return support, l_estimate
+
+    # Return the results as a dictionary
+    dict_results = {
+        "support": support,
+        "l_estimate": l_estimate,
+        "used_center_points": used_center_points,
+    }
+
+    if return_mask:
+        dict_results["valid_mask"] = valid_mask
+
+    return dict_results
+
+#def _l_multiple_function(distances: NDArrayA,
+#                         support: NDArrayA,
+#                         n_center: int,
+#                         n_neighbor: int,
+#                         area: float,
+#                         remove_diagonal: bool) -> tuple[NDArrayA, NDArrayA]:
+#
+#    # break the line below less than 80  characters
+#    distances = distances.flatten()
+#    n_pairs_less_than_d = (distances < support.reshape(-1, 1)).sum(axis=1)
+#    if remove_diagonal:
+#        # Remove diagona except for when Radius = 0
+#        n_pairs_less_than_d = n_pairs_less_than_d - n_center
+#        n_pairs_less_than_d[n_pairs_less_than_d < 0] = 0
+#    k_estimate = n_pairs_less_than_d * area / n_center / n_neighbor
+#    l_estimate = np.sqrt(k_estimate / np.pi)
+#    return support, l_estimate
 
 
 def _ppp(

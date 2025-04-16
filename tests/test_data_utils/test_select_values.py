@@ -142,7 +142,9 @@ class TestSelectValues(unittest.TestCase):
         Test error raised for nonexistent values from an AnnData object.
         """
         with self.assertRaises(ValueError):
-            select_values(self.adata, 'column1', exclude_values=['Nonexistent'])
+            select_values(
+                self.adata, 'column1', exclude_values=['Nonexistent']
+            )
 
     def test_both_values_and_exclude_values(self):
         """
@@ -158,6 +160,24 @@ class TestSelectValues(unittest.TestCase):
         # Check that the error is raised with proper message
         error_msg = "Only use with values to include or exclude, but not both."
         self.assertEqual(str(cm.exception), error_msg)
+
+    def test_select_values_adata_obsm_ndarray(self):
+        """
+        Ensure adata.obsm array remains a NumPy array.
+        """
+        adata_with_spatial = ad.AnnData(
+            np.random.rand(6, 3),
+            obs={'column1': ['X', 'Y', 'X', 'Y', 'X', 'Z']}
+        )
+        adata_with_spatial.obsm['spatial'] = np.random.rand(6, 2)
+
+        result_adata = select_values(
+            adata_with_spatial,
+            'column1',
+            values=['X', 'Y']
+        )
+
+        self.assertIsInstance(result_adata.obsm['spatial'], np.ndarray)
 
 
 if __name__ == '__main__':

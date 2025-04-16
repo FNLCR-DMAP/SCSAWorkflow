@@ -2,6 +2,7 @@ import re
 import anndata as ad
 import numpy as np
 import matplotlib.cm as cm
+import pandas as pd
 import logging
 import warnings
 import numbers
@@ -379,6 +380,7 @@ def check_column_name(
         if any(symbol in column_name for symbol in symbol_checklist):
             raise ValueError(f"One of the symbols in {symbol_checklist} is present in {column_name} for {field_name}.")
 
+
 def check_distances(distances):
     """
     Check that the distances are valid: must be an array-like of
@@ -582,46 +584,99 @@ def annotation_category_relations(
             "target"
         ].apply(lambda x: "target_" + x)
 
+
     return relationships
 
 
 def color_mapping(
         labels,
         color_map='viridis',
-        opacity=1.0
+        opacity=1.0,
+        rgba_mode=True,
+        return_dict=False
 ):
     """
-    Map a list of labels to colors using a specified
-    matplotlib colormap and opacity.
+    Map a list of labels to colors using a Matplotlib colormap and opacity.
 
-    This function takes a list of labels and maps each one to a color from the
-    specified colormap. If the colormap is continuous, it linearly interpolates
-    between the colors. For discrete colormap, it calculates the number of
-    categories per color and interpolates between the colors.
+    This function assigns a unique color to each label in the provided list
+    using a specified colormap from Matplotlib. The generated colors can be
+    returned in either `rgba` or `rgb` format, suitable for visualization in
+    libraries like Plotly.
 
-    For more information on colormaps, see:
-    https://matplotlib.org/stable/users/explain/colors/colormaps.html
+    The function supports both continuous and discrete colormaps:
+    - Continuous colormaps interpolate smoothly between colors across a range.
+    - Discrete colormaps have a fixed number of distinct colors, and labels are
+      distributed evenly across these colors.
+
+    Opacity can be set with a value between 0 (fully transparent) and 1 (fully
+    opaque). The resulting colors are CSS-compatible strings.
 
     Parameters
     ----------
     labels : list
-        The list of labels to map to colors.
+        A list of unique labels to map to colors. The number of labels
+        determines how the colormap is sampled.
     color_map : str, optional
-        The name of the colormap to use. Default is 'viridis'.
+        The colormap name (e.g., 'viridis', 'plasma', 'inferno'). It must be a
+        valid Matplotlib colormap. Default is 'viridis'.
     opacity : float, optional
-        The opacity of the colors. Must be between 0 and 1. Default is 1.0.
+        Opacity (alpha channel) for colors, between 0 (transparent) and 1
+        (opaque). Default is 1.0.
+    rgba_mode : bool, optional
+        If True, returns colors in `rgba` format (e.g., `rgba(255, 0, 0, 0.5)`).
+        If False, returns `rgb` format (e.g., `rgb(255, 0, 0)`).
+        Default is True.
+    return_dict : bool, optional
+        If True, returns a dictionary where keys are labels, and values are the
+        corresponding colors. Default is False.
 
     Returns
     -------
-    label_colors : list[str]
-        A list of strings, each representing an rgba color in CSS format.
-        The opacity of each color is set to the provided `opacity` value.
+    label_colors : list[str] or dict
+        If `return_dict` is False, returns a list of color strings, one for
+        each label. If `return_dict` is True, returns a dictionary with label
+        keys and color values. The format of the colors depends on the
+        `rgba_mode` parameter.
 
     Raises
     ------
     ValueError
-        If the opacity is not between 0 and 1,
-        or if the colormap name is invalid.
+        - If `opacity` is not in the range [0, 1].
+        - If `color_map` is not a valid Matplotlib colormap name.
+
+    Examples
+    --------
+    Assign colors to labels with default settings:
+
+    >>> labels = ['A', 'B', 'C']
+    >>> color_mapping(labels)
+    ['rgba(68, 1, 84, 1.0)', 'rgba(58, 82, 139, 1.0)',
+     'rgba(33, 145, 140, 1.0)']
+
+    Use a different colormap with reduced opacity:
+
+    >>> color_mapping(labels, color_map='plasma', opacity=0.5)
+    ['rgba(13, 8, 135, 0.5)', 'rgba(126, 3, 167, 0.5)',
+     'rgba(240, 249, 33, 0.5)']
+
+    Generate colors in `rgb` format:
+
+    >>> color_mapping(labels, rgba_mode=False)
+    ['rgb(68, 1, 84)', 'rgb(58, 82, 139)', 'rgb(33, 145, 140)']
+
+    Return a dictionary of labels and colors:
+
+    >>> color_mapping(labels, return_dict=True)
+    {'A': 'rgba(68, 1, 84, 1.0)', 'B': 'rgba(58, 82, 139, 1.0)',
+     'C': 'rgba(33, 145, 140, 1.0)'}
+
+    Notes
+    -----
+    - Continuous colormaps interpolate colors evenly based on the number of
+      labels.
+    - Discrete colormaps divide labels evenly across available colors.
+    - For more information on Matplotlib colormaps:
+      https://matplotlib.org/stable/users/explain/colors/colormaps.html
     """
 
     if not 0 <= opacity <= 1:
@@ -633,9 +688,14 @@ def color_mapping(
         raise ValueError(f"Invalid color map name: {color_map}")
 
     if cmap.N > 50:  # This is a continuous colormap
-        label_colors = [
-            cmap(i / (len(labels) - 1)) for i in range(len(labels))
-        ]
+        if len(labels) == 1:
+            label_colors = [
+                cmap(i / (len(labels))) for i in range(len(labels))
+            ]
+        else:
+            label_colors = [
+                cmap(i / (len(labels) - 1)) for i in range(len(labels))
+            ]
     else:  # This is a discrete colormap
         # Calculate the number of categories per color
         categories_per_color = np.ceil(len(labels) / cmap.N)
@@ -646,15 +706,29 @@ def color_mapping(
             cmap(i / (categories_per_color * cmap.N - 1))
             for i in range(len(labels))
         ]
+    if rgba_mode:
+        label_colors = [
+            f'rgba({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)},{opacity})'
+            for color in label_colors
+        ]
+    else:
+        label_colors = [
+            f'rgb({int(color[0]*255)},'
+            f'{int(color[1]*255)},'
+            f'{int(color[2]*255)})'
+            for color in label_colors
+        ]
 
-    label_colors = [
-        f'rgba({int(color[0]*255)},'
-        f'{int(color[1]*255)},'
-        f'{int(color[2]*255)},{opacity})'
-        for color in label_colors
-    ]
+    if return_dict:
+        returning = {}
+        for i, color in enumerate(label_colors):
+            returning[labels[i]] = color
+    else:
+        returning = label_colors
 
-    return label_colors
+    return returning
 
 
 def check_label(
@@ -747,3 +821,371 @@ def check_label(
             need_exist=should_exist,
             warning=warning
         )
+
+def spell_out_special_characters(text):
+    """
+    Convert special characters in a string to comply with NIDAP naming rules.
+
+    This function processes a string by replacing or removing disallowed
+    characters to ensure compatibility with NIDAP. Spaces, special symbols,
+    and certain substrings are replaced or transformed into readable and
+    regulation-compliant equivalents.
+
+    Parameters
+    ----------
+    text : str
+        The input string to be processed and converted.
+
+    Returns
+    -------
+    str
+        A sanitized string with special characters replaced or removed,
+        adhering to NIDAP naming conventions.
+
+    Processing Steps
+    ----------------
+    1. Spaces are replaced with underscores (`_`).
+    2. Substrings related to units (e.g., 'µm²') are replaced with text
+       equivalents:
+       - 'µm²' -> 'um2'
+       - 'µm' -> 'um'
+    3. Hyphens (`-`) between letters are replaced with underscores (`_`).
+    4. Certain special symbols are mapped to readable equivalents:
+       - `+` -> `_pos_`
+       - `-` -> `_neg_`
+       - `@` -> `at`
+       - `#` -> `hash`
+       - `&` -> `and`
+       - And more (see Notes section for a full mapping).
+    5. Remaining disallowed characters are removed (non-alphanumeric and
+       non-underscore characters).
+    6. Consecutive underscores are consolidated into a single underscore.
+    7. Leading and trailing underscores are stripped.
+
+    Notes
+    -----
+    The following special character mappings are used:
+    - `µ` -> `u`
+    - `²` -> `2`
+    - `/` -> `slash`
+    - `=` -> `equals`
+    - `!` -> `exclamation`
+    - `|` -> `pipe`
+    - For a complete list, refer to the `special_char_map` in the code.
+
+    Example
+    -------
+    >>> spell_out_special_characters("Data µm²+Analysis #1-2")
+    'Data_um2_pos_Analysis_hash1_neg_2'
+
+    >>> spell_out_special_characters("Invalid!Char@Format")
+    'Invalid_exclamation_Char_at_Format'
+
+    """
+    # Replace spaces with underscores
+    text = text.replace(' ', '_')
+
+    # Replace specific substrings for units
+    text = text.replace('µm²', 'um2')
+    text = text.replace('µm', 'um')
+
+    # Replace hyphens between letters with '_'
+    text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)
+
+    # Replace '+' with '_pos_' and '-' with '_neg_'
+    text = text.replace('+', '_pos_')
+    text = text.replace('-', '_neg_')
+
+    # Mapping for specific characters
+    special_char_map = {
+        'µ': 'u',       # Micro symbol replaced with 'u'
+        '²': '2',       # Superscript two replaced with '2'
+        '@': 'at',
+        '#': 'hash',
+        '$': 'dollar',
+        '%': 'percent',
+        '&': 'and',
+        '*': 'asterisk',
+        '/': 'slash',
+        '\\': 'backslash',
+        '=': 'equals',
+        '^': 'caret',
+        '!': 'exclamation',
+        '?': 'question',
+        '~': 'tilde',
+        # '(': 'open_parenthesis',
+        # ')': 'close_parenthesis',
+        # '{': 'open_brace',
+        # '}': 'close_brace',
+        # '[': 'open_bracket',
+        # ']': 'close_bracket',
+        '|': 'pipe',
+    }
+
+    # Replace special characters using special_char_map
+    for char, replacement in special_char_map.items():
+        text = text.replace(char, replacement)
+
+    # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)
+    text = re.sub(r'[^a-zA-Z0-9_]', '', text)
+
+    # Remove multiple underscores and strip leading/trailing underscores
+    text = re.sub(r'_+', '_', text)
+    text = text.strip('_')
+
+    return text
+
+
+def get_defined_color_map(adata, defined_color_map=None, annotations=None,
+                          colorscale='viridis'):
+    """
+    Retrieve or generate a predefined color mapping dictionary from an AnnData
+    object.
+
+    If `defined_color_map` is provided and found within `adata.uns`, the
+    corresponding dictionary is returned. Otherwise, if it is not provided, a
+    color mapping is generated using the unique values of the annotation column
+    specified by `annotations` and the given `colorscale`.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        Annotated data matrix object that should contain a color mapping in its
+        `uns` attribute if a predefined mapping is desired.
+    defined_color_map : str, optional
+        The key in `adata.uns` that holds the predefined color mapping.
+        If None, a new mapping is generated using `annotations`.
+    annotations : str, optional
+        The annotation column name in adata.obs from which to obtain unique
+        labels if `defined_color_map` is not provided.
+    colorscale : str, optional
+        The Matplotlib colormap name to use when generating a color mapping if
+        `defined_color_map` is not provided. Default is 'viridis'.
+
+    Returns
+    -------
+    dict
+        A dictionary mapping unique labels to colors.
+
+    Raises
+    ------
+    TypeError
+        If `defined_color_map` is provided but is not a string.
+    ValueError
+        If a predefined mapping is requested but not found, or if neither
+        `defined_color_map` nor `annotations` is provided.
+    """
+    if defined_color_map is not None:
+        if not isinstance(defined_color_map, str):
+            raise TypeError(
+                'The "defined_color_map" should be a string, '
+                f'getting {type(defined_color_map)}.'
+            )
+        uns_keys = list(adata.uns.keys())
+        if len(uns_keys) == 0:
+            raise ValueError(
+                "No existing color map found. Please make sure the "
+                "Append Pin Color Rules template has been run prior to "
+                "the current visualization node."
+            )
+        if defined_color_map not in uns_keys:
+            raise ValueError(
+                f'The given color map name: {defined_color_map} is not found '
+                f'in current analysis. Available items are: {uns_keys}'
+            )
+        defined_color_map_dict = adata.uns[defined_color_map]
+        print(
+            (f'Selected color mapping "{defined_color_map}":\n'
+             f'{defined_color_map_dict}')
+        )
+        return defined_color_map_dict
+
+    else:
+        if annotations is None:
+            raise ValueError(
+                "Either a defined color map must be provided, or "
+                "an annotation column must be specified."
+            )
+        # Generate a color mapping based on unique values in the annotation
+        if isinstance(annotations, str):
+            annotations = [annotations]
+        combined_labels = np.concatenate(
+            [adata.obs[col].astype(str).values for col in annotations])
+        unique_labels = np.unique(combined_labels)
+        return color_mapping(
+            unique_labels,
+            color_map=colorscale,
+            rgba_mode=False,
+            return_dict=True
+        )
+
+
+def compute_boxplot_metrics(
+    data: pd.DataFrame, annotation=None, showfliers: bool = None
+):
+    """
+    Compute boxplot-related statistical metrics for a given dataset
+    efficiently.
+
+    Statistics include:
+        - Lower and upper whiskers (`whislo`, `whishi`),
+        - First quartile (`q1`),
+        - Median (`median`),
+        - Third quartile (`q3`),
+        - Mean (`mean`)
+        - Outliers (`fliers`) [If `showfliers` is not None]
+
+    It can identify outliers based on the 'showfliers' parameter, and
+    supports efficient handling of large datasets by downsampling outliers
+    when specified.
+
+    Parameters
+    -----------
+    data : pd.DataFrame
+        A pandas DataFrame containing the numerical data for which
+        the boxplot statistics are to be computed.
+
+    annotation: str, optional:
+        The annotation used to group the features
+
+    showfliers: {None, "downsample", "all"}, default = None
+        Defines how outliers are handled
+        If 'all', all outliers are displayed in the boxplot.
+        If 'downsample', when num outliers is >10k, they are downsampled to
+        10% of the original count.
+        If None, outliers are hidden.
+
+    Returns
+    -------
+    metrics : pd.DataFrame
+        A dataframe with one row per feature/annotation grouping and
+        columns representing the calculated features
+    """
+
+    def compute_metrics(data):
+        """
+        Computes all relevant boxplot statistics in a single pass.
+
+        Parameters
+        -----------
+        data : pd.DataFrame
+            A pandas DataFrame containing the numerical data for which
+            the boxplot statistics are to be computed.
+
+        Returns
+        --------
+        metrics : List[float or List[float]]
+            A list containing the computed boxplot statistics.
+        """
+        q1, median, q3 = np.percentile(data, [25, 50, 75])
+        iqr = q3 - q1
+        # Min within whisker range
+        lower_whisker = np.min(data[data >= (q1 - 1.5 * iqr)])
+        # Max within whisker range
+        upper_whisker = np.max(data[data <= (q3 + 1.5 * iqr)])
+        mean = np.mean(data)
+
+        if showfliers == "downsample":
+            # Identify outliers outside 1.5 IQR from Q1 and Q3
+            outliers = data[
+                (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
+            ]
+
+            # Downsample outliers for large datasets
+            if len(outliers) > 10000:
+                # Convert outliers list to a pandas Series
+                outlier_series = pd.Series(outliers)
+
+                # Get the quantile-based bins
+                bins = pd.qcut(outlier_series, q=10, labels=False)
+
+                # Sample 10% from each quantile group
+                outliers_sampled = outlier_series.groupby(bins).apply(
+                    lambda x: x.sample(frac=0.10)
+                )
+
+                # Ensure the maximum and minimum outliers are included
+                max_outlier = outlier_series.max()
+                min_outlier = outlier_series.min()
+                outliers_sampled = outliers_sampled.append(
+                    pd.Series([max_outlier, min_outlier])
+                )
+
+                # Convert the sampled values back to a list
+                outliers = outliers_sampled.reset_index(drop=True).tolist()
+
+            metrics = [
+                lower_whisker,
+                q1,
+                median,
+                mean,
+                q3,
+                upper_whisker,
+                outliers,
+            ]
+        elif showfliers == "all":
+            # Identify outliers outside 1.5 IQR from Q1 and Q3
+            outliers = data[
+                (data < (q1 - 1.5 * iqr)) | (data > (q3 + 1.5 * iqr))
+            ].tolist()
+
+            metrics = [
+                lower_whisker,
+                q1,
+                median,
+                mean,
+                q3,
+                upper_whisker,
+                outliers,
+            ]
+        else:
+            metrics = lower_whisker, q1, median, mean, q3, upper_whisker
+
+        return metrics
+
+    # If annotation is specified, check if it exists in the data
+    if annotation and annotation not in data.columns:
+        raise ValueError(
+            f"The provided annotation '{annotation}' is not found in the data."
+        )
+
+    # Validate showfliers parameter
+    if showfliers and showfliers not in ("all", "downsample", None):
+        raise ValueError(
+            'showfliers must be one of "all", "downsample", or None. '
+            f'Got: "{showfliers}".'
+        )
+
+    # Define metric names
+    metric_names = ["whislo", "q1", "med", "mean", "q3", "whishi"]
+    if showfliers:
+        metric_names.append("fliers")
+
+    if annotation:
+        # Calculate metrics for each group defined by the annotation
+        metrics = data.groupby(annotation).agg(
+            lambda x: compute_metrics(x.to_numpy())
+        )
+
+        # Reshape the DataFrame for easier plotting
+        metrics = metrics.reset_index().melt(
+            id_vars=[annotation], var_name="marker", value_name="stats"
+        )
+        stats_df = metrics["stats"].apply(pd.Series)
+        stats_df.columns = metric_names
+        metrics = pd.concat(
+            [metrics.drop(columns=["stats"]), stats_df], axis=1
+        )
+    else:
+        # Calculate metrics for the entire dataset
+        metrics = data.apply(
+            lambda col: compute_metrics(col.to_numpy()), axis=0
+        )
+
+        # Reshape the DataFrame for easier plotting
+        metrics = metrics.T
+        metrics.columns = metric_names
+        metrics.reset_index(names="marker", inplace=True)
+        return metrics
+
+    return metrics

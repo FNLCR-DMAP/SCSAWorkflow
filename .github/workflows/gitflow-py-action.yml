@@ -3,7 +3,7 @@ run-name: ${{ github.event_name }} to ${{ github.ref_name }} by ${{ github.actor
 
 on:
   push:
-    branches: ['*', '!dev', '!main', '!github_page', '!Conda_Package']    
+    branches: ['*', '!dev', '!main', '!github_page', '!Conda_Package']
   pull_request:
     types: ['opened', 'closed']
     branches: ['main', 'release*', 'dev', 'master']
@@ -13,6 +13,7 @@ jobs:
     with:
       artifact_rid_production: "ri.artifacts.main.repository.92434867-d670-4bc2-9625-570d322ef0b2"
       artifact_rid_development: "ri.artifacts.main.repository.e537634a-0a9c-42f1-affb-1a152c2e331b"
+      image_to_use: "ghcr.io/fnlcr-dmap/scsaworkflow:spac_py39"
     secrets:
       NIDAP_TOKEN_PRODUCTION: ${{ secrets.NIDAP_TOKEN_PRODUCTION }}
       NIDAP_TOKEN_DEVELOPMENT: ${{ secrets.NIDAP_TOKEN_DEVELOPMENT }}

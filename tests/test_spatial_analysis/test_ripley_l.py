@@ -143,29 +143,31 @@ class TestRipleyL(unittest.TestCase):
     def test_no_phenotype(self):
         """
         Test that Ripley does not run if a region has a missing phenotype
+        "region1" does not include the phenotype 'B'
         """
         adata = self.create_dummy_dataset()
-        adata_region = adata[adata.obs.region == 'region1']
         distances = [5]
-        phenotypes = ['A', 'C']
+        phenotypes = ['A', 'B']
 
-        result = ripley_l(
-            adata=adata_region,
+        results = ripley_l(
+            adata=adata,
             annotation='phenotype',
             phenotypes=phenotypes,
             distances=distances,
+            regions="region"
         )
 
         # Check that ripley results are None
-        self.assertIsNone(result.iloc[0]['ripley_l'])
+        region1_result = results[results['region']=='region1']
+        self.assertIsNone(region1_result.iloc[0]['ripley_l'])
         expected_message = (
-            'WARNING, phenotype "C" not found in region "all",'
+            'WARNING, phenotype "B" not found in region "region1",'
             ' skipping Ripley L.'
         )
         # Check that the expected message is printed
-        self.assertEqual(result.iloc[0]['message'], expected_message)
+        self.assertEqual(region1_result.iloc[0]['message'], expected_message)
 
-    def test_two(self):
+    def test_region_with_missing_phenotype(self):
         """
         Test that Ripley does not run if a region has a missing phenotype
         """

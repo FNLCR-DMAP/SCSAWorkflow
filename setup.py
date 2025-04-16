@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='spac',
-    version="0.7.15",
+    version="0.8.8",
     description=(
         'SPatial Analysis for single-Cell analysis (SPAC)'
         'is a Scalable Python package for single-cell spatial protein data '
@@ -16,22 +16,23 @@ setup(
         'SPAC enables user-friendly web interfaces and offers insights into '
         'cell interactions in diverse environments, benefiting studies of '
         'cancer microenvironments, stem cell niches, and drug responses.'
+        'Latest release on Jan 6th, 2025'
     ),
     author='Fang Liu, Rui He, and George Zaki',
     url='https://github.com/FNLCR-DMAP/SCSAWorkflow',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
-        'pandas==1.4.3',
-        'anndata==0.8.0',
-        'numpy==1.19.5',
-        'scikit-learn==1.1.1',
-        'squidpy==1.2.2',
-        'matplotlib==3.5.2',
-        'seaborn==0.12.2',
-        'scanpy==1.8.0',
-        'phenograph==1.5.7',
-        'zarr==2.12.0',
+        'pandas',
+        'anndata',
+        'numpy',
+        'scikit-learn',
+        'squidpy',
+        'matplotlib',
+        'seaborn',
+        'scanpy',
+        'phenograph',
+        'zarr',
         'numba',
         'Pillow',
         'datashader',

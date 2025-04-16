@@ -9,6 +9,11 @@ class TestColorMapping(unittest.TestCase):
         colors = color_mapping(labels, 'viridis', 1.0)
         self.assertEqual(len(colors), len(labels))
 
+    def test_one_label(self):
+        labels = ['A']
+        colors = color_mapping(labels, 'viridis', 1.0)
+        self.assertEqual(len(colors), len(labels))
+
     def test_discrete_colormap(self):
         labels = ['A', 'B', 'C', 'D', 'E']
         colors = color_mapping(labels, 'Set3', 1.0)
