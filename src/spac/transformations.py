@@ -105,6 +105,7 @@ def phenograph_clustering(
     adata.obs[output_annotation] = pd.Categorical(phenograph_out[0])
     adata.uns["phenograph_features"] = features
 
+
 def knn_clustering(
         adata,
         features,
@@ -113,7 +114,7 @@ def knn_clustering(
         k=50,
         output_annotation="knn",
         associated_table=None,
-        missing_label = "no_label",
+        missing_label="no_label",
         **kwargs):
     """
     Calculate knn clusters using sklearn KNeighborsClassifier
@@ -168,7 +169,9 @@ def knn_clustering(
     )
 
     if not isinstance(k, int) or k <= 0:
-        raise ValueError(f"`k` must be a positive integer. Received value: `{k}`")
+        raise ValueError(
+            f"`k` must be a positive integer. Received value: `{k}`"
+        )
 
     data = _select_input_features(
         adata=adata,
@@ -185,16 +188,24 @@ def knn_clustering(
 
     # check that annotation is non-trivial
     if all(annotation_mask):
-        raise ValueError(f"All cells are labeled in the annotation `{annotation}`. Please provide a mix of labeled and unlabeled data.")
+        raise ValueError(
+            f"All cells are labeled in the annotation `{annotation}`.",
+            " Please provide a mix of labeled and unlabeled data."
+        )
     elif not any(annotation_mask):
-        raise ValueError(f"No cells are labeled in the annotation `{annotation}`. Please provide a mix of labeled and unlabeled data.")
+        raise ValueError(
+            f"No cells are labeled in the annotation `{annotation}`.",
+            " Please provide a mix of labeled and unlabeled data."
+        )
 
     # fit knn classifier to labeled data and predict on unlabeled data
     data_labeled = data[annotation_mask]
     label_encoder = LabelEncoder()
-    annotation_labeled = label_encoder.fit_transform(annotation_data[annotation_mask])
+    annotation_labeled = label_encoder.fit_transform(
+        annotation_data[annotation_mask]
+    )
 
-    classifier = KNeighborsClassifier(n_neighbors = k, **kwargs)
+    classifier = KNeighborsClassifier(n_neighbors=k, **kwargs)
     classifier.fit(data_labeled, annotation_labeled)
 
     data_unlabeled = data[unlabeled_mask]
@@ -204,8 +215,10 @@ def knn_clustering(
     # format output and place predictions/data in right location
     adata.obs[output_annotation] = np.nan
     adata.obs[output_annotation][unlabeled_mask] = predicted_labels
-    adata.obs[output_annotation][annotation_mask] = annotation_data[annotation_mask]
+    adata.obs[output_annotation][annotation_mask] = \
+        annotation_data[annotation_mask]
     adata.uns[f"{output_annotation}_features"] = features
+
 
 def get_cluster_info(adata, annotation, features=None, layer=None):
     """
