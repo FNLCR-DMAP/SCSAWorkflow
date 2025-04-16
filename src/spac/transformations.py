@@ -189,12 +189,12 @@ def knn_clustering(
     # check that annotation is non-trivial
     if all(annotation_mask):
         raise ValueError(
-            f"All cells are labeled in the annotation `{annotation}`.",
+            f"All cells are labeled in the annotation `{annotation}`."
             " Please provide a mix of labeled and unlabeled data."
         )
     elif not any(annotation_mask):
         raise ValueError(
-            f"No cells are labeled in the annotation `{annotation}`.",
+            f"No cells are labeled in the annotation `{annotation}`."
             " Please provide a mix of labeled and unlabeled data."
         )
 
