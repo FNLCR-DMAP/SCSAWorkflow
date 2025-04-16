@@ -739,6 +739,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 fig = hist.figure
                 axs.extend(hist.axes.flat)
+                hist_data = plot_data
 
     else:
         # Precompute histogram data for single plot
