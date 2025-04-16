@@ -679,10 +679,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
             for i, ax_i in enumerate(ax_array):
                 group = groups[i]
-                group_data = plot_data[plot_data[group_by] == group][data_column]
-                hist_data = calculate_histogram(group_data, kwargs['bins'])
+                group_data = plot_data[plot_data[group_by] == group][
+                    data_column
+                ]
+                hist_data = calculate_histogram(
+                    group_data, kwargs['bins']
+                )
                 
-                # Retrieve the specific color for this group if defined_color_map is provided
+                #If defined_color_map provided, retrieves color map
                 group_color = None
                 if defined_color_map:
                     group_color = color_dict.get(group, None)
