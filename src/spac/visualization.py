@@ -35,7 +35,7 @@ def visualize_2D_scatter(
     x, y, labels=None, point_size=None, theme=None,
     ax=None, annotate_centers=False,
     x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
-    color_representation=None, defined_color_map=None, **kwargs
+    color_representation=None, color_map=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -65,7 +65,7 @@ def visualize_2D_scatter(
         Title for the plot.
     color_representation : str, optional
         Description of what the colors represent.
-    defined_color_map : dictionary, optional
+    color_map : dictionary, optional
         Dictionary containing colors for label annotations.
     **kwargs
         Additional keyword arguments passed to plt.scatter.
@@ -85,10 +85,10 @@ def visualize_2D_scatter(
         raise ValueError("x and y must have the same length.")
     if labels is not None and len(labels) != len(x):
         raise ValueError("Labels length should match x and y length.")
-    if defined_color_map is not None:
-        if not isinstance(defined_color_map, dict):
-            raise ValueError("`defined_color_map` must be a dict mapping label→color.")
-        color_dict = defined_color_map
+    if color_map is not None:
+        if not isinstance(color_map, dict):
+            raise ValueError("`color_map` must be a dict mapping label→color.")
+        color_dict = color_map
 
     # Define color themes
     themes = {
@@ -142,7 +142,7 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            if defined_color_map is not None:
+            if color_map is not None:
                 cluster_to_color = color_dict
             else:
                 # fall back to your combined tab20 palettes
