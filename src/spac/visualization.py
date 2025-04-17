@@ -21,8 +21,6 @@ from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
-import re
-import copy
 import datashader as ds
 import datashader.transfer_functions as tf
 
@@ -653,6 +651,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Check for negative values and apply log1p transformation if 
     # x_log_scale is True
+
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
@@ -675,7 +674,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Bin calculation section
     # The default bin calculation used by sns.histo take quite
     # some time to compute for large number of points,
-
     # DMAP implemented the Rice rule for bin computation
 
     def cal_bin_num(
@@ -774,9 +772,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
+
             sns.histplot(data=hist_data, x='bin_center', weights='count', 
                          hue=group_by, ax=ax, **kwargs)
-
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
@@ -800,7 +798,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 sns.histplot(data=hist_data, x="bin_center", ax=ax_i, 
                     weights='count', **kwargs)
-
                 # If plotting feature specify which layer
                 if feature:
                     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
