@@ -365,7 +365,7 @@ def dimensionality_reduction_plot(
         y_axis_title=y_axis_title,
         plot_title=plot_title,
         color_representation=color_representation,
-        defined_color_map=color_mapping,
+        color_map=color_mapping,
         **kwargs
     )
 
