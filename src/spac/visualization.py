@@ -215,6 +215,7 @@ def dimensionality_reduction_plot(
         layer=None,
         ax=None,
         associated_table=None,
+        color_map = None,
         **kwargs):
     """
     Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.
@@ -243,6 +244,9 @@ def dimensionality_reduction_plot(
     associated_table : str, optional (default: None)
         Name of the key in `obsm` that contains the numpy array. Takes
         precedence over `method`
+    color_map : str, optional (default: None)
+        Name of the key in adata.uns that contains color-mapping for
+        the plot
     **kwargs
         Parameters passed to visualize_2D_scatter function,
         including point_size.
@@ -268,6 +272,14 @@ def dimensionality_reduction_plot(
         check_annotation(adata, annotations=annotation)
     if feature:
         check_feature(adata, features=[feature])
+
+    color_mapping = None
+    if color_map is not None:
+        color_mapping = get_defined_color_map(
+            adata,
+            defined_color_map=color_map,
+            annotations=annotation
+        )
 
     # Validate the method and check if the necessary data exists in adata.obsm
     if associated_table is None:
@@ -305,16 +317,20 @@ def dimensionality_reduction_plot(
     x, y = adata.obsm[key].T
 
     # Determine coloring scheme
-    if annotation:
+    if color_mapping is None:
+        if annotation:
+            color_values = adata.obs[annotation].astype('category').values
+            color_representation = annotation
+        elif feature:
+            data_src = adata.layers[layer] if layer else adata.X
+            color_values = data_src[:, adata.var_names == feature].squeeze()
+            color_representation = feature
+        else:
+            color_values = None
+            color_representation = None
+    else:
         color_values = adata.obs[annotation].astype('category').values
         color_representation = annotation
-    elif feature:
-        data_source = adata.layers[layer] if layer else adata.X
-        color_values = data_source[:, adata.var_names == feature].squeeze()
-        color_representation = feature
-    else:
-        color_values = None
-        color_representation = None
 
     # Set axis titles based on method and color representation
     if method == 'tsne':
@@ -349,6 +365,7 @@ def dimensionality_reduction_plot(
         y_axis_title=y_axis_title,
         plot_title=plot_title,
         color_representation=color_representation,
+        defined_color_map=color_mapping,
         **kwargs
     )
 
