@@ -481,9 +481,9 @@ def _select_values_dataframe(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data[annotation].isin(values)]
+        filtered_data = data[data[annotation].astype(str).isin(values)]
     elif exclude_values is not None:
-        filtered_data = data[~data[annotation].isin(exclude_values)]
+        filtered_data = data[~data[annotation].astype(str).isin(exclude_values)]
 
     count = filtered_data.shape[0]
     logging.info(
@@ -525,9 +525,9 @@ def _select_values_anndata(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data.obs[annotation].isin(values)].copy()
+        filtered_data = data[data.obs[annotation].astype(str).isin(values)].copy()
     elif exclude_values is not None:
-        filtered_data = data[~data.obs[annotation].isin(exclude_values)].copy()
+        filtered_data = data[~data.obs[annotation].astype(str).isin(exclude_values)].copy()
 
     count = filtered_data.n_obs
     logging.info(
