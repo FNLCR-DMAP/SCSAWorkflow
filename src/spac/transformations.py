@@ -1282,7 +1282,7 @@ def run_utag_clustering(
         k=k,
     )
     # change camel case to snake
-    curClusterCol = 'UTAG Label_leiden_' + str(resolution)
-    cluster_list = utag_results.obs[curClusterCol].copy()
+    cur_cluster_col = 'UTAG Label_leiden_' + str(resolution)
+    cluster_list = utag_results.obs[cur_cluster_col].copy()
     adata.obs[output_annotation] = cluster_list.copy()
     adata.uns["utag_features"] = features

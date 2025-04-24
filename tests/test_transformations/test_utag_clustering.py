@@ -53,24 +53,46 @@ class TestRunUtagClustering(unittest.TestCase):
     # make a dataset with non normal distribution of genes, so that clustering 
     # done with PCAs and with features will produce different clusters 
     def create_adata_complex(self, n_cells_complex=500):
-        # Generate spatial coordinates in a circular pattern
+        # Creates a complex AnnData object with spatial gene expression patterns.
+        # Step 1: Generate spatial coordinates in a circular pattern
+            # - theta represents angular position (0 to 2π radians)
+            # - r represents radial distance from center (0 to 10 units)
         theta = np.random.uniform(0, 2*np.pi, n_cells_complex)
         r = np.random.uniform(0, 10, n_cells_complex)
+        # Step 2: Convert polar coordinates (r, theta) to Cartesian coordinates (x, y)
         x_coord = r * np.cos(theta)
         y_coord = r * np.sin(theta)
-        # Radial distance-dependent genes (higher expression at the periphery)
-        gene1 = np.exp(r/5) + np.random.normal(0, 0.5, n_cells_complex)
-        gene2 = -np.exp(r/5) + np.random.normal(0, 0.5, n_cells_complex)
-        # Angular position-dependent genes (periodic pattern)
+        # Step 3: Create radial distance-dependent genes
+            # - gene1: Expression increases with distance from center (exponential gradient)
+            # - gene2: Expression decreases with distance from center (negative exponential gradient)
+            # - Both include random noise to simulate biological variability
+        gene1 = np.exp(r/5) + np.random.normal(0, 0.5, n_cells_complex) # Higher expression at periphery
+        gene2 = -np.exp(r/5) + np.random.normal(0, 0.5, n_cells_complex) # Higher expression at center
+        # Step 4: Create angular position-dependent genes
+            # - gene3: Expression follows sinusoidal pattern based on angular position
+            # - gene4: Expression follows cosine pattern based on angular position
+            # - These create 3 peaks/valleys around the circle (frequency=3)
+            # - The cosine pattern in gene4 is shifted 30° (π/6 radians) compared to gene3's sine pattern
+            # - Adds random noise with lower standard deviation (0.3)
         gene3 = np.sin(3*theta) + np.random.normal(0, 0.3, n_cells_complex)
         gene4 = np.cos(3*theta) + np.random.normal(0, 0.3, n_cells_complex)
-        # Quadrant-specific genes
+        # Step 5: Identify quadrants based on Cartesian coordinates
+            # - Quadrant 1: x>0, y>0 (top right)
+            # - Quadrant 2: x<0, y>0 (top left)
+            # - Quadrant 3: x<0, y<0 (bottom left)
+            # - Quadrant 4: x>0, y<0 (bottom right)
         quadrant = np.where((x_coord > 0) & (y_coord > 0), 1,
                         np.where((x_coord < 0) & (y_coord > 0), 2,
                                 np.where((x_coord < 0) & (y_coord < 0), 3, 4)))
+        # Step 6: Create genes with quadrant-specific expression patterns
+            # - gene5: Highly expressed in top half (quadrants 1,2)
+            # - gene6: Highly expressed in right half (quadrants 1,4)
+            # - Both include random noise to simulate biological variability                        
         gene5 = np.where(np.isin(quadrant, [1, 2]), 3, 0) + np.random.normal(0, 0.3, n_cells_complex)
         gene6 = np.where(np.isin(quadrant, [1, 4]), 3, 0) + np.random.normal(0, 0.3, n_cells_complex)
-        # Random noise genes
+        # Step 7: Create control genes with random expression (no spatial pattern)
+            # - gene7, gene8: Random normal distribution with no spatial dependency
+            # - These simulate genes that are not spatially regulated
         gene7 = np.random.normal(0, 1, n_cells_complex)
         gene8 = np.random.normal(0, 1, n_cells_complex)
         # Combine all genes
@@ -96,8 +118,9 @@ class TestRunUtagClustering(unittest.TestCase):
             )
         )
 
-        # Add raw counts layer (here our main matrix is already "normalized")
+        # Add raw counts layer
         adata_complex.layers['counts'] = expression_matrix.copy()
+        # Add spatial coordinates
         adata_complex.obsm["spatial"] = np.random.rand(n_cells_complex, n_cells_complex)
         return adata_complex
 
