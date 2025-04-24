@@ -236,7 +236,9 @@ class TestRunUtagClustering(unittest.TestCase):
                                 output_annotation="UTAG",
                                 associated_table=None,
                                 parallel=False)
-            
+
+    # test is done on the simple synthetic data with 2 populations of 500 cells 
+    # each and 2 features       
     def test_clustering_accuracy(self):
         run_utag_clustering(adata=self.syn_data,
                             features=None,
