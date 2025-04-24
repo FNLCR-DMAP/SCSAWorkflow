@@ -85,10 +85,8 @@ def visualize_2D_scatter(
         raise ValueError("x and y must have the same length.")
     if labels is not None and len(labels) != len(x):
         raise ValueError("Labels length should match x and y length.")
-    if color_map is not None:
-        if not isinstance(color_map, dict):
-            raise ValueError("`color_map` must be a dict mapping label→color.")
-        color_dict = color_map
+    if color_map is not None and not isinstance(color_map, dict):
+        raise ValueError("`color_map` must be a dict mapping label→color.")
 
     # Define color themes
     themes = {
@@ -142,18 +140,14 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            if color_map is not None:
-                cluster_to_color = color_dict
-            else:
-                # fall back to your combined tab20 palettes
-                cmap1 = plt.get_cmap('tab20')
-                cmap2 = plt.get_cmap('tab20b')
-                cmap3 = plt.get_cmap('tab20c')
-                colors = cmap1.colors + cmap2.colors + cmap3.colors
-                cluster_to_color = {
-                    str(cluster): colors[i % len(colors)]
-                    for i, cluster in enumerate(unique_clusters)
-                }
+            cmap1 = plt.get_cmap('tab20')
+            cmap2 = plt.get_cmap('tab20b')
+            cmap3 = plt.get_cmap('tab20c')
+            colors = cmap1.colors + cmap2.colors + cmap3.colors
+            cluster_to_color = color_map if color_map is not None else {
+                str(cluster): colors[i % len(colors)]
+                for i, cluster in enumerate(unique_clusters)
+            }
 
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
