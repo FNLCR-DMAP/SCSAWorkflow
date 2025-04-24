@@ -85,7 +85,7 @@ def visualize_2D_scatter(
         raise ValueError("x and y must have the same length.")
     if labels is not None and len(labels) != len(x):
         raise ValueError("Labels length should match x and y length.")
-    if not isinstance(color_map, dict):
+    if color_map is not None and not isinstance(color_map, dict):
         raise ValueError("`color_map` must be a dict mapping label→color.")
 
     # Define color themes
