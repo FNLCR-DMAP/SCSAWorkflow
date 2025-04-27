@@ -94,28 +94,28 @@ def heatmap_datashader(x, y, labels=None, theme=None,
     x_min, x_max = coords["x"].min(), coords["x"].max()
     y_min, y_max = coords["y"].min(), coords["y"].max()
 
-    # Set figure dimensions
-    plot_width = kwargs.get('fig_width', 600)
-    plot_height = kwargs.get('fig_height', 400)
+    # Supply default ranges if not in kwargs
+    canvas_kwargs = {
+        'plot_width': 600,
+        'plot_height': 400,
+        'x_range': (x_min, x_max),
+        'y_range': (y_min, y_max)
+    }
+    canvas_kwargs.update(kwargs)
+
+    create_canvas = partial(ds.Canvas, **canvas_kwargs)
 
     if labels is not None:
-        # Create multiple subplots for each category
         categories = pd.Categorical(coords["labels"]).categories
         num_categories = len(categories)
 
-        # Arrange subplots in rows of 3
         rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
         fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
         axes = axes.flatten()
 
         for i, cat in enumerate(categories):
             subset = coords[coords["labels"] == cat]
-            canvas = ds.Canvas(
-                plot_width=plot_width,
-                plot_height=plot_height,
-                x_range=(x_min, x_max),
-                y_range=(y_min, y_max)
-            )
+            canvas = create_canvas()
             agg = canvas.points(subset, x="x", y="y", agg=ds.count())
             img = tf.shade(agg, cmap=cmap).to_pil()
 
@@ -125,21 +125,19 @@ def heatmap_datashader(x, y, labels=None, theme=None,
             ax.set_xlabel(x_axis_title)
             ax.set_ylabel(y_axis_title)
 
-        # Remove unused subplot axes if they exist
         for j in range(i + 1, len(axes)):
             fig.delaxes(axes[j])
     else:
-        # Generate single heatmap if no labels are provided
-        canvas = ds.Canvas(
-            plot_width=plot_width,
-            plot_height=plot_height,
-            x_range=(x_min, x_max),
-            y_range=(y_min, y_max)
-        )
+        canvas = create_canvas()
         agg = canvas.points(coords, x="x", y="y", agg=ds.count())
         img = tf.shade(agg, cmap=cmap).to_pil()
 
-        fig, ax = plt.subplots(figsize=(plot_width / 100, plot_height / 100))
+        fig, ax = plt.subplots(
+            figsize=(
+                canvas_kwargs["plot_width"] / 100,
+                canvas_kwargs["plot_height"] / 100
+            )
+        )
         ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
         ax.set_title(plot_title if plot_title else "Density Plot")
         ax.set_xlabel(x_axis_title)
