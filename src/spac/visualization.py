@@ -910,6 +910,29 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         'col_linkage': dendro_col_data
     }
 
+    # Add cell counts to labels
+    # Retrieve the number of cells in each group
+    cell_counts = labels.value_counts()
+    cell_counts = dict(cell_counts)
+
+    # Retrieve the cluster labels from the heatmap
+    cluster_labels = clustergrid.ax_heatmap.get_yticklabels()
+
+    # Append the cell number to each cluster
+    numbered_labels = []
+    for x in cluster_labels:
+        key = int(x.get_text())
+        value = cell_counts[key]
+        numbered_label = f'cluster {key}\n{value} cells'
+        numbered_labels.append(numbered_label)
+
+    # add updated labels with cell counts to the heatmap
+    clustergrid.ax_heatmap.set_yticklabels(numbered_labels)
+    plt.setp(clustergrid.ax_heatmap.get_yticklabels(), rotation=0)
+
+    # adjust so labels don't get cut off
+    clustergrid.ax_heatmap.figure.subplots_adjust(right=0.9, left=0.1)
+
     return mean_intensity, clustergrid, dendrogram_data
 
 
