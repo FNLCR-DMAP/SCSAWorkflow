@@ -1151,6 +1151,7 @@ def summarize_dataframe(
         A dictionary where each key is a column name and its value is another
         dictionary with:
           - 'data_type': either 'numeric' or 'categorical'
+          - 'missing_count': int
           - 'missing_indices': list of row indices with missing values
           - 'summary': summary statistics if numeric or unique labels with
           counts if categorical
@@ -1205,7 +1206,7 @@ def summarize_dataframe(
         print(f"Summary for column '{col}':")
         print(f"Type: {col_info['data_type']}")
         print("Count missing indices:", col_info['count_missing_indices'])
-        print("Missing indices:", col_info['missing_indices'])
+        # print("Missing indices:", col_info['missing_indices'])
         print("Details:", col_info['summary'])
         print("-" * 40)
     return results
