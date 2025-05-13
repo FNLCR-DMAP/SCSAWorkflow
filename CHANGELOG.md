@@ -1,15 +1,42 @@
 # CHANGELOG
 
 
-## v0.8.8 (2025-04-06)
+## v0.8.9 (2025-05-13)
 
 ### Bug Fixes
 
-- **core**: Return hist_data instead of original data
-  ([`2734421`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/27344216b2d0f1fef43ac0e66fc1613ddfbf9349))
+- **knn clustering**: Fixed conflict in imports
+  ([`e6d5f1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e6d5f1eb4668d8e25ed09469525e128abcabbb6a))
+
+- **knn_clustering**: Fixed format of the error message
+  ([`ddf92e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ddf92e63c760c56e035071c0edc2ce245aa3fb7c))
+
+- **select_values**: Added support when observation are numerical
+  ([`4bcbaa2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bcbaa249e70c51860ae55356c5b6ab2bf8961bc))
+
+- **summarize_dataframe**: Remove duplicated missing index
+  ([`2c0d907`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2c0d9077ea9414172090d8c10488f75360430e10))
+
+### Code Style
+
+- **knn_clustering**: Adjusted to code style standar
+  ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
+
+### Features
+
+- **visualize_nearest_neighbor**: Add pin-color and corresponding unit test
+  ([`015692f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/015692f87e75e5c4581638dedd4d277c63c6ddec))
+
+### Testing
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`ef95276`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ef952769f8d20310903f8a9269772a67cb1057d4))
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`cd8cb25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8cb25764a3a5f4718692dea3585bae17f88105))
 
 
-## v0.8.7 (2025-04-03)
+## v0.8.8 (2025-04-06)
 
 ### Bug Fixes
 
@@ -18,6 +45,9 @@
 
 - **_ripley**: Removed old call
   ([`e89835b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e89835b339034d6c543bd4b6231508811828c26d))
+
+- **core**: Return hist_data instead of original data
+  ([`2734421`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/27344216b2d0f1fef43ac0e66fc1613ddfbf9349))
 
 - **core**: Specify weights for all histplot calls
   ([`b661495`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b66149509fa4aa2280d14dfa6e83567c95c87cf8))
@@ -55,6 +85,9 @@
   ([`739b4b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/739b4b3221efec4af2e9228aa8b3260f74a541bf))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`b2921d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2921d70a7c2d8928f9b48d047a625aebea2d55b))
 
 - **version**: Automatic development release
   ([`1ad51bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1ad51bb329ec95c14de24e276bbf36c7375081b5))
