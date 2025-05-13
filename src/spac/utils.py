@@ -1,6 +1,7 @@
 import re
 import anndata as ad
 import numpy as np
+import matplotlib
 import matplotlib.cm as cm
 import pandas as pd
 import logging
@@ -683,7 +684,7 @@ def color_mapping(
         raise ValueError("Opacity must be between 0 and 1")
 
     try:
-        cmap = cm.get_cmap(color_map)
+        cmap = matplotlib.colormaps.get_cmap(color_map)
     except ValueError:
         raise ValueError(f"Invalid color map name: {color_map}")
 

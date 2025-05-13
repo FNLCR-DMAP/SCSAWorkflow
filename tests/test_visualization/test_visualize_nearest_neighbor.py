@@ -1,8 +1,12 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
 import numpy as np
 import anndata
 import matplotlib
+import matplotlib.colors as mcolors
 matplotlib.use('Agg')  # Uses a non-interactive backend for tests
 import matplotlib.pyplot as plt
 from spac.visualization import visualize_nearest_neighbor
@@ -131,6 +135,50 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
         # Validate the plot uses the correct label for log-transformed distance
         ax = fig.axes[0]
         self.assertEqual(ax.get_xlabel(), "Log(Nearest Neighbor Distance)")
+
+    def test_pin_color_palette(self):
+        """
+        Verifies that:
+        1.  The predefined RGB pin‑colour map is converted to HEX and returned
+            in result['palette'].
+        2.  The custom legend attached to the figure contains every entry in
+            that palette with the correct HEX colours.
+        """
+        # Pre‑define a colour map in adata.uns
+        self.adata.uns['pin_color_map'] = {
+            'type1': 'rgb(255,0,0)',   # red
+            'type2': 'rgb(0,255,0)'    # green
+        }
+
+        result = visualize_nearest_neighbor(
+            adata=self.adata,
+            annotation='cell_type',
+            distance_from='type1',
+            distance_to=None,
+            method='numeric',
+            plot_type='box',
+            defined_color_map='pin_color_map'
+        )
+
+        expected = {'type1': '#ff0000', 'type2': '#00ff00'}
+        self.assertEqual(result['palette'], expected)
+
+        fig = result['fig']
+        legend = fig.legends[0] if fig.legends else fig.axes[0].get_legend()
+        self.assertIsNotNone(legend, "Legend should be attached somewhere")
+
+        # Matplotlib 3.6+: legend_handles; older versions: legendHandles
+        handles = (
+            getattr(legend, "legend_handles", None)
+            or getattr(legend, "legendHandles", None)
+        )
+        texts = legend.get_texts()  # robust API
+
+        legend_hex = {
+            txt.get_text(): mcolors.to_hex(hdl.get_facecolor())
+            for hdl, txt in zip(handles, texts)
+        }
+        self.assertEqual(legend_hex, expected)
 
 
 if __name__ == '__main__':
