@@ -1,15 +1,65 @@
 # CHANGELOG
 
 
-## v0.8.7 (2025-04-03)
+## v0.8.9 (2025-05-13)
 
 ### Bug Fixes
+
+- **knn clustering**: Fixed conflict in imports
+  ([`e6d5f1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e6d5f1eb4668d8e25ed09469525e128abcabbb6a))
+
+- **knn_clustering**: Fixed format of the error message
+  ([`ddf92e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ddf92e63c760c56e035071c0edc2ce245aa3fb7c))
+
+- **select_values**: Added support when observation are numerical
+  ([`4bcbaa2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bcbaa249e70c51860ae55356c5b6ab2bf8961bc))
+
+- **summarize_dataframe**: Remove duplicated missing index
+  ([`2c0d907`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2c0d9077ea9414172090d8c10488f75360430e10))
+
+### Code Style
+
+- **knn_clustering**: Adjusted to code style standar
+  ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
+
+### Features
+
+- **visualize_nearest_neighbor**: Add pin-color and corresponding unit test
+  ([`015692f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/015692f87e75e5c4581638dedd4d277c63c6ddec))
+
+### Testing
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`ef95276`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ef952769f8d20310903f8a9269772a67cb1057d4))
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`cd8cb25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8cb25764a3a5f4718692dea3585bae17f88105))
+
+
+## v0.8.8 (2025-04-06)
+
+### Bug Fixes
+
+- **_ripley**: Fixed conflicts
+  ([`fa4c06f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fa4c06f697ebe95438c3fc583e7767399b72dcf7))
+
+- **_ripley**: Removed old call
+  ([`e89835b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e89835b339034d6c543bd4b6231508811828c26d))
+
+- **core**: Return hist_data instead of original data
+  ([`2734421`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/27344216b2d0f1fef43ac0e66fc1613ddfbf9349))
 
 - **core**: Specify weights for all histplot calls
   ([`b661495`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b66149509fa4aa2280d14dfa6e83567c95c87cf8))
 
 - **docstring**: Add returned df to doctstring
   ([`9caddca`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9caddca51e69e2213da866d9f74c6abe9ab7c181))
+
+- **interactive_spatial_plot**: Fixed typos in api name and arguments
+  ([`b833123`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b833123dc9f124abf34e539be553a8388048ee1b))
+
+- **present_summary_as_figure**: Fixed json conversion when non python types are used
+  ([`61c8480`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61c848051cf86f6cf1cff5fe9bf012bb1c12c9d2))
 
 - **relational_heatmap**: Adjusted the flipped axis labels
   ([`5d950bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d950bb0bb3dd2f45e32d4bd7c4aa15f939922ac))
@@ -29,43 +79,18 @@
 - **tests**: Update tests to match new return param
   ([`da83e3d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/da83e3dcef1b7ccb7de6e6854613f63bef7e8780))
 
-### Features
-
-- **core**: Change histogram/boxplot return types to dicts
-  ([`bf160c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bf160c24c8fca82ad9057fb2be049b200f4f7139))
-
-- **core**: Changed histogram to precompute data.
-  ([`0201c6f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0201c6f153b440c7b93494fc5355dcf1fe446c28))
-
-- **core**: Changed how boxplot return type is handled
-  ([`714bf98`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/714bf98e2acf8b42b39588ec866f87ac38979dd0))
-
-- **core**: Use plotly figure for static plot instead of png
-  ([`5738234`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5738234fc7e16cc8f9c1e421343028976f73ecc2))
-
-
-## v0.8.6 (2025-03-18)
-
-### Bug Fixes
-
-- **_ripley**: Fixed conflicts
-  ([`fa4c06f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fa4c06f697ebe95438c3fc583e7767399b72dcf7))
-
-- **_ripley**: Removed old call
-  ([`e89835b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e89835b339034d6c543bd4b6231508811828c26d))
-
-- **interactive_spatial_plot**: Fixed typos in api name and arguments
-  ([`b833123`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b833123dc9f124abf34e539be553a8388048ee1b))
-
-- **present_summary_as_figure**: Fixed json conversion when non python types are used
-  ([`61c8480`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61c848051cf86f6cf1cff5fe9bf012bb1c12c9d2))
-
 ### Build System
 
 - Restored docker file to FNLCR organization
   ([`739b4b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/739b4b3221efec4af2e9228aa8b3260f74a541bf))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`b2921d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2921d70a7c2d8928f9b48d047a625aebea2d55b))
+
+- **version**: Automatic development release
+  ([`1ad51bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1ad51bb329ec95c14de24e276bbf36c7375081b5))
 
 - **version**: Automatic development release
   ([`627b384`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/627b3846a0d913318c846fc73f11d6141fc6a64e))
@@ -92,6 +117,18 @@
 
 - **_ripley_l_multiple**: Enabled edget correction to remove center cell near border
   ([`87324fd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/87324fd1f168df6a809cf94321d10c632d2b9448))
+
+- **core**: Change histogram/boxplot return types to dicts
+  ([`bf160c2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bf160c24c8fca82ad9057fb2be049b200f4f7139))
+
+- **core**: Changed histogram to precompute data.
+  ([`0201c6f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0201c6f153b440c7b93494fc5355dcf1fe446c28))
+
+- **core**: Changed how boxplot return type is handled
+  ([`714bf98`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/714bf98e2acf8b42b39588ec866f87ac38979dd0))
+
+- **core**: Use plotly figure for static plot instead of png
+  ([`5738234`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5738234fc7e16cc8f9c1e421343028976f73ecc2))
 
 - **ripley_l**: Added edge correction parameter to the high level function
   ([`9a54f15`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9a54f150c88cd4e86c0559d22ecf3f663bc6afd9))

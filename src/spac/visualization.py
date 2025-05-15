@@ -24,6 +24,8 @@ import warnings
 import base64
 import time
 import json
+import re
+from typing import Dict, List, Union
 
 
 # Configure logging
@@ -486,7 +488,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         axs : matplotlib.axes.Axes or list of Axes
             The Axes object(s) of the histogram plot(s). Returns a single Axes
             if only one plot is created, otherwise returns a list of Axes.
-        
+
         df : pandas.DataFrame
             DataFrame containing the data used for plotting the histogram.
 
@@ -532,7 +534,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     data_column = feature if feature else annotation
 
-    # Check for negative values and apply log1p transformation if 
+    # Check for negative values and apply log1p transformation if
     # x_log_scale is True
     if x_log_scale:
         if (df[data_column] < 0).any():
@@ -580,25 +582,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         Parameters:
         - data (pd.Series): The input data to be binned.
-        - bins (int or sequence): Number of bins (if numeric) or unique categories 
+        - bins (int or sequence): Number of bins (if numeric) or unique categories
             (if categorical).
-        - bin_edges (array-like, optional): Predefined bin edges for numeric data. 
+        - bin_edges (array-like, optional): Predefined bin edges for numeric data.
         If None, automatic binning is used.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the following columns:
-            - `count`: 
+            - `count`:
                 Frequency of values in each bin.
-            - `bin_left`: 
+            - `bin_left`:
                 Left edge of each bin (for numeric data).
-            - `bin_right`: 
+            - `bin_right`:
                 Right edge of each bin (for numeric data).
-            - `bin_center`: 
-                Center of each bin (for numeric data) or category labels 
+            - `bin_center`:
+                Center of each bin (for numeric data) or category labels
                 (for categorical data).
-            
+
         """
-        
+
         # Check if the data is numeric or categorical
         if pd.api.types.is_numeric_dtype(data):
             if bin_edges is None:
@@ -656,6 +658,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
+
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
@@ -673,6 +676,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 # Ensure ax_array is always iterable
                 if n_groups == 1:
                     ax_array = [ax_array]
+
                 else:
                     ax_array = ax_array.flatten()
 
@@ -741,6 +745,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_xlim(hist_data['bin_left'].min(),
                         hist_data['bin_right'].max())
 
+
         sns.histplot(
             data=hist_data,
             x='bin_center',
@@ -781,9 +786,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return {"fig": fig, "axs": axs[0], "df": plot_data}
+        return {"fig": fig, "axs": axs[0], "df": hist_data}
     else:
-        return {"fig": fig, "axs": axs, "df": plot_data}
+        return {"fig": fig, "axs": axs, "df": hist_data}
 
 
 def heatmap(adata, column, layer=None, **kwargs):
@@ -1652,7 +1657,7 @@ def boxplot_interactive(
         is used.
 
     figure_type : {"interactive", "static", "png"}, default = "interactive"
-        If "interactive", the plot is interactive, allowing for zooming 
+        If "interactive", the plot is interactive, allowing for zooming
         and panning.
         If "static", the plot is static.
         If "png", the plot is returned as a PNG image.
@@ -1668,7 +1673,7 @@ def boxplot_interactive(
     A dictionary containing the following keys:
         fig : plotly.graph_objects.Figure or str
             The generated boxplot figure, which can be either:
-                - If `figure_type` is "static": A base64-encoded PNG 
+                - If `figure_type` is "static": A base64-encoded PNG
                 image string
                 - If `figure_type` is "interactive": A Plotly figure object
 
@@ -2018,14 +2023,14 @@ def boxplot_interactive(
             'hovermode': False,
             'clickmode': 'none',
             'modebar_remove': [
-                'toimage', 
-                'zoom', 
-                'zoomin', 
+                'toimage',
+                'zoom',
+                'zoomin',
                 'zoomout',
-                'select', 
-                'pan', 
-                'lasso', 
-                'autoscale', 
+                'select',
+                'pan',
+                'lasso',
+                'autoscale',
                 'resetscale'
             ],
             'legend_itemclick': False,
@@ -3287,7 +3292,8 @@ def _plot_spatial_distance_dispatch(
     """
 
     distance_col = kwargs.pop('distance_col', 'distance')
-    hue_axis = kwargs.pop('hue_axis', None)
+    hue_axis = kwargs.pop('hue_axis', 'group')
+    palette_hex = kwargs.pop('palette', None)
 
     if method not in ['numeric', 'distribution']:
         raise ValueError("`method` must be 'numeric' or 'distribution'.")
@@ -3299,15 +3305,36 @@ def _plot_spatial_distance_dispatch(
             data=None,
             x=distance_col,
             y='group',
-            kind=plot_type
+            hue=hue_axis,
+            kind=plot_type,
+            palette=palette_hex,
         )
     else:  # distribution
         plot_func = partial(
             sns.displot,
             data=None,
             x=distance_col,
-            hue=hue_axis if hue_axis else None,
-            kind=plot_type
+            hue=hue_axis,
+            kind=plot_type,
+            palette=palette_hex,
+        )
+
+    def _add_custom_legend(fig, palette):
+        """Attach a full pin‑color legend to the figure."""
+        if not palette:
+            return
+        import matplotlib.patches as mpatches
+
+        handles = [
+            mpatches.Patch(color=hex_code, label=lab)
+            for lab, hex_code in palette.items()
+        ]
+        fig.legend(
+            handles=handles,
+            title='Group',
+            bbox_to_anchor=(1.02, 1.0),
+            loc='upper left',
+            frameon=False,
         )
 
     # Helper to plot a single figure or faceted figure
@@ -3324,7 +3351,8 @@ def _plot_spatial_distance_dispatch(
         else:
             # Fallback if 'set_axis_labels' is unavailable
             plt.xlabel(x_label)
-
+        fig = g.fig
+        _add_custom_legend(fig, palette_hex)
         return g.fig
 
     figures = []
@@ -3353,8 +3381,25 @@ def _plot_spatial_distance_dispatch(
         result["fig"] = figures[0]
     else:
         result["fig"] = figures
+
     return result
 
+import re
+from typing import Dict, List, Union
+
+_RGB_RE = re.compile(
+    r'rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)', re.IGNORECASE
+)
+
+def _css_rgb_or_hex_to_hex(color: str) -> str:
+    """Convert 'rgb(r, g, b)' **or** '#rrggbb' → '#rrggbb' (lower‑case)."""
+    if color.startswith('#'):
+        return color.lower()
+    match = _RGB_RE.fullmatch(color)
+    if match is None:
+        raise ValueError(f'Unsupported colour format: {color!r}')
+    r, g, b = map(int, match.groups())
+    return f'#{r:02x}{g:02x}{b:02x}'
 
 def visualize_nearest_neighbor(
     adata,
@@ -3367,15 +3412,20 @@ def visualize_nearest_neighbor(
     plot_type=None,
     log=False,
     method=None,
+    annotation_colorscale='rainbow',
+    defined_color_map=None,
     **kwargs
 ):
     """
     Visualize nearest-neighbor (spatial distance) data between groups of cells
-    as numeric or distribution plots.
+    with optional pin-color map via numeric or distribution plots.
 
     This user-facing function assembles the data by calling
     `_prepare_spatial_distance_data` and then creates plots through
-    `_plot_spatial_distance_dispatch`.
+    `_plot_spatial_distance_dispatch`. It introduces a pin-color feature that
+    guarantees a consistent mapping from annotation labels to colors across
+    figures. The mapping is retireved from 'adata.uns' or generated via
+    'spac.utils.color_mapping'.
 
     Plot arrangement logic:
       1) If stratify_by is not None and facet_plot=True => single figure
@@ -3410,6 +3460,12 @@ def visualize_nearest_neighbor(
         If True, applies np.log1p transform to the distance values.
     method : {'numeric', 'distribution'}
         Determines the plotting style (catplot vs displot).
+    annotation_colorscale : str, optional
+        Matplotlib colormap name used when generating a new mapping.
+        Ignored if 'defined_color_map' is provided.
+    defined_color_map : str, optional
+        Key in 'adata.uns' holding a pre-computed color dictionary.
+        Falls back to automatic generation from 'annotation' values.
     **kwargs : dict
         Additional arguments for seaborn figure-level functions.
 
@@ -3428,7 +3484,7 @@ def visualize_nearest_neighbor(
 
     Examples
     --------
-    >>> # Numeric box plot comparing Tumor distances to multiple targets
+    >>> # Pin-colored numeric box plot comparing tumor to multiple targets
     >>> res = visualize_nearest_neighbor(
     ...     adata=my_adata,
     ...     annotation='cell_type',
@@ -3438,7 +3494,8 @@ def visualize_nearest_neighbor(
     ...     distance_to=['Stroma', 'Immune'],
     ...     facet_plot=True,
     ...     plot_type='box',
-    ...     method='numeric'
+    ...     method='numeric',
+    ...     defined_color_map='pin_color_map'
     ... )
     >>> df_long, fig = res["data"], res["fig"]
 
@@ -3464,6 +3521,21 @@ def visualize_nearest_neighbor(
             "Invalid 'method'. Please choose 'numeric' or 'distribution'."
         )
 
+    # Build/fetch color map
+    color_dict_rgb = get_defined_color_map(
+        adata=adata,
+        defined_color_map=defined_color_map,
+        annotations=annotation,
+        colorscale=annotation_colorscale
+    )
+
+    palette_hex = {
+        k: _css_rgb_or_hex_to_hex(v) for k, v in color_dict_rgb.items()
+    }
+    # cache for downstream use
+    cache_key = f'{defined_color_map or annotation}_hex'
+    adata.uns[cache_key] = palette_hex
+
     df_long = _prepare_spatial_distance_data(
         adata=adata,
         annotation=annotation,
@@ -3481,7 +3553,13 @@ def visualize_nearest_neighbor(
     # If log=True, the column name is 'log_distance', else 'distance'
     distance_col = 'log_distance' if log else 'distance'
 
-    # Dispatch to the plot logic
+    # Assemble kwargs & dispatch
+    dispatch_kwargs: dict[str, object] = {**kwargs}
+    dispatch_kwargs['hue_axis'] = 'group'
+    dispatch_kwargs.setdefault('palette', palette_hex)
+    if method == 'numeric':
+        dispatch_kwargs.setdefault('saturation', 1)
+
     result_dict = _plot_spatial_distance_dispatch(
         df_long=df_long,
         method=method,
@@ -3489,9 +3567,9 @@ def visualize_nearest_neighbor(
         stratify_by=stratify_by,
         facet_plot=facet_plot,
         distance_col=distance_col,
-        **kwargs
+        **dispatch_kwargs
     )
-
+    result_dict['palette'] = palette_hex
     return result_dict
 
 import json
@@ -3506,7 +3584,7 @@ def present_summary_as_html(summary_dict: dict) -> str:
     For each specified column, the HTML includes:
       - Column name and data type
       - Count and list of missing indices
-      - Summary details presented in a table (for numeric: stats; 
+      - Summary details presented in a table (for numeric: stats;
         categorical: unique values and counts)
 
     Parameters
@@ -3591,11 +3669,11 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
         clean_data = {}
         for k, v in info['summary'].items():
             # Check if the value is a NumPy integer
-            if isinstance(v, np.integer):  
-                clean_data[k] = int(v)  
+            if isinstance(v, np.integer):
+                clean_data[k] = int(v)
             # Check if the value is a NumPy float
-            elif isinstance(v, np.floating): 
-                clean_data[k] = float(v)  
+            elif isinstance(v, np.floating):
+                clean_data[k] = float(v)
             else:
                 # Keep the value as is if it's already a standard type
                 clean_data[k] = v
