@@ -1,6 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import re # Import re if used directly in tests, though _css_rgb_or_hex_to_hex encapsulates its re usage
 import matplotlib.colors as mcolors

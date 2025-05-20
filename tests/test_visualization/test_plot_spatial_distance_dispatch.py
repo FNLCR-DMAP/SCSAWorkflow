@@ -1,6 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
 import matplotlib
@@ -24,11 +21,11 @@ class TestPlotSpatialDistanceDispatch(unittest.TestCase):
         })
         self.df_strat_and_hue = pd.DataFrame({
             'cellid': ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'],
-            'group': ['g1', 'g1', 'g2', 'g2', 'g1', 'g2'], 
+            'group': ['g1', 'g1', 'g2', 'g2', 'g1', 'g2'],
             'distance': [0.5, 1.5, 0.7, 1.2, 0.8, 1.0],
             'log_distance': [0.405, 0.916, 0.530, 0.788, 0.587, 0.693],
-            'phenotype': ['p1', 'p1', 'p2', 'p2', 'p1', 'p2'], 
-            'region': ['R1', 'R1', 'R2', 'R2', 'R1', 'R2'] 
+            'phenotype': ['p1', 'p1', 'p2', 'p2', 'p1', 'p2'],
+            'region': ['R1', 'R1', 'R2', 'R2', 'R1', 'R2']
         })
 
     def tearDown(self):
@@ -107,14 +104,14 @@ class TestPlotSpatialDistanceDispatch(unittest.TestCase):
         assert_frame_equal(result['data'], self.df_strat_and_hue)
         ax_list = result['ax']
         self.assertIsInstance(ax_list, list)
-        
+
         num_facets = self.df_strat_and_hue['region'].nunique()
         self.assertEqual(len(ax_list), num_facets)
 
         for i, ax_item in enumerate(ax_list):
             self.assertIsInstance(ax_item, MatplotlibAxes)
             self.assertEqual(ax_item.get_xlabel(), "Nearest Neighbor Distance")
-            
+
             # Determine expected y-label based on position in the wrapped grid
             # Axes in the first column of a wrapped layout should have the y-label.
             # Others (inner columns) should have it cleared by Seaborn.

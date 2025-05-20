@@ -1,3 +1,4 @@
+import logging
 import seaborn as sns
 import seaborn
 import pandas as pd
@@ -3239,8 +3240,8 @@ def _plot_spatial_distance_dispatch(
         If True with stratify_by, create a faceted grid, otherwise
         returns individual axes.
     distance_col : str, default 'distance'
-        Column name in df_long holding the numeric distance values. 
-        'distance' – raw Euclidean / pixel / micron distances.  
+        Column name in df_long holding the numeric distance values.
+        'distance' – raw Euclidean / pixel / micron distances.
         'log_distance' – natural-log‐transformed distances.
         The axis label is automatically adjusted.
     hue_axis : str, default 'group'
@@ -3266,7 +3267,7 @@ def _plot_spatial_distance_dispatch(
     if method not in ("numeric", "distribution"):
         raise ValueError("`method` must be 'numeric' or 'distribution'.")
 
-    # Choose plotting function 
+    # Choose plotting function
     if method == "numeric":
         _plot_base = partial(
             sns.catplot,
@@ -3287,7 +3288,7 @@ def _plot_spatial_distance_dispatch(
             palette=palette,
         )
 
-    # Single plotting wrapper to create Axes object(s) 
+    # Single plotting wrapper to create Axes object(s)
     def _make_axes_object(_data, **kws_plot):
         g = _plot_base(data=_data, **kws_plot)
 
@@ -3306,7 +3307,7 @@ def _plot_spatial_distance_dispatch(
 
         return returned_ax
 
-    # Build axes 
+    # Build axes
     final_axes_object = None
 
     if stratify_by and facet_plot:
@@ -3359,7 +3360,7 @@ def _css_rgb_or_hex_to_hex(col, keep_alpha=False):
     ------
     ValueError
         If the color cannot be interpreted.
-    
+
     Examples
     --------
     >>> _css_rgb_or_hex_to_hex('gold')
@@ -3408,8 +3409,23 @@ def _css_rgb_or_hex_to_hex(col, keep_alpha=False):
     if col in mcolors.get_named_colors_mapping():
         return col  # let Matplotlib handle named colors
 
-    # 4. unsupported format 
+    # 4. unsupported format
     raise ValueError(f'Unsupported color format: "{col}"')
+
+
+from collections import OrderedDict
+# Helper function (can be defined at module level)
+def _ordered_unique_figs(axes_list: list):
+    """
+    Helper to get unique figures from a list of axes,
+    preserving first-seen order.
+    """
+    seen = OrderedDict()
+    for ax_item in axes_list: # Assumes axes_list is indeed a list
+        fig = getattr(ax_item, 'figure', None)
+        if fig is not None:
+            seen.setdefault(fig, None)
+    return list(seen)
 
 
 def visualize_nearest_neighbor(
@@ -3481,12 +3497,9 @@ def visualize_nearest_neighbor(
         Key in 'adata.uns' holding a pre-computed color dictionary.
         Falls back to automatic generation from 'annotation' values.
     ax : matplotlib.axes.Axes, optional
-        A Matplotlib Axes object. Currently, this parameter is not used by the
-        underlying plotting functions (Seaborn's `catplot`/`displot`), which
-        will always generate a new figure and axes. The `ax` key in the
-        returned dictionary will contain the Axes from these new plots.
-        This parameter is maintained for API consistency and potential
-        future enhancements. Default is None.
+        The matplotlib Axes containing the analysis plots.
+        The returned ax is the passed ax or new ax created.
+        Only works if plotting a single component. Default is None.
     **kwargs : dict
         Additional arguments for seaborn figure-level functions.
 
@@ -3495,7 +3508,7 @@ def visualize_nearest_neighbor(
     dict
         {
             'data': pd.DataFrame,  # long-form table for plotting
-            'fig' : matplotlib.figure.Figure | list[matplotlib.figure.Figure],
+            'fig' : matplotlib.figure.Figure | list[Figure] | None,
             'ax': matplotlib.axes.Axes | list[matplotlib.axes.Axes],
             'palette': dict  # {label: '#rrggbb'}
         }
@@ -3566,7 +3579,7 @@ def visualize_nearest_neighbor(
     # df_long['group']. These are the groups that will actually be used for hue
     # in the plot.
     target_groups_in_plot = df_long['group'].astype(str).unique()
-    
+
     plot_specific_palette = {
         str(group): palette_hex.get(str(group))
         for group in target_groups_in_plot
@@ -3597,33 +3610,40 @@ def visualize_nearest_neighbor(
     )
 
     returned_axes = disp['ax']
-    fig_object = [] 
+    fig_object = None  # Initialize
 
     if isinstance(returned_axes, list):
-        if returned_axes:  # If the list of axes is not empty
-            # Collect all unique figures from the list of axes
-            unique_figures_set = {
-                ax_obj.figure
-                for ax_obj in returned_axes
-                if hasattr(ax_obj, 'figure')
-            }
-            unique_figures_list = list(unique_figures_set)
-            if len(unique_figures_list) == 1:
-                fig_object = unique_figures_list[0]
-            elif len(unique_figures_list) > 1:
-                fig_object = unique_figures_list  # Returns a list of figures
-            else:
-                fig_object = None
-        else:
-            fig_object = None
-    elif returned_axes is not None and hasattr(returned_axes, 'figure'):
-        fig_object = returned_axes.figure
+        if returned_axes:
+            # Unique figures, preserved in axis order
+            unique_figs_ordered = _ordered_unique_figs(returned_axes)
+
+            if unique_figs_ordered:     # at least one valid figure
+                if stratify_by and not facet_plot:
+                    # one figure per category → return the ordered list
+                    fig_object = unique_figs_ordered
+                else:
+                    # single-figure layout (facet grid or no stratify)
+                    if len(unique_figs_ordered) == 1:
+                        fig_object = unique_figs_ordered[0]
+                        # first (and usually only) figure
+                    else:            # defensive fallback
+                        logging.warning(
+                            "Multiple figures detected in a single-figure "
+                            "scenario; using the first one."
+                        )
+                        # Return the first one
+                        fig_object = unique_figs_ordered[0]
+        # empty list → keep fig_object = None
+    elif returned_axes is not None:
+        # single Axes → grab its figure
+        fig_object = getattr(returned_axes, 'figure', None)
+    # returned_axes is None → fig_object stays None
 
     return {
-        'data': disp['data'],     
+        'data': disp['data'],
         'fig': fig_object,
         'ax': disp['ax'],
-        'palette': plot_specific_palette # Return the filtered palette
+        'palette': plot_specific_palette  # Return the filtered palette
     }
 
 
