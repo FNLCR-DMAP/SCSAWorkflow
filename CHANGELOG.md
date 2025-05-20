@@ -1,42 +1,19 @@
 # CHANGELOG
 
 
-## v0.8.9 (2025-05-13)
-
-### Bug Fixes
-
-- **knn clustering**: Fixed conflict in imports
-  ([`e6d5f1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e6d5f1eb4668d8e25ed09469525e128abcabbb6a))
-
-- **knn_clustering**: Fixed format of the error message
-  ([`ddf92e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ddf92e63c760c56e035071c0edc2ce245aa3fb7c))
-
-- **select_values**: Added support when observation are numerical
-  ([`4bcbaa2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bcbaa249e70c51860ae55356c5b6ab2bf8961bc))
-
-- **summarize_dataframe**: Remove duplicated missing index
-  ([`2c0d907`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2c0d9077ea9414172090d8c10488f75360430e10))
-
-### Code Style
-
-- **knn_clustering**: Adjusted to code style standar
-  ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
+## v0.8.10 (2025-05-20)
 
 ### Features
 
-- **visualize_nearest_neighbor**: Add pin-color and corresponding unit test
-  ([`015692f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/015692f87e75e5c4581638dedd4d277c63c6ddec))
+- **pin_color**: Add pin color feature to visualize nearest neighbor and helpers and unit test files
+  individually
+  ([`6e0adc9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0adc9aaf63c443c615e27dd3d6a6ded4a4b391))
 
-### Testing
-
-- **comments**: Add extensive comments for complex data set generation in utag tests
-  ([`ef95276`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ef952769f8d20310903f8a9269772a67cb1057d4))
-
-- **comments**: Add extensive comments for complex data set generation in utag tests
-  ([`cd8cb25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8cb25764a3a5f4718692dea3585bae17f88105))
+- **visualize_nn**: Add pin-color feature and enhance layout of fig and ax
+  ([`22e047a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/22e047aa3d765469c8d0acd32f8ea3d8be5b27bd))
 
 
-## v0.8.8 (2025-04-06)
+## v0.8.9 (2025-05-13)
 
 ### Bug Fixes
 
@@ -58,11 +35,23 @@
 - **interactive_spatial_plot**: Fixed typos in api name and arguments
   ([`b833123`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b833123dc9f124abf34e539be553a8388048ee1b))
 
+- **knn clustering**: Fixed conflict in imports
+  ([`e6d5f1e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e6d5f1eb4668d8e25ed09469525e128abcabbb6a))
+
+- **knn_clustering**: Fixed format of the error message
+  ([`ddf92e6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ddf92e63c760c56e035071c0edc2ce245aa3fb7c))
+
 - **present_summary_as_figure**: Fixed json conversion when non python types are used
   ([`61c8480`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/61c848051cf86f6cf1cff5fe9bf012bb1c12c9d2))
 
 - **relational_heatmap**: Adjusted the flipped axis labels
   ([`5d950bb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d950bb0bb3dd2f45e32d4bd7c4aa15f939922ac))
+
+- **select_values**: Added support when observation are numerical
+  ([`4bcbaa2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4bcbaa249e70c51860ae55356c5b6ab2bf8961bc))
+
+- **summarize_dataframe**: Remove duplicated missing index
+  ([`2c0d907`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2c0d9077ea9414172090d8c10488f75360430e10))
 
 - **tests**: Add tests for figure_type and showfliers params
   ([`3488a59`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3488a597ead551285f8791d4028fe800a3c822d4))
@@ -84,7 +73,15 @@
 - Restored docker file to FNLCR organization
   ([`739b4b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/739b4b3221efec4af2e9228aa8b3260f74a541bf))
 
+### Code Style
+
+- **knn_clustering**: Adjusted to code style standar
+  ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
+
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`70c004e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/70c004e2079086aa46e38db7803c7c52e6c3356b))
 
 - **version**: Automatic development release
   ([`b2921d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2921d70a7c2d8928f9b48d047a625aebea2d55b))
@@ -136,6 +133,9 @@
 - **summarize dataframe**: Added two visualization functions for the summary
   ([`66fdd4e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/66fdd4e4e7c136d4aec3e4c7b49958a5af020858))
 
+- **visualize_nearest_neighbor**: Add pin-color and corresponding unit test
+  ([`015692f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/015692f87e75e5c4581638dedd4d277c63c6ddec))
+
 ### Performance Improvements
 
 - Updating the default colormap for interactive spatial to rainbow
@@ -159,6 +159,12 @@
   ([`60283bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60283bd7671d2f2a65b52d77f4792b7461a8e407))
 
 ### Testing
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`ef95276`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ef952769f8d20310903f8a9269772a67cb1057d4))
+
+- **comments**: Add extensive comments for complex data set generation in utag tests
+  ([`cd8cb25`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd8cb25764a3a5f4718692dea3585bae17f88105))
 
 - **compute_box_plot_metric**: Added verbose error message and check
   ([`fb3a372`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fb3a372d9f0cb2613ab77bda8e3c2407a6dd0e4c))
