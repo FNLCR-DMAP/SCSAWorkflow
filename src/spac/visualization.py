@@ -30,6 +30,7 @@ from typing import Dict, List, Union
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatch
 from functools import partial
+from collections import OrderedDict
 
 
 # Configure logging
@@ -3413,7 +3414,6 @@ def _css_rgb_or_hex_to_hex(col, keep_alpha=False):
     raise ValueError(f'Unsupported color format: "{col}"')
 
 
-from collections import OrderedDict
 # Helper function (can be defined at module level)
 def _ordered_unique_figs(axes_list: list):
     """
