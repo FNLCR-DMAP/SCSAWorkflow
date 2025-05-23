@@ -3333,6 +3333,20 @@ def _plot_spatial_distance_dispatch(
     return {"data": df_long, "ax": final_axes_object}
 
 
+# Build a master HEX palette and cache it inside the AnnData object
+# -----------------------------------------------------------------------------
+# WHAT  Convert every entry in ``color_dict_rgb`` (which may contain RGB tuples,
+#       "rgb()" strings, or already‑hex values) into a canonical six‑digit HEX
+#       string, storing the results in ``palette_hex``.
+# WHY   Downstream plotting utilities (Matplotlib / Seaborn) expect colours in
+#       HEX.  Performing the conversion once, here, guarantees a uniform format
+#       for all later plots and prevents inconsistencies when colours are
+#       re‑used.
+# HOW   The helper ``_css_rgb_or_hex_to_hex`` normalises each colour.  The
+#       resulting dictionary is cached under ``adata.uns['_spac_palettes']`` so
+#       that *any* later function can retrieve the same palette by name.
+#       ``defined_color_map or annotation`` forms a unique key that ties the
+#       palette to either a user‑defined map or the current annotation field.
 def _css_rgb_or_hex_to_hex(col, keep_alpha=False):
     """
     Normalise a CSS-style color string to a hexadecimal value or
@@ -3578,6 +3592,17 @@ def visualize_nearest_neighbor(
     # Filter the full palette to include only the target groups present in
     # df_long['group']. These are the groups that will actually be used for hue
     # in the plot.
+    # Derive a palette tailored to *this* figure
+    # -----------------------------------------------------------------------------
+    # WHAT  ``plot_specific_palette`` keeps only the colours that correspond to the
+    #       groups actually present in the tidy DataFrame ``df_long``.
+    # WHY   Passing the full master palette could create legend entries (and colour
+    #       assignments) for groups that do not appear in the current subset,
+    #       cluttering the figure.  Trimming the palette ensures a clean, accurate
+    #       legend and avoids any mismatch between data and colour.
+    # HOW   ``target_groups_in_plot`` is the list of unique group labels in the
+    #       plot.  For each label we look up its HEX code in ``palette_hex``; if a
+    #       colour exists we copy the mapping into the new dictionary.
     target_groups_in_plot = df_long['group'].astype(str).unique()
 
     plot_specific_palette = {
@@ -3587,6 +3612,20 @@ def visualize_nearest_neighbor(
     }
 
     # Assemble kwargs & dispatch
+    # Inject the palette into the plotting dispatcher
+    # -----------------------------------------------------------------------------
+    # WHAT  Two keyword arguments are added/overwritten:
+    #       • ``hue_axis='group'`` tells the plotting function to colour elements
+    #           by the ``group`` column.
+    #       • ``palette=plot_specific_palette`` supplies the exact colour mapping
+    #           we just created.
+    # WHY   Explicitly specifying both the hue axis and its palette guarantees that
+    #       every group is rendered with the intended colour, bypassing Seaborn’s
+    #       default colour cycle and preventing accidental re‑ordering.
+    # HOW   ``dispatch_kwargs`` starts as a copy of any user‑supplied kwargs; the
+    #       call to ``update`` adds these palette‑related keys before control is
+    #       handed off to the generic plotting helper.
+
     dispatch_kwargs = dict(kwargs)
     dispatch_kwargs.update({
         'hue_axis': 'group',

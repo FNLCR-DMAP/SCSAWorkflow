@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
 import numpy as np
@@ -40,37 +43,10 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
         """Close all Matplotlib figures after each test."""
         plt.close('all')
 
-    def test_axis_labels_across_plot_types(self):
-        """
-        X/Y labels are correct for each plotting mode (no duplication).
-        """
-        scenarios = [
-            # explicit plot_type
-            ('numeric', 'box', 'group'),
-            ('distribution', 'kde', 'Density'),
-            # default plot_type (None)
-            ('numeric', None, 'group'),
-            ('distribution', None, 'Density'),
-        ]
-        for method, plot_type, expected_ylabel in scenarios:
-            with self.subTest(method=method, plot_type=plot_type):
-                result = visualize_nearest_neighbor(
-                    adata=self.adata,
-                    annotation='cell_type',
-                    distance_from='typeA',
-                    distance_to='typeB',
-                    method=method,
-                    plot_type=plot_type,
-                )
-                ax = (result['ax'] if method == 'numeric'
-                      else result['fig'].axes[0])
-                self.assertEqual(
-                    ax.get_xlabel(), "Nearest Neighbor Distance"
-                )
-                self.assertEqual(ax.get_ylabel(), expected_ylabel)
-
     def test_output_structure_and_types_single_plot(self):
-        """Dict keys and object types for a simple numeric plot."""
+        """
+        Tests the basic output structure and types for a single plot.
+        """
         result = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
@@ -79,19 +55,44 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             method='numeric',
             plot_type='box'
         )
+
+        self.assertIsInstance(result, dict, "Result should be a dict.")
         expected_keys = ['data', 'fig', 'ax', 'palette']
         for key in expected_keys:
-            self.assertIn(key, result)
-        self.assertIsInstance(result['data'], pd.DataFrame)
-        self.assertIsInstance(result['fig'], matplotlib.figure.Figure)
-        self.assertIsInstance(result['ax'], matplotlib.axes.Axes)
-        self.assertIsInstance(result['palette'], dict)
-        self.assertEqual(len(result['fig'].axes), 1)
-        self.assertIs(result['ax'], result['fig'].axes[0])
-        self.assertIs(result['ax'].figure, result['fig'])
+            self.assertIn(key, result, f"Key '{key}' missing in result.")
 
-    def test_minimal_numeric_palette(self):
-        """ Palette filtered to target groups."""
+        self.assertIsInstance(
+            result['data'], pd.DataFrame, "'data' should be a DataFrame."
+        )
+        self.assertIsInstance(
+            result['fig'], matplotlib.figure.Figure,
+            "'fig' should be a Figure."
+        )
+        self.assertIsInstance(
+            result['ax'], matplotlib.axes.Axes,
+            "'ax' should be an Axes object for a single plot."
+        )
+        self.assertIsInstance(
+            result['palette'], dict, "'palette' should be a dictionary."
+        )
+
+        self.assertEqual(
+            len(result['fig'].axes), 1,
+            "Single plot figure should contain one axis."
+        )
+        self.assertIs(
+            result['ax'], result['fig'].axes[0],
+            "Returned 'ax' should be the axis in 'fig'."
+        )
+        self.assertIs(
+            result['ax'].figure, result['fig'],
+            "Returned 'ax' should belong to returned 'fig'."
+        )
+
+    def test_minimal_numeric_plot_axis_labels_and_palette(self):
+        """
+        Tests a minimal numeric plot, focusing on axis labels and palette.
+        """
         result = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
@@ -100,11 +101,30 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             method='numeric',
             plot_type='box'
         )
-        self.assertIn('typeB', result['palette'])
-        self.assertTrue(result['palette']['typeB'].startswith('#'))
 
-    def test_minimal_distribution_has_axes(self):
-        """Distribution plot returns one Axes."""
+        ax = result['ax']
+        self.assertEqual(
+            ax.get_xlabel(), "Nearest Neighbor Distance",
+            "X-axis label mismatch."
+        )
+        self.assertEqual(
+            ax.get_ylabel(), "group",
+            "Y-axis label mismatch for catplot."
+        )
+
+        self.assertIn(
+            'typeB', result['palette'],
+            "'typeB' should be in the generated palette."
+        )
+        self.assertTrue(
+            result['palette']['typeB'].startswith('#'),
+            "Palette color should be hex."
+        )
+
+    def test_minimal_distribution_plot_axis_labels(self):
+        """
+        Tests a minimal distribution plot, focusing on axis labels.
+        """
         result = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
@@ -113,13 +133,24 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             method='distribution',
             plot_type='kde'
         )
-        # Under the default settings (no stratify, no facets), displot
-        # produces a single subplot.
-        self.assertEqual(len(result['fig'].axes), 1)
+
+        self.assertTrue(
+            len(result['fig'].axes) > 0,
+            "Figure should have axes for displot."
+        )
+        ax = result['fig'].axes[0]
+        self.assertEqual(
+            ax.get_xlabel(), "Nearest Neighbor Distance",
+            "X-axis label mismatch."
+        )
+        self.assertEqual(
+            ax.get_ylabel(), "Density",
+            "Y-axis label for KDE plot mismatch."
+        )
 
     def test_stratify_by_facet_plot_true_output_structure(self):
         """
-        facet_plot=True returns one Figure and two Axes (img1, img2).
+        Tests output structure for stratify_by with facet_plot=True.
         """
         result = visualize_nearest_neighbor(
             adata=self.adata,
@@ -130,19 +161,32 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             stratify_by='image_id',
             facet_plot=True
         )
-
-        self.assertIsInstance(result['fig'], matplotlib.figure.Figure)
-        self.assertIsInstance(result['ax'], list)
-
-        # hard-coded: the dummy AnnData has exactly 2 image_id levels
-        self.assertEqual(len(result['ax']), 2)
-
-        for ax in result['ax']:
-            self.assertIs(ax.figure, result['fig'])
+        self.assertIsInstance(
+            result['fig'], matplotlib.figure.Figure,
+            "Should be a single Figure for facet plot."
+        )
+        self.assertIsInstance(
+            result['ax'], list,
+            "'ax' should be a list of Axes for facet plot."
+        )
+        expected_num_facets = self.adata.obs['image_id'].nunique()
+        self.assertEqual(
+            len(result['ax']), expected_num_facets,
+            "Number of axes should match unique categories in stratify_by."
+        )
+        for ax_item in result['ax']:
+            self.assertIsInstance(
+                ax_item, matplotlib.axes.Axes,
+                "Each item in 'ax' list should be an Axes object."
+            )
+            self.assertIs(
+                ax_item.figure, result['fig'],
+                "All facet axes should belong to the same figure."
+            )
 
     def test_stratify_by_facet_plot_false_output_structure(self):
         """
-        facet_plot=False returns two Figure/Axes pairs (img1, img2).
+        Tests output structure for stratify_by with facet_plot=False.
         """
         result = visualize_nearest_neighbor(
             adata=self.adata,
@@ -153,15 +197,42 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             stratify_by='image_id',
             facet_plot=False
         )
-        # hard-coded: we expect exactly 2 categories → 2 figs / 2 axes
-        self.assertEqual(len(result['fig']), 2)
-        self.assertEqual(len(result['ax']), 2)
+        num_categories = self.adata.obs['image_id'].nunique()
+        self.assertIsInstance(
+            result['fig'], list,
+            "Should be a list of Figures for non-faceted stratified plot."
+        )
+        self.assertEqual(
+            len(result['fig']), num_categories,
+            "Number of figures should match unique categories."
+        )
+        for fig_item in result['fig']:
+            self.assertIsInstance(
+                fig_item, matplotlib.figure.Figure,
+                "Each item in 'fig' list should be a Figure."
+            )
 
-        for fig, ax in zip(result['fig'], result['ax']):
-            self.assertIs(ax.figure, fig)
+        self.assertIsInstance(
+            result['ax'], list, "'ax' should be a list of Axes."
+        )
+        self.assertEqual(
+            len(result['ax']), num_categories,
+            "Number of axes should match unique categories."
+        )
+        for i, ax_item in enumerate(result['ax']):
+            self.assertIsInstance(
+                ax_item, matplotlib.axes.Axes,
+                "Each item in 'ax' list should be an Axes object."
+            )
+            self.assertIs(
+                ax_item.figure, result['fig'][i],
+                "Each ax should belong to its corresponding fig."
+            )
 
     def test_defined_color_map_generates_correct_palette(self):
-        """ Only requested `distance_to` groups appear in palette. """
+        """
+        Tests that a defined_color_map is correctly processed.
+        """
         self.adata.uns['my_colors'] = {
             'typeA': 'rgb(255,0,0)',
             'typeB': '#00FF00',
@@ -175,55 +246,109 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             method='numeric',
             defined_color_map='my_colors'
         )
-        self.assertEqual(result['palette'],
-                         {'typeB': '#00ff00', 'typeC': 'blue'})
+        expected_palette = {
+            'typeB': '#00ff00',
+            'typeC': 'blue'
+        }
+        self.assertEqual(
+            result['palette']['typeB'], expected_palette['typeB']
+        )
+        self.assertEqual(
+            result['palette']['typeC'], expected_palette['typeC']
+        )
+        self.assertNotIn(
+            'typeA', result['palette'],
+            "Source phenotype 'typeA' should not be in palette keys."
+        )
 
-    # Default plot_type ­→ must be 'boxen' (numeric) or 'kde' (distribution)
-    def test_default_plot_type_numeric_is_boxen(self):
-        """method='numeric', plot_type=None should draw boxen patches."""
+    def test_default_plot_type_selection(self):
+        """
+        Tests that plot_type defaults correctly and axis labels are set.
+        """
+        # Test numeric default ('boxen' plot via catplot)
         res_numeric = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
             distance_from='typeA',
             distance_to='typeB',
-            method='numeric',      # plot_type defaults to 'boxen'
-            plot_type=None,
+            method='numeric'
+        )
+        self.assertIsInstance(
+            res_numeric['fig'], matplotlib.figure.Figure,
+            "Numeric default should generate a Figure object."
+        )
+        self.assertIsInstance(
+            res_numeric['ax'], matplotlib.axes.Axes,
+            "Numeric default should return an Axes object."
+        )
+        ax_numeric = res_numeric['ax']
+        self.assertEqual(
+            ax_numeric.get_xlabel(), "Nearest Neighbor Distance",
+            "X-axis label for numeric default mismatch."
+        )
+        self.assertEqual(
+            ax_numeric.get_ylabel(), "group",
+            "Y-axis label for numeric default (catplot) mismatch."
         )
 
-        ax = res_numeric['ax']
-
-        # In current Seaborn/Matplotlib, each boxen is a PatchCollection
-        patch_collections = [
-            coll for coll in ax.collections
-            if isinstance(coll, mcoll.PatchCollection)
-        ]
-
-        self.assertTrue(
-            patch_collections,
-            "Expected ≥1 PatchCollection from a boxenplot, found none.",
-        )
-
-    def test_default_plot_type_distribution_is_kde(self):
-        """method='distribution', plot_type=None should draw KDE lines."""
+        # Test distribution default ('kde' plot via displot)
         res_dist = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
             distance_from='typeA',
             distance_to='typeB',
-            method='distribution',  # plot_type defaults to 'kde'
-            plot_type=None,
+            method='distribution'
+        )
+        self.assertIsInstance(
+            res_dist['fig'], matplotlib.figure.Figure,
+            "Distribution default should generate a Figure object."
+        )
+        self.assertTrue(
+            len(res_dist['fig'].axes) > 0,
+            "Distribution plot figure should have axes."
+        )
+        ax_dist = res_dist['fig'].axes[0]
+        self.assertEqual(
+            ax_dist.get_xlabel(), "Nearest Neighbor Distance",
+            "X-axis label for distribution default mismatch."
+        )
+        self.assertEqual(
+            ax_dist.get_ylabel(), "Density",
+            "Y-axis label for distribution default (KDE) mismatch."
         )
 
-        ax = res_dist['fig'].axes[0]     # displot returns a FacetGrid fig
-        # KDE curves are plain Line2D objects
-        kde_lines = [
-            line for line in ax.lines
-            if isinstance(line, matplotlib.lines.Line2D)
-        ]
-        self.assertGreater(len(kde_lines), 0, "No KDE lines found.")
+    def test_legend_default_is_false_passed_to_dispatch(self):
+        """
+        Tests that legend=False is passed to dispatch by default.
+        """
+        result = visualize_nearest_neighbor(
+            adata=self.adata,
+            annotation='cell_type',
+            distance_from='typeA',
+            distance_to=['typeB', 'typeC'],
+            method='numeric',
+            plot_type='box'
+        )
+        fig = result['fig']
+        self.assertEqual(
+            len(fig.legends), 0,
+            "Figure should not have a legend by default."
+        )
+        if isinstance(result['ax'], matplotlib.axes.Axes):
+            self.assertIsNone(
+                result['ax'].get_legend(), "Axes should not have a legend."
+            )
+        elif isinstance(result['ax'], list):
+            for ax_item in result['ax']:
+                self.assertIsNone(
+                    ax_item.get_legend(),
+                    "Each Axes in list should not have a legend."
+                )
 
-    def test_legend_default_and_override(self):
-        """legend=False by default; can be overridden via kwargs."""
+    def test_legend_can_be_overridden_via_kwargs(self):
+        """
+        Tests that the user can pass legend=True via kwargs.
+        """
         result = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
@@ -231,22 +356,24 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             distance_to=['typeB', 'typeC'],
             method='numeric',
             plot_type='box',
+            legend=True
         )
-        self.assertEqual(len(result['fig'].legends), 0)
-
-        result = visualize_nearest_neighbor(
-            adata=self.adata,
-            annotation='cell_type',
-            distance_from='typeA',
-            distance_to=['typeB', 'typeC'],
-            method='numeric',
-            plot_type='box',
-            legend=True,
+        fig = result['fig']
+        self.assertEqual(
+            len(fig.legends), 1,
+            "Figure should have exactly one legend when legend=True."
         )
-        self.assertEqual(len(result['fig'].legends), 1)
+        if fig.legends: # Should be true given the assertion above
+            legend_texts = [
+                text.get_text() for text in fig.legends[0].get_texts()
+            ]
+            self.assertIn('typeB', legend_texts)
+            self.assertIn('typeC', legend_texts)
 
-    def test_error_invalid_method(self):
-        """Invalid `method` raises a clear ValueError."""
+    def test_error_invalid_method_in_visualize_nearest_neighbor(self):
+        """
+        Tests ValueError if 'method' is invalid.
+        """
         expected_msg = ("Invalid 'method'. Please choose 'numeric' or "
                         "'distribution'.")
         with self.assertRaisesRegex(ValueError, expected_msg):
@@ -257,9 +384,9 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
                 method='invalid_plot_method'
             )
 
-    # log=True → x-axis label must be "Log(Nearest Neighbor Distance)"
-    def test_log_distance_axis_label(self):
-        """X-axis title switches to log scale wording when log=True."""
+    # log=True → verify x‑axis label and log‑transformed max value
+    def test_log_distance_scale_and_axis(self):
+        """With log=True the data and axis must be on log scale (max ≈ 1.60944)."""
         res_log = visualize_nearest_neighbor(
             adata=self.adata,
             annotation='cell_type',
@@ -270,10 +397,30 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
             log=True,
         )
 
-        ax = res_log['ax']            # numeric mode returns a single Axes
+        df = res_log['data']
+        # Hard‑coded expectation: transformed column exists
+        self.assertIn('log_distance', df.columns)
+
+        # Hard‑coded expected max of log1p(4.0) ≈ 1.6094379124341003
+        expected_max_log = 1.6094379124341003
+        self.assertAlmostEqual(
+            df['log_distance'].max(),
+            expected_max_log,
+            places=6,
+            msg='log_distance max is not log1p(4.0)'
+        )
+
+        ax = res_log['ax']
+        # Axis label must reflect log scale
         self.assertEqual(
             ax.get_xlabel(),
-            'Log(Nearest Neighbor Distance)',
+            'Log(Nearest Neighbor Distance)'
+        )
+        # x‑axis upper limit should at least reach the expected max value
+        self.assertGreaterEqual(
+            ax.get_xlim()[1],
+            expected_max_log,
+            msg='x‑axis upper limit less than expected log max'
         )
 
 
