@@ -1,19 +1,18 @@
 # CHANGELOG
 
 
+## v0.8.11 (2025-05-23)
+
+### Bug Fixes
+
+- **visualize_nearest_neighbor**: Add comments on function and refactor unit tests
+  ([`fa20694`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fa206948af9db292a6389ddfedd142ac8563f5f9))
+
+- **visualize_nearest_neighbor**: Rewrite unit tests and move up library in function
+  ([`4b49fac`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b49fac0e56949a2a66a2c7c5a415733ba5e7aef))
+
+
 ## v0.8.10 (2025-05-20)
-
-### Features
-
-- **pin_color**: Add pin color feature to visualize nearest neighbor and helpers and unit test files
-  individually
-  ([`6e0adc9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0adc9aaf63c443c615e27dd3d6a6ded4a4b391))
-
-- **visualize_nn**: Add pin-color feature and enhance layout of fig and ax
-  ([`22e047a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/22e047aa3d765469c8d0acd32f8ea3d8be5b27bd))
-
-
-## v0.8.9 (2025-05-13)
 
 ### Bug Fixes
 
@@ -81,6 +80,9 @@
 ### Continuous Integration
 
 - **version**: Automatic development release
+  ([`f1b0ab2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f1b0ab271b53758668f5256bdc63004ae007741a))
+
+- **version**: Automatic development release
   ([`70c004e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/70c004e2079086aa46e38db7803c7c52e6c3356b))
 
 - **version**: Automatic development release
@@ -127,6 +129,10 @@
 - **core**: Use plotly figure for static plot instead of png
   ([`5738234`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5738234fc7e16cc8f9c1e421343028976f73ecc2))
 
+- **pin_color**: Add pin color feature to visualize nearest neighbor and helpers and unit test files
+  individually
+  ([`6e0adc9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e0adc9aaf63c443c615e27dd3d6a6ded4a4b391))
+
 - **ripley_l**: Added edge correction parameter to the high level function
   ([`9a54f15`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9a54f150c88cd4e86c0559d22ecf3f663bc6afd9))
 
@@ -135,6 +141,9 @@
 
 - **visualize_nearest_neighbor**: Add pin-color and corresponding unit test
   ([`015692f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/015692f87e75e5c4581638dedd4d277c63c6ddec))
+
+- **visualize_nn**: Add pin-color feature and enhance layout of fig and ax
+  ([`22e047a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/22e047aa3d765469c8d0acd32f8ea3d8be5b27bd))
 
 ### Performance Improvements
 
