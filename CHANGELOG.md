@@ -1,18 +1,15 @@
 # CHANGELOG
 
 
+## v0.9.0 (2025-05-23)
+
+### Step
+
+- Bumping minor version
+  ([`e333641`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e3336417a09b4ef26e71bde1b54da840f0980ab9))
+
+
 ## v0.8.11 (2025-05-23)
-
-### Bug Fixes
-
-- **visualize_nearest_neighbor**: Add comments on function and refactor unit tests
-  ([`fa20694`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fa206948af9db292a6389ddfedd142ac8563f5f9))
-
-- **visualize_nearest_neighbor**: Rewrite unit tests and move up library in function
-  ([`4b49fac`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b49fac0e56949a2a66a2c7c5a415733ba5e7aef))
-
-
-## v0.8.10 (2025-05-20)
 
 ### Bug Fixes
 
@@ -67,6 +64,12 @@
 - **tests**: Update tests to match new return param
   ([`da83e3d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/da83e3dcef1b7ccb7de6e6854613f63bef7e8780))
 
+- **visualize_nearest_neighbor**: Add comments on function and refactor unit tests
+  ([`fa20694`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fa206948af9db292a6389ddfedd142ac8563f5f9))
+
+- **visualize_nearest_neighbor**: Rewrite unit tests and move up library in function
+  ([`4b49fac`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4b49fac0e56949a2a66a2c7c5a415733ba5e7aef))
+
 ### Build System
 
 - Restored docker file to FNLCR organization
@@ -78,6 +81,9 @@
   ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`195761d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/195761de5563e80a60a7ea43ecb73e6105dc7d1d))
 
 - **version**: Automatic development release
   ([`f1b0ab2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/f1b0ab271b53758668f5256bdc63004ae007741a))
