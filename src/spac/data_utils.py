@@ -481,13 +481,14 @@ def _select_values_dataframe(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data[annotation].isin(values)]
+        filtered_data = data[data[annotation].astype(str).isin(values)]
     elif exclude_values is not None:
-        filtered_data = data[~data[annotation].isin(exclude_values)]
+        filtered_data = data[~data[annotation].astype(str).isin(exclude_values)]
 
     count = filtered_data.shape[0]
     logging.info(
-        f"Summary of returned dataset: {count} cells match the selected labels."
+        f"Summary of returned dataset: {count} cells",
+        " match the selected labels."
         )
 
     return filtered_data
@@ -524,9 +525,9 @@ def _select_values_anndata(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data.obs[annotation].isin(values)]
+        filtered_data = data[data.obs[annotation].astype(str).isin(values)].copy()
     elif exclude_values is not None:
-        filtered_data = data[~data.obs[annotation].isin(exclude_values)]
+        filtered_data = data[~data.obs[annotation].astype(str).isin(exclude_values)].copy()
 
     count = filtered_data.n_obs
     logging.info(
@@ -932,7 +933,6 @@ def combine_dfs(dataframes: list):
     return combined_df
 
 
-
 def add_pin_color_rules(
     adata,
     label_color_dict: dict,
@@ -1121,3 +1121,92 @@ def combine_annotations(
 
     return adata
 
+
+def summarize_dataframe(
+    df: pd.DataFrame,
+    columns,
+    print_nan_locations: bool = False
+) -> dict:
+    """
+    Summarize specified columns in a DataFrame.
+
+    For numeric columns, computes summary statistics.
+    For categorical columns, returns unique labels and frequencies.
+    In both cases, missing values (None/NaN) are flagged and their row indices
+    identified.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to summarize.
+    columns : str or list of str
+        The column name or list of column names to analyze.
+    print_nan_locations : bool, optional
+        If True, prints the row indices where None/NaN values occur.
+        Default is False.
+
+    Returns
+    -------
+    dict
+        A dictionary where each key is a column name and its value is another
+        dictionary with:
+          - 'data_type': either 'numeric' or 'categorical'
+          - 'missing_count': int
+          - 'missing_indices': list of row indices with missing values
+          - 'summary': summary statistics if numeric or unique labels with
+          counts if categorical
+    """
+    # Convert a single column string to list
+    if isinstance(columns, str):
+        columns = [columns]
+
+    results = {}
+    for col in columns:
+        col_info = {}
+        # Identify missing values (None or NaN)
+        missing_mask = df[col].isnull()
+        missing_indices = df.index[missing_mask].tolist()
+        col_info['missing_indices'] = missing_indices
+        col_info['count_missing_indices'] = len(missing_indices)
+
+        # Optionally print locations of missing values
+        if print_nan_locations and missing_indices:
+            print(
+                f"Column '{col}' has missing values at rows:"
+                " {missing_indices}"
+            )
+
+        # If the column is numeric, compute summary statistics
+        if pd.api.types.is_numeric_dtype(df[col]):
+            data = df[col]
+            stats = {
+                'count': int(data.count()),
+                'mean': data.mean(),
+                'std': data.std(),
+                'min': data.min(),
+                '25%': data.quantile(0.25),
+                '50%': data.median(),
+                '75%': data.quantile(0.75),
+                'max': data.max()
+            }
+            col_info['data_type'] = 'numeric'
+            col_info['summary'] = stats
+        else:
+            # Otherwise, treat as categorical
+            unique_values = df[col].dropna().unique().tolist()
+            value_counts = df[col].value_counts(dropna=True).to_dict()
+            col_info['data_type'] = 'categorical'
+            col_info['summary'] = {
+                'unique_values': unique_values,
+                'value_counts': value_counts
+            }
+        results[col] = col_info
+
+        # Also print a summary to standard output
+        print(f"Summary for column '{col}':")
+        print(f"Type: {col_info['data_type']}")
+        print("Count missing indices:", col_info['count_missing_indices'])
+        # print("Missing indices:", col_info['missing_indices'])
+        print("Details:", col_info['summary'])
+        print("-" * 40)
+    return results

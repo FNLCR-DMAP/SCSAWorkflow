@@ -167,7 +167,7 @@ class TestRipleyL(unittest.TestCase):
         # Check that the expected message is printed
         self.assertEqual(region1_result.iloc[0]['message'], expected_message)
 
-    def test_two(self):
+    def test_region_with_missing_phenotype(self):
         """
         Test that Ripley does not run if a region has a missing phenotype
         """

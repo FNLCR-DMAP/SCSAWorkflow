@@ -21,9 +21,11 @@ dependencies:
   - plotly=5.24.1               # Visualization and Plotting
   - squidpy=1.2.2               # Single-Cell Visualization and Plotting (scverse family)
   - pillow=11.0.0               # Image Processing
+  - python-kaleido=0.2.1        # Image Processing
   - pip:
     - pylint
     - pytest
     - sphinx
     - flake8
     - gendocs
+    - parmap==1.7.0

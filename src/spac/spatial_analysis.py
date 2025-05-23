@@ -14,7 +14,6 @@ from scipy.spatial import distance_matrix
 from sklearn.preprocessing import LabelEncoder
 from functools import partial
 import logging
-import scimap as sm
 
 
 def spatial_interaction(
@@ -688,7 +687,8 @@ def ripley_l(
     spatial_key="spatial",
     n_simulations=1,
     area=None,
-    seed=42
+    seed=42,
+    edge_correction=True
 ):
     """
     Calculate Ripley's L statistic for spatial data in `adata`.
@@ -726,6 +726,9 @@ def ripley_l(
         will be inferred from the data. Default is `None`.
     seed : int, optional
         Random seed for simulation reproducibility. Default is 42.
+    edge_correction: boo, optional
+        If True, apply edge correction to the Ripley's L calculation.
+
 
     Returns
     -------
@@ -792,7 +795,8 @@ def ripley_l(
         n_simulations=n_simulations,
         seed=seed,
         area=area,
-        copy=True
+        copy=True,
+        edge_correction=edge_correction
     )
 
     # Check if adata already has ripley_l results,
@@ -1150,8 +1154,8 @@ def calculate_nearest_neighbor(
 ):
     """
     Computes the shortest distance from each cell to the nearest cell of
-    each phenotype `scimap.tl.spatial_distance`, and stores the resulted
-    DataFrame in `adata.obsm[label]`.
+    each phenotype (via scimap.tl.spatial_distance) and stores the
+    resulting DataFrame in `adata.obsm[label]`.
 
     Parameters
     ----------
@@ -1220,6 +1224,8 @@ def calculate_nearest_neighbor(
         If spatial coordinates are missing or invalid.
     """
 
+    import scimap as sm
+
     # Input validation for annotation
     check_annotation(adata, annotations=annotation)
 
@@ -1253,11 +1259,10 @@ def calculate_nearest_neighbor(
     adata.obs['_x_coord'] = coords[:, 0]
     adata.obs['_y_coord'] = coords[:, 1]
 
+    use_z = False
     if coords.shape[1] > 2:
         adata.obs['_z_coord'] = coords[:, 2]
         use_z = True
-    else:
-        use_z = False
 
     # Handle imageid logic
     dummy_column_created = False
@@ -1265,9 +1270,8 @@ def calculate_nearest_neighbor(
     if imageid is None:
         dummy_column_created = True
         imageid = '_dummy_imageid'
-        adata.obs[imageid] = 'dummy_image'  # All cells belong to one 'image'
+        adata.obs[imageid] = 'dummy_image'  # Treat all cells as one 'image'
 
-    # Run scimap's spatial_distance function
     sm.tl.spatial_distance(
         adata=adata,
         x_coordinate='_x_coord',
@@ -1280,9 +1284,13 @@ def calculate_nearest_neighbor(
     )
 
     # The scimap function stores the result in adata.uns[label].
-    # Move it to adata.obsm.
+    # Need to align it to adata.obs_names before placing into .obsm.
     result_df = adata.uns.pop(label)  # remove from uns and capture
-    adata.obsm[label] = result_df  # store in obsm
+
+    # Reindex the results to match adata.obs_names.
+    result_df = result_df.reindex(adata.obs_names)
+
+    adata.obsm[label] = result_df
 
     # Remove temporary coordinates from adata.obs
     drop_cols = ['_x_coord', '_y_coord']
@@ -1293,8 +1301,7 @@ def calculate_nearest_neighbor(
     # Remove dummy column if it was created
     if dummy_column_created:
         adata.obs.drop(columns=[imageid], inplace=True, errors='ignore')
-        # Restore imageid to None to reflect the input
-        imageid = original_imageid
+        imageid = original_imageid  # restore the original state
 
     if verbose:
         print(f"Spatial distances stored in adata.obsm['{label}']")
