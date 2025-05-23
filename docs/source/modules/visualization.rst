@@ -1,0 +1,35 @@
+.. automodule:: spac.visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :autosummary:
+
+spac.visualization.visualize_2D_scatter
+spac.visualization.dimensionality_reduction_plot
+spac.visualization.tsne_plot
+spac.visualization.histogram
+spac.visualization.cal_bin_num
+spac.visualization.calculate_histogram
+spac.visualization.heatmap
+spac.visualization.hierarchical_heatmap
+spac.visualization.threshold_heatmap
+spac.visualization.spatial_plot
+spac.visualization.boxplot
+spac.visualization.boxplot_interactive
+spac.visualization.boxplot_from_statistics
+spac.visualization.interactive_spatial_plot
+spac.visualization.prepare_spatial_dataframe
+spac.visualization.main_figure_generation
+spac.visualization.create_scatter_trace
+spac.visualization.create_annotation_trace
+spac.visualization.sankey_plot
+spac.visualization.relational_heatmap
+spac.visualization.plot_ripley_l
+spac.visualization._prepare_spatial_distance_data
+spac.visualization._plot_spatial_distance_dispatch
+spac.visualization._make_axes_object
+spac.visualization._css_rgb_or_hex_to_hex
+spac.visualization._ordered_unique_figs
+spac.visualization.visualize_nearest_neighbor
+spac.visualization.present_summary_as_html
+spac.visualization.present_summary_as_figure
