@@ -1,8 +1,12 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../src")
 import unittest
 import pandas as pd
 import numpy as np
 import anndata
 import matplotlib
+import matplotlib.collections as mcoll
 matplotlib.use('Agg')  # Uses a non-interactive backend for tests
 import matplotlib.pyplot as plt
 from spac.visualization import visualize_nearest_neighbor
@@ -12,7 +16,9 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
 
     @staticmethod
     def _create_test_adata():
-        """Creates a common AnnData object for testing various scenarios."""
+        """
+        Creates a common AnnData object for testing various scenarios.
+        """
         data = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]])
         obs = pd.DataFrame({
             'cell_type': ['typeA', 'typeB', 'typeA', 'typeC'],
@@ -377,6 +383,45 @@ class TestVisualizeNearestNeighbor(unittest.TestCase):
                 distance_from='typeA',
                 method='invalid_plot_method'
             )
+
+    # log=True → verify x‑axis label and log‑transformed max value
+    def test_log_distance_scale_and_axis(self):
+        """With log=True the data and axis must be on log scale (max ≈ 1.60944)."""
+        res_log = visualize_nearest_neighbor(
+            adata=self.adata,
+            annotation='cell_type',
+            distance_from='typeA',
+            distance_to='typeB',
+            method='numeric',
+            plot_type='box',
+            log=True,
+        )
+
+        df = res_log['data']
+        # Hard‑coded expectation: transformed column exists
+        self.assertIn('log_distance', df.columns)
+
+        # Hard‑coded expected max of log1p(4.0) ≈ 1.6094379124341003
+        expected_max_log = 1.6094379124341003
+        self.assertAlmostEqual(
+            df['log_distance'].max(),
+            expected_max_log,
+            places=6,
+            msg='log_distance max is not log1p(4.0)'
+        )
+
+        ax = res_log['ax']
+        # Axis label must reflect log scale
+        self.assertEqual(
+            ax.get_xlabel(),
+            'Log(Nearest Neighbor Distance)'
+        )
+        # x‑axis upper limit should at least reach the expected max value
+        self.assertGreaterEqual(
+            ax.get_xlim()[1],
+            expected_max_log,
+            msg='x‑axis upper limit less than expected log max'
+        )
 
 
 if __name__ == '__main__':
