@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Layout logic &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">spac</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../spac.html">spac package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Layout logic</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/visualization._plot_spatial_distance_dispatch.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization._plot_spatial_distance_dispatch">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">_plot_spatial_distance_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_long</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facet_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hue_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'group'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#_plot_spatial_distance_dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization._plot_spatial_distance_dispatch" title="Permalink to this definition"></a></dt>
+<dd><p>Dispatch a seaborn call to visualise nearest-neighbor distances.
+Returns Axes object(s) for further customization.</p>
+<section id="layout-logic">
+<h1>Layout logic<a class="headerlink" href="#layout-logic" title="Permalink to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stratify_by</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">facet_plot</span></code> → Faceted plot, returns <code class="docutils literal notranslate"><span class="pre">Axes</span></code>
+or <code class="docutils literal notranslate"><span class="pre">List[Axes]</span></code> for the “ax” key.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stratify_by</span></code> &amp; not <code class="docutils literal notranslate"><span class="pre">facet_plot</span></code> → List of plots, returns
+<code class="docutils literal notranslate"><span class="pre">List[Axes]</span></code> for the “ax” key.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stratify_by</span></code> is None → Single plot, returns <code class="docutils literal notranslate"><span class="pre">Axes</span></code> or
+<code class="docutils literal notranslate"><span class="pre">List[Axes]</span></code> (if plot_type creates facets) for the “ax” key.</p></li>
+</ol>
+<dl class="field-list">
+<dt class="field-odd">param df_long<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tidy DataFrame returned by <cite>_prepare_spatial_distance_data</cite> with
+a long layout and with  columns [‘cellid’, ‘group’, ‘distance’,
+‘phenotype’, ‘stratify_by’].</p>
+</dd>
+<dt class="field-even">type df_long<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+<dt class="field-odd">param method<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">'numeric'</span></code> → <a href="#id1"><span class="problematic" id="id2">:pyfunc:`seaborn.catplot`</span></a>
+<code class="docutils literal notranslate"><span class="pre">'distribution'</span></code> → <a href="#id3"><span class="problematic" id="id4">:pyfunc:`seaborn.displot`</span></a></p>
+</dd>
+<dt class="field-even">type method<span class="colon">:</span></dt>
+<dd class="field-even"><p>{‘numeric’, ‘distribution’}</p>
+</dd>
+<dt class="field-odd">param plot_type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Kind forwarded to Seaborn.
+Numeric (<cite>method=’numeric’</cite>) – box, violin, boxen, strip, swarm, etc.
+Distribution (<cite>method=’distribution’</cite>) – hist, kde, ecdf, etc.</p>
+</dd>
+<dt class="field-even">type plot_type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">param stratify_by<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column used to split data. <em>None</em> for no splitting.</p>
+</dd>
+<dt class="field-even">type stratify_by<span class="colon">:</span></dt>
+<dd class="field-even"><p>str or None</p>
+</dd>
+<dt class="field-odd">param facet_plot<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If True with stratify_by, create a faceted grid, otherwise
+returns individual axes.</p>
+</dd>
+<dt class="field-even">type facet_plot<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool, default False</p>
+</dd>
+<dt class="field-odd">param distance_col<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column name in df_long holding the numeric distance values.
+‘distance’ – raw Euclidean / pixel / micron distances.
+‘log_distance’ – natural-log‐transformed distances.
+The axis label is automatically adjusted.</p>
+</dd>
+<dt class="field-even">type distance_col<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, default ‘distance’</p>
+</dd>
+<dt class="field-odd">param hue_axis<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column that encodes the hue (color) dimension.</p>
+</dd>
+<dt class="field-even">type hue_axis<span class="colon">:</span></dt>
+<dd class="field-even"><p>str, default ‘group’</p>
+</dd>
+<dt class="field-odd">param palette<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>dict → color map forwarded to seaborn/Matpotlib.</p></li>
+<li><p>str  → any Seaborn/Matplotlib palette name</p></li>
+<li><p>None → defaults chosen by Seaborn</p></li>
+</ul>
+<p>Typically the pin‑color map prepared upstream.</p>
+</dd>
+<dt class="field-even">type palette<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict or str or None</p>
+</dd>
+<dt class="field-odd">param **kwargs<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Extra keyword args propagated to Seaborn. Legend control
+(e.g. <cite>legend=False</cite>) should be passed here if needed.</p>
+</dd>
+<dt class="field-even">returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>{</dt><dd><p>‘data’: pandas.DataFrame,      # the input df_long
+‘ax’  : matplotlib.axes.Axes | list[Axes]</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+<dt class="field-odd">rtype<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
