@@ -1,0 +1,185 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">spac</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../spac.html">spac package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/visualization.boxplot_interactive.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.boxplot_interactive">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">boxplot_interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showfliers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defined_color_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seismic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'interactive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#boxplot_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.boxplot_interactive" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a boxplot for given features from an AnnData object.</p>
+<p>This function visualizes the distribution of gene expression
+(or other features) across different annotations in the provided data.
+It can handle various options such as log-transformation, feature
+selection, and handling of outliers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – An AnnData object containing the data to plot. The expression matrix
+is accessed via <cite>adata.X</cite> or <cite>adata.layers[layer]</cite>, and annotations
+are taken from <cite>adata.obs</cite>.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the annotation column (e.g., cell type or sample
+condition) from <cite>adata.obs</cite> used to group the features. If <cite>None</cite>, no
+grouping is applied.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer from <cite>adata.layers</cite> to use. If <cite>None</cite>, <cite>adata.X</cite>
+is used.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – The figure to plot the boxplot onto. If <cite>None</cite>, a new figure is
+created.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The list of features (genes) to plot. If <cite>None</cite>, all features are
+included.</p></li>
+<li><p><strong>showfliers</strong> (<em>{None</em><em>, </em><em>&quot;downsample&quot;</em><em>, </em><em>&quot;all&quot;}</em><em>, </em><em>default = None</em>) – If ‘all’, all outliers are displayed in the boxplot.
+If ‘downsample’, when num outliers is &gt;10k, they are downsampled to
+10% of the original count.
+If None, outliers are hidden.</p></li>
+<li><p><strong>log_scale</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, the log1p transformation is applied to the features before
+plotting. This option is disabled if negative values are found in the
+features.</p></li>
+<li><p><strong>orient</strong> (<em>{&quot;v&quot;</em><em>, </em><em>&quot;h&quot;}</em><em>, </em><em>default=&quot;v&quot;</em>) – The orientation of the boxplots: “v” for vertical, “h” for horizontal.</p></li>
+<li><p><strong>figure_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the figure in inches. Default is 3.2.</p></li>
+<li><p><strong>figure_height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of the figure in inches. Default is 2.</p></li>
+<li><p><strong>figure_dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – DPI (dots per inch) for the figure. Default is 200.</p></li>
+<li><p><strong>defined_color_map</strong> (<em>str</em><em>, </em><em>optional</em>) – Key in ‘adata.uns’ holding a pre-computed color dictionary.
+Falls back to automatic generation from ‘annotation’ values.</p></li>
+<li><p><strong>ax</strong> – A Matplotlib Axes object. Currently, this parameter is not used by the
+underlying plotting functions (Seaborn’s <cite>catplot</cite>/<cite>displot</cite>), which
+will always generate a new figure and axes. The <cite>ax</cite> key in the
+returned dictionary will contain the Axes from these new plots.
+This parameter is maintained for API consistency and potential
+future enhancements. Default is None.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional arguments for seaborn figure-level functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>fig<span class="classifier">plotly.graph_objects.Figure or str</span></dt><dd><dl>
+<dt>The generated boxplot figure, which can be either:</dt><dd><ul class="simple">
+<li><p>If <cite>figure_type</cite> is “static”: A base64-encoded PNG</p></li>
+</ul>
+<p>image string
+- If <cite>figure_type</cite> is “interactive”: A Plotly figure object</p>
+</dd>
+</dl>
+</dd>
+<dt>df<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame containing the features and their corresponding values.</p>
+</dd>
+<dt>metrics<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame containing the computed boxplot metrics (if
+<cite>return_metrics</cite> is True).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the following keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
