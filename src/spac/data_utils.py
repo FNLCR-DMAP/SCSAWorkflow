@@ -610,6 +610,16 @@ def downsample_cells(input_data, annotations, n_samples=None, stratify=False,
     """
 
     logging.basicConfig(level=logging.WARNING)
+    
+    # if input is an anndata object convert to pandas dataframe
+    if isinstance(input_data, anndata.AnnData):
+        counts_df = input_data.to_df()
+        input_data = pd.merge(counts_df, input_data.obs, left_index = True, right_index = True, how = 'left')
+    elif isinstance(input_data, pd.DataFrame):
+        pass
+    else:
+        raise TypeError("Input data must be a Pandas DataFrame or Anndata Object.")
+            
     # Convert annotations to list if it's a string
     if isinstance(annotations, str):
         annotations = [annotations]
