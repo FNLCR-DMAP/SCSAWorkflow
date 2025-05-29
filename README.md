@@ -5,6 +5,7 @@ This Python-based package leverages the anndata framework for easy integration w
 
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
+Latest released version is v0.9.0 at 5/23/2025
 ```bash
 cd <home directory of SCSAWorkflow folder>
 # If conda is not activate

@@ -481,9 +481,9 @@ def _select_values_dataframe(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data[annotation].isin(values)]
+        filtered_data = data[data[annotation].astype(str).isin(values)]
     elif exclude_values is not None:
-        filtered_data = data[~data[annotation].isin(exclude_values)]
+        filtered_data = data[~data[annotation].astype(str).isin(exclude_values)]
 
     count = filtered_data.shape[0]
     logging.info(
@@ -525,9 +525,9 @@ def _select_values_anndata(data, annotation, values, exclude_values):
 
     # Proceed with filtering based on values or exclude_values
     if values is not None:
-        filtered_data = data[data.obs[annotation].isin(values)].copy()
+        filtered_data = data[data.obs[annotation].astype(str).isin(values)].copy()
     elif exclude_values is not None:
-        filtered_data = data[~data.obs[annotation].isin(exclude_values)].copy()
+        filtered_data = data[~data.obs[annotation].astype(str).isin(exclude_values)].copy()
 
     count = filtered_data.n_obs
     logging.info(
@@ -1151,6 +1151,7 @@ def summarize_dataframe(
         A dictionary where each key is a column name and its value is another
         dictionary with:
           - 'data_type': either 'numeric' or 'categorical'
+          - 'missing_count': int
           - 'missing_indices': list of row indices with missing values
           - 'summary': summary statistics if numeric or unique labels with
           counts if categorical
@@ -1205,7 +1206,7 @@ def summarize_dataframe(
         print(f"Summary for column '{col}':")
         print(f"Type: {col_info['data_type']}")
         print("Count missing indices:", col_info['count_missing_indices'])
-        print("Missing indices:", col_info['missing_indices'])
+        # print("Missing indices:", col_info['missing_indices'])
         print("Details:", col_info['summary'])
         print("-" * 40)
     return results

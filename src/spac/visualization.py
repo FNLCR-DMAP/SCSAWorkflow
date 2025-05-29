@@ -1,3 +1,4 @@
+import logging
 import seaborn as sns
 import seaborn
 import pandas as pd
@@ -24,6 +25,12 @@ import warnings
 import base64
 import time
 import json
+import re
+from typing import Dict, List, Union
+import matplotlib.colors as mcolors
+import matplotlib.patches as mpatch
+from functools import partial
+from collections import OrderedDict
 
 
 # Configure logging
@@ -659,7 +666,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
-
+            
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
@@ -679,13 +686,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 ax_array = ax_array.flatten()
 
             for i, ax_i in enumerate(ax_array):
-                group = groups[i]
-                group_data = plot_data[plot_data[group_by] == group][
-                    data_column
-                ]
-                hist_data = calculate_histogram(
-                    group_data, kwargs['bins']
-                )
+                group_data = plot_data[plot_data[group_by] ==
+                             groups[i]][data_column]
+                hist_data = calculate_histogram(group_data, kwargs['bins'])
 
                 # If defined_color_map provided, retrieves color map
                 group_color = None
@@ -777,9 +780,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
-        return {"fig": fig, "axs": axs[0], "df": plot_data}
+        return {"fig": fig, "axs": axs[0], "df": hist_data}
     else:
-        return {"fig": fig, "axs": axs, "df": plot_data}
+        return {"fig": fig, "axs": axs, "df": hist_data}
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
@@ -1635,35 +1638,24 @@ def boxplot_interactive(
         DPI (dots per inch) for the figure. Default is 200.
 
     defined_color_map : str, optional
-        Predefined color mapping stored in adata.uns for specific labels.
-        Default is None, which will generate the color mapping automatically.
-
-    annotation_colorscale : str, default='viridis'
-        Name of the color scale to use for the dots when annotation
-        is used.
-
-    feature_colorscale: str, default='seismic'
-        Name of the color scale to use for the dots when feature
-        is used.
-
-    figure_type : {"interactive", "static", "png"}, default = "interactive"
-        If "interactive", the plot is interactive, allowing for zooming 
-        and panning.
-        If "static", the plot is static.
-        If "png", the plot is returned as a PNG image.
-
-    return_metrics: bool, default = False
-        If True, the function also returns the computed boxplot metrics.
-
-    **kwargs : additional keyword arguments
-        Any other keyword arguments passed to the underlying plotting function.
+        Key in 'adata.uns' holding a pre-computed color dictionary.
+        Falls back to automatic generation from 'annotation' values.
+    ax : matplotlib.axes.Axes, optional
+        A Matplotlib Axes object. Currently, this parameter is not used by the
+        underlying plotting functions (Seaborn's `catplot`/`displot`), which
+        will always generate a new figure and axes. The `ax` key in the
+        returned dictionary will contain the Axes from these new plots.
+        This parameter is maintained for API consistency and potential
+        future enhancements. Default is None.
+    **kwargs : dict
+        Additional arguments for seaborn figure-level functions.
 
     Returns
     -------
     A dictionary containing the following keys:
         fig : plotly.graph_objects.Figure or str
             The generated boxplot figure, which can be either:
-                - If `figure_type` is "static": A base64-encoded PNG 
+                - If `figure_type` is "static": A base64-encoded PNG
                 image string
                 - If `figure_type` is "interactive": A Plotly figure object
 
@@ -2013,14 +2005,14 @@ def boxplot_interactive(
             'hovermode': False,
             'clickmode': 'none',
             'modebar_remove': [
-                'toimage', 
-                'zoom', 
-                'zoomin', 
+                'toimage',
+                'zoom',
+                'zoomin',
                 'zoomout',
-                'select', 
-                'pan', 
-                'lasso', 
-                'autoscale', 
+                'select',
+                'pan',
+                'lasso',
+                'autoscale',
                 'resetscale'
             ],
             'legend_itemclick': False,
@@ -3232,145 +3224,270 @@ def _plot_spatial_distance_dispatch(
     plot_type,
     stratify_by=None,
     facet_plot=False,
-    **kwargs
+    distance_col="distance",
+    hue_axis="group",
+    palette=None,
+    **kwargs,
 ):
     """
-    Decides the figure layout based on 'stratify_by' and 'facet_plot'
-    and dispatches actual plotting calls.
+    Dispatch a seaborn call to visualise nearest-neighbor distances.
+    Returns Axes object(s) for further customization.
 
-    Logic:
-      1) If stratify_by and facet_plot => single figure with subplots (faceted)
-      2) If stratify_by and not facet_plot => multiple figures, one per group
-      3) If stratify_by is None => single figure (no subplots)
-
-    This function calls seaborn figure-level functions (catplot or displot).
+    Layout logic
+    ------------
+    1. ``stratify_by`` & ``facet_plot`` → Faceted plot, returns ``Axes``
+       or ``List[Axes]`` for the "ax" key.
+    2. ``stratify_by`` & not ``facet_plot`` → List of plots, returns
+       ``List[Axes]`` for the "ax" key.
+    3. ``stratify_by`` is None → Single plot, returns ``Axes`` or
+       ``List[Axes]`` (if plot_type creates facets) for the "ax" key.
 
     Parameters
     ----------
     df_long : pd.DataFrame
-        Tidy DataFrame with columns ['cellid', 'group', 'distance',
+        Tidy DataFrame returned by `_prepare_spatial_distance_data` with
+        a long layout and with  columns ['cellid', 'group', 'distance',
         'phenotype', 'stratify_by'].
     method : {'numeric', 'distribution'}
-        Determines which seaborn function is used (catplot or displot).
+        ``'numeric'`` → :pyfunc:`seaborn.catplot`
+        ``'distribution'`` → :pyfunc:`seaborn.displot`
     plot_type : str
-        For method='numeric': 'box', 'violin', 'boxen', etc.
-        For method='distribution': 'hist', 'kde', 'ecdf', etc.
+        Kind forwarded to Seaborn.
+        Numeric (`method='numeric'`) – box, violin, boxen, strip, swarm, etc.
+        Distribution (`method='distribution'`) – hist, kde, ecdf, etc.
     stratify_by : str or None
-        Column name for grouping. If None, no grouping is done.
-    facet_plot : bool
-        If True, subplots in a single figure (faceted).
-        If False, separate figures (one per group) or a single figure.
+        Column used to split data. *None* for no splitting.
+    facet_plot : bool, default False
+        If True with stratify_by, create a faceted grid, otherwise
+        returns individual axes.
+    distance_col : str, default 'distance'
+        Column name in df_long holding the numeric distance values.
+        'distance' – raw Euclidean / pixel / micron distances.
+        'log_distance' – natural-log‐transformed distances.
+        The axis label is automatically adjusted.
+    hue_axis : str, default 'group'
+        Column that encodes the hue (color) dimension.
+    palette : dict or str or None
+        • dict → color map forwarded to seaborn/Matpotlib.
+        • str  → any Seaborn/Matplotlib palette name
+        • None → defaults chosen by Seaborn
+        Typically the pin‑color map prepared upstream.
     **kwargs
-        Additional seaborn plotting arguments (e.g., col_wrap=2).
+        Extra keyword args propagated to Seaborn. Legend control
+        (e.g. `legend=False`) should be passed here if needed.
 
     Returns
     -------
     dict
-        Dictionary with two keys:
-            - "data": the DataFrame (df_long)
-            - "fig": a Matplotlib Figure or a list of Figures
+        {
+            'data': pandas.DataFrame,      # the input df_long
+            'ax'  : matplotlib.axes.Axes | list[Axes]
+        }
+    """
+
+    if method not in ("numeric", "distribution"):
+        raise ValueError("`method` must be 'numeric' or 'distribution'.")
+
+    # Choose plotting function
+    if method == "numeric":
+        _plot_base = partial(
+            sns.catplot,
+            data=None,
+            x=distance_col,
+            y="group",
+            hue=hue_axis,
+            kind=plot_type,
+            palette=palette,
+        )
+    else:  # distribution
+        _plot_base = partial(
+            sns.displot,
+            data=None,
+            x=distance_col,
+            hue=hue_axis,
+            kind=plot_type,
+            palette=palette,
+        )
+
+    # Single plotting wrapper to create Axes object(s)
+    def _make_axes_object(_data, **kws_plot):
+        g = _plot_base(data=_data, **kws_plot)
+
+        axis_label = (
+            "Log(Nearest Neighbor Distance)"
+            if "log" in distance_col
+            else "Nearest Neighbor Distance"
+        )
+
+        g.set_axis_labels(axis_label, None)
+
+        if g.axes.size == 1:
+            returned_ax = g.ax
+        else:
+            returned_ax = g.axes.flatten().tolist()
+
+        return returned_ax
+
+    # Build axes
+    final_axes_object = None
+
+    if stratify_by and facet_plot:
+        final_axes_object = _make_axes_object(
+            df_long, col=stratify_by, **kwargs
+        )
+    elif stratify_by and not facet_plot:
+        list_of_all_axes = []
+        for category_value in df_long[stratify_by].unique():
+            data_subset = df_long[df_long[stratify_by] == category_value]
+            axes_or_list_for_category = _make_axes_object(
+                data_subset, **kwargs
+            )
+            if isinstance(axes_or_list_for_category, list):
+                list_of_all_axes.extend(axes_or_list_for_category)
+            else:
+                list_of_all_axes.append(axes_or_list_for_category)
+        final_axes_object = list_of_all_axes
+    else:
+        final_axes_object = _make_axes_object(df_long, **kwargs)
+
+    return {"data": df_long, "ax": final_axes_object}
+
+
+# Build a master HEX palette and cache it inside the AnnData object
+# -----------------------------------------------------------------------------
+# WHAT  Convert every entry in ``color_dict_rgb`` (which may contain RGB tuples,
+#       "rgb()" strings, or already‑hex values) into a canonical six‑digit HEX
+#       string, storing the results in ``palette_hex``.
+# WHY   Downstream plotting utilities (Matplotlib / Seaborn) expect colours in
+#       HEX.  Performing the conversion once, here, guarantees a uniform format
+#       for all later plots and prevents inconsistencies when colours are
+#       re‑used.
+# HOW   The helper ``_css_rgb_or_hex_to_hex`` normalises each colour.  The
+#       resulting dictionary is cached under ``adata.uns['_spac_palettes']`` so
+#       that *any* later function can retrieve the same palette by name.
+#       ``defined_color_map or annotation`` forms a unique key that ties the
+#       palette to either a user‑defined map or the current annotation field.
+def _css_rgb_or_hex_to_hex(col, keep_alpha=False):
+    """
+    Normalise a CSS-style color string to a hexadecimal value or
+    a valid Matplotlib color name.
+
+    Parameters
+    ----------
+    col : str
+        Accepted formats:
+        * '#abc', '#aabbcc', '#rrggbbaa'
+        * 'rgb(r,g,b)' or 'rgba(r,g,b,a)', where r, g, b are 0-255 and
+          a is 0-1 or 0-255
+        * any named Matplotlib color
+
+    keep_alpha : bool, optional
+        If True and the input includes alpha, return an 8-digit hex;
+        otherwise drop the alpha channel.  Default is False.
+
+    Returns
+    -------
+    str
+        * Lower-case colour name or
+        * 6- or 8-digit lower-case hex.
 
     Raises
     ------
     ValueError
-        If 'method' is invalid (not 'numeric' or 'distribution').
+        If the color cannot be interpreted.
 
     Examples
     --------
-    Called internally by 'visualize_nearest_neighbor'. Typically not used
-    directly by end users.
+    >>> _css_rgb_or_hex_to_hex('gold')
+    'gold'
+    >>> _css_rgb_or_hex_to_hex('rgb(255,0,0)')
+    '#ff0000'
+    >>> _css_rgb_or_hex_to_hex('rgba(255,0,0,0.5)', keep_alpha=True)
+    '#ff000080'
     """
 
-    distance_col = kwargs.pop('distance_col', 'distance')
-    hue_axis = kwargs.pop('hue_axis', None)
+    col = col.strip().lower()
 
-    if method not in ['numeric', 'distribution']:
-        raise ValueError("`method` must be 'numeric' or 'distribution'.")
+    # Compile the rgb()/rgba() matcher locally to satisfy style request.
+    rgb_re = re.compile(
+        r'rgba?\s*\('
+        r'\s*([0-9]{1,3})\s*,'
+        r'\s*([0-9]{1,3})\s*,'
+        r'\s*([0-9]{1,3})'
+        r'(?:\s*,\s*([0-9]*\.?[0-9]+))?'
+        r'\s*\)',
+        re.I,
+    )
 
-    # Set up the plotting function using partial
-    if method == 'numeric':
-        plot_func = partial(
-            sns.catplot,
-            data=None,
-            x=distance_col,
-            y='group',
-            kind=plot_type
-        )
-    else:  # distribution
-        plot_func = partial(
-            sns.displot,
-            data=None,
-            x=distance_col,
-            hue=hue_axis if hue_axis else None,
-            kind=plot_type
-        )
+    # 1. direct hex
+    if col.startswith('#'):
+        return mcolors.to_hex(col, keep_alpha=keep_alpha).lower()
 
-    # Helper to plot a single figure or faceted figure
-    def _make_figure(data, **kws):
-        g = plot_func(data=data, **kws)
-        if distance_col == 'log_distance':
-            x_label = "Log(Nearest Neighbor Distance)"
-        else:
-            x_label = "Nearest Neighbor Distance"
+    # 2. rgb()/rgba()
+    match = rgb_re.fullmatch(col)
+    if match:
+        r, g, b, a = match.groups()
+        r, g, b = map(int, (r, g, b))
+        if not all(0 <= v <= 255 for v in (r, g, b)):
+            raise ValueError(
+                f'RGB components in "{col}" must be between 0 and 255'
+            )
+        rgba = [r / 255, g / 255, b / 255]
+        if a is not None:
+            a_val = float(a)
+            if a_val > 1:      # user supplied 0-255 alpha
+                a_val /= 255
+            rgba.append(a_val)
+        return mcolors.to_hex(rgba, keep_alpha=keep_alpha).lower()
 
-        # Set axis label based on whether log transform was applied
-        if hasattr(g, 'set_axis_labels'):
-            g.set_axis_labels(x_label, None)
-        else:
-            # Fallback if 'set_axis_labels' is unavailable
-            plt.xlabel(x_label)
+    # 3. named color
+    if col in mcolors.get_named_colors_mapping():
+        return col  # let Matplotlib handle named colors
 
-        return g.fig
+    # 4. unsupported format
+    raise ValueError(f'Unsupported color format: "{col}"')
 
-    figures = []
 
-    # Branching logic for figure creation
-    if stratify_by and facet_plot:
-        # Single figure with faceted subplots (col=stratify_by)
-        fig = _make_figure(df_long, col=stratify_by, **kwargs)
-        figures.append(fig)
-
-    elif stratify_by and not facet_plot:
-        # Multiple separate figures, one per unique value in stratify_by
-        categories = df_long[stratify_by].unique()
-        for cat in categories:
-            subset = df_long[df_long[stratify_by] == cat]
-            fig = _make_figure(subset, **kwargs)
-            figures.append(fig)
-    else:
-        # Single figure (no subplots)
-        fig = _make_figure(df_long, **kwargs)
-        figures.append(fig)
-
-    # Return dictionary: { 'data': DataFrame, 'fig': Figure(s) }
-    result = {"data": df_long}
-    if len(figures) == 1:
-        result["fig"] = figures[0]
-    else:
-        result["fig"] = figures
-    return result
+# Helper function (can be defined at module level)
+def _ordered_unique_figs(axes_list: list):
+    """
+    Helper to get unique figures from a list of axes,
+    preserving first-seen order.
+    """
+    seen = OrderedDict()
+    for ax_item in axes_list: # Assumes axes_list is indeed a list
+        fig = getattr(ax_item, 'figure', None)
+        if fig is not None:
+            seen.setdefault(fig, None)
+    return list(seen)
 
 
 def visualize_nearest_neighbor(
     adata,
     annotation,
+    distance_from,
+    distance_to=None,
     stratify_by=None,
     spatial_distance='spatial_distance',
-    distance_from=None,
-    distance_to=None,
     facet_plot=False,
+    method=None,
     plot_type=None,
     log=False,
-    method=None,
+    annotation_colorscale='rainbow',
+    defined_color_map=None,
+    ax=None,
     **kwargs
 ):
     """
     Visualize nearest-neighbor (spatial distance) data between groups of cells
-    as numeric or distribution plots.
+    with optional pin-color map via numeric or distribution plots.
 
-    This user-facing function assembles the data by calling
-    `_prepare_spatial_distance_data` and then creates plots through
-    `_plot_spatial_distance_dispatch`.
+    This landing function first constructs a tidy long-form DataFrame via
+    function `_prepare_spatial_distance_data`, then dispatches plotting to
+    function `_plot_spatial_distance_dispatch`.  A pin-color feature guarantees
+    consistent mapping from annotation labels to colors across figures,
+    drawing the mapping from ``adata.uns`` (if present) or generating one
+    automatically through `spac.utils.color_mapping`.
 
     Plot arrangement logic:
       1) If stratify_by is not None and facet_plot=True => single figure
@@ -3385,26 +3502,38 @@ def visualize_nearest_neighbor(
         Annotated data matrix with distances in `adata.obsm[spatial_distance]`.
     annotation : str
         Column in `adata.obs` containing cell phenotypes or annotations.
-    stratify_by : str, optional
-        Column in `adata.obs` used to group or stratify data (e.g. imageid).
-    spatial_distance : str, optional
-        Key in `adata.obsm` storing the distance DataFrame. Default is
-        'spatial_distance'.
     distance_from : str
         Reference phenotype from which distances are measured. Required.
     distance_to : str or list of str, optional
         Target phenotype(s) to measure distance to. If None, uses all
         available phenotypes.
+    stratify_by : str, optional
+        Column in `adata.obs` used to group or stratify data (e.g. imageid).
+    spatial_distance : str, optional
+        Key in `adata.obsm` storing the distance DataFrame. Default is
+        'spatial_distance'.
     facet_plot : bool, optional
         If True (and stratify_by is not None), subplots in a single figure.
-        Else, multiple or single figure(s).
-    plot_type : str, optional
-        For method='numeric': 'box', 'violin', 'boxen', etc.
-        For method='distribution': 'hist', 'kde', 'ecdf', etc.
-    log : bool, optional
-        If True, applies np.log1p transform to the distance values.
+        Otherwise, multiple or single figure(s).
     method : {'numeric', 'distribution'}
         Determines the plotting style (catplot vs displot).
+    plot_type : str or None, optional
+        Specific seaborn plot kind.  If None, sensible defaults are selected
+        ('boxen' for numeric, 'violin' for distribution).
+        For method='numeric': 'box', 'violin', 'boxen', 'strip', 'swarm'.
+        For method='distribution': 'hist', 'kde', 'ecdf'.
+    log : bool, optional
+        If True, applies np.log1p transform to the distance values.
+    annotation_colorscale : str, optional
+        Matplotlib colormap name used when auto-enerating a new mapping.
+        Ignored if 'defined_color_map' is provided.
+    defined_color_map : str, optional
+        Key in 'adata.uns' holding a pre-computed color dictionary.
+        Falls back to automatic generation from 'annotation' values.
+    ax : matplotlib.axes.Axes, optional
+        The matplotlib Axes containing the analysis plots.
+        The returned ax is the passed ax or new ax created.
+        Only works if plotting a single component. Default is None.
     **kwargs : dict
         Additional arguments for seaborn figure-level functions.
 
@@ -3412,53 +3541,64 @@ def visualize_nearest_neighbor(
     -------
     dict
         {
-            "data": pd.DataFrame,  # Tidy DataFrame used for plotting
-            "fig": Figure or list[Figure]  # Single or multiple figures
+            'data': pd.DataFrame,  # long-form table for plotting
+            'fig' : matplotlib.figure.Figure | list[Figure] | None,
+            'ax': matplotlib.axes.Axes | list[matplotlib.axes.Axes],
+            'palette': dict  # {label: '#rrggbb'}
         }
 
     Raises
     ------
     ValueError
-        If required parameters are missing or invalid.
+        If required parameters are invalid.
 
     Examples
     --------
-    >>> # Numeric box plot comparing Tumor distances to multiple targets
     >>> res = visualize_nearest_neighbor(
     ...     adata=my_adata,
     ...     annotation='cell_type',
-    ...     stratify_by='sample_id',
-    ...     spatial_distance='spatial_distance',
-    ...     distance_from='Tumor',
-    ...     distance_to=['Stroma', 'Immune'],
-    ...     facet_plot=True,
+    ...     distance_from='Tumour',
+    ...     distance_to=['Stroma', 'B cell'],
+    ...     method='numeric',
     ...     plot_type='box',
-    ...     method='numeric'
+    ...     facet_plot=True,
+    ...     stratify_by='image_id',
+    ...     defined_color_map='pin_color_map'
     ... )
-    >>> df_long, fig = res["data"], res["fig"]
-
-    >>> # Distribution plot (kde) for a single target, single figure
-    >>> res2 = visualize_nearest_neighbor(
-    ...     adata=my_adata,
-    ...     annotation='cell_type',
-    ...     distance_from='Tumor',
-    ...     distance_to='Stroma',
-    ...     method='distribution',
-    ...     plot_type='kde'
-    ... )
-    >>> df_dist, fig2 = res2["data"], res2["fig"]
+    >>> fig = res['fig']      # matplotlib.figure.Figure
+    >>> ax_list = res['ax']   # list[matplotlib.axes.Axes] (faceted plot)
+    >>> df  = res['data']     # long-form DataFrame
+    >>> ax_list[0].set_title('Tumour → Stroma distances')
     """
 
-    if distance_from is None:
-        raise ValueError(
-            "Please specify the 'distance_from' phenotype. It indicates "
-            "the reference group from which distances are measured."
-        )
     if method not in ['numeric', 'distribution']:
         raise ValueError(
             "Invalid 'method'. Please choose 'numeric' or 'distribution'."
         )
 
+    # Determine plot_type if not provided
+    if plot_type is None:
+        plot_type = 'boxen' if method == 'numeric' else 'kde'
+
+    # If log=True, the column name is 'log_distance', else 'distance'
+    distance_col = 'log_distance' if log else 'distance'
+
+    # Build/fetch color palette
+    color_dict_rgb = get_defined_color_map(
+        adata=adata,
+        defined_color_map=defined_color_map,
+        annotations=annotation,
+        colorscale=annotation_colorscale
+    )
+
+    palette_hex = {
+        k: _css_rgb_or_hex_to_hex(v) for k, v in color_dict_rgb.items()
+    }
+    adata.uns.setdefault('_spac_palettes', {})[
+        f"{defined_color_map or annotation}_hex"
+    ] = palette_hex
+
+    # Reshape data
     df_long = _prepare_spatial_distance_data(
         adata=adata,
         annotation=annotation,
@@ -3469,25 +3609,102 @@ def visualize_nearest_neighbor(
         log=log
     )
 
-    # Determine plot_type if not provided
-    if plot_type is None:
-        plot_type = 'boxen' if method == 'numeric' else 'kde'
+    # Filter the full palette to include only the target groups present in
+    # df_long['group']. These are the groups that will actually be used for hue
+    # in the plot.
+    # Derive a palette tailored to *this* figure
+    # -----------------------------------------------------------------------------
+    # WHAT  ``plot_specific_palette`` keeps only the colours that correspond to the
+    #       groups actually present in the tidy DataFrame ``df_long``.
+    # WHY   Passing the full master palette could create legend entries (and colour
+    #       assignments) for groups that do not appear in the current subset,
+    #       cluttering the figure.  Trimming the palette ensures a clean, accurate
+    #       legend and avoids any mismatch between data and colour.
+    # HOW   ``target_groups_in_plot`` is the list of unique group labels in the
+    #       plot.  For each label we look up its HEX code in ``palette_hex``; if a
+    #       colour exists we copy the mapping into the new dictionary.
+    target_groups_in_plot = df_long['group'].astype(str).unique()
 
-    # If log=True, the column name is 'log_distance', else 'distance'
-    distance_col = 'log_distance' if log else 'distance'
+    plot_specific_palette = {
+        str(group): palette_hex.get(str(group))
+        for group in target_groups_in_plot
+        if palette_hex.get(str(group)) is not None
+    }
 
-    # Dispatch to the plot logic
-    result_dict = _plot_spatial_distance_dispatch(
+    # Assemble kwargs & dispatch
+    # Inject the palette into the plotting dispatcher
+    # -----------------------------------------------------------------------------
+    # WHAT  Two keyword arguments are added/overwritten:
+    #       • ``hue_axis='group'`` tells the plotting function to colour elements
+    #           by the ``group`` column.
+    #       • ``palette=plot_specific_palette`` supplies the exact colour mapping
+    #           we just created.
+    # WHY   Explicitly specifying both the hue axis and its palette guarantees that
+    #       every group is rendered with the intended colour, bypassing Seaborn’s
+    #       default colour cycle and preventing accidental re‑ordering.
+    # HOW   ``dispatch_kwargs`` starts as a copy of any user‑supplied kwargs; the
+    #       call to ``update`` adds these palette‑related keys before control is
+    #       handed off to the generic plotting helper.
+
+    dispatch_kwargs = dict(kwargs)
+    dispatch_kwargs.update({
+        'hue_axis': 'group',
+        'palette': plot_specific_palette
+    })
+    if method == 'numeric':
+        dispatch_kwargs.setdefault('saturation', 1.0)
+
+    # Set legend=False to allow for custom legend creation by the caller
+    # The user can still override this by passing legend=True in kwargs
+    dispatch_kwargs.setdefault('legend', False)
+
+    disp = _plot_spatial_distance_dispatch(
         df_long=df_long,
         method=method,
         plot_type=plot_type,
         stratify_by=stratify_by,
         facet_plot=facet_plot,
         distance_col=distance_col,
-        **kwargs
+        **dispatch_kwargs
     )
 
-    return result_dict
+    returned_axes = disp['ax']
+    fig_object = None  # Initialize
+
+    if isinstance(returned_axes, list):
+        if returned_axes:
+            # Unique figures, preserved in axis order
+            unique_figs_ordered = _ordered_unique_figs(returned_axes)
+
+            if unique_figs_ordered:     # at least one valid figure
+                if stratify_by and not facet_plot:
+                    # one figure per category → return the ordered list
+                    fig_object = unique_figs_ordered
+                else:
+                    # single-figure layout (facet grid or no stratify)
+                    if len(unique_figs_ordered) == 1:
+                        fig_object = unique_figs_ordered[0]
+                        # first (and usually only) figure
+                    else:            # defensive fallback
+                        logging.warning(
+                            "Multiple figures detected in a single-figure "
+                            "scenario; using the first one."
+                        )
+                        # Return the first one
+                        fig_object = unique_figs_ordered[0]
+        # empty list → keep fig_object = None
+    elif returned_axes is not None:
+        # single Axes → grab its figure
+        fig_object = getattr(returned_axes, 'figure', None)
+    # returned_axes is None → fig_object stays None
+
+    return {
+        'data': disp['data'],
+        'fig': fig_object,
+        'ax': disp['ax'],
+        'palette': plot_specific_palette  # Return the filtered palette
+    }
+
 
 import json
 import plotly.graph_objects as go
@@ -3501,7 +3718,7 @@ def present_summary_as_html(summary_dict: dict) -> str:
     For each specified column, the HTML includes:
       - Column name and data type
       - Count and list of missing indices
-      - Summary details presented in a table (for numeric: stats; 
+      - Summary details presented in a table (for numeric: stats;
         categorical: unique values and counts)
 
     Parameters
@@ -3586,11 +3803,11 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
         clean_data = {}
         for k, v in info['summary'].items():
             # Check if the value is a NumPy integer
-            if isinstance(v, np.integer):  
-                clean_data[k] = int(v)  
+            if isinstance(v, np.integer):
+                clean_data[k] = int(v)
             # Check if the value is a NumPy float
-            elif isinstance(v, np.floating): 
-                clean_data[k] = float(v)  
+            elif isinstance(v, np.floating):
+                clean_data[k] = float(v)
             else:
                 # Keep the value as is if it's already a standard type
                 clean_data[k] = v

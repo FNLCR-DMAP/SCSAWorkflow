@@ -17,7 +17,8 @@ class TestSelectValues(unittest.TestCase):
         # AnnData setup with values 'X', 'Y', 'Z' for the same 'column1'
         self.adata = ad.AnnData(
             np.random.rand(6, 2),
-            obs={'column1': ['X', 'Y', 'X', 'Y', 'X', 'Z']}
+            obs={'column1': ['X', 'Y', 'X', 'Y', 'X', 'Z'],
+                 'numerical': [1, 2, 3, 1, 2, 3]}
         )
 
     def test_dataframe_nonexistent_annotation(self):
@@ -47,6 +48,19 @@ class TestSelectValues(unittest.TestCase):
         unique_values_in_result = result_df['column1'].unique().tolist()
         self.assertCountEqual(unique_values_in_result, expected_values)
 
+    def test_select_values_dataframe_numerical_case(self):
+        """
+        Test selecting specified numerical values from a DataFrame column.
+        """
+        result_df = select_values(self.df, 'column2', ['1'])
+        # Expecting 1 rows where column2
+        self.assertEqual(len(result_df), 1)
+        # Assert that the sets of unique values in the result and expected
+        # values are identical.
+        expected_values = [1]
+        unique_values_in_result = result_df['column2'].unique().tolist()
+        self.assertCountEqual(unique_values_in_result, expected_values)
+
     def test_select_values_adata_typical_case(self):
         """
         Test selecting specified values from an AnnData object.
@@ -56,6 +70,17 @@ class TestSelectValues(unittest.TestCase):
         self.assertEqual(result_adata.n_obs, 5)
         unique_values_in_result = result_adata.obs['column1'].unique().tolist()
         expected_values = ['X', 'Y']
+        self.assertCountEqual(unique_values_in_result, expected_values)
+
+    def test_select_values_adata_numerical_case(self):
+        """
+        Test selecting specified numerical values from an AnnData object.
+        """
+        result_adata = select_values(self.adata, 'numerical', ['1'])
+        # Expecting 2 rows where column2 is '1'
+        self.assertEqual(result_adata.n_obs, 2)
+        unique_values_in_result = result_adata.obs['numerical'].unique().tolist()
+        expected_values = [1]
         self.assertCountEqual(unique_values_in_result, expected_values)
 
     def test_exclude_values_dataframe_typical_case(self):
