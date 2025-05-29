@@ -396,6 +396,7 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
+
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
               x_log_scale=False, y_log_scale=False,
@@ -440,7 +441,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     y_log_scale : bool, default False
         If True, the y-axis will be set to log scale.
-    
+
     defined_color_map : str, optional, default=None
         Key in adata.uns used to retrieve a color mapping dictionary to
         color code the histogram.
@@ -488,7 +489,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         axs : matplotlib.axes.Axes or list of Axes
             The Axes object(s) of the histogram plot(s). Returns a single Axes
             if only one plot is created, otherwise returns a list of Axes.
-        
+
         df : pandas.DataFrame
             DataFrame containing the data used for plotting the histogram.
 
@@ -528,7 +529,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     df = pd.concat([df, adata.obs], axis=1)
 
     if defined_color_map:
-        color_dict = get_defined_color_map(adata,defined_color_map)
+        color_dict = get_defined_color_map(adata, defined_color_map)
         kwargs.setdefault("palette", color_dict)
 
     if feature and annotation:
@@ -537,7 +538,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     data_column = feature if feature else annotation
 
-    # Check for negative values and apply log1p transformation if 
+    # Check for negative values and apply log1p transformation if
     # x_log_scale is True
     if x_log_scale:
         if (df[data_column] < 0).any():
@@ -568,7 +569,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ):
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
-        return(bins)
+        return (bins)
 
     num_rows = plot_data.shape[0]
 
@@ -584,25 +585,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         Parameters:
         - data (pd.Series): The input data to be binned.
-        - bins (int or sequence): Number of bins (if numeric) or unique categories 
+        - bins (int or sequence): Number of bins (if numeric) or unique categories
             (if categorical).
-        - bin_edges (array-like, optional): Predefined bin edges for numeric data. 
+        - bin_edges (array-like, optional): Predefined bin edges for numeric data.
         If None, automatic binning is used.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the following columns:
-            - `count`: 
+            - `count`:
                 Frequency of values in each bin.
-            - `bin_left`: 
+            - `bin_left`:
                 Left edge of each bin (for numeric data).
-            - `bin_right`: 
+            - `bin_right`:
                 Right edge of each bin (for numeric data).
-            - `bin_center`: 
-                Center of each bin (for numeric data) or category labels 
+            - `bin_center`:
+                Center of each bin (for numeric data) or category labels
                 (for categorical data).
-            
+
         """
-        
+
         # Check if the data is numeric or categorical
         if pd.api.types.is_numeric_dtype(data):
             if bin_edges is None:
@@ -620,7 +621,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         else:
             counts = data.value_counts().sort_index()
             return pd.DataFrame({
-                'bin_center': counts.index, 
+                'bin_center': counts.index,
                 'bin_left': counts.index,
                 'bin_right': counts.index,
                 'count': counts.values
@@ -649,7 +650,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 group_data = plot_data[
                     plot_data[group_by] == group
                 ][data_column]
-                group_hist = calculate_histogram(group_data, kwargs['bins'], 
+                group_hist = calculate_histogram(group_data, kwargs['bins'],
                                                  bin_edges=global_bin_edges)
                 group_hist[group_by] = group
                 hist_data.append(group_hist)
@@ -659,7 +660,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
-            sns.histplot(data=hist_data, x='bin_center', weights='count', 
+            sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
             if feature:
@@ -685,15 +686,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 hist_data = calculate_histogram(
                     group_data, kwargs['bins']
                 )
-                
-                #If defined_color_map provided, retrieves color map
+
+                # If defined_color_map provided, retrieves color map
                 group_color = None
                 if defined_color_map:
                     group_color = color_dict.get(group, None)
-                
-                sns.histplot(data=hist_data, x="bin_center", ax=ax_i, 
-                            weights='count', color=group_color, **kwargs)
-                
+
+                sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                             weights='count', color=group_color, **kwargs)
+
                 # If plotting feature specify which layer
                 if feature:
                     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -729,7 +730,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         # Precompute histogram data for single plot
         hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
         if pd.api.types.is_numeric_dtype(plot_data[data_column]):
-            ax.set_xlim(hist_data['bin_left'].min(), 
+            ax.set_xlim(hist_data['bin_left'].min(),
                         hist_data['bin_right'].max())
 
         # Set default color from custom color map if available
@@ -739,13 +740,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs['color'] = default_color
 
         sns.histplot(
-            data=hist_data, 
+            data=hist_data,
             x='bin_center',
-            weights="count", 
-            ax=ax, 
+            weights="count",
+            ax=ax,
             **kwargs
         )
-        
+
         # If plotting feature specify which layer
         if feature:
             ax.set_title(f'Layer: {layer}')
