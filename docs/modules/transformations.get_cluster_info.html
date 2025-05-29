@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.get_cluster_info">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">get_cluster_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#get_cluster_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.get_cluster_info" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve information about clusters based on specific annotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Annotation in adata.obs for cluster info.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Features (e.g., markers) for cluster metrics.
+Defaults to all features in adata.var_names.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used in the aggregate summaries.
+If None, uses adata.X.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with metrics for each cluster including the percentage of
+each cluster to the whole sample.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

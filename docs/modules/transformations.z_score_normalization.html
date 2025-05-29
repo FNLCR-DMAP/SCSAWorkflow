@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.z_score_normalization">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">z_score_normalization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#z_score_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.z_score_normalization" title="Permalink to this definition"></a></dt>
+<dd><p>Compute z-scores for the provided AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object containing the data to normalize.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em>) – The name of the layer to store the computed z-scores.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer in the AnnData object to normalize.
+If None, the main data matrix .X is used.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional arguments to pass to scipy.stats.zscore.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

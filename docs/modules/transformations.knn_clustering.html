@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.knn_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">knn_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'knn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'no_label'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#knn_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.knn_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate knn clusters using sklearn KNeighborsClassifier</p>
+<p>The function will add these two attributes to <cite>adata</cite>:
+<cite>.obs[output_annotation]</cite></p>
+<blockquote>
+<div><p>The assigned int64 class labels by KNeighborsClassifier</p>
+</div></blockquote>
+<dl class="simple">
+<dt><cite>.uns[output_annotation_features]</cite></dt><dd><p>The features used to calculate the knn clusters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em>) – The variables that would be included in fitting the KNN classifier.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation used for classifying the data</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used.</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nearest neighbor to be used in creating the graph.</p></li>
+<li><p><strong>output_annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the output layer where the clusters are stored.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, use the corresponding key <cite>adata.obsm</cite> to calcuate the
+clustering. Takes priority over the layer argument.</p></li>
+<li><p><strong>missing_label</strong> (<em>str</em><em> or </em><em>int</em>) – The value of missing annotations in adata.obs[annotation]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>adata is updated inplace</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

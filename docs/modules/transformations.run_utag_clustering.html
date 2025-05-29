@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.run_utag_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">run_utag_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slide_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Slide'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'UTAG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#run_utag_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.run_utag_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Run UTAG clustering on the AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list</em>) – List of features to use for clustering or for PCA. Default
+(None) is to use all.</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – The number of nearest neighbor to be used in creating the graph.
+Default is 15.</p></li>
+<li><p><strong>resolution</strong> (<em>float</em>) – Resolution parameter for the clustering, higher resolution produces
+more clusters. Default is 1.</p></li>
+<li><p><strong>max_dist</strong> (<em>float</em>) – Maximum distance to cut edges within a graph. Default is 20.</p></li>
+<li><p><strong>n_principal_components</strong> (<em>int</em>) – Number of principal components to use for clustering.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Random state for reproducibility.</p></li>
+<li><p><strong>n_jobs</strong> (<em>int</em>) – Number of jobs to run in parallel. Default is 5.</p></li>
+<li><p><strong>n_iterations</strong> (<em>int</em>) – Number of iterations for the clustering.</p></li>
+<li><p><strong>slide_key</strong> (<em>str</em>) – Key of adata.obs containing information on the batch structure
+of the data.In general, for image data this will often be a variable
+indicating the imageb so image-specific effects are removed from data.
+Default is “Slide”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with clustering results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

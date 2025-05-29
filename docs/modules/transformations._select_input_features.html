@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations._select_input_features">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">_select_input_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata:</span> <span class="pre">&lt;module</span> <span class="pre">'anndata'</span> <span class="pre">from</span> <span class="pre">'/rstudio-files/ccbr-data/users/RH/nidap_hpc_environment_twin/workflow_envs/spac/lib/python3.8/site-packages/anndata/__init__.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features:</span> <span class="pre">~typing.List[str]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/spac/transformations.html#_select_input_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations._select_input_features" title="Permalink to this definition"></a></dt>
+<dd><p>Selects the numpy array to be used as input for transformations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Layer of AnnData object for UMAP. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the key in <cite>adata.obsm</cite> that contains the numpy array.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>features</strong> (<em>str</em><em> or </em><em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Names of the features to select from layer. If None, all features are
+selected. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The selected numpy array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

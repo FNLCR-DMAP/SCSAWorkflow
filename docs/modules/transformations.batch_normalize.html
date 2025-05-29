@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.batch_normalize">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">batch_normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#batch_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.batch_normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Adjust the features of every marker using a normalization method.</p>
+<p>The normalization methods are summarized here:
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation in <cite>adata</cite> to define batches.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em>) – The name of the new layer to add to the anndata object for storing
+normalized data.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer from which to read data. If None, read from <cite>.X</cite>.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;median&quot;</em><em>, </em><em>&quot;Q50&quot;</em><em>, </em><em>&quot;Q75&quot;</em><em>, </em><em>&quot;z-score&quot;}</em><em>, </em><em>default &quot;median&quot;</em>) – The normalization method to use.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, take the log2 of features before normalization.
+Ensure this is boolean.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

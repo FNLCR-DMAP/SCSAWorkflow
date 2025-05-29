@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.utag_functions &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">spac</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../spac.html">spac package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utils">spac.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.visualization">spac.visualization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spac.utag_functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spac.utag_functions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">squidpy</span> <span class="k">as</span> <span class="nn">sq</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">tp</span>
+<span class="kn">import</span> <span class="nn">parmap</span> <span class="c1"># need to install parmap</span>
+<span class="kn">import</span> <span class="nn">anndata</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<div class="viewcode-block" id="z_score"><a class="viewcode-back" href="../../modules/utag_functions.z_score.html#spac.utag_functions.z_score">[docs]</a><span class="k">def</span> <span class="nf">z_score</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scale (divide by standard deviation) and center (subtract mean) </span>
+<span class="sd">    array-like objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="sparse_matrix_dstack"><a class="viewcode-back" href="../../modules/utag_functions.sparse_matrix_dstack.html#spac.utag_functions.sparse_matrix_dstack">[docs]</a><span class="k">def</span> <span class="nf">sparse_matrix_dstack</span><span class="p">(</span>
+    <span class="n">matrices</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Diagonally stack sparse matrices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">matrices</span><span class="p">])</span>
+    <span class="n">_res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">matrices</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">))</span>
+        <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">_res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">_res</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_parallel_message_pass"><a class="viewcode-back" href="../../modules/utag_functions._parallel_message_pass.html#spac.utag_functions._parallel_message_pass">[docs]</a><span class="k">def</span> <span class="nf">_parallel_message_pass</span><span class="p">(</span>
+    <span class="n">ad</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">coord_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">set_diag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">spatial_neighbors</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">coord_type</span><span class="o">=</span><span class="n">coord_type</span><span class="p">,</span> 
+                            <span class="n">set_diag</span><span class="o">=</span><span class="n">set_diag</span><span class="p">)</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">custom_message_passing</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ad</span></div>
+
+
+<div class="viewcode-block" id="custom_message_passing"><a class="viewcode-back" href="../../modules/utag_functions.custom_message_passing.html#spac.utag_functions.custom_message_passing">[docs]</a><span class="k">def</span> <span class="nf">custom_message_passing</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">):</span>
+    <span class="c1"># from scipy.linalg import sqrtm</span>
+    <span class="c1"># import logging</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">:</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_connectivities&quot;</span><span class="p">]</span>
+        <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">normalize</span>
+        <span class="n">affinity</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Plain A_mod multiplication</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_connectivities&quot;</span><span class="p">]</span>
+        <span class="n">affinity</span> <span class="o">=</span> <span class="n">A</span>
+    <span class="c1"># logging.info(type(affinity))</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">affinity</span> <span class="o">@</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span>
+    <span class="k">return</span> <span class="n">adata</span></div>
+
+
+<div class="viewcode-block" id="low_variance_filter"><a class="viewcode-back" href="../../modules/utag_functions.low_variance_filter.html#spac.utag_functions.low_variance_filter">[docs]</a><span class="k">def</span> <span class="nf">low_variance_filter</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()]</span></div>
+
+
+<div class="viewcode-block" id="add_probabilities_to_centroid"><a class="viewcode-back" href="../../modules/utag_functions.add_probabilities_to_centroid.html#spac.utag_functions.add_probabilities_to_centroid">[docs]</a><span class="k">def</span> <span class="nf">add_probabilities_to_centroid</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name_to_output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
+
+    <span class="k">if</span> <span class="n">name_to_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name_to_output</span> <span class="o">=</span> <span class="n">col</span> <span class="o">+</span> <span class="s2">&quot;_probabilities&quot;</span>
+
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">z_score</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">col</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">softmax</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span> <span class="o">@</span> <span class="n">mean</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">name_to_output</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
+    <span class="k">return</span> <span class="n">adata</span></div>
+
+<div class="viewcode-block" id="utag"><a class="viewcode-back" href="../../modules/utag_functions.utag.html#spac.utag_functions.utag">[docs]</a><span class="k">def</span> <span class="nf">utag</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">channels_to_use</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">slide_key</span> <span class="o">=</span> <span class="s2">&quot;Slide&quot;</span><span class="p">,</span>
+    <span class="n">save_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UTAG Label&quot;</span><span class="p">,</span>
+    <span class="n">filter_by_variance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">max_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span>
+    <span class="n">normalization_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">,</span>
+    <span class="n">keep_spatial_connectivity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_pcs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">apply_umap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">umap_kwargs</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
+    <span class="n">apply_clustering</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">clustering_method</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;leiden&quot;</span><span class="p">],</span>
+    <span class="n">resolutions</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+    <span class="n">leiden_kwargs</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">parc_kwargs</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">processes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discover tissue architechture in single-cell imaging data</span>
+<span class="sd">    by combining phenotypes and positional information of cells.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    adata: AnnData</span>
+<span class="sd">        AnnData object with spatial positioning of cells in obsm &#39;spatial&#39; slot.</span>
+<span class="sd">    channels_to_use: Optional[Sequence[str]]</span>
+<span class="sd">        An optional sequence of strings used to subset variables to use.</span>
+<span class="sd">        Default (None) is to use all variables.</span>
+<span class="sd">    max_dist: float</span>
+<span class="sd">        Maximum distance to cut edges within a graph.</span>
+<span class="sd">        Should be adjusted depending on resolution of images.</span>
+<span class="sd">        For imaging mass cytometry, where resolution is 1um, 20 often </span>
+<span class="sd">        gives good results. Default is 20.</span>
+<span class="sd">    slide_key: {str, None}</span>
+<span class="sd">        Key of adata.obs containing information on the batch structure </span>
+<span class="sd">        of the data. In general, for image data this will often be a variable </span>
+<span class="sd">        indicating the image so image-specific effects are removed from data.</span>
+<span class="sd">        Default is &quot;Slide&quot;.</span>
+<span class="sd">    save_key: str</span>
+<span class="sd">        Key to be added to adata object holding the UTAG clusters.</span>
+<span class="sd">        Depending on the values of `clustering_method` and `resolutions`,</span>
+<span class="sd">        the final keys will be of the form: {save_key}_{method}_{resolution}&quot;.</span>
+<span class="sd">        Default is &quot;UTAG Label&quot;.</span>
+<span class="sd">    filter_by_variance: bool</span>
+<span class="sd">        Whether to filter vairiables by variance.</span>
+<span class="sd">        Default is False, which keeps all variables.</span>
+<span class="sd">    max_dist: float</span>
+<span class="sd">        Recommended values are between 20 to 50 depending on magnification.</span>
+<span class="sd">        Default is 20.</span>
+<span class="sd">    normalization_mode: str</span>
+<span class="sd">        Method to normalize adjacency matrix.</span>
+<span class="sd">        Default is &quot;l1_norm&quot;, any other value will not use normalization.</span>
+<span class="sd">    keep_spatial_connectivity: bool</span>
+<span class="sd">        Whether to keep sparse matrices of spatial connectivity and distance </span>
+<span class="sd">        in the obsp attribute of the resulting anndata object. This could be </span>
+<span class="sd">        useful in downstream applications.</span>
+<span class="sd">        Default is not to (False).</span>
+<span class="sd">    n_pcs: Number of principal components to use for clustering. Default is 10.</span>
+<span class="sd">    If None, no PCA is performed and clustering is done on features.</span>
+<span class="sd">    apply_umap: bool</span>
+<span class="sd">        Whether to build a UMAP representation after message passing.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    umap_kwargs: Dict[str, Any]</span>
+<span class="sd">        Keyword arguments to be passed to scanpy.tl.umap for dimensionality </span>
+<span class="sd">        reduction after message passing. Default is 10.0.</span>
+<span class="sd">    apply_clustering: bool</span>
+<span class="sd">        Whether to cluster the message passed matrix.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    clustering_method: Sequence[str]</span>
+<span class="sd">        Which clustering method(s) to use for clustering of the </span>
+<span class="sd">        message passed matrix. Default is [&quot;leiden&quot;].</span>
+<span class="sd">    resolutions: Sequence[float]</span>
+<span class="sd">        What resolutions should the methods in `clustering_method` be run at.</span>
+<span class="sd">        Default is [0.05, 0.1, 0.3, 1.0].</span>
+<span class="sd">    leiden_kwargs: dict[str, Any]</span>
+<span class="sd">        Keyword arguments to pass to scanpy.tl.leiden.</span>
+<span class="sd">    parc_kwargs: dict[str, Any]</span>
+<span class="sd">        Keyword arguments to pass to parc.PARC.</span>
+<span class="sd">    parallel: bool</span>
+<span class="sd">        Whether to run message passing part of algorithm in parallel.</span>
+<span class="sd">        Will accelerate the process but consume more memory.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    processes: int</span>
+<span class="sd">        Number of processes to use in parallel.</span>
+<span class="sd">        Default is to use all available (-1).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    adata: AnnData</span>
+<span class="sd">        AnnData object with UTAG domain predictions for each cell in adata.obs,</span>
+<span class="sd">        column `save_key`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">channels_to_use</span><span class="p">:</span>
+        <span class="n">ad</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[:,</span> <span class="n">channels_to_use</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">filter_by_variance</span><span class="p">:</span>
+        <span class="n">ad</span> <span class="o">=</span> <span class="n">low_variance_filter</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">clustering_method</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">clustering_method</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">clustering_method</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">clustering_method</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">clustering_method</span> <span class="o">=</span> <span class="p">[</span><span class="n">clustering_method</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Invalid Clustering Method. Clustering Method Should Either be </span>
+<span class="sd">            a string or a list&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;LEIDEN&quot;</span><span class="p">,</span> <span class="s2">&quot;KMEANS&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">clustering_method</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;KMEANS&quot;</span> <span class="ow">in</span> <span class="n">clustering_method</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Applying UTAG Algorithm...&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">slide_key</span><span class="p">:</span>
+        <span class="n">ads</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ad</span><span class="p">[</span><span class="n">ad</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">slide_key</span><span class="p">]</span> <span class="o">==</span> <span class="n">slide</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">slide</span> <span class="ow">in</span> <span class="n">ad</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">slide_key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="n">ad_list</span> <span class="o">=</span> <span class="n">parmap</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+            <span class="n">_parallel_message_pass</span><span class="p">,</span>
+            <span class="n">ads</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="n">max_dist</span><span class="p">,</span>
+            <span class="n">coord_type</span><span class="o">=</span><span class="s2">&quot;generic&quot;</span><span class="p">,</span>
+            <span class="n">set_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">normalization_mode</span><span class="p">,</span>
+            <span class="n">pm_pbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">pm_parallel</span><span class="o">=</span><span class="n">parallel</span><span class="p">,</span>
+            <span class="n">pm_processes</span><span class="o">=</span><span class="n">processes</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ad_result</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">ad_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keep_spatial_connectivity</span><span class="p">:</span>
+            <span class="n">ad_result</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_connectivities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_matrix_dstack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_connectivities&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ad_list</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">ad_result</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_distances&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_matrix_dstack</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">obsp</span><span class="p">[</span><span class="s2">&quot;spatial_distances&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ad_list</span><span class="p">]</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">spatial_neighbors</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">max_dist</span><span class="p">,</span> <span class="n">coord_type</span><span class="o">=</span><span class="s2">&quot;generic&quot;</span><span class="p">,</span> 
+                                <span class="n">set_diag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ad_result</span> <span class="o">=</span> <span class="n">custom_message_passing</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">normalization_mode</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">apply_clustering</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_pcs</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;0 components&quot;</span><span class="p">)</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;execute with </span><span class="si">{</span><span class="n">n_pcs</span><span class="si">}</span><span class="s2"> principal components&quot;</span><span class="p">)</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="n">n_comps</span><span class="o">=</span><span class="n">n_pcs</span><span class="p">)</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="n">n_pcs</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">use_rep</span><span class="o">=</span><span class="s1">&#39;X_pca&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">apply_umap</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running UMAP on Input Dataset...&quot;</span><span class="p">)</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="o">**</span><span class="n">umap_kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">resolution</span> <span class="ow">in</span> <span class="n">resolutions</span><span class="p">:</span>
+
+            <span class="n">res_key1</span> <span class="o">=</span> <span class="n">save_key</span> <span class="o">+</span> <span class="s2">&quot;_leiden_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+            <span class="n">res_key3</span> <span class="o">=</span> <span class="n">save_key</span> <span class="o">+</span> <span class="s2">&quot;_kmeans_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;LEIDEN&quot;</span> <span class="ow">in</span> <span class="n">clustering_method</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying Leiden Clustering at Resolution: </span><span class="si">{</span><span class="n">resolution</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">leiden_kwargs</span> <span class="ow">or</span> <span class="p">{})</span>
+                <span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span>
+                    <span class="n">ad_result</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">key_added</span><span class="o">=</span><span class="n">res_key1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
+                <span class="n">add_probabilities_to_centroid</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="n">res_key1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;KMEANS&quot;</span> <span class="ow">in</span> <span class="n">clustering_method</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying K-means Clustering at Resolution: </span><span class="si">{</span><span class="n">resolution</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">resolution</span> <span class="o">*</span> <span class="mi">10</span><span class="p">))</span>
+                <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ad_result</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;X_pca&quot;</span><span class="p">])</span>
+                <span class="n">ad_result</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">res_key3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">kmeans</span><span class="o">.</span><span class="n">labels_</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+                <span class="n">add_probabilities_to_centroid</span><span class="p">(</span><span class="n">ad_result</span><span class="p">,</span> <span class="n">res_key3</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ad_result</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

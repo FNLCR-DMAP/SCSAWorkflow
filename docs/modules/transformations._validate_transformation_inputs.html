@@ -48,8 +48,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../spac.html#module-spac">Module contents</a></li>
@@ -83,7 +83,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations._validate_transformation_inputs">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">_validate_transformation_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata:</span> <span class="pre">&lt;module</span> <span class="pre">'anndata'</span> <span class="pre">from</span> <span class="pre">'/rstudio-files/ccbr-data/users/RH/nidap_hpc_environment_twin/workflow_envs/spac/lib/python3.8/site-packages/anndata/__init__.py'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features:</span> <span class="pre">~typing.List[str]</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/spac/transformations.html#_validate_transformation_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations._validate_transformation_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Validate inputs for transformation functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the layer in <cite>adata</cite> to use for transformation.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the key in <cite>obsm</cite> that contains the numpy array.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Names of features to use for transformation.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of annotation column in <cite>obs</cite> that contains class labels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If both <cite>associated_table</cite> and <cite>layer</cite> are specified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+
 
            </div>
           </div>

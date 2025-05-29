@@ -47,8 +47,8 @@
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.data_utils">spac.data_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.transformations">spac.transformations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.utils">spac.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac.visualization">spac.visualization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="spac.html#module-spac">Module contents</a></li>
@@ -93,6 +93,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -100,7 +101,9 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="_">_</h2>
@@ -112,15 +115,21 @@
 </li>
       <li><a href="modules/visualization._ordered_unique_figs.html#spac.visualization._ordered_unique_figs">_ordered_unique_figs() (in module spac.visualization)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/utag_functions._parallel_message_pass.html#spac.utag_functions._parallel_message_pass">_parallel_message_pass() (in module spac.utag_functions)</a>
+</li>
       <li><a href="modules/visualization._plot_spatial_distance_dispatch.html#spac.visualization._plot_spatial_distance_dispatch">_plot_spatial_distance_dispatch() (in module spac.visualization)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/visualization._prepare_spatial_distance_data.html#spac.visualization._prepare_spatial_distance_data">_prepare_spatial_distance_data() (in module spac.visualization)</a>
+</li>
+      <li><a href="modules/transformations._select_input_features.html#spac.transformations._select_input_features">_select_input_features() (in module spac.transformations)</a>
 </li>
       <li><a href="modules/data_utils._select_values_anndata.html#spac.data_utils._select_values_anndata">_select_values_anndata() (in module spac.data_utils)</a>
 </li>
       <li><a href="modules/data_utils._select_values_dataframe.html#spac.data_utils._select_values_dataframe">_select_values_dataframe() (in module spac.data_utils)</a>
+</li>
+      <li><a href="modules/transformations._validate_transformation_inputs.html#spac.transformations._validate_transformation_inputs">_validate_transformation_inputs() (in module spac.transformations)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -130,15 +139,23 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.add_pin_color_rules.html#spac.data_utils.add_pin_color_rules">add_pin_color_rules() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.add_pin_color_rules">[1]</a>
 </li>
+      <li><a href="modules/utag_functions.add_probabilities_to_centroid.html#spac.utag_functions.add_probabilities_to_centroid">add_probabilities_to_centroid() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.add_probabilities_to_centroid">[1]</a>
+</li>
       <li><a href="modules/data_utils.add_rescaled_features.html#spac.data_utils.add_rescaled_features">add_rescaled_features() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.add_rescaled_features">[1]</a>
 </li>
       <li><a href="modules/utils.annotation_category_relations.html#spac.utils.annotation_category_relations">annotation_category_relations() (in module spac.utils)</a>, <a href="spac.html#spac.utils.annotation_category_relations">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.append_annotation.html#spac.data_utils.append_annotation">append_annotation() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.append_annotation">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.apply_per_batch.html#spac.transformations.apply_per_batch">apply_per_batch() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.apply_per_batch">[1]</a>
+</li>
       <li><a href="modules/phenotyping.apply_phenotypes.html#spac.phenotyping.apply_phenotypes">apply_phenotypes() (in module spac.phenotyping)</a>, <a href="spac.html#spac.phenotyping.apply_phenotypes">[1]</a>
+</li>
+      <li><a href="modules/transformations.arcsinh_transformation.html#spac.transformations.arcsinh_transformation">arcsinh_transformation() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.arcsinh_transformation">[1]</a>
+</li>
+      <li><a href="modules/transformations.arcsinh_transformation_core.html#spac.transformations.arcsinh_transformation_core">arcsinh_transformation_core() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.arcsinh_transformation_core">[1]</a>
 </li>
       <li><a href="modules/phenotyping.assign_manual_phenotypes.html#spac.phenotyping.assign_manual_phenotypes">assign_manual_phenotypes() (in module spac.phenotyping)</a>, <a href="spac.html#spac.phenotyping.assign_manual_phenotypes">[1]</a>
 </li>
@@ -148,6 +165,8 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.batch_normalize.html#spac.transformations.batch_normalize">batch_normalize() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.batch_normalize">[1]</a>
+</li>
       <li><a href="modules/data_utils.bin2cat.html#spac.data_utils.bin2cat">bin2cat() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.bin2cat">[1]</a>
 </li>
   </ul></td>
@@ -176,10 +195,10 @@
 </li>
       <li><a href="modules/utils.check_label.html#spac.utils.check_label">check_label() (in module spac.utils)</a>, <a href="spac.html#spac.utils.check_label">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/utils.check_list_in_list.html#spac.utils.check_list_in_list">check_list_in_list() (in module spac.utils)</a>, <a href="spac.html#spac.utils.check_list_in_list">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/utils.check_table.html#spac.utils.check_table">check_table() (in module spac.utils)</a>, <a href="spac.html#spac.utils.check_table">[1]</a>
 </li>
       <li><a href="modules/utils.color_mapping.html#spac.utils.color_mapping">color_mapping() (in module spac.utils)</a>, <a href="spac.html#spac.utils.color_mapping">[1]</a>
@@ -193,6 +212,8 @@
       <li><a href="modules/utils.compute_boxplot_metrics.html#spac.utils.compute_boxplot_metrics">compute_boxplot_metrics() (in module spac.utils)</a>, <a href="spac.html#spac.utils.compute_boxplot_metrics">[1]</a>
 </li>
       <li><a href="modules/data_utils.concatinate_regions.html#spac.data_utils.concatinate_regions">concatinate_regions() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.concatinate_regions">[1]</a>
+</li>
+      <li><a href="modules/utag_functions.custom_message_passing.html#spac.utag_functions.custom_message_passing">custom_message_passing() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.custom_message_passing">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -218,6 +239,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.get_cluster_info.html#spac.transformations.get_cluster_info">get_cluster_info() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.get_cluster_info">[1]</a>
+</li>
       <li><a href="modules/utils.get_defined_color_map.html#spac.utils.get_defined_color_map">get_defined_color_map() (in module spac.utils)</a>, <a href="spac.html#spac.utils.get_defined_color_map">[1]</a>
 </li>
   </ul></td>
@@ -251,10 +274,22 @@
   </ul></td>
 </tr></table>
 
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.knn_clustering.html#spac.transformations.knn_clustering">knn_clustering() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.knn_clustering">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.load_csv_files.html#spac.data_utils.load_csv_files">load_csv_files() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.load_csv_files">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/utag_functions.low_variance_filter.html#spac.utag_functions.low_variance_filter">low_variance_filter() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.low_variance_filter">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -274,6 +309,10 @@
 </li>
         <li><a href="spac.html#module-spac.spatial_analysis">spac.spatial_analysis</a>
 </li>
+        <li><a href="spac.html#module-spac.transformations">spac.transformations</a>
+</li>
+        <li><a href="spac.html#module-spac.utag_functions">spac.utag_functions</a>
+</li>
         <li><a href="spac.html#module-spac.utils">spac.utils</a>
 </li>
         <li><a href="spac.html#module-spac.visualization">spac.visualization</a>
@@ -288,11 +327,19 @@
       <li><a href="modules/spatial_analysis.neighborhood_profile.html#spac.spatial_analysis.neighborhood_profile">neighborhood_profile() (in module spac.spatial_analysis)</a>, <a href="spac.html#spac.spatial_analysis.neighborhood_profile">[1]</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.normalize_features.html#spac.transformations.normalize_features">normalize_features() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.normalize_features">[1]</a>
+</li>
+      <li><a href="modules/transformations.normalize_features_core.html#spac.transformations.normalize_features_core">normalize_features_core() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.normalize_features_core">[1]</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.phenograph_clustering.html#spac.transformations.phenograph_clustering">phenograph_clustering() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.phenograph_clustering">[1]</a>
+</li>
       <li><a href="modules/visualization.plot_ripley_l.html#spac.visualization.plot_ripley_l">plot_ripley_l() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.plot_ripley_l">[1]</a>
 </li>
   </ul></td>
@@ -311,11 +358,17 @@
 </li>
       <li><a href="modules/visualization.relational_heatmap.html#spac.visualization.relational_heatmap">relational_heatmap() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.relational_heatmap">[1]</a>
 </li>
+      <li><a href="modules/transformations.rename_annotations.html#spac.transformations.rename_annotations">rename_annotations() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.rename_annotations">[1]</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/data_utils.rescale_features.html#spac.data_utils.rescale_features">rescale_features() (in module spac.data_utils)</a>, <a href="spac.html#spac.data_utils.rescale_features">[1]</a>
 </li>
       <li><a href="modules/spatial_analysis.ripley_l.html#spac.spatial_analysis.ripley_l">ripley_l() (in module spac.spatial_analysis)</a>, <a href="spac.html#spac.spatial_analysis.ripley_l">[1]</a>
+</li>
+      <li><a href="modules/transformations.run_umap.html#spac.transformations.run_umap">run_umap() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.run_umap">[1]</a>
+</li>
+      <li><a href="modules/transformations.run_utag_clustering.html#spac.transformations.run_utag_clustering">run_utag_clustering() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.run_utag_clustering">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -355,8 +408,22 @@
         <li><a href="spac.html#module-spac.spatial_analysis">module</a>
 </li>
       </ul></li>
+      <li>
+    spac.transformations
+
+      <ul>
+        <li><a href="spac.html#module-spac.transformations">module</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    spac.utag_functions
+
+      <ul>
+        <li><a href="spac.html#module-spac.utag_functions">module</a>
+</li>
+      </ul></li>
       <li>
     spac.utils
 
@@ -371,6 +438,8 @@
         <li><a href="spac.html#module-spac.visualization">module</a>
 </li>
       </ul></li>
+      <li><a href="modules/utag_functions.sparse_matrix_dstack.html#spac.utag_functions.sparse_matrix_dstack">sparse_matrix_dstack() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.sparse_matrix_dstack">[1]</a>
+</li>
       <li><a href="modules/spatial_analysis.spatial_interaction.html#spac.spatial_analysis.spatial_interaction">spatial_interaction() (in module spac.spatial_analysis)</a>, <a href="spac.html#spac.spatial_analysis.spatial_interaction">[1]</a>
 </li>
       <li><a href="modules/visualization.spatial_plot.html#spac.visualization.spatial_plot">spatial_plot() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.spatial_plot">[1]</a>
@@ -391,11 +460,21 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/utils.text_to_others.html#spac.utils.text_to_others">text_to_others() (in module spac.utils)</a>, <a href="spac.html#spac.utils.text_to_others">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/visualization.threshold_heatmap.html#spac.visualization.threshold_heatmap">threshold_heatmap() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.threshold_heatmap">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.tsne.html#spac.transformations.tsne">tsne() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.tsne">[1]</a>
+</li>
       <li><a href="modules/visualization.tsne_plot.html#spac.visualization.tsne_plot">tsne_plot() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.tsne_plot">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/utag_functions.utag.html#spac.utag_functions.utag">utag() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.utag">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -408,6 +487,18 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/visualization.visualize_nearest_neighbor.html#spac.visualization.visualize_nearest_neighbor">visualize_nearest_neighbor() (in module spac.visualization)</a>, <a href="spac.html#spac.visualization.visualize_nearest_neighbor">[1]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/utag_functions.z_score.html#spac.utag_functions.z_score">z_score() (in module spac.utag_functions)</a>, <a href="spac.html#spac.utag_functions.z_score">[1]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/transformations.z_score_normalization.html#spac.transformations.z_score_normalization">z_score_normalization() (in module spac.transformations)</a>, <a href="spac.html#spac.transformations.z_score_normalization">[1]</a>
 </li>
   </ul></td>
 </tr></table>
