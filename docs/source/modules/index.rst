@@ -4,10 +4,97 @@ spac modules
 .. toctree::
    :maxdepth: 1
 
+   spac.data_utils.add_pin_color_rules
+   spac.data_utils.add_rescaled_features
+   spac.data_utils.append_annotation
+   spac.data_utils.bin2cat
+   spac.data_utils.calculate_centroid
+   spac.data_utils.combine_annotations
+   spac.data_utils.combine_dfs
+   spac.data_utils.concatinate_regions
+   spac.data_utils.downsample_cells
+   spac.data_utils.ingest_cells
+   spac.data_utils.load_csv_files
+   spac.data_utils.rescale_features
    spac.data_utils
+   spac.data_utils._select_values_anndata
+   spac.data_utils._select_values_dataframe
+   spac.data_utils.select_values
+   spac.data_utils.subtract_min_per_region
+   spac.data_utils.subtract_min_quantile
+   spac.data_utils.summarize_dataframe
+   spac.phenotyping.apply_phenotypes
+   spac.phenotyping.assign_manual_phenotypes
+   spac.phenotyping.combine_phenotypes
+   spac.phenotyping.decode_phenotype
+   spac.phenotyping.generate_phenotypes_dict
+   spac.phenotyping.is_binary_0_1
    spac.phenotyping
+   spac.spatial_analysis.calculate_nearest_neighbor
+   spac.spatial_analysis._neighborhood_profile_core
+   spac.spatial_analysis.neighborhood_profile
+   spac.spatial_analysis.ripley_l
    spac.spatial_analysis
+   spac.spatial_analysis.spatial_interaction
+   spac.transformations.apply_per_batch
+   spac.transformations.arcsinh_transformation_core
+   spac.transformations.arcsinh_transformation
+   spac.transformations.batch_normalize
+   spac.transformations.get_cluster_info
+   spac.transformations.knn_clustering
+   spac.transformations.normalize_features_core
+   spac.transformations.normalize_features
+   spac.transformations.phenograph_clustering
+   spac.transformations.rename_annotations
    spac.transformations
+   spac.transformations.run_umap
+   spac.transformations.run_utag_clustering
+   spac.transformations._select_input_features
+   spac.transformations.tsne
+   spac.transformations._validate_transformation_inputs
+   spac.transformations.z_score_normalization
+   spac.utag_functions.add_probabilities_to_centroid
+   spac.utag_functions.custom_message_passing
+   spac.utag_functions.low_variance_filter
+   spac.utag_functions._parallel_message_pass
    spac.utag_functions
+   spac.utag_functions.sparse_matrix_dstack
+   spac.utag_functions.utag
+   spac.utag_functions.z_score
+   spac.utils.annotation_category_relations
+   spac.utils.check_annotation
+   spac.utils.check_column_name
+   spac.utils.check_distances
+   spac.utils.check_feature
+   spac.utils.check_label
+   spac.utils.check_list_in_list
+   spac.utils.check_table
+   spac.utils.color_mapping
+   spac.utils.compute_boxplot_metrics
+   spac.utils.get_defined_color_map
+   spac.utils.regex_search_list
    spac.utils
+   spac.utils.spell_out_special_characters
+   spac.utils.text_to_others
+   spac.visualization.boxplot_interactive
+   spac.visualization.boxplot
+   spac.visualization._css_rgb_or_hex_to_hex
+   spac.visualization.dimensionality_reduction_plot
+   spac.visualization.heatmap
+   spac.visualization.hierarchical_heatmap
+   spac.visualization.histogram
+   spac.visualization.interactive_spatial_plot
+   spac.visualization._ordered_unique_figs
+   spac.visualization.plot_ripley_l
+   spac.visualization._plot_spatial_distance_dispatch
+   spac.visualization._prepare_spatial_distance_data
+   spac.visualization.present_summary_as_figure
+   spac.visualization.present_summary_as_html
+   spac.visualization.relational_heatmap
    spac.visualization
+   spac.visualization.sankey_plot
+   spac.visualization.spatial_plot
+   spac.visualization.threshold_heatmap
+   spac.visualization.tsne_plot
+   spac.visualization.visualize_2D_scatter
+   spac.visualization.visualize_nearest_neighbor

@@ -12,8 +12,8 @@ Functions
 .. toctree::
    :maxdepth: 1
 
-   spatial_analysis.spatial_interaction
-   spatial_analysis.ripley_l
-   spatial_analysis.neighborhood_profile
-   spatial_analysis._neighborhood_profile_core
-   spatial_analysis.calculate_nearest_neighbor
+   spac.spatial_analysis.spatial_interaction
+   spac.spatial_analysis.ripley_l
+   spac.spatial_analysis.neighborhood_profile
+   spac.spatial_analysis._neighborhood_profile_core
+   spac.spatial_analysis.calculate_nearest_neighbor

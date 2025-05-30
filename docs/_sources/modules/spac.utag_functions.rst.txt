@@ -12,10 +12,10 @@ Functions
 .. toctree::
    :maxdepth: 1
 
-   utag_functions.z_score
-   utag_functions.sparse_matrix_dstack
-   utag_functions._parallel_message_pass
-   utag_functions.custom_message_passing
-   utag_functions.low_variance_filter
-   utag_functions.add_probabilities_to_centroid
-   utag_functions.utag
+   spac.utag_functions.z_score
+   spac.utag_functions.sparse_matrix_dstack
+   spac.utag_functions._parallel_message_pass
+   spac.utag_functions.custom_message_passing
+   spac.utag_functions.low_variance_filter
+   spac.utag_functions.add_probabilities_to_centroid
+   spac.utag_functions.utag

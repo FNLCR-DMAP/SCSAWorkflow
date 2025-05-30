@@ -12,9 +12,9 @@ Functions
 .. toctree::
    :maxdepth: 1
 
-   phenotyping.is_binary_0_1
-   phenotyping.decode_phenotype
-   phenotyping.generate_phenotypes_dict
-   phenotyping.apply_phenotypes
-   phenotyping.combine_phenotypes
-   phenotyping.assign_manual_phenotypes
+   spac.phenotyping.is_binary_0_1
+   spac.phenotyping.decode_phenotype
+   spac.phenotyping.generate_phenotypes_dict
+   spac.phenotyping.apply_phenotypes
+   spac.phenotyping.combine_phenotypes
+   spac.phenotyping.assign_manual_phenotypes

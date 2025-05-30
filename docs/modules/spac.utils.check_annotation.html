@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>check_annotation &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=b3f5c315" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="check_column_name" href="spac.utils.check_column_name.html" />
+    <link rel="prev" title="annotation_category_relations" href="spac.utils.annotation_category_relations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.add_pin_color_rules.html">add_pin_color_rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.add_rescaled_features.html">add_rescaled_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.append_annotation.html">append_annotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.bin2cat.html">bin2cat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.calculate_centroid.html">calculate_centroid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.combine_annotations.html">combine_annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.combine_dfs.html">combine_dfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.concatinate_regions.html">concatinate_regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.downsample_cells.html">downsample_cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.ingest_cells.html">ingest_cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.load_csv_files.html">load_csv_files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.rescale_features.html">rescale_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.append_annotation.html">append_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.ingest_cells.html">ingest_cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.concatinate_regions.html">concatinate_regions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.rescale_features.html">rescale_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.add_rescaled_features.html">add_rescaled_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.subtract_min_per_region.html">subtract_min_per_region</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.subtract_min_quantile.html">subtract_min_quantile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.load_csv_files.html">load_csv_files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.select_values.html">select_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils._select_values_dataframe.html">_select_values_dataframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils._select_values_anndata.html">_select_values_anndata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.downsample_cells.html">downsample_cells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.calculate_centroid.html">calculate_centroid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.bin2cat.html">bin2cat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.combine_dfs.html">combine_dfs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.add_pin_color_rules.html">add_pin_color_rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.combine_annotations.html">combine_annotations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.data_utils.summarize_dataframe.html">summarize_dataframe</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils._select_values_anndata.html">_select_values_anndata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils._select_values_dataframe.html">_select_values_dataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.select_values.html">select_values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.subtract_min_per_region.html">subtract_min_per_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.subtract_min_quantile.html">subtract_min_quantile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.summarize_dataframe.html">summarize_dataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.apply_phenotypes.html">apply_phenotypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.assign_manual_phenotypes.html">assign_manual_phenotypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.combine_phenotypes.html">combine_phenotypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.decode_phenotype.html">decode_phenotype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.generate_phenotypes_dict.html">generate_phenotypes_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.is_binary_0_1.html">is_binary_0_1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.is_binary_0_1.html">is_binary_0_1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.decode_phenotype.html">decode_phenotype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.generate_phenotypes_dict.html">generate_phenotypes_dict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.apply_phenotypes.html">apply_phenotypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.combine_phenotypes.html">combine_phenotypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.phenotyping.assign_manual_phenotypes.html">assign_manual_phenotypes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.calculate_nearest_neighbor.html">calculate_nearest_neighbor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis._neighborhood_profile_core.html">_neighborhood_profile_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.neighborhood_profile.html">neighborhood_profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.ripley_l.html">ripley_l</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.spatial_analysis.spatial_interaction.html">spatial_interaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.spatial_analysis.ripley_l.html">ripley_l</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.spatial_analysis.neighborhood_profile.html">neighborhood_profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.spatial_analysis._neighborhood_profile_core.html">_neighborhood_profile_core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.spatial_analysis.calculate_nearest_neighbor.html">calculate_nearest_neighbor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.spatial_interaction.html">spatial_interaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.apply_per_batch.html">apply_per_batch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.arcsinh_transformation_core.html">arcsinh_transformation_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.arcsinh_transformation.html">arcsinh_transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.batch_normalize.html">batch_normalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.get_cluster_info.html">get_cluster_info</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.knn_clustering.html">knn_clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.normalize_features_core.html">normalize_features_core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.normalize_features.html">normalize_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.phenograph_clustering.html">phenograph_clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.rename_annotations.html">rename_annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.phenograph_clustering.html">phenograph_clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.knn_clustering.html">knn_clustering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.get_cluster_info.html">get_cluster_info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.tsne.html">tsne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.run_umap.html">run_umap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations._validate_transformation_inputs.html">_validate_transformation_inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations._select_input_features.html">_select_input_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.batch_normalize.html">batch_normalize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.rename_annotations.html">rename_annotations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.normalize_features.html">normalize_features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.normalize_features_core.html">normalize_features_core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.arcsinh_transformation.html">arcsinh_transformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.arcsinh_transformation_core.html">arcsinh_transformation_core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.z_score_normalization.html">z_score_normalization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.apply_per_batch.html">apply_per_batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.transformations.run_utag_clustering.html">run_utag_clustering</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.run_umap.html">run_umap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.run_utag_clustering.html">run_utag_clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations._select_input_features.html">_select_input_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.tsne.html">tsne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations._validate_transformation_inputs.html">_validate_transformation_inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.z_score_normalization.html">z_score_normalization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.add_probabilities_to_centroid.html">add_probabilities_to_centroid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.custom_message_passing.html">custom_message_passing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.low_variance_filter.html">low_variance_filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions._parallel_message_pass.html">_parallel_message_pass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.z_score.html">z_score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.sparse_matrix_dstack.html">sparse_matrix_dstack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions._parallel_message_pass.html">_parallel_message_pass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.custom_message_passing.html">custom_message_passing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.low_variance_filter.html">low_variance_filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.add_probabilities_to_centroid.html">add_probabilities_to_centroid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utag_functions.utag.html">utag</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.sparse_matrix_dstack.html">sparse_matrix_dstack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.utag.html">utag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.z_score.html">z_score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.annotation_category_relations.html">annotation_category_relations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">check_annotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_column_name.html">check_column_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_distances.html">check_distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_feature.html">check_feature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_label.html">check_label</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_list_in_list.html">check_list_in_list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.check_table.html">check_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.color_mapping.html">color_mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.compute_boxplot_metrics.html">compute_boxplot_metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.get_defined_color_map.html">get_defined_color_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.regex_search_list.html">regex_search_list</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="spac.utils.html">spac.utils module</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.regex_search_list.html">regex_search_list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_list_in_list.html">check_list_in_list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_table.html">check_table</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">check_annotation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_feature.html">check_feature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_column_name.html">check_column_name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_distances.html">check_distances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.text_to_others.html">text_to_others</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.annotation_category_relations.html">annotation_category_relations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.color_mapping.html">color_mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.check_label.html">check_label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.spell_out_special_characters.html">spell_out_special_characters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.get_defined_color_map.html">get_defined_color_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.utils.compute_boxplot_metrics.html">compute_boxplot_metrics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.spell_out_special_characters.html">spell_out_special_characters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.text_to_others.html">text_to_others</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.boxplot_interactive.html">boxplot_interactive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.boxplot.html">boxplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization._css_rgb_or_hex_to_hex.html">_css_rgb_or_hex_to_hex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.dimensionality_reduction_plot.html">dimensionality_reduction_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.heatmap.html">heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.hierarchical_heatmap.html">hierarchical_heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.histogram.html">histogram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.interactive_spatial_plot.html">interactive_spatial_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization._ordered_unique_figs.html">_ordered_unique_figs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.plot_ripley_l.html">plot_ripley_l</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization._plot_spatial_distance_dispatch.html">_plot_spatial_distance_dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization._prepare_spatial_distance_data.html">_prepare_spatial_distance_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.present_summary_as_figure.html">present_summary_as_figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.present_summary_as_html.html">present_summary_as_html</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.relational_heatmap.html">relational_heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.visualize_2D_scatter.html">visualize_2D_scatter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.dimensionality_reduction_plot.html">dimensionality_reduction_plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.tsne_plot.html">tsne_plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.histogram.html">histogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.heatmap.html">heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.hierarchical_heatmap.html">hierarchical_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.threshold_heatmap.html">threshold_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.spatial_plot.html">spatial_plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.boxplot.html">boxplot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.boxplot_interactive.html">boxplot_interactive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.interactive_spatial_plot.html">interactive_spatial_plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.sankey_plot.html">sankey_plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.relational_heatmap.html">relational_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.plot_ripley_l.html">plot_ripley_l</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization._prepare_spatial_distance_data.html">_prepare_spatial_distance_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization._plot_spatial_distance_dispatch.html">_plot_spatial_distance_dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization._css_rgb_or_hex_to_hex.html">_css_rgb_or_hex_to_hex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization._ordered_unique_figs.html">_ordered_unique_figs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.visualize_nearest_neighbor.html">visualize_nearest_neighbor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.present_summary_as_html.html">present_summary_as_html</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spac.visualization.present_summary_as_figure.html">present_summary_as_figure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.sankey_plot.html">sankey_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.spatial_plot.html">spatial_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.threshold_heatmap.html">threshold_heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.tsne_plot.html">tsne_plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.visualize_2D_scatter.html">visualize_2D_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.visualize_nearest_neighbor.html">visualize_nearest_neighbor</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">check_annotation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.utils.check_annotation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="check-annotation">
+<h1>check_annotation<a class="headerlink" href="#check-annotation" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.utils.check_annotation">
+<span class="sig-prename descclassname"><span class="pre">spac.utils.</span></span><span class="sig-name descname"><span class="pre">check_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_exist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/utils.html#check_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.utils.check_annotation" title="Permalink to this definition"></a></dt>
+<dd><p>Perform common error checks for annotations in
+anndata related objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object to be checked.</p></li>
+<li><p><strong>annotations</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The annotation(s) to check for existence in adata.obs.</p></li>
+<li><p><strong>should_exist</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – Determines whether to check if elements exist in the
+target list (True), or if they should not exist (False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If adata is not an instance of anndata.AnnData.</p></li>
+<li><p><strong>ValueError</strong> – If any of the specified layers, annotations, or features do not exist.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spac.utils.annotation_category_relations.html" class="btn btn-neutral float-left" title="annotation_category_relations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spac.utils.check_column_name.html" class="btn btn-neutral float-right" title="check_column_name" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
