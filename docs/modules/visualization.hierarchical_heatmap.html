@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="visualization.threshold_heatmap.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="visualization.heatmap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.append_annotation.html"><code class="docutils literal notranslate"><span class="pre">append_annotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.ingest_cells.html"><code class="docutils literal notranslate"><span class="pre">ingest_cells()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.concatinate_regions.html"><code class="docutils literal notranslate"><span class="pre">concatinate_regions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.rescale_features.html"><code class="docutils literal notranslate"><span class="pre">rescale_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.add_rescaled_features.html"><code class="docutils literal notranslate"><span class="pre">add_rescaled_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.subtract_min_per_region.html"><code class="docutils literal notranslate"><span class="pre">subtract_min_per_region()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.subtract_min_quantile.html"><code class="docutils literal notranslate"><span class="pre">subtract_min_quantile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.load_csv_files.html"><code class="docutils literal notranslate"><span class="pre">load_csv_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.select_values.html"><code class="docutils literal notranslate"><span class="pre">select_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils._select_values_dataframe.html"><code class="docutils literal notranslate"><span class="pre">_select_values_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils._select_values_anndata.html"><code class="docutils literal notranslate"><span class="pre">_select_values_anndata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.downsample_cells.html"><code class="docutils literal notranslate"><span class="pre">downsample_cells()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.calculate_centroid.html"><code class="docutils literal notranslate"><span class="pre">calculate_centroid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.bin2cat.html"><code class="docutils literal notranslate"><span class="pre">bin2cat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.combine_dfs.html"><code class="docutils literal notranslate"><span class="pre">combine_dfs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.add_pin_color_rules.html"><code class="docutils literal notranslate"><span class="pre">add_pin_color_rules()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.combine_annotations.html"><code class="docutils literal notranslate"><span class="pre">combine_annotations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="data_utils.summarize_dataframe.html"><code class="docutils literal notranslate"><span class="pre">summarize_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.is_binary_0_1.html"><code class="docutils literal notranslate"><span class="pre">is_binary_0_1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.decode_phenotype.html"><code class="docutils literal notranslate"><span class="pre">decode_phenotype()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.generate_phenotypes_dict.html"><code class="docutils literal notranslate"><span class="pre">generate_phenotypes_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.apply_phenotypes.html"><code class="docutils literal notranslate"><span class="pre">apply_phenotypes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.combine_phenotypes.html"><code class="docutils literal notranslate"><span class="pre">combine_phenotypes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="phenotyping.assign_manual_phenotypes.html"><code class="docutils literal notranslate"><span class="pre">assign_manual_phenotypes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="spatial_analysis.spatial_interaction.html"><code class="docutils literal notranslate"><span class="pre">spatial_interaction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial_analysis.ripley_l.html"><code class="docutils literal notranslate"><span class="pre">ripley_l()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial_analysis.neighborhood_profile.html"><code class="docutils literal notranslate"><span class="pre">neighborhood_profile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial_analysis._neighborhood_profile_core.html"><code class="docutils literal notranslate"><span class="pre">_neighborhood_profile_core()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="spatial_analysis.calculate_nearest_neighbor.html"><code class="docutils literal notranslate"><span class="pre">calculate_nearest_neighbor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transformations.phenograph_clustering.html"><code class="docutils literal notranslate"><span class="pre">phenograph_clustering()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.knn_clustering.html"><code class="docutils literal notranslate"><span class="pre">knn_clustering()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.get_cluster_info.html"><code class="docutils literal notranslate"><span class="pre">get_cluster_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.tsne.html"><code class="docutils literal notranslate"><span class="pre">tsne()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.run_umap.html"><code class="docutils literal notranslate"><span class="pre">run_umap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations._validate_transformation_inputs.html"><code class="docutils literal notranslate"><span class="pre">_validate_transformation_inputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations._select_input_features.html"><code class="docutils literal notranslate"><span class="pre">_select_input_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.batch_normalize.html"><code class="docutils literal notranslate"><span class="pre">batch_normalize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.rename_annotations.html"><code class="docutils literal notranslate"><span class="pre">rename_annotations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.normalize_features.html"><code class="docutils literal notranslate"><span class="pre">normalize_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.normalize_features_core.html"><code class="docutils literal notranslate"><span class="pre">normalize_features_core()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.arcsinh_transformation.html"><code class="docutils literal notranslate"><span class="pre">arcsinh_transformation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.arcsinh_transformation_core.html"><code class="docutils literal notranslate"><span class="pre">arcsinh_transformation_core()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.z_score_normalization.html"><code class="docutils literal notranslate"><span class="pre">z_score_normalization()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.apply_per_batch.html"><code class="docutils literal notranslate"><span class="pre">apply_per_batch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.run_utag_clustering.html"><code class="docutils literal notranslate"><span class="pre">run_utag_clustering()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.z_score.html"><code class="docutils literal notranslate"><span class="pre">z_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.sparse_matrix_dstack.html"><code class="docutils literal notranslate"><span class="pre">sparse_matrix_dstack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions._parallel_message_pass.html"><code class="docutils literal notranslate"><span class="pre">_parallel_message_pass()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.custom_message_passing.html"><code class="docutils literal notranslate"><span class="pre">custom_message_passing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.low_variance_filter.html"><code class="docutils literal notranslate"><span class="pre">low_variance_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.add_probabilities_to_centroid.html"><code class="docutils literal notranslate"><span class="pre">add_probabilities_to_centroid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utag_functions.utag.html"><code class="docutils literal notranslate"><span class="pre">utag()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.regex_search_list.html"><code class="docutils literal notranslate"><span class="pre">regex_search_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_list_in_list.html"><code class="docutils literal notranslate"><span class="pre">check_list_in_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_table.html"><code class="docutils literal notranslate"><span class="pre">check_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_annotation.html"><code class="docutils literal notranslate"><span class="pre">check_annotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_feature.html"><code class="docutils literal notranslate"><span class="pre">check_feature()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_column_name.html"><code class="docutils literal notranslate"><span class="pre">check_column_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_distances.html"><code class="docutils literal notranslate"><span class="pre">check_distances()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.text_to_others.html"><code class="docutils literal notranslate"><span class="pre">text_to_others()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.annotation_category_relations.html"><code class="docutils literal notranslate"><span class="pre">annotation_category_relations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.color_mapping.html"><code class="docutils literal notranslate"><span class="pre">color_mapping()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.check_label.html"><code class="docutils literal notranslate"><span class="pre">check_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.spell_out_special_characters.html"><code class="docutils literal notranslate"><span class="pre">spell_out_special_characters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.get_defined_color_map.html"><code class="docutils literal notranslate"><span class="pre">get_defined_color_map()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.compute_boxplot_metrics.html"><code class="docutils literal notranslate"><span class="pre">compute_boxplot_metrics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="visualization.visualize_2D_scatter.html"><code class="docutils literal notranslate"><span class="pre">visualize_2D_scatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.dimensionality_reduction_plot.html"><code class="docutils literal notranslate"><span class="pre">dimensionality_reduction_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.tsne_plot.html"><code class="docutils literal notranslate"><span class="pre">tsne_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.histogram.html"><code class="docutils literal notranslate"><span class="pre">histogram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.heatmap.html"><code class="docutils literal notranslate"><span class="pre">heatmap()</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">hierarchical_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.threshold_heatmap.html"><code class="docutils literal notranslate"><span class="pre">threshold_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.spatial_plot.html"><code class="docutils literal notranslate"><span class="pre">spatial_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.boxplot.html"><code class="docutils literal notranslate"><span class="pre">boxplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.boxplot_interactive.html"><code class="docutils literal notranslate"><span class="pre">boxplot_interactive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.interactive_spatial_plot.html"><code class="docutils literal notranslate"><span class="pre">interactive_spatial_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.sankey_plot.html"><code class="docutils literal notranslate"><span class="pre">sankey_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.relational_heatmap.html"><code class="docutils literal notranslate"><span class="pre">relational_heatmap()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.plot_ripley_l.html"><code class="docutils literal notranslate"><span class="pre">plot_ripley_l()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization._prepare_spatial_distance_data.html"><code class="docutils literal notranslate"><span class="pre">_prepare_spatial_distance_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization._plot_spatial_distance_dispatch.html"><code class="docutils literal notranslate"><span class="pre">_plot_spatial_distance_dispatch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization._css_rgb_or_hex_to_hex.html"><code class="docutils literal notranslate"><span class="pre">_css_rgb_or_hex_to_hex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization._ordered_unique_figs.html"><code class="docutils literal notranslate"><span class="pre">_ordered_unique_figs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.visualize_nearest_neighbor.html"><code class="docutils literal notranslate"><span class="pre">visualize_nearest_neighbor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.present_summary_as_html.html"><code class="docutils literal notranslate"><span class="pre">present_summary_as_html()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="visualization.present_summary_as_figure.html"><code class="docutils literal notranslate"><span class="pre">present_summary_as_figure()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+          <li class="breadcrumb-item"><a href="spac.visualization.html">spac.visualization module</a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/visualization.hierarchical_heatmap.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.hierarchical_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">hierarchical_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'annotation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#hierarchical_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.hierarchical_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a hierarchical clustering heatmap and dendrogram.
+By default, the dataset is assumed to have features as columns and
+annotations as rows. Cells are grouped by annotation (e.g., phenotype),
+and for each group, the average expression intensity of each feature
+(e.g., protein or marker) is computed. The heatmap is plotted using
+seaborn’s clustermap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Name of the annotation in adata.obs to group by and calculate mean
+intensity.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – List of feature names (e.g., markers) to be included in the
+visualization. If None, all features are used. Default is None.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the <cite>adata</cite> layer to use to calculate the mean intensity.
+If not provided, uses the main matrix. Default is None.</p></li>
+<li><p><strong>cluster_feature</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the feature axis.
+Default is False.</p></li>
+<li><p><strong>cluster_annotations</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the annotations axis.
+Default is False.</p></li>
+<li><p><strong>standard_scale</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to standard scale data (0: row-wise or 1: column-wise).
+Default is None.</p></li>
+<li><p><strong>z_score</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the axis for z-score normalization. Can be “feature” or
+“annotation”. Default is “annotation”.</p></li>
+<li><p><strong>swap_axes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, switches the axes of the heatmap, effectively transposing
+the dataset. By default (when False), annotations are on the vertical
+axis (rows) and features are on the horizontal axis (columns).
+When set to True, features will be on the vertical axis and
+annotations on the horizontal axis. Default is False.</p></li>
+<li><p><strong>rotate_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, rotate x-axis labels by 45 degrees. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional parameters passed to <cite>sns.clustermap</cite> function or its
+underlying functions. Some essential parameters include:
+- <cite>cmap</cite> : colormap</p>
+<blockquote>
+<div><p>Colormap to use for the heatmap. It’s an argument for the underlying
+<cite>sns.heatmap()</cite> used within <cite>sns.clustermap()</cite>. Examples include
+“viridis”, “plasma”, “coolwarm”, etc.</p>
+</div></blockquote>
+<ul>
+<li><p><cite>{row,col}_colors</cite> : Lists or DataFrames
+Colors to use for annotating the rows/columns. Useful for visualizing
+additional categorical information alongside the main heatmap.</p></li>
+<li><p><cite>{dendrogram,colors}_ratio</cite> : tuple(float)
+Control the size proportions of the dendrogram and the color labels
+relative to the main heatmap.</p></li>
+<li><p><cite>cbar_pos</cite> : tuple(float) or None
+Specify the position and size of the colorbar in the figure. If set
+to None, no colorbar will be added.</p></li>
+<li><p><cite>tree_kws</cite> : dict
+Customize the appearance of the dendrogram tree. Passes additional
+keyword arguments to the underlying
+<cite>matplotlib.collections.LineCollection</cite>.</p></li>
+<li><p><cite>method</cite> : str
+The linkage algorithm to use for the hierarchical clustering.
+Defaults to ‘centroid’ in the function, but can be changed.</p></li>
+<li><p><cite>metric</cite> : str
+The distance metric to use for the hierarchy. Defaults to ‘euclidean’
+in the function.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>mean_intensity</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the mean intensity of cells for each annotation.</p></li>
+<li><p><strong>clustergrid</strong> (<em>seaborn.matrix.ClusterGrid</em>) – The seaborn ClusterGrid object representing the heatmap and
+dendrograms.</p></li>
+<li><p><strong>dendrogram_data</strong> (<em>dict</em>) – A dictionary containing hierarchical clustering linkage data for both
+rows and columns. These linkage matrices can be used to generate
+dendrograms with tools like scipy’s dendrogram function. This offers
+flexibility in customizing and plotting dendrograms as needed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>import matplotlib.pyplot as plt
+import pandas as pd
+import anndata
+from spac.visualization import hierarchical_heatmap
+X = pd.DataFrame([[1, 2], [3, 4]], columns=[‘gene1’, ‘gene2’])
+annotation = pd.DataFrame([‘type1’, ‘type2’], columns=[‘cell_type’])
+all_data = anndata.AnnData(X=X, obs=annotation)</p>
+<dl class="simple">
+<dt>mean_intensity, clustergrid, dendrogram_data = hierarchical_heatmap(</dt><dd><p>all_data,
+“cell_type”,
+layer=None,
+z_score=”annotation”,
+swap_axes=True,
+cluster_feature=False,
+cluster_annotations=True</p>
+</dd>
+</dl>
+<p>)</p>
+<p># To display a standalone dendrogram using the returned linkage matrix:
+import scipy.cluster.hierarchy as sch
+import numpy as np
+import matplotlib.pyplot as plt</p>
+<p># Convert the linkage data to type double
+dendro_col_data = np.array(dendrogram_data[‘col_linkage’], dtype=np.double)</p>
+<p># Ensure the linkage matrix has at least two dimensions and
+more than one linkage
+if dendro_col_data.ndim == 2 and dendro_col_data.shape[0] &gt; 1:</p>
+<blockquote>
+<div><p>fig, ax = plt.subplots(figsize=(10, 7))
+sch.dendrogram(dendro_col_data, ax=ax)
+plt.title(‘Standalone Col Dendrogram’)
+plt.show()</p>
+</div></blockquote>
+<dl class="simple">
+<dt>else:</dt><dd><p>print(“Insufficient data to plot a dendrogram.”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="visualization.heatmap.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualization.threshold_heatmap.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
