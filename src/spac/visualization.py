@@ -276,6 +276,7 @@ def embedded_scatter_plot(
         check_annotation(adata, annotations=annotation)
     if feature:
         check_feature(adata, features=[feature])
+<<<<<<< HEAD
     color_mapping = None
     if color_map is not None:
         color_mapping = get_defined_color_map(
@@ -283,6 +284,8 @@ def embedded_scatter_plot(
             defined_color_map=color_map,
             annotations=annotation
         )
+=======
+>>>>>>> 2820b07 (Use of 2D_scatter for spatial)
 
     # Validate the method and check if the necessary data exists in adata.obsm
     if associated_table is None:
@@ -315,6 +318,7 @@ def embedded_scatter_plot(
                 f' two dimensions. It shape is:"{associated_table_shape}"'
             )
         key = associated_table
+<<<<<<< HEAD
 
     err_msg_layer = "The 'layer' parameter must be a string, " + \
         f"got {str(type(layer))}"
@@ -339,6 +343,32 @@ def embedded_scatter_plot(
     err_msg_ax = "The 'ax' parameter must be an instance " + \
         f"of matplotlib.axes.Axes, got {str(type(ax))}"
 
+=======
+    
+    err_msg_layer = "The 'layer' parameter must be a string, " + \
+        f"got {str(type(layer))}"
+    err_msg_feature = "The 'feature' parameter must be a string, " + \
+        f"got {str(type(feature))}"
+    err_msg_annotation = "The 'annotation' parameter must be a string, " + \
+        f"got {str(type(annotation))}"
+    err_msg_feat_annotation_coe = "Both annotation and feature are passed, " +\
+        "please provide sinle input."
+    err_msg_feat_annotation_non = "Both annotation and feature are None, " + \
+        "please provide single input."
+    err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
+        f"got {str(type(spot_size))}"
+    err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
+        f"got {str(type(alpha))}"
+    err_msg_alpha_value = "The 'alpha' parameter must be between " + \
+        f"0 and 1 (inclusive), got {str(alpha)}"
+    err_msg_vmin = "The 'vmin' parameter must be a float or an int, " + \
+        f"got {str(type(vmin))}"
+    err_msg_vmax = "The 'vmax' parameter must be a float or an int, " + \
+        f"got {str(type(vmax))}"
+    err_msg_ax = "The 'ax' parameter must be an instance " + \
+        f"of matplotlib.axes.Axes, got {str(type(ax))}"
+
+>>>>>>> 2820b07 (Use of 2D_scatter for spatial)
     if adata is None:
         raise ValueError("The input dataset must not be None.")
 
@@ -373,6 +403,11 @@ def embedded_scatter_plot(
             raise ValueError(err_msg)
 
 # Extract feature name
+<<<<<<< HEAD
+=======
+    feature_names = adata.var_names.tolist()
+
+>>>>>>> 2820b07 (Use of 2D_scatter for spatial)
     if not isinstance(spot_size, int):
         raise ValueError(err_msg_spot_size)
 
@@ -401,6 +436,7 @@ def embedded_scatter_plot(
     x, y = adata.obsm[key].T
 
     # Determine coloring scheme
+<<<<<<< HEAD
     if color_mapping is None:
         if annotation:
             color_values = adata.obs[annotation].astype('category').values
@@ -415,6 +451,25 @@ def embedded_scatter_plot(
     else:
         color_values = adata.obs[annotation].astype('category').values
         color_representation = annotation
+=======
+    if annotation:
+        color_values = adata.obs[annotation].astype('category').values
+        color_representation = annotation
+        vmin = None
+        vmax = None
+    elif feature:
+        data_source = adata.layers[layer] if layer else adata.X
+        color_values = data_source[:, adata.var_names == feature].squeeze()
+        color_representation = feature
+        feature_index = feature_names.index(feature)
+        if vmin == -999:
+            vmin = np.min(data_source[:, feature_index])
+        if vmax == -999:
+            vmax = np.max(data_source[:, feature_index])
+    else:
+        color_values = None
+        color_representation = None
+>>>>>>> 2820b07 (Use of 2D_scatter for spatial)
 
     # Set axis titles based on method and color representation
     if method == 'tsne':
@@ -444,6 +499,10 @@ def embedded_scatter_plot(
     kwargs.pop('y_axis_title', None)
     kwargs.pop('plot_title', None)
     kwargs.pop('color_representation', None)
+    
+    # Set Min and Max in kwargs
+    kwargs['vmin'] = vmin
+    kwargs['vmax'] = vmax
 
     # Set Min and Max in kwargs
     kwargs['vmin'] = vmin
