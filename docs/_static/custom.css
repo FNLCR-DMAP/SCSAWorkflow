@@ -1,0 +1,5 @@
+/* bold & fully opaque the level-2 toctree links */
+.wy-nav-content ul.toctree-l2 li a {
+    font-weight: 600 !important;
+    opacity: 1 !important;
+}

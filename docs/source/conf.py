@@ -54,3 +54,7 @@ html_theme_options   = {
     'titles_only': True,
     'style_external_links': True,
 }
+
+# add our custom CSS
+html_static_path = ['_static']
+html_css_files  = ['custom.css']
