@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.visualization module &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="spac.utils module" href="spac.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac.visualization module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">spac.visualization module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.visualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spac.visualization">
+<span id="spac-visualization-module"></span><h1>spac.visualization module<a class="headerlink" href="#module-spac.visualization" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.boxplot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">boxplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#boxplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.boxplot" title="Permalink to this definition"></a></dt>
+<dd><p>Create a boxplot visualization of the features in the passed adata object.
+This function offers flexibility in how the boxplots are displayed,
+based on the arguments provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Annotation to determine if separate plots are needed for every label.</p></li>
+<li><p><strong>second_annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Second annotation to further divide the data.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the matrix layer to use. If not provided,
+uses the main data matrix adata.X.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – An existing Axes object to draw the plot onto, optional.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em>, </em><em>optional</em>) – List of feature names to be plotted.
+If not provided, all features will be plotted.</p></li>
+<li><p><strong>log_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the Y-axis will be in log scale. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional arguments to pass to seaborn.boxplot.
+Key arguments include:
+- <cite>orient</cite>: Determines the orientation of the plot.
+* “v”: Vertical orientation (default). In this case, categorical data</p>
+<blockquote>
+<div><p>will be plotted on the x-axis, and the boxplots will be vertical.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>”h”: Horizontal orientation. Categorical data will be plotted on the</dt><dd><p>y-axis, and the boxplots will be horizontal.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fig, ax</strong> – The created figure and axes for the plot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matplotlib.figure.Figure, matplotlib.axes.Axes</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<ul class="simple">
+<li><p>Multiple features boxplot: boxplot(adata, features=[‘GeneA’,’GeneB’])</p></li>
+<li><p>Boxplot grouped by a single annotation:
+boxplot(adata, features=[‘GeneA’], annotation=’cell_type’)</p></li>
+<li><p>Boxplot for multiple features grouped by a single annotation:
+boxplot(adata, features=[‘GeneA’, ‘GeneB’], annotation=’cell_type’)</p></li>
+<li><p>Nested grouping by two annotations: boxplot(adata, features=[‘GeneA’],
+annotation=’cell_type’, second_annotation=’treatment’)</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.boxplot_interactive">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">boxplot_interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showfliers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defined_color_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'viridis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seismic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'interactive'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#boxplot_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.boxplot_interactive" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a boxplot for given features from an AnnData object.</p>
+<p>This function visualizes the distribution of gene expression
+(or other features) across different annotations in the provided data.
+It can handle various options such as log-transformation, feature
+selection, and handling of outliers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – An AnnData object containing the data to plot. The expression matrix
+is accessed via <cite>adata.X</cite> or <cite>adata.layers[layer]</cite>, and annotations
+are taken from <cite>adata.obs</cite>.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the annotation column (e.g., cell type or sample
+condition) from <cite>adata.obs</cite> used to group the features. If <cite>None</cite>, no
+grouping is applied.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer from <cite>adata.layers</cite> to use. If <cite>None</cite>, <cite>adata.X</cite>
+is used.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – The figure to plot the boxplot onto. If <cite>None</cite>, a new figure is
+created.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The list of features (genes) to plot. If <cite>None</cite>, all features are
+included.</p></li>
+<li><p><strong>showfliers</strong> (<em>{None</em><em>, </em><em>&quot;downsample&quot;</em><em>, </em><em>&quot;all&quot;}</em><em>, </em><em>default = None</em>) – If ‘all’, all outliers are displayed in the boxplot.
+If ‘downsample’, when num outliers is &gt;10k, they are downsampled to
+10% of the original count.
+If None, outliers are hidden.</p></li>
+<li><p><strong>log_scale</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, the log1p transformation is applied to the features before
+plotting. This option is disabled if negative values are found in the
+features.</p></li>
+<li><p><strong>orient</strong> (<em>{&quot;v&quot;</em><em>, </em><em>&quot;h&quot;}</em><em>, </em><em>default=&quot;v&quot;</em>) – The orientation of the boxplots: “v” for vertical, “h” for horizontal.</p></li>
+<li><p><strong>figure_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the figure in inches. Default is 3.2.</p></li>
+<li><p><strong>figure_height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of the figure in inches. Default is 2.</p></li>
+<li><p><strong>figure_dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – DPI (dots per inch) for the figure. Default is 200.</p></li>
+<li><p><strong>defined_color_map</strong> (<em>str</em><em>, </em><em>optional</em>) – Key in ‘adata.uns’ holding a pre-computed color dictionary.
+Falls back to automatic generation from ‘annotation’ values.</p></li>
+<li><p><strong>ax</strong> – A Matplotlib Axes object. Currently, this parameter is not used by the
+underlying plotting functions (Seaborn’s <cite>catplot</cite>/<cite>displot</cite>), which
+will always generate a new figure and axes. The <cite>ax</cite> key in the
+returned dictionary will contain the Axes from these new plots.
+This parameter is maintained for API consistency and potential
+future enhancements. Default is None.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional arguments for seaborn figure-level functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>fig<span class="classifier">plotly.graph_objects.Figure or str</span></dt><dd><dl>
+<dt>The generated boxplot figure, which can be either:</dt><dd><ul class="simple">
+<li><p>If <cite>figure_type</cite> is “static”: A base64-encoded PNG</p></li>
+</ul>
+<p>image string
+- If <cite>figure_type</cite> is “interactive”: A Plotly figure object</p>
+</dd>
+</dl>
+</dd>
+<dt>df<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame containing the features and their corresponding values.</p>
+</dd>
+<dt>metrics<span class="classifier">pd.DataFrame</span></dt><dd><p>A DataFrame containing the computed boxplot metrics (if
+<cite>return_metrics</cite> is True).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the following keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.dimensionality_reduction_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">dimensionality_reduction_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#dimensionality_reduction_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.dimensionality_reduction_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object with coordinates precomputed by the ‘tsne’ or ‘UMAP’
+function and stored in ‘adata.obsm[“X_tsne”]’ or ‘adata.obsm[“X_umap”]’</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – Dimensionality reduction method to visualize.
+Choose from {‘tsne’, ‘umap’, ‘pca’}.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column in <cite>adata.obs</cite> to use for coloring
+the scatter plot points based on cell annotations.
+Takes precedence over <cite>feature</cite>.</p></li>
+<li><p><strong>feature</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the gene or feature in <cite>adata.var_names</cite> to use
+for coloring the scatter plot points based on feature expression.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the data layer in <cite>adata.layers</cite> to use for visualization.
+If None, the main data matrix <cite>adata.X</cite> is used.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – A matplotlib axes object to plot on.
+If not provided, a new figure and axes will be created.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – Name of the key in <cite>obsm</cite> that contains the numpy array. Takes
+precedence over <cite>method</cite></p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to visualize_2D_scatter function,
+including point_size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The created figure for the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the heatmap of the mean feature of cells that belong to a <cite>column</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – Name of member of adata.obs to plot the histogram.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>default None</em>) – The name of the <cite>adata</cite> layer to use to calculate the mean feature.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to seaborn heatmap function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>pandas.DataFrame</em> – A dataframe tha has the labels as indexes the mean feature for every
+marker.</p></li>
+<li><p><em>matplotlib.figure.Figure</em> – The figure of the heatmap.</p></li>
+<li><p><em>matplotlib.axes._subplots.AxesSubplot</em> – The AsxesSubplot of the heatmap.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.hierarchical_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">hierarchical_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_score</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'annotation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotate_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#hierarchical_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.hierarchical_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a hierarchical clustering heatmap and dendrogram.
+By default, the dataset is assumed to have features as columns and
+annotations as rows. Cells are grouped by annotation (e.g., phenotype),
+and for each group, the average expression intensity of each feature
+(e.g., protein or marker) is computed. The heatmap is plotted using
+seaborn’s clustermap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Name of the annotation in adata.obs to group by and calculate mean
+intensity.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – List of feature names (e.g., markers) to be included in the
+visualization. If None, all features are used. Default is None.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the <cite>adata</cite> layer to use to calculate the mean intensity.
+If not provided, uses the main matrix. Default is None.</p></li>
+<li><p><strong>cluster_feature</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the feature axis.
+Default is False.</p></li>
+<li><p><strong>cluster_annotations</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, perform hierarchical clustering on the annotations axis.
+Default is False.</p></li>
+<li><p><strong>standard_scale</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Whether to standard scale data (0: row-wise or 1: column-wise).
+Default is None.</p></li>
+<li><p><strong>z_score</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the axis for z-score normalization. Can be “feature” or
+“annotation”. Default is “annotation”.</p></li>
+<li><p><strong>swap_axes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, switches the axes of the heatmap, effectively transposing
+the dataset. By default (when False), annotations are on the vertical
+axis (rows) and features are on the horizontal axis (columns).
+When set to True, features will be on the vertical axis and
+annotations on the horizontal axis. Default is False.</p></li>
+<li><p><strong>rotate_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, rotate x-axis labels by 45 degrees. Default is False.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional parameters passed to <cite>sns.clustermap</cite> function or its
+underlying functions. Some essential parameters include:
+- <cite>cmap</cite> : colormap</p>
+<blockquote>
+<div><p>Colormap to use for the heatmap. It’s an argument for the underlying
+<cite>sns.heatmap()</cite> used within <cite>sns.clustermap()</cite>. Examples include
+“viridis”, “plasma”, “coolwarm”, etc.</p>
+</div></blockquote>
+<ul>
+<li><p><cite>{row,col}_colors</cite> : Lists or DataFrames
+Colors to use for annotating the rows/columns. Useful for visualizing
+additional categorical information alongside the main heatmap.</p></li>
+<li><p><cite>{dendrogram,colors}_ratio</cite> : tuple(float)
+Control the size proportions of the dendrogram and the color labels
+relative to the main heatmap.</p></li>
+<li><p><cite>cbar_pos</cite> : tuple(float) or None
+Specify the position and size of the colorbar in the figure. If set
+to None, no colorbar will be added.</p></li>
+<li><p><cite>tree_kws</cite> : dict
+Customize the appearance of the dendrogram tree. Passes additional
+keyword arguments to the underlying
+<cite>matplotlib.collections.LineCollection</cite>.</p></li>
+<li><p><cite>method</cite> : str
+The linkage algorithm to use for the hierarchical clustering.
+Defaults to ‘centroid’ in the function, but can be changed.</p></li>
+<li><p><cite>metric</cite> : str
+The distance metric to use for the hierarchy. Defaults to ‘euclidean’
+in the function.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>mean_intensity</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing the mean intensity of cells for each annotation.</p></li>
+<li><p><strong>clustergrid</strong> (<em>seaborn.matrix.ClusterGrid</em>) – The seaborn ClusterGrid object representing the heatmap and
+dendrograms.</p></li>
+<li><p><strong>dendrogram_data</strong> (<em>dict</em>) – A dictionary containing hierarchical clustering linkage data for both
+rows and columns. These linkage matrices can be used to generate
+dendrograms with tools like scipy’s dendrogram function. This offers
+flexibility in customizing and plotting dendrograms as needed.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>import matplotlib.pyplot as plt
+import pandas as pd
+import anndata
+from spac.visualization import hierarchical_heatmap
+X = pd.DataFrame([[1, 2], [3, 4]], columns=[‘gene1’, ‘gene2’])
+annotation = pd.DataFrame([‘type1’, ‘type2’], columns=[‘cell_type’])
+all_data = anndata.AnnData(X=X, obs=annotation)</p>
+<dl class="simple">
+<dt>mean_intensity, clustergrid, dendrogram_data = hierarchical_heatmap(</dt><dd><p>all_data,
+“cell_type”,
+layer=None,
+z_score=”annotation”,
+swap_axes=True,
+cluster_feature=False,
+cluster_annotations=True</p>
+</dd>
+</dl>
+<p>)</p>
+<p># To display a standalone dendrogram using the returned linkage matrix:
+import scipy.cluster.hierarchy as sch
+import numpy as np
+import matplotlib.pyplot as plt</p>
+<p># Convert the linkage data to type double
+dendro_col_data = np.array(dendrogram_data[‘col_linkage’], dtype=np.double)</p>
+<p># Ensure the linkage matrix has at least two dimensions and
+more than one linkage
+if dendro_col_data.ndim == 2 and dendro_col_data.shape[0] &gt; 1:</p>
+<blockquote>
+<div><p>fig, ax = plt.subplots(figsize=(10, 7))
+sch.dendrogram(dendro_col_data, ax=ax)
+plt.title(‘Standalone Col Dendrogram’)
+plt.show()</p>
+</div></blockquote>
+<dl class="simple">
+<dt>else:</dt><dd><p>print(“Insufficient data to plot a dendrogram.”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.histogram">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">together</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_log_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.histogram" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the histogram of cells based on a specific feature from adata.X
+or annotation from adata.obs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>feature</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of continuous feature from adata.X to plot its histogram.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the annotation from adata.obs to plot its histogram.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the layer in adata.layers to plot its histogram.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em>, </em><em>default None</em>) – Choose either to group the histogram by another column.</p></li>
+<li><p><strong>together</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, and if group_by != None, create one plot combining all groups.
+If False, create separate histograms for each group.
+The appearance of combined histograms can be controlled using the
+<cite>multiple</cite> and <cite>element</cite> parameters in <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs.
+To control how the histograms are normalized (e.g., to divide the
+histogram by the number of elements in every group), use the <cite>stat</cite>
+parameter in <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs. For example, set <cite>stat=”probability”</cite> to show
+the relative frequencies of each group.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – An existing Axes object to draw the plot onto, optional.</p></li>
+<li><p><strong>x_log_scale</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, the data will be transformed using np.log1p before plotting,
+and the x-axis label will be adjusted accordingly.</p></li>
+<li><p><strong>y_log_scale</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, the y-axis will be set to log scale.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional keyword arguments passed to seaborn histplot function.
+Key arguments include:
+- <cite>multiple</cite>: Determines how the subsets of data are displayed</p>
+<blockquote>
+<div><dl class="simple">
+<dt>on the same axes. Options include:</dt><dd><ul>
+<li><dl class="simple">
+<dt>”layer”: Draws each subset on top of the other</dt><dd><p>without adjustments.</p>
+</dd>
+</dl>
+</li>
+<li><p>”dodge”: Dodges bars for each subset side by side.</p></li>
+<li><p>”stack”: Stacks bars for each subset on top of each other.</p></li>
+<li><p>”fill”: Adjusts bar heights to fill the axes.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt><cite>element</cite>: Determines the visual representation of the bins.</dt><dd><dl class="simple">
+<dt>Options include:</dt><dd><ul>
+<li><p>”bars”: Displays the typical bar-style histogram (default).</p></li>
+<li><p>”step”: Creates a step line plot without bars.</p></li>
+<li><dl class="simple">
+<dt>”poly”: Creates a polygon where the bottom edge represents</dt><dd><p>the x-axis and the top edge the histogram’s bins.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>log_scale</cite>: Determines if the data should be plotted on</dt><dd><p>a logarithmic scale.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>stat</cite>: Determines the statistical transformation to use on the data</dt><dd><dl class="simple">
+<dt>for the histogram. Options include:</dt><dd><ul>
+<li><p>”count”: Show the counts of observations in each bin.</p></li>
+<li><p>”frequency”: Show the number of observations divided
+by the bin width.</p></li>
+<li><dl class="simple">
+<dt>”density”: Normalize such that the total area of the histogram</dt><dd><p>equals 1.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>”probability”: Normalize such that each bar’s height reflects</dt><dd><p>the probability of observing that bin.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>bins</cite>: Specification of hist bins.</dt><dd><p>Can be a number (indicating the number of bins) or a list
+(indicating bin edges). For example, <cite>bins=10</cite> will create 10 bins,
+while <cite>bins=[0, 1, 2, 3]</cite> will create bins [0,1), [1,2), [2,3].
+If not provided, the binning will be determined automatically.
+Note, don’t pass a numpy array, only python lists or strs/numbers.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>fig<span class="classifier">matplotlib.figure.Figure</span></dt><dd><p>The created figure for the plot.</p>
+</dd>
+<dt>axs<span class="classifier">matplotlib.axes.Axes or list of Axes</span></dt><dd><p>The Axes object(s) of the histogram plot(s). Returns a single Axes
+if only one plot is created, otherwise returns a list of Axes.</p>
+</dd>
+<dt>df<span class="classifier">pandas.DataFrame</span></dt><dd><p>DataFrame containing the data used for plotting the histogram.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the following</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.interactive_spatial_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">interactive_spatial_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dot_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dot_transparency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rainbow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defined_color_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_y_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#interactive_spatial_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.interactive_spatial_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Create an interactive scatter plot for
+spatial data using provided annotations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix object,
+must have a .obsm attribute with ‘spatial’ key.</p></li>
+<li><p><strong>annotations</strong> (<em>list</em><em> of </em><em>str</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Column(s) in <cite>adata.obs</cite> that contain the annotations to plot.
+If a single string is provided, it will be converted to a list.
+The interactive plot will show all the labels in the annotation
+columns passed.</p></li>
+<li><p><strong>feature</strong> (<em>str</em><em>, </em><em>optional</em>) – If annotation is None, the name of the gene or feature
+in <cite>adata.var_names</cite> to use for coloring the scatter plot points
+based on feature expression.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – If feature is not None, the name of the data layer in <cite>adata.layers</cite>
+to use for visualization. If None, the main data matrix <cite>adata.X</cite> is
+used.</p></li>
+<li><p><strong>dot_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Size of the scatter dots in the plot. Default is 1.5.</p></li>
+<li><p><strong>dot_transparency</strong> (<em>float</em><em>, </em><em>optional</em>) – Transparancy level of the scatter dots. Default is 0.75.</p></li>
+<li><p><strong>annotation_colorscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the color scale to use for the dots when annotation
+is used. Default is ‘Viridis’.</p></li>
+<li><p><strong>feature_colorscale</strong> (<em>srt</em><em>, </em><em>optional</em>) – Name of the color scale to use for the dots when feature
+is used. Default is ‘seismic’.</p></li>
+<li><p><strong>figure_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the figure in inches. Default is 12.</p></li>
+<li><p><strong>figure_height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of the figure in inches. Default is 8.</p></li>
+<li><p><strong>figure_dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – DPI (dots per inch) for the figure. Default is 200.</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Font size for text in the plot. Default is 12.</p></li>
+<li><p><strong>stratify_by</strong> (<em>str</em><em>, </em><em>optional</em>) – Column in <cite>adata.obs</cite> to stratify the plot. Default is None.</p></li>
+<li><p><strong>defined_color_map</strong> (<em>str</em><em>, </em><em>optional</em>) – Predefined color mapping stored in adata.uns for specific labels.
+Default is None, which will generate the color mapping automatically.</p></li>
+<li><p><strong>reverse_y_axis</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, reverse the Y-axis of the plot. Default is False.</p></li>
+<li><p><strong>cmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum value for the color scale when using features.
+Default is None.</p></li>
+<li><p><strong>cmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum value for the color scale when using features.
+Default is None.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for customization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of dictionaries, each containing the following keys:
+- “image_name”: str, the name of the generated image.
+- “image_object”: Plotly Figure object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function is tailored for spatial single-cell data and expects the
+AnnData object to have spatial coordinates in its <cite>.obsm</cite> attribute under
+the ‘spatial’ key.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.plot_ripley_l">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_ripley_l</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#plot_ripley_l"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.plot_ripley_l" title="Permalink to this definition"></a></dt>
+<dd><p>Plot Ripley’s L statistic for multiple bins and different regions
+for a given pair of phenotypes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – AnnData object containing Ripley’s L results in <cite>adata.uns[‘ripley_l’]</cite>.</p></li>
+<li><p><strong>phenotypes</strong> (<em>tuple</em><em> of </em><em>str</em>) – A tuple of two phenotypes: (center_phenotype, neighbor_phenotype).</p></li>
+<li><p><strong>regions</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – A list of region labels to plot. If None, plot all available regions.
+Default is None.</p></li>
+<li><p><strong>sims</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the simulation results. Default is False.</p></li>
+<li><p><strong>return_df</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to return the DataFrame containing the Ripley’s L results.</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments to pass to <cite>seaborn.lineplot</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the Ripley L results are not found in <cite>adata.uns[‘ripley_l’]</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The Axes object containing the plot, which can be further modified.</p></li>
+<li><p><strong>df</strong> (<em>pandas.DataFrame, optional</em>) – The DataFrame containing the Ripley’s L results, if <cite>return_df</cite> is True.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">plot_ripley_l</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">adata</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">phenotypes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Phenotype1&#39;</span><span class="p">,</span> <span class="s1">&#39;Phenotype2&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">regions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;region1&#39;</span><span class="p">,</span> <span class="s1">&#39;region2&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This returns the <cite>Axes</cite> object for further customization and displays the plot.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.present_summary_as_figure">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">present_summary_as_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="../_modules/spac/visualization.html#present_summary_as_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.present_summary_as_figure" title="Permalink to this definition"></a></dt>
+<dd><p>Build a static Plotly figure (using a table) to depict the
+summary dictionary.</p>
+<dl class="simple">
+<dt>The figure includes columns:</dt><dd><ul class="simple">
+<li><p>Column name</p></li>
+<li><p>Data type</p></li>
+<li><p>Count of missing values</p></li>
+<li><p>Missing indices (as a string)</p></li>
+<li><p>Summary details (formatted as JSON for readability)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>summary_dict</strong> (<em>dict</em>) – The summary dictionary returned from summarize_dataframe.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A static Plotly table figure representing the summary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.present_summary_as_html">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">present_summary_as_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/spac/visualization.html#present_summary_as_html"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.present_summary_as_html" title="Permalink to this definition"></a></dt>
+<dd><p>Build an HTML string that presents the summary information
+intuitively.</p>
+<dl class="simple">
+<dt>For each specified column, the HTML includes:</dt><dd><ul class="simple">
+<li><p>Column name and data type</p></li>
+<li><p>Count and list of missing indices</p></li>
+<li><p>Summary details presented in a table (for numeric: stats;
+categorical: unique values and counts)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>summary_dict</strong> (<em>dict</em>) – The summary dictionary returned by summarize_dataframe.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HTML string representing the summary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.relational_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">relational_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mint'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#relational_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.relational_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a relational heatmap from the given AnnData object.
+The color map refers to matplotlib color maps, default is mint.
+For more information on colormaps, see:
+<a class="reference external" href="https://matplotlib.org/stable/users/explain/colors/colormaps.html">https://matplotlib.org/stable/users/explain/colors/colormaps.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The annotated data matrix.</p></li>
+<li><p><strong>source_annotation</strong> (<em>str</em>) – The source annotation to use for the relational heatmap.</p></li>
+<li><p><strong>target_annotation</strong> (<em>str</em>) – The target annotation to use for the relational heatmap.</p></li>
+<li><p><strong>color_map</strong> (<em>str</em>) – The color map to use for the relational heatmap. Default is mint.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments. For example, you can pass font_size=12.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary containing:
+- “figure” (plotly.graph_objs._figure.Figure):</p>
+<blockquote>
+<div><p>The generated relational heatmap as a Plotly figure.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>”file_name” (str):</dt><dd><p>The name of the file where the relational matrix can be saved.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>”data” (pandas.DataFrame):</dt><dd><p>A relational matrix DataFrame with percentage values.
+Rows represent source annotations,
+columns represent target annotations,
+and an additional “total” column sums
+the percentages for each source.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.sankey_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">sankey_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_color_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'tab20'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_color_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'tab20c'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sankey_font</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#sankey_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.sankey_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a Sankey plot from the given AnnData object.
+The color map refers to matplotlib color maps, default is tab20 for
+source annotation, and tab20c for target annotation.
+For more information on colormaps, see:
+<a class="reference external" href="https://matplotlib.org/stable/users/explain/colors/colormaps.html">https://matplotlib.org/stable/users/explain/colors/colormaps.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The annotated data matrix.</p></li>
+<li><p><strong>source_annotation</strong> (<em>str</em>) – The source annotation to use for the Sankey plot.</p></li>
+<li><p><strong>target_annotation</strong> (<em>str</em>) – The target annotation to use for the Sankey plot.</p></li>
+<li><p><strong>source_color_map</strong> (<em>str</em>) – The color map to use for the source nodes. Default is tab20.</p></li>
+<li><p><strong>target_color_map</strong> (<em>str</em>) – The color map to use for the target nodes. Default is tab20c.</p></li>
+<li><p><strong>sankey_font</strong> (<em>float</em><em>, </em><em>optional</em>) – The font size to use for the Sankey plot. Defaults to 12.0.</p></li>
+<li><p><strong>prefix</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to prefix the target labels with
+the source labels. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated Sankey plot.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>plotly.graph_objs._figure.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.spatial_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">spatial_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spot_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-999</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#spatial_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.spatial_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Generate the spatial plot of selected features
+:param adata: The AnnData object containing target feature and spatial coordinates.
+:type adata: anndata.AnnData
+:param spot_size: The size of spot on the spatial plot.
+:type spot_size: int
+:param alpha: The transparency of spots, range from 0 (invisible) to 1 (solid)
+:type alpha: float
+:param vmin: The lower limit of the feature value for visualization
+:type vmin: float or int
+:param vmax: The upper limit of the feature value for visualization
+:type vmax: float or int
+:param feature: The feature to visualize on the spatial plot.</p>
+<blockquote>
+<div><p>Default None.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>annotation</strong> (<em>str</em>) – The annotation to visualize in the spatial plot.
+Can’t be set with feature, default None.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – Name of the AnnData object layer that wants to be plotted.
+By default adata.raw.X is plotted.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The matplotlib Axes containing the analysis plots.
+The returned ax is the passed ax or new ax created.
+Only works if plotting a single component.</p></li>
+<li><p><strong>**kwargs</strong> – Arguments to pass to matplotlib.pyplot.scatter()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Single or a list of class</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>~matplotlib.axes.Axes</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.threshold_heatmap">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">threshold_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_cutoffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#threshold_heatmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.threshold_heatmap" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a heatmap for each feature, categorizing intensities into low,
+medium, and high based on provided cutoffs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – AnnData object containing the feature intensities in .X attribute
+or specified layer.</p></li>
+<li><p><strong>feature_cutoffs</strong> (<em>dict</em>) – Dictionary with feature names as keys and tuples with two intensity
+cutoffs as values.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Column name in .obs DataFrame that contains the annotation
+used for grouping.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Layer name in adata.layers to use for intensities.
+If None, uses .X attribute.</p></li>
+<li><p><strong>swap_axes</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, swaps the axes of the heatmap.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword arguments</em>) – Additional keyword arguments to pass to scanpy’s heatmap function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary contains the axes of figures generated in the scanpy
+heatmap function.
+Consistent Key: ‘heatmap_ax’
+Potential Keys includes: ‘groupby_ax’, ‘dendrogram_ax’, and
+‘gene_groups_ax’.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.tsne_plot">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">tsne_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#tsne_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.tsne_plot" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize scatter plot in tSNE basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object with t-SNE coordinates precomputed by the ‘tsne’
+function and stored in ‘adata.obsm[“X_tsne”]’.</p></li>
+<li><p><strong>color_column</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column to use for coloring the scatter plot points.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – A matplotlib axes object to plot on.
+If not provided, a new figure and axes will be created.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to scanpy.pl.tsne function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The created figure for the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the tsne plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.visualize_2D_scatter">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">visualize_2D_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_axis_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Component</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_axis_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Component</span> <span class="pre">2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_representation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#visualize_2D_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.visualize_2D_scatter" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize 2D data using plt.scatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array-like</em>) – Coordinates of the data.</p></li>
+<li><p><strong>y</strong> (<em>array-like</em>) – Coordinates of the data.</p></li>
+<li><p><strong>labels</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Array of labels for the data points. Can be numerical or categorical.</p></li>
+<li><p><strong>point_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Size of the points. If None, it will be automatically determined.</p></li>
+<li><p><strong>theme</strong> (<em>str</em><em>, </em><em>optional</em>) – Color theme for the plot. Defaults to ‘viridis’ if theme not
+recognized. For a list of supported themes, refer to Matplotlib’s
+colormap documentation:
+<a class="reference external" href="https://matplotlib.org/stable/tutorials/colors/colormaps.html">https://matplotlib.org/stable/tutorials/colors/colormaps.html</a></p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em><em> (</em><em>default: None</em><em>)</em>) – Matplotlib axis object. If None, a new one is created.</p></li>
+<li><p><strong>annotate_centers</strong> (<em>bool</em><em>, </em><em>optional</em><em> (</em><em>default: False</em><em>)</em>) – Annotate the centers of clusters if labels are categorical.</p></li>
+<li><p><strong>x_axis_title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title for the x-axis.</p></li>
+<li><p><strong>y_axis_title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title for the y-axis.</p></li>
+<li><p><strong>plot_title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title for the plot.</p></li>
+<li><p><strong>color_representation</strong> (<em>str</em><em>, </em><em>optional</em>) – Description of what the colors represent.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments passed to plt.scatter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – The figure of the plot.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em>) – The axes of the plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.visualization.visualize_nearest_neighbor">
+<span class="sig-prename descclassname"><span class="pre">spac.visualization.</span></span><span class="sig-name descname"><span class="pre">visualize_nearest_neighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatial_distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facet_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation_colorscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rainbow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defined_color_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/visualization.html#visualize_nearest_neighbor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.visualization.visualize_nearest_neighbor" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize nearest-neighbor (spatial distance) data between groups of cells
+with optional pin-color map via numeric or distribution plots.</p>
+<p>This landing function first constructs a tidy long-form DataFrame via
+function <cite>_prepare_spatial_distance_data</cite>, then dispatches plotting to
+function <cite>_plot_spatial_distance_dispatch</cite>.  A pin-color feature guarantees
+consistent mapping from annotation labels to colors across figures,
+drawing the mapping from <code class="docutils literal notranslate"><span class="pre">adata.uns</span></code> (if present) or generating one
+automatically through <cite>spac.utils.color_mapping</cite>.</p>
+<dl class="simple">
+<dt>Plot arrangement logic:</dt><dd><ol class="arabic simple">
+<li><p>If stratify_by is not None and facet_plot=True =&gt; single figure
+with subplots (faceted).</p></li>
+<li><p>If stratify_by is not None and facet_plot=False =&gt; multiple separate
+figures, one per group.</p></li>
+<li><p>If stratify_by is None =&gt; a single figure with one plot.</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – Annotated data matrix with distances in <cite>adata.obsm[spatial_distance]</cite>.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Column in <cite>adata.obs</cite> containing cell phenotypes or annotations.</p></li>
+<li><p><strong>distance_from</strong> (<em>str</em>) – Reference phenotype from which distances are measured. Required.</p></li>
+<li><p><strong>distance_to</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Target phenotype(s) to measure distance to. If None, uses all
+available phenotypes.</p></li>
+<li><p><strong>stratify_by</strong> (<em>str</em><em>, </em><em>optional</em>) – Column in <cite>adata.obs</cite> used to group or stratify data (e.g. imageid).</p></li>
+<li><p><strong>spatial_distance</strong> (<em>str</em><em>, </em><em>optional</em>) – Key in <cite>adata.obsm</cite> storing the distance DataFrame. Default is
+‘spatial_distance’.</p></li>
+<li><p><strong>facet_plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True (and stratify_by is not None), subplots in a single figure.
+Otherwise, multiple or single figure(s).</p></li>
+<li><p><strong>method</strong> (<em>{'numeric'</em><em>, </em><em>'distribution'}</em>) – Determines the plotting style (catplot vs displot).</p></li>
+<li><p><strong>plot_type</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Specific seaborn plot kind.  If None, sensible defaults are selected
+(‘boxen’ for numeric, ‘violin’ for distribution).
+For method=’numeric’: ‘box’, ‘violin’, ‘boxen’, ‘strip’, ‘swarm’.
+For method=’distribution’: ‘hist’, ‘kde’, ‘ecdf’.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, applies np.log1p transform to the distance values.</p></li>
+<li><p><strong>annotation_colorscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Matplotlib colormap name used when auto-enerating a new mapping.
+Ignored if ‘defined_color_map’ is provided.</p></li>
+<li><p><strong>defined_color_map</strong> (<em>str</em><em>, </em><em>optional</em>) – Key in ‘adata.uns’ holding a pre-computed color dictionary.
+Falls back to automatic generation from ‘annotation’ values.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>optional</em>) – The matplotlib Axes containing the analysis plots.
+The returned ax is the passed ax or new ax created.
+Only works if plotting a single component. Default is None.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional arguments for seaborn figure-level functions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>{</dt><dd><p>‘data’: pd.DataFrame,  # long-form table for plotting
+‘fig’ : matplotlib.figure.Figure | list[Figure] | None,
+‘ax’: matplotlib.axes.Axes | list[matplotlib.axes.Axes],
+‘palette’: dict  # {label: ‘#rrggbb’}</p>
+</dd>
+</dl>
+<p>}</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If required parameters are invalid.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">visualize_nearest_neighbor</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">adata</span><span class="o">=</span><span class="n">my_adata</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">annotation</span><span class="o">=</span><span class="s1">&#39;cell_type&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">distance_from</span><span class="o">=</span><span class="s1">&#39;Tumour&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">distance_to</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Stroma&#39;</span><span class="p">,</span> <span class="s1">&#39;B cell&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;numeric&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">facet_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">stratify_by</span><span class="o">=</span><span class="s1">&#39;image_id&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">defined_color_map</span><span class="o">=</span><span class="s1">&#39;pin_color_map&#39;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span>      <span class="c1"># matplotlib.figure.Figure</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax_list</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ax&#39;</span><span class="p">]</span>   <span class="c1"># list[matplotlib.axes.Axes] (faceted plot)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>  <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>     <span class="c1"># long-form DataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Tumour → Stroma distances&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spac.utils.html" class="btn btn-neutral float-left" title="spac.utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

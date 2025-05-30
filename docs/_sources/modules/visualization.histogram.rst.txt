@@ -1,1 +1,0 @@
-.. autofunction:: spac.visualization.histogram

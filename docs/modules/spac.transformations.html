@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.transformations module &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="spac.utag_functions module" href="spac.utag_functions.html" />
+    <link rel="prev" title="spac.spatial_analysis module" href="spac.spatial_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">spac.transformations module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.transformations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spac.transformations">
+<span id="spac-transformations-module"></span><h1>spac.transformations module<a class="headerlink" href="#module-spac.transformations" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.apply_per_batch">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">apply_per_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#apply_per_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.apply_per_batch" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a given function to data per batch, with additional parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data to transform.</p></li>
+<li><p><strong>annotation</strong> (<em>np.ndarray</em>) – Batch annotations for each row in the data.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The function to apply to each batch. Options: ‘arcsinh_transformation’
+or ‘normalize_features’.</p></li>
+<li><p><strong>kwargs</strong> – Additional parameters to pass to the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.arcsinh_transformation">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">arcsinh_transformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">co_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'arcsinh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#arcsinh_transformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.arcsinh_transformation" title="Permalink to this definition"></a></dt>
+<dd><p>Apply arcsinh transformation using a co-factor (fixed number) or a given
+percentile of each feature. This transformation can be applied to the
+entire dataset or per batch based on provided parameters.</p>
+<p>Computes the co-factor or percentile for each biomarker individually,
+ensuring proper scaling based on its unique range of expression levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object containing the data to transform.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer in the AnnData object to transform.
+If None, the main data matrix .X is used.</p></li>
+<li><p><strong>co_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – A fixed positive number to use as a co-factor for the transformation.</p></li>
+<li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – The percentile is computed for each feature (column) individually.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em><em>, </em><em>default=&quot;arcsinh&quot;</em>) – Name of the layer to put the transformed results. If it already exists,
+it will be overwritten with a warning.</p></li>
+<li><p><strong>per_batch</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – Whether to apply the transformation per batch.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the annotation in <cite>adata</cite> to define batches. Required if
+per_batch is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – The AnnData object with the transformed data stored in the specified
+output_layer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.arcsinh_transformation_core">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">arcsinh_transformation_core</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">co_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#arcsinh_transformation_core"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.arcsinh_transformation_core" title="Permalink to this definition"></a></dt>
+<dd><p>Apply arcsinh transformation using a co-factori or a percentile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data to transform.</p></li>
+<li><p><strong>co_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – A fixed positive number to use as a co-factor for the
+transformation.</p></li>
+<li><p><strong>percentile</strong> (<em>float</em><em>, </em><em>optional</em>) – The percentile to determine the co-factor if co_factor is not
+provided.
+The percentile is computed for each feature (column)
+individually.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If both co_factor and percentile are None.
+    If both co_factor and percentile are specified.
+    If percentile is not in the range [0, 100].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.batch_normalize">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">batch_normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'median'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#batch_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.batch_normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Adjust the features of every marker using a normalization method.</p>
+<p>The normalization methods are summarized here:
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8723144/</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation in <cite>adata</cite> to define batches.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em>) – The name of the new layer to add to the anndata object for storing
+normalized data.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer from which to read data. If None, read from <cite>.X</cite>.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;median&quot;</em><em>, </em><em>&quot;Q50&quot;</em><em>, </em><em>&quot;Q75&quot;</em><em>, </em><em>&quot;z-score&quot;}</em><em>, </em><em>default &quot;median&quot;</em>) – The normalization method to use.</p></li>
+<li><p><strong>log</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, take the log2 of features before normalization.
+Ensure this is boolean.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.get_cluster_info">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">get_cluster_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#get_cluster_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.get_cluster_info" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve information about clusters based on specific annotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Annotation in adata.obs for cluster info.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Features (e.g., markers) for cluster metrics.
+Defaults to all features in adata.var_names.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used in the aggregate summaries.
+If None, uses adata.X.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with metrics for each cluster including the percentage of
+each cluster to the whole sample.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.knn_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">knn_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'knn'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'no_label'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#knn_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.knn_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate knn clusters using sklearn KNeighborsClassifier</p>
+<p>The function will add these two attributes to <cite>adata</cite>:
+<cite>.obs[output_annotation]</cite></p>
+<blockquote>
+<div><p>The assigned int64 class labels by KNeighborsClassifier</p>
+</div></blockquote>
+<dl class="simple">
+<dt><cite>.uns[output_annotation_features]</cite></dt><dd><p>The features used to calculate the knn clusters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em>) – The variables that would be included in fitting the KNN classifier.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation used for classifying the data</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used.</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nearest neighbor to be used in creating the graph.</p></li>
+<li><p><strong>output_annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the output layer where the clusters are stored.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, use the corresponding key <cite>adata.obsm</cite> to calcuate the
+clustering. Takes priority over the layer argument.</p></li>
+<li><p><strong>missing_label</strong> (<em>str</em><em> or </em><em>int</em>) – The value of missing annotations in adata.obs[annotation]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>adata is updated inplace</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.normalize_features">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">normalize_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normalized_feature'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#normalize_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.normalize_features" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize the features stored in an AnnData object.
+Any entry lower than the value corresponding to low_quantile of the
+column will be assigned a value of low_quantile, and entry that
+are greater than high_quantile value will be assigned as the value of
+high_quantile.
+Other entries will be normalized with
+(values - quantile min)/(quantile max - quantile min).
+Resulting column will have value ranged between [0, 1].</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.normalize_features_core">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">normalize_features_core</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.98</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#normalize_features_core"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.normalize_features_core" title="Permalink to this definition"></a></dt>
+<dd><p>Normalize the features in a numpy array.</p>
+<p>Any entry lower than the value corresponding to low_quantile of the column
+will be assigned a value of low_quantile, and entries that are greater than
+high_quantile value will be assigned as value of high_quantile.
+Other entries will be normalized with
+(values - quantile min)/(quantile max - quantile min).
+Resulting column will have values ranged between [0, 1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em>) – The data to be normalized.</p></li>
+<li><p><strong>low_quantile</strong> (<em>float</em><em>, </em><em>optional</em><em> (</em><em>default: 0.02</em><em>)</em>) – The lower quantile to use for normalization. Determines the
+minimum value after normalization.
+Must be a positive float between [0,1).</p></li>
+<li><p><strong>high_quantile</strong> (<em>float</em><em>, </em><em>optional</em><em> (</em><em>default: 0.98</em><em>)</em>) – The higher quantile to use for normalization. Determines the
+maximum value after normalization.
+Must be a positive float between (0,1].</p></li>
+<li><p><strong>interpolation</strong> (<em>str</em><em>, </em><em>optional</em><em> (</em><em>default: &quot;linear&quot;</em><em>)</em>) – The interpolation method to use when selecting the value for
+low and high quantile. Values can be “nearest” or “linear”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normalized data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If low_quantile or high_quantile are not numeric.</p></li>
+<li><p><strong>ValueError</strong> – If low_quantile is not less than high_quantile, or if they are
+    out of the range [0, 1] and (0, 1], respectively.</p></li>
+<li><p><strong>ValueError</strong> – If interpolation is not one of the allowed values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.phenograph_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">phenograph_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'phenograph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#phenograph_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.phenograph_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate automatic phenotypes using phenograph.</p>
+<p>The function will add these two attributes to <cite>adata</cite>:
+<cite>.obs[“phenograph”]</cite></p>
+<blockquote>
+<div><p>The assigned int64 class by phenograph</p>
+</div></blockquote>
+<dl class="simple">
+<dt><cite>.uns[“phenograph_features”]</cite></dt><dd><p>The features used to calculate the phenograph clusters</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list</em><em> of </em><em>str</em>) – The variables that would be included in creating the phenograph
+clusters.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The layer to be used in calculating the phengraph clusters.</p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of nearest neighbor to be used in creating the graph.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>output_annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the output layer where the clusters are stored.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, use the corresponding key <cite>adata.obsm</cite> to calcuate the
+Phenograph. Takes priority over the layer argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with the phenograph clusters
+stored in <cite>adata.obs[output_annotation]</cite></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.rename_annotations">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">rename_annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest_annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#rename_annotations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.rename_annotations" title="Permalink to this definition"></a></dt>
+<dd><p>Rename labels in a given annotation in an AnnData object based on a
+provided dictionary. This function modifies the adata object in-place
+and creates a new annotation column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>src_annotation</strong> (<em>str</em>) – Name of the column in adata.obs containing the original
+labels of the source annotation.</p></li>
+<li><p><strong>dest_annotation</strong> (<em>str</em>) – The name of the new column to be created in the AnnData object
+containing the renamed labels.</p></li>
+<li><p><strong>mappings</strong> (<em>dict</em>) – A dictionary mapping the original annotation labels to
+the new labels.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span> <span class="o">=</span> <span class="n">your_anndata_object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src_annotation</span> <span class="o">=</span> <span class="s2">&quot;phenograph&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mappings</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="s2">&quot;group_8&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;group_2&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;group_6&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="c1"># ...</span>
+<span class="gp">... </span>    <span class="s2">&quot;37&quot;</span><span class="p">:</span> <span class="s2">&quot;group_5&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dest_annotation</span> <span class="o">=</span> <span class="s2">&quot;renamed_annotations&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span> <span class="o">=</span> <span class="n">rename_annotations</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">adata</span><span class="p">,</span> <span class="n">src_annotation</span><span class="p">,</span> <span class="n">dest_annotation</span><span class="p">,</span> <span class="n">mappings</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.run_umap">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">run_umap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_derived_feature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X_umap'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#run_umap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.run_umap" title="Permalink to this definition"></a></dt>
+<dd><p>Perform UMAP analysis on the specific layer of the AnnData object
+or the default data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – Annotated data matrix.</p></li>
+<li><p><strong>n_neighbors</strong> (<em>int</em><em>, </em><em>default=75</em>) – Number of neighbors to consider when constructing the UMAP. This
+influences the balance between preserving local and global structures
+in the data.</p></li>
+<li><p><strong>min_dist</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – Minimum distance between points in the UMAP space. Controls how
+tightly the embedding is allowed to compress points together.</p></li>
+<li><p><strong>n_components</strong> (<em>int</em><em>, </em><em>default=2</em>) – Number of dimensions for embedding.</p></li>
+<li><p><strong>metric</strong> (<em>str</em><em>, </em><em>optional</em>) – Metric to compute distances in high dimensional space.
+Check <cite>https://umap-learn.readthedocs.io/en/latest/api.html</cite> for
+options. The default is ‘euclidean’.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em>, </em><em>default=0</em>) – Seed used by the random number generator(RNG) during UMAP fitting.</p></li>
+<li><p><strong>transform_seed</strong> (<em>int</em><em>, </em><em>default=42</em>) – RNG seed during UMAP transformation.</p></li>
+<li><p><strong>layer</strong> (<em>str</em><em>, </em><em>optional</em>) – Layer of AnnData object for UMAP. Defaults to <cite>adata.X</cite>.</p></li>
+<li><p><strong>output_derived_feature</strong> (<em>str</em><em>, </em><em>default='X_umap'</em>) – The name of the column in adata.obsm that will contain the
+umap coordinates.</p></li>
+<li><p><strong>associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, use the corresponding key <cite>adata.obsm</cite> to calcuate the
+UMAP. Takes priority over the layer argument.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with UMAP coordinates stored in the <cite>obsm</cite>
+attribute. The key for the UMAP embedding in <cite>obsm</cite> is “X_umap” by
+default.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.run_utag_clustering">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">run_utag_clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pcs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slide_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Slide'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'UTAG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#run_utag_clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.run_utag_clustering" title="Permalink to this definition"></a></dt>
+<dd><p>Run UTAG clustering on the AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>features</strong> (<em>list</em>) – List of features to use for clustering or for PCA. Default
+(None) is to use all.</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – The number of nearest neighbor to be used in creating the graph.
+Default is 15.</p></li>
+<li><p><strong>resolution</strong> (<em>float</em>) – Resolution parameter for the clustering, higher resolution produces
+more clusters. Default is 1.</p></li>
+<li><p><strong>max_dist</strong> (<em>float</em>) – Maximum distance to cut edges within a graph. Default is 20.</p></li>
+<li><p><strong>n_principal_components</strong> (<em>int</em>) – Number of principal components to use for clustering.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em>) – Random state for reproducibility.</p></li>
+<li><p><strong>n_jobs</strong> (<em>int</em>) – Number of jobs to run in parallel. Default is 5.</p></li>
+<li><p><strong>n_iterations</strong> (<em>int</em>) – Number of iterations for the clustering.</p></li>
+<li><p><strong>slide_key</strong> (<em>str</em>) – Key of adata.obs containing information on the batch structure
+of the data.In general, for image data this will often be a variable
+indicating the imageb so image-specific effects are removed from data.
+Default is “Slide”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with clustering results.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.tsne">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">tsne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#tsne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.tsne" title="Permalink to this definition"></a></dt>
+<dd><p>Perform t-SNE transformation on specific layer information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – Layer for phenograph cluster calculation.</p></li>
+<li><p><strong>**kwargs</strong> – Parameters for scanpy.tl.tsne function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>adata</strong> – Updated AnnData object with t-SNE coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.transformations.z_score_normalization">
+<span class="sig-prename descclassname"><span class="pre">spac.transformations.</span></span><span class="sig-name descname"><span class="pre">z_score_normalization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/transformations.html#z_score_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.transformations.z_score_normalization" title="Permalink to this definition"></a></dt>
+<dd><p>Compute z-scores for the provided AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object containing the data to normalize.</p></li>
+<li><p><strong>output_layer</strong> (<em>str</em>) – The name of the layer to store the computed z-scores.</p></li>
+<li><p><strong>input_layer</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the layer in the AnnData object to normalize.
+If None, the main data matrix .X is used.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional arguments to pass to scipy.stats.zscore.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spac.spatial_analysis.html" class="btn btn-neutral float-left" title="spac.spatial_analysis module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spac.utag_functions.html" class="btn btn-neutral float-right" title="spac.utag_functions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

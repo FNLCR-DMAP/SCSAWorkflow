@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.spatial_analysis module &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="spac.transformations module" href="spac.transformations.html" />
+    <link rel="prev" title="spac.phenotyping module" href="spac.phenotyping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">spac.spatial_analysis module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.spatial_analysis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spac.spatial_analysis">
+<span id="spac-spatial-analysis-module"></span><h1>spac.spatial_analysis module<a class="headerlink" href="#module-spac.spatial_analysis" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.spatial_analysis.calculate_nearest_neighbor">
+<span class="sig-prename descclassname"><span class="pre">spac.spatial_analysis.</span></span><span class="sig-name descname"><span class="pre">calculate_nearest_neighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_associated_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imageid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatial_distance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/spatial_analysis.html#calculate_nearest_neighbor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.spatial_analysis.calculate_nearest_neighbor" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the shortest distance from each cell to the nearest cell of
+each phenotype (via scimap.tl.spatial_distance) and stores the
+resulting DataFrame in <cite>adata.obsm[label]</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – Annotated data matrix with spatial information.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – Column name in <cite>adata.obs</cite> containing cell annotationsi (i.e.
+phenotypes).</p></li>
+<li><p><strong>spatial_associated_table</strong> (<em>str</em><em>, </em><em>optional</em>) – Key in <cite>adata.obsm</cite> where spatial coordinates are stored. Default is
+‘spatial’.</p></li>
+<li><p><strong>imageid</strong> (<em>str</em><em>, </em><em>optional</em>) – The column in <cite>adata.obs</cite> specifying image IDs. If None,
+a dummy image column is created temporarily. Spatial distances are
+computed across the entire dataseti as if it’s one image.</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – The key under which results are stored  in <cite>adata.obsm</cite>. Default is
+‘spatial_distance’.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints progress messages. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modifies <cite>adata</cite> in place by storing a DataFrame of
+spatial distances in <cite>adata.obsm[label]</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>For a dataset with two cells (CellA, CellB) both of the same phenotype
+“type1”, the output might look like:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;spatial_distance&#39;</span><span class="p">]</span>
+<span class="go">       type1</span>
+<span class="go">CellA    0.0</span>
+<span class="go">CellB    0.0</span>
+</pre></div>
+</div>
+<p>For a dataset with two phenotypes “type1” and “type2”, the output might
+look like:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s1">&#39;spatial_distance&#39;</span><span class="p">]</span>
+<span class="go">       type1     type2</span>
+<span class="go">CellA   0.00  1.414214</span>
+<span class="go">CellB  1.414214  0.00</span>
+</pre></div>
+</div>
+<dl>
+<dt>Input:</dt><dd><dl class="simple">
+<dt>adata.obs:</dt><dd><p>cell_type   imageid
+type1       image1
+type1       image1
+type2       image1</p>
+</dd>
+<dt>adata.obsm[‘spatial’]:</dt><dd><p>[[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]</p>
+</dd>
+</dl>
+</dd>
+<dt>Output stored in adata.obsm[‘spatial_distance’]:</dt><dd><blockquote>
+<div><p>type1   type2</p>
+</div></blockquote>
+<p>0    0.0    1.414
+1    1.414  0.0
+2    2.236  1.0</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <cite>spatial_associated_table</cite> is not found in <cite>adata.obsm</cite>.
+    If spatial coordinates are missing or invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.spatial_analysis.neighborhood_profile">
+<span class="sig-prename descclassname"><span class="pre">spac.spatial_analysis.</span></span><span class="sig-name descname"><span class="pre">neighborhood_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">associated_table_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neighborhood_profile'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/spatial_analysis.html#neighborhood_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.spatial_analysis.neighborhood_profile" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the neighborhood profile for every cell in all slides in an analysis
+and update the input AnnData object in place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – The AnnData object containing the spatial coordinates and phenotypes.</p></li>
+<li><p><strong>phenotypes</strong> (<em>str</em>) – The name of the column in adata.obs that contains the phenotypes.</p></li>
+<li><p><strong>distances</strong> (<em>list</em>) – The list of increasing distances for the neighborhood profile.</p></li>
+<li><p><strong>spatial_key</strong> (<em>str</em><em>, </em><em>optional</em>) – The key in adata.obs that contains the spatial coordinates. Default is
+‘spatial’.</p></li>
+<li><p><strong>normalize</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – If ‘total_cells’, normalize the neighborhood profile based on the
+total number of cells in each bin.
+If ‘bin_area’, normalize the neighborhood profile based on the area
+of every bin.  Default is None.</p></li>
+<li><p><strong>associated_table_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column in adata.obsm that will contain the
+neighborhood profile. Default is ‘neighborhood_profile’.</p></li>
+<li><p><strong>regions</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The name of the column in adata.obs that contains the regions.
+If None, all cells in adata will be used. Default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function modifies the input AnnData object in place, adding a new
+column containing the neighborhood profile to adata.obsm.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The input AnnData object ‘adata’ is modified in place. The function adds a
+new column containing the neighborhood profile to adata.obsm, named by the
+parameter ‘associated_table_name’. The associated_table_name is a 3D array of
+shape (n_cells, n_phenotypes, n_bins) where n_cells is the number of cells
+in the all slides, n_phenotypes is the number of unique phenotypes, and
+n_bins is the number of bins in the distances list.</p>
+<p>A dictionary is added to adata.uns[associated_table_name] with the two keys
+“bins” and “labels”. “labels” will store all the values in the phenotype
+annotation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.spatial_analysis.ripley_l">
+<span class="sig-prename descclassname"><span class="pre">spac.spatial_analysis.</span></span><span class="sig-name descname"><span class="pre">ripley_l</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spatial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/spatial_analysis.html#ripley_l"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.spatial_analysis.ripley_l" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate Ripley’s L statistic for spatial data in <cite>adata</cite>.</p>
+<p>Ripley’s L statistic is a spatial point pattern analysis metric that
+quantifies clustering or regularity in point patterns across various
+distances. This function calculates the statistic for each region in
+<cite>adata</cite> (if provided) or for all cells if regions are not specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – The annotated data matrix containing the spatial coordinates and
+cell phenotypes.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The key in <cite>adata.obs</cite> representing the annotation for cell phenotypes.</p></li>
+<li><p><strong>phenotypes</strong> (<em>list</em><em> of </em><em>str</em>) – A list containing two phenotypes for which the Ripley L statistic
+will be calculated. If the two phenotypes are the same, the
+calculation is done for the same type; if different, it considers
+interactions between the two.</p></li>
+<li><p><strong>distances</strong> (<em>array-like</em>) – An array of distances at which to calculate Ripley’s L statistic.
+The values must be positive and incremental.</p></li>
+<li><p><strong>regions</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The key in <cite>adata.obs</cite> representing regions for stratifying the
+data. If <cite>None</cite>, all cells will be treated as one region.</p></li>
+<li><p><strong>spatial_key</strong> (<em>str</em><em>, </em><em>optional</em>) – The key in <cite>adata.obsm</cite> representing the spatial coordinates.
+Default is <cite>“spatial”</cite>.</p></li>
+<li><p><strong>n_simulations</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of simulations to perform for significance testing. Default is 100.</p></li>
+<li><p><strong>area</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – The area of the spatial region of interest. If <cite>None</cite>, the area
+will be inferred from the data. Default is <cite>None</cite>.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for simulation reproducibility. Default is 42.</p></li>
+<li><p><strong>edge_correction</strong> (<em>boo</em><em>, </em><em>optional</em>) – If True, apply edge correction to the Ripley’s L calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing the Ripley’s L results for each region or
+the entire dataset if <cite>regions</cite> is <cite>None</cite>. The DataFrame includes
+the following columns:
+- <cite>region</cite>: The region label or ‘all’ if no regions are specified.
+- <cite>center_phenotype</cite>: The first phenotype in <cite>phenotypes</cite>.
+- <cite>neighbor_phenotype</cite>: The second phenotype in <cite>phenotypes</cite>.
+- <cite>ripley_l</cite>: The Ripley’s L statistic calculated for the region.
+- <cite>config</cite>: A dictionary with configuration settings used for the calculation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Ripley’s L is an adjusted version of Ripley’s K that corrects for the
+inherent increase in point-to-point distances as the distance grows.
+This statistic is used to evaluate spatial clustering or dispersion
+of points (cells) in biological datasets.</p>
+<p>The function uses pre-defined distances and performs simulations to
+assess the significance of observed patterns. The results are stored
+in the <cite>.uns</cite> attribute of <cite>adata</cite> under the key <cite>‘ripley_l’</cite>, or in
+a new DataFrame if no prior results exist.</p>
+<p class="rubric">Examples</p>
+<p>Calculate Ripley’s L for two phenotypes in a single region dataset:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ripley_l</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="s1">&#39;cell_type&#39;</span><span class="p">,</span> <span class="n">phenotypes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">distances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Calculate Ripley’s L for multiple regions in <cite>adata</cite>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ripley_l</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="s1">&#39;cell_type&#39;</span><span class="p">,</span> <span class="n">phenotypes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">distances</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">regions</span><span class="o">=</span><span class="s1">&#39;region_key&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.spatial_analysis.spatial_interaction">
+<span class="sig-prename descclassname"><span class="pre">spac.spatial_analysis.</span></span><span class="sig-name descname"><span class="pre">spatial_interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'seismic'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/spatial_analysis.html#spatial_interaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.spatial_analysis.spatial_interaction" title="Permalink to this definition"></a></dt>
+<dd><p>Perform spatial analysis on the selected annotation in the dataset.
+Current analysis methods are provided in squidpy:</p>
+<blockquote>
+<div><p>Neighborhood Enrichment,
+Cluster Interaction Matrix</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The column name of the annotation (e.g., phenotypes) to analyze in the
+provided dataset.</p></li>
+<li><p><strong>analysis_method</strong> (<em>str</em>) – The analysis method to use, currently available:
+“Neighborhood Enrichment” and “Cluster Interaction Matrix”.</p></li>
+<li><p><strong>stratify_by</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>strs</em>) – The annotation[s] to stratify the dataset when generating
+interaction plots. If single annotation is passed, the dataset
+will be stratified by the unique labels in the annotation column.
+If n (n&gt;=2) annotations are passed, the function will be stratified
+based on existing combination of labels in the passed annotations.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes.Axes</em><em>, </em><em>default None</em>) – The matplotlib Axes to display the image. This option is only
+available when stratify is None.</p></li>
+<li><p><strong>return_matrix</strong> (<em>boolean</em><em>, </em><em>default False</em>) – If true, the fucntion will return a list of two dictionaries,
+the first contains axes and the second containing computed matrix.
+Note that for Neighborhood Encrichment, the matrix will be a tuple
+with the z-score and the enrichment count.
+For Cluster Interaction Matrix, it will returns the
+interaction matrix.
+If False, the function will return only the axes dictionary.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>default None</em>) – Random seed for reproducibility, used in Neighborhood Enrichment
+Analysis.</p></li>
+<li><p><strong>coord_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of coordinate system used in sq.gr.spatial_neighbors.
+Should be either ‘grid’ (Visium Data) or ‘generic’ (Others).
+Default is None, decided by the squidy pacakge. If spatial_key
+is in anndata.uns the coord_type would be ‘grid’, otherwise
+general.</p></li>
+<li><p><strong>n_rings</strong> (<em>int</em><em>, </em><em>default 1</em>) – Number of rings of neighbors for grid data.
+Only used when coord_type = ‘grid’ (Visium)</p></li>
+<li><p><strong>n_neights</strong> (<em>int</em><em>, </em><em>optional</em>) – Default is 6.
+Depending on the <code class="docutils literal notranslate"><span class="pre">coord_type</span></code>:
+- ‘grid’ (Visium) - number of neighboring tiles.
+- ‘generic’ - number of neighborhoods for non-grid data.</p></li>
+<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Default is None.
+Only available when coord_type = ‘generic’. Depending on the type:
+- <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> - compute the graph based on neighborhood radius.
+- <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> - prune the final graph to only contain</p>
+<blockquote>
+<div><p>edges in interval <cite>[min(radius), max(radius)]</cite>.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em>, </em><em>default 'seismic'</em>) – The colormap to use for the plot. The ‘seismic’ color map
+consist of three color regions: red for positive, blue for negative,
+and the white at the center. This color map effectively represents
+the nature of the spatial interaction analysis results,
+where positive values indicate clustering and
+negative values indicate seperation. For more color maps, please visit
+<a class="reference external" href="https://matplotlib.org/stable/tutorials/colors/colormaps.html">https://matplotlib.org/stable/tutorials/colors/colormaps.html</a></p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments for matplotlib.pyplot.text()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary containing the results of the spatial interaction
+analysis. The keys of the dictionary depend on the parameters
+passed to the function:</p>
+<dl class="simple">
+<dt>Ax<span class="classifier">dict or matplotlib.axes.Axes</span></dt><dd><p>If <cite>stratify_by</cite> is not used, returns a single
+matplotlib.axes.Axes object. If <cite>stratify_by</cite> is used,
+returns a dictionary of Axes objects, with keys
+representing the stratification groups.</p>
+</dd>
+<dt>Matrix<span class="classifier">dict, optional</span></dt><dd><p>Contains processed DataFrames of computed matrices with row and
+column labels applied. If <cite>stratify_by</cite> is used, the keys represent
+the stratification groups. For example:
+- <cite>results[‘Matrix’][‘GroupA’]</cite> for a specific stratification group.
+- If <cite>stratify_by</cite> is not used, the table is accessible via
+<cite>results[‘Matrix’][‘annotation’]</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spac.phenotyping.html" class="btn btn-neutral float-left" title="spac.phenotyping module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spac.transformations.html" class="btn btn-neutral float-right" title="spac.transformations module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

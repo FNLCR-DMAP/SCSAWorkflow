@@ -40,20 +40,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">spac</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../spac.html">spac package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utils">spac.utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.visualization">spac.visualization module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/index.html">spac modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.visualization.html">spac.visualization module</a></li>
 </ul>
 </li>
 </ul>
@@ -97,7 +91,7 @@
 <span class="kn">from</span> <span class="nn">anndata</span> <span class="kn">import</span> <span class="n">AnnData</span>
 
 
-<div class="viewcode-block" id="append_annotation"><a class="viewcode-back" href="../../spac.html#spac.data_utils.append_annotation">[docs]</a><span class="k">def</span> <span class="nf">append_annotation</span><span class="p">(</span>
+<div class="viewcode-block" id="append_annotation"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.append_annotation">[docs]</a><span class="k">def</span> <span class="nf">append_annotation</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">annotation</span><span class="p">:</span> <span class="nb">dict</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -147,7 +141,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="ingest_cells"><a class="viewcode-back" href="../../spac.html#spac.data_utils.ingest_cells">[docs]</a><span class="k">def</span> <span class="nf">ingest_cells</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span>
+<div class="viewcode-block" id="ingest_cells"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.ingest_cells">[docs]</a><span class="k">def</span> <span class="nf">ingest_cells</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span>
                  <span class="n">regex_str</span><span class="p">,</span>
                  <span class="n">x_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">y_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -229,7 +223,7 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="concatinate_regions"><a class="viewcode-back" href="../../spac.html#spac.data_utils.concatinate_regions">[docs]</a><span class="k">def</span> <span class="nf">concatinate_regions</span><span class="p">(</span><span class="n">regions</span><span class="p">):</span>
+<div class="viewcode-block" id="concatinate_regions"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.concatinate_regions">[docs]</a><span class="k">def</span> <span class="nf">concatinate_regions</span><span class="p">(</span><span class="n">regions</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Concatinate data from multiple regions and create new indexes.</span>
 
@@ -249,7 +243,7 @@
     <span class="k">return</span> <span class="n">all_adata</span></div>
 
 
-<div class="viewcode-block" id="rescale_features"><a class="viewcode-back" href="../../spac.html#spac.data_utils.rescale_features">[docs]</a><span class="k">def</span> <span class="nf">rescale_features</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">max_quantile</span><span class="o">=</span><span class="mf">0.99</span><span class="p">):</span>
+<div class="viewcode-block" id="rescale_features"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.rescale_features">[docs]</a><span class="k">def</span> <span class="nf">rescale_features</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">max_quantile</span><span class="o">=</span><span class="mf">0.99</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clip and rescale features outside the minimum and maximum quantile.</span>
 
@@ -290,7 +284,7 @@
     <span class="k">return</span> <span class="n">features_scaled</span></div>
 
 
-<div class="viewcode-block" id="add_rescaled_features"><a class="viewcode-back" href="../../spac.html#spac.data_utils.add_rescaled_features">[docs]</a><span class="k">def</span> <span class="nf">add_rescaled_features</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_quantile</span><span class="p">,</span> <span class="n">max_quantile</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+<div class="viewcode-block" id="add_rescaled_features"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.add_rescaled_features">[docs]</a><span class="k">def</span> <span class="nf">add_rescaled_features</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_quantile</span><span class="p">,</span> <span class="n">max_quantile</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clip and rescale the features matrix.</span>
 
@@ -316,7 +310,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="n">rescaled</span></div>
 
 
-<div class="viewcode-block" id="subtract_min_per_region"><a class="viewcode-back" href="../../spac.html#spac.data_utils.subtract_min_per_region">[docs]</a><span class="k">def</span> <span class="nf">subtract_min_per_region</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<div class="viewcode-block" id="subtract_min_per_region"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.subtract_min_per_region">[docs]</a><span class="k">def</span> <span class="nf">subtract_min_per_region</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Substract the minimum quantile of every marker per region.</span>
 
@@ -347,7 +341,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_df</span></div>
 
 
-<div class="viewcode-block" id="subtract_min_quantile"><a class="viewcode-back" href="../../spac.html#spac.data_utils.subtract_min_quantile">[docs]</a><span class="k">def</span> <span class="nf">subtract_min_quantile</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">.01</span><span class="p">):</span>
+<div class="viewcode-block" id="subtract_min_quantile"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.subtract_min_quantile">[docs]</a><span class="k">def</span> <span class="nf">subtract_min_quantile</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">min_quantile</span><span class="o">=</span><span class="mf">.01</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subtract the features defined by the minimum quantile from all columns.</span>
 
@@ -375,7 +369,7 @@
     <span class="k">return</span> <span class="n">subtracted_min</span></div>
 
 
-<div class="viewcode-block" id="load_csv_files"><a class="viewcode-back" href="../../spac.html#spac.data_utils.load_csv_files">[docs]</a><span class="k">def</span> <span class="nf">load_csv_files</span><span class="p">(</span><span class="n">file_names</span><span class="p">):</span>
+<div class="viewcode-block" id="load_csv_files"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.load_csv_files">[docs]</a><span class="k">def</span> <span class="nf">load_csv_files</span><span class="p">(</span><span class="n">file_names</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the csv file(s) into a pandas dataframe.</span>
@@ -472,7 +466,7 @@
     <span class="k">return</span> <span class="n">combined_dataframe</span></div>
 
 
-<div class="viewcode-block" id="select_values"><a class="viewcode-back" href="../../spac.html#spac.data_utils.select_values">[docs]</a><span class="k">def</span> <span class="nf">select_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="select_values"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.select_values">[docs]</a><span class="k">def</span> <span class="nf">select_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects values from either a pandas DataFrame or an AnnData object based</span>
 <span class="sd">    on the annotation and values.</span>
@@ -535,7 +529,7 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="_select_values_dataframe"><a class="viewcode-back" href="../../modules/data_utils._select_values_dataframe.html#spac.data_utils._select_values_dataframe">[docs]</a><span class="k">def</span> <span class="nf">_select_values_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">exclude_values</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_select_values_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">exclude_values</span><span class="p">):</span>
     <span class="n">possible_annotations</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="c1"># Check if the annotation exists using check_list_in_list</span>
@@ -576,10 +570,10 @@
         <span class="s2">&quot; match the selected labels.&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">filtered_data</span></div>
+    <span class="k">return</span> <span class="n">filtered_data</span>
 
 
-<div class="viewcode-block" id="_select_values_anndata"><a class="viewcode-back" href="../../modules/data_utils._select_values_anndata.html#spac.data_utils._select_values_anndata">[docs]</a><span class="k">def</span> <span class="nf">_select_values_anndata</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">exclude_values</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_select_values_anndata</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">exclude_values</span><span class="p">):</span>
     <span class="n">possible_annotations</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="c1"># Check if the annotation exists using check_list_in_list</span>
@@ -620,10 +614,10 @@
         <span class="s2">&quot; cells match the selected labels.&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">filtered_data</span></div>
+    <span class="k">return</span> <span class="n">filtered_data</span>
 
 
-<div class="viewcode-block" id="downsample_cells"><a class="viewcode-back" href="../../spac.html#spac.data_utils.downsample_cells">[docs]</a><span class="k">def</span> <span class="nf">downsample_cells</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="downsample_cells"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.downsample_cells">[docs]</a><span class="k">def</span> <span class="nf">downsample_cells</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                      <span class="n">rand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">combined_col_name</span><span class="o">=</span><span class="s1">&#39;_combined_&#39;</span><span class="p">,</span>
                      <span class="n">min_threshold</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -813,7 +807,7 @@
     <span class="k">return</span> <span class="n">output_data</span></div>
 
 
-<div class="viewcode-block" id="calculate_centroid"><a class="viewcode-back" href="../../spac.html#spac.data_utils.calculate_centroid">[docs]</a><span class="k">def</span> <span class="nf">calculate_centroid</span><span class="p">(</span>
+<div class="viewcode-block" id="calculate_centroid"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.calculate_centroid">[docs]</a><span class="k">def</span> <span class="nf">calculate_centroid</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
     <span class="n">x_min</span><span class="p">,</span>
     <span class="n">x_max</span><span class="p">,</span>
@@ -886,7 +880,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="bin2cat"><a class="viewcode-back" href="../../spac.html#spac.data_utils.bin2cat">[docs]</a><span class="k">def</span> <span class="nf">bin2cat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">one_hot_annotations</span><span class="p">,</span> <span class="n">new_annotation</span><span class="p">):</span>
+<div class="viewcode-block" id="bin2cat"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.bin2cat">[docs]</a><span class="k">def</span> <span class="nf">bin2cat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">one_hot_annotations</span><span class="p">,</span> <span class="n">new_annotation</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combine a set of columns representing</span>
 <span class="sd">    a binary one hot encoding of categories</span>
@@ -970,7 +964,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="combine_dfs"><a class="viewcode-back" href="../../spac.html#spac.data_utils.combine_dfs">[docs]</a><span class="k">def</span> <span class="nf">combine_dfs</span><span class="p">(</span><span class="n">dataframes</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<div class="viewcode-block" id="combine_dfs"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.combine_dfs">[docs]</a><span class="k">def</span> <span class="nf">combine_dfs</span><span class="p">(</span><span class="n">dataframes</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combined multiple pandas dataframes into one.</span>
 <span class="sd">    Schema of the first dataframe is considered primary.</span>
@@ -1018,7 +1012,7 @@
     <span class="k">return</span> <span class="n">combined_df</span></div>
 
 
-<div class="viewcode-block" id="add_pin_color_rules"><a class="viewcode-back" href="../../spac.html#spac.data_utils.add_pin_color_rules">[docs]</a><span class="k">def</span> <span class="nf">add_pin_color_rules</span><span class="p">(</span>
+<div class="viewcode-block" id="add_pin_color_rules"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.add_pin_color_rules">[docs]</a><span class="k">def</span> <span class="nf">add_pin_color_rules</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">label_color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">color_map_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_spac_colors&quot;</span><span class="p">,</span>
@@ -1143,7 +1137,7 @@
 
     <span class="k">return</span> <span class="n">label_matches</span><span class="p">,</span> <span class="n">result_str</span></div>
 
-<div class="viewcode-block" id="combine_annotations"><a class="viewcode-back" href="../../spac.html#spac.data_utils.combine_annotations">[docs]</a><span class="k">def</span> <span class="nf">combine_annotations</span><span class="p">(</span>
+<div class="viewcode-block" id="combine_annotations"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.combine_annotations">[docs]</a><span class="k">def</span> <span class="nf">combine_annotations</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">:</span> <span class="n">AnnData</span><span class="p">,</span>
     <span class="n">annotations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1207,7 +1201,7 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="summarize_dataframe"><a class="viewcode-back" href="../../spac.html#spac.data_utils.summarize_dataframe">[docs]</a><span class="k">def</span> <span class="nf">summarize_dataframe</span><span class="p">(</span>
+<div class="viewcode-block" id="summarize_dataframe"><a class="viewcode-back" href="../../modules/spac.data_utils.html#spac.data_utils.summarize_dataframe">[docs]</a><span class="k">def</span> <span class="nf">summarize_dataframe</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">columns</span><span class="p">,</span>
     <span class="n">print_nan_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>

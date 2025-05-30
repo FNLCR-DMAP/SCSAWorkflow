@@ -40,20 +40,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">spac</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../spac.html">spac package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#spac-transformations-module">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#spac-utag-functions-module">spac.utag_functions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utils">spac.utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.visualization">spac.visualization module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/index.html">spac modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.visualization.html">spac.visualization module</a></li>
 </ul>
 </li>
 </ul>
@@ -101,7 +95,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 
-<div class="viewcode-block" id="spatial_interaction"><a class="viewcode-back" href="../../spac.html#spac.spatial_analysis.spatial_interaction">[docs]</a><span class="k">def</span> <span class="nf">spatial_interaction</span><span class="p">(</span>
+<div class="viewcode-block" id="spatial_interaction"><a class="viewcode-back" href="../../modules/spac.spatial_analysis.html#spac.spatial_analysis.spatial_interaction">[docs]</a><span class="k">def</span> <span class="nf">spatial_interaction</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">annotation</span><span class="p">,</span>
         <span class="n">analysis_method</span><span class="p">,</span>
@@ -763,7 +757,7 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="ripley_l"><a class="viewcode-back" href="../../spac.html#spac.spatial_analysis.ripley_l">[docs]</a><span class="k">def</span> <span class="nf">ripley_l</span><span class="p">(</span>
+<div class="viewcode-block" id="ripley_l"><a class="viewcode-back" href="../../modules/spac.spatial_analysis.html#spac.spatial_analysis.ripley_l">[docs]</a><span class="k">def</span> <span class="nf">ripley_l</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotation</span><span class="p">,</span>
     <span class="n">phenotypes</span><span class="p">,</span>
@@ -973,7 +967,7 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="neighborhood_profile"><a class="viewcode-back" href="../../spac.html#spac.spatial_analysis.neighborhood_profile">[docs]</a><span class="k">def</span> <span class="nf">neighborhood_profile</span><span class="p">(</span>
+<div class="viewcode-block" id="neighborhood_profile"><a class="viewcode-back" href="../../modules/spac.spatial_analysis.html#spac.spatial_analysis.neighborhood_profile">[docs]</a><span class="k">def</span> <span class="nf">neighborhood_profile</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">phenotypes</span><span class="p">,</span>
     <span class="n">distances</span><span class="p">,</span>
@@ -1132,7 +1126,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="n">associated_table_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">summary</span></div>
 
 
-<div class="viewcode-block" id="_neighborhood_profile_core"><a class="viewcode-back" href="../../modules/spatial_analysis._neighborhood_profile_core.html#spac.spatial_analysis._neighborhood_profile_core">[docs]</a><span class="k">def</span> <span class="nf">_neighborhood_profile_core</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_neighborhood_profile_core</span><span class="p">(</span>
         <span class="n">coord</span><span class="p">,</span>
         <span class="n">phenotypes</span><span class="p">,</span>
         <span class="n">n_phenotypes</span><span class="p">,</span>
@@ -1226,10 +1220,10 @@
         <span class="n">bins_areas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">circles_areas</span><span class="p">)</span>
         <span class="n">neighborhood_array</span> <span class="o">=</span> <span class="n">neighborhood_array</span> <span class="o">/</span> <span class="n">bins_areas</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
 
-    <span class="k">return</span> <span class="n">neighborhood_array</span></div>
+    <span class="k">return</span> <span class="n">neighborhood_array</span>
 
 
-<div class="viewcode-block" id="calculate_nearest_neighbor"><a class="viewcode-back" href="../../spac.html#spac.spatial_analysis.calculate_nearest_neighbor">[docs]</a><span class="k">def</span> <span class="nf">calculate_nearest_neighbor</span><span class="p">(</span>
+<div class="viewcode-block" id="calculate_nearest_neighbor"><a class="viewcode-back" href="../../modules/spac.spatial_analysis.html#spac.spatial_analysis.calculate_nearest_neighbor">[docs]</a><span class="k">def</span> <span class="nf">calculate_nearest_neighbor</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotation</span><span class="p">,</span>
     <span class="n">spatial_associated_table</span><span class="o">=</span><span class="s1">&#39;spatial&#39;</span><span class="p">,</span>

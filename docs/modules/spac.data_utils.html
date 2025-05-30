@@ -1,0 +1,565 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.data_utils module &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="spac.phenotyping module" href="spac.phenotyping.html" />
+    <link rel="prev" title="spac modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">spac.data_utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.data_utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spac.data_utils">
+<span id="spac-data-utils-module"></span><h1>spac.data_utils module<a class="headerlink" href="#module-spac.data_utils" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.add_pin_color_rules">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">add_pin_color_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_color_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_map_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_spac_colors'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/spac/data_utils.html#add_pin_color_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.add_pin_color_rules" title="Permalink to this definition"></a></dt>
+<dd><p>Adds pin color rules to the AnnData object and scans for matching labels.</p>
+<p>This function scans unique labels in each adata.obs and column names in all
+adata tables, to find the labels defined by the pin color rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> – The anndata object containing upstream analysis.</p></li>
+<li><p><strong>label_color_dict</strong> (<em>dict</em>) – Dictionary of pin color rules with label as key and color as value.</p></li>
+<li><p><strong>color_map_name</strong> (<em>str</em>) – The name to use for storing pin color rules in <cite>adata.uns</cite>.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to overwrite existing pin color rules in <cite>adata.uns</cite> with the
+same name, by default True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>label_matches</strong> (<em>dict</em>) – Dictionary with the matching labels in each
+section (obs, var, X, etc.).</p></li>
+<li><p><strong>result_str</strong> (<em>str</em>) – Summary string with the matching labels in each
+section (obs, var, X, etc.).</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <cite>color_map_name</cite> already exists in <cite>adata.uns</cite>
+    and <cite>overwrite</cite> is False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.add_rescaled_features">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">add_rescaled_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#add_rescaled_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.add_rescaled_features" title="Permalink to this definition"></a></dt>
+<dd><p>Clip and rescale the features matrix.</p>
+<p>The results will be added into a new layer in the AnnData object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to rescale to zero.</p></li>
+<li><p><strong>max_quantile</strong> (<em>float</em>) – The maximum quantile to rescale to one.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – The name of the new layer to add to the anndata object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.append_annotation">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">append_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/spac/data_utils.html#append_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.append_annotation" title="Permalink to this definition"></a></dt>
+<dd><p>Append a new annotation with single value to
+a Pandas DataFrame based on mapping rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – The input DataFrame to which the new observation will be appended.</p></li>
+<li><p><strong>annotation</strong> (<em>dict</em>) – dictionary of string pairs representing
+the new annotation and its value.
+Each pair should have this format:
+&lt;new annotation column name&gt;:&lt;value of the annotation&gt;
+The values must be a single string or numeric value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The DataFrame with the new observation appended.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.bin2cat">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">bin2cat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_hot_annotations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_annotation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#bin2cat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.bin2cat" title="Permalink to this definition"></a></dt>
+<dd><p>Combine a set of columns representing
+a binary one hot encoding of categories
+into a new categorical column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pandas.DataFrame</em>) – The pandas dataframe containing the one hot encoded annotations.</p></li>
+<li><p><strong>one_hot_annotations</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – A string or a list of strings representing
+python regular expression of the one hot encoded annotations
+columns in the data frame.</p></li>
+<li><p><strong>new_annotation</strong> (<em>str</em>) – The column name for new categorical annotation to be created.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>pandas.DataFrame</em> – DataFrame with new categorical column added.</p></li>
+<li><p><em>Example</em></p></li>
+<li><p><em>——–</em></p></li>
+<li><p><em>&gt;&gt;&gt; data = pd.DataFrame({</em></p></li>
+<li><p><strong>…    ‘A’</strong> (<em>[1, 1, 0, 0],</em>)</p></li>
+<li><p><strong>…     ‘B’</strong> (<em>[0, 0, 1, 0]</em>)</p></li>
+<li><p><em>… })</em></p></li>
+<li><p><em>&gt;&gt;&gt; one_hot_annotations = [‘A’, ‘B’]</em></p></li>
+<li><p><em>&gt;&gt;&gt; new_annotation = ‘new_category’</em></p></li>
+<li><p><em>&gt;&gt;&gt; result = bin2cat(data, one_hot_annotations, new_annotation)</em></p></li>
+<li><p><em>&gt;&gt;&gt; print(result[new_annotation])</em></p></li>
+<li><p><em>0      A</em></p></li>
+<li><p><em>1      A</em></p></li>
+<li><p><em>2      B</em></p></li>
+<li><p><em>3    NaN</em></p></li>
+<li><p><strong>Name</strong> (<em>new_category, dtype: object</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.calculate_centroid">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">calculate_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#calculate_centroid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.calculate_centroid" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the spatial coordinates of the cell centroid as the average of
+min and max coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – The input data frame. The dataframe should contain four columns for
+x_min, x_max, y_min, and y_max for centroid calculation.</p></li>
+<li><p><strong>x_min</strong> (<em>str</em>) – column name with minimum x value</p></li>
+<li><p><strong>x_max</strong> (<em>str</em>) – column name with maximum x value</p></li>
+<li><p><strong>y_min</strong> (<em>str</em>) – column name with minimum y value</p></li>
+<li><p><strong>y_max</strong> (<em>str</em>) – column name with maximum y value</p></li>
+<li><p><strong>new_x</strong> (<em>str</em>) – the new column name of the x dimension of the cientroid,
+allowing characters are alphabetic, digits and underscore</p></li>
+<li><p><strong>new_y</strong> (<em>str</em>) – the new column name of the y dimension of the centroid,
+allowing characters are alphabetic, digits and underscore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data</strong> – dataframe with two new centroid columns addded. Note that the
+dataframe is modified in place.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.combine_annotations">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">combine_annotations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnnData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_annotation_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnnData</span></span></span><a class="reference internal" href="../_modules/spac/data_utils.html#combine_annotations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.combine_annotations" title="Permalink to this definition"></a></dt>
+<dd><p>Combine multiple annotations into a new annotation using a defined separator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>AnnData</em>) – The input AnnData object whose .obs will be modified.</p></li>
+<li><p><strong>annotations</strong> (<em>list</em>) – List of annotation column names to combine.</p></li>
+<li><p><strong>separator</strong> (<em>str</em>) – Separator to use when combining annotations.</p></li>
+<li><p><strong>new_annotation_name</strong> (<em>str</em>) – The name of the new annotation to be created.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The AnnData object with the combined annotation added.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.combine_dfs">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">combine_dfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#combine_dfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.combine_dfs" title="Permalink to this definition"></a></dt>
+<dd><p>Combined multiple pandas dataframes into one.
+Schema of the first dataframe is considered primary.
+A warming will be printed if schema of current dataframe
+is different than the primary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataframes</strong> (<em>list</em><em>[</em><em>pd.DataFrame</em><em>]</em>) – A list of pandas dataframe to be combined</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pd.DataFrame of combined dataframs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.concatinate_regions">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">concatinate_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#concatinate_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.concatinate_regions" title="Permalink to this definition"></a></dt>
+<dd><p>Concatinate data from multiple regions and create new indexes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>regions</strong> (<em>list</em><em> of </em><em>anndata.AnnData</em>) – AnnData objects to be concatinated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New AnddData object with the concatinated values in AnnData.X</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.downsample_cells">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">downsample_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined_col_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_combined_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#downsample_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.downsample_cells" title="Permalink to this definition"></a></dt>
+<dd><p>Custom downsampling of data based on one or more annotations.</p>
+<p>This function offers two primary modes of operation:
+1. <strong>Grouping (stratify=False)</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For a single annotation: The data is grouped by unique values of the
+annotation, and ‘n_samples’ rows are selected from each group.</p></li>
+<li><p>For multiple annotations: The data is grouped based on unique
+combinations of the annotations, and ‘n_samples’ rows are selected
+from each combined group.</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p><strong>Stratification (stratify=True)</strong>:
+- Annotations (single or multiple) are combined into a new column.
+- Proportionate stratified sampling is performed based on the unique</p>
+<blockquote>
+<div><p>combinations in the new column, ensuring that the downsampled dataset
+maintains the proportionate representation of each combined group
+from the original dataset.</p>
+</div></blockquote>
+</li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_data</strong> (<em>pd.DataFrame</em>) – The input data frame.</p></li>
+<li><p><strong>annotations</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The column name(s) to downsample on. If multiple column names are
+provided, their values are combined using an underscore as a separator.</p></li>
+<li><p><strong>n_samples</strong> (<em>int</em><em>, </em><em>default=None</em>) – <p>The number of samples to return. Behavior differs based on the
+‘stratify’ parameter:
+- stratify=False: Returns ‘n_samples’ for each unique value (or</p>
+<blockquote>
+<div><p>combination) of annotations.</p>
+</div></blockquote>
+<ul>
+<li><p>stratify=True: Returns a total of ‘n_samples’ stratified by the
+frequency of every label or combined labels in the annotation(s).</p></li>
+</ul>
+</p></li>
+<li><p><strong>stratify</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If true, perform proportionate stratified sampling based on the unique
+combinations of annotations. This ensures that the downsampled dataset
+maintains the proportionate representation of each combined group from
+the original dataset.</p></li>
+<li><p><strong>rand</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If true and stratify is True, randomly select the returned cells.
+Otherwise, choose the first n cells.</p></li>
+<li><p><strong>combined_col_name</strong> (<em>str</em><em>, </em><em>default='_combined_'</em>) – Name of the column that will store combined values when multiple
+annotation columns are provided.</p></li>
+<li><p><strong>min_threshold</strong> (<em>int</em><em>, </em><em>default=5</em>) – The minimum number of samples a combined group should have in the
+original dataset to be considered in the downsampled dataset. Groups
+with fewer samples than this threshold will be excluded from the
+stratification process. Adjusting this parameter determines the
+minimum presence a combined group should have in the original dataset
+to appear in the downsampled version.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>output_data</strong> – The proportionately stratified downsampled data frame.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function emphasizes proportionate stratified sampling, ensuring that
+the downsampled dataset is a representative subset of the original data
+with respect to the combined annotations. Due to this proportionate nature,
+not all unique combinations from the original dataset might be present in
+the downsampled dataset, especially if a particular combination has very
+few samples in the original dataset. The <cite>min_threshold</cite> parameter can be
+adjusted to determine the minimum number of samples a combined group
+should have in the original dataset to appear in the downsampled version.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.ingest_cells">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">ingest_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#ingest_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.ingest_cells" title="Permalink to this definition"></a></dt>
+<dd><p>Read the csv file into an anndata object.</p>
+<p>The function will also intialize features and spatial coordiantes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> (<em>pandas.DataFrame</em>) – The data frame that contains cells as rows, and cells informations as
+columns.</p></li>
+<li><p><strong>regex_str</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – A string or a list of strings representing python regular expression
+for the features columns in the data frame.  x_col : str The column
+name for the x coordinate of the cell.</p></li>
+<li><p><strong>y_col</strong> (<em>str</em>) – The column name for the y coordinate of the cell.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The column name for the region that the cells. If a list is passed,
+multiple annotations will be created in the returned AnnData object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The generated AnnData object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.load_csv_files">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">load_csv_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#load_csv_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.load_csv_files" title="Permalink to this definition"></a></dt>
+<dd><p>Read the csv file(s) into a pandas dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_names</strong> (<em>str</em><em> or </em><em>list</em>) – A list of csv file paths to be
+combined into single list of dataframe output</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas dataframe of all the csv files. The returned dataset
+will have an extra column called “loaded_file_name” containing
+source file name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.rescale_features">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">rescale_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#rescale_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.rescale_features" title="Permalink to this definition"></a></dt>
+<dd><p>Clip and rescale features outside the minimum and maximum quantile.</p>
+<p>The rescaled features will be between 0 and 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<em>pandas.Dataframe</em>) – The DataRrame of features.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to be consider zero.</p></li>
+<li><p><strong>max_quantile</strong> (<em>float</em>) – The maximum quantile to be considerd 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The created DataFrame with normalized features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.select_values">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">select_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#select_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.select_values" title="Permalink to this definition"></a></dt>
+<dd><p>Selects values from either a pandas DataFrame or an AnnData object based
+on the annotation and values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pandas.DataFrame</em><em> or </em><em>anndata.AnnData</em>) – The input data. Can be a DataFrame for tabular data or an AnnData
+object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The column name in a DataFrame or the annotation key in an AnnData
+object to be used for selection.</p></li>
+<li><p><strong>values</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – List of values for the annotation to include. If None, all values are
+considered for selection.</p></li>
+<li><p><strong>exclude_values</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – List of values for the annotation to exclude. Can’t be combined with
+values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The filtered DataFrame or AnnData object containing only the selected
+rows based on the annotation and values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame or anndata.AnnData</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.subtract_min_per_region">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">subtract_min_per_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#subtract_min_per_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.subtract_min_per_region" title="Permalink to this definition"></a></dt>
+<dd><p>Substract the minimum quantile of every marker per region.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>adata</strong> (<em>anndata.AnnData</em>) – The AnnData object.</p></li>
+<li><p><strong>annotation</strong> (<em>str</em>) – The name of the annotation in <cite>adata</cite> to define batches.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to rescale to zero.</p></li>
+<li><p><strong>layer</strong> (<em>str</em>) – The name of the new layer to add to the AnnData object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.subtract_min_quantile">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">subtract_min_quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_quantile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/data_utils.html#subtract_min_quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.subtract_min_quantile" title="Permalink to this definition"></a></dt>
+<dd><p>Subtract the features defined by the minimum quantile from all columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<em>pandas.DataFrame</em>) – The dataframe of features.</p></li>
+<li><p><strong>min_quantile</strong> (<em>float</em>) – The minimum quantile to be consider zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe with rescaled features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.data_utils.summarize_dataframe">
+<span class="sig-prename descclassname"><span class="pre">spac.data_utils.</span></span><span class="sig-name descname"><span class="pre">summarize_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_nan_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/spac/data_utils.html#summarize_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.data_utils.summarize_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Summarize specified columns in a DataFrame.</p>
+<p>For numeric columns, computes summary statistics.
+For categorical columns, returns unique labels and frequencies.
+In both cases, missing values (None/NaN) are flagged and their row indices
+identified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – The DataFrame to summarize.</p></li>
+<li><p><strong>columns</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The column name or list of column names to analyze.</p></li>
+<li><p><strong>print_nan_locations</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints the row indices where None/NaN values occur.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary where each key is a column name and its value is another
+dictionary with:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>’data_type’: either ‘numeric’ or ‘categorical’</p></li>
+<li><p>’missing_count’: int</p></li>
+<li><p>’missing_indices’: list of row indices with missing values</p></li>
+<li><p>’summary’: summary statistics if numeric or unique labels with</p></li>
+</ul>
+<p>counts if categorical</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="spac modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spac.phenotyping.html" class="btn btn-neutral float-right" title="spac.phenotyping module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,1 +1,0 @@
-.. autofunction:: spac.transformations.tsne

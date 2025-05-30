@@ -40,20 +40,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">Analysis of SPAtial Single Cell Datasets (SPAC)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">spac</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../spac.html">spac package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.data_utils">spac.data_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.phenotyping">spac.phenotyping module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.spatial_analysis">spac.spatial_analysis module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.transformations">spac.transformations module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utag_functions">spac.utag_functions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.utils">spac.utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac.visualization">spac.visualization module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../spac.html#module-spac">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/index.html">spac modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.phenotyping.html">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spac.visualization.html">spac.visualization module</a></li>
 </ul>
 </li>
 </ul>
@@ -94,14 +88,14 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 
-<div class="viewcode-block" id="z_score"><a class="viewcode-back" href="../../modules/utag_functions.z_score.html#spac.utag_functions.z_score">[docs]</a><span class="k">def</span> <span class="nf">z_score</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="z_score"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.z_score">[docs]</a><span class="k">def</span> <span class="nf">z_score</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scale (divide by standard deviation) and center (subtract mean) </span>
 <span class="sd">    array-like objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="sparse_matrix_dstack"><a class="viewcode-back" href="../../modules/utag_functions.sparse_matrix_dstack.html#spac.utag_functions.sparse_matrix_dstack">[docs]</a><span class="k">def</span> <span class="nf">sparse_matrix_dstack</span><span class="p">(</span>
+<div class="viewcode-block" id="sparse_matrix_dstack"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.sparse_matrix_dstack">[docs]</a><span class="k">def</span> <span class="nf">sparse_matrix_dstack</span><span class="p">(</span>
     <span class="n">matrices</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -118,7 +112,7 @@
         <span class="n">i</span> <span class="o">+=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">_res</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="_parallel_message_pass"><a class="viewcode-back" href="../../modules/utag_functions._parallel_message_pass.html#spac.utag_functions._parallel_message_pass">[docs]</a><span class="k">def</span> <span class="nf">_parallel_message_pass</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_parallel_message_pass</span><span class="p">(</span>
     <span class="n">ad</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">coord_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -128,10 +122,10 @@
     <span class="n">sq</span><span class="o">.</span><span class="n">gr</span><span class="o">.</span><span class="n">spatial_neighbors</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">coord_type</span><span class="o">=</span><span class="n">coord_type</span><span class="p">,</span> 
                             <span class="n">set_diag</span><span class="o">=</span><span class="n">set_diag</span><span class="p">)</span>
     <span class="n">ad</span> <span class="o">=</span> <span class="n">custom_message_passing</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ad</span></div>
+    <span class="k">return</span> <span class="n">ad</span>
 
 
-<div class="viewcode-block" id="custom_message_passing"><a class="viewcode-back" href="../../modules/utag_functions.custom_message_passing.html#spac.utag_functions.custom_message_passing">[docs]</a><span class="k">def</span> <span class="nf">custom_message_passing</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="custom_message_passing"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.custom_message_passing">[docs]</a><span class="k">def</span> <span class="nf">custom_message_passing</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">):</span>
     <span class="c1"># from scipy.linalg import sqrtm</span>
     <span class="c1"># import logging</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;l1_norm&quot;</span><span class="p">:</span>
@@ -147,11 +141,11 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="low_variance_filter"><a class="viewcode-back" href="../../modules/utag_functions.low_variance_filter.html#spac.utag_functions.low_variance_filter">[docs]</a><span class="k">def</span> <span class="nf">low_variance_filter</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
+<div class="viewcode-block" id="low_variance_filter"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.low_variance_filter">[docs]</a><span class="k">def</span> <span class="nf">low_variance_filter</span><span class="p">(</span><span class="n">adata</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">adata</span><span class="p">[:,</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()]</span></div>
 
 
-<div class="viewcode-block" id="add_probabilities_to_centroid"><a class="viewcode-back" href="../../modules/utag_functions.add_probabilities_to_centroid.html#spac.utag_functions.add_probabilities_to_centroid">[docs]</a><span class="k">def</span> <span class="nf">add_probabilities_to_centroid</span><span class="p">(</span>
+<div class="viewcode-block" id="add_probabilities_to_centroid"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.add_probabilities_to_centroid">[docs]</a><span class="k">def</span> <span class="nf">add_probabilities_to_centroid</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name_to_output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">):</span>
     <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">softmax</span>
@@ -164,7 +158,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="n">name_to_output</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
     <span class="k">return</span> <span class="n">adata</span></div>
 
-<div class="viewcode-block" id="utag"><a class="viewcode-back" href="../../modules/utag_functions.utag.html#spac.utag_functions.utag">[docs]</a><span class="k">def</span> <span class="nf">utag</span><span class="p">(</span>
+<div class="viewcode-block" id="utag"><a class="viewcode-back" href="../../modules/spac.utag_functions.html#spac.utag_functions.utag">[docs]</a><span class="k">def</span> <span class="nf">utag</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">channels_to_use</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">slide_key</span> <span class="o">=</span> <span class="s2">&quot;Slide&quot;</span><span class="p">,</span>

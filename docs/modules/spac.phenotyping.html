@@ -1,0 +1,385 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spac.phenotyping module &mdash; spac  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="spac.spatial_analysis module" href="spac.spatial_analysis.html" />
+    <link rel="prev" title="spac.data_utils module" href="spac.data_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            spac
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">spac modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spac.data_utils.html">spac.data_utils module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spac.phenotyping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.spatial_analysis.html">spac.spatial_analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.transformations.html">spac.transformations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utag_functions.html">spac.utag_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.utils.html">spac.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spac.visualization.html">spac.visualization module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">spac</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">spac modules</a></li>
+      <li class="breadcrumb-item active">spac.phenotyping module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/spac.phenotyping.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-spac.phenotyping">
+<span id="spac-phenotyping-module"></span><h1>spac.phenotyping module<a class="headerlink" href="#module-spac.phenotyping" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.apply_phenotypes">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">apply_phenotypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes_dic</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#apply_phenotypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.apply_phenotypes" title="Permalink to this definition"></a></dt>
+<dd><p>Add binary columns to the DataFrame indicating if each cell matches a
+phenotype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_df</strong> (<em>pandas.DataFrame</em>) – The DataFrame to which binary phenotype columns will be added.</p></li>
+<li><p><strong>phenotypes_dic</strong> (<em>dict</em>) – A dictionary where the keys are phenotype names and the values are
+dictionaries mapping column names to values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where the keys are phenotype names and the values are
+the counts of rows that match each phenotype.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function creates binary columns in the DataFrame for each phenotype
+and counts the number of rows matching each phenotype.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.assign_manual_phenotypes">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">assign_manual_phenotypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'manual_phenotype'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_binary_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#assign_manual_phenotypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.assign_manual_phenotypes" title="Permalink to this definition"></a></dt>
+<dd><p>Assign manual phenotypes to the DataFrame and generate summaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_df</strong> (<em>pandas.DataFrame</em>) – The DataFrame to which manual phenotypes will be assigned.</p></li>
+<li><p><strong>phenotypes_df</strong> (<em>pandas.DataFrame</em>) – <p>A DataFrame containing phenotype definitions with columns:
+- “phenotype_name” : str</p>
+<blockquote>
+<div><p>The name of the phenotype.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>”phenotype_code”<span class="classifier">str</span></dt><dd><p>The code used to decode the phenotype.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+<li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column to store the combined phenotype. Default is
+“manual_phenotype”.</p></li>
+<li><p><strong>prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix to be added to the column names. Default is ‘’.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – Suffix to be added to the column names. Default is ‘’.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to concatenate the names of multiple positive phenotypes.
+Default is True.</p></li>
+<li><p><strong>drop_binary_code</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to drop the binary phenotype columns. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary with the following keys:
+- “phenotypes_counts”: dict</p>
+<blockquote>
+<div><p>Counts of cells matching each defined phenotype.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>”assigned_phenotype_counts”: dict</dt><dd><p>Counts of cells matching different numbers of phenotypes.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>”multiple_phenotypes_summary”: pandas.DataFrame</dt><dd><p>Summary of cells with multiple phenotypes.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function generates a combined phenotype column, prints summaries of
+cells matching multiple phenotypes, and returns a dictionary with
+detailed counts and summaries.</p>
+<p class="rubric">Examples</p>
+<p>Suppose <cite>data_df</cite> is a DataFrame with binary phenotype columns and
+<cite>phenotypes_df</cite> contains the following definitions:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;cd4_phenotype&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;cd8_phenotype&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phenotypes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;phenotype_name&quot;</span><span class="p">:</span> <span class="s2">&quot;cd4_cells&quot;</span><span class="p">,</span> <span class="s2">&quot;phenotype_code&quot;</span><span class="p">:</span> <span class="s2">&quot;cd4+&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;phenotype_name&quot;</span><span class="p">:</span> <span class="s2">&quot;cd8_cells&quot;</span><span class="p">,</span> <span class="s2">&quot;phenotype_code&quot;</span><span class="p">:</span> <span class="s2">&quot;cd8+&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;phenotype_name&quot;</span><span class="p">:</span> <span class="s2">&quot;cd4_cd8&quot;</span><span class="p">,</span> <span class="s2">&quot;phenotype_code&quot;</span><span class="p">:</span> <span class="s2">&quot;cd4+cd8+&quot;</span><span class="p">}</span>
+<span class="gp">... </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">assign_manual_phenotypes</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">data_df</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">phenotypes_df</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">annotation</span><span class="o">=</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_phenotype&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <cite>data_df</cite> DataFrame will be edited in place to include a new column
+<cite>“manual”</cite> with the combined phenotype labels:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">)</span>
+<span class="go">   cd4_phenotype  cd8_phenotype manual</span>
+<span class="go">0              0              0 no_label</span>
+<span class="go">1              1              0 cd4_cells</span>
+<span class="go">2              0              1 cd8_cells</span>
+<span class="go">3              1              1 cd8_cells, cd4_cd8</span>
+</pre></div>
+</div>
+<p>The result dictionary contains counts and summaries as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;phenotypes_counts&quot;</span><span class="p">])</span>
+<span class="go">{&#39;cd4_cells&#39;: 1, &#39;cd8_cells&#39;: 2, &#39;cd4_cd8&#39;: 1}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;assigned_phenotype_counts&quot;</span><span class="p">])</span>
+<span class="go">0    1</span>
+<span class="go">1    2</span>
+<span class="go">2    1</span>
+<span class="go">Name: num_phenotypes, dtype: int64</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;multiple_phenotypes_summary&quot;</span><span class="p">])</span>
+<span class="go">               manual  count</span>
+<span class="go">0  cd8_cells, cd4_cd8      1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.combine_phenotypes">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">combine_phenotypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotype_columns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#combine_phenotypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.combine_phenotypes" title="Permalink to this definition"></a></dt>
+<dd><p>Combine multiple binary phenotype columns into a new column in a vectorized manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_df</strong> (<em>pandas.DataFrame</em>) – DataFrame containing the phenotype columns.</p></li>
+<li><p><strong>phenotype_columns</strong> (<em>list</em><em> of </em><em>str</em>) – List of binary phenotype column names.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to concatenate the names of multiple positive phenotypes.
+If False, all multiple positive phenotypes are labeled as
+“no_label”. Default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Series representing the combined phenotype for each row.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.decode_phenotype">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">decode_phenotype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotype_code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#decode_phenotype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.decode_phenotype" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a phenotype code into a dictionary mapping
+feature (marker) names to values for that marker’s
+classification as ‘+’ or ‘-‘.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pandas.DataFrame</em>) – The DataFrame containing the columns that will be used to decode
+the phenotype.</p></li>
+<li><p><strong>phenotype_code</strong> (<em>str</em>) – The phenotype code string, which should end with ‘+’ or ‘-‘.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword arguments</em>) – <p>Optional keyword arguments to specify prefix and suffix to be added
+to the column names.
+- prefix : str, optional</p>
+<blockquote>
+<div><p>Prefix to be added to the column names for the
+feature classification. Default is ‘’.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>suffix<span class="classifier">str, optional</span></dt><dd><p>Suffix to be added to the column names for the
+feature classification. Default is ‘’.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where the keys are column names and the values are the
+corresponding phenotype classification.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the phenotype code does not end with ‘+’ or ‘-’ or if any columns
+    specified in the phenotype code do not exist in the DataFrame.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function splits the phenotype code on ‘+’ and ‘-’ characters to
+determine the phenotype columns and values. It checks if the columns
+exist in the DataFrame and whether they are binary or string types to
+properly map values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.generate_phenotypes_dict">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">generate_phenotypes_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phenotypes_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#generate_phenotypes_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.generate_phenotypes_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a dictionary of phenotype names to their corresponding
+decoding rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_df</strong> (<em>pandas.DataFrame</em>) – The DataFrame containing the columns that will be used to decode
+the phenotypes.</p></li>
+<li><p><strong>phenotypes_df</strong> (<em>pandas.DataFrame</em>) – <p>A DataFrame containing phenotype definitions with columns:
+- “phenotype_name” : str</p>
+<blockquote>
+<div><p>The name of the phenotype.</p>
+</div></blockquote>
+<ul>
+<li><dl class="simple">
+<dt>”phenotype_code”<span class="classifier">str</span></dt><dd><p>The code used to decode the phenotype.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+<li><p><strong>prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix to be added to the column names. Default is ‘’.</p></li>
+<li><p><strong>suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – Suffix to be added to the column names. Default is ‘’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where the keys are phenotype names and the values are
+dictionaries mapping column names to values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function iterates over each row in the <cite>phenotypes_df</cite> DataFrame and
+decodes the phenotype using the <cite>decode_phenotype</cite> function.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spac.phenotyping.is_binary_0_1">
+<span class="sig-prename descclassname"><span class="pre">spac.phenotyping.</span></span><span class="sig-name descname"><span class="pre">is_binary_0_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spac/phenotyping.html#is_binary_0_1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spac.phenotyping.is_binary_0_1" title="Permalink to this definition"></a></dt>
+<dd><p>Check if a pandas Series contains only binary values (0 and 1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>column</strong> (<em>pandas.Series</em>) – The pandas Series to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the Series contains only 0 and 1, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The function considers a Series to be binary if it contains exactly
+the values 0 and 1, and no other values.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spac.data_utils.html" class="btn btn-neutral float-left" title="spac.data_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spac.spatial_analysis.html" class="btn btn-neutral float-right" title="spac.spatial_analysis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Fang Liu, Rui He, and George Zaki.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
