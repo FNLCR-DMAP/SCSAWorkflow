@@ -306,7 +306,7 @@
                     <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="visualize_2D_scatter"><a class="viewcode-back" href="../../modules/spac.visualization.visualize_2D_scatter.html#spac.visualization.visualize_2D_scatter">[docs]</a><span class="k">def</span> <span class="nf">visualize_2D_scatter</span><span class="p">(</span>
+<div class="viewcode-block" id="visualize_2D_scatter"><a class="viewcode-back" href="../../spac.html#spac.visualization.visualize_2D_scatter">[docs]</a><span class="k">def</span> <span class="nf">visualize_2D_scatter</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate_centers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">x_axis_title</span><span class="o">=</span><span class="s1">&#39;Component 1&#39;</span><span class="p">,</span> <span class="n">y_axis_title</span><span class="o">=</span><span class="s1">&#39;Component 2&#39;</span><span class="p">,</span> <span class="n">plot_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -471,7 +471,7 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="dimensionality_reduction_plot"><a class="viewcode-back" href="../../modules/spac.visualization.dimensionality_reduction_plot.html#spac.visualization.dimensionality_reduction_plot">[docs]</a><span class="k">def</span> <span class="nf">dimensionality_reduction_plot</span><span class="p">(</span>
+<div class="viewcode-block" id="dimensionality_reduction_plot"><a class="viewcode-back" href="../../spac.html#spac.visualization.dimensionality_reduction_plot">[docs]</a><span class="k">def</span> <span class="nf">dimensionality_reduction_plot</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -619,7 +619,7 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="tsne_plot"><a class="viewcode-back" href="../../modules/spac.visualization.tsne_plot.html#spac.visualization.tsne_plot">[docs]</a><span class="k">def</span> <span class="nf">tsne_plot</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="tsne_plot"><a class="viewcode-back" href="../../spac.html#spac.visualization.tsne_plot">[docs]</a><span class="k">def</span> <span class="nf">tsne_plot</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">color_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize scatter plot in tSNE basis.</span>
 
@@ -671,7 +671,7 @@
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="histogram"><a class="viewcode-back" href="../../modules/spac.visualization.histogram.html#spac.visualization.histogram">[docs]</a><span class="k">def</span> <span class="nf">histogram</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="histogram"><a class="viewcode-back" href="../../spac.html#spac.visualization.histogram">[docs]</a><span class="k">def</span> <span class="nf">histogram</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">group_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">together</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="n">x_log_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y_log_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1032,7 +1032,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;fig&quot;</span><span class="p">:</span> <span class="n">fig</span><span class="p">,</span> <span class="s2">&quot;axs&quot;</span><span class="p">:</span> <span class="n">axs</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="n">hist_data</span><span class="p">}</span></div>
 
-<div class="viewcode-block" id="heatmap"><a class="viewcode-back" href="../../modules/spac.visualization.heatmap.html#spac.visualization.heatmap">[docs]</a><span class="k">def</span> <span class="nf">heatmap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="heatmap"><a class="viewcode-back" href="../../spac.html#spac.visualization.heatmap">[docs]</a><span class="k">def</span> <span class="nf">heatmap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the heatmap of the mean feature of cells that belong to a `column`.</span>
 
@@ -1089,7 +1089,7 @@
     <span class="k">return</span> <span class="n">mean_feature</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="hierarchical_heatmap"><a class="viewcode-back" href="../../modules/spac.visualization.hierarchical_heatmap.html#spac.visualization.hierarchical_heatmap">[docs]</a><span class="k">def</span> <span class="nf">hierarchical_heatmap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="hierarchical_heatmap"><a class="viewcode-back" href="../../spac.html#spac.visualization.hierarchical_heatmap">[docs]</a><span class="k">def</span> <span class="nf">hierarchical_heatmap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">cluster_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cluster_annotations</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                          <span class="n">standard_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_score</span><span class="o">=</span><span class="s2">&quot;annotation&quot;</span><span class="p">,</span>
                          <span class="n">swap_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rotate_label</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1301,7 +1301,7 @@
     <span class="k">return</span> <span class="n">mean_intensity</span><span class="p">,</span> <span class="n">clustergrid</span><span class="p">,</span> <span class="n">dendrogram_data</span></div>
 
 
-<div class="viewcode-block" id="threshold_heatmap"><a class="viewcode-back" href="../../modules/spac.visualization.threshold_heatmap.html#spac.visualization.threshold_heatmap">[docs]</a><span class="k">def</span> <span class="nf">threshold_heatmap</span><span class="p">(</span>
+<div class="viewcode-block" id="threshold_heatmap"><a class="viewcode-back" href="../../spac.html#spac.visualization.threshold_heatmap">[docs]</a><span class="k">def</span> <span class="nf">threshold_heatmap</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span> <span class="n">feature_cutoffs</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">swap_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1437,7 +1437,7 @@
     <span class="k">return</span> <span class="n">heatmap_plot</span></div>
 
 
-<div class="viewcode-block" id="spatial_plot"><a class="viewcode-back" href="../../modules/spac.visualization.spatial_plot.html#spac.visualization.spatial_plot">[docs]</a><span class="k">def</span> <span class="nf">spatial_plot</span><span class="p">(</span>
+<div class="viewcode-block" id="spatial_plot"><a class="viewcode-back" href="../../spac.html#spac.visualization.spatial_plot">[docs]</a><span class="k">def</span> <span class="nf">spatial_plot</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">spot_size</span><span class="p">,</span>
         <span class="n">alpha</span><span class="p">,</span>
@@ -1618,7 +1618,7 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="boxplot"><a class="viewcode-back" href="../../modules/spac.visualization.boxplot.html#spac.visualization.boxplot">[docs]</a><span class="k">def</span> <span class="nf">boxplot</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">second_annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="boxplot"><a class="viewcode-back" href="../../spac.html#spac.visualization.boxplot">[docs]</a><span class="k">def</span> <span class="nf">boxplot</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">second_annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a boxplot visualization of the features in the passed adata object.</span>
@@ -1811,7 +1811,7 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="boxplot_interactive"><a class="viewcode-back" href="../../modules/spac.visualization.boxplot_interactive.html#spac.visualization.boxplot_interactive">[docs]</a><span class="k">def</span> <span class="nf">boxplot_interactive</span><span class="p">(</span>
+<div class="viewcode-block" id="boxplot_interactive"><a class="viewcode-back" href="../../spac.html#spac.visualization.boxplot_interactive">[docs]</a><span class="k">def</span> <span class="nf">boxplot_interactive</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2281,7 +2281,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="interactive_spatial_plot"><a class="viewcode-back" href="../../modules/spac.visualization.interactive_spatial_plot.html#spac.visualization.interactive_spatial_plot">[docs]</a><span class="k">def</span> <span class="nf">interactive_spatial_plot</span><span class="p">(</span>
+<div class="viewcode-block" id="interactive_spatial_plot"><a class="viewcode-back" href="../../spac.html#spac.visualization.interactive_spatial_plot">[docs]</a><span class="k">def</span> <span class="nf">interactive_spatial_plot</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2799,7 +2799,7 @@
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="sankey_plot"><a class="viewcode-back" href="../../modules/spac.visualization.sankey_plot.html#spac.visualization.sankey_plot">[docs]</a><span class="k">def</span> <span class="nf">sankey_plot</span><span class="p">(</span>
+<div class="viewcode-block" id="sankey_plot"><a class="viewcode-back" href="../../spac.html#spac.visualization.sankey_plot">[docs]</a><span class="k">def</span> <span class="nf">sankey_plot</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span>
         <span class="n">source_annotation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">target_annotation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2931,7 +2931,7 @@
     <span class="k">return</span> <span class="n">fig</span></div>
 
 
-<div class="viewcode-block" id="relational_heatmap"><a class="viewcode-back" href="../../modules/spac.visualization.relational_heatmap.html#spac.visualization.relational_heatmap">[docs]</a><span class="k">def</span> <span class="nf">relational_heatmap</span><span class="p">(</span>
+<div class="viewcode-block" id="relational_heatmap"><a class="viewcode-back" href="../../spac.html#spac.visualization.relational_heatmap">[docs]</a><span class="k">def</span> <span class="nf">relational_heatmap</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">:</span> <span class="n">anndata</span><span class="o">.</span><span class="n">AnnData</span><span class="p">,</span>
         <span class="n">source_annotation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">target_annotation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -3089,7 +3089,7 @@
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;figure&quot;</span><span class="p">:</span> <span class="n">fig</span><span class="p">,</span> <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">matrix</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="plot_ripley_l"><a class="viewcode-back" href="../../modules/spac.visualization.plot_ripley_l.html#spac.visualization.plot_ripley_l">[docs]</a><span class="k">def</span> <span class="nf">plot_ripley_l</span><span class="p">(</span>
+<div class="viewcode-block" id="plot_ripley_l"><a class="viewcode-back" href="../../spac.html#spac.visualization.plot_ripley_l">[docs]</a><span class="k">def</span> <span class="nf">plot_ripley_l</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">phenotypes</span><span class="p">,</span>
         <span class="n">regions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -3710,7 +3710,7 @@
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">seen</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="visualize_nearest_neighbor"><a class="viewcode-back" href="../../modules/spac.visualization.visualize_nearest_neighbor.html#spac.visualization.visualize_nearest_neighbor">[docs]</a><span class="k">def</span> <span class="nf">visualize_nearest_neighbor</span><span class="p">(</span>
+<div class="viewcode-block" id="visualize_nearest_neighbor"><a class="viewcode-back" href="../../spac.html#spac.visualization.visualize_nearest_neighbor">[docs]</a><span class="k">def</span> <span class="nf">visualize_nearest_neighbor</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotation</span><span class="p">,</span>
     <span class="n">distance_from</span><span class="p">,</span>
@@ -3958,7 +3958,7 @@
 <span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
 
 
-<div class="viewcode-block" id="present_summary_as_html"><a class="viewcode-back" href="../../modules/spac.visualization.present_summary_as_html.html#spac.visualization.present_summary_as_html">[docs]</a><span class="k">def</span> <span class="nf">present_summary_as_html</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="present_summary_as_html"><a class="viewcode-back" href="../../spac.html#spac.visualization.present_summary_as_html">[docs]</a><span class="k">def</span> <span class="nf">present_summary_as_html</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build an HTML string that presents the summary information</span>
 <span class="sd">    intuitively.</span>
@@ -4012,7 +4012,7 @@
     <span class="k">return</span> <span class="n">html</span></div>
 
 
-<div class="viewcode-block" id="present_summary_as_figure"><a class="viewcode-back" href="../../modules/spac.visualization.present_summary_as_figure.html#spac.visualization.present_summary_as_figure">[docs]</a><span class="k">def</span> <span class="nf">present_summary_as_figure</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<div class="viewcode-block" id="present_summary_as_figure"><a class="viewcode-back" href="../../spac.html#spac.visualization.present_summary_as_figure">[docs]</a><span class="k">def</span> <span class="nf">present_summary_as_figure</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a static Plotly figure (using a table) to depict the</span>
 <span class="sd">    summary dictionary.</span>

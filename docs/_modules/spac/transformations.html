@@ -292,7 +292,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="phenograph_clustering"><a class="viewcode-back" href="../../modules/spac.transformations.phenograph_clustering.html#spac.transformations.phenograph_clustering">[docs]</a><span class="k">def</span> <span class="nf">phenograph_clustering</span><span class="p">(</span>
+<div class="viewcode-block" id="phenograph_clustering"><a class="viewcode-back" href="../../spac.html#spac.transformations.phenograph_clustering">[docs]</a><span class="k">def</span> <span class="nf">phenograph_clustering</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">features</span><span class="p">,</span>
         <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -374,7 +374,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">&quot;phenograph_features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span></div>
 
 
-<div class="viewcode-block" id="knn_clustering"><a class="viewcode-back" href="../../modules/spac.transformations.knn_clustering.html#spac.transformations.knn_clustering">[docs]</a><span class="k">def</span> <span class="nf">knn_clustering</span><span class="p">(</span>
+<div class="viewcode-block" id="knn_clustering"><a class="viewcode-back" href="../../spac.html#spac.transformations.knn_clustering">[docs]</a><span class="k">def</span> <span class="nf">knn_clustering</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">features</span><span class="p">,</span>
         <span class="n">annotation</span><span class="p">,</span>
@@ -488,7 +488,7 @@
     <span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_annotation</span><span class="si">}</span><span class="s2">_features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span></div>
 
 
-<div class="viewcode-block" id="get_cluster_info"><a class="viewcode-back" href="../../modules/spac.transformations.get_cluster_info.html#spac.transformations.get_cluster_info">[docs]</a><span class="k">def</span> <span class="nf">get_cluster_info</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_cluster_info"><a class="viewcode-back" href="../../spac.html#spac.transformations.get_cluster_info">[docs]</a><span class="k">def</span> <span class="nf">get_cluster_info</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve information about clusters based on specific annotation.</span>
 
@@ -565,7 +565,7 @@
     <span class="k">return</span> <span class="n">cluster_metrics</span></div>
 
 
-<div class="viewcode-block" id="tsne"><a class="viewcode-back" href="../../modules/spac.transformations.tsne.html#spac.transformations.tsne">[docs]</a><span class="k">def</span> <span class="nf">tsne</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="tsne"><a class="viewcode-back" href="../../spac.html#spac.transformations.tsne">[docs]</a><span class="k">def</span> <span class="nf">tsne</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform t-SNE transformation on specific layer information.</span>
 
@@ -604,7 +604,7 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="run_umap"><a class="viewcode-back" href="../../modules/spac.transformations.run_umap.html#spac.transformations.run_umap">[docs]</a><span class="k">def</span> <span class="nf">run_umap</span><span class="p">(</span>
+<div class="viewcode-block" id="run_umap"><a class="viewcode-back" href="../../spac.html#spac.transformations.run_umap">[docs]</a><span class="k">def</span> <span class="nf">run_umap</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
         <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
@@ -793,7 +793,7 @@
         <span class="k">return</span> <span class="n">np_array</span></div>
 
 
-<div class="viewcode-block" id="batch_normalize"><a class="viewcode-back" href="../../modules/spac.transformations.batch_normalize.html#spac.transformations.batch_normalize">[docs]</a><span class="k">def</span> <span class="nf">batch_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">output_layer</span><span class="p">,</span>
+<div class="viewcode-block" id="batch_normalize"><a class="viewcode-back" href="../../spac.html#spac.transformations.batch_normalize">[docs]</a><span class="k">def</span> <span class="nf">batch_normalize</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">output_layer</span><span class="p">,</span>
                     <span class="n">input_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adjust the features of every marker using a normalization method.</span>
@@ -904,7 +904,7 @@
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normalization completed. Data in layer &#39;</span><span class="si">{</span><span class="n">output_layer</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="rename_annotations"><a class="viewcode-back" href="../../modules/spac.transformations.rename_annotations.html#spac.transformations.rename_annotations">[docs]</a><span class="k">def</span> <span class="nf">rename_annotations</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">src_annotation</span><span class="p">,</span> <span class="n">dest_annotation</span><span class="p">,</span> <span class="n">mappings</span><span class="p">):</span>
+<div class="viewcode-block" id="rename_annotations"><a class="viewcode-back" href="../../spac.html#spac.transformations.rename_annotations">[docs]</a><span class="k">def</span> <span class="nf">rename_annotations</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">src_annotation</span><span class="p">,</span> <span class="n">dest_annotation</span><span class="p">,</span> <span class="n">mappings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rename labels in a given annotation in an AnnData object based on a</span>
 <span class="sd">    provided dictionary. This function modifies the adata object in-place</span>
@@ -973,7 +973,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="normalize_features"><a class="viewcode-back" href="../../modules/spac.transformations.normalize_features.html#spac.transformations.normalize_features">[docs]</a><span class="k">def</span> <span class="nf">normalize_features</span><span class="p">(</span>
+<div class="viewcode-block" id="normalize_features"><a class="viewcode-back" href="../../spac.html#spac.transformations.normalize_features">[docs]</a><span class="k">def</span> <span class="nf">normalize_features</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">low_quantile</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
     <span class="n">high_quantile</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
@@ -1077,7 +1077,7 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="normalize_features_core"><a class="viewcode-back" href="../../modules/spac.transformations.normalize_features_core.html#spac.transformations.normalize_features_core">[docs]</a><span class="k">def</span> <span class="nf">normalize_features_core</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">low_quantile</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">high_quantile</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+<div class="viewcode-block" id="normalize_features_core"><a class="viewcode-back" href="../../spac.html#spac.transformations.normalize_features_core">[docs]</a><span class="k">def</span> <span class="nf">normalize_features_core</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">low_quantile</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">high_quantile</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
                             <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Normalize the features in a numpy array.</span>
@@ -1192,7 +1192,7 @@
     <span class="k">return</span> <span class="n">normalized_data</span></div>
 
 
-<div class="viewcode-block" id="arcsinh_transformation"><a class="viewcode-back" href="../../modules/spac.transformations.arcsinh_transformation.html#spac.transformations.arcsinh_transformation">[docs]</a><span class="k">def</span> <span class="nf">arcsinh_transformation</span><span class="p">(</span>
+<div class="viewcode-block" id="arcsinh_transformation"><a class="viewcode-back" href="../../spac.html#spac.transformations.arcsinh_transformation">[docs]</a><span class="k">def</span> <span class="nf">arcsinh_transformation</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span> <span class="n">input_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">co_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">output_layer</span><span class="o">=</span><span class="s2">&quot;arcsinh&quot;</span><span class="p">,</span> <span class="n">per_batch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
@@ -1298,7 +1298,7 @@
     <span class="k">return</span> <span class="n">adata</span></div>
 
 
-<div class="viewcode-block" id="arcsinh_transformation_core"><a class="viewcode-back" href="../../modules/spac.transformations.arcsinh_transformation_core.html#spac.transformations.arcsinh_transformation_core">[docs]</a><span class="k">def</span> <span class="nf">arcsinh_transformation_core</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">co_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="arcsinh_transformation_core"><a class="viewcode-back" href="../../spac.html#spac.transformations.arcsinh_transformation_core">[docs]</a><span class="k">def</span> <span class="nf">arcsinh_transformation_core</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">co_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply arcsinh transformation using a co-factori or a percentile.</span>
 
@@ -1348,7 +1348,7 @@
     <span class="k">return</span> <span class="n">transformed_data</span></div>
 
 
-<div class="viewcode-block" id="z_score_normalization"><a class="viewcode-back" href="../../modules/spac.transformations.z_score_normalization.html#spac.transformations.z_score_normalization">[docs]</a><span class="k">def</span> <span class="nf">z_score_normalization</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">output_layer</span><span class="p">,</span> <span class="n">input_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="z_score_normalization"><a class="viewcode-back" href="../../spac.html#spac.transformations.z_score_normalization">[docs]</a><span class="k">def</span> <span class="nf">z_score_normalization</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">output_layer</span><span class="p">,</span> <span class="n">input_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute z-scores for the provided AnnData object.</span>
 
@@ -1396,7 +1396,7 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="apply_per_batch"><a class="viewcode-back" href="../../modules/spac.transformations.apply_per_batch.html#spac.transformations.apply_per_batch">[docs]</a><span class="k">def</span> <span class="nf">apply_per_batch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="apply_per_batch"><a class="viewcode-back" href="../../spac.html#spac.transformations.apply_per_batch">[docs]</a><span class="k">def</span> <span class="nf">apply_per_batch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a given function to data per batch, with additional parameters.</span>
 
@@ -1453,7 +1453,7 @@
     <span class="k">return</span> <span class="n">transformed_data</span></div>
 
 <span class="c1"># utag clustering</span>
-<div class="viewcode-block" id="run_utag_clustering"><a class="viewcode-back" href="../../modules/spac.transformations.run_utag_clustering.html#spac.transformations.run_utag_clustering">[docs]</a><span class="k">def</span> <span class="nf">run_utag_clustering</span><span class="p">(</span>
+<div class="viewcode-block" id="run_utag_clustering"><a class="viewcode-back" href="../../spac.html#spac.transformations.run_utag_clustering">[docs]</a><span class="k">def</span> <span class="nf">run_utag_clustering</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">k</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>

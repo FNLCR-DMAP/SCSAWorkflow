@@ -281,7 +281,7 @@
                     <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="regex_search_list"><a class="viewcode-back" href="../../modules/spac.utils.regex_search_list.html#spac.utils.regex_search_list">[docs]</a><span class="k">def</span> <span class="nf">regex_search_list</span><span class="p">(</span>
+<div class="viewcode-block" id="regex_search_list"><a class="viewcode-back" href="../../spac.html#spac.utils.regex_search_list">[docs]</a><span class="k">def</span> <span class="nf">regex_search_list</span><span class="p">(</span>
         <span class="n">regex_patterns</span><span class="p">,</span>
         <span class="n">list_to_search</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -357,7 +357,7 @@
     <span class="k">return</span> <span class="n">all_results</span></div>
 
 
-<div class="viewcode-block" id="check_list_in_list"><a class="viewcode-back" href="../../modules/spac.utils.check_list_in_list.html#spac.utils.check_list_in_list">[docs]</a><span class="k">def</span> <span class="nf">check_list_in_list</span><span class="p">(</span>
+<div class="viewcode-block" id="check_list_in_list"><a class="viewcode-back" href="../../spac.html#spac.utils.check_list_in_list">[docs]</a><span class="k">def</span> <span class="nf">check_list_in_list</span><span class="p">(</span>
         <span class="nb">input</span><span class="p">,</span>
         <span class="n">input_name</span><span class="p">,</span>
         <span class="n">input_type</span><span class="p">,</span>
@@ -455,7 +455,7 @@
                         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_table"><a class="viewcode-back" href="../../modules/spac.utils.check_table.html#spac.utils.check_table">[docs]</a><span class="k">def</span> <span class="nf">check_table</span><span class="p">(</span>
+<div class="viewcode-block" id="check_table"><a class="viewcode-back" href="../../spac.html#spac.utils.check_table">[docs]</a><span class="k">def</span> <span class="nf">check_table</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">should_exist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -532,7 +532,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_annotation"><a class="viewcode-back" href="../../modules/spac.utils.check_annotation.html#spac.utils.check_annotation">[docs]</a><span class="k">def</span> <span class="nf">check_annotation</span><span class="p">(</span>
+<div class="viewcode-block" id="check_annotation"><a class="viewcode-back" href="../../spac.html#spac.utils.check_annotation">[docs]</a><span class="k">def</span> <span class="nf">check_annotation</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">parameter_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -587,7 +587,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_feature"><a class="viewcode-back" href="../../modules/spac.utils.check_feature.html#spac.utils.check_feature">[docs]</a><span class="k">def</span> <span class="nf">check_feature</span><span class="p">(</span>
+<div class="viewcode-block" id="check_feature"><a class="viewcode-back" href="../../spac.html#spac.utils.check_feature">[docs]</a><span class="k">def</span> <span class="nf">check_feature</span><span class="p">(</span>
         <span class="n">adata</span><span class="p">,</span>
         <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">should_exist</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -637,7 +637,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_column_name"><a class="viewcode-back" href="../../modules/spac.utils.check_column_name.html#spac.utils.check_column_name">[docs]</a><span class="k">def</span> <span class="nf">check_column_name</span><span class="p">(</span>
+<div class="viewcode-block" id="check_column_name"><a class="viewcode-back" href="../../spac.html#spac.utils.check_column_name">[docs]</a><span class="k">def</span> <span class="nf">check_column_name</span><span class="p">(</span>
     <span class="n">column_name</span><span class="p">,</span>
     <span class="n">field_name</span><span class="p">,</span>
     <span class="n">symbol_checklist</span><span class="o">=</span><span class="s2">&quot;!?,.&quot;</span><span class="p">,</span>
@@ -650,7 +650,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;One of the symbols in </span><span class="si">{</span><span class="n">symbol_checklist</span><span class="si">}</span><span class="s2"> is present in </span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_distances"><a class="viewcode-back" href="../../modules/spac.utils.check_distances.html#spac.utils.check_distances">[docs]</a><span class="k">def</span> <span class="nf">check_distances</span><span class="p">(</span><span class="n">distances</span><span class="p">):</span>
+<div class="viewcode-block" id="check_distances"><a class="viewcode-back" href="../../spac.html#spac.utils.check_distances">[docs]</a><span class="k">def</span> <span class="nf">check_distances</span><span class="p">(</span><span class="n">distances</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check that the distances are valid: must be an array-like of</span>
 <span class="sd">    incremental positive values.</span>
@@ -683,7 +683,7 @@
                          <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="n">distances</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="text_to_others"><a class="viewcode-back" href="../../modules/spac.utils.text_to_others.html#spac.utils.text_to_others">[docs]</a><span class="k">def</span> <span class="nf">text_to_others</span><span class="p">(</span>
+<div class="viewcode-block" id="text_to_others"><a class="viewcode-back" href="../../spac.html#spac.utils.text_to_others">[docs]</a><span class="k">def</span> <span class="nf">text_to_others</span><span class="p">(</span>
     <span class="n">parameter</span><span class="p">,</span>
     <span class="n">text</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
     <span class="n">to_None</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -737,7 +737,7 @@
     <span class="k">return</span> <span class="n">parameter</span></div>
 
 
-<div class="viewcode-block" id="annotation_category_relations"><a class="viewcode-back" href="../../modules/spac.utils.annotation_category_relations.html#spac.utils.annotation_category_relations">[docs]</a><span class="k">def</span> <span class="nf">annotation_category_relations</span><span class="p">(</span>
+<div class="viewcode-block" id="annotation_category_relations"><a class="viewcode-back" href="../../spac.html#spac.utils.annotation_category_relations">[docs]</a><span class="k">def</span> <span class="nf">annotation_category_relations</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">source_annotation</span><span class="p">,</span>
     <span class="n">target_annotation</span><span class="p">,</span>
@@ -857,7 +857,7 @@
     <span class="k">return</span> <span class="n">relationships</span></div>
 
 
-<div class="viewcode-block" id="color_mapping"><a class="viewcode-back" href="../../modules/spac.utils.color_mapping.html#spac.utils.color_mapping">[docs]</a><span class="k">def</span> <span class="nf">color_mapping</span><span class="p">(</span>
+<div class="viewcode-block" id="color_mapping"><a class="viewcode-back" href="../../spac.html#spac.utils.color_mapping">[docs]</a><span class="k">def</span> <span class="nf">color_mapping</span><span class="p">(</span>
         <span class="n">labels</span><span class="p">,</span>
         <span class="n">color_map</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
         <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
@@ -1000,7 +1000,7 @@
     <span class="k">return</span> <span class="n">returning</span></div>
 
 
-<div class="viewcode-block" id="check_label"><a class="viewcode-back" href="../../modules/spac.utils.check_label.html#spac.utils.check_label">[docs]</a><span class="k">def</span> <span class="nf">check_label</span><span class="p">(</span>
+<div class="viewcode-block" id="check_label"><a class="viewcode-back" href="../../spac.html#spac.utils.check_label">[docs]</a><span class="k">def</span> <span class="nf">check_label</span><span class="p">(</span>
     <span class="n">adata</span><span class="p">,</span>
     <span class="n">annotation</span><span class="p">,</span>
     <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1091,7 +1091,7 @@
             <span class="n">warning</span><span class="o">=</span><span class="n">warning</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="spell_out_special_characters"><a class="viewcode-back" href="../../modules/spac.utils.spell_out_special_characters.html#spac.utils.spell_out_special_characters">[docs]</a><span class="k">def</span> <span class="nf">spell_out_special_characters</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<div class="viewcode-block" id="spell_out_special_characters"><a class="viewcode-back" href="../../spac.html#spac.utils.spell_out_special_characters">[docs]</a><span class="k">def</span> <span class="nf">spell_out_special_characters</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert special characters in a string to comply with NIDAP naming rules.</span>
 
@@ -1205,7 +1205,7 @@
     <span class="k">return</span> <span class="n">text</span></div>
 
 
-<div class="viewcode-block" id="get_defined_color_map"><a class="viewcode-back" href="../../modules/spac.utils.get_defined_color_map.html#spac.utils.get_defined_color_map">[docs]</a><span class="k">def</span> <span class="nf">get_defined_color_map</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">defined_color_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="get_defined_color_map"><a class="viewcode-back" href="../../spac.html#spac.utils.get_defined_color_map">[docs]</a><span class="k">def</span> <span class="nf">get_defined_color_map</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">defined_color_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">colorscale</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieve or generate a predefined color mapping dictionary from an AnnData</span>
@@ -1289,7 +1289,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_boxplot_metrics"><a class="viewcode-back" href="../../modules/spac.utils.compute_boxplot_metrics.html#spac.utils.compute_boxplot_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_boxplot_metrics</span><span class="p">(</span>
+<div class="viewcode-block" id="compute_boxplot_metrics"><a class="viewcode-back" href="../../spac.html#spac.utils.compute_boxplot_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_boxplot_metrics</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">showfliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

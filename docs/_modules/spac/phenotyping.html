@@ -270,7 +270,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 
-<div class="viewcode-block" id="is_binary_0_1"><a class="viewcode-back" href="../../modules/spac.phenotyping.is_binary_0_1.html#spac.phenotyping.is_binary_0_1">[docs]</a><span class="k">def</span> <span class="nf">is_binary_0_1</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
+<div class="viewcode-block" id="is_binary_0_1"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.is_binary_0_1">[docs]</a><span class="k">def</span> <span class="nf">is_binary_0_1</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a pandas Series contains only binary values (0 and 1).</span>
 
@@ -293,7 +293,7 @@
     <span class="k">return</span> <span class="n">unique_values</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="decode_phenotype"><a class="viewcode-back" href="../../modules/spac.phenotyping.decode_phenotype.html#spac.phenotyping.decode_phenotype">[docs]</a><span class="k">def</span> <span class="nf">decode_phenotype</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">phenotype_code</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="decode_phenotype"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.decode_phenotype">[docs]</a><span class="k">def</span> <span class="nf">decode_phenotype</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">phenotype_code</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a phenotype code into a dictionary mapping</span>
 <span class="sd">    feature (marker) names to values for that marker&#39;s</span>
@@ -379,7 +379,7 @@
     <span class="k">return</span> <span class="n">phenotype_dict</span></div>
 
 
-<div class="viewcode-block" id="generate_phenotypes_dict"><a class="viewcode-back" href="../../modules/spac.phenotyping.generate_phenotypes_dict.html#spac.phenotyping.generate_phenotypes_dict">[docs]</a><span class="k">def</span> <span class="nf">generate_phenotypes_dict</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotypes_df</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_phenotypes_dict"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.generate_phenotypes_dict">[docs]</a><span class="k">def</span> <span class="nf">generate_phenotypes_dict</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotypes_df</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a dictionary of phenotype names to their corresponding</span>
 <span class="sd">    decoding rules.</span>
@@ -424,7 +424,7 @@
     <span class="k">return</span> <span class="n">all_phenotypes</span></div>
 
 
-<div class="viewcode-block" id="apply_phenotypes"><a class="viewcode-back" href="../../modules/spac.phenotyping.apply_phenotypes.html#spac.phenotyping.apply_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">apply_phenotypes</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotypes_dic</span><span class="p">):</span>
+<div class="viewcode-block" id="apply_phenotypes"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.apply_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">apply_phenotypes</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotypes_dic</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add binary columns to the DataFrame indicating if each cell matches a</span>
 <span class="sd">    phenotype.</span>
@@ -465,7 +465,7 @@
     <span class="k">return</span> <span class="n">return_dic</span></div>
 
 
-<div class="viewcode-block" id="combine_phenotypes"><a class="viewcode-back" href="../../modules/spac.phenotyping.combine_phenotypes.html#spac.phenotyping.combine_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">combine_phenotypes</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotype_columns</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="combine_phenotypes"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.combine_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">combine_phenotypes</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">phenotype_columns</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combine multiple binary phenotype columns into a new column in a vectorized manner.</span>
 
@@ -511,7 +511,7 @@
     <span class="k">return</span> <span class="n">combined_phenotypes</span></div>
 
 
-<div class="viewcode-block" id="assign_manual_phenotypes"><a class="viewcode-back" href="../../modules/spac.phenotyping.assign_manual_phenotypes.html#spac.phenotyping.assign_manual_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">assign_manual_phenotypes</span><span class="p">(</span>
+<div class="viewcode-block" id="assign_manual_phenotypes"><a class="viewcode-back" href="../../spac.html#spac.phenotyping.assign_manual_phenotypes">[docs]</a><span class="k">def</span> <span class="nf">assign_manual_phenotypes</span><span class="p">(</span>
         <span class="n">data_df</span><span class="p">,</span>
         <span class="n">phenotypes_df</span><span class="p">,</span>
         <span class="n">annotation</span><span class="o">=</span><span class="s2">&quot;manual_phenotype&quot;</span><span class="p">,</span>
