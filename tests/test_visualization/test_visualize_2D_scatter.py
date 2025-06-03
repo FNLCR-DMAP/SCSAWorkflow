@@ -129,6 +129,26 @@ class TestVisualize2DScatter(unittest.TestCase):
         legend = axis.get_legend()
         self.assertIn(color_representation, legend.get_title().get_text())
 
+    def test_color_map(self):
+        color_map = {'A': '#123456', 'B': '#abcdef', 'C': '#654321'}
+        fig, ax = visualize_2D_scatter(
+            self.x, self.y, labels=self.labels_categorical,
+            color_map=color_map)
+        # Get all PathCollections (one per category)
+        collections = [c for c in ax.collections if
+                       isinstance(c, matplotlib.collections.PathCollection)]
+        import matplotlib.colors as mcolors
+        for i, cluster in enumerate(['A', 'B', 'C']):
+            expected_rgba = mcolors.to_rgba(color_map[cluster])
+            facecolors = collections[i].get_facecolors()
+            # All points in this collection should have the same color
+            for fc in facecolors:
+                self.assertTrue(
+                    all(abs(a - b) < 1e-3 for a, b in zip(fc, expected_rgba)),
+                    f"Color mismatch for {cluster}: expected {expected_rgba},"
+                    f"got {fc}"
+                )
+
 
 if __name__ == '__main__':
     unittest.main()

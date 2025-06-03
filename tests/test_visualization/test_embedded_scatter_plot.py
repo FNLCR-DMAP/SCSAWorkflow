@@ -256,6 +256,12 @@ class SpatialPlotTestCase(unittest.TestCase):
             embedded_scatter_plot(adata=self.adata, method='spatial',
                                   spot_size=self.spot_size, alpha=-0.5)
 
+    def test_invalid_theme(self):
+        # Should raise ValueError for invalid theme
+        with self.assertRaises(ValueError):
+            embedded_scatter_plot(self.adata, 'umap', annotation='cat_anno',
+                                  theme='not_a_theme')
+
     def test_missing_annotation(self):
         # Test when annotation is None and feature is None
         with self.assertRaises(ValueError) as cm:
@@ -518,6 +524,29 @@ class SpatialPlotTestCase(unittest.TestCase):
             # Perform assertions on the spatial plot
             # Check if ax has data plotted
             self.assertTrue(ax.has_data())
+
+    def test_color_map_from_uns(self):
+        # Should use color map from adata.uns
+        self.adata.uns['anno_colors'] = {'A': '#111111', 'B': '#222222',
+                                         'C': '#333333', 'D': '#444444'}
+        returned_fig, ax = embedded_scatter_plot(
+                adata=self.adata,
+                method='spatial',
+                annotation='annotation1',
+                color_map='anno_colors'
+        )
+        self.assertTrue(ax.has_data())
+
+    def test_color_map_input(self):
+        # Should raise failure as it accepts colormap as str not dict
+        anno_colors = {'A': '#111111', 'B': '#222222',
+                       'C': '#333333', 'D': '#444444'}
+        with self.assertRaises(TypeError):
+            embedded_scatter_plot(
+                adata=self.adata,
+                method='spatial',
+                annotation='annotation1',
+                color_map=anno_colors)
 
 
 if __name__ == '__main__':
