@@ -20,6 +20,8 @@ from spac.utils import compute_boxplot_metrics
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
+from scipy import stats
+from statsmodels.stats.multitest import multipletests
 import logging
 import warnings
 import base64
@@ -3000,6 +3002,91 @@ def plot_ripley_l(
 
     return fig
 
+def compute_pairwise_stats_multi(df, group_col, value_cols, pairs, test='t-test_ind', comparisons_correction=None):
+    """
+    Compute statistical tests between pairs of groups across multiple value columns.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame containing group labels and multiple value columns.
+
+    group_col : str
+        Name of the column with group labels.
+
+    value_cols : list of str
+        List of value columns to test between groups.
+
+    pairs : list of tuple
+        List of (group1, group2) pairs to compare.
+
+    test : str, default 't-test_ind'
+        Statistical test to apply: 't-test_ind', 'mannwhitneyu', or 'wilcoxon'.
+
+    comparisons_correction : str or None, optional
+        Multiple testing correction method: 'bonferroni', 'holm', 'fdr_bh', etc.
+
+    Returns
+    -------
+    pd.DataFrame
+        Long-form DataFrame with results for each feature and pairwise comparison.
+    """
+    test_func_map = {
+        't-test_ind': stats.ttest_ind,
+        'mannwhitneyu': stats.mannwhitneyu,
+        'wilcoxon': stats.wilcoxon,
+    }
+
+    if test not in test_func_map:
+        raise ValueError(f"Unsupported test: {test}")
+
+    results = []
+
+    for value_col in value_cols:
+        for g1, g2 in pairs:
+            data1 = df[df[group_col] == g1][value_col].dropna()
+            data2 = df[df[group_col] == g2][value_col].dropna()
+
+            if test == 'wilcoxon':
+                # Wilcoxon requires paired samples of equal length and at least 2 observations
+                min_len = min(len(data1), len(data2))
+                if min_len < 2:
+                    stat, pval = float('nan'), float('nan')
+                else:
+                    # Only use Wilcoxon if both groups have the same length and more than 1 observation
+                    stat, pval = test_func_map[test](data1.iloc[:min_len], data2.iloc[:min_len])
+            else:
+                stat, pval = test_func_map[test](data1, data2)
+
+            results.append({
+                'Feature': value_col,
+                'Group 1': g1,
+                'Group 2': g2,
+                'Test': test,
+                'Test Statistic': stat,
+                'p-value': pval
+            })
+
+    results_df = pd.DataFrame(results)
+
+    # Multiple comparisons correction across all tests
+    if comparisons_correction:
+        corrected = multipletests(results_df['p-value'].fillna(1), method=comparisons_correction)
+        results_df['Corrected p-value'] = corrected[1]
+        results_df['Significance'] = pd.cut(
+            corrected[1],
+            bins=[-1, 0.001, 0.01, 0.05, 1],
+            labels=["***", "**", "*", "ns"]
+        )
+    else:
+        results_df['Corrected p-value'] = None
+        results_df['Significance'] = pd.cut(
+            results_df['p-value'],
+            bins=[-1, 0.001, 0.01, 0.05, 1],
+            labels=["***", "**", "*", "ns"]
+        )
+
+    return results_df
 
 def _prepare_spatial_distance_data(
     adata,
