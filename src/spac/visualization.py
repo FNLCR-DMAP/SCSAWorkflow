@@ -3047,6 +3047,17 @@ def compute_pairwise_stats_multi(df, group_col, value_cols, pairs, test='t-test_
             data1 = df[df[group_col] == g1][value_col].dropna()
             data2 = df[df[group_col] == g2][value_col].dropna()
 
+            # Check if both groups have data
+            if data1.empty or data2.empty:
+                raise KeyError(f"Group(s) {g1} or {g2} not found in column {group_col}")
+            
+            # Check if both groups have the same length for Wilcoxon
+            # Wilcoxon test requires paired samples of equal length
+            if len(data1) != len(data2):
+                stat, pval = float('nan'), float('nan')
+            else:
+                stat, pval = test_func_map[test](data1, data2)
+
             if test == 'wilcoxon':
                 # Wilcoxon requires paired samples of equal length and at least 2 observations
                 min_len = min(len(data1), len(data2))
