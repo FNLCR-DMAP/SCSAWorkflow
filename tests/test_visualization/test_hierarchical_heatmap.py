@@ -128,7 +128,7 @@ class TestHierarchicalHeatmap(unittest.TestCase):
         self.adata = anndata.AnnData(X=X_data, obs=obs_data)
 
         # Use hierarchical_heatmap function on AnnData object and get y-axis labels
-        _, clustergrid, _ = hierarchical_heatmap(self.adata, annotation='cluster')
+        _, clustergrid, _ = hierarchical_heatmap(self.adata, annotation='cluster', show_counts=True)
         actual_labels = []
         for label in clustergrid.ax_heatmap.get_yticklabels():
             actual_labels.append(label.get_text())
