@@ -614,7 +614,11 @@ def downsample_cells(input_data, annotations, n_samples=None,
     # If n_samples is None, return the input data without processing
     if n_samples is None:
         return input_data
-    
+
+    # Convert annotations to list if it's a string
+    if isinstance(annotations, str):
+        annotations = [annotations]
+        
     # Extract the cell information for downsampling process
     if isinstance(input_data, anndata.AnnData):
         cell_data = input_data.obs[annotations].copy()
@@ -626,10 +630,6 @@ def downsample_cells(input_data, annotations, n_samples=None,
         raise TypeError("Input data must be a Pandas DataFrame or Anndata Object.")
 
     # Prepare cell annotation column for downsample process:
-    # Convert annotations to list if it's a string
-    if isinstance(annotations, str):
-        annotations = [annotations]
-
     # Check if the columns to downsample on exist
     missing_columns = [
         col for col in annotations if col not in cell_data.columns
