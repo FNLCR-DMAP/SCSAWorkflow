@@ -1243,7 +1243,8 @@ def compute_pairwise_stats_multi(
             if len(data1) == 0 or len(data2) == 0:
                 # If either group has no data, skip the comparison
                 raise KeyError(
-                    f"Group(s) {g1} or {g2} not found or all values are NaN in column {group_col} for feature {value_col}"
+                    f"Group(s) {g1} or {g2} not found or all values are NaN "
+                    f"in column {group_col} for feature {value_col}"
                 )
             if test == "wilcoxon":
                 # Only valid for paired samples of equal length
