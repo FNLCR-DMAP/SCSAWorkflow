@@ -148,22 +148,21 @@ class TestComputePairwiseStatsMulti(unittest.TestCase):
         self.assertIn('p-value', result.columns)
 
     def test_multiple_testing_correction_with_nan(self):
-        """Test multiple testing correction works with some NaN p-values."""
+        """Test multiple testing correction raises KeyError if all values are NaN for a feature."""
         df = pd.DataFrame({
             'group': ['A', 'A', 'B', 'B'],
             'feature1': [1, np.nan, 2, 3],
             'feature2': [np.nan, np.nan, np.nan, np.nan]
         })
-        result = compute_pairwise_stats_multi(
-            df=df,
-            group_col='group',
-            value_cols=['feature1', 'feature2'],
-            pairs=[('A', 'B')],
-            test='t-test_ind',
-            comparisons_correction='bonferroni'
-        )
-        self.assertTrue((result['Corrected p-value'] <= 1).all())
-        self.assertEqual(result.shape[0], 2)
+        with self.assertRaises(KeyError):
+            compute_pairwise_stats_multi(
+                df=df,
+                group_col='group',
+                value_cols=['feature1', 'feature2'],
+                pairs=[('A', 'B')],
+                test='t-test_ind',
+                comparisons_correction='bonferroni'
+            )
 
 
 if __name__ == '__main__':

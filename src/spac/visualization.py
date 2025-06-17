@@ -2052,6 +2052,7 @@ def interactive_spatial_plot(
     feature : str, optional
         If annotation is None, the name of the gene or feature
         in `adata.var_names` to use for coloring the scatter plot points
+       
         based on feature expression.
     layer : str, optional
         If feature is not None, the name of the data layer in `adata.layers`
@@ -3046,26 +3047,15 @@ def compute_pairwise_stats_multi(df, group_col, value_cols, pairs, test='t-test_
         for g1, g2 in pairs:
             data1 = df[df[group_col] == g1][value_col].dropna()
             data2 = df[df[group_col] == g2][value_col].dropna()
-
-            # Check if both groups have data
-            if data1.empty or data2.empty:
-                raise KeyError(f"Group(s) {g1} or {g2} not found in column {group_col}")
-            
-            # Check if both groups have the same length for Wilcoxon
-            # Wilcoxon test requires paired samples of equal length
-            if len(data1) != len(data2):
-                stat, pval = float('nan'), float('nan')
-            else:
-                stat, pval = test_func_map[test](data1, data2)
-
+            if len(data1) == 0 or len(data2) == 0:
+                # If either group has no data, skip the comparison
+                raise KeyError(f"Group(s) {g1} or {g2} not found or all values are NaN in column {group_col} for feature {value_col}")
             if test == 'wilcoxon':
-                # Wilcoxon requires paired samples of equal length and at least 2 observations
-                min_len = min(len(data1), len(data2))
-                if min_len < 2:
+                # Only valid for paired samples of equal length
+                if len(data1) != len(data2) or len(data1) == 0:
                     stat, pval = float('nan'), float('nan')
                 else:
-                    # Only use Wilcoxon if both groups have the same length and more than 1 observation
-                    stat, pval = test_func_map[test](data1.iloc[:min_len], data2.iloc[:min_len])
+                    stat, pval = test_func_map[test](data1, data2)
             else:
                 stat, pval = test_func_map[test](data1, data2)
 
@@ -3745,10 +3735,6 @@ def visualize_nearest_neighbor(
     }
 
 
-import json
-import plotly.graph_objects as go
-
-
 def present_summary_as_html(summary_dict: dict) -> str:
     """
     Build an HTML string that presents the summary information
@@ -3818,7 +3804,7 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
     Parameters
     ----------
     summary_dict : dict
-        The summary dictionary returned from summarize_dataframe.
+        The summary dictionary returned by summarize_dataframe.
 
     Returns
     -------
