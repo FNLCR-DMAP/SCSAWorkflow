@@ -1347,6 +1347,8 @@ def add_qc_metrics(adata,
             mt_match_pattern = "MT-"
         elif organism == "mm":
             mt_match_pattern = "mt-"
+        else:
+            raise ValueError(f"Unsupported organism '{organism}'. Supported values are 'hs' and 'mm'.")
 
     if layer is None:
         test_matrix = adata.X
