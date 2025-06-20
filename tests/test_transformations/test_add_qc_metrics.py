@@ -25,11 +25,11 @@ class TestAddQCMetrics(unittest.TestCase):
     def test_qc_metrics_dense(self):
         adata = self.create_test_adata(sparse=False)
         add_qc_metrics(adata, organism="hs")
-        self.assertIn("nFeatue", adata.obs)
+        self.assertIn("nFeature", adata.obs)
         self.assertIn("nCount", adata.obs)
         self.assertIn("nCount_mt", adata.obs)
         self.assertIn("percent.mt", adata.obs)
-        np.testing.assert_array_equal(adata.obs["nFeatue"].values, [2, 2, 2])
+        np.testing.assert_array_equal(adata.obs["nFeature"].values, [2, 2, 2])
         np.testing.assert_array_equal(adata.obs["nCount"].values, [4, 6, 11])
         np.testing.assert_array_equal(adata.obs["nCount_mt"].values, [1, 2, 5])
         np.testing.assert_allclose(adata.obs["percent.mt"].values, 
@@ -38,11 +38,11 @@ class TestAddQCMetrics(unittest.TestCase):
     def test_qc_metrics_sparse(self):
         adata = self.create_test_adata(sparse=True)
         add_qc_metrics(adata, organism="hs")
-        self.assertIn("nFeatue", adata.obs)
+        self.assertIn("nFeature", adata.obs)
         self.assertIn("nCount", adata.obs)
         self.assertIn("nCount_mt", adata.obs)
         self.assertIn("percent.mt", adata.obs)
-        np.testing.assert_array_equal(adata.obs["nFeatue"].values, [2, 2, 2])
+        np.testing.assert_array_equal(adata.obs["nFeature"].values, [2, 2, 2])
         np.testing.assert_array_equal(adata.obs["nCount"].values, [4, 6, 11])
         np.testing.assert_array_equal(adata.obs["nCount_mt"].values, [1, 2, 5])
         np.testing.assert_allclose(adata.obs["percent.mt"].values, 
