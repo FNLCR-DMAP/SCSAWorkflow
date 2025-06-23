@@ -1353,8 +1353,7 @@ def add_qc_metrics(adata,
     if layer is None:
         test_matrix = adata.X
     else:
-        if layer not in adata.layers:
-            raise ValueError(f"Layer '{layer}' not found in adata.layers.")
+        check_table(adata, tables=layer)
         test_matrix = adata.layers[layer]
     
     # Check if adata.X is sparse, and convert if necessary
