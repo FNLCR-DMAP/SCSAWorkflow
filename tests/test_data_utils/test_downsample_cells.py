@@ -221,8 +221,7 @@ class TestDownsampleCells(unittest.TestCase):
             n_samples = 1,
             stratify = False,
             rand = True,
-            combined_col_name= '_combined_',
-            min_threshold= 5
+            combined_col_name= '_combined_'
         )
     
         # confirm the downsampled_df is an anndata object

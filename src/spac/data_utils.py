@@ -705,8 +705,8 @@ def _get_downsampled_indexes(cell_data, annotations,
 
     # Combine annotations into a single column if multiple annotations
     if len(annotations) > 1:
-        grouping_col = cell_data[annotations].apply(
-            lambda row: '_'.join(row.values.astype(str)), axis=1)
+        cell_data[combined_col_name] = cell_data[annotations].astype(str).agg('_'.join, axis=1)
+        grouping_col = combined_col_name
     else:
         grouping_col = annotations[0]
 
