@@ -138,9 +138,11 @@ class TestVisualize2DScatter(unittest.TestCase):
         collections = [c for c in ax.collections if
                        isinstance(c, matplotlib.collections.PathCollection)]
         import matplotlib.colors as mcolors
-        for i, cluster in enumerate(['A', 'B', 'C']):
+        # Map collections to their labels
+        collection_map = {c.get_label(): c for c in collections}
+        for cluster in ['A', 'B', 'C']:
             expected_rgba = mcolors.to_rgba(color_map[cluster])
-            facecolors = collections[i].get_facecolors()
+            facecolors = collection_map[cluster].get_facecolors()
             # All points in this collection should have the same color
             for fc in facecolors:
                 self.assertTrue(
