@@ -13,7 +13,7 @@ import plotly.io as pio
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import check_label
+from spac.utils import check_label, check_list_in_list
 from spac.utils import get_defined_color_map
 from spac.utils import compute_boxplot_metrics
 from functools import partial
@@ -150,9 +150,6 @@ def visualize_2D_scatter(
                 for i, cluster in enumerate(unique_clusters)
             }
 
-            # Use the number of unique clusters to set the colormap length
-            cmap = ListedColormap(colors[:len(unique_clusters)])
-
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
                 color = cluster_to_color.get(str(cluster), 'gray')
@@ -205,7 +202,7 @@ def visualize_2D_scatter(
     return fig, ax
 
 
-def embedded_scatter_plot(        
+def embedded_scatter_plot(
         adata,
         method=None,
         annotation=None,
@@ -284,9 +281,11 @@ def embedded_scatter_plot(
     # Validate the method and check if the necessary data exists in adata.obsm
     if associated_table is None:
         valid_methods = ['tsne', 'umap', 'pca', 'spatial']
-        if method not in valid_methods:
-            raise ValueError("Method should be one of {'tsne', 'umap', 'pca', 'spatial'}"
-                             f'. Got:"{method}"')
+        check_list_in_list(input=method, input_name="method",
+                           input_type="method",
+                           target_list=valid_methods,
+                           need_exist=True
+                           )
         if method == "spatial":
             key = "spatial"
         else:
@@ -313,14 +312,6 @@ def embedded_scatter_plot(
             )
         key = associated_table
 
-    err_msg_layer = "The 'layer' parameter must be a string, " + \
-        f"got {str(type(layer))}"
-    err_msg_feature = "The 'feature' parameter must be a string, " + \
-        f"got {str(type(feature))}"
-    err_msg_annotation = "The 'annotation' parameter must be a string, " + \
-        f"got {str(type(annotation))}"
-    err_msg_feat_annotation_coe = "Both annotation and feature are passed, " +\
-        "please provide sinle input."
     err_msg_feat_annotation_non = "Both annotation and feature are None, " + \
         "please provide single input."
     err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
@@ -344,27 +335,10 @@ def embedded_scatter_plot(
             f"instance of anndata.AnnData, got {str(type(adata))}."
         raise ValueError(err_msg_adata)
 
-    if layer is not None and not isinstance(layer, str):
-        raise ValueError(err_msg_layer)
-
-    if layer is not None and layer not in adata.layers.keys():
-        err_msg_layer_exist = f"Layer {layer} does not exists, " + \
-            f"available layers are {str(adata.layers.keys())}"
-        raise ValueError(err_msg_layer_exist)
-
-    if feature is not None and not isinstance(feature, str):
-        raise ValueError(err_msg_feature)
-
-    if annotation is not None and not isinstance(annotation, str):
-        raise ValueError(err_msg_annotation)
-
-    if annotation is not None and feature is not None:
-        raise ValueError(err_msg_feat_annotation_coe)
-
     if key == "spatial":
         if annotation is None and feature is None:
             raise ValueError(err_msg_feat_annotation_non)
-
+        
         if 'spatial' not in adata.obsm_keys():
             err_msg = "Spatial coordinates not found in the 'obsm' attribute."
             raise ValueError(err_msg)

@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import itertools
 from spac.visualization import embedded_scatter_plot
+from matplotlib.collections import PathCollection
 matplotlib.use('Agg')
 
 
@@ -129,9 +130,14 @@ class TestStaticScatterPlot(unittest.TestCase):
     def test_invalid_method(self):
         with self.assertRaises(ValueError) as cm:
             embedded_scatter_plot(self.adata, 'invalid_method')
-        expected_msg = ("Method should be one of {'tsne', 'umap', 'pca',"
-                        " 'spatial'}."
-                        ' Got:"invalid_method"'
+        expected_msg = (
+                        "The method 'invalid_method' does not exist"
+                        " in the provided dataset.\n"
+                        "Existing methods are:\n"
+                        "tsne\n"
+                        "umap\n"
+                        "pca\n"
+                        "spatial"
                         )
         self.assertEqual(str(cm.exception), expected_msg)
 
@@ -526,21 +532,45 @@ class SpatialPlotTestCase(unittest.TestCase):
             self.assertTrue(ax.has_data())
 
     def test_color_map_from_uns(self):
+        # Color conversion formula
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+
         # Should use color map from adata.uns
-        self.adata.uns['anno_colors'] = {'A': '#111111', 'B': '#222222',
-                                         'C': '#333333', 'D': '#444444'}
+        self.adata.uns['anno_colors'] = {'A': '#ff1111', 'B': '#22ff22',
+                                         'C': '#ee3333'}
+        annotation = 'annotation1'
         returned_fig, ax = embedded_scatter_plot(
                 adata=self.adata,
                 method='spatial',
-                annotation='annotation1',
+                annotation=annotation,
                 color_map='anno_colors'
         )
-        self.assertTrue(ax.has_data())
+        expected_rgb = {k: hex_to_rgb(v) for k, v in
+                        self.adata.uns['anno_colors'].items()}
+        found_labels = set()
+        for collection in ax.collections:
+            if isinstance(collection, PathCollection):
+                label = collection.get_label()
+                color = collection.get_facecolor()[0][:3]
+                expected = expected_rgb.get(label)
+                self.assertIsNotNone(expected, f"Unexpected label"
+                                     f"'{label}' in plot.")
+                np.testing.assert_allclose(color, expected, atol=1e-2,
+                                           err_msg=f"Color mismatch"
+                                           f"for label '{label}':"
+                                           f" got {color},"
+                                           f" expected {expected}")
+                found_labels.add(label)
+
+        # Ensure all expected labels were found in the plot
+        self.assertEqual(found_labels, set(expected_rgb.keys()))
 
     def test_color_map_input(self):
         # Should raise failure as it accepts colormap as str not dict
         anno_colors = {'A': '#111111', 'B': '#222222',
-                       'C': '#333333', 'D': '#444444'}
+                       'C': '#333333'}
         with self.assertRaises(TypeError):
             embedded_scatter_plot(
                 adata=self.adata,
