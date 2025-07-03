@@ -16,6 +16,8 @@ from sklearn.preprocessing import LabelEncoder
 import multiprocessing
 import parmap
 from spac.utag_functions import utag
+from scipy.stats import median_abs_deviation
+from anndata import AnnData
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1376,3 +1378,85 @@ def add_qc_metrics(adata,
     adata.obs["percent.mt"] = adata.obs["percent.mt"].fillna(0)
     # Ensure percent.mt is stored as a float
     adata.obs["percent.mt"] = adata.obs["percent.mt"].astype(float)
+
+# Add the QC summary table to AnnData object
+def get_qc_summary_table(
+    adata: AnnData,
+    n_mad: int = 5,
+    upper_quantile: float = 0.95,
+    lower_quantile: float = 0.05,
+    stat_columns_list: list = ["nFeature", "nCount", "percent.mt"],
+    sample_column: str = None
+) -> None:
+    """
+    Compute summary statistics for quality control metrics in an AnnData object 
+    and store the result in adata.uns['qc_summary_table'].
+
+    Parameters:
+        adata (AnnData): The AnnData object containing the data.
+        n_mad (int): Number of MADs to use for upper/lower thresholds.
+        upper_quantile (float): Upper quantile to compute (e.g., 0.95).
+        lower_quantile (float): Lower quantile to compute (e.g., 0.05).
+        stat_columns_list (list): List of column names to compute statistics for.
+        sample_column (str, optional): Column name to group by sample. 
+        If None, computes for all data.
+
+    Returns:
+        None. The summary table is stored in adata.uns['qc_summary_table'].
+    """
+
+    # Check that required columns exist in adata.obs
+    check_annotation(
+        adata,
+        annotations=stat_columns_list,
+        should_exist=True)
+
+    # compute summary statistics for the specified columns
+    def compute_stats(df):
+        stat_vals = []
+        for col_name in stat_columns_list:
+            # Ensure the column is numeric
+            if not pd.api.types.is_numeric_dtype(df[col_name]):
+                raise TypeError(f"Column '{col_name}' must be numeric to compute statistics.")
+            # Compute median and MAD (median absolute deviation)
+            median = df[col_name].median()
+            mad = median_abs_deviation(df[col_name], nan_policy='omit')
+            # Collect statistics for this column
+            col_stats = [
+                col_name,
+                df[col_name].mean(),
+                median,
+                median + n_mad * mad,
+                median - n_mad * mad,
+                df[col_name].quantile(upper_quantile),
+                df[col_name].quantile(lower_quantile)
+            ]
+            stat_vals.append(col_stats)
+        # Return DataFrame with statistics for all columns
+        return pd.DataFrame(
+            stat_vals,
+            columns=[
+                "metric_name", "mean", "median", 
+                "upper_mad", "lower_mad", 
+                "upper_quantile", "lower_quantile"
+            ]
+        )
+
+    obs_df = adata.obs
+    summary_table = pd.DataFrame()
+    # If no sample_column, compute stats for all data
+    if sample_column is None:
+        stat_df = compute_stats(obs_df)
+        stat_df["Sample"] = "All"
+        summary_table = stat_df
+    else:
+        # Otherwise, compute stats for each sample group
+        samples_list = pd.unique(obs_df[sample_column])
+        for current_sample in samples_list:
+            sample_df = obs_df[obs_df[sample_column] == current_sample]
+            stat_df = compute_stats(sample_df)
+            stat_df["Sample"] = current_sample
+            summary_table = pd.concat([summary_table, stat_df])
+    # Reset index and store in adata.uns
+    summary_table = summary_table.reset_index(drop=True)
+    adata.uns["qc_summary_table"] = summary_table
