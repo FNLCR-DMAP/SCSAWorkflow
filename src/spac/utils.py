@@ -1199,7 +1199,7 @@ def compute_summary_qc_stats(
         n_mad: int = 5,
         upper_quantile: float = 0.95,
         lower_quantile: float = 0.05,
-        stat_columns_list: Optional[List[str]] = None
+        stat_columns_list: List[str]
         ) -> pd.DataFrame:
     
     """
