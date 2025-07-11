@@ -7,6 +7,8 @@ import pandas as pd
 import logging
 import warnings
 import numbers
+from scipy.stats import median_abs_deviation
+from typing import List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1190,3 +1192,84 @@ def compute_boxplot_metrics(
         return metrics
 
     return metrics
+
+# compute summary statistics for the specified columns
+def compute_summary_qc_stats(
+        df: pd.DataFrame, 
+        n_mad: int = 5,
+        upper_quantile: float = 0.95,
+        lower_quantile: float = 0.05,
+        stat_columns_list: Optional[List[str]] = None
+        ) -> pd.DataFrame:
+    
+    """
+    Compute summary quality control statistics for specified columns in a dataset.
+
+    For each column in stat_columns_list, this function calculates:
+        - Mean
+        - Median
+        - Upper and lower thresholds based on median ± n_mad * MAD 
+        (median absolute deviation)
+        - Upper and lower quantiles
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame containing the data.
+    n_mad : int, optional
+        Number of MADs to use for upper and lower thresholds (default is 5).
+    upper_quantile : float, optional
+        Upper quantile to compute (default is 0.95).
+    lower_quantile : float, optional
+        Lower quantile to compute (default is 0.05).
+    stat_columns_list : list of str, optional
+        List of column names to compute statistics for. Columns must be numeric.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with summary statistics for each specified column.
+        Columns: ["metric_name", "mean", "median", "upper_mad", "lower_mad", 
+        "upper_quantile", "lower_quantile"]
+
+    Raises
+    ------
+    TypeError
+        If any column in stat_columns_list is not numeric or all values are NaN.
+    """
+    stat_vals = []
+    for col_name in stat_columns_list:
+        # Ensure the column is numeric
+        if not pd.api.types.is_numeric_dtype(df[col_name]):
+            raise TypeError(
+                f'Column "{col_name}" must be numeric to compute statistics.'
+                )
+        # Check for all-NaN column
+        if df[col_name].isna().all():
+            raise TypeError(
+                f'Column "{col_name}" must be numeric to compute statistics. '
+                'All values are NaN.'
+                )
+        # Compute median and MAD (median absolute deviation)
+        median = df[col_name].median()
+        mad = median_abs_deviation(df[col_name], nan_policy='omit')
+        # Collect statistics for this column
+        col_stats = [
+            col_name,
+            df[col_name].mean(),
+            median,
+            median + n_mad * mad,
+            median - n_mad * mad,
+            df[col_name].quantile(upper_quantile),
+            df[col_name].quantile(lower_quantile)
+        ]
+        stat_vals.append(col_stats)
+    # Return DataFrame with statistics for all columns
+    return pd.DataFrame(
+        stat_vals,
+        columns=[
+            "metric_name", "mean", "median", 
+            "upper_mad", "lower_mad", 
+            "upper_quantile", "lower_quantile"
+        ]
+    )
