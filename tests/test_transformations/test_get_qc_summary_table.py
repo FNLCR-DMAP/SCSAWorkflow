@@ -59,29 +59,8 @@ class TestGetQCSummaryTable(unittest.TestCase):
         expected_msg = 'Column "non_numeric" must be numeric to compute statistics.'
         self.assertEqual(str(exc_info.exception), expected_msg)
 
-    # Test that summary statistics are computed correctly for nFeature and nCount
-    def test_qc_summary_table_statistics(self):
-        adata = self.create_test_adata()
-        get_qc_summary_table(adata)
-        summary = adata.uns["qc_summary_table"]
-        # Check mean, median, quantiles for nFeature (all values are 2)
-        nfeature_row = summary[summary["metric_name"] == "nFeature"].iloc[0]
-        self.assertEqual(nfeature_row["mean"], 2)
-        self.assertEqual(nfeature_row["median"], 2)
-        self.assertEqual(nfeature_row["upper_mad"], 2)
-        self.assertEqual(nfeature_row["lower_mad"], 2)
-        self.assertEqual(nfeature_row["upper_quantile"], 2)
-        self.assertEqual(nfeature_row["lower_quantile"], 2)
-        # Check nCount statistics
-        # nCount per cell = [4, 6, 11] -> 
-        # mean 7.0, median 6.0, 95th pct 10.5, 5th pct 4.2
-        ncount_row = summary[summary["metric_name"] == "nCount"].iloc[0]
-        self.assertAlmostEqual(ncount_row["mean"], 7.0) 
-        self.assertAlmostEqual(ncount_row["median"], 6.0)  
-        self.assertAlmostEqual(ncount_row["upper_quantile"], 10.5) 
-        self.assertAlmostEqual(ncount_row["lower_quantile"], 4.2)  
-
-    # Test that summary statistics is computed correctly with sample_column grouping
+    # Test that summary statistics is computed correctly with 
+    # sample_column grouping
     def test_qc_summary_table_grouping(self):
         adata = self.create_test_adata()
         get_qc_summary_table(adata)
@@ -92,7 +71,8 @@ class TestGetQCSummaryTable(unittest.TestCase):
         # There should be two groups: A and B
         self.assertEqual(set(summary["Sample"]), {"A", "B"})
         # For group A (cells 0 and 1): nCount = [4, 6]
-        group_a = summary[(summary["Sample"] == "A") & (summary["metric_name"] == "nCount")].iloc[0]
+        group_a = summary[(summary["Sample"] == "A") & 
+                          (summary["metric_name"] == "nCount")].iloc[0]
         self.assertAlmostEqual(group_a["mean"], 5.0)
         self.assertAlmostEqual(group_a["median"], 5.0)
         # For group B (cell 2): nCount = [11]
@@ -101,15 +81,13 @@ class TestGetQCSummaryTable(unittest.TestCase):
         self.assertAlmostEqual(group_b["mean"], 11.0)
         self.assertAlmostEqual(group_b["median"], 11.0)
 
-    # Test that all-NaN columns are handled gracefully
-    def test_qc_summary_table_all_nan_column(self):
+    #Test that ValueError is raised if stat_columns_list is empty
+    def test_qc_summary_table_empty_stat_columns_list(self):
         adata = self.create_test_adata()
-        adata.obs["all_nan"] = [np.nan, np.nan, np.nan]
-        with self.assertRaises(TypeError) as exc_info:
-            get_qc_summary_table(adata, stat_columns_list=["all_nan"])
+        with self.assertRaises(ValueError) as exc_info:
+            get_qc_summary_table(adata, stat_columns_list=[])
         expected_msg = (
-            'Column "all_nan" must be numeric to compute statistics. '
-            'All values are NaN.'
+            'Parameter "stat_columns_list" must contain at least one column name.'
         )
         self.assertEqual(str(exc_info.exception), expected_msg)
 

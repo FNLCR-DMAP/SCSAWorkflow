@@ -1417,6 +1417,12 @@ def get_qc_summary_table(
         annotations=stat_columns_list,
         should_exist=True)
     
+    # check that stat_column_list is not empty
+    if not stat_columns_list:   # catches [], (), None
+        raise ValueError(
+            'Parameter "stat_columns_list" must contain at least one column name.'
+        )
+    
     # check grouping column
     if sample_column is not None:
         check_annotation(adata, annotations=[sample_column], should_exist=True)
