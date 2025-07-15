@@ -31,6 +31,7 @@ import matplotlib.colors as mcolors
 import matplotlib.patches as mpatch
 from functools import partial
 from collections import OrderedDict
+from typing import List, Optional
 
 
 # Configure logging
@@ -3826,3 +3827,92 @@ def present_summary_as_figure(summary_dict: dict) -> go.Figure:
         title="Data Summary"
     )
     return fig
+
+# single cell quality control metrics violin plot
+def plot_qc_metrics(
+    adata, 
+    stat_columns_list: Optional[List[str]] = None, 
+    annotation=None, 
+    log=False, 
+    size=1, 
+    table=None,
+    **kwargs
+):
+    """
+    Generate violin plots for quality control metrics from an AnnData object.
+
+    Parameters
+    ----------
+    adata : AnnData object
+    stat_columns_list (list): List of column names to compute statistics for.
+    If None, defaults to ['nFeature', 'nCount', 'percent.mt']. 
+    annotation : str or None, optional
+        Column name in adata.obs to group the data by (default: None).
+    log : bool, optional
+        Whether to log-transform the data (default: False).
+    size : float, optional
+        Size of the points in the violin plot (default: 1).
+    **kwargs : dict
+    Additional keyword arguments are passed to the underlying matplotlib 
+    plotting functions and Scanpy plotting utilities. This allows customization 
+    of plot appearance, such as axis labels, colors, figure size, 
+    and other matplotlib options.
+
+    Returns
+    -------
+    dict
+        If group_column is None, returns a dictionary with keys 
+        'figure' and 'axes' for the whole dataset.
+        If group_column is provided, returns a dictionary mapping each group 
+        to its own {'figure', 'axes'} dict for the subsetted AnnData.
+    """
+
+    # if not provided select default stat columns
+    if stat_columns_list is None:
+        stat_columns_list = ['nFeature', 'nCount', 'percent.mt']
+
+    # Check that required columns exist in adata.obs
+    check_annotation(
+        adata,
+        annotations=stat_columns_list,
+        should_exist=True)
+    
+    if annotation is not None:
+        check_annotation(adata, annotations=annotation)
+        results = {}
+        for group in adata.obs[annotation].unique():
+            adata_subset = adata[adata.obs[annotation] == group]
+            violin_plot = sc.pl.violin(
+                adata_subset,
+                stat_columns_list,
+                size=size,
+                groupby=None, 
+                log=log,
+                jitter=0.4,
+                multi_panel=True,
+                show=False,
+                use_raw=False,
+                **kwargs
+            )
+            results[group] = {
+                "figure": violin_plot.figure,
+                "axes": violin_plot.axes
+            }
+        return results
+    else:
+        violin_plot = sc.pl.violin(
+            adata,
+            stat_columns_list,
+            size=size,
+            groupby=None,
+            log=log,
+            jitter=0.4,
+            multi_panel=True,
+            show=False,
+            use_raw=False,
+            **kwargs
+        )
+        return {
+            "figure": violin_plot.figure,
+            "axes": violin_plot.axes
+        }
