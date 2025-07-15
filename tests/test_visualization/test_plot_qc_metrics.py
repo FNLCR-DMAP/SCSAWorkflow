@@ -1,4 +1,5 @@
 import unittest
+from unittest import result
 import numpy as np
 import pandas as pd
 import scanpy as sc
@@ -6,6 +7,7 @@ from anndata import AnnData
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from spac.visualization import plot_qc_metrics
+import numpy as np
 
 class TestPlotQCMetrics(unittest.TestCase):
     @classmethod
@@ -39,11 +41,18 @@ class TestPlotQCMetrics(unittest.TestCase):
         adata = self.create_test_adata()
         result = plot_qc_metrics(adata, annotation="group")
         self.assertIsInstance(result["A"]["figure"], Figure)
+        print(result["A"]["axes"])
+        print(type(result["A"]["axes"]))
+        self.assertTrue(
+            isinstance(result["A"]["axes"], Axes) or
+            all(isinstance(ax, Axes) for ax in result["A"]["axes"].flat)
+        )
 
     def test_plot_qc_metrics_with_log(self):
         adata = self.create_test_adata()
         result = plot_qc_metrics(adata, log=True)
         self.assertIsInstance(result["figure"], Figure)
+        self.assertTrue(isinstance(result["axes"], (np.ndarray, Axes)))
 
 if __name__ == "__main__":
     unittest.main()

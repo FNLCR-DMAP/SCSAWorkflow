@@ -3861,9 +3861,9 @@ def plot_qc_metrics(
     Returns
     -------
     dict
-        If group_column is None, returns a dictionary with keys 
+        If annotation is None, returns a dictionary with keys 
         'figure' and 'axes' for the whole dataset.
-        If group_column is provided, returns a dictionary mapping each group 
+        If annotation is provided, returns a dictionary mapping each group 
         to its own {'figure', 'axes'} dict for the subsetted AnnData.
     """
 
