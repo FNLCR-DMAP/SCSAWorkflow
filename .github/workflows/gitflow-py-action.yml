@@ -17,6 +17,3 @@ jobs:
     secrets:
       NIDAP_TOKEN_PRODUCTION: ${{ secrets.NIDAP_TOKEN_PRODUCTION }}
       NIDAP_TOKEN_DEVELOPMENT: ${{ secrets.NIDAP_TOKEN_DEVELOPMENT }}
-
-    env:
-        PYTHONPATH: ${{ github.workspace }}/src:${{ env.PYTHONPATH }}
