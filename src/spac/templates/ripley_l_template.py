@@ -76,7 +76,11 @@ def _validate(p: Dict[str, Any]) -> None:
     if missing:
         raise ValueError(f"missing required keys: {missing}")
 
-    if not (isinstance(p["radii"], list) and all(isinstance(r, (int, float)) for r in p["radii"])):
+    # Validate p["radii"] is a list of numbers
+    if not (
+        isinstance(p["radii"], list)
+        and all(isinstance(r, (int, float)) for r in p["radii"])
+    ):
         raise TypeError("'radii' must be list[float]")
 
     if not (isinstance(p["phenotypes"], list) and len(p["phenotypes"]) == 2):
@@ -94,10 +98,10 @@ def _validate(p: Dict[str, Any]) -> None:
 
 # CLI hook
 if __name__ == "__main__":
-    import sys, pprint
+    import sys
+    import pprint
     if len(sys.argv) != 2:
         print("usage: python ripley_l_template.py params.json")
         sys.exit(1)
     ad_out = run_from_json(sys.argv[1])
     pprint.pp(ad_out.uns["ripley_l_results"])
-

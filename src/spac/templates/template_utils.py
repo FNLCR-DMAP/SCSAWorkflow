@@ -14,4 +14,3 @@ def save_pickle(obj, path: str):
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("wb") as fh:
         pickle.dump(obj, fh)
-
