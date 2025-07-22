@@ -1,0 +1,14 @@
+{
+  "input_data": "data/mock_input.pickle",
+  "radii": [0, 50, 100, 150, 200, 250, 300],
+  "annotation": "renamed_phenotypes",
+  "phenotypes": ["B cells", "CD8 T cells"],
+  "regions": null,
+  "n_simulations": 100,
+  "area": null,
+  "seed": 42,
+  "spatial_key": "spatial",
+  "edge_correction": true,
+  "output_path": "data/ripley_output.pickle"
+}
+
