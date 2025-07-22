@@ -1,0 +1,9 @@
+{
+  "Upstream_Analysis": "/Users/liuf9/Projects/SCSAWorkflow/examples/spac_ripley_analysis/outputs/ripley_output.h5ad",
+  "Center_Phenotype": "B cells",
+  "Neighbor_Phenotype": "CD8 T cells",
+  "Plot_Specific_Regions": false,
+  "Regions_Label_s_": [],
+  "Plot_Simulations": true,
+  "Output_File": "/Users/liuf9/Projects/SCSAWorkflow/examples/spac_ripley_analysis/outputs/ripley_plots.h5ad"
+}

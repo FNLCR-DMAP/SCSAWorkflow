@@ -1,0 +1,13 @@
+{
+  "input_data": "test_data.pickle",
+  "radii": [0, 50, 100, 150, 200],
+  "annotation": "cell_type",
+  "phenotypes": ["TypeA", "TypeB"],
+  "regions": null,
+  "n_simulations": 10,
+  "area": null,
+  "seed": 42,
+  "spatial_key": "spatial",
+  "edge_correction": true,
+  "output_path": "ripley_output.pickle"
+}
