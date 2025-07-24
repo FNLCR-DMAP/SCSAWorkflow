@@ -1,4 +1,4 @@
-# tests/utils/test_template_utils.py
+# tests/templates/test_template_utils.py
 """Unit tests for template utilities."""
 
 import json
@@ -100,7 +100,7 @@ class TestTemplateUtils(unittest.TestCase):
                 "other_data": {"key": "value"}  # Defaults to pickle
             }
             saved_files = save_outputs(outputs, self.tmp_dir.name)
-            
+
             # Verify all files were saved
             self.assertEqual(len(saved_files), 5)
             for filename, filepath in saved_files.items():
@@ -119,11 +119,11 @@ class TestTemplateUtils(unittest.TestCase):
             )
             with open(pickle_src, "wb") as f:
                 pickle.dump(self.test_adata, f)
-            
+
             h5ad_dest = convert_pickle_to_h5ad(pickle_src)
             self.assertTrue(os.path.exists(h5ad_dest))
             self.assertTrue(h5ad_dest.endswith(".h5ad"))
-            
+
             # Test with custom output path
             custom_dest = os.path.join(
                 self.tmp_dir.name, "custom_output.h5ad"
@@ -197,7 +197,7 @@ class TestTemplateUtils(unittest.TestCase):
         # Test 3: Invalid value
         with self.assertRaises(ValueError) as context:
             convert_to_floats(["1.0", "invalid", "3.0"])
-        expected_msg = "Failed to convert the radius: 'invalid' to float"
+        expected_msg = "Failed to convert value: 'invalid' to float"
         self.assertIn(expected_msg, str(context.exception))
 
         # Test 4: Empty list
@@ -207,10 +207,10 @@ class TestTemplateUtils(unittest.TestCase):
     def test_load_input_missing_file_error_message(self) -> None:
         """Test exact error message for missing input file."""
         missing_path = "/nonexistent/path/file.h5ad"
-        
+
         with self.assertRaises(FileNotFoundError) as context:
             load_input(missing_path)
-        
+
         expected_msg = f"Input file not found: {missing_path}"
         actual_msg = str(context.exception)
         self.assertEqual(expected_msg, actual_msg)
@@ -221,10 +221,10 @@ class TestTemplateUtils(unittest.TestCase):
         txt_path = os.path.join(self.tmp_dir.name, "test.txt")
         with open(txt_path, "w") as f:
             f.write("This is not a valid data file")
-        
+
         with self.assertRaises(ValueError) as context:
             load_input(txt_path)
-        
+
         actual_msg = str(context.exception)
         self.assertTrue(actual_msg.startswith("Unable to load file"))
         self.assertIn("Supported formats: h5ad, pickle", actual_msg)
@@ -235,7 +235,7 @@ class TestTemplateUtils(unittest.TestCase):
             text_to_value(
                 "not_a_number", to_float=True, param_name="test_param"
             )
-        
+
         expected_msg = (
             'Error: can\'t convert test_param to float. '
             'Received:"not_a_number"'
@@ -247,7 +247,7 @@ class TestTemplateUtils(unittest.TestCase):
         """Test exact error message for invalid integer conversion."""
         with self.assertRaises(ValueError) as context:
             text_to_value("3.14", to_int=True, param_name="count")
-        
+
         expected_msg = (
             'Error: can\'t convert count to integer. '
             'Received:"3.14"'
@@ -258,10 +258,10 @@ class TestTemplateUtils(unittest.TestCase):
     def test_convert_pickle_to_h5ad_missing_file_error_message(self) -> None:
         """Test exact error message for missing pickle file."""
         missing_pickle = "/nonexistent/file.pickle"
-        
+
         with self.assertRaises(FileNotFoundError) as context:
             convert_pickle_to_h5ad(missing_pickle)
-        
+
         expected_msg = f"Pickle file not found: {missing_pickle}"
         actual_msg = str(context.exception)
         self.assertEqual(expected_msg, actual_msg)
@@ -272,10 +272,10 @@ class TestTemplateUtils(unittest.TestCase):
         wrong_pickle = os.path.join(self.tmp_dir.name, "wrong_type.pickle")
         with open(wrong_pickle, "wb") as f:
             pickle.dump({"not": "anndata"}, f)
-        
+
         with self.assertRaises(TypeError) as context:
             convert_pickle_to_h5ad(wrong_pickle)
-        
+
         expected_msg = "Loaded object is not AnnData, got <class 'dict'>"
         actual_msg = str(context.exception)
         self.assertEqual(expected_msg, actual_msg)
@@ -286,7 +286,7 @@ class TestTemplateUtils(unittest.TestCase):
             "no_extension": self.test_adata
         }
         saved_files = save_outputs(outputs, self.tmp_dir.name)
-        
+
         # Should have .pickle extension
         filepath = saved_files["no_extension"]
         self.assertTrue(filepath.endswith('.pickle'))
