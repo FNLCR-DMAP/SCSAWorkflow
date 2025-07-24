@@ -1,4 +1,4 @@
-# tests//templates/test_template_utils.py
+# tests/templates/test_template_utils.py
 """Unit tests for template utilities."""
 
 import json
@@ -197,7 +197,7 @@ class TestTemplateUtils(unittest.TestCase):
         # Test 3: Invalid value
         with self.assertRaises(ValueError) as context:
             convert_to_floats(["1.0", "invalid", "3.0"])
-        expected_msg = "Failed to convert value : 'invalid' to float"
+        expected_msg = "Failed to convert value: 'invalid' to float"
         self.assertIn(expected_msg, str(context.exception))
 
         # Test 4: Empty list

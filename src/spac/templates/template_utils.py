@@ -111,7 +111,7 @@ def save_outputs(
                     f"Object for '{str(filename)}' must be AnnData, got {type(obj)}"
                 )
             logger.info(f"Saving AnnData to {str(filepath)}")
-            print(obj)
+            logger.debug(f"AnnData object: {obj}")
             obj.write_h5ad(str(filepath))
             logger.info(f"Saved AnnData to {str(filepath)}")
         elif filename.endswith(('.pickle', '.pkl', '.p')):
@@ -301,7 +301,7 @@ def convert_to_floats(text_list: List[Any]) -> List[float]:
         try:
             float_list.append(float(value))
         except ValueError:
-            msg = f"Failed to convert value : '{value}' to float."
+            msg = f"Failed to convert value: '{value}' to float."
             raise ValueError(msg)
     return float_list
 
