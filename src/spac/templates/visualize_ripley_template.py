@@ -28,12 +28,13 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_results: bool = True,
+    show_plot: bool = True
 ) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
     """
     Execute Visualize Ripley L analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
-    
+
     Parameters
     ----------
     json_path : str, Path, or dict
@@ -41,7 +42,9 @@ def run_from_json(
     save_results : bool, optional
         Whether to save results to file. If False, returns the figure and
         dataframe directly for in-memory workflows. Default is True.
-    
+    show_plot : bool, optional
+        Whether to display the plot. Default is True.
+
     Returns
     -------
     dict or tuple
@@ -50,10 +53,10 @@ def run_from_json(
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
-    
+
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
-    
+
     # Extract parameters
     center_phenotype = params["Center_Phenotype"]
     neighbor_phenotype = params["Neighbor_Phenotype"]
@@ -82,17 +85,18 @@ def run_from_json(
         return_df=True
     )
 
-    plt.show()
-    
+    if show_plot:
+        plt.show()
+
     # Print the dataframe to console
     print(plots_df.to_string())
-    
+
     # Handle results based on save_results flag
     if save_results:
         # Save outputs
         output_file = params.get("Output_File", "plots.csv")
         saved_files = save_outputs({output_file: plots_df})
-        
+
         print(f"Visualize Ripley L completed → {saved_files[output_file]}")
         return saved_files
     else:
@@ -106,9 +110,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python visualize_ripley_template.py <params.json>")
         sys.exit(1)
-    
+
     result = run_from_json(sys.argv[1])
-    
+
     if isinstance(result, dict):
         print("\nOutput files:")
         for filename, filepath in result.items():
