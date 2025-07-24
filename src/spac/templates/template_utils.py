@@ -1,25 +1,26 @@
 from pathlib import Path
 import pickle
-from typing import Any, Dict, Union, Optional,  List
+from typing import Any, Dict, Union, Optional, List
 import json
 import anndata as ad
-
+import logging
+logger = logging.getLogger(__name__)
 
 def load_input(file_path: Union[str, Path]):
     """
     Load input data from either h5ad or pickle file.
-    
+
     Parameters
     ----------
     file_path : str or Path
         Path to input file (h5ad or pickle)
-    
+
     Returns
     -------
     Loaded data object (typically AnnData)
     """
     path = Path(file_path)
-    
+
     if not path.exists():
         raise FileNotFoundError(f"Input file not found: {file_path}")
 
@@ -68,7 +69,7 @@ def save_outputs(
     """
     Save multiple outputs to files and return a dict {filename: absolute_path}.
     (Always a dict, even if just one file.)
-    
+
     Parameters
     ----------
     outputs : dict
@@ -77,12 +78,12 @@ def save_outputs(
         - value: object to save
     output_dir : str or Path
         Directory to save files
-    
+
     Returns
     -------
     dict
         Dictionary of saved file paths
-    
+
     Example
     -------
     >>> outputs = {
@@ -94,12 +95,12 @@ def save_outputs(
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     saved_files = {}
-    
+
     for filename, obj in outputs.items():
         filepath = output_dir / filename
-        
+
         # Save based on file extension
         if filename.endswith('.csv'):
             obj.to_csv(filepath, index=False)
@@ -109,10 +110,10 @@ def save_outputs(
                 raise TypeError(
                     f"Object for '{str(filename)}' must be AnnData, got {type(obj)}"
                 )
-            print(f"Saving AnnData to {str(filepath)}")
+            logger.info(f"Saving AnnData to {str(filepath)}")
             print(obj)
             obj.write_h5ad(str(filepath))
-            print(f"Saved AnnData to {str(filepath)}")
+            logger.info(f"Saved AnnData to {str(filepath)}")
         elif filename.endswith(('.pickle', '.pkl', '.p')):
             with open(filepath, 'wb') as f:
                 pickle.dump(obj, f)
@@ -125,12 +126,11 @@ def save_outputs(
             with open(filepath, 'wb') as f:
                 pickle.dump(obj, f)
 
-        # filepath = filepath.resolve()
         print(type(filepath))
         print(type(filename))
         saved_files[str(filename)] = str(filepath)
         print(f"Saved: {filepath}")
-    
+
     return saved_files
 
 
@@ -139,12 +139,12 @@ def parse_params(
 ) -> Dict[str, Any]:
     """
     Parse parameters from JSON file, string, or dict.
-    
+
     Parameters
     ----------
     json_input : str, Path, or dict
         JSON file path, JSON string, or dictionary
-    
+
     Returns
     -------
     dict
@@ -152,10 +152,10 @@ def parse_params(
     """
     if isinstance(json_input, dict):
         return json_input
-    
+
     if isinstance(json_input, (str, Path)):
         path = Path(json_input)
-        
+
         # Check if it's a file path
         if path.exists() or str(json_input).endswith('.json'):
             with open(path, 'r') as file:
@@ -163,7 +163,7 @@ def parse_params(
         else:
             # It's a JSON string
             return json.loads(str(json_input))
-    
+
     raise TypeError(
         "json_input must be dict, JSON string, or path to JSON file"
     )
@@ -250,7 +250,7 @@ def text_to_value(
         var.lower().strip() == default_none_text.lower().strip() or
         var.strip() == ''
     )
-    
+
     if none_condition:
         var = value_to_convert_to
 
@@ -301,7 +301,7 @@ def convert_to_floats(text_list: List[Any]) -> List[float]:
         try:
             float_list.append(float(value))
         except ValueError:
-            msg = f"Failed to convert the radius: '{value}' to float."
+            msg = f"Failed to convert value : '{value}' to float."
             raise ValueError(msg)
     return float_list
 
@@ -312,7 +312,7 @@ def convert_pickle_to_h5ad(
 ) -> str:
     """
     Convert a pickle file containing AnnData to h5ad format.
-    
+
     Parameters
     ----------
     pickle_path : str or Path
@@ -320,21 +320,21 @@ def convert_pickle_to_h5ad(
     h5ad_path : str or Path, optional
         Path for output h5ad file. If None, uses same name with .h5ad
         extension
-    
+
     Returns
     -------
     str
         Path to saved h5ad file
     """
     pickle_path = Path(pickle_path)
-    
+
     if not pickle_path.exists():
         raise FileNotFoundError(f"Pickle file not found: {pickle_path}")
-    
+
     # Load from pickle
     with pickle_path.open('rb') as fh:
         adata = pickle.load(fh)
-    
+
     # Check if it's AnnData
     try:
         import anndata as ad
@@ -346,14 +346,14 @@ def convert_pickle_to_h5ad(
         raise ImportError(
             "anndata package required for conversion to h5ad"
         )
-    
+
     # Determine output path
     if h5ad_path is None:
         h5ad_path = pickle_path.with_suffix('.h5ad')
     else:
         h5ad_path = Path(h5ad_path)
-    
+
     # Save as h5ad
     adata.write_h5ad(h5ad_path)
-    
+
     return str(h5ad_path)
