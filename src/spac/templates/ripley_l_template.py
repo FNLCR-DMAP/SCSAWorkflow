@@ -11,7 +11,8 @@ import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, Union, List
-# import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -24,7 +25,7 @@ from spac.templates.template_utils import (
     text_to_value,
     convert_to_floats
 )
-   
+
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
@@ -106,30 +107,30 @@ def run_from_json(
         if not outfile.endswith(('.pickle', '.pkl', '.h5ad')):
             outfile = outfile.replace('.h5ad', '.pickle')
 
-        print(type(outfile))
+        logging.debug(f"Output file type: {type(outfile)}")
         saved_files = save_outputs({outfile: adata})
-        print(saved_files)
+        logging.debug(f"Saved files: {saved_files}")
 
-        print(f"Ripley-L completed → {str(saved_files[outfile])}")
-        print(adata)
+        logging.info(f"Ripley-L completed → {str(saved_files[outfile])}")
+        logging.debug(f"AnnData object: {adata}")
         return saved_files
     else:
         # Return the adata object directly for in-memory workflows
-        print("Returning AnnData object (not saving to file)")
+        logging.info("Returning AnnData object (not saving to file)")
         return adata
 
 
 # CLI interface
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python ripley_l_template.py <params.json>")
+        logging.error("Usage: python ripley_l_template.py <params.json>")
         sys.exit(1)
 
     saved_files = run_from_json(sys.argv[1])
 
     if isinstance(saved_files, dict):
-        print("\nOutput files:")
+        logging.info("\nOutput files:")
         for filename, filepath in saved_files.items():
-            print(f"  {filename}: {filepath}")
+            logging.info(f"  {filename}: {filepath}")
     else:
-        print("\nReturned AnnData object")
+        logging.info("\nReturned AnnData object")
