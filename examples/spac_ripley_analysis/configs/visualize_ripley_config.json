@@ -5,5 +5,5 @@
   "Plot_Specific_Regions": false,
   "Regions_Label_s_": [],
   "Plot_Simulations": true,
-  "Output_File": "/Users/liuf9/Projects/SCSAWorkflow/examples/spac_ripley_analysis/outputs/ripley_plots.h5ad"
+  "Output_File": "/Users/liuf9/Projects/SCSAWorkflow/examples/spac_ripley_analysis/outputs/ripley_plots.csv"
 }

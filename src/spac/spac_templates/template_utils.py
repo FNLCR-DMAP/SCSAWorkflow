@@ -1,6 +1,6 @@
 from pathlib import Path
 import pickle
-from typing import Any, Dict, Union, Optional,  List
+from typing import Any, Dict, Union, Optional
 import json
 import anndata as ad
 
@@ -86,9 +86,9 @@ def save_outputs(
     Example
     -------
     >>> outputs = {
-    ...     "adata.pickle": adata,  # Preferred format
+    ...     "adata.h5ad": adata,
     ...     "results.csv": results_df,
-    ...     "adata.h5ad": adata  # Still supported
+    ...     "adata.pickle": adata
     ... }
     >>> saved = save_outputs(outputs, "results/")
     """
@@ -104,7 +104,6 @@ def save_outputs(
         if filename.endswith('.csv'):
             obj.to_csv(filepath, index=False)
         elif filename.endswith('.h5ad'):
-            # Still support h5ad, but not the default
             if type(obj) is not ad.AnnData:
                 raise TypeError(
                     f"Object for '{str(filename)}' must be AnnData, got {type(obj)}"
@@ -113,7 +112,7 @@ def save_outputs(
             print(obj)
             obj.write_h5ad(str(filepath))
             print(f"Saved AnnData to {str(filepath)}")
-        elif filename.endswith(('.pickle', '.pkl', '.p')):
+        elif filename.endswith(('.pickle', '.pkl')):
             with open(filepath, 'wb') as f:
                 pickle.dump(obj, f)
         elif hasattr(obj, "savefig"):
@@ -121,10 +120,8 @@ def save_outputs(
             filepath = filepath.with_suffix('.png')
         else:
             # Default to pickle
-            filepath = filepath.with_suffix('.pickle')
             with open(filepath, 'wb') as f:
                 pickle.dump(obj, f)
-
         # filepath = filepath.resolve()
         print(type(filepath))
         print(type(filename))
@@ -242,10 +239,6 @@ def text_to_value(
     Error: can't convert test_param to integer. Received:"abc"
     'abc'
     """
-    # Handle non-string inputs
-    if not isinstance(var, str):
-        var = str(var)
-
     none_condition = (
         var.lower().strip() == default_none_text.lower().strip() or
         var.strip() == ''
@@ -275,35 +268,6 @@ def text_to_value(
             raise ValueError(error_msg)
 
     return var
-
-
-def convert_to_floats(text_list: List[Any]) -> List[float]:
-    """
-    Convert list of text values to floats.
-
-    Parameters
-    ----------
-    text_list : list
-        List of values to convert
-
-    Returns
-    -------
-    list
-        List of float values
-
-    Raises
-    ------
-    ValueError
-        If any value cannot be converted to float
-    """
-    float_list = []
-    for value in text_list:
-        try:
-            float_list.append(float(value))
-        except ValueError:
-            msg = f"Failed to convert the radius: '{value}' to float."
-            raise ValueError(msg)
-    return float_list
 
 
 def convert_pickle_to_h5ad(
