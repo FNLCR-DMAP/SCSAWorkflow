@@ -200,7 +200,7 @@ class TestRipleyLTemplate(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             run_from_json(params_bad)
 
-        expected_msg = "Failed to convert value : 'invalid' to float"
+        expected_msg = "Failed to convert value: 'invalid' to float"
         self.assertIn(expected_msg, str(context.exception))
 
     def test_parameter_validation(self) -> None:

@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Union, List
 import logging
-logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -123,14 +122,14 @@ def run_from_json(
 # CLI interface
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        logging.error("Usage: python ripley_l_template.py <params.json>")
+        print("Usage: python ripley_l_template.py <params.json>", file=sys.stderr)
         sys.exit(1)
 
     saved_files = run_from_json(sys.argv[1])
 
     if isinstance(saved_files, dict):
-        logging.info("\nOutput files:")
+        print("\nOutput files:")
         for filename, filepath in saved_files.items():
-            logging.info(f"  {filename}: {filepath}")
+            print(f"  {filename}: {filepath}")
     else:
-        logging.info("\nReturned AnnData object")
+        print("\nReturned AnnData object")
