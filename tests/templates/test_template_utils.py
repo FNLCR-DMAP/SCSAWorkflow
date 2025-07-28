@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 import warnings
-
+from unittest.mock import patch
 import anndata as ad
 import numpy as np
 import pandas as pd
@@ -23,7 +23,9 @@ from spac.templates.template_utils import (
     save_outputs,
     text_to_value,
     convert_pickle_to_h5ad,
-    convert_to_floats
+    convert_to_floats,
+    spell_out_special_characters,
+    load_csv_files
 )
 
 
@@ -292,6 +294,230 @@ class TestTemplateUtils(unittest.TestCase):
         self.assertTrue(filepath.endswith('.pickle'))
         self.assertTrue(os.path.exists(filepath))
 
+    def test_spell_out_special_characters(self) -> None:
+        """Test spell_out_special_characters function."""
+        from spac.templates.template_utils import spell_out_special_characters
+
+        # Test space replacement
+        result = spell_out_special_characters("Cell Type")
+        self.assertEqual(result, "Cell_Type")
+
+        # Test special units
+        result = spell_out_special_characters("Area µm²")
+        self.assertEqual(result, "Area_um2")
+
+        # Test hyphen between letters
+        result = spell_out_special_characters("CD4-positive")
+        self.assertEqual(result, "CD4_positive")
+
+        # Test plus/minus
+        result = spell_out_special_characters("CD4+")
+        self.assertEqual(result, "CD4_pos")  # Trailing underscore is stripped
+        result = spell_out_special_characters("CD8-")
+        self.assertEqual(result, "CD8_neg")  # Trailing underscore is stripped
+
+        # Test combination markers
+        result = spell_out_special_characters("CD4+CD20-")
+        self.assertEqual(result, "CD4_pos_CD20_neg")
+        
+        # Test edge cases with special separators
+        result = spell_out_special_characters("CD4+/CD20-")
+        self.assertEqual(result, "CD4_pos_slashCD20_neg")
+        
+        result = spell_out_special_characters("CD4+ CD20-")
+        self.assertEqual(result, "CD4_pos_CD20_neg")
+        
+        result = spell_out_special_characters("CD4+,CD20-")
+        self.assertEqual(result, "CD4_pos_CD20_neg")
+        
+        # Test parentheses removal
+        result = spell_out_special_characters("CD4+ (bright)")
+        self.assertEqual(result, "CD4_pos_bright")
+
+        # Test special characters
+        result = spell_out_special_characters("Cell@100%")
+        self.assertEqual(result, "Cellat100percent")
+
+        # Test multiple underscores
+        result = spell_out_special_characters("Cell___Type")
+        self.assertEqual(result, "Cell_Type")
+
+        # Test leading/trailing underscores
+        result = spell_out_special_characters("_Cell_Type_")
+        self.assertEqual(result, "Cell_Type")
+
+        # Test complex case
+        result = spell_out_special_characters("CD4+ T-cells (µm²)")
+        self.assertEqual(result, "CD4_pos_T_cells_um2")
+
+        # Test empty string
+        result = spell_out_special_characters("")
+        self.assertEqual(result, "")
+
+        # Additional edge cases
+        result = spell_out_special_characters("CD3+CD4+CD8-")
+        self.assertEqual(result, "CD3_pos_CD4_pos_CD8_neg")
+        
+        result = spell_out_special_characters("PD-1/PD-L1")
+        self.assertEqual(result, "PD_1slashPD_L1")
+        
+        result = spell_out_special_characters("CD45RA+CD45RO-")
+        self.assertEqual(result, "CD45RA_pos_CD45RO_neg")
+        
+        result = spell_out_special_characters("CD4+CD25+FOXP3+")
+        self.assertEqual(result, "CD4_pos_CD25_pos_FOXP3_pos")
+
+        # Test with multiple special characters
+        result = spell_out_special_characters("CD4+ & CD8+ (double positive)")
+        self.assertEqual(result, "CD4_pos_and_CD8_pos_double_positive")
+        
+        # Test with numbers at start (should add col_ prefix in 
+        # clean_column_name)
+        result = spell_out_special_characters("123ABC")
+        # Note: col_ prefix is added by clean_column_name
+        self.assertEqual(result, "123ABC")
+
+    def test_load_csv_files(self) -> None:
+        """Test load_csv_files function."""
+
+        # Create test CSV files
+        csv_dir = Path(self.tmp_dir.name) / "csv_data"
+        csv_dir.mkdir()
+
+        # CSV 1: Normal data
+        csv1 = pd.DataFrame({
+            'ID': ['001', '002', '003'],
+            'Value': [1.5, 2.5, 3.5],
+            'Type': ['A', 'B', 'A']
+        })
+        csv1.to_csv(csv_dir / 'data1.csv', index=False)
+
+        # CSV 2: Special characters in columns
+        csv2 = pd.DataFrame({
+            'ID': ['004', '005'],
+            'Value': [4.5, 5.5],
+            'Type': ['B', 'C'],
+            'Area µm²': [100, 200]
+        })
+        csv2.to_csv(csv_dir / 'data2.csv', index=False)
+
+        # Test 1: Basic loading with metadata
+        config = pd.DataFrame({
+            'file_name': ['data1.csv', 'data2.csv'],
+            'experiment': ['Exp1', 'Exp2'],
+            'batch': [1, 2]
+        })
+
+        result = load_csv_files(csv_dir, config)
+        
+        # Verify basic structure
+        self.assertEqual(len(result), 5)  # 3 + 2 rows
+        self.assertIn('file_name', result.columns)
+        self.assertIn('experiment', result.columns)
+        self.assertIn('batch', result.columns)
+        self.assertIn('ID', result.columns)
+        self.assertIn('Area_um2', result.columns)  # Cleaned name
+
+        # Verify metadata mapping
+        exp1_rows = result[result['file_name'] == 'data1.csv']
+        self.assertTrue(all(exp1_rows['experiment'] == 'Exp1'))
+        self.assertTrue(all(exp1_rows['batch'] == 1))
+
+        # Test 2: String columns preservation
+        result_str = load_csv_files(
+            csv_dir, config, string_columns=['ID']
+        )
+        self.assertEqual(result_str['ID'].dtype, 'object')
+        self.assertTrue(all(isinstance(x, str) for x in result_str['ID']))
+
+        # Test 3: Empty string_columns list
+        result_empty = load_csv_files(csv_dir, config, string_columns=[])
+        self.assertIsInstance(result_empty, pd.DataFrame)
+
+        # Test 4: Column name with spaces in config
+        config_spaces = pd.DataFrame({
+            'file_name': ['data1.csv'],
+            'Sample Type': ['Control']  # Space in column name
+        })
+        with self.assertRaises(ValueError):
+            # Should fail validation due to string_columns not being list
+            load_csv_files(csv_dir, config_spaces, string_columns="ID")
+
+        # Test 5: Missing file in config
+        config_missing = pd.DataFrame({
+            'file_name': ['missing.csv'],
+            'experiment': ['Exp3']
+        })
+        with self.assertRaises(TypeError) as context:
+            load_csv_files(csv_dir, config_missing)
+        self.assertIn("not found", str(context.exception))
+
+        # Test 6: Empty CSV file
+        empty_csv = csv_dir / 'empty.csv'
+        empty_csv.write_text('')
+        config_empty = pd.DataFrame({
+            'file_name': ['empty.csv'],
+            'experiment': ['Exp4']
+        })
+        with self.assertRaises(TypeError) as context:
+            load_csv_files(csv_dir, config_empty)
+        self.assertIn("empty", str(context.exception))
+
+        # Test 7: First file validation for string_columns
+        config_single = pd.DataFrame({
+            'file_name': ['data1.csv']
+        })
+        with self.assertRaises(ValueError):
+            # Non-existent column should raise error
+            load_csv_files(
+                csv_dir, config_single, 
+                string_columns=['NonExistentColumn']
+            )
+
+    @patch('builtins.print')
+    def test_load_csv_files_console_output(self, mock_print) -> None:
+        """Test console output from load_csv_files."""
+        from spac.templates.template_utils import load_csv_files
+
+        # Setup test data
+        csv_dir = Path(self.tmp_dir.name) / "csv_test"
+        csv_dir.mkdir()
+
+        csv_data = pd.DataFrame({
+            'ID': [1, 2],
+            'CD4+': ['pos', 'neg']  # Special character
+        })
+        csv_data.to_csv(csv_dir / 'test.csv', index=False)
+
+        config = pd.DataFrame({
+            'file_name': ['test.csv'],
+            'group': ['A']
+        })
+
+        # Run function
+        load_csv_files(csv_dir, config)
+
+        # Check console output
+        print_calls = [str(call[0][0]) for call in mock_print.call_args_list
+                      if call[0]]
+
+        # Should print column name updates
+        updates = [msg for msg in print_calls 
+                  if 'Column Name Updated:' in msg]
+        self.assertTrue(len(updates) > 0)
+        # The function strips trailing underscores, so CD4+ becomes CD4_pos
+        self.assertTrue(any('CD4+' in msg and 'CD4_pos' in msg 
+                           for msg in updates))
+
+        # Should print processing messages
+        processing = [msg for msg in print_calls 
+                     if 'Processing file:' in msg]
+        self.assertTrue(len(processing) > 0)
+
+        # Should print final info
+        final_info = [msg for msg in print_calls 
+                     if 'Final Dataframe Info' in msg]
+        self.assertTrue(len(final_info) > 0)
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,9 +2,12 @@ from pathlib import Path
 import pickle
 from typing import Any, Dict, Union, Optional, List
 import json
+import pandas as pd
 import anndata as ad
+import re
 import logging
 logger = logging.getLogger(__name__)
+
 
 def load_input(file_path: Union[str, Path]):
     """
@@ -108,7 +111,8 @@ def save_outputs(
             # Still support h5ad, but not the default
             if type(obj) is not ad.AnnData:
                 raise TypeError(
-                    f"Object for '{str(filename)}' must be AnnData, got {type(obj)}"
+                    f"Object for '{str(filename)}' must be AnnData, "
+                    f"got {type(obj)}"
                 )
             logger.info(f"Saving AnnData to {str(filepath)}")
             logger.debug(f"AnnData object: {obj}")
@@ -357,3 +361,261 @@ def convert_pickle_to_h5ad(
     adata.write_h5ad(h5ad_path)
 
     return str(h5ad_path)
+
+
+def spell_out_special_characters(text: str) -> str:
+    """
+    Clean column names by replacing special characters with text equivalents.
+
+    Handles biological marker names like:
+    - "CD4+" → "CD4_pos"
+    - "CD8-" → "CD8_neg"
+    - "CD4+CD20-" → "CD4_pos_CD20_neg"
+    - "CD4+/CD20-" → "CD4_pos_slashCD20_neg"
+    - "CD4+ CD20-" → "CD4_pos_CD20_neg"
+    - "Area µm²" → "Area_um2"
+
+    Parameters
+    ----------
+    text : str
+        The text to clean
+
+    Returns
+    -------
+    str
+        Cleaned text with special characters replaced
+    """
+    # Replace spaces with underscores
+    text = text.replace(' ', '_')
+
+    # Replace specific substrings for units
+    text = text.replace('µm²', 'um2')
+    text = text.replace('µm', 'um')
+
+    # Handle hyphens between alphanumeric characters FIRST
+    # (before + and - replacements)
+    # This pattern matches a hyphen that has alphanumeric on both sides
+    text = re.sub(r'(?<=[A-Za-z0-9])-(?=[A-Za-z0-9])', '_', text)
+
+    # Now replace remaining '+' with '_pos_' and '-' with '_neg_'
+    text = text.replace('+', '_pos_')
+    text = text.replace('-', '_neg_')
+
+    # Mapping for specific characters
+    special_char_map = {
+        'µ': 'u',       # Micro symbol replaced with 'u'
+        '²': '2',       # Superscript two replaced with '2'
+        '@': 'at',
+        '#': 'hash',
+        '$': 'dollar',
+        '%': 'percent',
+        '&': 'and',
+        '*': 'asterisk',
+        '/': 'slash',
+        '\\': 'backslash',
+        '=': 'equals',
+        '^': 'caret',
+        '!': 'exclamation',
+        '?': 'question',
+        '~': 'tilde',
+        '|': 'pipe',
+        ',': '',        # Remove commas
+        '(': '',        # Remove parentheses
+        ')': '',        # Remove parentheses
+        '[': '',        # Remove brackets
+        ']': '',        # Remove brackets
+        '{': '',        # Remove braces
+        '}': '',        # Remove braces
+    }
+
+    # Replace special characters using special_char_map
+    for char, replacement in special_char_map.items():
+        text = text.replace(char, replacement)
+
+    # Remove any remaining disallowed characters 
+    # (keep only alphanumeric and underscore)
+    text = re.sub(r'[^a-zA-Z0-9_]', '', text)
+
+    # Remove multiple consecutive underscores and 
+    # replace with single underscore
+    text = re.sub(r'_+', '_', text)
+    
+    # Strip both leading and trailing underscores
+    text = text.strip('_')
+
+    return text
+
+
+def load_csv_files(
+    csv_dir: Union[str, Path],
+    files_config: pd.DataFrame,
+    string_columns: Optional[List[str]] = None
+) -> pd.DataFrame:
+    """
+    Load and combine CSV files based on configuration.
+
+    Parameters
+    ----------
+    csv_dir : str or Path
+        Directory containing CSV files
+    files_config : pd.DataFrame
+        Configuration dataframe with 'file_name' column and optional 
+        metadata
+    string_columns : list, optional
+        Columns to force as string type
+
+    Returns
+    -------
+    pd.DataFrame
+        Combined dataframe with all CSV data
+    """
+    import pprint
+    from spac.data_utils import combine_dfs
+    from spac.utils import check_list_in_list
+
+    csv_dir = Path(csv_dir)
+    filename = "file_name"
+
+    # Clean configuration
+    files_config = files_config.applymap(
+        lambda x: x.strip() if isinstance(x, str) else x
+    )
+
+    # Get column names
+    all_column_names = files_config.columns.tolist()
+    filtered_column_names = [
+        col for col in all_column_names if col not in [filename]
+    ]
+
+    # Validate string_columns
+    if string_columns is None:
+        string_columns = []
+    elif not isinstance(string_columns, list):
+        raise ValueError(
+            "String Columns must be a *list* of column names (strings)."
+        )
+
+    # Handle ["None"] or [""] => empty list
+    if (len(string_columns) == 1 and
+        isinstance(string_columns[0], str) and
+        text_to_value(string_columns[0]) is None):
+        string_columns = []
+
+    # Extract data types
+    dtypes = files_config.dtypes.to_dict()
+
+    # Clean column names
+    def clean_column_name(column_name):
+        original = column_name
+        cleaned = spell_out_special_characters(column_name)
+        # Ensure doesn't start with digit
+        if cleaned and cleaned[0].isdigit():
+            cleaned = f'col_{cleaned}'
+        if original != cleaned:
+            print(f'Column Name Updated: "{original}" -> "{cleaned}"')
+        return cleaned
+
+    # Get files to process
+    files_config = files_config.astype(str)
+    files_to_use = [
+        f.strip() for f in files_config[filename].tolist()
+    ]
+
+    # Check all files exist
+    missing_files = []
+    for file_name in files_to_use:
+        if not (csv_dir / file_name).exists():
+            missing_files.append(file_name)
+
+    if missing_files:
+        raise TypeError(
+            f"The following files are not found: "
+            f"{', '.join(missing_files)}"
+        )
+
+    # Prepare dtype override
+    dtype_override = (
+        {col: str for col in string_columns} if string_columns else None
+    )
+
+    # Process files
+    processed_df_list = []
+    first_file = True
+
+    for file_name in files_to_use:
+        file_path = csv_dir / file_name
+        file_locations = files_config[
+            files_config[filename] == file_name
+        ].index.tolist()
+
+        # Check for duplicate file names
+        if len(file_locations) > 1:
+            print(
+                f'Multiple entries for file: "{file_name}", exiting...'
+            )
+            return None
+
+        try:
+            current_df = pd.read_csv(file_path, dtype=dtype_override)
+            print(f'\nProcessing file: "{file_name}"')
+            current_df.columns = [
+                clean_column_name(col) for col in current_df.columns
+            ]
+
+            # Validate string_columns exist
+            if first_file and string_columns:
+                check_list_in_list(
+                    input=string_columns,
+                    input_name='string_columns',
+                    input_type='column',
+                    target_list=list(current_df.columns),
+                    need_exist=True,
+                    warning=False
+                )
+                first_file = False
+
+        except pd.errors.EmptyDataError:
+            raise TypeError(f'The file: "{file_name}" is empty.')
+        except pd.errors.ParserError:
+            raise TypeError(
+                f'The file "{file_name}" could not be parsed. '
+                'Please check that the file is a valid CSV.'
+            )
+
+        current_df[filename] = file_name
+
+        # Reorder columns
+        cols = current_df.columns.tolist()
+        cols.insert(0, cols.pop(cols.index(filename)))
+        current_df = current_df[cols]
+
+        processed_df_list.append(current_df)
+        print(f'File: "{file_name}" Processed!\n')
+
+    # Combine dataframes
+    final_df = combine_dfs(processed_df_list)
+
+    # Ensure string columns remain strings
+    for col in string_columns:
+        if col in final_df.columns:
+            final_df[col] = final_df[col].astype(str)
+
+    # Add metadata columns
+    if filtered_column_names:
+        for column in filtered_column_names:
+            # Map values from config
+            file_to_value = (
+                files_config.set_index(filename)[column].to_dict()
+            )
+            final_df[column] = final_df[filename].map(file_to_value)
+            # Ensure correct dtype
+            final_df[column] = final_df[column].astype(dtypes[column])
+
+            print(f'\n\nColumn "{column}" Mapping: ')
+            pp = pprint.PrettyPrinter(indent=4)
+            pp.pprint(file_to_value)
+
+    print("\n\nFinal Dataframe Info")
+    print(final_df.info())
+
+    return final_df
