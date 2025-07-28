@@ -7,11 +7,12 @@ Usage
 >>> from spac.templates.setup_analysis_template import run_from_json
 >>> run_from_json("examples/setup_analysis_params.json")
 """
-import json
+
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, List, Optional
+from typing import Any, Dict, Union
 import pandas as pd
+import ast
 import logging
 
 # Add parent directory to path for imports
@@ -91,7 +92,6 @@ def run_from_json(
     if isinstance(feature_names, str):
         feature_names = [feature_names]
     if isinstance(regex_str, str):
-        import ast
         try:
             regex_str = ast.literal_eval(regex_str)
         except (ValueError, SyntaxError):
@@ -123,9 +123,9 @@ def run_from_json(
     if save_results:
         # Save outputs
         output_file = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format
+        # Default to pickle format if no recognized extension
         if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
-            output_file = output_file.replace('.h5ad', '.pickle')
+            output_file = output_file + '.pickle'
 
         saved_files = save_outputs({output_file: ingested_anndata})
 
