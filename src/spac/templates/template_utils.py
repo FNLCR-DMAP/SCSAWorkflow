@@ -459,7 +459,8 @@ def load_csv_files(
     csv_dir : str or Path
         Directory containing CSV files
     files_config : pd.DataFrame
-        Configuration dataframe with 'file_name' column and optional metadata
+        Configuration dataframe with 'file_name' column and optional 
+        metadata
     string_columns : list, optional
         Columns to force as string type
 
@@ -476,7 +477,7 @@ def load_csv_files(
     filename = "file_name"
 
     # Clean configuration
-    files_config = files_config.map(
+    files_config = files_config.applymap(
         lambda x: x.strip() if isinstance(x, str) else x
     )
 
@@ -528,11 +529,14 @@ def load_csv_files(
 
     if missing_files:
         raise TypeError(
-            f"The following files are not found: {', '.join(missing_files)}"
+            f"The following files are not found: "
+            f"{', '.join(missing_files)}"
         )
 
     # Prepare dtype override
-    dtype_override = {col: str for col in string_columns} if string_columns else None
+    dtype_override = (
+        {col: str for col in string_columns} if string_columns else None
+    )
 
     # Process files
     processed_df_list = []
@@ -546,7 +550,9 @@ def load_csv_files(
 
         # Check for duplicate file names
         if len(file_locations) > 1:
-            print(f'Multiple entries for file: "{file_name}", exiting...')
+            print(
+                f'Multiple entries for file: "{file_name}", exiting...'
+            )
             return None
 
         try:
@@ -598,7 +604,9 @@ def load_csv_files(
     if filtered_column_names:
         for column in filtered_column_names:
             # Map values from config
-            file_to_value = files_config.set_index(filename)[column].to_dict()
+            file_to_value = (
+                files_config.set_index(filename)[column].to_dict()
+            )
             final_df[column] = final_df[filename].map(file_to_value)
             # Ensure correct dtype
             final_df[column] = final_df[column].astype(dtypes[column])
