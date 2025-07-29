@@ -101,10 +101,11 @@ class TestBoxplotTemplate(unittest.TestCase):
     def test_run_with_save(self, mock_show, mock_boxplot) -> None:
         """Test boxplot with file saving."""
         # Mock the boxplot function to return figure, ax, and dataframe
+        rng = np.random.default_rng(42)
         mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return({
-            'Gene_0': np.random.RandomState(42).rand(20),
-            'Gene_1': np.random.RandomState(42).rand(20),
-            'Gene_2': np.random.RandomState(42).rand(20)
+            'Gene_0': rng.random(20),
+            'Gene_1': rng.random(20),
+            'Gene_2': rng.random(20)
         })
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         

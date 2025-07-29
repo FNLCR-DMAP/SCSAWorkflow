@@ -131,7 +131,7 @@ def run_from_json(
     try:
         sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
     except Exception as e:
-        logging.debug(f"Legend does not exist.")
+        logging.debug("Legend does not exist.")
     
     plt.tight_layout()
     
