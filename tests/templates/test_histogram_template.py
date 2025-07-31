@@ -32,9 +32,10 @@ def mock_adata_with_features(n_cells: int = 10) -> ad.AnnData:
     # Simple expression data
     x_mat = rng.normal(size=(n_cells, 3))
     
-    # Simple observations
+    # Simple observations- fixed to handle odd n_cells
     obs = pd.DataFrame({
-        "cell_type": ["TypeA", "TypeB"] * (n_cells // 2)
+        "cell_type": (["TypeA", "TypeB"] * (n_cells // 2) + 
+                     ["TypeA"] * (n_cells % 2))[:n_cells]
     })
     
     # Simple var names
