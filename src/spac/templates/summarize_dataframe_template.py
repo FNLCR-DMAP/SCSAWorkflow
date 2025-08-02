@@ -12,13 +12,11 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Union, List, Optional, Tuple
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from spac.data_utils import summarize_dataframe
-from spac.visualization import present_summary_as_html
 from spac.visualization import present_summary_as_figure
 from spac.templates.template_utils import (
     load_input,
@@ -73,8 +71,8 @@ def run_from_json(
         df,
         columns=columns,
         print_nan_locations=print_missing_location)
-        # Generate HTML from the summary.
-
+    
+    # Generate HTML from the summary.
     fig = present_summary_as_figure(summary)
 
     if show_plot:
