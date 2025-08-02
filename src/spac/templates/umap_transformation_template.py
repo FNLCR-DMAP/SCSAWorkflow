@@ -66,7 +66,7 @@ def run_from_json(
     if layer == "Original":
         layer = None
 
-    udpated_dataset = run_umap(
+    updated_dataset = run_umap(
         adata=adata,
         n_neighbors=n_neighbors,
         min_dist=min_dist,
@@ -89,14 +89,16 @@ def run_from_json(
         if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
             output_file = output_file + '.pickle'
         
-        saved_files = save_outputs({output_file: udpated_dataset})
+        # Note: Following NIDAP pattern, save the transformed object
+        # (which is the same as adata if run_umap modifies in-place)
+        saved_files = save_outputs({output_file: updated_dataset})
         
         print(f"UMAP transformation completed → {saved_files[output_file]}")
         return saved_files
     else:
         # Return the adata object directly for in-memory workflows
         print("Returning AnnData object (not saving to file)")
-        return udpated_dataset
+        return adata
 
 
 # CLI interface

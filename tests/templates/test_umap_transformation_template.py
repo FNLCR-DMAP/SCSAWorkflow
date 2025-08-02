@@ -75,10 +75,12 @@ class TestUmapTransformationTemplate(unittest.TestCase):
             # Test 1: Run with default parameters
             with patch('spac.templates.umap_transformation_template.'
                       'run_umap') as mock_umap:
-                # Mock the run_umap function
-                mock_adata_obj = mock_adata()
-                mock_adata_obj.obsm["X_umap"] = np.random.rand(10, 2)
-                mock_umap.return_value = mock_adata_obj
+                # Mock run_umap to modify in-place and return the same object
+                def mock_run_umap_inplace(adata, **kwargs):
+                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
+                    return adata
+                
+                mock_umap.side_effect = mock_run_umap_inplace
                 
                 result = run_from_json(self.params)
                 self.assertIsInstance(result, dict)
@@ -100,9 +102,12 @@ class TestUmapTransformationTemplate(unittest.TestCase):
             # Test 2: Run without saving
             with patch('spac.templates.umap_transformation_template.'
                       'run_umap') as mock_umap:
-                mock_adata_obj = mock_adata()
-                mock_adata_obj.obsm["X_umap"] = np.random.rand(10, 2)
-                mock_umap.return_value = mock_adata_obj
+                # Mock run_umap to modify in-place and return the same object
+                def mock_run_umap_inplace(adata, **kwargs):
+                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
+                    return adata
+                
+                mock_umap.side_effect = mock_run_umap_inplace
                 
                 result_no_save = run_from_json(
                     self.params, save_results=False
@@ -118,9 +123,12 @@ class TestUmapTransformationTemplate(unittest.TestCase):
             
             with patch('spac.templates.umap_transformation_template.'
                       'run_umap') as mock_umap:
-                mock_adata_obj = mock_adata()
-                mock_adata_obj.obsm["X_umap"] = np.random.rand(10, 2)
-                mock_umap.return_value = mock_adata_obj
+                # Mock run_umap to modify in-place
+                def mock_run_umap_inplace(adata, **kwargs):
+                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
+                    return adata
+                
+                mock_umap.side_effect = mock_run_umap_inplace
                 
                 result_json = run_from_json(json_path)
                 self.assertIsInstance(result_json, dict)
@@ -133,9 +141,12 @@ class TestUmapTransformationTemplate(unittest.TestCase):
         
         with patch('spac.templates.umap_transformation_template.'
                   'run_umap') as mock_umap:
-            mock_adata_obj = mock_adata()
-            mock_adata_obj.obsm["X_umap"] = np.random.rand(10, 2)
-            mock_umap.return_value = mock_adata_obj
+            # Mock run_umap to modify in-place
+            def mock_run_umap_inplace(adata, **kwargs):
+                adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
+                return adata
+            
+            mock_umap.side_effect = mock_run_umap_inplace
             
             run_from_json(params_with_layer, save_results=False)
             
@@ -152,9 +163,12 @@ class TestUmapTransformationTemplate(unittest.TestCase):
         
         with patch('spac.templates.umap_transformation_template.'
                   'run_umap') as mock_umap:
-            mock_adata_obj = mock_adata()
-            mock_adata_obj.obsm["X_umap"] = np.random.rand(10, 2)
-            mock_umap.return_value = mock_adata_obj
+            # Mock run_umap to modify in-place
+            def mock_run_umap_inplace(adata, **kwargs):
+                adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
+                return adata
+            
+            mock_umap.side_effect = mock_run_umap_inplace
             
             run_from_json(minimal_params, save_results=False)
             
