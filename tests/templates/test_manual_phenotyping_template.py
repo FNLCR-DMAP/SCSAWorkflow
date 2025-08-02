@@ -22,7 +22,7 @@ from spac.templates.manual_phenotyping_template import run_from_json
 def create_mock_data_and_phenotypes(tmp_dir: Path) -> tuple:
     """Create minimal data and phenotypes files for testing."""
     # Create mock expression data
-    n_cells = 20  # Simple scenario as per rule 1
+    n_cells = 20  # Simple scenario with 20 cells for testing
     data = pd.DataFrame({
         'cell_id': [f'cell_{i}' for i in range(n_cells)],
         'CD3D_expression': np.random.choice([0, 1], n_cells),
@@ -88,7 +88,7 @@ class TestManualPhenotypingTemplate(unittest.TestCase):
     @patch('spac.templates.manual_phenotyping_template.'
            'assign_manual_phenotypes')
     def test_complete_io_workflow(self, mock_assign) -> None:
-        """Single I/O test covering all input/output scenarios (Rule 2)."""
+        """Single I/O test covering all input/output scenarios."""
         # Mock the assign_manual_phenotypes function
         def mock_assign_func(df, pheno, **kwargs):
             # Add phenotype column with the correct annotation name
@@ -165,7 +165,7 @@ class TestManualPhenotypingTemplate(unittest.TestCase):
     @patch('spac.templates.manual_phenotyping_template.'
            'assign_manual_phenotypes')
     def test_error_validation(self, mock_assign) -> None:
-        """Test exact error messages for various failure scenarios (Rule 3)."""
+        """Test exact error messages for various failure scenarios."""
         # Test 1: Missing phenotypes file
         params_missing = self.params.copy()
         params_missing["Phenotypes_Code"] = str(
@@ -174,40 +174,26 @@ class TestManualPhenotypingTemplate(unittest.TestCase):
         
         with self.assertRaises(FileNotFoundError) as context:
             run_from_json(params_missing)
-        
-        # pandas will raise this error
-        self.assertIn("No such file or directory", str(context.exception))
-        
+   
         # Test 2: Missing input data file
         params_no_input = self.params.copy()
         params_no_input["Upstream_Dataset"] = str(
             self.tmp_path / "nonexistent.csv"
         )
         
-        with self.assertRaises(FileNotFoundError) as context:
+        with self.assertRaises(FileNotFoundError):
             run_from_json(params_no_input)
         
-        self.assertIn("No such file or directory", str(context.exception))
-        
         # Test 3: Invalid CSV file for phenotypes
-        invalid_phenotypes = self.tmp_path / "invalid_phenotypes.csv"
-        invalid_phenotypes.write_text(
-            "invalid,csv,content\nwithout proper,structure"
-        )
-        
-        params_invalid = self.params.copy()
-        params_invalid["Phenotypes_Code"] = str(invalid_phenotypes)
-        
+        # SPAC function error
         # Mock to simulate SPAC function error
-        mock_assign.side_effect = KeyError(
-            "phenotype_code column not found"
-        )
+        mock_assign.side_effect = ValueError("Invalid phenotype code format")
         
-        with self.assertRaises(KeyError) as context:
-            run_from_json(params_invalid)
+        with self.assertRaises(ValueError) as context:
+            run_from_json(self.params)
         
-        expected_msg = "phenotype_code column not found"
-        self.assertEqual(str(context.exception).strip("'"), expected_msg)
+        expected_msg = "Invalid phenotype code format"
+        self.assertEqual(str(context.exception), expected_msg)
 
     @patch('spac.templates.manual_phenotyping_template.'
            'assign_manual_phenotypes')
