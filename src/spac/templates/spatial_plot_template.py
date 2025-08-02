@@ -75,9 +75,6 @@ def run_from_json(
     stratify = params["Stratify"]
     stratify_by = params["Stratify_By"]
 
-    ##--------------- ##
-    ## Error Messages ##
-    ## -------------- ##
     if stratify and len(stratify_by) == 0:
         raise ValueError(
             'Please set at least one annotation in the "Stratify By" '
@@ -97,13 +94,6 @@ def run_from_json(
     else:
         annotation = None
 
-    ## --------- ##
-    ## Functions ##
-    ## --------- ##
-
-    ## --------------- ##
-    ## Main Code Block ##
-    ## --------------- ##
     layer = text_to_value(layer, "Original")
 
     prefilled_spatial = partial(
