@@ -91,7 +91,7 @@ def run_from_json(
             csv_name: df_counts
         })
         
-        print(f"\nLabel‑count table written to {csv_name}")
+        print(f"\nLabel-count table written to {csv_name}")
         print(f"Combine Annotations completed → {saved_files[output_file]}")
         return saved_files
     else:
