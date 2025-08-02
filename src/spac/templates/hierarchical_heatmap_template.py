@@ -10,7 +10,7 @@ Usage
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, List, Optional, Tuple
+from typing import Any, Dict, Union, List, Optional
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -31,7 +31,7 @@ def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
     save_results: bool = True,
     show_plot: bool = True
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
+) -> Union[Dict[str, str], pd.DataFrame]:
     """
     Execute Hierarchical Heatmap analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -48,9 +48,9 @@ def run_from_json(
 
     Returns
     -------
-    dict or tuple
+    dict or DataFrame
         If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (figure, dataframe)
+        If save_results=False: The mean intensity dataframe
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -74,10 +74,10 @@ def run_from_json(
     matrix_ratio = params.get("Matrix_Plot_Ratio", 0.8)
     swap_axes = params.get("Swap_Axes", False)
     rotate_label = params.get("Rotate_Label_", False)
-    r_h_axis_dengrogram = params.get(
+    r_h_axis_dendrogram = params.get(
         "Horizontal_Dendrogram_Display_Ratio", 0.2
     )
-    r_v_axis_dengrogram = params.get(
+    r_v_axis_dendrogram = params.get(
         "Vertical_Dendrogram_Display_Ratio", 0.2
     )
     v_min = params.get("Value_Min", "None")
@@ -127,7 +127,7 @@ def run_from_json(
         swap_axes=swap_axes,
         rotate_label=rotate_label,
         figsize=(fig_width, fig_height),
-        dendrogram_ratio=(r_h_axis_dengrogram, r_v_axis_dengrogram),
+        dendrogram_ratio=(r_h_axis_dendrogram, r_v_axis_dendrogram),
         vmin=vmin,
         vmax=vmax,
         cmap=color_map
@@ -172,7 +172,7 @@ def run_from_json(
     else:
         # Return the figure and dataframe directly for in-memory workflows
         print("Returning figure and dataframe (not saving to file)")
-        return clustergrid.fig, mean_intensity
+        return mean_intensity
 
 
 # CLI interface

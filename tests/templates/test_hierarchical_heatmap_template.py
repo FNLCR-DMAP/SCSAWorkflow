@@ -133,8 +133,8 @@ class TestHierarchicalHeatmapTemplate(unittest.TestCase):
                     self.params, save_results=False, show_plot=False
                 )
                 # Check appropriate return type based on template
-                self.assertIsInstance(result_no_save, tuple)
-                self.assertEqual(len(result_no_save), 2)
+                self.assertIsInstance(result_no_save, pd.DataFrame)
+                self.assertEqual(len(result_no_save), 3)  # 3 clusters
                 
                 # Test 3: JSON file input
                 json_path = os.path.join(
