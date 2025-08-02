@@ -64,7 +64,7 @@ class TestUTAGClusteringTemplate(unittest.TestCase):
             "Random_Seed": 42,
             "N_Jobs": 1,
             "Leiden_Iterations": 5,
-            "Parellel_Processes": False,
+            "Parallel_Processes": False,
             "Output_Annotation_Name": "UTAG",
             "Output_File": self.out_file,
         }

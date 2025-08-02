@@ -71,7 +71,9 @@ def run_from_json(
     layer_arg = None if layer.lower().strip() == "original" else layer
 
     # features: ["All"] → None, else leave list and print selection
-    if isinstance(features, list) and any(item == "All" for item in features):
+    if isinstance(features, list) and any(
+        item == "All" for item in features
+    ):
         print("Clustering all features")
         features_arg = None
     else:
@@ -99,31 +101,37 @@ def run_from_json(
 
     run_utag_clustering(
         adata,
-        features = features_arg,
-        k = K_neighbors,
-        resolution = resolution,
-        max_dist = Distance_threshold,
-        n_pcs = principal_components_arg,
-        random_state = random_seed,
-        n_jobs = n_jobs,
-        n_iterations = N_iterations,
-        slide_key = slide_arg,
-        layer = layer_arg,
-        output_annotation = output_annotation,
-        parallel = Parallel_processes,
+        features=features_arg,
+        k=K_neighbors,
+        resolution=resolution,
+        max_dist=Distance_threshold,
+        n_pcs=principal_components_arg,
+        random_state=random_seed,
+        n_jobs=n_jobs,
+        n_iterations=N_iterations,
+        slide_key=slide_arg,
+        layer=layer_arg,
+        output_annotation=output_annotation,
+        parallel=Parallel_processes,
     )
 
-    print("\nAfter UTAG Clustering: \n", 
-        adata)
+    print("\nAfter UTAG Clustering: \n", adata)
 
-    print("\nUTAG Cluster Count: \n", 
-        len(adata.obs[output_annotation].unique().tolist()))
+    print(
+        "\nUTAG Cluster Count: \n",
+        len(adata.obs[output_annotation].unique().tolist())
+    )
 
-    print("\nUTAG Cluster Names: \n", 
-        adata.obs[output_annotation].unique().tolist())
+    print(
+        "\nUTAG Cluster Names: \n",
+        adata.obs[output_annotation].unique().tolist()
+    )
 
     # Count and display occurrences of each label in the annotation
-    print(f'\nCount of cells in the output annotation:"{output_annotation}":')
+    print(
+        f'\nCount of cells in the output annotation:'
+        f'"{output_annotation}":'
+    )
     label_counts = adata.obs[output_annotation].value_counts()
     print(label_counts)
     print("\n")
