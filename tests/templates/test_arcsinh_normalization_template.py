@@ -27,8 +27,8 @@ def mock_adata(n_cells: int = 10) -> ad.AnnData:
     # Create expression data with some high values to normalize
     x_mat = rng.exponential(scale=10, size=(n_cells, 5))
     obs = pd.DataFrame({
-        "cell_type": ["TypeA", "TypeB"] * (n_cells // 2),
-        "batch": ["Batch1", "Batch2"] * (n_cells // 2)
+        "cell_type": (["TypeA", "TypeB"] * ((n_cells + 1) // 2))[:n_cells],
+        "batch": (["Batch1", "Batch2"] * ((n_cells + 1) // 2))[:n_cells]
     })
     adata = ad.AnnData(X=x_mat, obs=obs)
     adata.var_names = [f"Marker{i}" for i in range(5)]
@@ -66,16 +66,13 @@ class TestArcsinhNormalizationTemplate(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    @patch('spac.templates.arcsinh_normalization_template.'
-           'arcsinh_transformation')
+    @patch('spac.templates.arcsinh_normalization_template.arcsinh_transformation')
     def test_complete_io_workflow(self, mock_arcsinh) -> None:
         """Single I/O test covering input/output scenarios."""
         # Mock the arcsinh_transformation function
         def mock_transform(adata, **kwargs):
             # Simulate transformation by adding a layer
-            adata.layers[kwargs['output_layer']] = (
-                np.log1p(adata.X) / 5.0
-            )
+            adata.layers[kwargs['output_layer']] = np.log1p(adata.X) / 5.0
             return adata
 
         mock_arcsinh.side_effect = mock_transform
@@ -88,15 +85,11 @@ class TestArcsinhNormalizationTemplate(unittest.TestCase):
             self.assertIsInstance(result, dict)
             # Verify file was saved
             self.assertTrue(len(result) > 0)
-            pickle_files = [
-                f for f in result.values() if '.pickle' in str(f)
-            ]
+            pickle_files = [f for f in result.values() if '.pickle' in str(f)]
             self.assertTrue(len(pickle_files) > 0)
             
             # Test 2: Run without saving
-            result_no_save = run_from_json(
-                self.params, save_results=False
-            )
+            result_no_save = run_from_json(self.params, save_results=False)
             # Check appropriate return type based on template
             self.assertIsInstance(result_no_save, ad.AnnData)
             self.assertIn("arcsinh", result_no_save.layers)
@@ -109,10 +102,9 @@ class TestArcsinhNormalizationTemplate(unittest.TestCase):
             result_json = run_from_json(json_path)
             self.assertIsInstance(result_json, dict)
 
-        # Verify arcsinh_transformation was called with correct params
+        # Verify arcsinh_transformation was called with correct parameters
         call_args = mock_arcsinh.call_args
-        # "Original" → None
-        self.assertEqual(call_args[1]['input_layer'], None)
+        self.assertEqual(call_args[1]['input_layer'], None)  # "Original" → None
         self.assertEqual(call_args[1]['co_factor'], 5.0)
         self.assertEqual(call_args[1]['percentile'], None)
         self.assertEqual(call_args[1]['output_layer'], "arcsinh")
@@ -135,8 +127,7 @@ class TestArcsinhNormalizationTemplate(unittest.TestCase):
         )
         self.assertEqual(str(context.exception), expected_msg)
 
-    @patch('spac.templates.arcsinh_normalization_template.'
-           'arcsinh_transformation')
+    @patch('spac.templates.arcsinh_normalization_template.arcsinh_transformation')
     def test_function_calls(self, mock_arcsinh) -> None:
         """Test that main function is called with correct parameters."""
         # Mock the main function to return transformed data
