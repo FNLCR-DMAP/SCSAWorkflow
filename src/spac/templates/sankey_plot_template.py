@@ -71,7 +71,7 @@ def run_from_json(
     height_num = params.get("Figure_Height_inch", 6)
     height_in_pixels = height_num / scale * dpi
 
-    sort_asscend = True
+    # sort_asscend = True   # unused variable
     source_color_map = params.get("Source_Annotation_Color_Map", "tab20")
     target_color_map = params.get("Target_Annotation_Color_Map", "tab20b")
 
@@ -98,7 +98,9 @@ def run_from_json(
     # Show the plot with the specified display options
     print(fig)
 
-    image_path = 'sankey_diagram.png'
+    # Use output prefix to avoid conflicts
+    output_prefix = params.get("Output_File", "sankey")
+    image_path = f"{output_prefix}_diagram.png"
 
     pio.write_image(
         fig,

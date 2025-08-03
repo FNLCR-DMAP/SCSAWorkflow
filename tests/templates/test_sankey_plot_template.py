@@ -157,7 +157,7 @@ class TestSankeyPlotTemplate(unittest.TestCase):
         params_bad["Source_Annotation_Name"] = "nonexistent_column"
         
         # This should trigger an error in the sankey_plot function
-        # For this test, we'll check that parameters are processed correctly
+        # This test will check that parameters are processed correctly
         with patch('spac.templates.sankey_plot_template.sankey_plot') as \
                 mock_sankey:
             mock_sankey.side_effect = KeyError("nonexistent_column")
