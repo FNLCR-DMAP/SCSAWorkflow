@@ -54,10 +54,6 @@ def run_from_json(
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
 
-    ## -------------------------------- ##
-    ## User-Defined Template Parameters ##
-    ## -------------------------------- ##
-
     color_by = params["Color_By"]
     annotations = params.get("Annotation_s_to_Highlight", [""])
     feature = params.get("Feature_to_Highlight", "None")
@@ -73,7 +69,7 @@ def run_from_json(
     stratify_by = text_to_value(
         params.get("Stratify_By", "None"),
         param_name="Stratify By"
-    )  # New parameter for stratification
+    )  
     
     defined_color_map = text_to_value(
         params.get("Define_Label_Color_Mapping", "None"),
@@ -100,17 +96,6 @@ def run_from_json(
 
     layer = text_to_value(layer, "Original")
 
-    ##--------------- ##
-    ## Error Messages ##
-    ## -------------- ##
-
-    ## --------- ##
-    ## Functions ##
-    ## --------- ##
-
-    ## --------------- ##
-    ## Main Code Block ##
-    ## --------------- ##
     result_list = interactive_spatial_plot(
         adata=adata,
         annotations=annotations,
