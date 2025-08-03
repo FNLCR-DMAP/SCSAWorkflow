@@ -1,5 +1,5 @@
 # tests/templates/test_umap_tsne_pca_template.py
-"""Unit tests for the UMAP\tSNE\PCA Visualization template."""
+"""Unit tests for the UMAP\\tSNE\\PCA Visualization template."""
 
 import json
 import os
@@ -43,7 +43,7 @@ def mock_adata(n_cells: int = 10) -> ad.AnnData:
 
 
 class TestUmapTsnePcaTemplate(unittest.TestCase):
-    """Unit tests for the UMAP\tSNE\PCA Visualization template."""
+    """Unit tests for the UMAP\\tSNE\\PCA Visualization template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()

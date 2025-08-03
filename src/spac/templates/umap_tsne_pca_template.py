@@ -1,5 +1,5 @@
 """
-Platform-agnostic UMAP\tSNE\PCA Visualization template converted from NIDAP.
+Platform-agnostic UMAP\\tSNE\\PCA Visualization template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
 Usage
@@ -32,7 +32,7 @@ def run_from_json(
     show_plot: bool = True
 ) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
     """
-    Execute UMAP\tSNE\PCA Visualization analysis with parameters from JSON.
+    Execute UMAP\\tSNE\\PCA Visualization analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
 
     Parameters
