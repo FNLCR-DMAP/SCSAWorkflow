@@ -9,6 +9,7 @@ Usage
 """
 import json
 import sys
+import os
 from pathlib import Path
 from typing import Any, Dict, Union, Optional, Tuple
 import pandas as pd
@@ -92,7 +93,10 @@ def run_from_json(
 
     # Generate temporary image name for Plotly export
     import tempfile
-    tmp_image_name = tempfile.mktemp(suffix='.png')
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix='.png'
+    ) as tmp_file:
+        tmp_image_name = tmp_file.name
     
     pio.write_image(
         fig,
@@ -116,7 +120,6 @@ def run_from_json(
     plt.show()
 
     # Clean up temp file
-    import os
     if os.path.exists(tmp_image_name):
         os.remove(tmp_image_name)
 

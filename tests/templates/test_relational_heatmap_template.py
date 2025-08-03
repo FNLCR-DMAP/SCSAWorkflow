@@ -97,10 +97,14 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
         # Mock the plotly write_image to create a dummy image
         def create_dummy_image(fig, path, **kwargs):
             # Create a minimal PNG file
-            fig, ax = plt.subplots(figsize=(1, 1))
+            # Ensure file path exists (for NamedTemporaryFile)
+            if not os.path.exists(path):
+                # Create parent directory if needed
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+            fig_dummy, ax = plt.subplots(figsize=(1, 1))
             ax.text(0.5, 0.5, 'test', ha='center', va='center')
             plt.savefig(path, dpi=72)
-            plt.close(fig)
+            plt.close(fig_dummy)
         
         mock_write_image.side_effect = create_dummy_image
         
@@ -155,10 +159,14 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
             # Mock write_image to create a dummy file
             def create_dummy_image(fig, path, **kwargs):
                 # Create a minimal PNG file
-                fig, ax = plt.subplots(figsize=(1, 1))
+                # Ensure file path exists (for NamedTemporaryFile)
+                if not os.path.exists(path):
+                    # Create parent directory if needed
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                fig_dummy, ax = plt.subplots(figsize=(1, 1))
                 ax.text(0.5, 0.5, 'test', ha='center', va='center')
                 plt.savefig(path, dpi=72)
-                plt.close(fig)
+                plt.close(fig_dummy)
             
             with patch('plotly.io.write_image', 
                       side_effect=create_dummy_image):
@@ -186,10 +194,14 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
         # Mock write_image to create a dummy file
         def create_dummy_image(fig, path, **kwargs):
             # Create a minimal PNG file
-            fig, ax = plt.subplots(figsize=(1, 1))
+            # Ensure file path exists (for NamedTemporaryFile)
+            if not os.path.exists(path):
+                # Create parent directory if needed
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+            fig_dummy, ax = plt.subplots(figsize=(1, 1))
             ax.text(0.5, 0.5, 'test', ha='center', va='center')
             plt.savefig(path, dpi=72)
-            plt.close(fig)
+            plt.close(fig_dummy)
         
         mock_write_image.side_effect = create_dummy_image
         
