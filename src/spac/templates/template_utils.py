@@ -619,3 +619,90 @@ def load_csv_files(
     print(final_df.info())
 
     return final_df
+
+
+def string_list_to_dictionary(
+    input_list: List[str],
+    key_name: str = "key",
+    value_name: str = "color"
+) -> Dict[str, str]:
+    """
+    Validate that a list contains strings in the "key:value" format
+    and return the parsed dictionary. Reports all invalid entries with
+    custom key and value names in error messages.
+
+    Parameters
+    ----------
+    input_list : list
+        List of strings to validate and parse
+    key_name : str, optional
+        Name to describe the 'key' part in error messages. Default is "key"
+    value_name : str, optional
+        Name to describe the 'value' part in error messages. Default is "color"
+
+    Returns
+    -------
+    dict
+        A dictionary parsed from the input list if all entries are valid
+
+    Raises
+    ------
+    TypeError
+        If input is not a list
+    ValueError
+        If any entry in the list is not a valid "key:value" format
+
+    Examples
+    --------
+    >>> string_list_to_dictionary(["red:#FF0000", "blue:#0000FF"])
+    {'red': '#FF0000', 'blue': '#0000FF'}
+    
+    >>> string_list_to_dictionary(["TypeA:Cancer", "TypeB:Normal"], "cell_type", "diagnosis")
+    {'TypeA': 'Cancer', 'TypeB': 'Normal'}
+    """
+    if not isinstance(input_list, list):
+        raise TypeError("Input must be a list.")
+
+    parsed_dict = {}
+    errors = []
+    seen_keys = set()
+
+    for entry in input_list:
+        if not isinstance(entry, str):
+            errors.append(
+                f"\nInvalid entry '{entry}': Must be a string in the "
+                f"'{key_name}:{value_name}' format."
+            )
+            continue
+        if ":" not in entry:
+            errors.append(
+                f"\nInvalid entry '{entry}': Missing ':' separator to "
+                f"separate '{key_name}' and '{value_name}'."
+            )
+            continue
+
+        key, *value = map(str.strip, entry.split(":", 1))
+        if not key or not value:
+            errors.append(
+                f"\nInvalid entry '{entry}': Both '{key_name}' and "
+                f"'{value_name}' must be non-empty."
+            )
+            continue
+
+        if key in seen_keys:
+            errors.append(f"\nDuplicate {key_name} '{key}' found.")
+        else:
+            seen_keys.add(key)
+            parsed_dict[key] = value[0]
+
+        # Add to dictionary if valid
+        parsed_dict[key] = value[0]
+
+    # Raise error if there are invalid entries
+    if errors:
+        raise ValueError(
+            "\nValidation failed for the following entries:\n" +
+            "\n".join(errors)
+        )
+
+    return parsed_dict
