@@ -192,12 +192,12 @@ class TestQuantileScalingTemplate(unittest.TestCase):
         print_calls = [str(call[0][0]) for call in mock_print.call_args_list
                        if call[0]]
         
-        # Should print quantile values (note typo in original)
+        # Should print quantile values
         self.assertTrue(
-            any("High qunatile used: 0.95" in msg for msg in print_calls)
+            any("High quantile used: 0.95" in msg for msg in print_calls)
         )
         self.assertTrue(
-            any("Low qunatile used: 0.05" in msg for msg in print_calls)
+            any("Low quantile used: 0.05" in msg for msg in print_calls)
         )
         
         # Verify function was called with per_batch=True

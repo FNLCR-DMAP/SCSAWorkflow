@@ -184,8 +184,8 @@ def run_from_json(
     
         return normalization_info
 
-    print(f"High qunatile used: {str(high_quantile)}")
-    print(f"Low qunatile used: {str(low_quantile)}")
+    print(f"High quantile used: {str(high_quantile)}")
+    print(f"Low quantile used: {str(low_quantile)}")
 
     transformed_data = normalize_features(
         adata=adata,
