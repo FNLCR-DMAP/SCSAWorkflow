@@ -52,7 +52,7 @@ def run_from_json(
     all_data = load_input(params["Upstream_Analysis"])
 
     # Extract parameters
-    # Select layer to perform tSNHE
+    # Select layer to perform tSNE
     Layer_to_Analysis = params.get("Table_to_Process", "Original")
 
     print(all_data)
