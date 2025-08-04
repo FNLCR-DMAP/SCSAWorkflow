@@ -1,5 +1,5 @@
 # tests/templates/test_posit_it_python_template.py
-"""Unit tests for the Post-It-Python template."""
+"""Unit tests for the Posit-It-Python template."""
 
 import json
 import os
@@ -22,7 +22,7 @@ from spac.templates.posit_it_python_template import run_from_json
 
 
 class TestPostItPythonTemplate(unittest.TestCase):
-    """Unit tests for the Post-It-Python template."""
+    """Unit tests for the Posit-It-Python template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()

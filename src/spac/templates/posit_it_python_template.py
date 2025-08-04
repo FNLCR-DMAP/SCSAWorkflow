@@ -125,7 +125,7 @@ def run_from_json(
         'Yellow3': '#FB9E00',
         'YellowGreen1': '#DBDF00',
         'YellowGreen2': '#B0BC00',
-        'Yellowgreen3': '#808900',
+        'YellowGreen3': '#808900',
         'Green1': '#A4DD00',
         'Green2': '#68BC00',
         'Green3': '#194D33',
@@ -157,9 +157,7 @@ def run_from_json(
             item.set_fontfamily(text_fontfamily)
             item.set_fontstyle(text_fontface)
             if bold:
-                item.set_fontweight('bold')
-
-    # plt.set_facecolor(paints[fill_color]+hex_fill)    
+                item.set_fontweight('bold')  
 
     fig.text(
         0.5, 0.5, text, 
