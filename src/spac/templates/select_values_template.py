@@ -76,16 +76,24 @@ def run_from_json(
     # Extract parameters
     observation = params["Annotation_of_Interest"]
     values = params["Label_s_of_Interest"]
-    
+
     with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
         filtered_dataset = select_values(
             data=input_dataset,
             annotation=observation,
             values=values
             )
-        if caught_warnings is not None:
+        # Only process warnings that are relevant to the select_values operation
+        if caught_warnings:
             for warning in caught_warnings:
-                raise ValueError(warning.message)
+                # Skip deprecation warnings from numpy/pandas
+                if (hasattr(warning, 'category') and 
+                    issubclass(warning.category, DeprecationWarning)):
+                    continue
+                # Raise actual operational warnings as errors
+                if hasattr(warning, 'message'):
+                    raise ValueError(str(warning.message))
     
     print(filtered_dataset.info())
 
