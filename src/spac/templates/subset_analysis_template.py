@@ -61,9 +61,9 @@ def run_from_json(
     labels = params["Labels"]
     
     # Use .get() with defaults for optional parameters from JSON template
-    toogle = params.get("Include_Exclude", "Include Selected Labels")
+    toggle = params.get("Include_Exclude", "Include Selected Labels")
 
-    if toogle == "Include Selected Labels":
+    if toggle == "Include Selected Labels":
         values_to_include = labels
         values_to_exclude = None
     else:
@@ -77,7 +77,7 @@ def run_from_json(
             values=values_to_include,
             exclude_values=values_to_exclude
             )
-        if caught_warnings is not None:
+        if caught_warnings:
             for warning in caught_warnings:
                 raise ValueError(warning.message)
     
