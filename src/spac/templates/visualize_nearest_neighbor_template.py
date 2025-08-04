@@ -90,7 +90,7 @@ def run_from_json(
 
     fig_width = params.get("Figure_Width", 12)
     fig_height = params.get("Figure_Height", 6)
-    fig_dpi = params.get("FIgure_DPI", 300)
+    fig_dpi = params.get("Figure_DPI", 300)
     global_font_size = params.get("Font_Size", 12)
     fig_title = (
         f'Nearest Neighbor Distance Distribution Measured from '

@@ -89,7 +89,7 @@ class TestVisualizeNearestNeighborTemplate(unittest.TestCase):
             "Defined_Color_Mapping": "None",
             "Figure_Width": 12,
             "Figure_Height": 6,
-            "FIgure_DPI": 300,
+            "Figure_DPI": 300,
             "Font_Size": 12,
             "Output_File": self.out_file,
         }
