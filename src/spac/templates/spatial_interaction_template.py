@@ -108,7 +108,7 @@ def run_from_json(
         # NIDAP display logic is different than the generic python
         # image output. For example, a 12in*8in image with font 12
         # should properly display all text in generic Image
-        # But in nidap code workbook resizing, the text will be reducted 
+        # But in nidap code workbook resizing, the text will be reduced. 
         # This function is to adjust the image sizing and font sizing
         # to fit the NIDAP display
         # Get the figure associated with the axes
