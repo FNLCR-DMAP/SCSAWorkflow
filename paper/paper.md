@@ -70,6 +70,6 @@ SPAC adheres to enterprise-level software engineering standards, featuring exten
 
 # Acknowledgements
 
-We thank our collaborators at the National Cancer Institute Frederick National Laboratory, the Purdue Data Mine program, and the single-cell and spatial imaging communities for their essential contributions and resources.
+We thank our collaborators at National Cancer Institute Frederick National Laboratory, Purdue Data Mine program, and the single-cell and spatial imaging communities for their essential contributions and resources.
 
 # References
