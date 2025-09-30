@@ -52,7 +52,7 @@ To address real-time scalability challenges in analyzing large multiplex imaging
 
 SPAC provides customizable visualization methods. Pin colors to annotations maintain consistent color mapping across figures and sessions. Interactive spatial plots (Plotly) allow users to toggle off features (e.g., biomarkers) and switch among multiple annotations simultaneously, enabling intuitive exploration of spatial relationships and patterns. Stratified and gridded plotting with optimized statistical summary make subgroup comparisons (e.g., across conditions or phenotypes) clear within a single view.
 
-## State of the Field
+# State of the Field
 
 The spatial omics ecosystem includes general frameworks for single cell data and spatial analysis (AnnData/Scanpy, Squidpy [@Palla:2022]) and toolkits focused on multiplex imaging and spatial proteomics (SCIMAP [@Nirmal:2024]), alongside methods aimed primarily at spatial transcriptomics (Seurat [@Hao:2021], GraphST [@Long:2023], Bento [@Mah:2024]). These packages collectively cover data structures, clustering, dimensionality reduction, neighborhood graphs, and spatial interaction metrics, and they are widely adopted for programmatic analyses.
 
