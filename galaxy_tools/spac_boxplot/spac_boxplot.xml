@@ -1,0 +1,76 @@
+<tool id="spac_boxplot" name="Boxplot [SPAC] [DMAP]" version="1.0.1" profile="21.05">
+    <description>Create a boxplot visualization of the features in the analysis dataset.</description>
+
+    <!-- Run this tool inside your SPAC image -->
+    <requirements>
+        <container type="docker">nciccbr/spac:v1</container>
+    </requirements>
+
+    <!-- Ensure the wrapper uses system python inside the container -->
+    <environment_variables>
+        <variable name="SPAC_PYTHON">python3</variable>
+    </environment_variables>
+
+    <command detect_errors="exit_code"><![CDATA[
+        ## Make sure Galaxy will always have a log file to display
+        : > tool_stdout.txt &&
+
+        ## Run the universal wrapper
+        bash $__tool_directory__/run_spac_template.sh "$params_json" boxplot
+    ]]></command>
+
+    <configfiles>
+        <!-- Galaxy serializes all form inputs (including the hidden 'outputs') to this JSON file -->
+        <inputs name="params_json" filename="params.json" data_style="paths"/>
+    </configfiles>
+
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Table_to_Visualize" type="text" value="Original" label="Table to Visualize" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+        <param name="Feature_s_to_Plot" type="text" area="true" value="[&quot;All&quot;]" label="Feature(s) to Plot" help="The feature(s) to plot in the box plot. Default &quot;All&quot; will plot all features. (Enter as comma-separated list, JSON array, or one per line)"/>
+        <param name="Primary_Annotation" type="text" value="None" label="Primary Annotation" help="The annotation to group the visualizations. Use &quot;None&quot; to disable."/>
+        <param name="Secondary_Annotation" type="text" value="None" label="Secondary Annotation" help="Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is &quot;None&quot;."/>
+        <param name="Value_Axis_Log_Scale" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Value Axis Log Scale" help="Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale."/>
+        <param name="Figure_Title" type="text" value="BoxPlot" label="Figure Title" help="Title of the figure"/>
+        <param name="Horizontal_Plot" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Horizontal Plot" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
+        <param name="Figure_Width" type="float" value="12" label="Figure Width" help="Width of the figure, inch."/>
+        <param name="Figure_Height" type="float" value="8" label="Figure Height" help="Height of the figure, inch."/>
+        <param name="Figure_DPI" type="float" value="300" label="Figure DPI" help="Higher the DPI, clearer the image."/>
+        <param name="Font_Size" type="float" value="10" label="Font Size" help="Figure font size."/>
+        <param name="Keep_Outliers" type="boolean" truevalue="True" falsevalue="False" checked="true" label="Keep Outliers" help="True to keep the outliers for every feature, False to remove them"/>
+
+        <!-- IMPORTANT: tell the wrapper where to write outputs.
+             The Docker-aware wrapper reads this from params.json. -->
+        <param name="outputs" type="hidden"
+               value='{"analysis":"transform_output.pickle","DataFrames":"dataframe_folder","figures":"figure_folder"}'/>
+    </inputs>
+
+    <outputs>
+        <collection name="dataframes" type="list" label="${tool.name} on ${on_string}: DataFrames">
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.csv" directory="dataframe_folder" format="csv"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.tsv" directory="dataframe_folder" format="tabular"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.txt" directory="dataframe_folder" format="txt"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.xlsx" directory="dataframe_folder" format="xlsx"/>
+        </collection>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.png" directory="figure_folder" format="png"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.pdf" directory="figure_folder" format="pdf"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.jpg" directory="figure_folder" format="jpg"/>
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.svg" directory="figure_folder" format="svg"/>
+        </collection>
+        <data name="config_used" format="json" from_work_dir="config_used.json" label="${tool.name} on ${on_string}: Parameters Used"/>
+        <data name="execution_log" format="txt" from_work_dir="tool_stdout.txt" label="${tool.name} on ${on_string}: Execution Log"/>
+    </outputs>
+
+    <help><![CDATA[
+        **Boxplot [SPAC] [DMAP]**
+
+        Create a boxplot visualization of the features in the analysis dataset.
+
+        **Input Format Notes:**
+        - For manual list entry: Use comma-separated values (e.g., CD25, CD20)
+        - Or use JSON array format: ["CD25", "CD20"]
+        - Or enter one item per line
+        - To select all items: Enter "All"
+    ]]></help>
+</tool>
