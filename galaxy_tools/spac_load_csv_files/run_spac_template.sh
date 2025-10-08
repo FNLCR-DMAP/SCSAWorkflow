@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# run_spac_template.sh - SPAC wrapper with Load CSV fixes
-# Version: 5.3.0 - Complete version with Load CSV handling
+# run_spac_template.sh - SPAC wrapper with column index conversion
+# Version: 5.5.0 - Fixed load_csv_files to output single CSV
 set -euo pipefail
 
 PARAMS_JSON="${1:?Missing params.json path}"
 TEMPLATE_BASE="${2:?Missing template base name}"
 
-# Handle both base names and full .py filenames for backward compatibility
+# Handle both base names and full .py filenames
 if [[ "$TEMPLATE_BASE" == *.py ]]; then
     TEMPLATE_PY="$TEMPLATE_BASE"
 elif [[ "$TEMPLATE_BASE" == "load_csv_files_with_config" ]]; then
@@ -18,7 +18,7 @@ fi
 # Use SPAC Python environment
 SPAC_PYTHON="${SPAC_PYTHON:-python3}"
 
-echo "=== SPAC Template Wrapper v5.3 ==="
+echo "=== SPAC Template Wrapper v5.5 ==="
 echo "Parameters: $PARAMS_JSON"
 echo "Template base: $TEMPLATE_BASE"
 echo "Template file: $TEMPLATE_PY"
@@ -33,6 +33,8 @@ import copy
 import traceback
 import inspect
 import shutil
+import re
+import csv
 
 # Get arguments
 params_path = sys.argv[1]
@@ -45,9 +47,12 @@ print(f"[Runner] Template: {template_filename}")
 with open(params_path, 'r') as f:
     params = json.load(f)
 
-# ---------------------------------------------------------------------------
-# De-sanitization and parsing helpers
-# ---------------------------------------------------------------------------
+# Extract template name
+template_name = os.path.basename(template_filename).replace('_template.py', '').replace('.py', '')
+
+# ===========================================================================
+# DE-SANITIZATION AND PARSING
+# ===========================================================================
 def _unsanitize(s: str) -> str:
     """Remove Galaxy's parameter sanitization tokens"""
     if not isinstance(s, str):
@@ -81,11 +86,221 @@ def _maybe_parse(v):
         return [_maybe_parse(item) for item in v]
     return v
 
-# First normalize the whole params tree
+# Normalize the whole params tree
 params = _maybe_parse(params)
 
-# Extract template name
-template_name = os.path.basename(template_filename).replace('_template.py', '').replace('.py', '')
+# ===========================================================================
+# COLUMN INDEX CONVERSION - CRITICAL FOR SETUP ANALYSIS
+# ===========================================================================
+def should_skip_column_conversion(template_name):
+    """Some templates don't need column index conversion"""
+    return 'load_csv' in template_name
+
+def read_file_headers(filepath):
+    """Read column headers from various file formats"""
+    try:
+        import pandas as pd
+        
+        # Try pandas auto-detect
+        try:
+            df = pd.read_csv(filepath, nrows=1)
+            if len(df.columns) > 1 or not df.columns[0].startswith('Unnamed'):
+                columns = df.columns.tolist()
+                print(f"[Runner] Pandas auto-detected delimiter, found {len(columns)} columns")
+                return columns
+        except:
+            pass
+        
+        # Try common delimiters
+        for sep in ['\t', ',', ';', '|', ' ']:
+            try:
+                df = pd.read_csv(filepath, sep=sep, nrows=1)
+                if len(df.columns) > 1:
+                    columns = df.columns.tolist()
+                    sep_name = {'\t': 'tab', ',': 'comma', ';': 'semicolon', 
+                               '|': 'pipe', ' ': 'space'}.get(sep, sep)
+                    print(f"[Runner] Pandas found {sep_name}-delimited file with {len(columns)} columns")
+                    return columns
+            except:
+                continue
+    except ImportError:
+        print("[Runner] pandas not available, using csv fallback")
+    
+    # CSV module fallback
+    try:
+        with open(filepath, 'r', encoding='utf-8', errors='replace', newline='') as f:
+            sample = f.read(8192)
+            f.seek(0)
+            
+            try:
+                dialect = csv.Sniffer().sniff(sample, delimiters='\t,;| ')
+                reader = csv.reader(f, dialect)
+                header = next(reader)
+                columns = [h.strip().strip('"') for h in header if h.strip()]
+                if columns:
+                    print(f"[Runner] csv.Sniffer detected {len(columns)} columns")
+                    return columns
+            except:
+                f.seek(0)
+                first_line = f.readline().strip()
+                for sep in ['\t', ',', ';', '|']:
+                    if sep in first_line:
+                        columns = [h.strip().strip('"') for h in first_line.split(sep)]
+                        if len(columns) > 1:
+                            print(f"[Runner] Manual parsing found {len(columns)} columns")
+                            return columns
+    except Exception as e:
+        print(f"[Runner] Failed to read headers: {e}")
+    
+    return None
+
+def should_convert_param(key, value):
+    """Check if parameter contains column indices"""
+    if value is None or value == "" or value == [] or value == {}:
+        return False
+    
+    key_lower = key.lower()
+    
+    # Skip String_Columns - it's names not indices
+    if key == 'String_Columns':
+        return False
+    
+    # Skip output/path parameters
+    if any(x in key_lower for x in ['output', 'path', 'file', 'directory', 'save', 'export']):
+        return False
+    
+    # Skip regex/pattern parameters (but we'll handle Feature_Regex specially)
+    if 'regex' in key_lower or 'pattern' in key_lower:
+        return False
+    
+    # Parameters with 'column' likely have indices
+    if 'column' in key_lower or '_col' in key_lower:
+        return True
+    
+    # Known index parameters
+    if key in {'Annotation_s_', 'Features_to_Analyze', 'Features', 'Markers', 'Markers_to_Plot', 'Phenotypes'}:
+        return True
+    
+    # Check if values look like indices
+    if isinstance(value, list):
+        return all(isinstance(v, int) or (isinstance(v, str) and v.strip().isdigit()) for v in value if v)
+    elif isinstance(value, (int, str)):
+        return isinstance(value, int) or (isinstance(value, str) and value.strip().isdigit())
+    
+    return False
+
+def convert_single_index(item, columns):
+    """Convert a single column index to name"""
+    if isinstance(item, str) and not item.strip().isdigit():
+        return item
+    
+    try:
+        if isinstance(item, str):
+            item = int(item.strip())
+        elif isinstance(item, float):
+            item = int(item)
+    except (ValueError, AttributeError):
+        return item
+    
+    if isinstance(item, int):
+        idx = item - 1  # Galaxy uses 1-based indexing
+        if 0 <= idx < len(columns):
+            return columns[idx]
+        elif 0 <= item < len(columns):  # Fallback for 0-based
+            print(f"[Runner] Note: Found 0-based index {item}, converting to {columns[item]}")
+            return columns[item]
+        else:
+            print(f"[Runner] Warning: Index {item} out of range (have {len(columns)} columns)")
+    
+    return item
+
+def convert_column_indices_to_names(params, template_name):
+    """Convert column indices to names for templates that need it"""
+    
+    if should_skip_column_conversion(template_name):
+        print(f"[Runner] Skipping column conversion for {template_name}")
+        return params
+    
+    print(f"[Runner] Checking for column index conversion (template: {template_name})")
+    
+    # Find input file
+    input_file = None
+    input_keys = ['Upstream_Dataset', 'Upstream_Analysis', 'CSV_Files', 
+                  'Input_File', 'Input_Dataset', 'Data_File']
+    
+    for key in input_keys:
+        if key in params:
+            value = params[key]
+            if isinstance(value, list) and value:
+                value = value[0]
+            if value and os.path.exists(str(value)):
+                input_file = str(value)
+                print(f"[Runner] Found input file via {key}: {os.path.basename(input_file)}")
+                break
+    
+    if not input_file:
+        print("[Runner] No input file found for column conversion")
+        return params
+    
+    # Read headers
+    columns = read_file_headers(input_file)
+    if not columns:
+        print("[Runner] Could not read column headers, skipping conversion")
+        return params
+    
+    print(f"[Runner] Successfully read {len(columns)} columns")
+    if len(columns) <= 10:
+        print(f"[Runner] Columns: {columns}")
+    else:
+        print(f"[Runner] First 10 columns: {columns[:10]}")
+    
+    # Convert indices to names
+    converted_count = 0
+    for key, value in params.items():
+        # Skip non-column parameters
+        if not should_convert_param(key, value):
+            continue
+        
+        # Convert indices
+        if isinstance(value, list):
+            converted_items = []
+            for item in value:
+                converted = convert_single_index(item, columns)
+                if converted is not None:
+                    converted_items.append(converted)
+            converted_value = converted_items
+        else:
+            converted_value = convert_single_index(value, columns)
+        
+        if value != converted_value:
+            params[key] = converted_value
+            converted_count += 1
+            print(f"[Runner] Converted {key}: {value} -> {converted_value}")
+    
+    if converted_count > 0:
+        print(f"[Runner] Total conversions: {converted_count} parameters")
+    
+    # CRITICAL: Handle Feature_Regex specially
+    if 'Feature_Regex' in params:
+        value = params['Feature_Regex']
+        if value in [[], [""], "__ob____cb__", "[]", "", None]:
+            params['Feature_Regex'] = ""
+            print("[Runner] Cleared empty Feature_Regex parameter")
+        elif isinstance(value, list) and value:
+            params['Feature_Regex'] = "|".join(str(v) for v in value if v)
+            print(f"[Runner] Joined Feature_Regex list: {params['Feature_Regex']}")
+    
+    return params
+
+# ===========================================================================
+# APPLY COLUMN CONVERSION
+# ===========================================================================
+print("[Runner] Step 1: Converting column indices to names")
+params = convert_column_indices_to_names(params, template_name)
+
+# ===========================================================================
+# SPECIAL HANDLING FOR SPECIFIC TEMPLATES
+# ===========================================================================
 
 # Helper function to coerce singleton lists to strings for load_csv
 def _coerce_singleton_paths_for_load_csv(params, template_name):
@@ -120,10 +335,10 @@ if 'load_csv' in template_name and 'String_Columns' in params:
             params['String_Columns'] = []
     print(f"[Runner] Ensured String_Columns is list: {params['String_Columns']}")
 
-# Apply the coercion for load_csv files
+# Apply coercion for load_csv files
 params = _coerce_singleton_paths_for_load_csv(params, template_name)
 
-# CRITICAL FIX: For Load CSV Files, check if we have csv_input_dir
+# Fix for Load CSV Files directory
 if 'load_csv' in template_name and 'CSV_Files' in params:
     # Check if csv_input_dir was created by Galaxy command
     if os.path.exists('csv_input_dir') and os.path.isdir('csv_input_dir'):
@@ -133,6 +348,112 @@ if 'load_csv' in template_name and 'CSV_Files' in params:
         # We have a single file path, need to get its directory
         params['CSV_Files'] = os.path.dirname(params['CSV_Files'])
         print(f"[Runner] Using directory of CSV file: {params['CSV_Files']}")
+
+# ===========================================================================
+# LIST PARAMETER NORMALIZATION 
+# ===========================================================================
+def should_normalize_as_list(key, value):
+    """Determine if a parameter should be normalized as a list"""
+    if isinstance(value, list):
+        return True
+    
+    if value is None or value == "":
+        return False
+    
+    key_lower = key.lower()
+    
+    # Skip regex parameters
+    if 'regex' in key_lower or 'pattern' in key_lower:
+        return False
+    
+    # Skip known single-value parameters
+    if any(x in key_lower for x in ['single', 'one', 'first', 'second', 'primary']):
+        return False
+    
+    # Plural forms suggest lists
+    if any(x in key_lower for x in ['features', 'markers', 'phenotypes', 'annotations',
+                                     'columns', 'types', 'labels', 'regions', 'radii']):
+        return True
+    
+    # Check for list separators
+    if isinstance(value, str):
+        if ',' in value or '\n' in value:
+            return True
+        if value.strip().startswith('[') and value.strip().endswith(']'):
+            return True
+    
+    return False
+
+def normalize_to_list(value):
+    """Convert various input formats to a proper Python list"""
+    if value in (None, "", "All", ["All"], "all", ["all"]):
+        return ["All"]
+    
+    if isinstance(value, list):
+        return value
+    
+    if isinstance(value, str):
+        s = value.strip()
+        
+        # Try JSON parsing
+        if s.startswith('[') and s.endswith(']'):
+            try:
+                parsed = json.loads(s)
+                return parsed if isinstance(parsed, list) else [str(parsed)]
+            except:
+                pass
+        
+        # Split by comma
+        if ',' in s:
+            return [item.strip() for item in s.split(',') if item.strip()]
+        
+        # Split by newline
+        if '\n' in s:
+            return [item.strip() for item in s.split('\n') if item.strip()]
+        
+        # Single value
+        return [s] if s else []
+    
+    return [value] if value is not None else []
+
+# Normalize list parameters
+print("[Runner] Step 2: Normalizing list parameters")
+list_count = 0
+for key, value in list(params.items()):
+    if should_normalize_as_list(key, value):
+        original = value
+        normalized = normalize_to_list(value)
+        if original != normalized:
+            params[key] = normalized
+            list_count += 1
+            if len(str(normalized)) > 100:
+                print(f"[Runner] Normalized {key}: {type(original).__name__} -> list of {len(normalized)} items")
+            else:
+                print(f"[Runner] Normalized {key}: {original} -> {normalized}")
+
+if list_count > 0:
+    print(f"[Runner] Normalized {list_count} list parameters")
+
+# CRITICAL FIX: Handle single-element lists for coordinate columns
+# These should be strings, not lists
+coordinate_keys = ['X_Coordinate_Column', 'Y_Coordinate_Column', 'X_centroid', 'Y_centroid']
+for key in coordinate_keys:
+    if key in params:
+        value = params[key]
+        if isinstance(value, list) and len(value) == 1:
+            params[key] = value[0]
+            print(f"[Runner] Extracted single value from {key}: {value} -> {params[key]}")
+
+# Also check for any key ending with '_Column' that has a single-element list
+for key in list(params.keys()):
+    if key.endswith('_Column') and isinstance(params[key], list) and len(params[key]) == 1:
+        original = params[key]
+        params[key] = params[key][0]
+        print(f"[Runner] Extracted single value from {key}: {original} -> {params[key]}")
+
+# ===========================================================================
+# OUTPUTS HANDLING
+# ===========================================================================
 
 # Extract outputs specification
 raw_outputs = params.pop('outputs', {})
@@ -167,34 +488,6 @@ for output_type, path in outputs.items():
         os.makedirs(path, exist_ok=True)
         print(f"[Runner] Created {output_type} directory: {path}")
 
-# Normalize list parameters for features
-feature_keys = [
-    'Feature_s_to_Plot', 'Features_to_Plot', 'features',
-    'Features', 'Phenotypes', 'Markers', 'Regions'
-]
-
-for key in feature_keys:
-    if key in params:
-        value = params[key]
-        if value in (None, "", "All", ["All"], "all", ["all"]):
-            params[key] = ["All"]
-        elif isinstance(value, str):
-            u = _unsanitize(value).strip()
-            if u.startswith('[') and u.endswith(']'):
-                try:
-                    params[key] = json.loads(u)
-                except:
-                    if ',' in u:
-                        params[key] = [s.strip() for s in u.split(',') if s.strip()]
-                    else:
-                        params[key] = [u] if u else []
-            elif ',' in u:
-                params[key] = [s.strip() for s in u.split(',') if s.strip()]
-            elif '\n' in u:
-                params[key] = [s.strip() for s in u.split('\n') if s.strip()]
-            else:
-                params[key] = [u] if u else []
-
 # Add output paths to params
 params['save_results'] = True
 
@@ -207,7 +500,11 @@ if 'DataFrames' in outputs:
     df_dir = outputs['DataFrames']
     params['output_dir'] = df_dir
     params['Export_Dir'] = df_dir
-    params['Output_File'] = os.path.join(df_dir, f'{template_name}_output.csv')
+    # For load_csv, use a specific filename for the combined dataframe
+    if 'load_csv' in template_name:
+        params['Output_File'] = os.path.join(df_dir, 'combined_dataframe.csv')
+    else:
+        params['Output_File'] = os.path.join(df_dir, f'{template_name}_output.csv')
 
 if 'figures' in outputs:
     fig_dir = outputs['figures']
@@ -233,7 +530,7 @@ with open('config_used.json', 'w') as f:
 print(f"[Runner] Saved runtime parameters")
 
 # ============================================================================
-# LOAD AND EXECUTE TEMPLATE - CRITICAL: THIS MUST BE COMPLETE
+# LOAD AND EXECUTE TEMPLATE
 # ============================================================================
 
 # Try to import from installed package first (Docker environment)
@@ -247,7 +544,7 @@ except (ImportError, ModuleNotFoundError):
     print(f"[Runner] Package import failed, trying file load")
     import importlib.util
     
-    # Try standard locations
+    # Standard locations
     template_paths = [
         f'/app/spac/templates/{template_filename}',
         f'/opt/spac/templates/{template_filename}',
@@ -291,8 +588,80 @@ try:
     result = mod.run_from_json('params.runtime.json', **kwargs)
     print(f"[Runner] Template completed, returned: {type(result).__name__}")
     
-    # Handle different return types
-    if result is not None:
+    # ===========================================================================
+    # SPECIAL HANDLING FOR LOAD_CSV_FILES TEMPLATE  
+    # ===========================================================================
+    if 'load_csv' in template_name:
+        print("[Runner] Special handling for load_csv_files template")
+        
+        # The template should return a DataFrame or save CSV files
+        if result is not None:
+            try:
+                import pandas as pd
+                
+                # If result is a DataFrame, save it directly
+                if hasattr(result, 'to_csv'):
+                    output_path = os.path.join(outputs.get('DataFrames', 'dataframe_folder'), 'combined_dataframe.csv')
+                    result.to_csv(output_path, index=False, header=True)
+                    print(f"[Runner] Saved combined DataFrame to {output_path}")
+                
+                # If result is a dict of DataFrames, combine them
+                elif isinstance(result, dict):
+                    dfs = []
+                    for name, df in result.items():
+                        if hasattr(df, 'to_csv'):
+                            # Add a source column to track origin
+                            df['_source_file'] = name
+                            dfs.append(df)
+                    
+                    if dfs:
+                        combined = pd.concat(dfs, ignore_index=True)
+                        output_path = os.path.join(outputs.get('DataFrames', 'dataframe_folder'), 'combined_dataframe.csv')
+                        combined.to_csv(output_path, index=False, header=True)
+                        print(f"[Runner] Combined {len(dfs)} DataFrames into {output_path}")
+            except Exception as e:
+                print(f"[Runner] Could not combine DataFrames: {e}")
+        
+        # Check if CSV files were saved in the dataframe folder
+        df_dir = outputs.get('DataFrames', 'dataframe_folder')
+        if os.path.exists(df_dir):
+            csv_files = [f for f in os.listdir(df_dir) if f.endswith('.csv')]
+            
+            # If we have multiple CSV files but no combined_dataframe.csv, create it
+            if len(csv_files) > 1 and 'combined_dataframe.csv' not in csv_files:
+                try:
+                    import pandas as pd
+                    dfs = []
+                    for csv_file in csv_files:
+                        filepath = os.path.join(df_dir, csv_file)
+                        df = pd.read_csv(filepath)
+                        df['_source_file'] = csv_file.replace('.csv', '')
+                        dfs.append(df)
+                    
+                    combined = pd.concat(dfs, ignore_index=True)
+                    output_path = os.path.join(df_dir, 'combined_dataframe.csv')
+                    combined.to_csv(output_path, index=False, header=True)
+                    print(f"[Runner] Combined {len(csv_files)} CSV files into {output_path}")
+                except Exception as e:
+                    print(f"[Runner] Could not combine CSV files: {e}")
+                    # If combination fails, just rename the first CSV
+                    if csv_files:
+                        src = os.path.join(df_dir, csv_files[0])
+                        dst = os.path.join(df_dir, 'combined_dataframe.csv')
+                        shutil.copy2(src, dst)
+                        print(f"[Runner] Copied {csv_files[0]} to combined_dataframe.csv")
+            
+            # If we have exactly one CSV file and it's not named combined_dataframe.csv, rename it
+            elif len(csv_files) == 1 and csv_files[0] != 'combined_dataframe.csv':
+                src = os.path.join(df_dir, csv_files[0])
+                dst = os.path.join(df_dir, 'combined_dataframe.csv')
+                shutil.move(src, dst)
+                print(f"[Runner] Renamed {csv_files[0]} to combined_dataframe.csv")
+    
+    # ===========================================================================
+    # HANDLE OTHER RETURN TYPES
+    # ===========================================================================
+    elif result is not None:
         if isinstance(result, dict):
             print(f"[Runner] Template saved files: {list(result.keys())}")
         elif isinstance(result, tuple):
@@ -319,7 +688,7 @@ try:
         
         elif hasattr(result, 'to_csv') and 'DataFrames' in outputs:
             df_path = os.path.join(outputs['DataFrames'], 'output.csv')
-            result.to_csv(df_path, index=True)
+            result.to_csv(df_path, index=False, header=True)
             print(f"[Runner] Saved DataFrame to {df_path}")
         
         elif hasattr(result, 'savefig') and 'figures' in outputs:
@@ -337,7 +706,21 @@ try:
     
 except Exception as e:
     print(f"[Runner] ERROR in template execution: {e}")
+    print(f"[Runner] Error type: {type(e).__name__}")
     traceback.print_exc()
+    
+    # Debug help for common issues
+    if "String Columns must be a *list*" in str(e):
+        print("\n[Runner] DEBUG: String_Columns validation failed")
+        print(f"[Runner] Current String_Columns value: {params.get('String_Columns')}")
+        print(f"[Runner] Type: {type(params.get('String_Columns'))}")
+    
+    elif "regex pattern" in str(e).lower() or "^8$" in str(e):
+        print("\n[Runner] DEBUG: This appears to be a column index issue")
+        print("[Runner] Check that column indices were properly converted to names")
+        print("[Runner] Current Features_to_Analyze value:", params.get('Features_to_Analyze'))
+        print("[Runner] Current Feature_Regex value:", params.get('Feature_Regex'))
+    
     sys.exit(1)
 
 # Verify outputs
@@ -348,7 +731,7 @@ for output_type, path in outputs.items():
     if output_type == 'analysis':
         if os.path.exists(path):
             size = os.path.getsize(path)
-            print(f"[Runner] ✔ {output_type}: {path} ({size:,} bytes)")
+            print(f"[Runner] ✓ {output_type}: {path} ({size:,} bytes)")
             found_outputs = True
         else:
             print(f"[Runner] ✗ {output_type}: NOT FOUND")
@@ -356,7 +739,7 @@ for output_type, path in outputs.items():
         if os.path.exists(path) and os.path.isdir(path):
             files = os.listdir(path)
             if files:
-                print(f"[Runner] ✔ {output_type}: {len(files)} files")
+                print(f"[Runner] ✓ {output_type}: {len(files)} files")
                 for f in files[:3]:
                     print(f"[Runner]   - {f}")
                 if len(files) > 3:
