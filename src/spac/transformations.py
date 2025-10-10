@@ -16,9 +16,15 @@ from sklearn.preprocessing import LabelEncoder
 import multiprocessing
 import parmap
 from spac.utag_functions import utag
+<<<<<<< HEAD
 from anndata import AnnData
 from spac.utils import compute_summary_qc_stats
 from typing import List, Optional
+=======
+import plotly.express as px
+from sklearn.metrics.cluster import adjusted_rand_score
+from sklearn.metrics.cluster import normalized_mutual_info_score
+>>>>>>> ramya
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1290,6 +1296,7 @@ def run_utag_clustering(
     adata.obs[output_annotation] = cluster_list.copy()
     adata.uns["utag_features"] = features
 
+<<<<<<< HEAD
 # add QC metrics to AnnData object
 def add_qc_metrics(adata, 
                    organism="hs", 
@@ -1465,3 +1472,84 @@ def get_qc_summary_table(
     # Reset index and store in adata.uns
     summary_table = summary_table.reset_index(drop=True)
     adata.uns["qc_summary_table"] = summary_table
+=======
+def compare_annotations(adata, annotation_list, metric="adjusted_rand_score"):
+    """
+    Create matrix storing metric information with every combination of annotations given
+    (which can later be used to create a heatmap)
+    Metric information typically is similarity measure between different clusterings
+ 
+    The function will add these two attributes to `adata`:
+    `.uns["compare_annotations"]`
+        The matrix (numpy array) that stores measure of mutual information between clusters
+        Each pair of annotations provided will have a value
+ 
+    `.uns["compare_annotations_list"]`
+        The annotations used to calculate and create the matrix that stores
+ 
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object.
+    annotation_list : list of str
+        List of names of (existing) annotations
+    metric : str
+        Metric type for calculations to be used
+        Should be adjusted_rand_score or normalized_mutual_info_score
+        Default = "adjusted_rand_score"
+ 
+    Returns
+    ----------
+    fig : plt.figure
+        it returns a heatmap of the return matrix
+ 
+    """
+ 
+    #Input Validation - there should be more than 1 annotation in order to compare annotations
+    if len(annotation_list) < 2:
+        raise ValueError("annotation_list must contain at least 2 annotations")
+ 
+    #Input Validation - make sure every annotation listed exists
+    for ann in annotation_list:
+        check_annotation(adata, annotations=ann)
+ 
+    #2D array that will contain each computed score
+    matrix = []
+ 
+    #If metric = "adjusted_rand_score", compute the metric using adjusted_rand_score
+    if metric == "adjusted_rand_score":
+        for annotation1 in annotation_list:
+            scores = []
+            for annotation2 in annotation_list:
+                scores.append(adjusted_rand_score(adata.obs[annotation1], adata.obs[annotation2]))
+            matrix.append(scores)
+ 
+    #If metric = "normalized_mutual_info_score", compute the metric using normalized_mutual_info_score
+    elif metric == "normalized_mutual_info_score":
+        for annotation1 in annotation_list:
+            scores = []
+            for annotation2 in annotation_list:
+                scores.append(normalized_mutual_info_score(adata.obs[annotation1], adata.obs[annotation2]))
+            matrix.append(scores)
+ 
+    else:
+        raise ValueError("metric should be 'adjusted_rand_score' or 'normalized_mutual_info_score'")
+    
+    #Convert 2D list containing scores to numpy array
+    matrix_final = np.array(matrix)
+ 
+    # creates a heatmap that corresponds to the final correlational matrix
+    fig = px.imshow(matrix_final,
+                    labels=dict(x="Clusters", y="Clusters", color="Value"),
+                    x=annotation_list,
+                    y=annotation_list)
+    fig.update_xaxes(side="top")
+ 
+    #Store output in AnnData
+    adata.uns["compare_annotations"] = matrix_final
+ 
+    #Store list of annotations used in Anndata
+    adata.uns["compare_annotations_list"] = annotation_list
+ 
+    return fig
+>>>>>>> ramya
