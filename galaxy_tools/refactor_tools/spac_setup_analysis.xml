@@ -1,0 +1,71 @@
+<tool id="spac_setup_analysis" name="Setup Analysis [SPAC] [DMAP]" version="1.0.0" profile="24.2">
+    <description>Convert the pre-processed dataset to the analysis object for downstream analysis.</description>
+    
+    <requirements>
+        <container type="docker">nciccbr/spac:v1</container>
+    </requirements>
+    
+    <environment_variables>
+        <variable name="SPAC_PYTHON">python3</variable>
+    </environment_variables>
+    
+        <command detect_errors="exit_code"><![CDATA[
+            set -eu &&
+            export GALAXY_OUTPUTS_SPEC='{"analysis": "transform_output.pickle"}' &&
+            
+            ## Debug: Show params.json
+            echo "=== params.json ===" >&2 &&
+            cat "$params_json" >&2 &&
+            echo "==================" >&2 &&
+            
+            ## Save snapshot
+            cp "$params_json" params_snapshot.json &&
+            
+            ## Run wrapper
+            bash $__tool_directory__/run_spac_template.sh "$params_json" "setup_analysis"
+        ]]></command>
+    
+    <configfiles>
+        <inputs name="params_json" filename="params.json" data_style="paths"/>
+    </configfiles>
+    
+    <inputs>
+        <param name="Upstream_Dataset" type="data" format="csv,tabular,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
+        <param name="X_Coordinate_Column" type="text" value="" optional="true" label="X Coordinate Column" help="The name of the column containing the X coordinate, default if XMax. (Enter column name)"/>
+        <param name="Y_Coordinate_Column" type="text" value="" optional="true" label="Y Coordinate Column" help="The name of the column containing the Y coordinate, default if YMax. (Enter column name)"/>
+        <param name="Annotation_s_" type="text" area="true" value="" optional="true" label="Annotation(s)" help="The annotation(s) of interest to include in downstream analysis. (Enter column names, one per line or comma-separated)"/>
+        <param name="Features_to_Analyze" type="text" area="true" value="" optional="true" label="Features to Analyze" help="A list of feature name(s) for downstream analysis. (Enter column names, one per line or comma-separated)"/>
+        <param name="Feature_Regex" type="text" area="true" value=""  label="Feature Regex" help="A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with &quot;Intensity&quot;, use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string. (Enter as comma-separated list or one per line)"/>
+    </inputs>
+    
+    <outputs>
+        <data name="analysis" format="binary" from_work_dir="transform_output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+        <data name="params_snapshot" format="json" from_work_dir="params_snapshot.json" label="${tool.name} on ${on_string}: Params Snapshot"/>
+        <data name="config_used" format="json" from_work_dir="config_used.json" label="${tool.name} on ${on_string}: Config Used"/>
+        <data name="execution_log" format="txt" from_work_dir="tool_stdout.txt" label="${tool.name} on ${on_string}: Execution Log"/>
+    </outputs>
+    
+    <help><![CDATA[
+        **Setup Analysis [SPAC] [DMAP]**
+
+Convert the pre-processed dataset to the analysis object for downstream analysis.
+[GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.ingest_cells) for further information.
+
+This tool is part of the SPAC (SPAtial single-Cell analysis) toolkit.
+
+**Column Parameters:** Enter column names as text. Use comma-separation or one per line for multiple columns.
+**List Parameters:** Use comma-separated values or one per line.
+**Special Values:** Enter "All" to select all items.
+    ]]></help>
+    
+    <citations>
+        <citation type="bibtex">
+@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2024},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}
+        </citation>
+    </citations>
+</tool>
