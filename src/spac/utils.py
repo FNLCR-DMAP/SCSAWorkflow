@@ -1108,12 +1108,13 @@ def compute_boxplot_metrics(
                 # Ensure the maximum and minimum outliers are included
                 max_outlier = outlier_series.max()
                 min_outlier = outlier_series.min()
-                outliers_sampled = outliers_sampled.append(
-                    pd.Series([max_outlier, min_outlier])
+                outliers_sampled = pd.concat(
+                    [outliers_sampled, pd.Series([max_outlier, min_outlier])],
+                    ignore_index=True
                 )
 
                 # Convert the sampled values back to a list
-                outliers = outliers_sampled.reset_index(drop=True).tolist()
+                outliers = outliers_sampled.tolist()
 
             metrics = [
                 lower_whisker,
