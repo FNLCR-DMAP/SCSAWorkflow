@@ -170,9 +170,9 @@ class TestBoxplotPerformance(unittest.TestCase):
         print(f"    Speedup factor:      {speedup:.2f}x")
         
         if speedup > 1:
-            print(f"    → boxplot is {speedup:.2f}x faster")
+            print(f"    → boxplot_interactive is {speedup:.2f}x faster")
         elif speedup < 1:
-            print(f"    → boxplot_interactive is {1/speedup:.2f}x faster")
+            print(f"    → boxplot is {1/speedup:.2f}x faster")
         else:
             print(f"    → Both functions have similar performance")
         
