@@ -128,7 +128,12 @@ class TestHistogramPerformance(unittest.TestCase):
     def histogram_old(adata, feature=None, annotation=None, layer=None,
                       group_by=None, together=False, ax=None,
                       x_log_scale=False, y_log_scale=False, **kwargs):
-        """Old histogram implementation for performance comparison."""
+        """
+        Old histogram implementation for performance comparison.
+
+        Copied from commit 1cfad52f00aa6c1b8384f727b60e3bf07f57bee6 in 
+        visualization.py, before the refactor to histogram
+        """
         # If no feature or annotation is specified, apply default behavior
         if feature is None and annotation is None:
             feature = adata.var_names[0]
