@@ -1,0 +1,121 @@
+<tool id="spac_setup_analysis" name="Setup Analysis [SPAC] [DMAP]" version="1.0.0" profile="21.05">
+    <description>Set up an analysis data object for downstream processing.</description>
+    
+    <requirements>
+        <container type="docker">nciccbr/spac:v1</container>
+    </requirements>
+    
+    <environment_variables>
+        <variable name="SPAC_PYTHON">python3</variable>
+    </environment_variables>
+    
+    <command detect_errors="exit_code"><![CDATA[
+        ## Ensure log file exists
+        : > tool_stdout.txt &&
+        
+        ## Run the universal wrapper
+        bash $__tool_directory__/run_spac_template.sh "$params_json" setup_analysis
+    ]]></command>
+    
+    <configfiles>
+        <!-- Galaxy serializes all inputs including hidden 'outputs' to this JSON -->
+        <inputs name="params_json" filename="params.json" data_style="paths"/>
+    </configfiles>
+    
+    <inputs>
+        <param name="Upstream_Dataset" type="data" format="csv,tabular" 
+            label="Upstream Dataset" 
+            help="Select the dataset from upstream processing (CSV or tabular format)."/>
+        
+        <param name="X_Coordinate_Column" type="text" 
+            label="X centroid column name" 
+            value="X_centroid"
+            help="Enter the exact column name for X coordinates (e.g., X_centroid, x, X)"/>
+
+        <param name="Y_Coordinate_Column" type="text" 
+            label="Y centroid column name" 
+            value="Y_centroid"
+            help="Enter the exact column name for Y coordinates (e.g., Y_centroid, y, Y)"/>
+        
+        <param name="Annotation_s_" type="text" area="true" 
+            label="Annotation column names" 
+            value=""
+            optional="true"
+            help="Enter annotation column names, one per line or comma-separated (e.g., cell_type, tissue_type, sample_id)"/>
+        
+        <param name="Features_to_Analyze" type="text" area="true" 
+            label="Feature column names" 
+            value=""
+            optional="true"
+            help="Enter feature/marker column names, one per line or comma-separated (e.g., CD3, CD4, CD8, Ki67)"/>
+        
+        <!-- Optional feature regex pattern -->
+        <param name="Feature_Regex" type="text" 
+            label="Feature Regex Pattern (Optional)" 
+            value=""
+            optional="true" 
+            help="Optional regex pattern to select features (e.g., ^CD[0-9]+ to match CD3, CD4, etc.)"/>
+        
+        <param name="outputs" type="hidden" value='{"analysis": "transform_output.pickle"}'/>
+    </inputs>
+    
+    <outputs>
+        <!-- Main analysis object (pickle format) -->
+        <data name="analysis_object" 
+            format="binary"
+            from_work_dir="transform_output.pickle"
+            label="${tool.name} on ${on_string}: Analysis Object"/>
+        <!-- Configuration and log files -->
+        <data name="config_used"
+            format="json"
+            from_work_dir="config_used.json"
+            label="${tool.name} on ${on_string}: Parameters Used"/>
+        <data name="execution_log"
+            format="txt"
+            from_work_dir="tool_stdout.txt"
+            label="${tool.name} on ${on_string}: Execution Log"/>
+    </outputs>
+    
+    <help><![CDATA[
+        **Setup Analysis [SPAC] [DMAP]**
+        
+        This tool initializes an analysis data object from upstream dataset for downstream SPAC processing.
+        
+        **Important**: Column names must be entered EXACTLY as they appear in your data, including:
+        - Special characters (e.g., CD45+, CD45_positive)
+        - Spaces (e.g., "Cell Type")
+        - Case sensitivity (e.g., CD3 vs cd3)
+
+        **Inputs:**
+        - X/Y centroid columns: Spatial coordinate columns
+        - Annotation columns: Metadata columns 
+        - Feature columns: Measurement/marker columns 
+
+        **Column Entry Format:**
+        - Multiple columns: Use commas or enter one per line
+        - Single column: Just type the name
+
+        **Feature Selection:**
+        Use either Feature column names OR Feature Regex Pattern, not both:
+        - Direct names: List specific columns
+        - Regex pattern: Match multiple columns (e.g., "^CD" for all CD markers)
+        
+        **Output:**
+        - Analysis Object: A pickle file containing the configured analysis for downstream tools
+        - Parameters Used: JSON file documenting the configuration
+        - Execution Log: Detailed log of the setup process
+        
+        This tool is part of the SPAC (SPAtial single-Cell analysis) toolkit.
+    ]]></help>
+    
+    <citations>
+        <citation type="bibtex">
+@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2024},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}
+        </citation>
+    </citations>
+</tool>
