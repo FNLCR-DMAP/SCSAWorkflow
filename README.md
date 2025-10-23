@@ -89,6 +89,28 @@ docker run --rm -p 8888:8888 -v $(pwd):/workspace spac
 
 Then open your browser to: `http://localhost:8888` and navigate to the timestamped executed notebook file.
 
+### Validate Performance Improvements
+To verify the performance speedups implemented in SPAC:
+```bash
+# Navigate to the paper directory  
+cd paper
+
+# Run the performance validation script in Docker (mounts current directory for results)
+# Note: Ensure Docker has at least 16GB memory allocated for full validation
+docker run --rm -v $(pwd):/workspace -v $(pwd)/test_performance_validation.sh:/test_script.sh spac bash /test_script.sh
+```
+
+This test will:
+- ✅ Run boxplot performance benchmarks (up to 10M cells: `boxplot` vs `boxplot_interactive`)
+- ✅ Run histogram performance benchmarks (up to 10M cells: `histogram_old` vs `histogram`)  
+- ✅ Generate detailed speedup analysis with concrete performance improvements
+- 📊 Generate detailed speedup analysis and performance reports
+- � Save results to your local `performance_results/` directory
+
+Performance results are saved locally as timestamped files in `performance_results/`:
+- `boxplot_performance_YYYYMMDD_HHMMSS.txt`
+- `histogram_performance_YYYYMMDD_HHMMSS.txt`
+
 ### Interactive Shell Access
 For debugging or manual exploration:
 ```bash
