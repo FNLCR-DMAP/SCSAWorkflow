@@ -19,6 +19,9 @@ conda env create -f environment.yml
 
 # Once environment is established
 conda activate spac
+
+# Install the SPAC package in development mode
+pip install -e .
 ```
 The envrionment works for Linux and noarc, if your are working on amd processor (commonly seen for latest Mac users), please replace the ` - numpy=1.19.5` with `numpy>=1.19.5,<2.0.0`
 
@@ -29,6 +32,90 @@ conda config --set ssl_verify false
 Then set the verification to True after the installation:
 ```
 conda config --set ssl_verify true
+```
+
+## Using SPAC with Docker
+
+For a reproducible environment, you can use Docker to run SPAC:
+
+### Build the Docker Image
+```bash
+docker build -t spac .
+```
+
+### Run Jupyter Notebook Server with Your Data
+Mount your working directory to access notebooks and data:
+```bash
+# Stop any existing containers using port 8888 (if needed)
+docker stop $(docker ps -q --filter "publish=8888") 2>/dev/null || true
+
+# From the project root directory
+docker run --rm -p 8888:8888 -v $(pwd)/paper/examples:/workspace spac
+
+# Or mount any directory containing your notebooks and data
+docker run --rm -p 8888:8888 -v /path/to/your/data:/workspace spac
+```
+
+Then open your browser to: `http://localhost:8888`
+
+### Test SPAC Installation
+To validate that SPAC works correctly, run the notebook execution test:
+```bash
+# Navigate to the paper directory  
+cd paper
+
+# Run the test script in Docker (mounts examples directory and test script)
+docker run --rm -v $(pwd)/examples:/workspace -v $(pwd)/test_notebook_execution.sh:/test_script.sh spac bash /test_script.sh
+```
+
+This test will:
+- ✅ Verify SPAC and scimap installation
+- ✅ Execute the example lymphnode analysis notebook  
+- ✅ Create a timestamped output file (e.g., `lymphnode_analysis_executed_20231023_134803.ipynb`)
+- 📓 Provide instructions for viewing results in Jupyter
+
+### View Executed Notebooks  
+After running the test, you can view the executed notebook in Jupyter:
+```bash
+# Navigate to paper/examples directory
+cd paper/examples
+
+# Stop any existing containers using port 8888 (if needed)
+docker stop $(docker ps -q --filter "publish=8888") 2>/dev/null || true
+
+# Start Jupyter server with your data mounted
+docker run --rm -p 8888:8888 -v $(pwd):/workspace spac
+```
+
+Then open your browser to: `http://localhost:8888` and navigate to the timestamped executed notebook file.
+
+### Interactive Shell Access
+For debugging or manual exploration:
+```bash
+docker run --rm -it spac bash
+```
+
+### Mount Local Data
+To work with your own data, mount a local directory:
+```bash
+# Stop any existing containers using port 8888 (if needed)
+docker stop $(docker ps -q --filter "publish=8888") 2>/dev/null || true
+
+# Mount your data directory
+docker run --rm -p 8888:8888 -v /path/to/your/data:/data spac
+```
+
+### Docker Cleanup
+If you need to clean up Docker resources:
+```bash
+# Stop all SPAC containers
+docker stop $(docker ps -q --filter "ancestor=spac") 2>/dev/null || true
+
+# Remove stopped containers (optional)
+docker container prune -f
+
+# Remove SPAC image (if you want to rebuild from scratch)
+docker rmi spac
 ```
 
 ## Contirbuting to SPAC:
