@@ -28,5 +28,6 @@ dependencies:
     - gendocs
     - parmap==1.7.0
     - scimap
-    - phenograph=1.5.7
+    - phenograph==1.5.7
+
 
