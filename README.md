@@ -8,6 +8,7 @@ Run the following command to establish the Conda environment supporting usage an
 Latest released version is v0.9.0 at 5/23/2025
 ```bash
 cd <home directory of SCSAWorkflow folder>
+git checkout address-reviewer-comments
 
 # If conda is not activate
 conda activate
