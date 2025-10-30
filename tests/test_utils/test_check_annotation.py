@@ -20,7 +20,7 @@ class TestCheckAnnotation(unittest.TestCase):
             obs={"annotation1": [1, 2],
                  "annotation2": [3, 4]}
         )
-        print("minor)
+        print("minor")
 
     def test_wrong_adata_type(self):
         with self.assertRaises(TypeError) as context:
