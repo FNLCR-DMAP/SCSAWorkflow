@@ -20,6 +20,7 @@ class TestCheckAnnotation(unittest.TestCase):
             obs={"annotation1": [1, 2],
                  "annotation2": [3, 4]}
         )
+        print("minor)
 
     def test_wrong_adata_type(self):
         with self.assertRaises(TypeError) as context:
@@ -44,12 +45,12 @@ class TestCheckAnnotation(unittest.TestCase):
 
     def test_valid_annotation(self):
         # Test with valid annotation
-        self.assertIsNone(check_annotation(self.adata, 
+        self.assertIsNone(check_annotation(self.adata,
                                            annotations="annotation1"))
 
     def test_valid_list_annotation(self):
         # Test with list input for annotation
-        self.assertIsNone(check_annotation(self.adata, 
+        self.assertIsNone(check_annotation(self.adata,
                                            annotations=["annotation1",
                                                         "annotation2"]))
 
@@ -58,7 +59,7 @@ class TestCheckAnnotation(unittest.TestCase):
         with self.assertRaises(ValueError):
             check_annotation(self.adata, annotations="invalid_annotation")
         with self.assertRaises(ValueError):
-            check_annotation(self.adata, 
+            check_annotation(self.adata,
                              annotations=["annotation1", "invalid_annotation"])
 
     def test_missing_annotations(self):
