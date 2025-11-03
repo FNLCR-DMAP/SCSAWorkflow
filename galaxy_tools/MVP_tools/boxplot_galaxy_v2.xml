@@ -1,0 +1,60 @@
+<tool id="boxplot_spac_dmap" name="Boxplot [SPAC] [DMAP]" version="1.0.0" profile="24.2">
+    <description>Create a boxplot visualization of the features in the analysis dataset.\
+Please refer to DUET Documentation,  GitHub Documentation</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v1</container>
+    </requirements>
+    <command detect_errors="exit_code">## Create output directories
+        mkdir -p dataframe_folder &amp;&amp;
+        mkdir -p figure_folder &amp;&amp;
+        ## Save raw Galaxy parameters to JSON
+        echo '$__json__' &gt; galaxy_params.json &amp;&amp;
+        echo &quot;=== Raw Galaxy Parameters ===&quot; &amp;&amp;
+        cat galaxy_params.json &amp;&amp;
+        echo &quot;===========================&quot; &amp;&amp;
+        ## Normalize Galaxy parameters for template consumption
+        python3 '$__tool_directory__/format_values_v2.py' galaxy_params.json cleaned_params.json \
+            --bool-values Value_Axis_Log_Scale Horizontal_Plot Keep_Outliers \
+            --list-values Feature_s_to_Plot
+            --debug &amp;&amp;
+        echo &quot;=== Cleaned Parameters ===&quot; &amp;&amp;
+        cat cleaned_params.json &amp;&amp;
+        echo &quot;===========================&quot; &amp;&amp;
+        ## Add output directories to cleaned params
+        python3 -c &quot;
+        import json
+        with open('cleaned_params.json', 'r') as f:
+            params = json.load(f)
+        params['outputs'] = {'DataFrames': 'dataframe_folder', 'figures': 'figure_folder'}
+        with open('cleaned_params.json', 'w') as f:
+            json.dump(params, f, indent=2)
+        &quot; &amp;&amp;
+        ## Execute the template with cleaned parameters
+        python3 '$__tool_directory__/boxplot_template.py' cleaned_params.json</command>
+    <inputs>
+        <param name="Table_to_Visualize" type="text" value="Original" label="Table to Visualize" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+        <repeat name="Feature_s_to_Plot_repeat" title="Feature(s) to Plot" min="0">
+            <param name="value" type="text" label="Feature(s) to Plot item" help="The feature(s) to plot in the box plot. Default &quot;All&quot; will plot all features."/>
+        </repeat>
+        <param name="Primary_Annotation" type="text" value="None" label="Primary Annotation" help="The annotation to group the visualizations. Use &quot;None&quot; to disable."/>
+        <param name="Secondary_Annotation" type="text" value="None" label="Secondary Annotation" help="Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is &quot;None&quot;."/>
+        <param name="Value_Axis_Log_Scale" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Value Axis Log Scale" help="Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale."/>
+        <param name="Figure_Title" type="text" value="BoxPlot" label="Figure Title" help="Title of the figure"/>
+        <param name="Horizontal_Plot" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Horizontal Plot" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
+        <param name="Figure_Width" type="float" value="12" label="Figure Width" help="Width of the figure, inch."/>
+        <param name="Figure_Height" type="float" value="8" label="Figure Height" help="Height of the figure, inch."/>
+        <param name="Figure_DPI" type="float" value="300" label="Figure DPI" help="Higher the DPI, clearer the image."/>
+        <param name="Font_Size" type="float" value="10" label="Font Size" help="Figure font size."/>
+        <param name="Keep_Outliers" type="boolean" truevalue="True" falsevalue="False" checked="true" label="Keep Outliers" help="True to keep the outliers for every feature, False to remove them"/>
+    </inputs>
+    <outputs>
+        <data name="galaxy_params" format="json" from_work_dir="galaxy_params.json" label="Raw Galaxy Parameters"/>
+        <data name="cleaned_params" format="json" from_work_dir="cleaned_params.json" label="Cleaned Parameters"/>
+        <collection name="dataframes" type="list" label="DataFrames">
+            <discover_datasets pattern="__name_and_ext__" directory="dataframe_folder"/>
+        </collection>
+        <collection name="figures" type="list" label="Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figure_folder"/>
+        </collection>
+    </outputs>
+</tool>
