@@ -15,6 +15,14 @@ from spac.utils import check_annotation, check_feature, check_table
 matplotlib.use('Agg')  # Set the backend to 'Agg' to suppress plot window
 
 
+
+
+skip_perf = unittest.skipUnless(
+    os.getenv("SPAC_RUN_PERF") == "1",
+    "Perf tests disabled by default"
+)
+
+@skip_perf
 class TestHistogramPerformance(unittest.TestCase):
     """Performance comparison tests for histogram vs histogram_old."""
 
@@ -24,19 +32,19 @@ class TestHistogramPerformance(unittest.TestCase):
         print("\n" + "=" * 70)
         print("Setting up large datasets for histogram performance tests...")
         print("=" * 70)
-        
+
         # Generate 1M cell dataset
         print("\nGenerating 1M cell dataset...")
         start = time.time()
         cls.adata_1m = cls._generate_dataset(n_obs=1_000_000, random_state=42)
         print(f"  Completed in {time.time() - start:.2f} seconds")
-        
+
         # Generate 5M cell dataset
         print("\nGenerating 5M cell dataset...")
         start = time.time()
         cls.adata_5m = cls._generate_dataset(n_obs=5_000_000, random_state=42)
         print(f"  Completed in {time.time() - start:.2f} seconds")
-        
+
         # Generate 10M cell dataset
         print("\nGenerating 10M cell dataset...")
         start = time.time()
@@ -48,18 +56,18 @@ class TestHistogramPerformance(unittest.TestCase):
     def _generate_dataset(n_obs: int, random_state: int = 42) -> ad.AnnData:
         """
         Generate a synthetic AnnData object with realistic clustering.
-        
+
         Creates dataset with:
         - 5 features (marker_1 to marker_5)
         - 5 annotations (cell_type, phenotype, region, batch, treatment)
         - 3 layers (normalized, log_transformed, scaled)
         """
         np.random.seed(random_state)
-        
+
         # Generate base data with natural clustering
         n_features = 5
         n_centers = 5
-        
+
         X, cluster_labels = make_blobs(
             n_samples=n_obs,
             n_features=n_features,
@@ -67,31 +75,31 @@ class TestHistogramPerformance(unittest.TestCase):
             cluster_std=1.5,
             random_state=random_state
         )
-        
+
         # Make values positive and add variation
         X = np.abs(X) + np.random.exponential(scale=2.0, size=X.shape)
-        
+
         # Create feature names
         feature_names = [f"marker_{i+1}" for i in range(n_features)]
-        
+
         # Create annotations based on clusters
         cell_types = [f"Type_{chr(65+i)}" for i in range(5)]
         cell_type = np.array([cell_types[i % 5] for i in cluster_labels])
-        
+
         phenotypes = [f"Pheno_{i+1}" for i in range(4)]
         phenotype = np.array([phenotypes[i % 4] for i in cluster_labels])
         random_mask = np.random.random(n_obs) < 0.2
         phenotype[random_mask] = np.random.choice(phenotypes, size=random_mask.sum())
-        
+
         regions = ["Region_X", "Region_Y", "Region_Z"]
         region = np.random.choice(regions, size=n_obs)
-        
+
         batches = ["Batch_1", "Batch_2", "Batch_3"]
         batch = np.random.choice(batches, size=n_obs)
-        
+
         treatments = ["Control", "Treated"]
         treatment = np.random.choice(treatments, size=n_obs, p=[0.5, 0.5])
-        
+
         # Create observations DataFrame
         obs = pd.DataFrame({
             'cell_type': pd.Categorical(cell_type),
@@ -100,11 +108,11 @@ class TestHistogramPerformance(unittest.TestCase):
             'batch': pd.Categorical(batch),
             'treatment': pd.Categorical(treatment)
         })
-        
+
         # Create AnnData object
         adata = ad.AnnData(X=X, obs=obs)
         adata.var_names = feature_names
-        
+
         # Create layers with different transformations
         X_normalized = np.zeros_like(X)
         for i in range(n_features):
@@ -112,12 +120,12 @@ class TestHistogramPerformance(unittest.TestCase):
             feature_max = X[:, i].max()
             X_normalized[:, i] = (X[:, i] - feature_min) / (feature_max - feature_min)
         adata.layers['normalized'] = X_normalized
-        
+
         adata.layers['log_transformed'] = np.log1p(X)
-        
+
         scaler = StandardScaler()
         adata.layers['scaled'] = scaler.fit_transform(X)
-        
+
         return adata
 
     def tearDown(self):
@@ -131,7 +139,7 @@ class TestHistogramPerformance(unittest.TestCase):
         """
         Old histogram implementation for performance comparison.
 
-        Copied from commit 1cfad52f00aa6c1b8384f727b60e3bf07f57bee6 in 
+        Copied from commit 1cfad52f00aa6c1b8384f727b60e3bf07f57bee6 in
         visualization.py, before the refactor to histogram
         """
         # If no feature or annotation is specified, apply default behavior
@@ -301,14 +309,14 @@ class TestHistogramPerformance(unittest.TestCase):
         feature = 'marker_1'
         annotation = None
         layer = 'normalized'
-        
+
         print(f"\n{'=' * 70}")
         print(f"{test_name}: {n_obs:,} cells")
         print(f"  Feature: {feature}")
         print(f"  Annotation: {annotation}")
         print(f"  Layer: {layer}")
         print(f"{'=' * 70}")
-        
+
         # Test histogram_old
         print("\n  Running histogram_old...")
         start = time.time()
@@ -321,7 +329,7 @@ class TestHistogramPerformance(unittest.TestCase):
         old_time = time.time() - start
         print(f"    Time: {old_time:.2f} seconds")
         plt.close('all')
-        
+
         # Test histogram from SPAC
         print("\n  Running histogram (SPAC)...")
         start = time.time()
@@ -334,24 +342,24 @@ class TestHistogramPerformance(unittest.TestCase):
         new_time = time.time() - start
         print(f"    Time: {new_time:.2f} seconds")
         plt.close('all')
-        
+
         # Calculate speedup
         speedup = old_time / new_time if new_time > 0 else 0
-        
+
         print(f"\n  Results:")
         print(f"    histogram_old:  {old_time:.2f}s")
         print(f"    histogram:      {new_time:.2f}s")
         print(f"    Speedup factor: {speedup:.2f}x")
-        
+
         if speedup > 1:
             print(f"    → histogram (SPAC) is {speedup:.2f}x faster")
         elif speedup < 1:
             print(f"    → histogram_old is {1/speedup:.2f}x faster")
         else:
             print(f"    → Both functions have similar performance")
-        
+
         print(f"{'=' * 70}\n")
-        
+
         # Store results for potential further analysis
         return {
             'n_obs': n_obs,

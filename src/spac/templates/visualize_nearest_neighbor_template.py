@@ -93,7 +93,7 @@ def run_from_json(
     fig_dpi = params.get("Figure_DPI", 300)
     global_font_size = params.get("Font_Size", 12)
     fig_title = (
-        f'Nearest Neighbor Distance Distribution Measured from '
+        f'Nearest Neighbor Distance Distribution\nMeasured from '
         f'"{source_label}"'
     )
 
@@ -135,16 +135,16 @@ def run_from_json(
         )
         print(warning_message)
         facet_plot = False
-    
+
     result_dict = visualize_nearest_neighbor(
         adata=adata,
         annotation=annotation,
-        spatial_distance=distance_key,  
+        spatial_distance=distance_key,
         distance_from=source_label,
         distance_to=distance_to_processed,
         method=method,
         plot_type=plot_type,
-        stratify_by=image_id,    
+        stratify_by=image_id,
         facet_plot=facet_plot,
         log=log_scale,
         annotation_colorscale=annotation_colorscale,
@@ -220,7 +220,7 @@ def run_from_json(
                 isinstance(figs_out, plt.Figure)):
             for ax_item in flat_axes_list:
                 ax_item.set_xlabel('')
-            
+
             sup_ha_align = 'center'
             if 0 < x_axis_title_rotation % 360 < 180:
                 sup_ha_align = 'right'
@@ -317,7 +317,7 @@ def run_from_json(
 
     # Track figures for optional saving
     figures = []
-    
+
     if isinstance(figs_out, list) and not facet_plot and \
             cat_list and len(figs_out) == len(cat_list):
         # Scenario: Multiple separate figures, one per category
@@ -336,7 +336,7 @@ def run_from_json(
         for fig_item_to_display in figures_to_display:
             if fig_item_to_display is not None:
                 _title_main(fig_item_to_display, fig_title)
-                
+
                 bottom_padding = 0.01
                 # Make space for shared x-title
                 if fig_item_to_display is shared_x_title_applied_to_fig:
@@ -350,7 +350,7 @@ def run_from_json(
                 )
                 if show_plot:
                     plt.show()
-                
+
     # summary statistics
     # 1) Per-group summary
     df_summary_group = (
@@ -391,7 +391,7 @@ def run_from_json(
             "Output_File", "nearest_neighbor_plots.csv"
         )
         saved_files = save_outputs({output_file: final_df})
-        
+
         print(f"\nSaved summary statistics to '{output_file}'.")
         print(
             f"Visualize Nearest Neighbor completed → "
