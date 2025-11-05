@@ -2,6 +2,10 @@
 Platform-agnostic Boxplot template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use save_results with blueprint configuration:
+- figure: {"type": "file", "name": "boxplot.png"}  (single figure file)
+- summary: {"type": "file", "name": "summary.csv"} (single summary file)
+
 Usage
 -----
 >>> from spac.templates.boxplot_template import run_from_json
@@ -22,7 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.visualization import boxplot
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -30,9 +34,10 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plot: bool = True
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
+    save_to_file: bool = True,
+    show_plot: bool = True,
+    output_dir: str = None,
+) -> Union[Dict[str, List[str]], Tuple[Any, pd.DataFrame]]:
     """
     Execute Boxplot analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -41,20 +46,34 @@ def run_from_json(
     ----------
     json_path : str, Path, or dict
         Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
+    save_to_file : bool, optional
         Whether to save results to file. If False, returns the figure and
         summary dataframe directly for in-memory workflows. Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
-
+    output_dir : str, optional
+        Base directory for outputs. If None, uses current directory or
+        Output_Directory from params.
+    
     Returns
     -------
     dict or tuple
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (figure, summary_dataframe)
+        If save_to_file=True: Dictionary of saved file paths (blueprint format)
+        If save_to_file=False: Tuple of (figure, summary_dataframe)
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+    
+    # Blueprint configuration for outputs
+    # For boxplot: single figure file + single summary file (no directories needed)
+    blueprint_config = params.get("outputs", {
+        "figure": {"type": "file", "name": "boxplot.png"},
+        "summary": {"type": "file", "name": "summary.csv"}
+    })
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -89,6 +108,11 @@ def run_from_json(
         figure_orientation = "h"
     else:
         figure_orientation = "v"
+
+    # Handle feature selection
+    if isinstance(feature_to_plot, str):
+        # If it's a single string, convert to list
+        feature_to_plot = [feature_to_plot]
 
     if any(item == "All" for item in feature_to_plot):
         logging.info("Plotting All Features")
@@ -138,18 +162,34 @@ def run_from_json(
     if show_plot:
         plt.show()
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "boxplot_summary.csv")
-        saved_files = save_outputs({output_file: summary_df})
+    # Handle results based on save_to_file flag
+    if save_to_file:
+        # Prepare results dictionary for save_results
+        results = {}
+        
+        # Add figure based on blueprint config (single file)
+        if "figure" in blueprint_config:
+            results["figure"] = fig  # Single figure, not a dict
+        
+        # Add dataframe based on blueprint config
+        if "summary" in blueprint_config:
+            results["summary"] = summary_df  # Single dataframe 
 
-        # Also save the figure if specified
-        figure_file = params.get("Figure_File", None)
-        if figure_file:
-            saved_files.update(save_outputs({figure_file: fig}))
-
-        logging.info(f"Boxplot completed → {saved_files[output_file]}")
+        # Use save_results with blueprint configuration
+        saved_files = save_results(
+            results=results,
+            outputs_config=blueprint_config,
+            output_base_dir=output_dir
+        )
+        
+        logging.info(f"Boxplot completed. Saved files:")
+        for key, paths in saved_files.items():
+            if isinstance(paths, list):
+                for path in paths:
+                    logging.info(f"  - {path}")
+            else:
+                logging.info(f"  - {paths}")
+        
         return saved_files
     else:
         # Return the figure and summary dataframe for in-memory workflows
@@ -161,21 +201,38 @@ def run_from_json(
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python boxplot_template.py <params.json>",
+            "Usage: python boxplot_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
     # Set up logging for CLI usage
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
     
-    result = run_from_json(sys.argv[1])
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            print(f"  {key}:")
+            if isinstance(paths, list):
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"    - {paths}")
     else:
+        fig, summary_df = result
         print("\nReturned figure and summary dataframe")
+        print(f"Figure: {fig}")
+        print(f"Summary shape: {summary_df.shape}")
