@@ -4,9 +4,10 @@ format_values.py - Utility to normalize Galaxy parameters JSON for template cons
 
 Version 2.0 - No Cheetah needed! Processes Galaxy repeat structures directly.
 
-Handles two main transformations:
+Handles three main transformations:
 1. Converts Galaxy repeat structures to simple lists
 2. Converts boolean string values to actual Python booleans
+3. Injects output configuration for template_utils (single files for boxplot MVP)
 
 Usage:
     python format_values.py galaxy_params.json cleaned_params.json \
@@ -101,6 +102,29 @@ def extract_list_from_repeat(params: Dict[str, Any], param_name: str) -> List[st
     return ["All"]
 
 
+def inject_output_directories(cleaned: Dict[str, Any]) -> None:
+    """
+    Inject output configuration for template_utils.save_results().
+    
+    For boxplot: single figure file + single summary file (no directories)
+    This matches what boxplot_template.py expects (lines 73-76).
+    
+    Parameters
+    ----------
+    cleaned : dict
+        Cleaned parameters dictionary (modified in-place)
+    """
+    # Configure outputs for template_utils.save_results()
+    # Must match the blueprint structure expected by template
+    cleaned['outputs'] = {
+        'figure': {'type': 'file', 'name': 'boxplot.png'},
+        'summary': {'type': 'file', 'name': 'summary.csv'}
+    }
+    
+    # Enable result saving
+    cleaned['save_results'] = True
+
+
 def process_galaxy_params(
     params: Dict[str, Any],
     bool_params: List[str],
@@ -144,6 +168,9 @@ def process_galaxy_params(
         repeat_key = f"{param_name}_repeat"
         if repeat_key in cleaned:
             del cleaned[repeat_key]
+    
+    # Inject output configuration (boxplot MVP uses single files)
+    inject_output_directories(cleaned)
     
     return cleaned
 
@@ -210,6 +237,9 @@ def main():
     if args.debug:
         print("\n=== Cleaned Parameters ===", file=sys.stderr)
         print(json.dumps(cleaned_params, indent=2), file=sys.stderr)
+        print("\n=== Output Configuration ===", file=sys.stderr)
+        print(f"  save_results: {cleaned_params.get('save_results')}", file=sys.stderr)
+        print(f"  outputs: {cleaned_params.get('outputs')}", file=sys.stderr)
     
     # Write output JSON
     output_path = Path(args.output_json)
@@ -234,6 +264,9 @@ def main():
             original = params[repeat_key]
             cleaned = cleaned_params.get(param, [])
             print(f"  {param}: Extracted {len(cleaned)} values from repeat structure")
+    
+    # Confirm output configuration injection
+    print(f"  Output configuration injected: {cleaned_params.get('outputs')}")
 
 
 if __name__ == "__main__":

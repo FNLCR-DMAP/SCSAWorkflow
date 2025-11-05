@@ -1,0 +1,108 @@
+<tool id="boxplot_spac_dmap" name="Boxplot [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Create a boxplot visualization of the features in the analysis dataset. Please refer to DUET Documentation, GitHub Documentation</description>
+    
+    <requirements>
+        <container type="docker">spac:boxplot-mvp</container>
+    </requirements>
+    
+    <configfiles>
+        <!-- Galaxy auto-serializes all parameters to JSON -->
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+        
+    <command><![CDATA[
+    python '$__tool_directory__/format_values.py' 
+        'galaxy_params.json' 
+        'cleaned_params.json'
+        --bool-values Horizontal_Plot Keep_Outliers Value_Axis_Log_Scale
+        --list-values Feature_s_to_Plot
+    &&
+    python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
+    ]]></command>
+    
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary" label="Upstream Analysis" help="Input analysis dataset"/>
+        <param name="Table_to_Visualize" type="text" value="Original" label="Table to Visualize" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+        <repeat name="Feature_s_to_Plot_repeat" title="Feature(s) to Plot" min="0">
+            <param name="value" type="text" label="Feature name" help="The feature(s) to plot in the box plot. Leave empty or use 'All' to plot all features."/>
+        </repeat>
+        <param name="Primary_Annotation" type="text" value="None" label="Primary Annotation" help="The annotation to group the visualizations. Use 'None' to disable."/>
+        <param name="Secondary_Annotation" type="text" value="None" label="Secondary Annotation" help="Secondary annotation to create subdivisions within each category defined by the primary annotation. Default is 'None'."/>
+        <param name="Value_Axis_Log_Scale" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Value Axis Log Scale" help="Make the Y-axis (or X-axis if horizontal) in log scale. Negative values in the data disable log scale."/>
+        <param name="Figure_Title" type="text" value="BoxPlot" label="Figure Title" help="Title of the figure"/>
+        <param name="Horizontal_Plot" type="boolean" truevalue="True" falsevalue="False" checked="false" label="Horizontal Plot" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
+        <param name="Figure_Width" type="float" value="12" label="Figure Width" help="Width of the figure, inch."/>
+        <param name="Figure_Height" type="float" value="8" label="Figure Height" help="Height of the figure, inch."/>
+        <param name="Figure_DPI" type="float" value="300" label="Figure DPI" help="Higher the DPI, clearer the image."/>
+        <param name="Font_Size" type="float" value="10" label="Font Size" help="Figure font size."/>
+        <param name="Keep_Outliers" type="boolean" truevalue="True" falsevalue="False" checked="true" label="Keep Outliers" help="True to keep the outliers for every feature, False to remove them"/>
+    </inputs>
+    
+    <outputs>
+        <!-- Debug outputs -->
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        
+        <!-- Main outputs -->
+        <data name="summary" format="csv" from_work_dir="summary.csv" label="${tool.name} on ${on_string}: Summary"/>
+        <data name="figure" format="png" from_work_dir="boxplot.png" label="${tool.name} on ${on_string}: Boxplot"/>
+    </outputs>
+    
+    <tests>
+        <test expect_num_outputs="4">
+            <param name="Upstream_Analysis" value="test_input.h5ad"/>
+            <param name="Table_to_Visualize" value="Original"/>
+            <repeat name="Feature_s_to_Plot_repeat">
+                <param name="value" value="CD3"/>
+            </repeat>
+            <repeat name="Feature_s_to_Plot_repeat">
+                <param name="value" value="CD4"/>
+            </repeat>
+            <param name="Primary_Annotation" value="cell_type"/>
+            <param name="Value_Axis_Log_Scale" value="False"/>
+            <param name="Keep_Outliers" value="True"/>
+            <output name="summary" file="summary.csv">
+                <assert_contents>
+                    <has_text text="index"/>
+                </assert_contents>
+            </output>
+            <output name="figure" file="boxplot.png" compare="sim_size" delta="1000"/>
+        </test>
+    </tests>
+    
+    <help><![CDATA[
+**Boxplot [SPAC] [DMAP] v2.0**
+
+This tool creates boxplot visualizations from spatial single-cell analysis data.
+
+**Key Features:**
+- Uses configfiles to generate params.json from Galaxy inputs
+- Normalizes parameters with format_values.py
+- Debug outputs available for troubleshooting
+- PNG format for figures (MVP scope)
+
+**Feature(s) to Plot:**
+- Add one or more features using the repeat control
+- Leave empty or use "All" to plot all features
+
+**Outputs:**
+- Summary: Single CSV file with summary statistics
+- Figure: Single PNG file with boxplot visualization
+- Debug: Raw and cleaned parameter JSON files
+
+**Technical Notes:**
+- Galaxy generates params.json via configfiles
+- Parameters are normalized by format_values.py before template execution
+- Booleans converted to true JSON booleans
+- Repeat structures converted to simple lists
+- Output files automatically created by template_utils.save_results()
+
+**Debug Mode:**
+The tool outputs both raw params.json and cleaned_params.json for debugging purposes.
+Check these files to verify parameter processing.
+    ]]></help>
+    
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>
