@@ -164,7 +164,7 @@ def run_from_json(
 
     # Handle results based on save_to_file flag
     if save_to_file:
-        # Prepare results dictionary for save_results
+        # Prepare results dictionary for save_to_file
         results = {}
         
         # Add figure based on blueprint config (single file)

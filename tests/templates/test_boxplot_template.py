@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 import warnings
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from pathlib import Path
 
 import matplotlib
@@ -116,7 +116,7 @@ class TestBoxplotTemplate(unittest.TestCase):
             # Test with save_to_file=True (default)
             saved_files = run_from_json(self.params)
             
-            # Check that save_results created the expected structure
+            # Check that save_to_file created the expected structure
             self.assertIn("figure", saved_files)
             self.assertIn("summary", saved_files)
             
@@ -144,9 +144,9 @@ class TestBoxplotTemplate(unittest.TestCase):
         })
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        # Test with save_results=False
+        # Test with save_to_file=False
         fig, summary_df = run_from_json(
-            self.params, save_results=False
+            self.params, save_to_file=False
         )
         
         # Verify we got the figure and summary dataframe back
@@ -157,12 +157,21 @@ class TestBoxplotTemplate(unittest.TestCase):
         self.assertIn('mean', summary_df['index'].values)
         self.assertIn('std', summary_df['index'].values)
 
+    @patch('spac.templates.boxplot_template.save_results')
     @patch('spac.templates.boxplot_template.boxplot')
     @patch('matplotlib.pyplot.show')
-    def test_blueprint_configuration(self, mock_show, mock_boxplot) -> None:
+    def test_blueprint_configuration(self, mock_show, mock_boxplot, mock_save_results) -> None:
         """Test blueprint configuration for outputs."""
         mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return()
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
+        
+        # Add this to mock save_results and create files
+        mock_save_results.return_value = {
+            "figure": [str(Path(self.tmp_dir.name) / "boxplot.png")],
+            "summary": [str(Path(self.tmp_dir.name) / "summary.csv")]
+        }
+        (Path(self.tmp_dir.name) / "boxplot.png").touch()
+        (Path(self.tmp_dir.name) / "summary.csv").touch()
         
         # Test with default blueprint configuration
         saved_files = run_from_json(self.params, save_to_file=True)
@@ -178,9 +187,10 @@ class TestBoxplotTemplate(unittest.TestCase):
         summary_path = Path(self.tmp_dir.name) / "summary.csv"
         self.assertTrue(summary_path.exists())
 
+    @patch('spac.templates.boxplot_template.save_results')
     @patch('spac.templates.boxplot_template.boxplot')
     @patch('matplotlib.pyplot.show')
-    def test_custom_blueprint_in_params(self, mock_show, mock_boxplot) -> None:
+    def test_custom_blueprint_in_params(self, mock_show, mock_boxplot, mock_save_results) -> None:
         """Test custom blueprint configuration passed in params."""
         mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return()
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
@@ -191,6 +201,14 @@ class TestBoxplotTemplate(unittest.TestCase):
             "figure": {"type": "file", "name": "my_plot.pdf"},
             "summary": {"type": "file", "name": "my_stats.csv"}
         }
+
+        # Mock save_results and create files
+        mock_save_results.return_value = {
+            "figure": [str(Path(self.tmp_dir.name) / "my_plot.pdf")],
+            "summary": [str(Path(self.tmp_dir.name) / "my_stats.csv")]
+        }
+        (Path(self.tmp_dir.name) / "my_plot.pdf").touch()
+        (Path(self.tmp_dir.name) / "my_stats.csv").touch()
         
         saved_files = run_from_json(params_with_blueprint, save_to_file=True)
         
@@ -210,7 +228,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         })
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(self.params, save_results=False)
+        run_from_json(self.params, save_to_file=False)
         
         # Verify features parameter - should be all gene names
         call_args = mock_boxplot.call_args
@@ -233,7 +251,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1], 'Gene_2': [2]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_specific, save_results=False)
+        run_from_json(params_specific, save_to_file=False)
         
         # Verify specific features were passed
         call_args = mock_boxplot.call_args
@@ -255,7 +273,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_norm, save_results=False)
+        run_from_json(params_norm, save_to_file=False)
         
         call_args = mock_boxplot.call_args
         self.assertEqual(call_args[1]['layer'], "normalized")
@@ -273,7 +291,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_horiz, save_results=False)
+        run_from_json(params_horiz, save_to_file=False)
         
         call_args = mock_boxplot.call_args
         self.assertEqual(call_args[1]['orient'], "h")
@@ -291,7 +309,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_second, save_results=False)
+        run_from_json(params_second, save_to_file=False)
         
         call_args = mock_boxplot.call_args
         self.assertEqual(call_args[1]['second_annotation'], "condition")
@@ -309,7 +327,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_log, save_results=False)
+        run_from_json(params_log, save_to_file=False)
         
         call_args = mock_boxplot.call_args
         self.assertEqual(call_args[1]['log_scale'], True)
@@ -327,7 +345,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         mock_df = pd.DataFrame({'Gene_0': [1, 2, 100]})
         mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        run_from_json(params_no_outliers, save_results=False)
+        run_from_json(params_no_outliers, save_to_file=False)
         
         call_args = mock_boxplot.call_args
         self.assertEqual(call_args[1]['showfliers'], False)
@@ -346,17 +364,22 @@ class TestBoxplotTemplate(unittest.TestCase):
         })
         
         mock_fig = MagicMock()
+        mock_fig.set_size_inches = MagicMock()  
+        mock_fig.set_dpi = MagicMock() 
         mock_ax = MagicMock()
         mock_ax.set_title = MagicMock()
         mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_custom, save_to_file=False)
-        
-        # Verify figure customization
-        mock_fig.set_size_inches.assert_called_with(16, 10)
-        mock_fig.set_dpi.assert_called_with(150)
-        mock_ax.set_title.assert_called_with("Custom Title")
+
+        # Add this patch for plt.subplots
+        with patch('matplotlib.pyplot.subplots', return_value=(mock_fig, mock_ax)):
+            mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
+            
+            run_from_json(params_custom, save_to_file=False)
+            
+            # Verify figure customization
+            mock_fig.set_size_inches.assert_called_with(16, 10)
+            mock_fig.set_dpi.assert_called_with(150)
+            mock_ax.set_title.assert_called_with("Custom Title")
 
     @patch('spac.templates.boxplot_template.boxplot')
     @patch('matplotlib.pyplot.show')
@@ -389,9 +412,9 @@ class TestBoxplotTemplate(unittest.TestCase):
         with open(json_path, "w") as f:
             json.dump(self.params, f)
         
-        result = run_from_json(json_path, save_results=False)
+        result = run_from_json(json_path, save_to_file=False)
         
-        # Should return tuple when save_results=False
+        # Should return tuple when save_to_file=False
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 2)
 
@@ -407,12 +430,12 @@ class TestBoxplotTemplate(unittest.TestCase):
         # Test both with and without legend error
         with patch('seaborn.move_legend') as mock_move_legend:
             # Case 1: Legend exists
-            run_from_json(self.params, save_results=False)
+            run_from_json(self.params, save_to_file=False)
             mock_move_legend.assert_called_once()
             
             # Case 2: Legend doesn't exist (raises exception)
             mock_move_legend.side_effect = Exception("No legend")
-            run_from_json(self.params, save_results=False)
+            run_from_json(self.params, save_to_file=False)
             # Should not raise error, just print message
 
     def test_parameter_validation(self) -> None:
@@ -425,30 +448,40 @@ class TestBoxplotTemplate(unittest.TestCase):
 
         self.assertIn("Upstream_Analysis", str(context.exception))
 
-    def test_output_directory_parameter(self) -> None:
+    @patch('spac.templates.boxplot_template.save_results')
+    @patch('spac.templates.boxplot_template.boxplot')
+    @patch('matplotlib.pyplot.show')
+    def test_output_directory_parameter(self, mock_show, mock_boxplot, mock_save_results) -> None:
         """Test custom output directory."""
         custom_output = os.path.join(self.tmp_dir.name, "custom_output")
+        os.makedirs(custom_output, exist_ok=True)
+
+        mock_fig = MagicMock()
+        mock_ax = MagicMock()
+        mock_ax.set_title = MagicMock()
+        mock_df = pd.DataFrame({'Gene_0': [1]})
+        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
         
-        with patch('spac.templates.boxplot_template.boxplot') as mock_boxplot:
-            with patch('matplotlib.pyplot.show'):
-                mock_fig = MagicMock()
-                mock_ax = MagicMock()
-                mock_ax.set_title = MagicMock()
-                mock_df = pd.DataFrame({'Gene_0': [1]})
-                mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-                
-                saved_files = run_from_json(
-                    self.params, 
-                    save_to_file=True,
-                    output_dir=custom_output
-                )
-                
-                # Check that files were created in custom directory
-                figure_path = Path(custom_output) / "boxplot.png"
-                self.assertTrue(figure_path.exists())
-                
-                summary_path = Path(custom_output) / "summary.csv"
-                self.assertTrue(summary_path.exists())
+        # Mock save_results and create files
+        mock_save_results.return_value = {
+            "figure": [str(Path(custom_output) / "boxplot.png")],
+            "summary": [str(Path(custom_output) / "summary.csv")]
+        }
+        (Path(custom_output) / "boxplot.png").touch()
+        (Path(custom_output) / "summary.csv").touch()
+        
+        saved_files = run_from_json(
+            self.params, 
+            save_to_file=True,
+            output_dir=custom_output
+        )
+        
+        # Check that files were created in custom directory
+        figure_path = Path(custom_output) / "boxplot.png"
+        self.assertTrue(figure_path.exists())
+        
+        summary_path = Path(custom_output) / "summary.csv"
+        self.assertTrue(summary_path.exists())
 
 
 if __name__ == "__main__":
