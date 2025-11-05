@@ -13,6 +13,7 @@ import anndata as ad
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -20,7 +21,8 @@ sys.path.append(
 
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
+    _save_single_object,
     text_to_value,
     convert_pickle_to_h5ad,
     convert_to_floats,
@@ -93,29 +95,7 @@ class TestTemplateUtils(unittest.TestCase):
             loaded_p = load_input(p_path)
             self.assertEqual(loaded_p.n_obs, 10)
 
-            # Test 5: Save outputs - multiple formats
-            outputs = {
-                "result.pickle": self.test_adata,  # Now preferred format
-                "data.csv": self.test_df,
-                "adata.pkl": self.test_adata,
-                "adata.h5ad": self.test_adata,  # Still supported
-                "other_data": {"key": "value"}  # Defaults to pickle
-            }
-            saved_files = save_outputs(outputs, self.tmp_dir.name)
-
-            # Verify all files were saved
-            self.assertEqual(len(saved_files), 5)
-            for filename, filepath in saved_files.items():
-                self.assertTrue(os.path.exists(filepath))
-                self.assertIn(filename, saved_files)
-
-            # Verify CSV content
-            csv_path = saved_files["data.csv"]
-            loaded_df = pd.read_csv(csv_path)
-            self.assertEqual(len(loaded_df), 5)
-            self.assertIn("col1", loaded_df.columns)
-
-            # Test 6: Convert pickle to h5ad
+            # Test 5: Convert pickle to h5ad
             pickle_src = os.path.join(
                 self.tmp_dir.name, "convert_src.pickle"
             )
@@ -281,18 +261,6 @@ class TestTemplateUtils(unittest.TestCase):
         expected_msg = "Loaded object is not AnnData, got <class 'dict'>"
         actual_msg = str(context.exception)
         self.assertEqual(expected_msg, actual_msg)
-
-    def test_default_pickle_extension(self) -> None:
-        """Test that files without extension default to pickle."""
-        outputs = {
-            "no_extension": self.test_adata
-        }
-        saved_files = save_outputs(outputs, self.tmp_dir.name)
-
-        # Should have .pickle extension
-        filepath = saved_files["no_extension"]
-        self.assertTrue(filepath.endswith('.pickle'))
-        self.assertTrue(os.path.exists(filepath))
 
     def test_spell_out_special_characters(self) -> None:
         """Test spell_out_special_characters function."""
@@ -518,6 +486,318 @@ class TestTemplateUtils(unittest.TestCase):
         final_info = [msg for msg in print_calls 
                      if 'Final Dataframe Info' in msg]
         self.assertTrue(len(final_info) > 0)
+
+    def test_save_results_single_csv_file(self) -> None:
+        """Test saving DataFrame as single CSV file using save_results."""
+        # Setup
+        df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+        
+        config = {
+            "DataFrames": {"type": "file", "name": "data.csv"}
+        }
+        
+        results = {
+            "dataframes": df
+        }
+        
+        # Execute
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Verify
+        csv_path = Path(self.tmp_dir.name) / "data.csv"
+        self.assertTrue(csv_path.exists())
+        self.assertTrue(csv_path.is_file())
+        
+        # Check content
+        loaded_df = pd.read_csv(csv_path)
+        pd.testing.assert_frame_equal(loaded_df, df)
+        
+    def test_save_results_multiple_csvs_directory(self) -> None:
+        """Test saving multiple DataFrames in directory using save_results."""
+        # Setup
+        df1 = pd.DataFrame({'X': [1, 2]})
+        df2 = pd.DataFrame({'Y': [3, 4]})
+        
+        config = {
+            "DataFrames": {"type": "directory", "name": "dataframe_dir"}
+        }
+        
+        results = {
+            "dataframes": {
+                "first": df1,
+                "second": df2
+            }
+        }
+        
+        # Execute
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Verify
+        dir_path = Path(self.tmp_dir.name) / "dataframe_dir"
+        self.assertTrue(dir_path.exists())
+        self.assertTrue(dir_path.is_dir())
+        self.assertTrue((dir_path / "first.csv").exists())
+        self.assertTrue((dir_path / "second.csv").exists())
+        
+    def test_save_results_figures_directory(self) -> None:
+        """Test saving multiple figures in directory using save_results."""
+        # Suppress matplotlib warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            
+            # Setup
+            fig1, ax1 = plt.subplots()
+            ax1.plot([1, 2, 3])
+            
+            fig2, ax2 = plt.subplots()
+            ax2.bar(['A', 'B'], [5, 10])
+            
+            config = {
+                "figures": {"type": "directory", "name": "plots"}
+            }
+            
+            results = {
+                "figures": {
+                    "line_plot": fig1,
+                    "bar_plot": fig2
+                }
+            }
+            
+            # Execute
+            saved = save_results(results, config, self.tmp_dir.name)
+            
+            # Verify
+            plots_dir = Path(self.tmp_dir.name) / "plots"
+            self.assertTrue(plots_dir.exists())
+            self.assertTrue(plots_dir.is_dir())
+            self.assertTrue((plots_dir / "line_plot.png").exists())
+            self.assertTrue((plots_dir / "bar_plot.png").exists())
+            
+            # Clean up
+            plt.close('all')
+    
+    def test_save_results_analysis_pickle_file(self) -> None:
+        """Test saving analysis object as pickle file using save_results."""
+        # Setup
+        analysis = {
+            "method": "test_analysis",
+            "results": [1, 2, 3, 4, 5],
+            "params": {"alpha": 0.05}
+        }
+        
+        config = {
+            "analysis": {"type": "file", "name": "results.pickle"}
+        }
+        
+        results = {
+            "analysis": analysis
+        }
+        
+        # Execute
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Verify
+        pickle_path = Path(self.tmp_dir.name) / "results.pickle"
+        self.assertTrue(pickle_path.exists())
+        self.assertTrue(pickle_path.is_file())
+        
+        # Check content
+        with open(pickle_path, 'rb') as f:
+            loaded = pickle.load(f)
+        self.assertEqual(loaded, analysis)
+    
+    def test_save_results_html_directory(self) -> None:
+        """Test saving HTML reports in directory using save_results."""
+        # Setup
+        html1 = "<html><body><h1>Report 1</h1></body></html>"
+        html2 = "<html><body><h1>Report 2</h1></body></html>"
+        
+        config = {
+            "html": {"type": "directory", "name": "reports"}
+        }
+        
+        results = {
+            "html": {
+                "main": html1,
+                "summary": html2
+            }
+        }
+        
+        # Execute
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Verify
+        reports_dir = Path(self.tmp_dir.name) / "reports"
+        self.assertTrue(reports_dir.exists())
+        self.assertTrue(reports_dir.is_dir())
+        self.assertTrue((reports_dir / "main.html").exists())
+        self.assertTrue((reports_dir / "summary.html").exists())
+        
+        # Check content
+        with open(reports_dir / "main.html") as f:
+            content = f.read()
+        self.assertIn("Report 1", content)
+    
+    def test_save_results_complete_configuration(self) -> None:
+        """Test complete configuration with all output types using save_results."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            
+            # Setup
+            fig, ax = plt.subplots()
+            ax.plot([1, 2, 3])
+            
+            df = pd.DataFrame({'A': [1, 2]})
+            analysis = {"result": "complete"}
+            html = "<html><body>Report</body></html>"
+            
+            config = {
+                "figures": {"type": "directory", "name": "figure_dir"},
+                "DataFrames": {"type": "file", "name": "dataframe.csv"},
+                "analysis": {"type": "file", "name": "output.pickle"},
+                "html": {"type": "directory", "name": "html_dir"}
+            }
+            
+            results = {
+                "figures": {"plot": fig},
+                "dataframes": df,
+                "analysis": analysis,
+                "html": {"report": html}
+            }
+            
+            # Execute
+            saved = save_results(results, config, self.tmp_dir.name)
+            
+            # Verify all outputs created
+            self.assertTrue((Path(self.tmp_dir.name) / "figure_dir").is_dir())
+            self.assertTrue((Path(self.tmp_dir.name) / "dataframe.csv").is_file())
+            self.assertTrue((Path(self.tmp_dir.name) / "output.pickle").is_file())
+            self.assertTrue((Path(self.tmp_dir.name) / "html_dir").is_dir())
+            
+            # Clean up
+            plt.close('all')
+    
+    def test_save_results_case_insensitive_matching(self) -> None:
+        """Test case-insensitive matching of result keys to config."""
+        # Setup
+        df = pd.DataFrame({'A': [1, 2]})
+        
+        config = {
+            "DataFrames": {"type": "file", "name": "data.csv"}  # Capital D
+        }
+        
+        results = {
+            "dataframes": df  # lowercase d
+        }
+        
+        # Execute
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Should still match and save
+        self.assertTrue((Path(self.tmp_dir.name) / "data.csv").exists())
+    
+    def test_save_results_missing_config(self) -> None:
+        """Test that missing config for result type generates warning."""
+        # Setup
+        df = pd.DataFrame({'A': [1, 2]})
+        
+        config = {
+            # No config for "dataframes"
+            "figures": {"type": "directory", "name": "plots"}
+        }
+        
+        results = {
+            "dataframes": df,  # No matching config
+            "figures": {}
+        }
+        
+        # Execute (should not raise, just warn)
+        saved = save_results(results, config, self.tmp_dir.name)
+        
+        # Only figures should be in saved files
+        self.assertIn("figures", saved)
+        self.assertNotIn("dataframes", saved)
+        self.assertNotIn("DataFrames", saved)
+    
+    def test_save_single_object_dataframe(self) -> None:
+        """Test _save_single_object helper with DataFrame."""
+        df = pd.DataFrame({'A': [1, 2]})
+        
+        path = _save_single_object(df, "test", Path(self.tmp_dir.name))
+        
+        self.assertEqual(path.name, "test.csv")
+        self.assertTrue(path.exists())
+    
+    def test_save_single_object_figure(self) -> None:
+        """Test _save_single_object helper with matplotlib figure."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            
+            fig, ax = plt.subplots()
+            ax.plot([1, 2, 3])
+            
+            path = _save_single_object(fig, "plot", Path(self.tmp_dir.name))
+            
+            self.assertEqual(path.name, "plot.png")
+            self.assertTrue(path.exists())
+            
+            plt.close('all')
+    
+    def test_save_single_object_html(self) -> None:
+        """Test _save_single_object helper with HTML string."""
+        html = "<html><body>Test</body></html>"
+        
+        path = _save_single_object(html, "report.html", Path(self.tmp_dir.name))
+        
+        self.assertEqual(path.name, "report.html")
+        self.assertTrue(path.exists())
+    
+    def test_save_single_object_generic(self) -> None:
+        """Test _save_single_object helper with generic object."""
+        data = {"test": "data", "value": 123}
+        
+        path = _save_single_object(data, "data", Path(self.tmp_dir.name))
+        
+        self.assertEqual(path.name, "data.pickle")
+        self.assertTrue(path.exists())
+    
+    def test_save_results_dataframes_both_configurations(self) -> None:
+        """Test DataFrames can be saved as both file and directory."""
+        # Test 1: Single DataFrame as file
+        df_single = pd.DataFrame({'A': [1, 2, 3]})
+        
+        config_file = {
+            "DataFrames": {"type": "file", "name": "single.csv"}
+        }
+        
+        results_single = {"dataframes": df_single}
+        
+        saved = save_results(results_single, config_file, self.tmp_dir.name)
+        self.assertTrue((Path(self.tmp_dir.name) / "single.csv").exists())
+        
+        # Test 2: Multiple DataFrames as directory
+        df1 = pd.DataFrame({'X': [1, 2]})
+        df2 = pd.DataFrame({'Y': [3, 4]})
+        
+        config_dir = {
+            "DataFrames": {"type": "directory", "name": "multi_df"}
+        }
+        
+        results_multi = {
+            "dataframes": {
+                "data1": df1,
+                "data2": df2
+            }
+        }
+        
+        saved = save_results(results_multi, config_dir, 
+                            os.path.join(self.tmp_dir.name, "test2"))
+        
+        dir_path = Path(self.tmp_dir.name) / "test2" / "multi_df"
+        self.assertTrue(dir_path.exists())
+        self.assertTrue(dir_path.is_dir())
+        self.assertTrue((dir_path / "data1.csv").exists())
+        self.assertTrue((dir_path / "data2.csv").exists())
 
 if __name__ == "__main__":
     unittest.main()

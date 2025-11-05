@@ -6,6 +6,8 @@ import pandas as pd
 import anndata as ad
 import re
 import logging
+import matplotlib.pyplot as plt
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +35,6 @@ def load_input(file_path: Union[str, Path]):
     if suffix in ['.h5ad', '.h5']:
         # Load h5ad file
         try:
-            import anndata as ad
             return ad.read_h5ad(path)
         except ImportError:
             raise ImportError(
@@ -51,7 +52,6 @@ def load_input(file_path: Union[str, Path]):
         # Try to detect file type by content
         try:
             # First try h5ad
-            import anndata as ad
             return ad.read_h5ad(path)
         except Exception:
             # Fall back to pickle
@@ -65,77 +65,225 @@ def load_input(file_path: Union[str, Path]):
                 )
 
 
-def save_outputs(
-    outputs: Dict[str, Any],
-    output_dir: Union[str, Path] = "."
-) -> Dict[str, str]:
+def save_results(
+    results: Dict[str, Any],
+    outputs_config: Dict[str, Dict[str, str]],
+    output_base_dir: Union[str, Path] = ".",
+    params: Optional[Dict[str, Any]] = None
+) -> Dict[str, List[str]]:
     """
-    Save multiple outputs to files and return a dict {filename: absolute_path}.
-    (Always a dict, even if just one file.)
-
+    Save results to appropriate locations based on explicit typed blueprint outputs.
+    
     Parameters
     ----------
-    outputs : dict
-        Dictionary where:
-        - key: filename (with extension)
-        - value: object to save
-    output_dir : str or Path
-        Directory to save files
-
+    results : dict
+        Dictionary of results to save where:
+        - key: result type ("analysis", "dataframes", "figures", "html")
+        - value: object(s) to save (can be single object or list/dict of objects)
+    outputs_config : dict
+        Explicit typed output configuration from blueprint JSON:
+        {
+            "figures": {"type": "directory", "name": "figure_dir"},
+            "DataFrames": {"type": "file", "name": "dataframe.csv"},
+            "DataFrames": {"type": "directory", "name": "dataframe_dir"},
+            "analysis": {"type": "file", "name": "output.pickle"},
+            "html": {"type": "directory", "name": "html_dir"}
+        }
+    output_base_dir : str or Path, optional
+        Base directory for all outputs. Default is current directory.
+    params : dict, optional
+        Optional parameters dict (for backward compatibility)
+        
     Returns
     -------
     dict
-        Dictionary of saved file paths
-
+        Dictionary mapping output types to lists of saved file paths
+        
     Example
     -------
-    >>> outputs = {
-    ...     "adata.pickle": adata,  # Preferred format
-    ...     "results.csv": results_df,
-    ...     "adata.h5ad": adata  # Still supported
+    >>> outputs_config = {
+    ...     "figures": {"type": "directory", "name": "plots"},
+    ...     "analysis": {"type": "file", "name": "results.pickle"}
     ... }
-    >>> saved = save_outputs(outputs, "results/")
+    >>> results = {
+    ...     "figures": {"plot1": fig1, "plot2": fig2},
+    ...     "analysis": adata
+    ... }
+    >>> saved = save_results(results, outputs_config, "outputs/")
     """
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
+    output_base_dir = Path(output_base_dir)
     saved_files = {}
-
-    for filename, obj in outputs.items():
-        filepath = output_dir / filename
-
-        # Save based on file extension
-        if filename.endswith('.csv'):
-            obj.to_csv(filepath, index=False)
-        elif filename.endswith('.h5ad'):
-            # Still support h5ad, but not the default
-            if type(obj) is not ad.AnnData:
-                raise TypeError(
-                    f"Object for '{str(filename)}' must be AnnData, "
-                    f"got {type(obj)}"
-                )
-            logger.info(f"Saving AnnData to {str(filepath)}")
-            logger.debug(f"AnnData object: {obj}")
-            obj.write_h5ad(str(filepath))
-            logger.info(f"Saved AnnData to {str(filepath)}")
-        elif filename.endswith(('.pickle', '.pkl', '.p')):
-            with open(filepath, 'wb') as f:
-                pickle.dump(obj, f)
-        elif hasattr(obj, "savefig"):
-            obj.savefig(filepath.with_suffix('.png'))
-            filepath = filepath.with_suffix('.png')
+    
+    # Process each result based on explicit typed configuration
+    for result_key, data in results.items():
+        # Find matching config (case-insensitive match)
+        config = None
+        config_key = None
+        
+        for key, value in outputs_config.items():
+            if key.lower() == result_key.lower():
+                config = value
+                config_key = key
+                break
+        
+        if not config:
+            logger.warning(f"No output config for '{result_key}', skipping")
+            continue
+        
+        # Read EXPLICIT type and name
+        output_type = config["type"]
+        output_name = config["name"]
+        
+        # Execute based on explicit type
+        if output_type == "directory":
+            # It's a directory. Create it. Save files there.
+            output_dir = output_base_dir / output_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            saved_files[config_key] = []
+            
+            if isinstance(data, dict):
+                # Dictionary of named items
+                for name, obj in data.items():
+                    filepath = _save_single_object(obj, name, output_dir)
+                    saved_files[config_key].append(str(filepath))
+                    
+            elif isinstance(data, (list, tuple)):
+                # List of items - auto-name them
+                for idx, obj in enumerate(data):
+                    name = f"{result_key}_{idx}"
+                    filepath = _save_single_object(obj, name, output_dir)
+                    saved_files[config_key].append(str(filepath))
+                    
+            else:
+                # Single item
+                name = result_key
+                filepath = _save_single_object(data, name, output_dir)
+                saved_files[config_key] = [str(filepath)]
+            
+            logger.info(f"Saved {len(saved_files[config_key])} files to {output_dir}")
+                
+        elif output_type == "file":
+            # It's a file. Save it.
+            output_path = output_base_dir / output_name
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Save based on file extension
+            if output_name.endswith('.pickle'):
+                with open(output_path, 'wb') as f:
+                    pickle.dump(data, f)
+                    
+            elif output_name.endswith('.csv'):
+                if isinstance(data, pd.DataFrame):
+                    data.to_csv(output_path, index=False)
+                else:
+                    # Convert to DataFrame if possible
+                    df = pd.DataFrame(data)
+                    df.to_csv(output_path, index=False)
+                    
+            elif output_name.endswith('.h5ad'):
+                if hasattr(data, 'write_h5ad'):
+                    data.write_h5ad(str(output_path))
+                else:
+                    # Fall back to pickle with warning
+                    logger.warning(f"Cannot save as h5ad, using pickle instead")
+                    output_path = output_path.with_suffix('.pickle')
+                    with open(output_path, 'wb') as f:
+                        pickle.dump(data, f)
+                        
+            elif output_name.endswith('.html'):
+                with open(output_path, 'w') as f:
+                    f.write(str(data))
+                    
+            elif output_name.endswith(('.png', '.pdf', '.svg')):
+                if hasattr(data, 'savefig'):
+                    data.savefig(output_path, dpi=300, bbox_inches='tight')
+                else:
+                    logger.error(f"Cannot save {type(data)} as image")
+                    
+            else:
+                # Default to pickle for unknown extensions
+                if not output_name.endswith('.pickle'):
+                    output_path = output_path.with_suffix('.pickle')
+                with open(output_path, 'wb') as f:
+                    pickle.dump(data, f)
+            
+            saved_files[config_key] = [str(output_path)]
+            logger.info(f"Saved file: {output_path}")
+            
         else:
-            # Default to pickle
-            filepath = filepath.with_suffix('.pickle')
-            with open(filepath, 'wb') as f:
-                pickle.dump(obj, f)
-
-        print(type(filepath))
-        print(type(filename))
-        saved_files[str(filename)] = str(filepath)
-        print(f"Saved: {filepath}")
-
+            logger.error(f"Unknown output type '{output_type}' for {config_key}")
+    
+    # Log summary
+    for output_key, paths in saved_files.items():
+        logger.info(f"Saved {len(paths)} {output_key} file(s)")
+        for path in paths:
+            logger.debug(f"  - {path}")
+    
     return saved_files
+
+
+def _save_single_object(obj: Any, name: str, output_dir: Path) -> Path:
+    """
+    Save a single object to file with appropriate format.
+    Internal helper function for save_results.
+    
+    Parameters
+    ----------
+    obj : Any
+        Object to save
+    name : str
+        Base name for the file (extension will be added if needed)
+    output_dir : Path
+        Directory to save to
+        
+    Returns
+    -------
+    Path
+        Path to saved file
+    """
+    # Determine file format based on object type
+    if isinstance(obj, pd.DataFrame):
+        # DataFrames -> CSV
+        if not name.endswith('.csv'):
+            name = f"{name}.csv"
+        filepath = output_dir / name
+        obj.to_csv(filepath, index=False)
+        
+    elif hasattr(obj, 'savefig'):
+        # Matplotlib figures -> PNG only
+        if not name.endswith('.png'):
+            name = f"{name}.png"
+        filepath = output_dir / name
+        obj.savefig(filepath, dpi=300, bbox_inches='tight')
+        plt.close(obj)  # Close figure to free memory
+        
+    elif isinstance(obj, str) and ('<html' in obj.lower() or name.endswith('.html')):
+        # HTML content
+        if not name.endswith('.html'):
+            name = f"{name}.html"
+        filepath = output_dir / name
+        with open(filepath, 'w') as f:
+            f.write(obj)
+            
+    elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'AnnData':
+        # AnnData -> pickle for now
+        if not name.endswith('.pickle'):
+            name = f"{name}.pickle"
+        filepath = output_dir / name
+        with open(filepath, 'wb') as f:
+            pickle.dump(obj, f)
+            
+    else:
+        # Everything else -> pickle
+        if '.' not in name:
+            name = f"{name}.pickle"
+        filepath = output_dir / name
+        with open(filepath, 'wb') as f:
+            pickle.dump(obj, f)
+    
+    logger.debug(f"Saved {type(obj).__name__} to {filepath}")
+    return filepath
 
 
 def parse_params(
