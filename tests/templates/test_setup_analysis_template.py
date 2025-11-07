@@ -55,7 +55,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
         )
         self.test_df.to_csv(self.csv_file, index=False)
 
-        # Minimal parameters
+        # Minimal parameters with standardized outputs config
         self.params = {
             "Upstream_Dataset": self.csv_file,
             "Features_to_Analyze": ["CD25", "CD3D", "CD45", "CD4", "CD8A"],
@@ -63,15 +63,20 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             "X_Coordinate_Column": "X_centroid",
             "Y_Coordinate_Column": "Y_centroid",
             "Annotation_s_": ["broad_cell_type", "detailed_cell_type"],
-            "Output_File": "analysis_output.pickle"
+            "Output_File": "analysis_output.pickle",
+            # Standardized outputs config - analysis as file
+            "outputs": {
+                "analysis": {"type": "file", "name": "analysis_output.pickle"}
+            }
         }
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
+    @patch('spac.templates.setup_analysis_template.save_results')
     @patch('spac.templates.setup_analysis_template.ingest_cells')
-    def test_run_with_save(self, mock_ingest) -> None:
-        """Test setup analysis with file saving."""
+    def test_run_with_save(self, mock_ingest, mock_save_results) -> None:
+        """Test setup analysis with saving to disk."""
         # Mock the ingest_cells function
         mock_adata = ad.AnnData(
             X=np.random.rand(10, 5),
@@ -80,7 +85,27 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
         mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
         mock_ingest.return_value = mock_adata
 
+        # Mock save_results to return expected structure
+        mock_save_results.return_value = {
+            "analysis": str(Path(self.tmp_dir.name) / "analysis_output.pickle")
+        }
+
+        # Test with save_to_disk=True (default)
         saved_files = run_from_json(self.params)
+
+        # Check that save_results was called with correct params
+        mock_save_results.assert_called_once()
+        call_args = mock_save_results.call_args
+
+        # Verify params were passed correctly
+        self.assertIn('results', call_args[1])
+        self.assertIn('params', call_args[1])
+        self.assertEqual(call_args[1]['params'], self.params)
+
+        # Check that results contain analysis
+        results = call_args[1]['results']
+        self.assertIn("analysis", results)
+        self.assertIs(results["analysis"], mock_adata)        
 
         # Check that ingest_cells was called with correct parameters
         mock_ingest.assert_called_once()
@@ -104,8 +129,9 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
         for feature in self.params["Features_to_Analyze"]:
             self.assertIn(f"^{feature}$", regex_list)
 
-        # Check that output file was created
-        self.assertIn("analysis_output.pickle", saved_files)
+        # Verify return structure
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("analysis", saved_files)
 
     @patch('spac.templates.setup_analysis_template.ingest_cells')
     def test_run_without_save(self, mock_ingest) -> None:
@@ -118,12 +144,95 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
         mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
         mock_ingest.return_value = mock_adata
 
-        result = run_from_json(self.params, save_results=False)
+        # Test with save_to_disk=False
+        result = run_from_json(self.params, save_to_disk=False)
 
         # Check that we got an AnnData object back
         self.assertIsInstance(result, ad.AnnData)
-        # For AnnData, we check that it's the same object reference
         self.assertIs(result, mock_adata)
+
+    @patch('spac.templates.setup_analysis_template.save_results')
+    @patch('spac.templates.setup_analysis_template.ingest_cells')
+    def test_default_outputs_config(self, mock_ingest, mock_save_results) -> None:
+        """Test that default outputs config is added when missing."""
+        # Remove outputs from params
+        params_no_outputs = self.params.copy()
+        del params_no_outputs["outputs"]
+
+        mock_adata = ad.AnnData(X=np.random.rand(10, 5))
+        mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
+        mock_ingest.return_value = mock_adata
+
+        mock_save_results.return_value = {
+            "analysis": str(Path(self.tmp_dir.name) / "analysis_output.pickle")
+        }
+
+        # Execute
+        saved_files = run_from_json(params_no_outputs)
+
+        # Verify save_results was called
+        mock_save_results.assert_called_once()
+        call_args = mock_save_results.call_args
+
+        # Check that outputs config was added with correct defaults
+        params_used = call_args[1]['params']
+        self.assertIn("outputs", params_used)
+        self.assertIn("analysis", params_used["outputs"])
+        # Check that analysis uses file type
+        self.assertEqual(params_used["outputs"]["analysis"]["type"], "file")
+        self.assertEqual(params_used["outputs"]["analysis"]["name"], "analysis_output.pickle")
+
+    @patch('spac.templates.setup_analysis_template.save_results')
+    @patch('spac.templates.setup_analysis_template.ingest_cells')
+    def test_custom_outputs_config(self, mock_ingest, mock_save_results) -> None:
+        """Test custom outputs configuration passed in params."""
+        mock_adata = ad.AnnData(X=np.random.rand(10, 5))
+        mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
+        mock_ingest.return_value = mock_adata
+
+        # Add custom outputs config to params
+        params_with_custom = self.params.copy()
+        params_with_custom["outputs"] = {
+            "analysis": {"type": "file", "name": "custom_output.h5ad"}
+        }
+
+        # Mock save_results
+        mock_save_results.return_value = {
+            "analysis": str(Path(self.tmp_dir.name) / "custom_output.h5ad")
+        }
+
+        saved_files = run_from_json(params_with_custom)
+
+        # Verify custom config was passed through
+        call_args = mock_save_results.call_args
+        params_used = call_args[1]['params']
+        self.assertEqual(params_used["outputs"]["analysis"]["name"], "custom_output.h5ad")
+
+    @patch('spac.templates.setup_analysis_template.save_results')
+    @patch('spac.templates.setup_analysis_template.ingest_cells')
+    def test_output_directory_parameter(self, mock_ingest, mock_save_results) -> None:
+        """Test custom output directory."""
+        custom_output = os.path.join(self.tmp_dir.name, "custom_output")
+        os.makedirs(custom_output, exist_ok=True)
+
+        mock_adata = ad.AnnData(X=np.random.rand(10, 5))
+        mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
+        mock_ingest.return_value = mock_adata
+
+        # Mock save_results
+        mock_save_results.return_value = {
+            "analysis": str(Path(custom_output) / "analysis_output.pickle")
+        }
+
+        saved_files = run_from_json(
+            self.params,
+            save_to_disk=True,
+            output_dir=custom_output
+        )
+
+        # Verify output_dir was passed to save_results
+        call_args = mock_save_results.call_args
+        self.assertEqual(call_args[1]['output_base_dir'], custom_output)
 
     def test_annotation_none_handling(self) -> None:
         """Test handling of 'None' annotation."""
@@ -137,7 +246,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(params_none, save_results=False)
+            run_from_json(params_none, save_to_disk=False)
 
             # Check that annotation was set to None
             call_args = mock_ingest.call_args
@@ -168,7 +277,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(params_no_coords, save_results=False)
+            run_from_json(params_no_coords, save_to_disk=False)
 
             # Check that coordinates were set to None
             call_args = mock_ingest.call_args
@@ -188,10 +297,11 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            saved_files = run_from_json(json_path)
+            # Test with save_to_disk=False to avoid needing save_results mock
+            result = run_from_json(json_path, save_to_disk=False)
 
-            # Check that files were saved
-            self.assertTrue(len(saved_files) > 0)
+            # Should return AnnData when save_to_disk=False
+            self.assertIsInstance(result, ad.AnnData)
 
     def test_feature_regex_combination(self) -> None:
         """Test combination of feature names and regex."""
@@ -205,7 +315,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(params_regex, save_results=False)
+            run_from_json(params_regex, save_to_disk=False)
 
             # Check that regex includes both custom patterns and features
             call_args = mock_ingest.call_args
@@ -231,7 +341,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(params_df, save_results=False)
+            run_from_json(params_df, save_to_disk=False)
 
             # Check that DataFrame was passed directly
             call_args = mock_ingest.call_args
@@ -249,27 +359,13 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(self.params, save_results=False)
+            # Use logging instead of print
+            with patch('spac.templates.setup_analysis_template.logging') as mock_logging:
+                run_from_json(self.params, save_to_disk=False)
 
-            # Verify output messages
-            print_calls = [
-                str(call[0][0]) for call in mock_print.call_args_list
-                if call[0]
-            ]
-
-            # Should print "Analysis Setup:"
-            setup_msgs = [
-                msg for msg in print_calls
-                if 'Analysis Setup:' in msg
-            ]
-            self.assertTrue(len(setup_msgs) > 0)
-
-            # Should print "Schema:"
-            schema_msgs = [
-                msg for msg in print_calls
-                if 'Schema:' in msg
-            ]
-            self.assertTrue(len(schema_msgs) > 0)
+                # Verify logging messages
+                mock_logging.info.assert_any_call("Analysis Setup:")
+                mock_logging.info.assert_any_call("Schema:")
 
     def test_single_feature_and_annotation(self) -> None:
         """Test with single feature and annotation as strings."""
@@ -284,7 +380,7 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             mock_adata.var_names = ['CD25']
             mock_ingest.return_value = mock_adata
 
-            run_from_json(params_single, save_results=False)
+            run_from_json(params_single, save_to_disk=False)
 
             # Check that single values were converted to lists
             call_args = mock_ingest.call_args
@@ -292,6 +388,53 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
             self.assertEqual(
                 call_args[1]['annotation'], ["broad_cell_type"]
             )
+
+    def test_argument_naming_compatibility(self) -> None:
+        """Test that the save_to_disk argument works correctly."""
+        with patch(
+            'spac.templates.setup_analysis_template.ingest_cells'
+        ) as mock_ingest:
+            mock_adata = ad.AnnData(X=np.random.rand(10, 5))
+            mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
+            mock_ingest.return_value = mock_adata
+
+            # Test with explicit save_to_disk=False
+            result = run_from_json(self.params, save_to_disk=False)
+            self.assertIsInstance(result, ad.AnnData)
+
+            # Test with save_to_disk=True (mocked)
+            with patch('spac.templates.setup_analysis_template.save_results') as mock_save_func:
+                mock_save_func.return_value = {
+                    "analysis": str(Path(self.tmp_dir.name) / "analysis_output.pickle")
+                }
+                result = run_from_json(self.params, save_to_disk=True)
+                self.assertIsInstance(result, dict)
+                mock_save_func.assert_called_once()
+
+    def test_analysis_file_structure(self) -> None:
+        """Test that analysis is saved as a file (not directory)."""
+        with patch('spac.templates.setup_analysis_template.ingest_cells') as mock_ingest:
+            mock_adata = ad.AnnData(X=np.random.rand(10, 5))
+            mock_adata.var_names = ['CD25', 'CD3D', 'CD45', 'CD4', 'CD8A']
+            mock_ingest.return_value = mock_adata
+
+            with patch('spac.templates.setup_analysis_template.save_results') as mock_save_results:
+                mock_save_results.return_value = {
+                    "analysis": str(Path(self.tmp_dir.name) / "analysis_output.pickle")
+                }
+
+                saved_files = run_from_json(self.params)
+
+                # Verify analysis was passed as single object (for file saving)
+                call_args = mock_save_results.call_args
+                results = call_args[1]['results']
+                self.assertIn("analysis", results)
+                # Should be the AnnData object directly, not wrapped in dict
+                self.assertIsInstance(results["analysis"], ad.AnnData)
+
+                # Verify return structure has single file path
+                self.assertIsInstance(saved_files["analysis"], str)
+                self.assertTrue(saved_files["analysis"].endswith(".pickle"))
 
 
 if __name__ == "__main__":

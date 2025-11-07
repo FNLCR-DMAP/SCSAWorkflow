@@ -67,54 +67,70 @@ def load_input(file_path: Union[str, Path]):
 
 def save_results(
     results: Dict[str, Any],
-    outputs_config: Dict[str, Dict[str, str]],
-    output_base_dir: Union[str, Path] = ".",
-    params: Optional[Dict[str, Any]] = None
-) -> Dict[str, List[str]]:
+    params: Dict[str, Any],
+    output_base_dir: Union[str, Path] = None
+) -> Dict[str, Union[str, List[str]]]:
     """
-    Save results to appropriate locations based on explicit typed blueprint outputs.
+    Save results based on output configuration in params.
+    
+    This function reads the output configuration from the params dictionary
+    and saves results accordingly. It applies a standardized schema where:
+    - figures → directory (may contain one or many)
+    - analysis → file  
+    - dataframe → file (or directory for exceptions like "Neighborhood Profile")
+    - html → directory
     
     Parameters
     ----------
     results : dict
         Dictionary of results to save where:
         - key: result type ("analysis", "dataframes", "figures", "html")
-        - value: object(s) to save (can be single object or list/dict of objects)
-    outputs_config : dict
-        Explicit typed output configuration from blueprint JSON:
+        - value: object(s) to save (single object, list, or dict of objects)
+    params : dict
+        Parameters dict containing 'outputs' configuration with structure:
         {
-            "figures": {"type": "directory", "name": "figure_dir"},
-            "DataFrames": {"type": "file", "name": "dataframe.csv"},
-            "DataFrames": {"type": "directory", "name": "dataframe_dir"},
-            "analysis": {"type": "file", "name": "output.pickle"},
-            "html": {"type": "directory", "name": "html_dir"}
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+                "html": {"type": "directory", "name": "html_dir"},
+                "dataframe": {"type": "file", "name": "dataframe.csv"},
+                "analysis": {"type": "file", "name": "output.pickle"}
+            }
         }
     output_base_dir : str or Path, optional
-        Base directory for all outputs. Default is current directory.
-    params : dict, optional
-        Optional parameters dict (for backward compatibility)
+        Base directory for outputs. If None, uses params['Output_Directory'] or '.'
         
     Returns
     -------
     dict
-        Dictionary mapping output types to lists of saved file paths
+        Dictionary mapping output types to saved file paths:
+        - For files: string path
+        - For directories: list of string paths
         
     Example
     -------
-    >>> outputs_config = {
-    ...     "figures": {"type": "directory", "name": "plots"},
-    ...     "analysis": {"type": "file", "name": "results.pickle"}
+    >>> params = {
+    ...     "outputs": {
+    ...         "figures": {"type": "directory", "name": "figure_outputs"},
+    ...         "dataframe": {"type": "file", "name": "summary.csv"}
+    ...     }
     ... }
-    >>> results = {
-    ...     "figures": {"plot1": fig1, "plot2": fig2},
-    ...     "analysis": adata
-    ... }
-    >>> saved = save_results(results, outputs_config, "outputs/")
+    >>> results = {"figures": {"boxplot": fig}, "dataframe": df}
+    >>> saved = save_results(results, params)
     """
+    # Get output directory from params if not provided
+    if output_base_dir is None:
+        output_base_dir = params.get("Output_Directory", ".")
     output_base_dir = Path(output_base_dir)
+    
+    # Get outputs config from params
+    outputs_config = params.get("outputs", {})
+    if not outputs_config:
+        logger.warning("No outputs configuration found in params")
+        return {}
+    
     saved_files = {}
     
-    # Process each result based on explicit typed configuration
+    # Process each result based on configuration
     for result_key, data in results.items():
         # Find matching config (case-insensitive match)
         config = None
@@ -130,45 +146,62 @@ def save_results(
             logger.warning(f"No output config for '{result_key}', skipping")
             continue
         
-        # Read EXPLICIT type and name
-        output_type = config["type"]
-        output_name = config["name"]
-        
-        # Execute based on explicit type
+        # Determine output type and name
+        output_type = config.get("type")
+        output_name = config.get("name", result_key)
+
+        # Apply standardized schema if type not explicitly specified
+        if not output_type:
+            result_key_lower = result_key.lower()
+            if "figures" in result_key_lower:
+                output_type = "directory"
+            elif "analysis" in result_key_lower:
+                output_type = "file"
+            elif "dataframe" in result_key_lower:
+                # Special case: Neighborhood Profile gets directory treatment
+                if "neighborhood" in output_name.lower() and "profile" in output_name.lower():
+                    output_type = "directory"
+                else:
+                    output_type = "file"
+            elif "html" in result_key_lower:
+                output_type = "directory"
+            else:
+                # Default based on data structure
+                output_type = "directory" if isinstance(data, (dict, list)) else "file"
+            
+            logger.debug(f"Auto-determined type '{output_type}' for '{result_key}'")
+
+        # Save based on determined type
         if output_type == "directory":
-            # It's a directory. Create it. Save files there.
+            # Create directory and save multiple files
             output_dir = output_base_dir / output_name
             output_dir.mkdir(parents=True, exist_ok=True)
-            
-            saved_files[config_key] = []
-            
+            saved_files[config_key or result_key] = []
+                        
             if isinstance(data, dict):
                 # Dictionary of named items
                 for name, obj in data.items():
                     filepath = _save_single_object(obj, name, output_dir)
-                    saved_files[config_key].append(str(filepath))
+                    saved_files[config_key or result_key].append(str(filepath))
                     
             elif isinstance(data, (list, tuple)):
                 # List of items - auto-name them
                 for idx, obj in enumerate(data):
                     name = f"{result_key}_{idx}"
                     filepath = _save_single_object(obj, name, output_dir)
-                    saved_files[config_key].append(str(filepath))
+                    saved_files[config_key or result_key].append(str(filepath))
                     
             else:
-                # Single item
-                name = result_key
-                filepath = _save_single_object(data, name, output_dir)
-                saved_files[config_key] = [str(filepath)]
-            
-            logger.info(f"Saved {len(saved_files[config_key])} files to {output_dir}")
+                # Single item saved to directory
+                filepath = _save_single_object(data, result_key, output_dir)
+                saved_files[config_key or result_key] = [str(filepath)]
                 
         elif output_type == "file":
-            # It's a file. Save it.
+            # Save as single file
             output_path = output_base_dir / output_name
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
-            # Save based on file extension
+            # Handle different file types based on extension
             if output_name.endswith('.pickle'):
                 with open(output_path, 'wb') as f:
                     pickle.dump(data, f)
@@ -184,12 +217,6 @@ def save_results(
             elif output_name.endswith('.h5ad'):
                 if hasattr(data, 'write_h5ad'):
                     data.write_h5ad(str(output_path))
-                else:
-                    # Fall back to pickle with warning
-                    logger.warning(f"Cannot save as h5ad, using pickle instead")
-                    output_path = output_path.with_suffix('.pickle')
-                    with open(output_path, 'wb') as f:
-                        pickle.dump(data, f)
                         
             elif output_name.endswith('.html'):
                 with open(output_path, 'w') as f:
@@ -198,27 +225,29 @@ def save_results(
             elif output_name.endswith(('.png', '.pdf', '.svg')):
                 if hasattr(data, 'savefig'):
                     data.savefig(output_path, dpi=300, bbox_inches='tight')
-                else:
-                    logger.error(f"Cannot save {type(data)} as image")
+                    plt.close(data)  # Close figure to free memory
                     
             else:
-                # Default to pickle for unknown extensions
+                # Default to pickle for unknown types
                 if not output_name.endswith('.pickle'):
                     output_path = output_path.with_suffix('.pickle')
                 with open(output_path, 'wb') as f:
                     pickle.dump(data, f)
             
-            saved_files[config_key] = [str(output_path)]
-            logger.info(f"Saved file: {output_path}")
-            
-        else:
-            logger.error(f"Unknown output type '{output_type}' for {config_key}")
+            saved_files[config_key or result_key] = str(output_path)
     
-    # Log summary
-    for output_key, paths in saved_files.items():
-        logger.info(f"Saved {len(paths)} {output_key} file(s)")
-        for path in paths:
-            logger.debug(f"  - {path}")
+    # Log summary of saved files
+    logger.info(f"Results saved to {output_base_dir}:")
+    for key, paths in saved_files.items():
+        if isinstance(paths, list):
+            output_name = outputs_config.get(key, {}).get('name', key)
+            logger.info(f"  {key}: {len(paths)} files in {output_base_dir}/{output_name}/")
+            for path in paths[:3]:  # Show first 3 files
+                logger.debug(f"    - {Path(path).name}")
+            if len(paths) > 3:
+                logger.debug(f"    ... and {len(paths) - 3} more files")
+        else:
+            logger.info(f"  {key}: {Path(paths).name}")
     
     return saved_files
 
@@ -267,7 +296,7 @@ def _save_single_object(obj: Any, name: str, output_dir: Path) -> Path:
             f.write(obj)
             
     elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'AnnData':
-        # AnnData -> pickle for now
+        # AnnData -> pickle (for consistency, could be h5ad)
         if not name.endswith('.pickle'):
             name = f"{name}.pickle"
         filepath = output_dir / name

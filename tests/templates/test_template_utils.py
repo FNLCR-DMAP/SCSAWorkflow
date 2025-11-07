@@ -492,16 +492,18 @@ class TestTemplateUtils(unittest.TestCase):
         # Setup
         df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
         
-        config = {
-            "DataFrames": {"type": "file", "name": "data.csv"}
+        params = {
+            "outputs": {
+                "dataframe": {"type": "file", "name": "data.csv"}
+            }
         }
         
         results = {
-            "dataframes": df
+            "dataframe": df
         }
         
         # Execute
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Verify
         csv_path = Path(self.tmp_dir.name) / "data.csv"
@@ -518,19 +520,21 @@ class TestTemplateUtils(unittest.TestCase):
         df1 = pd.DataFrame({'X': [1, 2]})
         df2 = pd.DataFrame({'Y': [3, 4]})
         
-        config = {
-            "DataFrames": {"type": "directory", "name": "dataframe_dir"}
+        params = {
+            "outputs": {
+                "dataframe": {"type": "directory", "name": "dataframe_dir"}
+            }
         }
         
         results = {
-            "dataframes": {
+            "dataframe": {
                 "first": df1,
                 "second": df2
             }
         }
         
         # Execute
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Verify
         dir_path = Path(self.tmp_dir.name) / "dataframe_dir"
@@ -552,8 +556,10 @@ class TestTemplateUtils(unittest.TestCase):
             fig2, ax2 = plt.subplots()
             ax2.bar(['A', 'B'], [5, 10])
             
-            config = {
-                "figures": {"type": "directory", "name": "plots"}
+            params = {
+                "outputs": {
+                    "figures": {"type": "directory", "name": "plots"}
+                }
             }
             
             results = {
@@ -564,8 +570,8 @@ class TestTemplateUtils(unittest.TestCase):
             }
             
             # Execute
-            saved = save_results(results, config, self.tmp_dir.name)
-            
+            saved = save_results(results, params, self.tmp_dir.name)
+
             # Verify
             plots_dir = Path(self.tmp_dir.name) / "plots"
             self.assertTrue(plots_dir.exists())
@@ -585,8 +591,10 @@ class TestTemplateUtils(unittest.TestCase):
             "params": {"alpha": 0.05}
         }
         
-        config = {
-            "analysis": {"type": "file", "name": "results.pickle"}
+        params = {
+            "outputs": {
+                "analysis": {"type": "file", "name": "results.pickle"}
+            }
         }
         
         results = {
@@ -594,7 +602,7 @@ class TestTemplateUtils(unittest.TestCase):
         }
         
         # Execute
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Verify
         pickle_path = Path(self.tmp_dir.name) / "results.pickle"
@@ -612,8 +620,10 @@ class TestTemplateUtils(unittest.TestCase):
         html1 = "<html><body><h1>Report 1</h1></body></html>"
         html2 = "<html><body><h1>Report 2</h1></body></html>"
         
-        config = {
-            "html": {"type": "directory", "name": "reports"}
+        params = {
+            "outputs": {
+                "html": {"type": "directory", "name": "reports"}
+            }
         }
         
         results = {
@@ -624,7 +634,7 @@ class TestTemplateUtils(unittest.TestCase):
         }
         
         # Execute
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Verify
         reports_dir = Path(self.tmp_dir.name) / "reports"
@@ -651,22 +661,24 @@ class TestTemplateUtils(unittest.TestCase):
             analysis = {"result": "complete"}
             html = "<html><body>Report</body></html>"
             
-            config = {
-                "figures": {"type": "directory", "name": "figure_dir"},
-                "DataFrames": {"type": "file", "name": "dataframe.csv"},
-                "analysis": {"type": "file", "name": "output.pickle"},
-                "html": {"type": "directory", "name": "html_dir"}
+            params = {
+                "outputs": {
+                    "figures": {"type": "directory", "name": "figure_dir"},
+                    "dataframe": {"type": "file", "name": "dataframe.csv"},
+                    "analysis": {"type": "file", "name": "output.pickle"},
+                    "html": {"type": "directory", "name": "html_dir"}
+                }
             }
             
             results = {
                 "figures": {"plot": fig},
-                "dataframes": df,
+                "dataframe": df,
                 "analysis": analysis,
                 "html": {"report": html}
             }
             
             # Execute
-            saved = save_results(results, config, self.tmp_dir.name)
+            saved = save_results(results, params, self.tmp_dir.name)
             
             # Verify all outputs created
             self.assertTrue((Path(self.tmp_dir.name) / "figure_dir").is_dir())
@@ -682,16 +694,18 @@ class TestTemplateUtils(unittest.TestCase):
         # Setup
         df = pd.DataFrame({'A': [1, 2]})
         
-        config = {
-            "DataFrames": {"type": "file", "name": "data.csv"}  # Capital D
+        params = {
+            "outputs": {
+                "dataframe": {"type": "file", "name": "data.csv"}  # Capital D
+            }
         }
         
         results = {
-            "dataframes": df  # lowercase d
+            "dataframe": df  # lowercase d
         }
         
         # Execute
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Should still match and save
         self.assertTrue((Path(self.tmp_dir.name) / "data.csv").exists())
@@ -701,18 +715,20 @@ class TestTemplateUtils(unittest.TestCase):
         # Setup
         df = pd.DataFrame({'A': [1, 2]})
         
-        config = {
-            # No config for "dataframes"
-            "figures": {"type": "directory", "name": "plots"}
+        params = {
+            "outputs": {
+                # No config for "dataframes"
+                "figures": {"type": "directory", "name": "plots"}
+            }
         }
         
         results = {
-            "dataframes": df,  # No matching config
+            "dataframe": df,  # No matching config
             "figures": {}
         }
         
         # Execute (should not raise, just warn)
-        saved = save_results(results, config, self.tmp_dir.name)
+        saved = save_results(results, params, self.tmp_dir.name)
         
         # Only figures should be in saved files
         self.assertIn("figures", saved)
@@ -766,31 +782,35 @@ class TestTemplateUtils(unittest.TestCase):
         # Test 1: Single DataFrame as file
         df_single = pd.DataFrame({'A': [1, 2, 3]})
         
-        config_file = {
-            "DataFrames": {"type": "file", "name": "single.csv"}
+        params_file = {
+            "outputs": {
+                "dataframe": {"type": "file", "name": "single.csv"}
+            }
         }
         
-        results_single = {"dataframes": df_single}
-        
-        saved = save_results(results_single, config_file, self.tmp_dir.name)
+        results_single = {"dataframe": df_single}
+
+        saved = save_results(results_single, params_file, self.tmp_dir.name)
         self.assertTrue((Path(self.tmp_dir.name) / "single.csv").exists())
         
         # Test 2: Multiple DataFrames as directory
         df1 = pd.DataFrame({'X': [1, 2]})
         df2 = pd.DataFrame({'Y': [3, 4]})
-        
-        config_dir = {
-            "DataFrames": {"type": "directory", "name": "multi_df"}
+
+        params_dir = {
+            "outputs": {
+                "dataframe": {"type": "directory", "name": "multi_df"}
+            }
         }
         
         results_multi = {
-            "dataframes": {
+            "dataframe": {
                 "data1": df1,
                 "data2": df2
             }
         }
-        
-        saved = save_results(results_multi, config_dir, 
+
+        saved = save_results(results_multi, params_dir,
                             os.path.join(self.tmp_dir.name, "test2"))
         
         dir_path = Path(self.tmp_dir.name) / "test2" / "multi_df"
@@ -798,6 +818,103 @@ class TestTemplateUtils(unittest.TestCase):
         self.assertTrue(dir_path.is_dir())
         self.assertTrue((dir_path / "data1.csv").exists())
         self.assertTrue((dir_path / "data2.csv").exists())
+
+    def test_save_results_auto_type_detection(self) -> None:
+        """Test automatic type detection based on standardized schema."""
+        # Setup - params with no explicit type
+        params = {
+            "outputs": {
+                "figures": {"name": "plot.png"},  # No type specified
+                "analysis": {"name": "results.pickle"},  # No type specified
+                "dataframe": {"name": "data.csv"},  # No type specified
+                "html": {"name": "report_dir"}  # No type specified
+            }
+        }
+        
+        # Create test data
+        fig, ax = plt.subplots()
+        ax.plot([1, 2, 3])
+        
+        results = {
+            "figures": {"plot1": fig, "plot2": fig},  # Should auto-detect as directory
+            "analysis": {"data": [1, 2, 3]},  # Should auto-detect as file
+            "dataframe": pd.DataFrame({'A': [1, 2]}),  # Should auto-detect as file
+            "html": {"report": "<html></html>"}  # Should auto-detect as directory
+        }
+        
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            
+            # Execute
+            saved = save_results(results, params, self.tmp_dir.name)
+            
+            # Verify auto-detection worked correctly
+            # figure should be directory (standardized for figures)
+            self.assertTrue((Path(self.tmp_dir.name) / "plot.png").is_dir())
+            
+            # analysis should be file
+            self.assertTrue((Path(self.tmp_dir.name) / "results.pickle").is_file())
+            
+            # dataframes should be file (standard case)
+            self.assertTrue((Path(self.tmp_dir.name) / "data.csv").is_file())
+            
+            # html should be directory (standardized for html)
+            self.assertTrue((Path(self.tmp_dir.name) / "report_dir").is_dir())
+            
+            plt.close('all')
+    
+    def test_save_results_neighborhood_profile_special_case(self) -> None:
+        """Test special case for Neighborhood Profile as directory."""
+        # Setup - Neighborhood Profile should be directory even though it's a dataframe
+        params = {
+            "outputs": {
+                "dataframes": {"name": "Neighborhood_Profile_Results"}  # No type, should auto-detect
+            }
+        }
+        
+        df1 = pd.DataFrame({'X': [1, 2]})
+        df2 = pd.DataFrame({'Y': [3, 4]})
+        
+        results = {
+            "dataframes": {
+                "profile1": df1,
+                "profile2": df2
+            }
+        }
+        
+        # Execute
+        saved = save_results(results, params, self.tmp_dir.name)
+        
+        # Verify it was saved as directory (special case)
+        dir_path = Path(self.tmp_dir.name) / "Neighborhood_Profile_Results"
+        self.assertTrue(dir_path.exists())
+        self.assertTrue(dir_path.is_dir())
+        self.assertTrue((dir_path / "profile1.csv").exists())
+        self.assertTrue((dir_path / "profile2.csv").exists())
+    
+    def test_save_results_with_output_directory_param(self) -> None:
+        """Test using Output_Directory from params."""
+        custom_dir = os.path.join(self.tmp_dir.name, "custom_output")
+        
+        # Setup - params includes Output_Directory
+        params = {
+            "Output_Directory": custom_dir,
+            "outputs": {
+                "dataframes": {"type": "file", "name": "data.csv"}
+            }
+        }
+        
+        results = {
+            "dataframes": pd.DataFrame({'A': [1, 2]})
+        }
+        
+        # Execute without specifying output_base_dir (should use params)
+        saved = save_results(results, params)
+        
+        # Verify it used the Output_Directory from params
+        csv_path = Path(custom_dir) / "data.csv"
+        self.assertTrue(csv_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

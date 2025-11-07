@@ -2,6 +2,9 @@
 Platform-agnostic Setup Analysis template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Follows standardized output schema where analysis is saved as a file.
+
 Usage
 -----
 >>> from spac.templates.setup_analysis_template import run_from_json
@@ -21,7 +24,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.data_utils import ingest_cells
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value
 )
@@ -29,7 +32,8 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_to_disk: bool = True,
+    output_dir: str = None,
 ) -> Union[Dict[str, str], Any]:
     """
     Execute Setup Analysis with parameters from JSON.
@@ -38,19 +42,68 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the adata object
-        directly for in-memory workflows. Default is True.
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Dataset": "path/to/data.csv",
+            "Features_to_Analyze": ["CD25", "CD3D"],
+            "Feature_Regex": [],
+            "X_Coordinate_Column": "X_centroid",
+            "Y_Coordinate_Column": "Y_centroid",
+            "Annotation_s_": ["cell_type"],
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If True, saves the AnnData object
+        to a pickle file. If False, returns the AnnData object directly 
+        for in-memory workflows. Default is True.
+    output_dir : str, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory. All outputs will be saved relative to this directory.
 
     Returns
     -------
     dict or AnnData
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: The processed AnnData object
+        If save_to_disk=True: Dictionary of saved file paths with structure:
+            {"analysis": "path/to/output.pickle"}
+        If save_to_disk=False: The processed AnnData object for in-memory use
+
+    Notes
+    -----
+    Output Structure:
+    - Analysis output is saved as a single pickle file (standardized for analysis outputs)
+    - When save_to_disk=False, the AnnData object is returned for programmatic use
+        
+    Examples
+    --------
+    >>> # Save results to disk
+    >>> saved_files = run_from_json("params.json")
+    >>> print(saved_files["analysis"])  # Path to saved pickle file
+    >>> # './output.pickle'
+    
+    >>> # Get results in memory for further processing
+    >>> adata = run_from_json("params.json", save_to_disk=False)
+    >>> # Can now work with adata object directly
+    
+    >>> # Custom output directory
+    >>> saved = run_from_json("params.json", output_dir="/custom/path")
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Ensure outputs configuration exists with standardized defaults
+    # Analysis uses file type per standardized schema
+    if "outputs" not in params:
+        # Get output filename from params or use default
+        output_file = params.get("Output_File", "output.pickle")
+        if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
+            output_file = output_file + '.pickle'
+        
+        params["outputs"] = {
+            "analysis": {"type": "file", "name": output_file}
+        }
 
     # Extract parameters
     upstream_dataset = params["Upstream_Dataset"]
@@ -114,23 +167,29 @@ def run_from_json(
         annotation=annotation
     )
 
-    print("Analysis Setup:")
-    print(ingested_anndata)
-    print("Schema:")
-    print(ingested_anndata.var_names)
+    logging.info("Analysis Setup:")
+    logging.info(f"{ingested_anndata}")
+    logging.info("Schema:")
+    logging.info(f"{ingested_anndata.var_names.tolist()}")
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format if no recognized extension
-        if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
-            output_file = output_file + '.pickle'
-
-        saved_files = save_outputs({output_file: ingested_anndata})
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
+        
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = ingested_anndata
+        
+        # Use centralized save_results function
+        # All file handling and logging is now done by save_results
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
 
         logging.info(
-            f"Setup Analysis completed → {saved_files[output_file]}"
+            f"Setup Analysis completed → {saved_files['analysis']}"
         )
         return saved_files
     else:
@@ -141,18 +200,34 @@ def run_from_json(
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
             "Usage: python setup_analysis_template.py <params.json>",
             file=sys.stderr
         )
         sys.exit(1)
 
-    saved_files = run_from_json(sys.argv[1])
-
-    if isinstance(saved_files, dict):
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
+    
+    # Display results based on return type
+    if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in saved_files.items():
-            print(f"  {filename}: {filepath}")
+        for key, path in result.items():
+            print(f"  {key}: {path}")
     else:
-        print("\nReturned AnnData object")
+        print("\nReturned AnnData object for in-memory use")
+        print(f"AnnData: {result}")
+        print(f"Shape: {result.shape}")
