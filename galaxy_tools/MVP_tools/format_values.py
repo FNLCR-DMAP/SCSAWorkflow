@@ -21,7 +21,7 @@ import json
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def normalize_boolean(value: Any) -> bool:
@@ -71,17 +71,16 @@ def extract_list_from_repeat(params: Dict[str, Any], param_name: str) -> List[st
     Returns
     -------
     list
-        Simple list of string values
+        Simple list of string values, or empty list if no values found
     """
-    # Check for the repeat version of the parameter
     repeat_key = f"{param_name}_repeat"
     
-    # Also check if parameter exists without _repeat (for backward compatibility)
+    # Check if parameter exists without _repeat (for backward compatibility)
     if param_name in params:
         value = params[param_name]
         # If it's already a simple list, return it
         if isinstance(value, list) and (not value or not isinstance(value[0], dict)):
-            return [str(v).strip() for v in value if v and str(v).strip()] or ["All"]
+            result = [str(v).strip() for v in value if v and str(v).strip()]
     
     # Process repeat structure
     if repeat_key in params:
@@ -94,41 +93,41 @@ def extract_list_from_repeat(params: Dict[str, Any], param_name: str) -> List[st
                     val = str(item['value']).strip()
                     if val:  # Skip empty values
                         result.append(val)
-            
-            # Return result or default to ["All"] if empty
-            return result if result else ["All"]
-    
-    # No parameter found, return default
-    return ["All"]
+            return result
+
+    # No parameter found, return empty list
+    return []
 
 
-def inject_output_directories(cleaned: Dict[str, Any]) -> None:
+def inject_output_configuration(cleaned: Dict[str, Any], outputs_config: Optional[Dict[str, Any]] = None) -> None:
     """
     Inject output configuration for template_utils.save_results().
     
-    For boxplot: single figure file + single summary file (no directories)
-    This matches what boxplot_template.py expects (lines 73-76).
+    This is a generic method that accepts output configuration as a parameter
+    rather than trying to detect the tool type.
     
     Parameters
     ----------
     cleaned : dict
         Cleaned parameters dictionary (modified in-place)
+    outputs_config : dict, optional
+        Output configuration to inject. If None, no outputs are configured.
+        Format: {"output_name": {"type": "file|directory", "name": "filename"}}
     """
-    # Configure outputs for template_utils.save_results()
-    # Must match the blueprint structure expected by template
-    cleaned['outputs'] = {
-        'figure': {'type': 'file', 'name': 'boxplot.png'},
-        'summary': {'type': 'file', 'name': 'summary.csv'}
-    }
+    if outputs_config:
+        cleaned['outputs'] = outputs_config
     
-    # Enable result saving
-    cleaned['save_results'] = True
+    # Enable result saving if outputs are configured
+    if cleaned.get('outputs'):
+        cleaned['save_results'] = True
 
 
 def process_galaxy_params(
     params: Dict[str, Any],
     bool_params: List[str],
-    list_params: List[str]
+    list_params: List[str],
+    outputs_config: Optional[Dict[str, Any]] = None,
+    inject_outputs: bool = False
 ) -> Dict[str, Any]:
     """
     Process raw Galaxy parameters to normalize booleans and extract lists from repeats.
@@ -141,6 +140,10 @@ def process_galaxy_params(
         List of parameter names that should be booleans
     list_params : list
         List of parameter names that should be extracted from repeat structures
+    outputs_config : dict, optional
+        Output configuration to inject if inject_outputs is True
+    inject_outputs : bool, optional
+        Whether to inject output configuration (default False)
         
     Returns
     -------
@@ -169,8 +172,10 @@ def process_galaxy_params(
         if repeat_key in cleaned:
             del cleaned[repeat_key]
     
-    # Inject output configuration (boxplot MVP uses single files)
-    inject_output_directories(cleaned)
+    # Only inject output configuration if requested
+    # Templates should handle their own output configuration
+    if inject_outputs and outputs_config:
+        inject_output_configuration(cleaned, outputs_config)
     
     return cleaned
 
@@ -200,6 +205,7 @@ def main():
         default=[],
         help="Parameter names that should be extracted from repeat structures"
     )
+
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -226,20 +232,20 @@ def main():
         print(json.dumps(params, indent=2), file=sys.stderr)
         print("\nBoolean parameters to convert:", args.bool_values, file=sys.stderr)
         print("List parameters to extract from repeats:", args.list_values, file=sys.stderr)
+        print("List parameters that default to ['All']:", args.list_default_all, file=sys.stderr)
     
     # Process parameters
+    # By default, do NOT inject outputs - let templates handle their own configuration
     cleaned_params = process_galaxy_params(
         params,
         bool_params=args.bool_values or [],
-        list_params=args.list_values or []
+        list_params=args.list_values or [],
+        inject_outputs=False  # Templates handle their own outputs
     )
     
     if args.debug:
         print("\n=== Cleaned Parameters ===", file=sys.stderr)
         print(json.dumps(cleaned_params, indent=2), file=sys.stderr)
-        print("\n=== Output Configuration ===", file=sys.stderr)
-        print(f"  save_results: {cleaned_params.get('save_results')}", file=sys.stderr)
-        print(f"  outputs: {cleaned_params.get('outputs')}", file=sys.stderr)
     
     # Write output JSON
     output_path = Path(args.output_json)
@@ -256,17 +262,13 @@ def main():
             original = params.get(param, "N/A")
             cleaned = cleaned_params.get(param, "N/A")
             if original != cleaned:
-                print(f"  {param}: '{original}' → {cleaned}")
+                print(f"  {param}: '{original}' â†’ {cleaned}")
     
     for param in args.list_values or []:
         repeat_key = f"{param}_repeat"
         if repeat_key in params:
-            original = params[repeat_key]
             cleaned = cleaned_params.get(param, [])
             print(f"  {param}: Extracted {len(cleaned)} values from repeat structure")
-    
-    # Confirm output configuration injection
-    print(f"  Output configuration injected: {cleaned_params.get('outputs')}")
 
 
 if __name__ == "__main__":

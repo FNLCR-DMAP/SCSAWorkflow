@@ -2,7 +2,7 @@
     <description>Create a boxplot visualization of the features in the analysis dataset. Please refer to DUET Documentation, GitHub Documentation</description>
     
     <requirements>
-        <container type="docker">spac:boxplot-mvp</container>
+        <container type="docker">spac:setup_analysis-mvp</container>
     </requirements>
     
     <configfiles>
@@ -16,6 +16,7 @@
         'cleaned_params.json'
         --bool-values Horizontal_Plot Keep_Outliers Value_Axis_Log_Scale
         --list-values Feature_s_to_Plot
+
     &&
     python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
     ]]></command>
@@ -23,8 +24,8 @@
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary" label="Upstream Analysis" help="Input analysis dataset"/>
         <param name="Table_to_Visualize" type="text" value="Original" label="Table to Visualize" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
-        <repeat name="Feature_s_to_Plot_repeat" title="Feature(s) to Plot" min="0">
-            <param name="value" type="text" label="Feature name" help="The feature(s) to plot in the box plot. Leave empty or use 'All' to plot all features."/>
+        <repeat name="Feature_s_to_Plot_repeat" title="Feature(s) to Plot" min="0" help="The feature(s) to plot in the box plot. Leave empty or use 'All' to plot all features." >
+            <param name="value" type="text" value="All" label="Feature name" />
         </repeat>
         <param name="Primary_Annotation" type="text" value="None" label="Primary Annotation" help="The annotation to group the visualizations. Use 'None' to disable."/>
         <param name="Secondary_Annotation" type="text" value="None" label="Secondary Annotation" help="Secondary annotation to create subdivisions within each category defined by the primary annotation. Default is 'None'."/>
@@ -43,9 +44,9 @@
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
         <data name="cleaned_params" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
         
-        <!-- Main outputs -->
-        <data name="summary" format="csv" from_work_dir="summary.csv" label="${tool.name} on ${on_string}: Summary"/>
-        <data name="figure" format="png" from_work_dir="boxplot.png" label="${tool.name} on ${on_string}: Boxplot"/>
+        <!-- Main outputs (boxplot_template.py will create these) -->
+        <data name="summary" format="csv" from_work_dir="output.csv" label="${tool.name} on ${on_string}: Summary"/>
+        <data name="figure" format="png" from_work_dir="figures/boxplot.png" label="${tool.name} on ${on_string}: Boxplot"/>
     </outputs>
     
     <tests>
@@ -76,30 +77,28 @@
 This tool creates boxplot visualizations from spatial single-cell analysis data.
 
 **Key Features:**
-- Uses configfiles to generate params.json from Galaxy inputs
-- Normalizes parameters with format_values.py
+- Uses Galaxy's auto-serialization (data_style="paths")
+- Parameters normalized by format_values.py
+- Output configuration handled by template
 - Debug outputs available for troubleshooting
-- PNG format for figures (MVP scope)
+- Figures saved in directory structure
 
 **Feature(s) to Plot:**
 - Add one or more features using the repeat control
-- Leave empty or use "All" to plot all features
+- Leave empty to plot all features (defaults to ["All"])
 
 **Outputs:**
-- Summary: Single CSV file with summary statistics
-- Figure: Single PNG file with boxplot visualization
+- Summary: CSV file with summary statistics (output.csv)
+- Figure: PNG file with boxplot visualization (figures/boxplot.png)
 - Debug: Raw and cleaned parameter JSON files
 
 **Technical Notes:**
-- Galaxy generates params.json via configfiles
-- Parameters are normalized by format_values.py before template execution
-- Booleans converted to true JSON booleans
-- Repeat structures converted to simple lists
-- Output files automatically created by template_utils.save_results()
-
-**Debug Mode:**
-The tool outputs both raw params.json and cleaned_params.json for debugging purposes.
-Check these files to verify parameter processing.
+- Galaxy generates galaxy_params.json via configfiles
+- format_values.py normalizes parameters (no output injection)
+- Template handles its own output configuration:
+  - figures: directory type containing plot files
+  - dataframe: file type for summary CSV
+- Feature_s_to_Plot defaults to ["All"] when empty
     ]]></help>
     
     <citations>
