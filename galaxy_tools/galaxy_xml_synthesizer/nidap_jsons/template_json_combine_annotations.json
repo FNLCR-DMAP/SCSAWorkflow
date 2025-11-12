@@ -1,0 +1,89 @@
+{
+  "rid": "ri.vector.main.template.1af525e4-031d-4bf2-8ddb-c4d28d2a53a1",
+  "title": "Combine Annotations [SPAC][DMAP]",
+  "description": "Combine multiple annotations into a new annotation using a defined separator.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.6ec69fb9-ffa5-4383-887e-1122782dbecd),  [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/modules/spac.data_utils.combine_annotations.html#spac.data_utils.combine_annotations)",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-05-30T18:45:38.273360827Z",
+  "commitMessage": "spac v0.9.0 correct github link",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Annotations_Names",
+      "displayName": "Annotations Names",
+      "description": "List of annotations to be combined.",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": null,
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "New_Annotation_Name",
+      "displayName": "New Annotation Name",
+      "description": "Annotation to be added to the dataset, containing the new labels after concatenation.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "combined_annotation",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Separator",
+      "displayName": "Separator",
+      "description": "A string to add between labels during concatenations.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "_",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Annotations_Names",
+    "New_Annotation_Name",
+    "Separator"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "# Rename Labels [SPAC] [DMAP] (5157030d-9c09-4bad-b537-27b1b0a40dd5): v15\n\ndef combine_annotation({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.data_utils import combine_annotations\n    import pickle\n    import anndata\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n    annotations_list = {{{Annotations_Names}}}\n    new_annotation = \"{{{New_Annotation_Name}}}\"\n    separator = \"{{{Separator}}}\"\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    # Create a new dictionary with the desired format\n\n    combine_annotations(\n        adata,\n        annotations=annotations_list,\n        separator=separator,\n        new_annotation_name=new_annotation\n    )\n\n    print(\"After combining annotations: \\n\", adata)\n    value_counts = adata.obs[new_annotation].value_counts(dropna=False)\n    print(f\"Unique labels in {new_annotation}\")\n    print(value_counts)\n\n    object_to_output = adata\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(object_to_output, f)\n\n    # create the frequency CSV for download\n    df_counts = (\n        value_counts\n        .rename_axis(new_annotation)   # move index to a column name\n        .reset_index(name='count')     # two columns: label | count\n    )\n    csv_name = f\"{new_annotation}_counts.csv\"\n    with output_fs.open(csv_name, 'w') as f:\n        df_counts.to_csv(f, index=False)\n        \n    print(f\"\\nLabel\u2011count table written to {csv_name}\")\n\n\n    return(None)\n\n#################################################\n## Global imports and functions included below ##\n#################################################\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 6,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Combine Annotations [SPAC][DMAP]",
+  "tags": [],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "combined_annotations",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"},
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

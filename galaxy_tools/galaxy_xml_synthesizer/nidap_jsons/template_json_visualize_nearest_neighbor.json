@@ -1,0 +1,283 @@
+{
+  "rid": "ri.vector.main.template.58fb29e2-41d4-43d5-b293-94b5a24049eb",
+  "title": "Visualize Nearest Neighbor [SPAC][DMAP]",
+  "description": "Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.003f853b-6e56-417c-b9f1-c5597ff38988),  and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/modules/spac.visualization.visualize_nearest_neighbor.html#spac.visualization.visualize_nearest_neighbor)  for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-05-30T18:55:16.279881199Z",
+  "commitMessage": "spac v0.9.0 correct github link",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "Annotation name specifying phenotypes. Must match name used when the distances were originally calculated.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "ImageID",
+      "displayName": "ImageID",
+      "description": "The annotation name used to distinguish different images or samples. If there's only one image, set to \"None.\"",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Plot_Method",
+      "displayName": "Plot Method",
+      "description": "Determines the plotting style- Catplots (\"numeric\" ) show relationship between a numerical and one or more categorical variables, e.g., \"violin\", \"box\", \"strip\"; Displots (\"distribution\") visualize the distribution of single variables, e.g., \"kdeplot\", \"ecdfplot\". Default is \"numeric\".",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "numeric",
+        "distribution"
+      ],
+      "defaultValue": "numeric",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Plot_Type",
+      "displayName": "Plot Type",
+      "description": "Specific plot used to display the distances. If Method=\"numeric\", use options such as \"box\", \"violin\", \"strip\", \"swarm\", or \"boxen\". If Method=\"distribution\", choose \"hist\", \"kde\", or \"ecdf\". Default-  \"boxen\" for \"numeric\", \"kde\" for \"distribution\".",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "boxen",
+        "box",
+        "violin",
+        "strip",
+        "swarm",
+        "hist",
+        "kde",
+        "ecdf"
+      ],
+      "defaultValue": "boxen",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Source_Anchor_Cell_Label",
+      "displayName": "Source \"Anchor\" Cell Label",
+      "description": "The phenotype from which distances are measured.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Target_Cell_Label",
+      "displayName": "Target Cell Label",
+      "description": "The phenotype(s) being measured against. Use \"All\" to include every phenotype.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "All",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Nearest_Neighbor_Associated_Table",
+      "displayName": "Nearest Neighbor Associated Table",
+      "description": "The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated.",
+      "paramType": "STRING",
+      "paramGroup": "Advanced Analysis Setting",
+      "paramValues": null,
+      "defaultValue": "spatial_distance",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Log_Scale",
+      "displayName": "Log Scale",
+      "description": "Display the distance in log scale. Default is False.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Facet_Plot",
+      "displayName": "Facet Plot",
+      "description": "If set to \u201cTrue,\u201d each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "X_Axis_Label_Rotation",
+      "displayName": "X Axis Label Rotation",
+      "description": "The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right).",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "0",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Shared_X_Axis_Title_",
+      "displayName": "Shared X Axis Title ",
+      "description": "For faceted plots, use one shared x-axis title at the bottom. Default is \"ON\".",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "X_Axis_Title_Font_Size",
+      "displayName": "X Axis Title Font Size",
+      "description": "Font size for x-axis title. If \"None \", use figure font size.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Defined_Color_Mapping",
+      "displayName": "Defined Color Mapping",
+      "description": "Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default \"None\" will allow the visualization to determine the color of labels automatically.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Width",
+      "displayName": "Figure Width",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Height",
+      "displayName": "Figure Height",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "6",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "FIgure_DPI",
+      "displayName": "FIgure DPI",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "300",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Font_Size",
+      "displayName": "Font Size",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Annotation",
+    "ImageID",
+    "Plot_Method",
+    "Plot_Type",
+    "Source_Anchor_Cell_Label",
+    "Target_Cell_Label",
+    "Nearest_Neighbor_Associated_Table",
+    "Log_Scale",
+    "Facet_Plot",
+    "X_Axis_Label_Rotation",
+    "Shared_X_Axis_Title_",
+    "X_Axis_Title_Font_Size",
+    "Defined_Color_Mapping",
+    "Figure_Width",
+    "Figure_Height",
+    "FIgure_DPI",
+    "Font_Size"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def plot_nearest_neighbor_defined_colormap({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    import pickle\n    import pandas as pd\n    import numpy as np\n    from matplotlib.axes import Axes\n    import matplotlib.pyplot as plt\n    import matplotlib.patches as mpatches\n    from spac.visualization import visualize_nearest_neighbor\n    from code_workbook_utils.utils import text_to_value\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as f:\n        adata = pickle.load(f)\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    annotation = \"{{{Annotation}}}\"       # Specify phenotypes from calculation node.\n    image_id = \"{{{ImageID}}}\"              # Column for stratifying by image/region. Use \"None\" if not applicable.\n    method = \"{{{Plot_Method}}}\"               # Method for visualization:'numeric' or 'distribution'.\n    plot_type = \"{{{Plot_Type}}}\"              # e.g., 'box', 'violin', 'kde', 'hist', etc.\n    source_label = \"{{{Source_Anchor_Cell_Label}}}\"    # The phenotype from which distances are measured.\n    target_label = \"{{{Target_Cell_Label}}}\"             # Target phenotypes: \"All\" or comma-separated list (e.g., \"Stroma,Immune\").\n    distance_key = \"{{{Nearest_Neighbor_Associated_Table}}}\"    # Key in adata.obsm where distance matrix is stored.\n    log_scale = {{{Log_Scale}}}                 # Apply log1p transform if True\n    facet_plot = {{{Facet_Plot}}}                # Create a single figure with subplots if True and image_id_col is valid.\n    x_axis_title_rotation = {{{X_Axis_Label_Rotation}}}       # Rotation angle for x-axis labels (in degrees)\n    shared_x_axis_title = {{{Shared_X_Axis_Title_}}}  # For faceted plots, use one shared x-axis title at the bottom.\n    x_axis_title_fontsize = \"{{{X_Axis_Title_Font_Size}}}\"    # Fontsize for x-axis title. None uses global font_size. Set e.g., 10 for smaller.\n\n    defined_color_map = text_to_value(\"{{{Defined_Color_Mapping}}}\", param_name=\"Define Label Color Mapping\")           \n    annotation_colorscale = \"rainbow\"\n\n    fig_width = {{{Figure_Width}}}\n    fig_height = {{{Figure_Height}}}\n    fig_dpi = {{{FIgure_DPI}}}\n    global_font_size = {{{Font_Size}}}\n    fig_title = f'Nearest Neighbor Distance Distribution Measured from \"{source_label}\"'\n    \n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    image_id = text_to_value(\n        image_id,\n        default_none_text=\"None\",\n        value_to_convert_to=None\n    )\n\n    # If target_label is None, it means \"All distance columns\"\n    # If it's a comma-separated string (e.g. \"Stroma,Immune\"), split into a list\n    target_label = text_to_value(\n        target_label, \n        default_none_text=\"All\", \n        value_to_convert_to=None\n    )\n\n    if target_label is not None:\n        distance_to_processed = [x.strip() for x in target_label.split(\",\")]\n    else:\n        distance_to_processed = None\n\n    x_axis_title_fontsize = text_to_value(\n        x_axis_title_fontsize,\n        default_none_text=\"None\",\n        to_int=\"True\"\n    )\n\n    # Configure Matplotlib font size\n    plt.rcParams.update({'font.size': global_font_size})\n\n    # If facet_plot=True but no valid stratify column => revert to single figure\n    if facet_plot and image_id is None:\n        warning_message = (\n            \"Facet plotting was requested, but there is no annotation to group by. \"\n            \"Switching to a single-figure display.\"\n        )\n        print(warning_message)\n        facet_plot = False\n    \n    result_dict = visualize_nearest_neighbor(\n        adata=adata,\n        annotation=annotation,\n        spatial_distance=distance_key,  \n        distance_from=source_label,\n        distance_to=distance_to_processed,\n        method=method,\n        plot_type=plot_type,\n        stratify_by=image_id,    \n        facet_plot=facet_plot,\n        log=log_scale,\n        annotation_colorscale=annotation_colorscale,\n        defined_color_map=defined_color_map,\n    )\n\n    # Extract the data and figure(s)\n    df_long = result_dict[\"data\"]\n    figs_out = result_dict[\"fig\"] # Single Figure or List of Figures\n    palette_hex = result_dict[\"palette\"]\n    axes_out = result_dict[\"ax\"]\n\n    print(\"Summary statistics of the dataset:\")\n    print(df_long.describe())\n\n    # ------------------------------------------ #\n    # Customize figure legends & X-axis rotation\n    # ------------------------------------------ #\n    legend_labels = distance_to_processed or df_long[\"group\"].unique().tolist()\n    legend_labels = legend_labels if distance_to_processed else sorted(legend_labels)\n\n    handles = [\n        mpatches.Patch(\n            facecolor=palette_hex[label],\n            edgecolor='none',\n            label=label\n        )\n        for label in legend_labels\n    ]\n\n    def _flatten_axes(ax_input):\n        if isinstance(ax_input, Axes):\n            return [ax_input]\n        if isinstance(ax_input, (list, tuple, np.ndarray)):\n            return [ax for ax in np.ravel(ax_input) if isinstance(ax, Axes)]\n        return []\n\n    flat_axes_list = _flatten_axes(axes_out)\n    shared_x_title_applied_to_fig = None\n\n    if flat_axes_list: \n        # Attach legend to the last axis\n        flat_axes_list[-1].legend(\n            handles=handles,\n            title=\"Target phenotype\",\n            bbox_to_anchor=(1.02, 1),\n            loc=\"upper left\",\n            frameon=False,\n        )\n\n        # --- X-Axis Title Handling ---\n        current_x_label_text = \"\"\n        if flat_axes_list[0].get_xlabel():\n            current_x_label_text = flat_axes_list[0].get_xlabel()\n\n        if not current_x_label_text:\n            current_x_label_text = f\"Log({distance_key})\" if log_scale else distance_key\n        if not current_x_label_text: current_x_label_text = \"Distance\" # Ultimate fallback\n\n        effective_fontsize = x_axis_title_fontsize if x_axis_title_fontsize is not None else global_font_size\n\n        if facet_plot and shared_x_axis_title and isinstance(figs_out, plt.Figure):\n            for ax_item in flat_axes_list: ax_item.set_xlabel('') \n            \n            sup_ha_align = 'center'\n            if 0 < x_axis_title_rotation % 360 < 180: sup_ha_align = 'right'\n            elif 180 < x_axis_title_rotation % 360 < 360: sup_ha_align = 'left'\n\n            figs_out.supxlabel(\n                current_x_label_text, y=0.02, fontsize=effective_fontsize,\n                rotation=x_axis_title_rotation, ha=sup_ha_align\n            )\n            shared_x_title_applied_to_fig = figs_out\n\n        else: # Apply to individual subplot x-axis titles\n            for ax_item in flat_axes_list:\n                label_object = ax_item.xaxis.get_label()\n                if not label_object.get_text(): # If subplot has no label, set it\n                    ax_item.set_xlabel(current_x_label_text)\n                    label_object = ax_item.xaxis.get_label()\n\n                if label_object.get_text(): # Configure if there's an actual label\n                    label_object.set_rotation(x_axis_title_rotation)\n                    label_object.set_fontsize(effective_fontsize)\n                    ha_align_val = 'center'\n                    if 0 < x_axis_title_rotation % 360 < 180: ha_align_val = 'right'\n                    elif 180 < x_axis_title_rotation % 360 < 360: ha_align_val = 'left'\n                    label_object.set_ha(ha_align_val)\n\n    # --- Stratification Info ---\n    if image_id is not None and image_id in df_long.columns:\n        unique_vals = df_long[image_id].unique()\n        n_unique = len(unique_vals)\n\n        if n_unique == 0:\n            print(\n                f\"[WARNING] The annotation '{image_id}' has 0 unique values or is empty. \"\n                \"No data to plot => Potential empty plot.\"\n            )\n        elif n_unique == 1 and facet_plot:\n            print(\n                f\"[INFO] The annotation '{image_id}' has only one unique value ({unique_vals[0]}). \"\n                \"Facet plot will resemble a single plot.\"\n            )\n        elif n_unique > 1:\n            print(f\"The annotation '{image_id}' has {n_unique} unique values: {unique_vals}\")\n\n    ## ------------------------------- ##\n    ## Figure Configuration & Display  ##\n    ## ------------------------------- ##\n    def _title_main(fig, title):\n        \"\"\"\n        Sets a bold, centered main title on the figure, and \n        adjusts figure size and layout accordingly.\n        \"\"\"\n        fig.set_size_inches(fig_width, fig_height)\n        fig.set_dpi(fig_dpi)\n        fig.suptitle(\n            title,\n            fontsize=global_font_size + 4,\n            weight='bold',\n            x=0.5,  # center horizontally\n            horizontalalignment='center'\n        )\n\n    def _label_each_figure(fig_list, categories):\n        \"\"\"\n        Adds a title to each figure, typically used when multiple \n        separate figures are returned (one per category).\n        \"\"\"\n        for fig, cat in zip(fig_list, categories):\n            if fig:\n                _title_main(fig, f\"{fig_title}\\n{image_id}: {cat}\")\n                fig.tight_layout(rect=[0.01, 0.01, 0.99, 0.96]) # Adjust top for the suptitle\n                plt.show()\n\n    # Determine the actual distance column name used in df_long for summary \n    distance_col = \"log_distance\" if \"log_distance\" in df_long.columns else \"distance\"\n\n    # --- Displaying Figures ---\n    cat_list = []\n    if image_id and (image_id in df_long.columns):\n        if pd.api.types.is_categorical_dtype(df_long[image_id]):\n            cat_list = list(df_long[image_id].cat.categories)\n        else:\n            cat_list = df_long[image_id].unique().tolist()\n\n    if isinstance(figs_out, list) and not facet_plot and \\\n        cat_list and len(figs_out) == len(cat_list):\n        # Scenario: Multiple separate figures, one per category (non-faceted)\n        _label_each_figure(figs_out, cat_list)\n        plt.show()\n    else:\n        # Scenario: Single figure (faceted) or list of figures not matching categories\n        figures_to_display = figs_out if isinstance(figs_out, list) else [figs_out]\n        for fig_item_to_display in figures_to_display:\n            if fig_item_to_display is not None: \n                _title_main(fig_item_to_display, fig_title)\n                \n                bottom_padding = 0.01\n                if fig_item_to_display is shared_x_title_applied_to_fig: # Make space for shared x-title\n                    bottom_padding = 0.01 # Adjusted from 0.05\n\n                top_padding = 0.99 # Adjusted from 0.90\n\n                # rect=[left, bottom, right, top]\n                fig_item_to_display.tight_layout(rect=[0.01, bottom_padding, 0.99, top_padding])\n                plt.show()\n                \n    # -------------------- #\n    # summary statistics\n    # -------------------- #\n    # 1) Per-group summary\n    df_summary_group = (\n        df_long\n        .groupby(\"group\")[distance_col]\n        .describe()\n        .reset_index()\n    )\n\n    # 2) Per-group-and-stratify, if image_id is valid\n    if image_id and (image_id in df_long.columns):\n        df_summary_group_strat = (\n            df_long\n            .groupby([image_id, \"group\"])[distance_col]\n            .describe()\n            .reset_index()\n        )\n    else:\n        df_summary_group_strat = None\n\n    if df_summary_group_strat is not None:\n        print(f\"\\nSummary by group(target phenotypes) AND '{image_id}':\")\n        print(df_summary_group_strat)\n    else:\n        print(\"\\nSummary: By group(target phenotypes) only\")\n        print(df_summary_group)\n\n    # --- CSV Output ---\n    final_df = df_summary_group_strat if df_summary_group_strat is not None else df_summary_group\n\n    csv_output_file = \"nearest_neighbor_plots.csv\"\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n\n    with output_fs.open(csv_output_file, 'w') as f:\n        final_df.to_csv(f, index=False)\n    print(f\"\\nSaved summary statistics to '{csv_output_file}'.\")\n\n    return None\n\n\n\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 25,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Visualize Nearest Neighbor [SPAC][DMAP]",
+  "tags": [],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "New Dataset",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"},
+    "figures": {"type": "directory", "name": "figures_dir"}
+  }
+}

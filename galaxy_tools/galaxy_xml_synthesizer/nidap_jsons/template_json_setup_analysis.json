@@ -1,0 +1,115 @@
+{
+  "rid": "ri.vector.main.template.b0edbb80-9007-42f7-adbc-d4fdaa0e12e9",
+  "title": "Setup Analysis [SPAC] [DMAP]",
+  "description": "Convert the pre-processed dataset to the analysis object for downstream analysis.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/fizc7sgbukcxe) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.ingest_cells) for further information.",
+  "createdBy": "473c74f1-6764-4d6c-87e8-4a56c2b2f5a0",
+  "createdAt": "2024-08-07T18:36:45.516760904Z",
+  "commitMessage": "",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Dataset",
+      "displayName": "Upstream Dataset",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PANDAS_DATAFRAME",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Feature_Regex",
+      "displayName": "Feature Regex",
+      "description": "A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with \"Intensity\", use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string.",
+      "paramType": "LIST",
+      "paramGroup": "Advanced",
+      "paramValues": null,
+      "defaultValue": null,      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [
+    {
+      "key": "X_Coordinate_Column",
+      "displayName": "X Coordinate Column",
+      "description": "The name of the column containing the X coordinate, default if XMax.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    },
+    {
+      "key": "Y_Coordinate_Column",
+      "displayName": "Y Coordinate Column",
+      "description": "The name of the column containing the Y coordinate, default if YMax.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    },
+    {
+      "key": "Annotation_s_",
+      "displayName": "Annotation(s)",
+      "description": "The annotation(s) of interest to include in downstream analysis.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "STRING",
+      "isMulti": true
+    },
+    {
+      "key": "Features_to_Analyze",
+      "displayName": "Features to Analyze",
+      "description": "A list of feature name(s) for downstream analysis.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": true
+    }
+  ],
+  "orderedMustacheKeys": [
+    "Upstream_Dataset",
+    "Features_to_Analyze",
+    "X_Coordinate_Column",
+    "Y_Coordinate_Column",
+    "Annotation_s_",
+    "Feature_Regex"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def Setup_Analysis({{{Upstream_Dataset}}}):\r\n\r\n    ## --------- ##\r\n    ## Libraries ##\r\n    ## --------- ##\r\n    from spac.data_utils import ingest_cells\r\n    import pandas as pd\r\n    import pickle\r\n\r\n    ## -------------------------------- ##\r\n    ## User-Defined Template Parameters ##\r\n    ## -------------------------------- ##\r\n\r\n    input_dataset = {{{Upstream_Dataset}}}\r\n    feature_names = {{{Features_to_Analyze}}}\r\n    regex_str = {{{Feature_Regex}}}\r\n    x_col = \"{{{X_Coordinate_Column}}}\"\r\n    y_col = \"{{{Y_Coordinate_Column}}}\"\r\n    annotation = {{{Annotation_s_}}}\r\n    \r\n    ##--------------- ##\r\n    ## Error Messages ##\r\n    ## -------------- ##\r\n    if len(annotation) == 1 and annotation[0] == \"None\":\r\n        annotation = None\r\n    \r\n    if len(annotation) != 1 and \"None\" in annotation:\r\n        error_msg = 'String \"None\" found in the annotation list'\r\n        raise ValueError(error_msg)\r\n\r\n    ## --------- ##\r\n    ## Functions ##\r\n    ## --------- ##\r\n    ##### Variable change to None function ######\r\n    def value_or_None(var):\r\n        if var == \"None\":\r\n            var = None\r\n        return var\r\n\r\n    ## --------------- ##\r\n    ## Main Code Block ##\r\n    ## --------------- ##\r\n    ################################\r\n    # Processing two search methods\r\n    for feature in feature_names:\r\n        regex_str.append(f\"^{feature}$\")\r\n    \r\n    # Sanitizing search list\r\n    regex_str_set = set(regex_str)\r\n    regex_str_list = list(regex_str)\r\n\r\n    ingested_anndata = ingest_cells(\r\n        dataframe=input_dataset,\r\n        regex_str=regex_str_list,\r\n        x_col=value_or_None(x_col),\r\n        y_col=value_or_None(y_col),\r\n        annotation=annotation\r\n    )\r\n    \r\n    print(\"Analysis Setup:\")\r\n    print(ingested_anndata)\r\n    print(\"Schema:\")\r\n    print(ingested_anndata.var_names)\r\n    ## --------------- ##\r\n    ## Save Item Block ##\r\n    ## --------------- ##\r\n    \r\n    output_item = ingested_anndata\r\n    output = Transforms.get_output()\r\n    output_fs = output.filesystem()\r\n    with output_fs.open('transform_output.pickle', 'wb') as f:\r\n        pickle.dump(output_item, f)\r\n\r\n    return(None)\r\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 18,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Setup Analysis [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "setup_analysis",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

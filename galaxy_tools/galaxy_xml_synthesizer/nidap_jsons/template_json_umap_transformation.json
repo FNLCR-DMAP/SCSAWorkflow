@@ -1,0 +1,256 @@
+{
+  "rid": "ri.vector.main.template.952ea46f-5891-4bb5-8826-a1ff6b653d47",
+  "title": "UMAP Transformation [SPAC] [DMAP]",
+  "description": "Perform UMAP dimensionality reduction using a specific table.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/qinkcqmfefnui) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.transformations.run_umap) for further information.",
+  "createdBy": "473c74f1-6764-4d6c-87e8-4a56c2b2f5a0",
+  "createdAt": "2025-02-24T15:32:24.049250494Z",
+  "commitMessage": "docs: updating the batch mode description",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Run_on_HPC",
+      "displayName": "Run on HPC",
+      "description": "If toggled on, this template will launch a computational task on HPC cluster with resource specified in the \"HPC Configuration\" parameters group. The computational result will be available one the HPC task is completed.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Table_to_Process",
+      "displayName": "Table to Process",
+      "description": "Source table to perform the computation. Default \"Original\" refers to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Number_of_Neighbors",
+      "displayName": "Number of Neighbors",
+      "description": "Number of neighbors to consider when constructing the UMAP. This influences the balance between preserving local and global structures in the data.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "75",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Target_Dimension_Number",
+      "displayName": "Target Dimension Number",
+      "description": "Number of dimensions for embedding to convert to. Default is 2 (plane).",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "2",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Minimum_Distance_between_Points",
+      "displayName": "Minimum Distance between Points",
+      "description": "Minimum distance between points in the UMAP space. Controls how tightly the embedding is allowed to compress points together.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "0.1",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Computational_Metric",
+      "displayName": "Computational Metric",
+      "description": "Metric to compute distances in high dimensional space.  Check `https://umap-learn.readthedocs.io/en/latest/api.html` for more information. The default is 'euclidean'.",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "euclidean",
+        "manhattan",
+        "chebyshev",
+        "minkowski",
+        "canberra",
+        "braycurtis",
+        "mahalanobis",
+        "wminkowski",
+        "seuclidean",
+        "cosine",
+        "correlation",
+        "haversine",
+        "hamming",
+        "jaccard",
+        "dice",
+        "russelrao",
+        "kulsinski",
+        "ll_dirichlet",
+        "hellinger",
+        "rogerstanimoto",
+        "sokalmichener",
+        "sokalsneath",
+        "yule"
+      ],
+      "defaultValue": "euclidean",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Transform_Seed",
+      "displayName": "Transform Seed",
+      "description": "This parameter sets a deterministic starting point for the UMAP transformation process, ensuring reproducibility of results. When the same dataset and 'Transform Seed' are used, the outcome of the analysis remains consistent. The default value is 42.",
+      "paramType": "NUMBER",
+      "paramGroup": "Random State Control",
+      "paramValues": null,
+      "defaultValue": "42",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Random_State",
+      "displayName": "Random State",
+      "description": "This parameter initializes the random number generator used during the UMAP fitting procedure, functioning as a control for the randomness inherent in the analysis. It guarantees that identical inputs and 'Random State' values will produce identical results, facilitating the verification of the analysis. The default setting is 0.",
+      "paramType": "NUMBER",
+      "paramGroup": "Random State Control",
+      "paramValues": null,
+      "defaultValue": "0",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Batch_Mode",
+      "displayName": "Batch Mode",
+      "description": "If set to True, this HPC run will launch in batch mode showing the template status as successful once the job is submitted to the HPC cluster. the results will be written after the HPC job completes. Avoid submitting twice before completion to prevent race conditions.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "HPC Configuration",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Partition",
+      "displayName": "Partition",
+      "description": "Biowulf nodes are grouped into partitions. A partition can be specified when submitting a job. Please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for more details",
+      "paramType": "SELECT",
+      "paramGroup": "HPC Configuration",
+      "paramValues": [
+        "quick",
+        "norm",
+        "gpu",
+        "largemem"
+      ],
+      "defaultValue": "quick",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Number_of_CPUs",
+      "displayName": "Number of CPUs",
+      "description": "Number of CPUs requested for this HPC submission",
+      "paramType": "NUMBER",
+      "paramGroup": "HPC Configuration",
+      "paramValues": null,
+      "defaultValue": "2",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Memory_GB",
+      "displayName": "Memory, GB",
+      "description": "Amount of memory in gigabytes requested for this HPC submission",
+      "paramType": "NUMBER",
+      "paramGroup": "HPC Configuration",
+      "paramValues": null,
+      "defaultValue": "10",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Request_Time",
+      "displayName": "Request Time",
+      "description": "Amount of time requested for this HPC submission. Please provide the time in the format of hh:mm:ss. For example, 2 hour 30 minute job would be 02:30:00. Please remind that different partition has different time limit, please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for further details.",
+      "paramType": "STRING",
+      "paramGroup": "HPC Configuration",
+      "paramValues": null,
+      "defaultValue": "00:20:00",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Run_on_HPC",
+    "Table_to_Process",
+    "Number_of_Neighbors",
+    "Target_Dimension_Number",
+    "Minimum_Distance_between_Points",
+    "Computational_Metric",
+    "Transform_Seed",
+    "Random_State",
+    "Batch_Mode",
+    "Partition",
+    "Number_of_CPUs",
+    "Memory_GB",
+    "Request_Time"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef UMAP_transformation({{{Upstream_Analysis}}}):\n\n    \n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    import pickle\n    from pyspark import SparkContext\n    from spac.transformations import run_umap\n    import pkgutil\n    from hpc_connector_addons.main import hpc_direct_launch\n    from hpc_connector_addons.hpc_request_utils import write_file_to_dataset_dmap\n\n\n    \n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    run_on_HPC = {{{Run_on_HPC}}}\n    hpc_partition = \"{{{Partition}}}\"\n    hpc_n_cpus = {{{Number_of_CPUs}}}\n    hpc_mem = \"{{{Memory_GB}}}\"\n    hpc_time = \"{{{Request_Time}}}\"\n    hpc_gpu = \"a100\"\n    hpc_gpu_num = 1\n    hpc_mode = \"CPU\"\n    batch_mode = {{{Batch_Mode}}}\n\n    if run_on_HPC:\n        template_code = \"spac_umap\"\n        input_file_name = \"transform_output.pickle\"\n\n        hpc_config = {\n            \"cpu\": hpc_n_cpus,\n            \"partition\": hpc_partition,\n            \"time\": hpc_time,\n            \"mem\": hpc_mem,\n            \"gpu\": hpc_gpu,\n            \"gpu_num\": hpc_gpu_num\n        }\n\n        upstream_node = {{{Upstream_Analysis}}}\n\n        transform_output = Transforms.get_output()\n\n        Current_SparkContext = SparkContext.getOrCreate()\n\n        try:\n            monitor_result = hpc_direct_launch(\n                upstream_node=upstream_node,\n                transform_output=transform_output,\n                mode=hpc_mode,\n                template=template_code,\n                hpc_config=hpc_config,\n                input_file=input_file_name,\n                batch_mode=batch_mode,\n                track_current=False,\n                test_flag=False\n            )\n        except:\n            raise ValueError(\"HPC job had encountered an error. Please check the log for further information.\")\n            return None\n        if batch_mode:\n            return None\n        if monitor_result[\"has_file\"]:\n            adata = pickle.loads(monitor_result[\"data\"])\n            print(\"\\n\\n\\n#####################################\")\n            print(\"Information of the HPC Job Results:\")\n            print(adata)\n        else:\n            print(\"No data had returned from the HPC session. If this is not the expected behavior, please refer to the job log for further information.\")\n        return None\n    else:\n        vector_check = pkgutil.find_loader(\"palantir\")\n        if vector_check is not None:\n            print(\"Template Running On NIDAP... Taking File Input\")\n            NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n            with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n                adata = pickle.load(input_file)\n        else:\n            print(\"Template Running Off NIDAP... Taking Object Input\")\n            adata = {{{Upstream_Analysis}}}\n       \n        n_neighbors = {{{Number_of_Neighbors}}}\n        min_dist = {{{Minimum_Distance_between_Points}}}\n        n_components = {{{Target_Dimension_Number}}}\n        metric = '{{{Computational_Metric}}}'\n        random_state = {{{Random_State}}}\n        transform_seed = {{{Transform_Seed}}}\n        layer = \"{{{Table_to_Process}}}\"\n\n        if layer == \"Original\":\n            layer = None\n        ##--------------- ##\n        ## Error Messages ##\n        ## -------------- ##\n\n        ## --------- ##\n        ## Functions ##\n        ## --------- ##\n\n\n        ## --------------- ##\n        ## Main Code Block ##\n        ## --------------- ##\n\n        udpated_dataset = run_umap(\n            adata=adata,\n            n_neighbors=n_neighbors,\n            min_dist=min_dist,\n            n_components=n_components,\n            metric=metric,\n            random_state=random_state,\n            transform_seed=transform_seed,\n            layer=layer,\n            verbose=True\n        )\n\n        if vector_check is not None:\n            object_to_output = udpated_dataset\n            output = Transforms.get_output()\n            output_fs = output.filesystem()\n            with output_fs.open('transform_output.pickle', 'wb') as f:\n                pickle.dump(object_to_output, f)\n            print(adata)\n        else:\n            return(adata)\n\n\n\n#################################################\n## Global imports and functions included below ##\n#################################################",
+      "shouldPersist": true
+    }
+  },
+  "version": 14,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/UMAP Transformation [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "umap_transformation",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

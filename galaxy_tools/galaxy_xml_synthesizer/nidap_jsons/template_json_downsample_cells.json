@@ -1,0 +1,135 @@
+{
+  "rid": "ri.vector.main.template.243ffdb2-e0c5-433f-9ad9-596c0a97231f",
+  "title": "Downsample Cells [SPAC] [DMAP]",
+  "description": "This template  reduces  number of cells based on one or more annotations. \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/ni65viqwqbu7y), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.downsample_cells) for further information.",
+  "createdBy": "2fdfc0bf-b680-4054-9cbc-2814fb01f8a4",
+  "createdAt": "2024-10-31T15:49:05.942665764Z",
+  "commitMessage": "Set default for random selection to True",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Dataset",
+      "displayName": "Upstream Dataset",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PANDAS_DATAFRAME",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Number_of_Samples",
+      "displayName": "Number of Samples",
+      "description": "Specifies how many cells to include in the downsampled dataset. When \"Stratify Option\" is off, it selects this number of cells from each label or from each unique combination of labels across multiple annotations. When \"Stratify Option\" is on,  it distributes this total number of cells across all labels or label combinations, in proportion to their frequencies in the full dataset.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "100000",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Stratify_Option",
+      "displayName": "Stratify Option",
+      "description": "If true, samples are chosen to reflect the original dataset's label distribution across the selected annotations. If false, an equal number of cells will be selected from each label or unique label combination across selected annotations, regardless of their original frequency.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Random_Selection",
+      "displayName": "Random Selection",
+      "description": "If this toggle is True, and \"Stratify Option\" is set to True, randomly select the returned cells within each annotation labels. Otherwise, choose the first cells up to \"Number_of_Samples\" from selected annotation(s).",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "New_Combined_Annotation_Name",
+      "displayName": "New Combined Annotation Name",
+      "description": "This is the name for a new annotation created when multiple annotations are selected. The values of this new annotation are the specific combinations of labels from the selected annotations, such as 'Region1_Day3'.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "_combined_",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Minimum_Threshold",
+      "displayName": "Minimum Threshold",
+      "description": "Determine the lowest count of cells an annotation label must be included in the downsampled data. Annotation labels with fewer cells than this threshold will be excluded to ensure meaningful representation.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "5",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [
+    {
+      "key": "Annotations_List",
+      "displayName": "Annotations List",
+      "description": "Choose one or more annotations for creating a smaller, representative sample of dataset.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "STRING",
+      "isMulti": true
+    }
+  ],
+  "orderedMustacheKeys": [
+    "Upstream_Dataset",
+    "Annotations_List",
+    "Number_of_Samples",
+    "Stratify_Option",
+    "Random_Selection",
+    "New_Combined_Annotation_Name",
+    "Minimum_Threshold"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def Downsample_Cells({{{Upstream_Dataset}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    from spac.data_utils import downsample_cells\n    from spac.utils import check_column_name\n    import pandas as pd\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    input_dataset = {{{Upstream_Dataset}}}\n    annotations = {{{Annotations_List}}}\n    n_samples = {{{Number_of_Samples}}}\n    stratify = {{{Stratify_Option}}}\n    rand = {{{Random_Selection}}}\n    combined_col_name = \"{{{New_Combined_Annotation_Name}}}\"\n    min_threshold = {{{Minimum_Threshold}}}\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    check_column_name(combined_col_name, \"New Combined Annotation Name\")\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n    ################################\n\n    down_sampled_dataset = downsample_cells(\n        input_data = input_dataset,\n        annotations = annotations,\n        n_samples = n_samples,\n        stratify = stratify,\n        rand = rand,\n        combined_col_name = combined_col_name,\n        min_threshold = min_threshold\n    )\n\n    print(\"Downsampled! Processed dataset info:\")\n    print(down_sampled_dataset.info())\n    ## --------------- ##\n    ## Save Item Block ##\n    ## --------------- ##\n    \n    return(down_sampled_dataset)",
+      "shouldPersist": true
+    }
+  },
+  "version": 16,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Downsample Cells [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python"
+  ],
+  "outputDatasetName": "downsample_cells",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"}
+  }
+}

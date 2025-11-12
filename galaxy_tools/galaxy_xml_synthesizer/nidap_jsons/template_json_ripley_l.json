@@ -1,0 +1,166 @@
+{
+  "rid": "ri.vector.main.template.aaddc327-f598-40e5-9f47-58d567355e52",
+  "title": "Ripley L Calculation [SPAC][DMAP]",
+  "description": "Calculates the Ripley L statistic that measures the amount of clustering/dispersion between two cell phenotypes at different radii.  Compares that metric with a baseline where cells are assumed to freely move in a given region of interest.  \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.ecf486fb-809e-46a9-aa58-4be78a70a073), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.spatial_analysis.ripley_l) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-05-23T04:50:55.776001372Z",
+  "commitMessage": "spac v0.8.10 ",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Radii",
+      "displayName": "Radii",
+      "description": "Radii around the center phenotype to calculate the Ripley L statistic",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "[\"0\",\"5\",\"10\"]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "Annotation name to be used in specifying phenotypes",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Center_Phenotype",
+      "displayName": "Center Phenotype",
+      "description": "The phenotype of the anchors cells.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Neighbor_Phenotype",
+      "displayName": "Neighbor Phenotype",
+      "description": "The phenotype of the neighbors cells.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Stratify_By",
+      "displayName": "Stratify By",
+      "description": "The annotation(s) to stratify the dataset when generating interaction plots. If a value other than \"None\" is passed, the dataset will be stratified by the unique labels in the annotation column. Use \"None\" without quotes to disable.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Number_of_Simulations",
+      "displayName": "Number of Simulations",
+      "description": "Number of simulation for the poisson point process where the Ripley L measure is estimated by shuffling the positions of the center and neighbor cells in the region of interest. The region of interest is defined as the convex hull that encapsulates all the cells in the region.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "1",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Area",
+      "displayName": "Area",
+      "description": "Area to normalize the Ripley L statistic. If set to \"None\" without the quotes, the area of the convex hull that surrounds the cells would be used instead.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Seed",
+      "displayName": "Seed",
+      "description": "Random seed for reproducibility, used in simulating the poisson point process.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "42",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Edge_Correction",
+      "displayName": "Edge Correction",
+      "description": "Set to True to identify and remove the cells that belong to the \"Center Phenotype\" that are closer than a given Radius from the edge of the region. These cells are identified for every Radius. Check the returned csv in the plot  to see how many cells contributed to the Ripley L calculation.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Radii",
+    "Annotation",
+    "Center_Phenotype",
+    "Neighbor_Phenotype",
+    "Stratify_By",
+    "Number_of_Simulations",
+    "Area",
+    "Seed",
+    "Edge_Correction"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "# Analysis to CSV [SPAC] [DMAP] (a767cbdf-7f21-4b08-b3a9-87ac0538457d): v6\ndef unnamed_18({{{Upstream_Analysis}}}):\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    import pickle\n    import pandas as pd\n    from spac.utils import check_table\n    from spac.spatial_analysis import ripley_l\n    from code_workbook_utils.utils import text_to_value\n    import matplotlib.pyplot as plt\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    radii = {{{Radii}}}\n    annotation = \"{{{Annotation}}}\"\n    phenotypes = [\"{{{Center_Phenotype}}}\", \"{{{Neighbor_Phenotype}}}\"]\n    regions=\"{{{Stratify_By}}}\"\n    n_simulations={{{Number_of_Simulations}}}\n    area=\"{{{Area}}}\"\n    seed={{{Seed}}}\n    spatial_key=\"spatial\"\n    edge_correction = {{{Edge_Correction}}}\n\n \n    regions = text_to_value(\n        regions, \n        default_none_text=\"None\"\n    )\n    \n    area = text_to_value(\n        area,\n        default_none_text=\"None\",\n        value_to_convert_to=None,\n        to_float=True,\n        param_name='Area'\n    )\n\n    \n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n    def convert_to_floats(text_list):\n        float_list = []\n        for value in text_list:\n            try:\n                float_list.append(float(value))\n            except ValueError:\n                raise ValueError(f\"Failed to convert the radius: '{value}' to float.\")\n        return float_list\n\n    radii=convert_to_floats(radii)\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n \n    ripley_l(\n        adata,\n        annotation=annotation,\n        phenotypes=phenotypes,\n        distances=radii,\n        regions=regions,\n        n_simulations=n_simulations,\n        area=area,\n        seed=seed,\n        spatial_key=spatial_key,\n        edge_correction=edge_correction\n    )\n\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(adata, f)\n    print(adata)\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 14,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Ripley L Calculation [SPAC][DMAP]",
+  "tags": [],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "Ripley L Calculation",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

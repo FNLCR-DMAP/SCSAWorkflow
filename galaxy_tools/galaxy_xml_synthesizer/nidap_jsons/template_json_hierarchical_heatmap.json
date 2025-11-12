@@ -1,0 +1,334 @@
+{
+  "rid": "ri.vector.main.template.bbe531a3-629c-4cd4-a45b-af91cb00baf6",
+  "title": "Hierarchical Heatmap [SPAC] [DMAP]",
+  "description": "Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensities for each feature. \\\nFor color maps definitions, refer to this [page](https://matplotlib.org/stable/users/explain/colors/colormaps.html) \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/s45v4n4nugj5k) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.visualization.hierarchical_heatmap) for further information.",
+  "createdBy": "2fdfc0bf-b680-4054-9cbc-2814fb01f8a4",
+  "createdAt": "2025-02-06T16:30:34.032467102Z",
+  "commitMessage": "Fixed issue to select default color map",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "Annotation to visualize in the heatmap.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Table_to_Visualize",
+      "displayName": "Table to Visualize",
+      "description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature_Dendrogram",
+      "displayName": "Feature Dendrogram",
+      "description": "If True, a dendrogram based on the feature will be generated.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation_Dendrogram",
+      "displayName": "Annotation Dendrogram",
+      "description": "If True, a dendrogram based on the annotation will be generated.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Z_Score",
+      "displayName": "Z Score",
+      "description": "Specifies the axis for z-score normalization. Can be \"feature\" or \"annotation\" or \"None\". Default is \"None\".",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "feature",
+        "annotation",
+        "None"
+      ],
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Swap_Axes",
+      "displayName": "Swap Axes",
+      "description": "By default (when False), annotations are on the vertical axis (rows) and features are on the horizontal axis (columns). When set to True, features will be on the vertical axis and annotations on the horizontal axis.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature_s_",
+      "displayName": "Feature(s)",
+      "description": "Need Swap Axes to be True, otherwise will always return all features. List of feature name(s) (e.g., markers) to be included in the visualization. If All, all features are used. Default is All.",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "[\"All\"]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Rotate_Label_",
+      "displayName": "Rotate Label ",
+      "description": "If True, rotate x-axis labels by 45 degrees. Default is False.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Title",
+      "displayName": "Figure Title",
+      "description": "",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "Hierarchical Heatmap",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Width",
+      "displayName": "Figure Width",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "8",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Height",
+      "displayName": "Figure Height",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "8",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_DPI",
+      "displayName": "Figure DPI",
+      "description": "Higher the DPI, clearer the image.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "300",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Font_Size",
+      "displayName": "Font Size",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "10",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Matrix_Plot_Ratio",
+      "displayName": "Matrix Plot Ratio",
+      "description": "0~1, the image size of matrix plot in the figure.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "0.8",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Standard_Scale_",
+      "displayName": "Standard Scale ",
+      "description": "Whether to standard scale data (0: row-wise or 1: column-wise). Default is None.",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "None",
+        "0",
+        "1"
+      ],
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Horizontal_Dendrogram_Display_Ratio",
+      "displayName": "Horizontal Dendrogram Display Ratio",
+      "description": "The ratio of plotting space for the horizontal dendrogram. Range from 0 to 1, default is 0.2.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "0.2",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Vertical_Dendrogram_Display_Ratio",
+      "displayName": "Vertical Dendrogram Display Ratio",
+      "description": "The ratio of plotting space for the vertical dendrogram. Range from 0 to 1, default is 0.2.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "0.2",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Value_Min",
+      "displayName": "Value Min",
+      "description": "The minimum value of the color bar.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Value_Max",
+      "displayName": "Value Max",
+      "description": "The maximum value of the color bar.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Color_Map",
+      "displayName": "Color Map",
+      "description": "Color map to be used in the figure. Check: https://matplotlib.org/stable/users/explain/colors/colormaps.html",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Configuration",
+      "paramValues": [
+        "seismic",
+        "bwr",
+        "RdBu",
+        "viridis",
+        "plasma",
+        "coolwarm"
+      ],
+      "defaultValue": "seismic",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Annotation",
+    "Table_to_Visualize",
+    "Feature_Dendrogram",
+    "Annotation_Dendrogram",
+    "Z_Score",
+    "Swap_Axes",
+    "Feature_s_",
+    "Rotate_Label_",
+    "Figure_Title",
+    "Figure_Width",
+    "Figure_Height",
+    "Figure_DPI",
+    "Font_Size",
+    "Matrix_Plot_Ratio",
+    "Standard_Scale_",
+    "Horizontal_Dendrogram_Display_Ratio",
+    "Vertical_Dendrogram_Display_Ratio",
+    "Value_Min",
+    "Value_Max",
+    "Color_Map"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef unnamed_20({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.visualization import hierarchical_heatmap\n    from spac.utils import check_feature\n    from code_workbook_utils.utils import text_to_value\n    import matplotlib.pyplot as plt    \n    import pickle\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    annotation  = \"{{{Annotation}}}\"\n    layer_to_plot = \"{{{Table_to_Visualize}}}\"\n    features = {{{Feature_s_}}}\n    standard_scale = \"{{{Standard_Scale_}}}\"\n    z_score = \"{{{Z_Score}}}\"\n    cluster_feature = {{{Feature_Dendrogram}}}\n    cluster_annotations = {{{Annotation_Dendrogram}}}\n    Figure_Title = \"{{{Figure_Title}}}\"\n    fig_width = {{{Figure_Width}}}\n    fig_height = {{{Figure_Height}}}\n    fig_dpi = {{{Figure_DPI}}}\n    font_size = {{{Font_Size}}}\n    matrix_ratio = {{{Matrix_Plot_Ratio}}}\n    swap_axes = {{{Swap_Axes}}}\n    rotate_label = {{{Rotate_Label_}}}\n    r_h_axis_dengrogram ={{{Horizontal_Dendrogram_Display_Ratio}}}\n    r_v_axis_dengrogram = {{{Vertical_Dendrogram_Display_Ratio}}}\n    v_min = \"{{{Value_Min}}}\"\n    v_max = \"{{{Value_Max}}}\"\n    color_map='{{{Color_Map}}}'\n\n    \n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##  \n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    # Use check_feature to validate features\n    if len(features) == 1 and features[0] == \"All\":\n        features = None\n    else:\n        check_feature(adata, features)\n    \n    if not swap_axes:\n        features = None\n\n    # Use text_to_value for parameter conversions\n    standard_scale = text_to_value(standard_scale, to_int=True, param_name='Standard Scale')\n    layer_to_plot = text_to_value(layer_to_plot, default_none_text=\"Original\")\n    z_score = text_to_value(z_score, param_name='Z Score')\n    vmin = text_to_value(v_min, default_none_text=\"none\", to_float=True, param_name=\"Value Min\")\n    vmax = text_to_value(v_max, default_none_text=\"none\", to_float=True, param_name=\"Value Max\")\n\n    fig, ax = plt.subplots()\n    plt.rcParams.update({'font.size': font_size})\n    fig.set_size_inches(fig_width, fig_height)\n    fig.set_dpi(fig_dpi)\n    \n    mean_intensity, clustergrid, dendrogram_data = hierarchical_heatmap(\n        adata, \n        annotation=annotation,\n        features=features, \n        layer=layer_to_plot,\n        cluster_feature=cluster_feature,\n        cluster_annotations=cluster_annotations,\n        standard_scale=standard_scale,\n        z_score=z_score,\n        swap_axes=swap_axes,\n        rotate_label=rotate_label,\n        figsize=(fig_width,fig_height),\n        dendrogram_ratio=(r_h_axis_dengrogram,r_v_axis_dengrogram),\n        vmin=vmin,\n        vmax=vmax,\n        cmap=color_map\n    )\n    print(\"Printing mean intensity data.\")\n    print(mean_intensity)\n    print()\n    print(\"Printing dendrogram data.\")\n    for data in dendrogram_data:\n        print(data)\n        print(dendrogram_data[data])\n   \n    # Ensure the mean_intensity index matches phenograph clusters\n    row_clusters = adata.obs[annotation].astype(str).unique()\n    mean_intensity[annotation] = mean_intensity.index.astype(str)\n\n    # Reorder columns to move 'clusters' to the first position\n    cols = mean_intensity.columns.tolist()\n    cols = [annotation] + [col for col in cols if col != annotation]\n    mean_intensity = mean_intensity[cols]\n\n    # Show the modified plot\n    clustergrid.ax_heatmap.set_title(Figure_Title)\n    clustergrid.height = fig_height*matrix_ratio\n    clustergrid.width = fig_width*matrix_ratio\n    plt.close(1)\n\n    plt.show()\n\n    return(mean_intensity)",
+      "shouldPersist": true
+    }
+  },
+  "version": 28,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Hierarchical Heatmap [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "New Dataset",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"},
+    "figures": {"type": "directory", "name": "figures_dir"}
+  }
+}
