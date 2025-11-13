@@ -405,7 +405,7 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
-              x_log_scale=False, y_log_scale=False, **kwargs):
+              x_log_scale=False, y_log_scale=False, facet=False, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
     or annotation from adata.obs.
@@ -446,6 +446,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     y_log_scale : bool, default False
         If True, the y-axis will be set to log scale.
+
+    facet : bool, default False
+        If True, group by function outputs facet plots
 
     **kwargs
         Additional keyword arguments passed to seaborn histplot function.
@@ -567,7 +570,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ):
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
-        return(bins)
+
+        return (bins)
 
     num_rows = plot_data.shape[0]
 
@@ -629,6 +633,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
         n_groups = len(groups)
+
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
@@ -665,62 +670,86 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             if feature:
                 ax.set_title(f'Layer: {layer}')
             axs.append(ax)
+
         else:
-            fig, ax_array = plt.subplots(
-                n_groups, 1, figsize=(5, 5 * n_groups)
-            )
+            if not facet:
+                fig, ax_array = plt.subplots(
+                    n_groups, 1, figsize=(5, 5 * n_groups)
+                )
 
-            # Convert a single Axes object to a list
-            # Ensure ax_array is always iterable
-            if n_groups == 1:
-                ax_array = [ax_array]
+                # Convert a single Axes object to a list
+                # Ensure ax_array is always iterable
+                if n_groups == 1:
+                    ax_array = [ax_array]
+
+                else:
+                    ax_array = ax_array.flatten()
+
+                for i, ax_i in enumerate(ax_array):
+                    group_data = plot_data[plot_data[group_by] ==
+                                           groups[i]][data_column]
+                    hist_data = calculate_histogram(group_data, kwargs['bins'])
+
+                    sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                                 weights='count', **kwargs)
+                    # If plotting feature specify which layer
+                    if feature:
+                        ax_i.set_title(f'{groups[i]} with Layer: {layer}')
+                    else:
+                        ax_array = ax_array.flatten()
+
+                    # Set axis scales if y_log_scale is True
+                    if y_log_scale:
+                        ax_i.set_yscale('log')
+
+                    # Adjust x-axis label if x_log_scale is True
+                    if x_log_scale:
+                        xlabel = f'log({data_column})'
+                    else:
+                        xlabel = data_column
+                    ax_i.set_xlabel(xlabel)
+
+                    # Adjust y-axis label based on 'stat' parameter
+                    stat = kwargs.get('stat', 'count')
+                    ylabel_map = {
+                        'count': 'Count',
+                        'frequency': 'Frequency',
+                        'density': 'Density',
+                        'probability': 'Probability'
+                    }
+                    ylabel = ylabel_map.get(stat, 'Count')
+                    if y_log_scale:
+                        ylabel = f'log({ylabel})'
+                    ax_i.set_ylabel(ylabel)
+                    axs.append(ax_i)
             else:
-                ax_array = ax_array.flatten()
+                hist = sns.FacetGrid(plot_data, col=group_by)
+                # Map the histogram function to the grid
+                hist.map(sns.histplot, data_column, **kwargs)
 
-            for i, ax_i in enumerate(ax_array):
-                group_data = plot_data[plot_data[group_by] ==
-                             groups[i]][data_column]
-                hist_data = calculate_histogram(group_data, kwargs['bins'])
+                # Set rotation of label
+                hist.set_xticklabels(rotation=20, ha='right')
 
-                sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
-                    weights='count', **kwargs)
-                # If plotting feature specify which layer
-                if feature:
-                    ax_i.set_title(f'{groups[i]} with Layer: {layer}')
-                else:
-                    ax_i.set_title(f'{groups[i]}')
+                # Titles for each facet
+                hist.set_titles("{col_name}")
 
-                # Set axis scales if y_log_scale is True
-                if y_log_scale:
-                    ax_i.set_yscale('log')
+                # Ajust top margin
+                hist.figure.subplots_adjust(left=.1,
+                                            top=0.85,
+                                            bottom=0.15,
+                                            hspace=0.3)
 
-                # Adjust x-axis label if x_log_scale is True
-                if x_log_scale:
-                    xlabel = f'log({data_column})'
-                else:
-                    xlabel = data_column
-                ax_i.set_xlabel(xlabel)
+                fig = hist.figure
+                axs.extend(hist.axes.flat)
+                hist_data = plot_data
 
-                # Adjust y-axis label based on 'stat' parameter
-                stat = kwargs.get('stat', 'count')
-                ylabel_map = {
-                    'count': 'Count',
-                    'frequency': 'Frequency',
-                    'density': 'Density',
-                    'probability': 'Probability'
-                }
-                ylabel = ylabel_map.get(stat, 'Count')
-                if y_log_scale:
-                    ylabel = f'log({ylabel})'
-                ax_i.set_ylabel(ylabel)
-
-                axs.append(ax_i)
     else:
         # Precompute histogram data for single plot
         hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
         if pd.api.types.is_numeric_dtype(plot_data[data_column]):
             ax.set_xlim(hist_data['bin_left'].min(),
-            hist_data['bin_right'].max())
+                        hist_data['bin_right'].max())
+
 
         sns.histplot(
             data=hist_data,
@@ -735,34 +764,37 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_title(f'Layer: {layer}')
         axs.append(ax)
 
-    # Set axis scales if y_log_scale is True
-    if y_log_scale:
-        ax.set_yscale('log')
+    axes = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+    for ax in axes:
+        # Set axis scales if y_log_scale is True
+        if y_log_scale:
+            ax.set_yscale('log')
 
-    # Adjust x-axis label if x_log_scale is True
-    if x_log_scale:
-        xlabel = f'log({data_column})'
-    else:
-        xlabel = data_column
-    ax.set_xlabel(xlabel)
+        # Adjust x-axis label if x_log_scale is True
+        if x_log_scale:
+            xlabel = f'log({data_column})'
+        else:
+            xlabel = data_column
+        ax.set_xlabel(xlabel)
 
-    # Adjust y-axis label based on 'stat' parameter
-    stat = kwargs.get('stat', 'count')
-    ylabel_map = {
-        'count': 'Count',
-        'frequency': 'Frequency',
-        'density': 'Density',
-        'probability': 'Probability'
-    }
-    ylabel = ylabel_map.get(stat, 'Count')
-    if y_log_scale:
-        ylabel = f'log({ylabel})'
-    ax.set_ylabel(ylabel)
+        # Adjust y-axis label based on 'stat' parameter
+        stat = kwargs.get('stat', 'count')
+        ylabel_map = {
+            'count': 'Count',
+            'frequency': 'Frequency',
+            'density': 'Density',
+            'probability': 'Probability'
+        }
+        ylabel = ylabel_map.get(stat, 'Count')
+        if y_log_scale:
+            ylabel = f'log({ylabel})'
+        ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": hist_data}
     else:
         return {"fig": fig, "axs": axs, "df": hist_data}
+
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
