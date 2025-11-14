@@ -1,0 +1,94 @@
+FROM continuumio/miniconda3:24.3.0-0
+
+# Build arguments
+ARG ENV_NAME=spac
+
+# Set labels
+LABEL maintainer="FNLCR-DMAP"
+LABEL description="SPAC - Single Cell Spatial Analysis Container (Development)"
+LABEL version="0.9.0-dev"
+
+# Install system dependencies including Chromium for Kaleido (ARM64 compatible)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libglu1-mesa \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Chromium for Kaleido visualization support (ARM64 compatible)
+RUN apt-get update && \
+    apt-get install -y chromium && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set Chrome binary path for Kaleido
+ENV CHROME_BIN=/usr/bin/chromium
+
+# Install and configure libmamba solver
+RUN conda install -n base -y conda-libmamba-solver && \
+    conda config --set solver libmamba
+
+# Set up working directory
+WORKDIR /home/reviewer/SCSAWorkflow
+
+# Copy only environment setup files first (for better layer caching)
+COPY environment.yml .
+
+# Configure conda channels
+RUN conda config --add channels https://fnlcr-dmap.github.io/scimap/ && \
+    conda config --add channels conda-forge && \
+    conda config --add channels ohsu-comp-bio && \
+    conda config --add channels leej3 && \
+    conda config --add channels bioconda
+
+# Create the Conda environment
+RUN conda config --set ssl_verify false && \
+    conda env create -f environment.yml && \
+    conda clean -afy && \
+    conda config --set ssl_verify true
+
+# Make the environment available
+ENV CONDA_DEFAULT_ENV=${ENV_NAME}
+ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
+
+# Copy setup.py and other necessary files for package installation
+COPY setup.py .
+COPY LICENSE .
+COPY README.md .
+COPY CHANGELOG.md .
+
+# Create a minimal src directory structure for initial installation
+# The actual source code will be mounted as a volume
+RUN mkdir -p src/spac && \
+    touch src/spac/__init__.py
+
+# Install the SPAC package in editable mode
+# The source code will be mounted, so changes will be reflected
+RUN /opt/conda/envs/${ENV_NAME}/bin/pip install -e .
+
+# Set environment variables for headless execution
+ENV QT_QPA_PLATFORM=offscreen
+ENV MPLBACKEND=Agg
+
+# Create working directories
+RUN mkdir -p /workspace /data /results
+
+# Install jupyter and nbconvert for notebook testing
+RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
+
+# Install development tools
+RUN /opt/conda/envs/${ENV_NAME}/bin/pip install ipdb pytest-watch black flake8 isort
+
+# Set working directory for Jupyter
+WORKDIR /workspace
+
+# Default command starts Jupyter notebook server
+CMD ["/opt/conda/envs/spac/bin/jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=", "--NotebookApp.password="]
