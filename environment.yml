@@ -21,6 +21,7 @@ dependencies:
   - squidpy=1.2.2               # Single-Cell Visualization and Plotting (scverse family)
   - pillow=11.0.0               # Image Processing
   - python-kaleido=0.2.1        # Image Processing
+  - jupyter                     # Notebook Environment
   - scipy=1.12.0                # Statistics (constrained by scimap)
   - dask=2023.12.1              # Parallel Computing (constrained by scimap)
   - tifffile=2023.9.26          # Image I/O (constrained by scimap)
