@@ -160,10 +160,55 @@ make rebuild  # Production
 docker-compose -f docker/docker-compose.dev.yml build --no-cache  # Development
 ```
 
+## Using with Galaxy
+
+Galaxy can use the Docker container to run SPAC tools. The container is configured so that:
+- The `spac` conda environment is active by default
+- Python and all SPAC commands work without special setup
+- Both direct commands and bash scripts work correctly
+
+### Galaxy Tool XML Example
+
+```xml
+<tool id="spac_analysis" name="SPAC Analysis" version="0.9.0">
+    <requirements>
+        <container type="docker">spac:latest</container>
+    </requirements>
+    <command><![CDATA[
+        python '$__tool_directory__/your_script.py' 
+            --input '$input' 
+            --output '$output'
+    ]]></command>
+    <inputs>
+        <param name="input" type="data" format="h5ad" label="Input file"/>
+    </inputs>
+    <outputs>
+        <data name="output" format="h5ad" label="Output file"/>
+    </outputs>
+</tool>
+```
+
+### Testing Galaxy Integration
+
+Test that commands work as Galaxy would run them:
+
+```bash
+# Test direct Python command (how Galaxy runs tools)
+docker run --rm spac:latest python -c "import spac; print(spac.__version__)"
+
+# Test with a script
+docker run --rm -v $(pwd):/work spac:latest python /work/your_script.py
+
+# Test bash command
+docker run --rm spac:latest bash -c "python -c 'import spac; print(spac.__version__)'"
+```
+
+All three methods should work without needing to activate conda manually.
+
 ## CI/CD Integration
 
 For CI/CD pipelines, use the production mode:
 ```bash
 docker build -t spac:latest .
-docker run --rm spac:latest /opt/conda/envs/spac/bin/pytest tests/ -v
+docker run --rm spac:latest pytest tests/ -v
 ```

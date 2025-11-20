@@ -60,11 +60,29 @@ RUN conda config --set ssl_verify false && \
     conda config --set ssl_verify true
 
 # Step 5: Make the environment available (simulate "conda activate spac")
+# Set all necessary environment variables for conda activation
 ENV CONDA_DEFAULT_ENV=${ENV_NAME}
+ENV CONDA_PREFIX=/opt/conda/envs/${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
+ENV PYTHONPATH=/opt/conda/envs/${ENV_NAME}/lib/python3.9/site-packages:${PYTHONPATH}
 
 # Step 6: "Install the SPAC package in development mode"
 RUN /opt/conda/envs/${ENV_NAME}/bin/pip install -e .
+
+# Make conda activate spac environment automatically in bash shells
+RUN echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate ${ENV_NAME}" >> ~/.bashrc
+
+# Create a wrapper script that ensures conda environment is activated
+# This helps when Galaxy runs commands directly
+RUN echo '#!/bin/bash' > /usr/local/bin/conda-run && \
+    echo 'source /opt/conda/etc/profile.d/conda.sh' >> /usr/local/bin/conda-run && \
+    echo 'conda activate spac' >> /usr/local/bin/conda-run && \
+    echo 'exec "$@"' >> /usr/local/bin/conda-run && \
+    chmod +x /usr/local/bin/conda-run
+
+# Set the shell to use bash for RUN commands
+SHELL ["/bin/bash", "-c"]
 
 # Set environment variables for headless notebook execution
 ENV QT_QPA_PLATFORM=offscreen
@@ -76,10 +94,18 @@ RUN mkdir -p /workspace /data /results
 # Install jupyter and nbconvert for notebook testing
 RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
 
-# Verify SPAC installation works correctly
+# Verify SPAC installation works correctly in multiple ways
 RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
-    /opt/conda/envs/${ENV_NAME}/bin/python -c "import spac; print(f'SPAC version: {spac.__version__}'); import scimap; print('All modules imported successfully!')" || \
-    echo "Some import issues detected but proceeding with test"
+    echo "Test 1: Direct python call" && \
+    python -c "import spac; print(f'SPAC version: {spac.__version__}')" && \
+    echo "Test 2: Which python" && \
+    which python && \
+    echo "Test 3: Python path" && \
+    python -c "import sys; print(sys.executable)" && \
+    echo "Test 4: Import scimap" && \
+    python -c "import scimap; print('scimap imported successfully')" && \
+    echo "=== ALL TESTS PASSED ===" || \
+    echo "Some import issues detected but proceeding"
 
 # Set working directory for Jupyter (will be mounted via volume)
 WORKDIR /workspace

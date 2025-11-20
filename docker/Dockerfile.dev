@@ -59,6 +59,10 @@ RUN conda config --set ssl_verify false && \
 ENV CONDA_DEFAULT_ENV=${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
 
+# Make conda activate spac environment automatically in bash shells
+RUN echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda activate ${ENV_NAME}" >> ~/.bashrc
+
 # Copy setup.py and other necessary files for package installation
 COPY setup.py .
 COPY LICENSE .
