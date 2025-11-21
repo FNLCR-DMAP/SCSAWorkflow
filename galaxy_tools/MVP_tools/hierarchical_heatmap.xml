@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<tool id="spac_hierarchical_heatmap" name="Hierarchical Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensi</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Feature_Dendrogram Annotation_Dendrogram Swap_Axes Rotate_Label_ --list-values Feature_s_ --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/hierarchical_heatmap_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Annotation" type="text" label="Annotation" value="" help="Annotation to visualize in the heatmap."/>
+        <param name="Table_to_Visualize" type="text" label="Table to Visualize" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+        <param name="Feature_Dendrogram" type="boolean" label="Feature Dendrogram" truevalue="True" falsevalue="False" checked="true" help="If True, a dendrogram based on the feature will be generated."/>
+        <param name="Annotation_Dendrogram" type="boolean" label="Annotation Dendrogram" truevalue="True" falsevalue="False" checked="true" help="If True, a dendrogram based on the annotation will be generated."/>
+        <param name="Z_Score" type="select" label="Z Score" help="Specifies the axis for z-score normalization. Can be &quot;feature&quot; or &quot;annotation&quot; or &quot;None&quot;. Default is &quot;None&quot;.">
+            <option value="feature">feature</option>
+            <option value="annotation">annotation</option>
+            <option value="None" selected="true">None</option>
+        </param>
+        <param name="Swap_Axes" type="boolean" label="Swap Axes" truevalue="True" falsevalue="False" checked="false" help="By default (when False), annotations are on the vertical axis (rows) and features are on the horizontal axis (columns). When set to True, features will be on the vertical axis and annotations on the horizontal axis."/>
+        <repeat name="Feature_s__repeat" title="Feature(s)">
+            <param name="value" type="text" label="Value" help="Need Swap Axes to be True, otherwise will always return all features. List of feature name(s) (e.g., markers) to be included in the visualization. If All, all features are used. Default is All."/>
+        </repeat>
+        <param name="Rotate_Label_" type="boolean" label="Rotate Label " truevalue="True" falsevalue="False" checked="false" help="If True, rotate x-axis labels by 45 degrees. Default is False."/>
+        <param name="Figure_Title" type="text" label="Figure Title" value="Hierarchical Heatmap"/>
+        <param name="Figure_Width" type="float" label="Figure Width" value="8"/>
+        <param name="Figure_Height" type="float" label="Figure Height" value="8"/>
+        <param name="Figure_DPI" type="float" label="Figure DPI" value="300" help="Higher the DPI, clearer the image."/>
+        <param name="Font_Size" type="float" label="Font Size" value="10"/>
+        <param name="Matrix_Plot_Ratio" type="float" label="Matrix Plot Ratio" value="0.8" help="0~1, the image size of matrix plot in the figure."/>
+        <param name="Standard_Scale_" type="select" label="Standard Scale " help="Whether to standard scale data (0: row-wise or 1: column-wise). Default is None.">
+            <option value="None" selected="true">None</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+        </param>
+        <param name="Horizontal_Dendrogram_Display_Ratio" type="float" label="Horizontal Dendrogram Display Ratio" value="0.2" help="The ratio of plotting space for the horizontal dendrogram. Range from 0 to 1, default is 0.2."/>
+        <param name="Vertical_Dendrogram_Display_Ratio" type="float" label="Vertical Dendrogram Display Ratio" value="0.2" help="The ratio of plotting space for the vertical dendrogram. Range from 0 to 1, default is 0.2."/>
+        <param name="Value_Min" type="text" label="Value Min" value="None" help="The minimum value of the color bar."/>
+        <param name="Value_Max" type="text" label="Value Max" value="None" help="The maximum value of the color bar."/>
+        <param name="Color_Map" type="select" label="Color Map" help="Color map to be used in the figure. Check: https://matplotlib.org/stable/users/explain/colors/colormaps.html">
+            <option value="seismic" selected="true">seismic</option>
+            <option value="bwr">bwr</option>
+            <option value="RdBu">RdBu</option>
+            <option value="viridis">viridis</option>
+            <option value="plasma">plasma</option>
+            <option value="coolwarm">coolwarm</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Hierarchical Heatmap [SPAC] [DMAP]**
+Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensities for each feature. \
+For color maps definitions, refer to this page \
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- dataframe: file (dataframe.csv)
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

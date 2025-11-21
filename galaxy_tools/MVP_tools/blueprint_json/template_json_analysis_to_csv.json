@@ -1,0 +1,84 @@
+{
+  "rid": "ri.vector.main.template.a767cbdf-7f21-4b08-b3a9-87ac0538457d",
+  "title": "Analysis to CSV [SPAC] [DMAP]",
+  "description": "Export a specified table with all annotations from an upstream analysis to a CSV file.  Please refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.f9795baf-21b9-458e-8947-bcf856767870) for further information.",
+  "createdBy": "2fdfc0bf-b680-4054-9cbc-2814fb01f8a4",
+  "createdAt": "2025-02-27T21:42:58.58156959Z",
+  "commitMessage": "",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysi",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Table_to_Export",
+      "displayName": "Table to Export",
+      "description": "Source table to be exported. Default is Original.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Save_as_CSV_File",
+      "displayName": "Save as CSV File",
+      "description": "If True, export the data as a single csv file, otherwise, export the data as a dataset that can be manipulated in NIDAP.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysi",
+    "Table_to_Export",
+    "Save_as_CSV_File"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def unnamed_11({{{Upstream_Analysi}}}):\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    import pickle\n    import pandas as pd\n    from spac.utils import check_table\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n    NIDAP_dataset = {{{Upstream_Analysi}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    input_layer = \"{{{Table_to_Export}}}\"\n    save_file = {{{Save_as_CSV_File}}}\n\n    if input_layer == \"Original\":\n        input_layer = None\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n    def export_layer_to_csv(\n        adata,\n        layer=None):\n        \"\"\"\n        Exports the specified layer or the default .X data matrix of an AnnData object to a CSV file.\n        \"\"\"\n        # Check if the provided layer exists in the AnnData object\n        if layer:\n            check_table(adata, tables=layer)\n            data_to_export = pd.DataFrame(adata.layers[layer],\n                                        index=adata.obs.index,\n                                        columns=adata.var.index)\n        else:\n            data_to_export = pd.DataFrame(adata.X,\n                                        index=adata.obs.index,\n                                        columns=adata.var.index)\n\n        # Join with the observation metadata\n        full_data_df = data_to_export.join(adata.obs)\n\n        #Join the spatial coordinates\n\n        # Extract the spatial coordinates\n        spatial_df = pd.DataFrame(adata.obsm['spatial'],    index=adata.obs.index, columns=['spatial_x', 'spatial_y'])\n\n        # Join spatial_df with full_data_df\n        full_data_df = full_data_df.join(spatial_df)\n\n\n        return(full_data_df)\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    csv_data = export_layer_to_csv(\n        adata=adata,\n        layer=input_layer\n    )\n    if save_file:\n        output = Transforms.get_output()\n        output_fs = output.filesystem()\n        with output_fs.open('analysis.csv', 'w') as f:\n            csv_data.to_csv(f, index=False)\n    else:\n        print(csv_data.info())\n        return(csv_data)\n\n\n#################################################\n## Global imports and functions included below ##\n#################################################\n\n\n\n#################################################\n## Global imports and functions included below ##\n#################################################\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 11,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Analysis to CSV [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "analysis_to_export",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"}
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "rid": "ri.vector.main.template.531d01bc-d3aa-465b-9491-b9d85cf07750",
+  "title": "Append Pin Color Rule [DMAP] [SPAC]",
+  "description": "Adds pin color rules to the analysis that can be used in downstream visualization. \\\nThe consistent color representation of the same labels between different visualizations promotes the comprehensiveness of the analysis.  \\\nThe list of available color is defined in this [link](https://matplotlib.org/stable/gallery/color/named_colors.html#css-colors). \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/vw4vqvlw4mfra) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.add_pin_color_rules) for further information.",
+  "createdBy": "2fdfc0bf-b680-4054-9cbc-2814fb01f8a4",
+  "createdAt": "2025-01-07T13:31:49.33147586Z",
+  "commitMessage": "Removed \"Dev\" from description",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Label_Color_Map",
+      "displayName": "Label Color Map",
+      "description": "List of string pairs representing the label and its assigned color. Each pair should have this format: <label>:<color> (without the '<' '>'). Example: b-cells:red. The values must be a single color string from the link provided in the description",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "[]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Color_Map_Name",
+      "displayName": "Color Map Name",
+      "description": "Name of the color map to be stored in the analysis. Default is \"_spac_colors\".",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "_spac_colors",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Overwrite_Previous_Color_Map",
+      "displayName": "Overwrite Previous Color Map",
+      "description": "When True, if a color map with name defined in the \"Color Map Name\" option already exists in the analysis, the current color mapping rule run will replace existing ones.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Label_Color_Map",
+    "Color_Map_Name",
+    "Overwrite_Previous_Color_Map"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def add_pin_color_rule({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    from spac.data_utils import add_pin_color_rules\n    from code_workbook_utils.utils import string_list_to_dictionary, save_pickle_to_output, load_pickle_from_dataset\n\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    adata = load_pickle_from_dataset({{{Upstream_Analysis}}})\n\n    color_dict_string_list = {{{Label_Color_Map}}}\n    color_map_name = \"{{{Color_Map_Name}}}\"\n    overwrite = {{{Overwrite_Previous_Color_Map}}}\n\n    color_dict = string_list_to_dictionary(\n        color_dict_string_list,\n        key_name=\"label\",\n        value_name=\"color\"\n    )\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    add_pin_color_rules(\n        adata,\n        label_color_dict=color_dict,\n        color_map_name=color_map_name,\n        overwrite=overwrite\n    )\n    print(adata.uns[f'{color_map_name}_summary'])\n\n\n\n    ## ----------------- ##\n    ## Data Return Block ##\n    ## ----------------- ##\n\n    save_pickle_to_output(\n        Transforms.get_output(),\n        adata\n    )\n\n    return None\n\n#################################################\n## Global imports and functions included below ##\n#################################################\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 4,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Append Pin Color Rule [DMAP] [SPAC]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "color_mapped_analysis",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

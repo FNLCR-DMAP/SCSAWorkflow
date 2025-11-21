@@ -1,0 +1,84 @@
+{
+  "rid": "ri.vector.main.template.b9134d5c-9e08-43fc-bc99-4c3866779b7b",
+  "title": "Z-Score Normalization [DMAP] [SPAC]",
+  "description": "Perform z-scores normalization for the selected data table in the analysis. Normalized data table is stored under name \"z_scores\".\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/hge2f7lnhdvrg) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.transformations.z_score_normalization) for further information.",
+  "createdBy": "473c74f1-6764-4d6c-87e8-4a56c2b2f5a0",
+  "createdAt": "2024-09-24T12:40:19.253994436Z",
+  "commitMessage": "spac v0.7.0",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Table_to_Process",
+      "displayName": "Table to Process",
+      "description": "Source table to perform the computation. Original refers to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Output_Table_Name",
+      "displayName": "Output Table Name",
+      "description": "Name of the table to be added to the analysis. Default is \"z_scores\".",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "z_scores",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Table_to_Process",
+    "Output_Table_Name"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def z_score_normalization({{{Upstream_Analysis}}}):\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    import pickle\n    import pandas as pd\n    from spac.transformations import z_score_normalization\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    input_layer = \"{{{Table_to_Process}}}\"\n    output_layer = \"{{{Output_Table_Name}}}\"\n\n    if input_layer == \"Original\":\n        input_layer = None\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n    ################################\n\n    z_score_normalization(\n        adata,\n        output_layer=output_layer,\n        input_layer=input_layer\n    )\n    \n    \n    # Convert the normalized layer to a DataFrame and print its summary\n    post_dataframe = adata.to_df(layer=output_layer)\n    print(post_dataframe.describe())\n\n    print(adata)\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(adata, f)\n\n    return(None)\n\n#################################################\n## Global imports and functions included below ##\n#################################################\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 11,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Z-Score Normalization [DMAP] [SPAC]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "z_score_normalized",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

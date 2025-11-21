@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<tool id="spac_nearest_neighbor_calculation" name="Nearest Neighbor Calculation [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Computes the shortest distance from each cell to the nearest cell of each phenotype. The distance table is stored with the key name &quot;Label&quot;. \
+Please refer to DUET Documentation, GitHub Documentation </description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Verbose --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/nearest_neighbor_calculation_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream_Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Annotation" type="text" label="Annotation" value="" help="Annotation name specifying phenotypes."/>
+        <param name="ImageID" type="text" label="ImageID" value="None" help="If multiple images are in the dataset, specify the annotation with image IDs. Otherwise, use &quot;None&quot; to treat the dataset as a single image."/>
+        <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="Key name to store the calculated distances. Default is &quot;spatial_distance&quot;."/>
+        <param name="Verbose" type="boolean" label="Verbose" truevalue="True" falsevalue="False" checked="true" help="Indicates whether to print progress messages."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Nearest Neighbor Calculation [SPAC][DMAP]**
+Computes the shortest distance from each cell to the nearest cell of each phenotype. The distance table is stored with the key name "Label". \
+Please refer to DUET Documentation, GitHub Documentation for further information.
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

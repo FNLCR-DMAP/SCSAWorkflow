@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<tool id="spac_visualize_nearest_neighbor" name="Visualize Nearest Neighbor [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\
+Please refer to DUET Document</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Log_Scale Facet_Plot Shared_X_Axis_Title_ --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/visualize_nearest_neighbor_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Annotation" type="text" label="Annotation" value="" help="Annotation name specifying phenotypes. Must match name used when the distances were originally calculated."/>
+        <param name="ImageID" type="text" label="ImageID" value="None" help="The annotation name used to distinguish different images or samples. If there's only one image, set to &quot;None.&quot;"/>
+        <param name="Plot_Method" type="select" label="Plot Method" help="Determines the plotting style- Catplots (&quot;numeric&quot; ) show relationship between a numerical and one or more categorical variables, e.g., &quot;violin&quot;, &quot;box&quot;, &quot;strip&quot;; Displots (&quot;distribution&quot;) visualize the distribution of single variables, e.g., &quot;kdeplot&quot;, &quot;ecdfplot&quot;. Default is &quot;numeric&quot;.">
+            <option value="numeric" selected="true">numeric</option>
+            <option value="distribution">distribution</option>
+        </param>
+        <param name="Plot_Type" type="select" label="Plot Type" help="Specific plot used to display the distances. If Method=&quot;numeric&quot;, use options such as &quot;box&quot;, &quot;violin&quot;, &quot;strip&quot;, &quot;swarm&quot;, or &quot;boxen&quot;. If Method=&quot;distribution&quot;, choose &quot;hist&quot;, &quot;kde&quot;, or &quot;ecdf&quot;. Default-  &quot;boxen&quot; for &quot;numeric&quot;, &quot;kde&quot; for &quot;distribution&quot;.">
+            <option value="boxen" selected="true">boxen</option>
+            <option value="box">box</option>
+            <option value="violin">violin</option>
+            <option value="strip">strip</option>
+            <option value="swarm">swarm</option>
+            <option value="hist">hist</option>
+            <option value="kde">kde</option>
+            <option value="ecdf">ecdf</option>
+        </param>
+        <param name="Source_Anchor_Cell_Label" type="text" label="Source &quot;Anchor&quot; Cell Label" value="" help="The phenotype from which distances are measured."/>
+        <param name="Target_Cell_Label" type="text" label="Target Cell Label" value="All" help="The phenotype(s) being measured against. Use &quot;All&quot; to include every phenotype."/>
+        <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated."/>
+        <param name="Log_Scale" type="boolean" label="Log Scale" truevalue="True" falsevalue="False" checked="false" help="Display the distance in log scale. Default is False."/>
+        <param name="Facet_Plot" type="boolean" label="Facet Plot" truevalue="True" falsevalue="False" checked="false" help="If set to “True,” each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample."/>
+        <param name="X_Axis_Label_Rotation" type="float" label="X Axis Label Rotation" value="0" help="The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right)."/>
+        <param name="Shared_X_Axis_Title_" type="boolean" label="Shared X Axis Title " truevalue="True" falsevalue="False" checked="true" help="For faceted plots, use one shared x-axis title at the bottom. Default is &quot;ON&quot;."/>
+        <param name="X_Axis_Title_Font_Size" type="text" label="X Axis Title Font Size" value="None" help="Font size for x-axis title. If &quot;None &quot;, use figure font size."/>
+        <param name="Defined_Color_Mapping" type="text" label="Defined Color Mapping" value="None" help="Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default &quot;None&quot; will allow the visualization to determine the color of labels automatically."/>
+        <param name="Figure_Width" type="float" label="Figure Width" value="12"/>
+        <param name="Figure_Height" type="float" label="Figure Height" value="6"/>
+        <param name="FIgure_DPI" type="float" label="FIgure DPI" value="300"/>
+        <param name="Font_Size" type="float" label="Font Size" value="12"/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Visualize Nearest Neighbor [SPAC][DMAP]**
+Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\
+Please refer to DUET Documentation,  and GitHub Documentation  for further information.
+**Outputs:**
+- dataframe: file (dataframe.csv)
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

@@ -1,0 +1,71 @@
+{
+  "rid": "ri.vector.main.template.968bfd76-4051-4db2-b339-1056b2feb84d",
+  "title": "Append Annotation [SPAC] [DMAP]",
+  "description": "Append new annotation columns with single label to the dataset.\\\nPlease refer to [DUET Documentation]( https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.06e4854f-4c41-4ae5-a350-ff6b51861cb8), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.append_annotation)",
+  "createdBy": "2fdfc0bf-b680-4054-9cbc-2814fb01f8a4",
+  "createdAt": "2024-09-05T13:07:13.99891787Z",
+  "commitMessage": "Edited the description of Annotation Pair List",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Dataset",
+      "displayName": "Upstream Dataset",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PANDAS_DATAFRAME",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Annotation_Pair_List",
+      "displayName": "Annotation Pair List",
+      "description": "List of string pairs representing the new annotation and its label.\nEach pair should have this format:\n        <new annotation column name>:<value of the annotation> without the '<' and '>' characters.\nThe values must be a single string or numeric value",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "[\"Example:Example\"]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Dataset",
+    "Annotation_Pair_List"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def Append_Annotation_1({{{Upstream_Dataset}}}):\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.data_utils import append_annotation\n    from spac.utils import check_column_name\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n    \n    input_dataframe = {{{Upstream_Dataset}}}\n    dataset_mapping_rules = {{{Annotation_Pair_List}}}\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##        \n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n    ################################\n\n    # Initialize an empty dictionary\n    parsed_dict = {}\n\n    # Loop through each string pair in the list\n    for pair in dataset_mapping_rules:\n        # Split the string on the colon\n        key, value = pair.split(\":\")\n        check_column_name(key, pair)\n        # Add the key-value pair to the dictionary\n        parsed_dict[key] = value\n\n    print(f\"The pairs to add are:\\n{parsed_dict}\")\n\n    output_dataframe = append_annotation(\n        input_dataframe,\n        parsed_dict\n    )\n\n    print(output_dataframe.info())\n    ## --------------- ##\n    ## Save Item Block ##\n    ## --------------- ##\n\n    return(output_dataframe)\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 12,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Append Annotation [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python"
+  ],
+  "outputDatasetName": "append_observations",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"}
+  }
+}

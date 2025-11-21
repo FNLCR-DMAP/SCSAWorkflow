@@ -1,0 +1,146 @@
+<?xml version="1.0" ?>
+<tool id="spac_relational_heatmap" name="Relational Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Relation Heatmap displays the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annota</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}, "dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && 
+python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && 
+python '$__tool_directory__/relational_heatmap_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Source_Annotation_Name" type="text" label="Source Annotation Name" value="None" help="Name of the source annotation. Display as vertical axis in the heatmap."/>
+        <param name="Target_Annotation_Name" type="text" label="Target Annotation Name" value="None" help="Name of the source annotation. Display as horizontal axis in the heatmap."/>
+        <param name="Colormap" type="select" label="Colormap" help="Colormap of annotation, default is &quot;darkmint&quot;. Please refer to [Matplotlib Colormap](https://matplotlib.org/stable/users/explain/colors/colormaps.html) for further information">
+            <option value="aggrnyl">aggrnyl</option>
+            <option value="agsunset">agsunset</option>
+            <option value="algae">algae</option>
+            <option value="amp">amp</option>
+            <option value="armyrose">armyrose</option>
+            <option value="balance">balance</option>
+            <option value="blackbody">blackbody</option>
+            <option value="bluered">bluered</option>
+            <option value="blues">blues</option>
+            <option value="blugrn">blugrn</option>
+            <option value="bluyl">bluyl</option>
+            <option value="brbg">brbg</option>
+            <option value="brwnyl">brwnyl</option>
+            <option value="bugn">bugn</option>
+            <option value="bupu">bupu</option>
+            <option value="burg">burg</option>
+            <option value="burgyl">burgyl</option>
+            <option value="cividis">cividis</option>
+            <option value="curl">curl</option>
+            <option value="darkmint" selected="true">darkmint</option>
+            <option value="deep">deep</option>
+            <option value="delta">delta</option>
+            <option value="dense">dense</option>
+            <option value="earth">earth</option>
+            <option value="edge">edge</option>
+            <option value="electric">electric</option>
+            <option value="emrld">emrld</option>
+            <option value="fall">fall</option>
+            <option value="geyser">geyser</option>
+            <option value="gnbu">gnbu</option>
+            <option value="gray">gray</option>
+            <option value="greens">greens</option>
+            <option value="greys">greys</option>
+            <option value="haline">haline</option>
+            <option value="hot">hot</option>
+            <option value="hsv">hsv</option>
+            <option value="ice">ice</option>
+            <option value="icefire">icefire</option>
+            <option value="inferno">inferno</option>
+            <option value="jet">jet</option>
+            <option value="magenta">magenta</option>
+            <option value="magma">magma</option>
+            <option value="matter">matter</option>
+            <option value="mint">mint</option>
+            <option value="mrybm">mrybm</option>
+            <option value="mygbm">mygbm</option>
+            <option value="oranges">oranges</option>
+            <option value="orrd">orrd</option>
+            <option value="oryel">oryel</option>
+            <option value="oxy">oxy</option>
+            <option value="peach">peach</option>
+            <option value="phase">phase</option>
+            <option value="picnic">picnic</option>
+            <option value="pinkyl">pinkyl</option>
+            <option value="piyg">piyg</option>
+            <option value="plasma">plasma</option>
+            <option value="plotly3">plotly3</option>
+            <option value="portland">portland</option>
+            <option value="prgn">prgn</option>
+            <option value="pubu">pubu</option>
+            <option value="pubugn">pubugn</option>
+            <option value="puor">puor</option>
+            <option value="purd">purd</option>
+            <option value="purp">purp</option>
+            <option value="purples">purples</option>
+            <option value="purpor">purpor</option>
+            <option value="rainbow">rainbow</option>
+            <option value="rdbu">rdbu</option>
+            <option value="rdgy">rdgy</option>
+            <option value="rdpu">rdpu</option>
+            <option value="rdylbu">rdylbu</option>
+            <option value="rdylgn">rdylgn</option>
+            <option value="redor">redor</option>
+            <option value="reds">reds</option>
+            <option value="solar">solar</option>
+            <option value="spectral">spectral</option>
+            <option value="speed">speed</option>
+            <option value="sunset">sunset</option>
+            <option value="sunsetdark">sunsetdark</option>
+            <option value="teal">teal</option>
+            <option value="tealgrn">tealgrn</option>
+            <option value="tealrose">tealrose</option>
+            <option value="tempo">tempo</option>
+            <option value="temps">temps</option>
+            <option value="thermal">thermal</option>
+            <option value="tropic">tropic</option>
+            <option value="turbid">turbid</option>
+            <option value="turbo">turbo</option>
+            <option value="twilight">twilight</option>
+            <option value="viridis">viridis</option>
+            <option value="ylgn">ylgn</option>
+            <option value="ylgnbu">ylgnbu</option>
+            <option value="ylorbr">ylorbr</option>
+            <option value="ylorrd">ylorrd</option>
+        </param>
+        <param name="Figure_Width_inch" type="float" label="Figure Width, inch" value="8" help="Figure Width, inch"/>
+        <param name="Figure_Height_inch" type="float" label="Figure Height, inch" value="10" help="Figure Height, inch"/>
+        <param name="Figure_DPI" type="integer" label="Figure DPI" value="300" help="Dots Per squared Inch, higher the value, better the image quality"/>
+        <param name="Font_Size" type="float" label="Font Size" value="8" help="Font Size"/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+        <collection name="html" type="list" label="${tool.name} on ${on_string}: Html">
+            <discover_datasets pattern="__name_and_ext__" directory="html_dir"/>
+        </collection>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+    </outputs>
+    <help><![CDATA[
+
+**Relational Heatmap [SPAC] [DMAP]**
+Relation Heatmap displays the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation. Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- figures: directory (figures_dir)
+- html: directory (html_dir)
+- dataframe: file (dataframe.csv)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

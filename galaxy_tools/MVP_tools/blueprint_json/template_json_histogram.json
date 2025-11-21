@@ -1,0 +1,345 @@
+{
+  "rid": "ri.vector.main.template.d8494721-3c2e-48e0-811b-156c662e40d4",
+  "title": "Histogram [SPAC] [DMAP]",
+  "description": "Plot the histogram of cells based on a specific feature or annotation. \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.d2bd8965-0985-4eb4-9440-1914b9613231), and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.visualization.histogram) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-05-23T05:21:02.465714297Z",
+  "commitMessage": "spac v0.8.10",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Plot_By",
+      "displayName": "Plot By",
+      "description": "Plot the histogram on the feature or annotation",
+      "paramType": "SELECT",
+      "paramGroup": "Plot by",
+      "paramValues": [
+        "Annotation",
+        "Feature"
+      ],
+      "defaultValue": "Annotation",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "Annotation name in the analysis to plot histogram. Can't be used with Feature.",
+      "paramType": "STRING",
+      "paramGroup": "Plot by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Table_",
+      "displayName": "Table ",
+      "description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": "Plot by",
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature",
+      "displayName": "Feature",
+      "description": "Feature name in the analysis to plot histogram.\nCan't be used with Annotation.",
+      "paramType": "STRING",
+      "paramGroup": "Plot by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Group_by",
+      "displayName": "Group by",
+      "description": "Choose either to group the histogram by another annotation. Default is None to disable this option.",
+      "paramType": "STRING",
+      "paramGroup": "Plot by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Together",
+      "displayName": "Together",
+      "description": "If Together is True, and Group by is not None, create one plot for all groups. Otherwise, divide every histogram by the number of elements.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Plot by",
+      "paramValues": null,
+      "defaultValue": "True",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Multiple",
+      "displayName": "Multiple",
+      "description": "Approach for showing multiple labels when \"Group By\" and \"Together\" are on. Existing methods are: layer, dodge, stack, and fill.",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Aesthetics",
+      "paramValues": [
+        "layer",
+        "dodge",
+        "stack",
+        "fill"
+      ],
+      "defaultValue": "dodge",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Take_Y_log",
+      "displayName": "Take Y log",
+      "description": "Set Y axis scale to log 10.  Default \"False\" will present linear axis scale.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Aesthetics",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Take_X_Log",
+      "displayName": "Take X Log",
+      "description": "Set X axis scale to log 10.  Default \"False\" will present linear axis scale. Only applies to feature.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Aesthetics",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Bins",
+      "displayName": "Bins",
+      "description": "The number of bins in the histogram. Default \"auto\" will set it automatically. Only applies to feature.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Aesthetics",
+      "paramValues": null,
+      "defaultValue": "auto",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Shrink_Number",
+      "displayName": "Shrink Number",
+      "description": "Scale the width of each bar or a group of bars relative to the bin width.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "1",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Width",
+      "displayName": "Figure Width",
+      "description": "Width of the figure.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "8",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Height",
+      "displayName": "Figure Height",
+      "description": "Height of the figure.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "6",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Font_Size",
+      "displayName": "Font Size",
+      "description": "Font size of the figure.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_DPI",
+      "displayName": "Figure DPI",
+      "description": "Higher the DPI, clearer the image.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "300",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Legend_in_Figure",
+      "displayName": "Legend in Figure",
+      "description": "Display legend inside the plotting area.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Legend_Location",
+      "displayName": "Legend Location",
+      "description": "Location of legend.",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Configurations",
+      "paramValues": [
+        "best",
+        "upper right",
+        "upper left",
+        "lower right",
+        "lower left",
+        "right",
+        "center left",
+        "center right",
+        "lower center",
+        "upper center",
+        "center"
+      ],
+      "defaultValue": "best",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Bin_Transparency",
+      "displayName": "Bin Transparency",
+      "description": "Transparency of bins",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "0.75",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Stat",
+      "displayName": "Stat",
+      "description": "Determines the statistical transformation for histogram bins. Default is \"count\". Options: \"count\" displays the count of cells in each bin; \"frequency\" shows the number of cells per bin, normalized by bin width;  \"density\" normalizes the histogram so that the total area equals 1; \"probability\" normalize such that bar heights sum to 1, bar height reflects the probability of observing each bin; \"percent\" normalize such that bar heights sum to 100, each bin's height shows the percentage of total cells it contains.",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Aesthetics",
+      "paramValues": [
+        "count",
+        "density",
+        "percent",
+        "probability",
+        "frequency"
+      ],
+      "defaultValue": "count",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "X_Axis_Label_Rotation",
+      "displayName": "X Axis Label Rotation",
+      "description": "The degree of rotation of X labels. Default is 0 (horizontal, text starting from left to right)",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configurations",
+      "paramValues": null,
+      "defaultValue": "0",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Plot_By",
+    "Annotation",
+    "Table_",
+    "Feature",
+    "Group_by",
+    "Together",
+    "Multiple",
+    "Take_Y_log",
+    "Take_X_Log",
+    "Bins",
+    "Shrink_Number",
+    "Figure_Width",
+    "Figure_Height",
+    "Font_Size",
+    "Figure_DPI",
+    "Legend_in_Figure",
+    "Legend_Location",
+    "Bin_Transparency",
+    "Stat",
+    "X_Axis_Label_Rotation"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef Histogram({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.visualization import histogram\n    import matplotlib.pyplot as plt\n    import pickle\n    import seaborn as sns\n    import pandas as pd\n    import numpy as np\n    from code_workbook_utils.utils import text_to_value\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##    \n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    feature  = \"{{{Feature}}}\"\n    annotation  = \"{{{Annotation}}}\"\n    layer = \"{{{Table_}}}\"\n    group_by = \"{{{Group_by}}}\"\n    together = {{{Together}}}\n    fig_width = {{{Figure_Width}}}\n    fig_height = {{{Figure_Height}}}\n    font_size = {{{Font_Size}}}\n    fig_dpi = {{{Figure_DPI}}}\n    legend_location = '{{{Legend_Location}}}'\n    legend_in_figure = {{{Legend_in_Figure}}}\n    take_X_log = {{{Take_X_Log}}}\n    take_Y_log = {{{Take_Y_log}}}\n    multiple = \"{{{Multiple}}}\"\n    shrink = {{{Shrink_Number}}}\n    bins = \"{{{Bins}}}\"\n    alpha = {{{Bin_Transparency}}}\n    stat = '{{{Stat}}}'\n    x_rotate = {{{X_Axis_Label_Rotation}}}\n    histplot_by = \"{{{Plot_By}}}\"\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n    \n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    # Close all existing figures to prevent extra plots\n    plt.close('all')\n    existing_fig_nums = plt.get_fignums()\n\n    plt.rcParams.update({'font.size': font_size})\n\n    # Process feature and annotation with text_to_value\n    feature = text_to_value(feature)\n    annotation = text_to_value(annotation)\n\n    # Adjust feature and annotation based on histplot_by\n    if histplot_by == \"Annotation\":\n        feature = None\n    else:\n        annotation = None\n\n    # If both feature and annotation are None, set default\n    if feature is None and annotation is None:\n        if histplot_by == \"Annotation\":\n            if adata.obs.columns.size > 0:\n                annotation = adata.obs.columns[0]\n                print(f'No annotation specified. Using the first annotation \"{annotation}\" as default.')\n            else:\n                raise ValueError('No annotations available in adata.obs to plot.')\n        else:\n            if adata.var_names.size > 0:\n                feature = adata.var_names[0]\n                print(f'No feature specified. Using the first feature \"{feature}\" as default.')\n            else:\n                raise ValueError('No features available in adata.var_names to plot.')\n\n    # Validate and set bins\n    if feature is not None:\n        bins = text_to_value(\n            bins,\n            default_none_text=\"auto\",\n            to_int=True,\n            param_name=\"bins\")     \n        if bins is None:\n            num_rows = adata.X.shape[0]\n            bins = max(int(2*(num_rows ** (1/3))), 1)\n        elif bins <= 0:\n            raise ValueError(f'Bins should be a positive integer. Received \"{bins}\"')\n    elif annotation is not None:\n        if take_X_log:\n            take_X_log = False\n            print(\"Warning: Take X log should only apply to feature. Setting Take X Log to False.\")\n        if bins != 'auto':\n            bins = 'auto'\n            print(\"Warning: Bin number should only apply to feature. Setting bin number calculation to auto.\")\n    \n    if (x_rotate < 0) or (x_rotate > 360):\n        raise ValueError(f'The X label rotation should fall within 0 to 360 degree. Received \"{x_rotate}\".')\n\n    # Initialize the x-variable before the loop\n    if histplot_by == \"Annotation\":\n        x_var = annotation\n    else:\n        x_var = feature\n\n    result = histogram(\n        adata=adata,\n        feature=feature,\n        annotation=annotation,\n        layer=text_to_value(layer, \"Original\"),\n        group_by=text_to_value(group_by),\n        together=together,\n        ax=None,\n        x_log_scale=take_X_log, \n        y_log_scale=take_Y_log,\n        multiple=multiple,\n        shrink=shrink,\n        bins=bins,\n        alpha=alpha,\n        stat=stat\n    )\n\n    fig = result[\"fig\"]\n    axs = result[\"axs\"]\n    df_counts = result[\"df\"]\n\n    # Set figure size and dpi\n    fig.set_size_inches(fig_width, fig_height)\n    fig.set_dpi(fig_dpi)\n\n    # Ensure axes is a list\n    if isinstance(axs, list):\n        axes = axs\n    else:\n        axes = [axs]\n\n    # Close any extra figures created during the histogram call\n    fig_nums_after = plt.get_fignums()\n    new_fig_nums = [num for num in fig_nums_after if num not in existing_fig_nums]\n    histogram_fig_num = fig.number\n\n    for num in new_fig_nums:\n        if num != histogram_fig_num:\n            plt.close(plt.figure(num))\n            print(f\"Closed extra figure {num}\")\n\n    # Process each axis\n    for ax in axes:\n        if feature:\n            print(f'Plotting Feature: \"{feature}\"')\n        if ax.get_legend() is not None:\n            if legend_in_figure:\n                sns.move_legend(ax, legend_location)\n            else:\n                sns.move_legend(ax, legend_location, bbox_to_anchor=(1, 1))\n\n        # Rotate x labels\n        ax.tick_params(axis='x', rotation=x_rotate)\n\n    # Set titles based on group_by\n    if text_to_value(group_by):\n        if together:\n            for ax in axes:\n                ax.set_title(f'Histogram of \"{x_var}\" grouped by \"{group_by}\"')\n        else:\n            # compute unique groups directly from adata.obs.\n            unique_groups = adata.obs[text_to_value(group_by)].dropna().unique()\n            if len(axes) != len(unique_groups):\n                print(\"Warning: Number of axes does not match number of groups. Titles may not correspond correctly.\")\n            for ax, grp in zip(axes, unique_groups):\n                ax.set_title(f'Histogram of \"{x_var}\" for group: \"{grp}\"')\n    else:\n        for ax in axes:\n            ax.set_title(f'Count plot of \"{x_var}\"')\n\n    plt.tight_layout()\n\n    print(\"Displaying top 10 rows of histogram dataframe:\")\n    print(df_counts.head(10))\n\n    plt.show()\n    plt.close('all')\n\n    output_file = \"plots.csv\"\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open(output_file, 'w') as f:\n        df_counts.to_csv(f, index=False)\n    print(f\"Histogram dataframe saved to {output_file}\")\n\n\n\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 92,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Histogram [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "New Dataset",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"},
+    "figures": {"type": "directory", "name": "figures_dir"}
+  }
+}

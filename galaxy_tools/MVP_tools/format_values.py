@@ -2,24 +2,33 @@
 """
 format_values.py - Utility to normalize Galaxy parameters JSON for template consumption.
 
-Version 2.0 - No Cheetah needed! Processes Galaxy repeat structures directly.
+Version 3.0 - Clean version per supervisor guidance
+              NO parameter-specific hardcoding
+              Generic delimiter support via CLI flags
 
 Handles three main transformations:
 1. Converts Galaxy repeat structures to simple lists
 2. Converts boolean string values to actual Python booleans
-3. Injects output configuration for template_utils (single files for boxplot MVP)
+3. Supports delimited text fields (e.g., text areas with semicolons or newlines)
+4. Injects output configuration for template_utils
 
 Usage:
+    # For repeat structures:
     python format_values.py galaxy_params.json cleaned_params.json \
-        --bool-values Horizontal_Plot Keep_Outliers Value_Axis_Log_Scale \
+        --bool-values Horizontal_Plot Keep_Outliers \
         --list-values Feature_s_to_Plot
+    
+    # For text area with newline separators:
+    python format_values.py galaxy_params.json cleaned_params.json \
+        --list-sep '\\n' --list-fields Anchor_Neighbor_List
 
-This processes Galaxy's raw parameter output directly without needing Cheetah preprocessing.
+This version is template-agnostic with no parameter name hardcoding.
 """
 
 import json
 import argparse
 import sys
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -99,6 +108,37 @@ def extract_list_from_repeat(params: Dict[str, Any], param_name: str) -> List[st
     return []
 
 
+def parse_delimited_text(text: str, separator: str = ';') -> List[str]:
+    """
+    Parse a delimited text string into a list of values.
+    
+    Parameters
+    ----------
+    text : str
+        Delimited text string (may contain newlines for multi-line input)
+    separator : str
+        Separator character (default: semicolon)
+        
+    Returns
+    -------
+    list
+        List of trimmed, non-empty values
+    """
+    if not text:
+        return []
+    
+    # Handle newline separator for text areas
+    if separator == '\n':
+        # Split by newlines
+        lines = text.strip().split('\n')
+        # Clean up each line
+        values = [line.strip() for line in lines if line.strip()]
+    else:
+        # Split by specified separator
+        values = [s.strip() for s in text.split(separator) if s.strip()]
+    
+    return values
+
 def inject_output_configuration(cleaned: Dict[str, Any], outputs_config: Optional[Dict[str, Any]] = None) -> None:
     """
     Inject output configuration for template_utils.save_results().
@@ -112,7 +152,7 @@ def inject_output_configuration(cleaned: Dict[str, Any], outputs_config: Optiona
         Cleaned parameters dictionary (modified in-place)
     outputs_config : dict, optional
         Output configuration to inject. If None, no outputs are configured.
-        Format: {"output_name": {"type": "file|directory", "name": "filename"}}
+        Format: {"output_name": {"type": "file", "name": "filename"}}
     """
     if outputs_config:
         cleaned['outputs'] = outputs_config
@@ -126,6 +166,7 @@ def process_galaxy_params(
     params: Dict[str, Any],
     bool_params: List[str],
     list_params: List[str],
+    delimited_params: Dict[str, str] = None,
     outputs_config: Optional[Dict[str, Any]] = None,
     inject_outputs: bool = False
 ) -> Dict[str, Any]:
@@ -140,6 +181,9 @@ def process_galaxy_params(
         List of parameter names that should be booleans
     list_params : list
         List of parameter names that should be extracted from repeat structures
+    delimited_params : dict, optional
+        Parameters with delimited text {param_name: separator}
+        For text areas or fields that use delimiters instead of repeat structures
     outputs_config : dict, optional
         Output configuration to inject if inject_outputs is True
     inject_outputs : bool, optional
@@ -151,6 +195,7 @@ def process_galaxy_params(
         Cleaned parameters ready for template consumption
     """
     cleaned = {}
+    delimited_params = delimited_params or {}
     
     # Copy all non-repeat parameters first
     for key, value in params.items():
@@ -163,9 +208,19 @@ def process_galaxy_params(
         if param_name in cleaned:
             cleaned[param_name] = normalize_boolean(cleaned[param_name])
     
-    # Process list parameters (extract from repeat structures)
+    # Process list parameters (extract from repeat structures or delimited text)
     for param_name in list_params:
-        cleaned[param_name] = extract_list_from_repeat(params, param_name)
+        # Check if this is a delimited parameter (text area with separator)
+        if param_name in delimited_params:
+            # Handle as delimited text
+            separator = delimited_params[param_name]
+            if param_name in params and isinstance(params[param_name], str):
+                cleaned[param_name] = parse_delimited_text(params[param_name], separator)
+            else:
+                cleaned[param_name] = []
+        else:
+            # Handle as repeat structure
+            cleaned[param_name] = extract_list_from_repeat(params, param_name)
         
         # Remove the repeat version if it exists in cleaned
         repeat_key = f"{param_name}_repeat"
@@ -205,7 +260,26 @@ def main():
         default=[],
         help="Parameter names that should be extracted from repeat structures"
     )
-
+    parser.add_argument(
+        "--list-sep",
+        default=None,
+        help='Separator for delimited list fields (e.g., ";" or "\\n" for newlines)'
+    )
+    parser.add_argument(
+        "--list-fields",
+        nargs="*",
+        default=[],
+        help="Fields to parse as delimited lists using list-sep"
+    )
+    parser.add_argument(
+        "--inject-outputs",
+        action="store_true",
+        help="Inject output configuration for template_utils"
+    )
+    parser.add_argument(
+        "--outputs-config",
+        help="JSON file containing output configuration"
+    )
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -227,20 +301,44 @@ def main():
         print(f"Error: Invalid JSON in '{input_path}': {e}", file=sys.stderr)
         sys.exit(1)
     
+    # Read outputs configuration if provided
+    outputs_config = None
+    if args.outputs_config:
+        try:
+            with open(args.outputs_config, 'r') as f:
+                outputs_config = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Warning: Could not read outputs config: {e}", file=sys.stderr)
+    
     if args.debug:
         print("=== Original Galaxy Parameters ===", file=sys.stderr)
         print(json.dumps(params, indent=2), file=sys.stderr)
         print("\nBoolean parameters to convert:", args.bool_values, file=sys.stderr)
         print("List parameters to extract from repeats:", args.list_values, file=sys.stderr)
-        print("List parameters that default to ['All']:", args.list_default_all, file=sys.stderr)
+        if args.list_sep and args.list_fields:
+            print(f"Delimited fields using '{args.list_sep}' separator:", args.list_fields, file=sys.stderr)
+    
+    # Build delimited parameters map
+    delimited_params = {}
+    if args.list_sep and args.list_fields:
+        # Handle escape sequences for separator
+        separator = args.list_sep
+        if separator == '\\n':
+            separator = '\n'
+        elif separator == '\\t':
+            separator = '\t'
+        
+        for field in args.list_fields:
+            delimited_params[field] = separator
     
     # Process parameters
-    # By default, do NOT inject outputs - let templates handle their own configuration
     cleaned_params = process_galaxy_params(
         params,
         bool_params=args.bool_values or [],
         list_params=args.list_values or [],
-        inject_outputs=False  # Templates handle their own outputs
+        delimited_params=delimited_params,
+        outputs_config=outputs_config,
+        inject_outputs=args.inject_outputs
     )
     
     if args.debug:
@@ -266,9 +364,13 @@ def main():
     
     for param in args.list_values or []:
         repeat_key = f"{param}_repeat"
-        if repeat_key in params:
+        if repeat_key in params or param in delimited_params:
             cleaned = cleaned_params.get(param, [])
-            print(f"  {param}: Extracted {len(cleaned)} values from repeat structure")
+            if param in delimited_params:
+                sep_display = repr(delimited_params[param])
+                print(f"  {param}: Parsed {len(cleaned)} values using {sep_display} separator")
+            elif repeat_key in params:
+                print(f"  {param}: Extracted {len(cleaned)} values from repeat structure")
 
 
 if __name__ == "__main__":

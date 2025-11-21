@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<tool id="spac_neighborhood_profile" name="Neighborhood Profile [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\
+Please refer to DUET Documentation, GitHub Documentation for further information.</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "directory", "name": "dataframe_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Bins Anchor_Neighbor_List --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/neighborhood_profile_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis"/>
+        <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to define cell labels."/>
+        <repeat name="Bins_repeat" title="Bins">
+            <param name="value" type="text" label="Value" help="Radii in micro meter that form the bands around the center phenotype to count the neighbor cells"/>
+        </repeat>
+        <param name="Stratify_By" type="text" label="Stratify By" value="" help="The annotation to stratify the dataset when generating the profiles (e.g., slide name). If a value other than &quot;None&quot; is passed, the dataset will be stratified by the unique labels in the annotation column. Use &quot;None&quot; without quotes to disable (e.g., all cells are from one region or slide)"/>
+        <repeat name="Anchor_Neighbor_List_repeat" title="Anchor Neighbor List">
+            <param name="value" type="text" label="Value" help="A list of anchor;neighbor cell labels to generate the results. The two types should be separated with a ';'. For example, if the anchor is &quot;T cells&quot; and the neighbor is &quot;B cells&quot;, enter the value: &quot;T cells; B cells&quot; without the quotes.">
+                <sanitizer>
+                    <valid initial="default">
+                        <!-- Allow semicolon for separator -->
+                        <add value=";"/>
+                        <!-- Allow additional characters common in biological nomenclature -->
+                        <add value="+"/>  <!-- For CD4+, CD8+, FOXP3+ -->
+                        <add value="/"/>  <!-- For CD4/CD8 ratios, FOXP3/CD25 -->
+                    </valid>
+                </sanitizer>
+            </param>
+        </repeat>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="dataframe" type="list" label="${tool.name} on ${on_string}: Dataframe">
+            <discover_datasets pattern="__name_and_ext__" directory="dataframe_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Neighborhood Profile [SPAC][DMAP]**
+Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\
+Please refer to DUET Documentation, GitHub Documentation for further information.
+
+**Anchor Neighbor List Format:**
+Enter anchor and neighbor cell types separated by semicolon (;)
+Examples:
+- T cells; B cells
+- CD4+; CD8+
+- FOXP3+/CD25+; Tregs
+- PD-1high; PD-L1+
+
+**Special Characters Allowed:**
+The following special characters are allowed in cell type names:
+- Semicolon (;) - as separator between anchor and neighbor
+- Plus (+) - for positive markers (CD4+, FOXP3+)
+- Slash (/) - for combinations (CD4/CD8, FOXP3/CD25)
+- Brackets [] {} - for concentrations or sets
+- Comparison operators (<, >, =)
+- Apostrophe (') - for 5' or 3' notation
+
+**Outputs:**
+- dataframe: directory containing CSV files for each anchor-neighbor pair
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

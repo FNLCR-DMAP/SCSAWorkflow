@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<tool id="spac_rename_labels" name="Rename Labels [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\
+Please refer to DUET Documentation, GitHub Documentation</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/rename_labels_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Cluster_Mapping_Dictionary" type="data" format="tabular,csv,tsv,txt" label="Cluster Mapping Dictionary" help="A Manual Entry node with &quot;Original&quot; and &quot;New&quot; columns specifying the original cluster names and corresponding new names."/>
+        <param name="Source_Annotation" type="text" label="Source Annotation" value="None" help="Annotation in the current dataset containing the original labels to be renamed."/>
+        <param name="New_Annotation" type="text" label="New Annotation" value="None" help="Annotation to be added to the dataset, containing the new labels after renaming."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Rename Labels [SPAC] [DMAP]**
+Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\
+Please refer to DUET Documentation, GitHub Documentation
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

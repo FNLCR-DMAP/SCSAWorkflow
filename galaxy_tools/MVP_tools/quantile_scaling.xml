@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<tool id="spac_quantile_scaling" name="Quantile Scaling [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\
+x' = (x- quantile min)/(quantile max - quantile min), x'=0 if x </description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"html": {"type": "directory", "name": "html_dir"}, "analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Per_Batch --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/quantile_scaling_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original" help="Source table to perform the computation, &quot;Original&quot; table refers to the raw data."/>
+        <param name="Low_Quantile" type="float" label="Low Quantile" value="0.02" help="Low quantile to be used as min."/>
+        <param name="High_Quantile" type="float" label="High Quantile" value="0.98" help="High quantile to be used as max."/>
+        <param name="Interpolation" type="select" label="Interpolation" help="The interpolation method to use when selecting the value for low and high quantile. Values can be &quot;nearest&quot; or &quot;linear&quot;">
+            <option value="nearest" selected="true">nearest</option>
+            <option value="linear">linear</option>
+        </param>
+        <param name="Output_Table_Name" type="text" label="Output Table Name" value="normalized_feature" help="Name of the table to be added to the analysis."/>
+        <param name="Per_Batch" type="boolean" label="Per Batch" truevalue="True" falsevalue="False" checked="false" help="Whether to apply the transformation per batch. If &quot;True&quot;, the transformation is applied per batch."/>
+        <param name="Annotation" type="text" label="Annotation" value="" help="The name of the annotation to define batches. Required if Per Batch is &quot;True&quot;."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="html" type="list" label="${tool.name} on ${on_string}: Html">
+            <discover_datasets pattern="__name_and_ext__" directory="html_dir"/>
+        </collection>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Quantile Scaling [SPAC] [DMAP]**
+Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\
+x' = (x- quantile min)/(quantile max - quantile min), x'=0 if x <= quantile min, x'=1 if x >= quantile max\
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- html: directory (html_dir)
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

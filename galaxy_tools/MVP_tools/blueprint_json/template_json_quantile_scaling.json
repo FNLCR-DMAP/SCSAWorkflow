@@ -1,0 +1,153 @@
+{
+  "rid": "ri.vector.main.template.1589a45e-e913-4db3-9f64-3483496777bb",
+  "title": "Quantile Scaling [SPAC] [DMAP]",
+  "description": "Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\\\nx' = (x- quantile min)/(quantile max - quantile min), x'=0 if x <= quantile min, x'=1 if x >= quantile max\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/iojw6qglzaof4) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.transformations.normalize_features) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2024-09-05T21:35:50.278837752Z",
+  "commitMessage": "spac v0.7.0 correct \"max\"",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Table_to_Process",
+      "displayName": "Table to Process",
+      "description": "Source table to perform the computation, \"Original\" table refers to the raw data.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Low_Quantile",
+      "displayName": "Low Quantile",
+      "description": "Low quantile to be used as min.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "0.02",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "High_Quantile",
+      "displayName": "High Quantile",
+      "description": "High quantile to be used as max.",
+      "paramType": "NUMBER",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "0.98",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Interpolation",
+      "displayName": "Interpolation",
+      "description": "The interpolation method to use when selecting the value for low and high quantile. Values can be \"nearest\" or \"linear\"",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "nearest",
+        "linear"
+      ],
+      "defaultValue": "nearest",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Output_Table_Name",
+      "displayName": "Output Table Name",
+      "description": "Name of the table to be added to the analysis.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "normalized_feature",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Per_Batch",
+      "displayName": "Per Batch",
+      "description": "Whether to apply the transformation per batch. If \"True\", the transformation is applied per batch.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "The name of the annotation to define batches. Required if Per Batch is \"True\".",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Table_to_Process",
+    "Low_Quantile",
+    "High_Quantile",
+    "Interpolation",
+    "Output_Table_Name",
+    "Per_Batch",
+    "Annotation"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef Quantile_Scaling_for_Arcsinh({{{Upstream_Analysis}}}):\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    import pickle\n    import anndata\n    from spac.transformations import normalize_features\n    import pandas as pd\n    import plotly.graph_objects as go\n\n\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n    \n    low_quantile = {{{Low_Quantile}}}\n    high_quantile = {{{High_Quantile}}}\n    interpolation = \"{{{Interpolation}}}\"\n    input_layer = \"{{{Table_to_Process}}}\"\n    output_layer = \"{{{Output_Table_Name}}}\"\n    per_batch = \"{{{Per_Batch}}}\"\n    annotation = \"{{{Annotation}}}\"\n\n    if input_layer == \"Original\":\n        input_layer = None\n\n    if low_quantile == \"None\":\n        low_quantile = None\n    else:\n        low_quantile = float(low_quantile)\n\n    if high_quantile == \"None\":\n        high_quantile = None\n    else:\n        high_quantile = float(high_quantile)\n\n    if per_batch == \"True\":\n        per_batch = True\n    else:\n        per_batch = False\n\n    if annotation == \"None\":\n        annotation = None\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n    \n    # Check if output_layer already exists in adata\n    print(f\"Checking if output layer '{output_layer}' exists in adata layers...\")\n    if output_layer in adata.layers.keys():\n        raise ValueError(f\"Output Table Name '{output_layer}' already exists, please rename it.\")\n    else:\n        print(f\"Output layer '{output_layer}' does not exist. Proceeding with normalization.\")\n\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n    \n    def df_as_html(\n        df,\n        columns_to_plot,\n        font_size = 12,\n        column_scaler=1\n        ):\n\n        df = df.reset_index()\n        df = df[columns_to_plot]        \n        df_str = df.astype(str)\n        \n\n        column_widths = [\n            max(df_str[col].apply(len)) * font_size * column_scaler \\\n            for col in df.columns\n            ]\n        column_widths[0] = 200\n        fig_width = sum(column_widths) * 1.1\n        # Create a table trace with the DataFrame data\n        table_trace = go.Table(\n            header=dict(values=list(df.columns),\n                        font=dict(size=font_size)),\n            cells=dict(values=df_str.values.T,\n                    font=dict(size=font_size),\n                    align='left'),\n            columnwidth=column_widths\n        )\n\n        layout = go.Layout(\n            autosize=True\n            )\n\n        fig = go.Figure(\n            data=[table_trace],\n            layout=layout\n        )\n\n        return fig\n\n    def create_normalization_info(\n        adata,\n        low_quantile,\n        high_quantile,\n        input_layer,\n        output_layer\n    ):\n        pre_dataframe = adata.to_df(layer=input_layer)\n        quantiles = pre_dataframe.quantile([low_quantile, high_quantile])\n        new_row_names = {high_quantile: 'quantile_high', low_quantile: 'quantile_low'}\n        quantiles.index = quantiles.index.map(new_row_names)\n        \n        pre_info = pre_dataframe.describe()    \n        pre_info = pd.concat([pre_info, quantiles])    \n        pre_info = pre_info.reset_index()\n        pre_info['index'] = 'Pre-Norm: ' + pre_info['index'].astype(str)\n        del pre_dataframe\n\n        post_dataframe = adata.to_df(layer=output_layer)\n        post_info = post_dataframe.describe()\n        post_info = post_info.reset_index()\n        post_info['index'] = 'Post-Norm: ' + post_info['index'].astype(str)\n        del post_dataframe\n\n        normalization_info = pd.concat([pre_info, post_info]).transpose()\n        normalization_info.columns = normalization_info.iloc[0]\n        normalization_info = normalization_info.drop(normalization_info.index[0])\n        normalization_info = normalization_info.astype(float)\n        normalization_info = normalization_info.round(3)\n        normalization_info = normalization_info.astype(str)\n    \n        return normalization_info\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    print(f\"High qunatile used: {str(high_quantile)}\")\n    print(f\"Low qunatile used: {str(low_quantile)}\")\n\n    transformed_data = normalize_features(\n        adata=adata,\n        low_quantile=low_quantile,\n        high_quantile=high_quantile,\n        interpolation=interpolation,\n        input_layer=input_layer,\n        output_layer=output_layer,\n        per_batch=per_batch,\n        annotation=annotation\n    )\n\n    print(f\"Transformed data stored in layer: {output_layer}\")\n    dataframe = pd.DataFrame(transformed_data.layers[output_layer])\n    print(dataframe.describe())\n\n    normalization_info = create_normalization_info(\n        adata,\n        low_quantile,\n        high_quantile,\n        input_layer,\n        output_layer\n    )\n    \n    columns_to_plot = [\n            'index', 'Pre-Norm: mean', 'Pre-Norm: std',\n            'Pre-Norm: quantile_high', 'Pre-Norm: quantile_low',\n            'Post-Norm: mean', 'Post-Norm: std', \n            ]\n    \n    html_plot = df_as_html(\n        normalization_info,\n        columns_to_plot\n        )\n\n    html_plot.show()\n\n    # Transfer data through pickle method and filesystem on NIDAP\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(adata, f)\n\n\n    return(None)\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 27,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Quantile Scaling [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.8"
+  ],
+  "outputDatasetName": "quantile_scaled",
+  "outputs": {
+    "html": {"type": "directory", "name": "html_dir"},
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

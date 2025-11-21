@@ -1,0 +1,129 @@
+{
+  "rid": "ri.vector.main.template.de8c0e9a-c7d4-4931-9519-3a2c1b9e3792",
+  "title": "Calculate Centroid [SPAC] [DMAP]",
+  "description": "Calculate the centroid of bonding box of the cell. \\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/lbj7scvqrgd42), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.calculate_centroid) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2024-09-24T11:37:13.30725261Z",
+  "commitMessage": "update spac v0.7.4",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Dataset",
+      "displayName": "Upstream Dataset",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PANDAS_DATAFRAME",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "X_Centroid_Name",
+      "displayName": "X Centroid Name",
+      "description": "Name of column containing X centroid, default XCentroid.",
+      "paramType": "STRING",
+      "paramGroup": "Optional",
+      "paramValues": null,
+      "defaultValue": "XCentroid",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Y_Centroid_Name",
+      "displayName": "Y Centroid Name",
+      "description": "Name of column containing Y centroid, default YCentroid.",
+      "paramType": "STRING",
+      "paramGroup": "Optional",
+      "paramValues": null,
+      "defaultValue": "YCentroid",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [
+    {
+      "key": "Min_X_Coordinate_Column_Name",
+      "displayName": "Min X Coordinate Column Name",
+      "description": "Name of column containing minimum X coordinate.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    },
+    {
+      "key": "Max_X_Coordinate_Column_Name",
+      "displayName": "Max X Coordinate Column Name",
+      "description": "Name of column containing maximum X coordinate.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    },
+    {
+      "key": "Min_Y_Coordinate_Column_Name",
+      "displayName": "Min Y Coordinate Column Name",
+      "description": "Name of column containing minimum Y coordinate.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    },
+    {
+      "key": "Max_Y_Coordinate_Column_Name",
+      "displayName": "Max Y Coordinate Column Name",
+      "description": "Name of column containing maximum Y coordinate.",
+      "paramGroup": null,
+      "sourceDataset": "Upstream_Dataset",
+      "defaultValue": null,
+      "columnType": "NUMBER",
+      "isMulti": null
+    }
+  ],
+  "orderedMustacheKeys": [
+    "Upstream_Dataset",
+    "Min_X_Coordinate_Column_Name",
+    "Max_X_Coordinate_Column_Name",
+    "Min_Y_Coordinate_Column_Name",
+    "Max_Y_Coordinate_Column_Name",
+    "X_Centroid_Name",
+    "Y_Centroid_Name"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def unnamed_17({{{Upstream_Dataset}}}):\n    Downsample = {{{Upstream_Dataset}}}\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.data_utils import calculate_centroid\n    from spac.utils import check_column_name\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    input_dataset = Downsample\n    x_min = \"{{{Min_X_Coordinate_Column_Name}}}\"\n    x_max = \"{{{Max_X_Coordinate_Column_Name}}}\"\n    y_min = \"{{{Min_Y_Coordinate_Column_Name}}}\"\n    y_max = \"{{{Max_Y_Coordinate_Column_Name}}}\"\n    new_x = \"{{{X_Centroid_Name}}}\"\n    new_y = \"{{{Y_Centroid_Name}}}\"\n\n    check_column_name(new_x,\"X Centroid Name\")\n    check_column_name(new_y,\"Y Centroid Name\")\n\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n    ################################\n\n    centroid_calculated = calculate_centroid(\n            input_dataset,\n            x_min = x_min,\n            x_max = x_max,\n            y_min = y_min,\n            y_max = y_max,\n            new_x = new_x,\n            new_y = new_y\n        )\n\n    print(centroid_calculated.info())\n    ## --------------- ##\n    ## Save Item Block ##\n    ## --------------- ##\n    return(centroid_calculated)\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 12,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Calculate Centroid [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python"
+  ],
+  "outputDatasetName": "centroid_calculated",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"}
+  }
+}

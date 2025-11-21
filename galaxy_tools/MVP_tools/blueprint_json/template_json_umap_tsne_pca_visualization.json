@@ -1,0 +1,263 @@
+{
+  "rid": "ri.vector.main.template.da5c3616-2165-4c54-aa14-dc04e1b917e9",
+  "title": "UMAP\\tSNE\\PCA Visualization [SPAC] [DMAP]",
+  "description": "Generate scatter plot for PCA, t-SNE and UMAP.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/c7iriuxnrpgyg), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.visualization.dimensionality_reduction_plot)",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2024-10-29T15:31:56.103153992Z",
+  "commitMessage": "Text_to_value",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Color_By",
+      "displayName": "Color By",
+      "description": "Color the points in the plot by either their corresponding feature or annotation.",
+      "paramType": "SELECT",
+      "paramGroup": "Color by",
+      "paramValues": [
+        "Annotation",
+        "Feature"
+      ],
+      "defaultValue": "Annotation",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation_to_Highlight",
+      "displayName": "Annotation to Highlight",
+      "description": "Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature.",
+      "paramType": "STRING",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Table",
+      "displayName": "Table",
+      "description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature_to_Highlight",
+      "displayName": "Feature to Highlight",
+      "description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+      "paramType": "STRING",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Dimension_Reduction_Method",
+      "displayName": "Dimension Reduction Method",
+      "description": "Dimensionality reduction method to visualize. Choose from 'tsne' or 'umap'.",
+      "paramType": "SELECT",
+      "paramGroup": null,
+      "paramValues": [
+        "tsne",
+        "umap"
+      ],
+      "defaultValue": "umap",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Dot_Size",
+      "displayName": "Dot Size",
+      "description": "Size of the dot of scatter plot.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "1",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Width",
+      "displayName": "Figure Width",
+      "description": "Figure width, inch",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Height",
+      "displayName": "Figure Height",
+      "description": "Figure height, inch",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Font_Size",
+      "displayName": "Font Size",
+      "description": "Global font size in figure.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_DPI",
+      "displayName": "Figure DPI",
+      "description": "Higher the DPI, clearer the image.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "300",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Legend_Location",
+      "displayName": "Legend Location",
+      "description": "Location of the Legend",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Configuration",
+      "paramValues": [
+        "best",
+        "upper left",
+        "center left"
+      ],
+      "defaultValue": "best",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Legend_Font_Size",
+      "displayName": "Legend Font Size",
+      "description": "Font size of the legend labels",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "16",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Legend_Marker_Size",
+      "displayName": "Legend Marker Size",
+      "description": "Dot size of the legend markers",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "5.0",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Value_Min",
+      "displayName": "Value Min",
+      "description": "The minimum value of the color bar",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Value_Max",
+      "displayName": "Value Max",
+      "description": "The maximum value of the color bar",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Color_By",
+    "Annotation_to_Highlight",
+    "Table",
+    "Feature_to_Highlight",
+    "Dimension_Reduction_Method",
+    "Dot_Size",
+    "Figure_Width",
+    "Figure_Height",
+    "Font_Size",
+    "Figure_DPI",
+    "Legend_Location",
+    "Legend_Font_Size",
+    "Legend_Marker_Size",
+    "Value_Min",
+    "Value_Max"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef unnamed_29({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    import pickle\n    import matplotlib.pyplot as plt\n    from spac.visualization import dimensionality_reduction_plot\n    from code_workbook_utils.utils import text_to_value\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##    \n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n \n    annotation = \"{{{Annotation_to_Highlight}}}\"\n    feature = \"{{{Feature_to_Highlight}}}\"\n    layer = \"{{{Table}}}\"\n    method = \"{{{Dimension_Reduction_Method}}}\"\n    fig_width = {{{Figure_Width}}}\n    fig_height = {{{Figure_Height}}}\n    font_size = {{{Font_Size}}}\n    fig_dpi = {{{Figure_DPI}}}    \n    legend_location = \"{{{Legend_Location}}}\"\n    legend_label_size = {{{Legend_Font_Size}}}\n    legend_marker_scale = {{{Legend_Marker_Size}}}\n    color_by = \"{{{Color_By}}}\"\n    point_size = {{{Dot_Size}}}\n    v_min = \"{{{Value_Min}}}\"\n    v_max = \"{{{Value_Max}}}\"\n\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n    feature = text_to_value(feature)\n    annotation = text_to_value(annotation)\n\n    if color_by == \"Annotation\":\n        feature = None\n    else:\n        annotation = None\n\n    # Store the original value of layer\n    layer_input = layer\n\n    layer = text_to_value(layer, default_none_text=\"Original\")\n\n    vmin = text_to_value(\n        v_min,\n        default_none_text=\"None\",\n        value_to_convert_to=None,\n        to_float=True,\n        param_name=\"Value Min\"\n    )\n\n    vmax = text_to_value(\n        v_max,\n        default_none_text=\"None\",\n        value_to_convert_to=None,\n        to_float=True,\n        param_name=\"Value Max\"\n    )\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    plt.rcParams.update({'font.size': font_size})\n\n    fig, ax = dimensionality_reduction_plot(\n        adata=adata,\n        method=method,\n        annotation=annotation,\n        feature=feature,\n        layer=layer,\n        point_size=point_size,\n        vmin=vmin,\n        vmax=vmax\n    )\n\n    if color_by == \"Annotation\":\n        title = annotation\n    else:\n        title = f'Table:\"{layer_input}\" \\n Feature:\"{feature}\"'\n    ax.set_title(title)\n\n    fig = ax.get_figure()\n\n    fig.set_size_inches(\n        fig_width,\n        fig_height\n    )\n    fig.set_dpi(fig_dpi)\n\n    legend = ax.get_legend()\n    has_legend = legend is not None\n\n    if has_legend:\n        ax.legend(\n            loc=legend_location,\n            bbox_to_anchor=(1, 0.5),\n            fontsize=legend_label_size,\n            markerscale=legend_marker_scale\n        )\n\n    plt.tight_layout()\n    plt.show()\n\n\n#################################################\n## Global imports and functions included below ##\n#################################################",
+      "shouldPersist": true
+    }
+  },
+  "version": 18,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/UMAP\\tSNE\\PCA Visualization [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "New Dataset",
+  "outputs": {
+    "figures": {"type": "directory", "name": "figures_dir"}
+  }
+}

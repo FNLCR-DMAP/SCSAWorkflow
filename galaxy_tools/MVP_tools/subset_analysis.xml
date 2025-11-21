@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<tool id="spac_subset_analysis" name="Subset Analysis [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Chooses cells that either include or exclude specific label(s) within a designated annotation for downstream analysis.\
+Please refer to DUET Documentation, GitHub Documentation</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Labels --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/subset_analysis_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis"/>
+        <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to select labels from."/>
+        <repeat name="Labels_repeat" title="Labels">
+            <param name="value" type="text" label="Value" help="Label(s) of interest to be included/excluded from the selected annotation."/>
+        </repeat>
+        <param name="Include_Exclude" type="select" label="Include / Exclude" help="Set the functionality to either &quot;Include&quot; or &quot;Exclude&quot; selected labels">
+            <option value="Include Selected Labels" selected="true">Include Selected Labels</option>
+            <option value="Exclude Selected Labels">Exclude Selected Labels</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Subset Analysis [SPAC] [DMAP]**
+Chooses cells that either include or exclude specific label(s) within a designated annotation for downstream analysis.\
+Please refer to DUET Documentation, GitHub Documentation
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

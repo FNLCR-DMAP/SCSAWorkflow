@@ -1,0 +1,272 @@
+{
+  "rid": "ri.vector.main.template.347e70d9-8b6e-4066-9060-abd3979823e0",
+  "title": "Interactive Spatial Plot [SPAC] [DMAP]",
+  "description": "Creates interactive, real-time visual explorations of single-cell spatial data for in-depth analysis. For color map strings, please refer to [Built-in Continuous Color Scales in Python](https://plotly.com/python/builtin-colorscales/).\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/5jncprhujo25s) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.visualization.interative_spatial_plot) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-05-20T15:14:15.307026372Z",
+  "commitMessage": "spac v0.8.10 released",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Stratify_By",
+      "displayName": "Stratify By",
+      "description": "The annotation to stratify the dataset when generating interaction plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. Use \"None\" without quotes to disable.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Color_By",
+      "displayName": "Color By",
+      "description": "Color the points in the plot by either their corresponding feature or annotation",
+      "paramType": "SELECT",
+      "paramGroup": "Color by",
+      "paramValues": [
+        "Annotation",
+        "Feature"
+      ],
+      "defaultValue": "Annotation",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation_s_to_Highlight",
+      "displayName": "Annotation(s) to Highlight",
+      "description": "Annotation(s) to visualize in the analysis. The interactive plot will show all the labels in the annotation(s) passed.",
+      "paramType": "LIST",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "[\"\"]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature_to_Highlight",
+      "displayName": "Feature to Highlight",
+      "description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+      "paramType": "STRING",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Table",
+      "displayName": "Table",
+      "description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": "Color by",
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Font_Size",
+      "displayName": "Font Size",
+      "description": "",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "12",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Dot_Size",
+      "displayName": "Dot Size",
+      "description": "Size of dot in the plot.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "1.5",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Dot_Transparency",
+      "displayName": "Dot Transparency",
+      "description": "Transparency of the dot in the plot.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "0.75",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Flip_Vertical_Axis",
+      "displayName": "Flip Vertical Axis",
+      "description": "If True, flip the vertical axis.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Width",
+      "displayName": "Figure Width",
+      "description": "Figure width in inch.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "6",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_Height",
+      "displayName": "Figure Height",
+      "description": "Figure height in inch.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "4",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Define_Label_Color_Mapping",
+      "displayName": "Define Label Color Mapping",
+      "description": "Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default \"None\" will allow the visualization to determine the color of labels automatically.",
+      "paramType": "STRING",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Figure_DPI",
+      "displayName": "Figure DPI",
+      "description": "The higher the DPI, the higher the image resolution.",
+      "paramType": "NUMBER",
+      "paramGroup": "Figure Configuration",
+      "paramValues": null,
+      "defaultValue": "200",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Feature_Color_Scale",
+      "displayName": "Feature Color Scale",
+      "description": "Color scale to use when dot colors are defined by features. Check the link in the template description.",
+      "paramType": "SELECT",
+      "paramGroup": "Figure Configuration",
+      "paramValues": [
+        "balance",
+        "Picnic"
+      ],
+      "defaultValue": "balance",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Lower_Colorbar_Bound",
+      "displayName": "Lower Colorbar Bound",
+      "description": "The lower bound of the colorbar scale. The default 999 will set the upper bound to the minimum of the dataset.",
+      "paramType": "NUMBER",
+      "paramGroup": "Colorbar Range",
+      "paramValues": null,
+      "defaultValue": "999",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Upper_Colorbar_Bound",
+      "displayName": "Upper Colorbar Bound",
+      "description": "The lower bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset.",
+      "paramType": "NUMBER",
+      "paramGroup": "Colorbar Range",
+      "paramValues": null,
+      "defaultValue": "-999",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Stratify_By",
+    "Color_By",
+    "Annotation_s_to_Highlight",
+    "Feature_to_Highlight",
+    "Table",
+    "Font_Size",
+    "Dot_Size",
+    "Dot_Transparency",
+    "Flip_Vertical_Axis",
+    "Figure_Width",
+    "Figure_Height",
+    "Define_Label_Color_Mapping",
+    "Figure_DPI",
+    "Feature_Color_Scale",
+    "Lower_Colorbar_Bound",
+    "Upper_Colorbar_Bound"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef unnamed_26({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    import pickle\n    import pandas as pd\n    import plotly.io as pio\n    from spac.visualization import interactive_spatial_plot    \n    from code_workbook_utils.utils import text_to_value\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        adata = pickle.load(input_file)\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    color_by = \"{{{Color_By}}}\"\n    annotations = {{{Annotation_s_to_Highlight}}}\n    feature = \"{{{Feature_to_Highlight}}}\"\n    layer = \"{{{Table}}}\"\n\n    dot_size = {{{Dot_Size}}}\n    dot_transparency = {{{Dot_Transparency}}}\n    color_map = \"{{{Feature_Color_Scale}}}\"\n    desired_width_in = {{{Figure_Width}}}\n    desired_height_in = {{{Figure_Height}}}\n    dpi = {{{Figure_DPI}}}\n    Font_size = {{{Font_Size}}}\n    stratify_by = text_to_value(\"{{{Stratify_By}}}\", param_name=\"Stratify By\")  # New parameter for stratification\n    \n    defined_color_map = text_to_value(\"{{{Define_Label_Color_Mapping}}}\", param_name=\"Define Label Color Mapping\")\n\n\n\n    cmin = {{{Lower_Colorbar_Bound}}}\n    cmax = {{{Upper_Colorbar_Bound}}}\n\n    flip_y = {{{Flip_Vertical_Axis}}}\n\n    feature = text_to_value(feature)\n    if color_by == \"Annotation\":\n        feature = None\n        if len(annotations) == 0:\n            raise ValueError('Please set at least one value in the \"Annotation(s) to Highlight\" parameter')\n    else:\n        annotations = None\n        if feature is None: \n            raise ValueError('Please set the \"Feature to Highlight\" parameter.') \n\n\n    layer = text_to_value(layer, \"Original\")\n\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n    result_list = interactive_spatial_plot(\n        adata=adata,\n        annotations=annotations,\n        feature=feature,\n        layer=layer,\n        dot_size=dot_size,\n        dot_transparency=dot_transparency,\n        feature_colorscale=color_map,\n        figure_width=desired_width_in,\n        figure_height=desired_height_in,\n        figure_dpi=dpi,\n        font_size=Font_size,\n        stratify_by=stratify_by,\n        defined_color_map=defined_color_map,\n        reverse_y_axis=flip_y,\n        cmin=cmin,\n        cmax=cmax\n    )\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n\n    for result in result_list:\n        image_name = result['image_name']\n        image_object = result['image_object']\n        image_object.show()\n        html_content = pio.to_html(image_object, full_html=True)\n\n        if output_fs is not None:\n            with output_fs.open(image_name, 'w') as file:\n                file.write(html_content)\n    return(None)\n",
+      "shouldPersist": true
+    }
+  },
+  "version": 44,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Interactive Spatial Plot [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "interactive_spatial_plot",
+  "outputs": {
+    "html": {"type": "directory", "name": "html_dir"}
+  }
+}

@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<tool id="spac_phenograph_clustering" name="Phenograph Clustering [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Calculate automatic phenotypes using PhenoGraph. The unsupervised clusters will be stored in annotation: &quot;phenograph&quot; by default in the analysis. \
+Please refer to DUET Documentation and GitHub Docume</description>
+    <requirements>
+        <container type="docker">spac:mvp</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Run_on_HPC Profiling Batch_Mode --list-values Resolution_List --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/phenograph_clustering_template.py' 'cleaned_params.json'
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Run_on_HPC" type="boolean" label="Run on HPC" truevalue="True" falsevalue="False" checked="false" help="If toggled on, this template will launch a computational task on HPC cluster with resource specified in the &quot;HPC Configuration&quot; parameters group. The computational result will be available one the HPC task is completed."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original" help="Source table to perform the computation. The default value &quot;Original&quot; will use the raw dataset."/>
+        <param name="K_Nearest_Neighbors" type="integer" label="K-Nearest Neighbors" min="1" value="30" help="The number of nearest neighbors to be used in creating the features neighborhood graph."/>
+        <param name="Seed" type="integer" label="Seed" min="1" value="42" help="Random seed for reproducibility."/>
+        <param name="Resolution_Parameter" type="float" label="Resolution Parameter" min="0" value="1" help="The resolution parameter (&gt;0) adjusts the level of granularity in identifying clusters within a dataset, with higher values promoting the detection of a larger number of clusters (e.g., more distinct clusters), while lower values emphasize a smaller number of clusters (e.g., more inclusive clusters)."/>
+        <param name="Output_Annotation_Name" type="text" label="Output Annotation Name" value="phenograph" help="The output annotation name from Phenograph clustering to be added to the analysis. Default is &quot;phenograph&quot;."/>
+        <param name="Number_of_Iterations" type="integer" label="Number of Iterations" min="1" value="100" help="Number of iterations to run the Leiden graph clustering algorithm. If the number of iterations is negative, the Leiden algorithm is run until an iteration in which there was no improvement. Default is 100."/>
+        <param name="Profiling" type="boolean" label="Profiling" truevalue="True" falsevalue="False" checked="false" help="Available on HPC only. If on, the template will run through all the resolutions defined in the resolution parameters only in GPU mode."/>
+        <repeat name="Resolution_List_repeat" title="Resolution List">
+            <param name="value" type="text" label="Value" help="List of resolutions used when the Profiling is True."/>
+        </repeat>
+        <param name="HPC_Compute_Mode" type="select" label="HPC Compute Mode" help="The compute mode for this submission. Available options are CPU and GPU, which run the compute on CPU or GPU, respectively. Please remind that if Profiling option is true, the default mode is set as GPU">
+            <option value="CPU" selected="true">CPU</option>
+            <option value="GPU">GPU</option>
+        </param>
+        <param name="Batch_Mode" type="boolean" label="Batch Mode" truevalue="True" falsevalue="False" checked="false" help="If set to True, this HPC run will launch in batch mode showing the template status as successful once the job is submitted to the HPC cluster. the results will be written after the HPC job completes. Avoid submitting twice before completion to prevent race conditions."/>
+        <param name="Partition" type="select" label="Partition" help="Biowulf nodes are grouped into partitions. A partition can be specified when submitting a job. Please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for more details">
+            <option value="quick" selected="true">quick</option>
+            <option value="norm">norm</option>
+            <option value="gpu">gpu</option>
+            <option value="largemem">largemem</option>
+        </param>
+        <param name="Number_of_CPUs" type="integer" label="Number of CPUs" min="1" value="2" help="Number of CPUs requested for this HPC submission"/>
+        <param name="Memory_GB" type="integer" label="Memory, GB" min="1" value="10" help="Amount of memory in gigabytes requested for this HPC submission"/>
+        <param name="Request_Time" type="text" label="Request Time" value="00:20:00" help="Amount of time requested for this HPC submission. Please provide the time in the format of hh:mm:ss. For example, 2 hour 30 minute job would be 02:30:00. Please remind that different partition has different time limit, please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for further details."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Phenograph Clustering [SPAC] [DMAP]**
+Calculate automatic phenotypes using PhenoGraph. The unsupervised clusters will be stored in annotation: "phenograph" by default in the analysis. \
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+    </citations>
+</tool>

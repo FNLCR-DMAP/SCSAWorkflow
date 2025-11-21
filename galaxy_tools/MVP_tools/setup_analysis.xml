@@ -1,79 +1,46 @@
-<tool id="spac_setup_analysis" name="Setup Analysis [SPAC] [DMAP]" version="1.0.0" profile="24.2">
-    <description>Convert the pre-processed dataset to the analysis object for downstream analysis.</description>
-
+<?xml version="1.0" ?>
+<tool id="spac_setup_analysis" name="Setup Analysis [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Convert the pre-processed dataset to the analysis object for downstream analysis.\
+Please refer to DUET Documentation and GitHub Documentation for further information.</description>
     <requirements>
-        <container type="docker">spac:setup_analysis-mvp</container>
+        <container type="docker">spac:mvp</container>
     </requirements>
-
     <configfiles>
-        <!-- Galaxy auto-serializes all parameters to JSON -->
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
-        
     <command detect_errors="exit_code"><![CDATA[
-    python '$__tool_directory__/format_values.py' 
-        'galaxy_params.json' 
-        'cleaned_params.json'
-        --list-values Annotation_s_ Features_to_Analyze Feature_Regex
-    &&
-    python3 '$__tool_directory__/setup_analysis_template.py' 'cleaned_params.json'
-    ]]></command>
 
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Feature_Regex Annotation_s_ Features_to_Analyze --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/setup_analysis_template.py' 'cleaned_params.json'
+
+]]></command>
     <inputs>
-        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Input CSV dataset"/>
-        <param name="X_Coordinate_Column" type="text" value="" optional="true" label="X Coordinate Column"/>
-        <param name="Y_Coordinate_Column" type="text" value="" optional="true" label="Y Coordinate Column"/>
-        <repeat name="Annotation_s__repeat" title="Annotation(s)" min="0">
-            <param name="value" type="text" label="Column name"/>
+        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
+        <repeat name="Feature_Regex_repeat" title="Feature Regex">
+            <param name="value" type="text" label="Value" help="A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with &quot;Intensity&quot;, use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string."/>
         </repeat>
-        <repeat name="Features_to_Analyze_repeat" title="Features to Analyze" min="0">
-            <param name="value" type="text" label="Column name" help="Leave empty to analyze all features"/>
+        <param name="X_Coordinate_Column" type="text" label="X Coordinate Column" help="The name of the column containing the X coordinate, default if XMax."/>
+        <param name="Y_Coordinate_Column" type="text" label="Y Coordinate Column" help="The name of the column containing the Y coordinate, default if YMax."/>
+        <repeat name="Annotation_s__repeat" title="Annotation(s)">
+            <param name="value" type="text" label="Value" help="The annotation(s) of interest to include in downstream analysis."/>
         </repeat>
-        <repeat name="Feature_Regex_repeat" title="Feature Regex" min="0">
-            <param name="value" type="text" label="Regex pattern" help="e.g., .*Intensity$ to match all columns ending with 'Intensity'"/>
+        <repeat name="Features_to_Analyze_repeat" title="Features to Analyze">
+            <param name="value" type="text" label="Value" help="A list of feature name(s) for downstream analysis."/>
         </repeat>
     </inputs>
-
     <outputs>
-        <!-- Debug outputs -->
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
-        <data name="cleaned_params" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
-        
-        <!-- Main output (setup_analysis_template.py will create this) -->
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
         <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
     </outputs>
-    
     <help><![CDATA[
-**Setup Analysis [SPAC] [DMAP] v1.0**
 
-This tool converts pre-processed CSV datasets to analysis objects for downstream analysis.
-
-**Key Features:**
-- Uses Galaxy's auto-serialization (data_style="paths")
-- Parameters normalized by format_values.py
-- Output configuration handled by template
-- Debug outputs available for troubleshooting
-
-**Features to Analyze:**
-- Add specific column names to analyze
-- Leave empty to analyze all features (defaults to ["All"])
-
-**Feature Regex:**
-- Add regex patterns to match multiple columns
-- Example: ".*Intensity$" matches all columns ending with "Intensity"
-- Leave empty if not using regex matching
-
+**Setup Analysis [SPAC] [DMAP]**
+Convert the pre-processed dataset to the analysis object for downstream analysis.\
+Please refer to DUET Documentation and GitHub Documentation for further information.
 **Outputs:**
-- Analysis: Binary pickle file containing the processed AnnData object
-- Debug: Raw and cleaned parameter JSON files
+- analysis: file (output.pickle)
 
-**Technical Notes:**
-- Galaxy generates galaxy_params.json via configfiles
-- format_values.py normalizes parameters (no output injection)
-- Template handles its own output configuration
-- Only Features_to_Analyze defaults to ["All"] when empty
-    ]]></help>
-    
+]]></help>
     <citations>
         <citation type="doi">10.1038/s41586-019-1876-x</citation>
     </citations>

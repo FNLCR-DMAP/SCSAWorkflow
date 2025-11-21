@@ -1,0 +1,94 @@
+{
+  "rid": "ri.vector.main.template.5157030d-9c09-4bad-b537-27b1b0a40dd5",
+  "title": "Rename Labels [SPAC] [DMAP]",
+  "description": "Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/qjq3txuney7io), [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.transformations.rename_annotations)",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-01-07T20:34:25.749872326Z",
+  "commitMessage": "",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    },
+    {
+      "key": "Cluster_Mapping_Dictionary",
+      "displayName": "Cluster Mapping Dictionary",
+      "description": "A Manual Entry node with \"Original\" and \"New\" columns specifying the original cluster names and corresponding new names.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYSPARK_DATAFRAME",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Source_Annotation",
+      "displayName": "Source Annotation",
+      "description": "Annotation in the current dataset containing the original labels to be renamed.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "New_Annotation",
+      "displayName": "New Annotation",
+      "description": "Annotation to be added to the dataset, containing the new labels after renaming.",
+      "paramType": "STRING",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "None",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Cluster_Mapping_Dictionary",
+    "Source_Annotation",
+    "New_Annotation"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "@synchronous_node_execution\ndef renamed_phenotype({{{Cluster_Mapping_Dictionary}}}, {{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n\n    from spac.transformations import rename_annotations\n    import matplotlib.pyplot as plt\n    import pickle\n    import anndata\n    from code_workbook_utils.utils import text_to_value\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        all_data = pickle.load(input_file)\n    rename_list = {{{Cluster_Mapping_Dictionary}}}.toPandas()\n    original_column = \"{{{Source_Annotation}}}\"\n    renamed_column = \"{{{New_Annotation}}}\"\n\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    original_column = text_to_value(original_column)\n    renamed_column = text_to_value(renamed_column)\n\n    # Create a new dictionary with the desired format\n\n    dict_list = rename_list.to_dict('records')\n\n    mappings = {d['Original']: d['New'] for d in dict_list}\n\n    print(\"Cluster Name Mapping: \\n\", mappings)\n\n    rename_annotations(\n        all_data, \n        src_annotation=original_column,\n        dest_annotation=renamed_column,\n        mappings=mappings)\n\n    print(\"After Renaming Clusters: \\n\", all_data)\n\n    # Count and display occurrences of each label in the annotation\n    print(f'Count of cells in the output annotation:\"{renamed_column}\":')\n    label_counts = all_data.obs[renamed_column].value_counts()\n    print(label_counts)\n    print(\"\\n\")\n\n    object_to_output = all_data\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(object_to_output, f)\n\n\n    return(None)",
+      "shouldPersist": true
+    }
+  },
+  "version": 22,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Rename Labels [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "rename_observations",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}
