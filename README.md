@@ -8,6 +8,8 @@ Run the following command to establish the Conda environment supporting usage an
 Latest released version is v0.9.0 at 5/23/2025
 ```bash
 cd <home directory of SCSAWorkflow folder>
+git checkout address-reviewer-comments
+
 # If conda is not activate
 conda activate
 
@@ -23,7 +25,7 @@ conda activate spac
 # Install the SPAC package in development mode
 pip install -e .
 ```
-The envrionment works for Linux and noarc, if your are working on amd processor (commonly seen for latest Mac users), please replace the ` - numpy=1.19.5` with `numpy>=1.19.5,<2.0.0`
+The envrionment works for Linux and noarc, if your are working on amd processor (commonly seen for latest Mac users), please replace the ` - numpy=1.26.4` with `numpy>=1.26.4,<2.0.0`, and remove the `- scimap=2.1.3_dmap_pandas153` but add pip `- scimap`
 
 If error occurs suggesting SSL certificate not found for our scimap channel, please run the following command before the environment creation:
 ```
