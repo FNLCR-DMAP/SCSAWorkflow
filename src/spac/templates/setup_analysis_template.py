@@ -115,13 +115,13 @@ def run_from_json(
 
     # Load upstream data - could be DataFrame or CSV
     if isinstance(upstream_dataset, (str, Path)):
-        # Check if it's a pickle/h5ad file or CSV
-        path = Path(upstream_dataset)
-        if path.suffix.lower() in ['.pickle', '.pkl', '.p', '.h5ad']:
-            input_dataset = load_input(upstream_dataset)
-        else:
-            # Assume it's a CSV file
+        try:
             input_dataset = pd.read_csv(upstream_dataset)
+            # Validate it's a proper DataFrame
+            if input_dataset.empty:
+                raise ValueError("CSV file is empty")
+        except Exception as e:
+            raise ValueError(f"Failed to read CSV from {upstream_dataset}: {e}")
     else:
         # Already a DataFrame
         input_dataset = upstream_dataset

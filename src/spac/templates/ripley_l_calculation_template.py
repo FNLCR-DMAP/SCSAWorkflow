@@ -10,7 +10,7 @@ Usage
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, List
+from typing import Any, Dict, Union, List, Optional
 import logging
 
 # Add parent directory to path for imports
@@ -19,7 +19,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.spatial_analysis import ripley_l
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
     convert_to_floats
@@ -28,7 +28,8 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_to_disk: bool = True,
+    output_dir: Optional[Union[str, Path]] = None
 ) -> Union[Dict[str, str], Any]:
     """
     Execute Ripley-L analysis with parameters from JSON.
@@ -38,15 +39,17 @@ def run_from_json(
     ----------
     json_path : str, Path, or dict
         Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
+    save_to_disk : bool, optional
         Whether to save results to file. If False, returns the adata object
         directly for in-memory workflows. Default is True.
+    output_dir : str or Path, optional
+        Directory for outputs. If None, uses current directory.
 
     Returns
     -------
     dict or AnnData
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: The processed AnnData object
+        If save_to_disk=True: Dictionary of saved file paths
+        If save_to_disk=False: The processed AnnData object
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -96,22 +99,25 @@ def run_from_json(
         edge_correction=edge_correction
     )
 
-    print("Ripley-L analysis completed successfully.")
+    logging.info("Ripley-L analysis completed successfully.")
+    logging.debug(f"AnnData object: {adata}")
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        outfile = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format if not specified
-        if not outfile.endswith(('.pickle', '.pkl', '.h5ad')):
-            outfile = outfile.replace('.h5ad', '.pickle')
-
-        logging.debug(f"Output file type: {type(outfile)}")
-        saved_files = save_outputs({outfile: adata})
-        logging.debug(f"Saved files: {saved_files}")
-
-        logging.info(f"Ripley-L completed → {str(saved_files[outfile])}")
-        logging.debug(f"AnnData object: {adata}")
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
+        
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = adata
+        
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+        
+        logging.info(f"Ripley-L completed → {saved_files['analysis']}")
         return saved_files
     else:
         # Return the adata object directly for in-memory workflows
@@ -121,15 +127,25 @@ def run_from_json(
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Usage: python ripley_l_template.py <params.json>", file=sys.stderr)
         sys.exit(1)
 
-    saved_files = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(sys.argv[1], output_dir=output_dir)
 
-    if isinstance(saved_files, dict):
+    if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in saved_files.items():
+        for filename, filepath in result.items():
             print(f"  {filename}: {filepath}")
     else:
         print("\nReturned AnnData object")

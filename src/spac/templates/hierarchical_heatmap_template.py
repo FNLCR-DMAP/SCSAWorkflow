@@ -21,7 +21,7 @@ from spac.visualization import hierarchical_heatmap
 from spac.utils import check_feature
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -29,8 +29,9 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plot: bool = True
+    save_results_flag: bool = True,
+    show_plot: bool = True,
+    output_dir: Union[str, Path] = None
 ) -> Union[Dict[str, str], pd.DataFrame]:
     """
     Execute Hierarchical Heatmap analysis with parameters from JSON.
@@ -40,17 +41,19 @@ def run_from_json(
     ----------
     json_path : str, Path, or dict
         Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
+    save_results_flag : bool, optional
         Whether to save results to file. If False, returns the figure and
         dataframe directly for in-memory workflows. Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
+    output_dir : str or Path, optional
+        Directory for outputs. If None, uses params['Output_Directory'] or '.'
 
     Returns
     -------
     dict or DataFrame
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: The mean intensity dataframe
+        If save_results_flag=True: Dictionary of saved file paths
+        If save_results_flag=False: The mean intensity dataframe
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -158,37 +161,55 @@ def run_from_json(
     if show_plot:
         plt.show()
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "plots.csv")
-        saved_files = save_outputs({output_file: mean_intensity})
-
-        print(
-            f"Hierarchical Heatmap completed → "
-            f"{saved_files[output_file]}"
+    # Handle results based on save_results_flag
+    if save_results_flag:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
+        
+        # Package figure in a dictionary for directory saving
+        # This ensures it's saved in a directory per standardized schema
+        if "figures" in params.get("outputs", {}):
+            results_dict["figures"] = {"hierarchical_heatmap": clustergrid.fig}
+        
+        # Check for dataframe output
+        if "dataframe" in params.get("outputs", {}):
+            results_dict["dataframe"] = mean_intensity
+        
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
         )
+        
+        print("Hierarchical Heatmap completed successfully.")
         return saved_files
     else:
-        # Return the figure and dataframe directly for in-memory workflows
-        print("Returning figure and dataframe (not saving to file)")
+        # Return the dataframe directly for in-memory workflows
+        print("Returning mean intensity dataframe (not saving to file)")
         return mean_intensity
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python hierarchical_heatmap_template.py <params.json>",
+            "Usage: python hierarchical_heatmap_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    result = run_from_json(sys.argv[1], output_dir=output_dir)
 
     if isinstance(result, dict):
         print("\nOutput files:")
         for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+            if isinstance(filepath, list):
+                print(f"  {filename}: {len(filepath)} files in directory")
+            else:
+                print(f"  {filename}: {filepath}")
     else:
-        print("\nReturned figure and dataframe")
+        print("\nReturned mean intensity dataframe")

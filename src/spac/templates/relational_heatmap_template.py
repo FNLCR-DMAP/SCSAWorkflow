@@ -1,83 +1,167 @@
 """
-Platform-agnostic Relational Heatmap template converted from NIDAP.
-Maintains the exact logic from the NIDAP template.
-
-Usage
------
->>> from spac.templates.relational_heatmap_template import run_from_json
->>> run_from_json("examples/relational_heatmap_params.json")
+Relational Heatmap with Plotly-matplotlib color synchronization.
+Extracts actual colors from Plotly and uses them in matplotlib.
 """
 import json
 import sys
-import os
 from pathlib import Path
-from typing import Any, Dict, Union, Optional, Tuple
+from typing import Any, Dict, Union, Tuple
 import pandas as pd
-import plotly.io as pio
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import plotly.io as pio
+import plotly.express as px
 
-# Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from spac.visualization import relational_heatmap
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
 
 
+def get_plotly_colorscale_as_matplotlib(plotly_colormap: str) -> mcolors.LinearSegmentedColormap:
+    """
+    Extract actual colors from Plotly colorscale and create matplotlib colormap.
+    This ensures exact color matching between Plotly and matplotlib.
+    """
+    # Get Plotly's colorscale
+    try:
+        # Use plotly express to get the actual color sequence
+        colorscale = getattr(px.colors.sequential, plotly_colormap, None)
+        if colorscale is None:
+            colorscale = getattr(px.colors.diverging, plotly_colormap, None)
+        if colorscale is None:
+            colorscale = getattr(px.colors.cyclical, plotly_colormap, None)
+        
+        if colorscale is None:
+            # Fallback to a default
+            print(f"Warning: Could not find Plotly colorscale '{plotly_colormap}', using default")
+            colorscale = px.colors.sequential.Viridis
+        
+        # Convert to matplotlib colormap
+        if isinstance(colorscale, list):
+            # Create custom colormap from color list
+            cmap = mcolors.LinearSegmentedColormap.from_list(
+                f"plotly_{plotly_colormap}", 
+                colorscale
+            )
+            return cmap
+    except Exception as e:
+        print(f"Error extracting Plotly colors: {e}")
+    
+    # Fallback to matplotlib's viridis
+    return plt.cm.viridis
+
+
+def create_matplotlib_heatmap_matching_plotly(
+    data: pd.DataFrame,
+    plotly_fig: Any,
+    source_annotation: str,
+    target_annotation: str,
+    colormap_name: str,
+    figsize: tuple,
+    dpi: int,
+    font_size: int
+) -> plt.Figure:
+    """
+    Create matplotlib heatmap that matches Plotly's appearance.
+    Extracts color information from the Plotly figure.
+    """
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    
+    # Get the actual colormap from Plotly
+    cmap = get_plotly_colorscale_as_matplotlib(colormap_name)
+    
+    # Extract data range from Plotly figure if possible
+    try:
+        zmin = plotly_fig.data[0].zmin if hasattr(plotly_fig.data[0], 'zmin') else data.min().min()
+        zmax = plotly_fig.data[0].zmax if hasattr(plotly_fig.data[0], 'zmax') else data.max().max()
+    except:
+        zmin, zmax = data.min().min(), data.max().max()
+    
+    # Create heatmap matching Plotly's style
+    im = ax.imshow(
+        data.values, 
+        aspect='auto', 
+        cmap=cmap,
+        interpolation='nearest',
+        vmin=zmin,
+        vmax=zmax
+    )
+    
+    # Match Plotly's tick placement
+    ax.set_xticks(np.arange(len(data.columns)))
+    ax.set_yticks(np.arange(len(data.index)))
+    ax.set_xticklabels(data.columns, rotation=45, ha='right', fontsize=font_size)
+    ax.set_yticklabels(data.index, fontsize=font_size)
+    
+    # Add colorbar
+    cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label('Count', fontsize=font_size)
+    cbar.ax.tick_params(labelsize=font_size)
+    
+    # Title matching Plotly
+    ax.set_title(
+        f'Relational Heatmap: {source_annotation} vs {target_annotation}',
+        fontsize=font_size + 2,
+        pad=20
+    )
+    ax.set_xlabel(target_annotation, fontsize=font_size)
+    ax.set_ylabel(source_annotation, fontsize=font_size)
+    
+    # Add grid for clarity (like Plotly)
+    ax.set_xticks(np.arange(len(data.columns) + 1) - 0.5, minor=True)
+    ax.set_yticks(np.arange(len(data.index) + 1) - 0.5, minor=True)
+    ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.3, alpha=0.3)
+    ax.tick_params(which='both', length=0)
+    
+    plt.tight_layout()
+    return fig
+
+
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
-    """
-    Execute Relational Heatmap analysis with parameters from JSON.
-    Replicates the NIDAP template functionality exactly.
-
-    Parameters
-    ----------
-    json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the figure and
-        dataframe directly for in-memory workflows. Default is True.
-
-    Returns
-    -------
-    dict or tuple
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (figure, dataframe)
-    """
-    # Parse parameters from JSON
-    params = parse_params(json_path)
-
-    # Load the upstream analysis data
-    adata = load_input(params["Upstream_Analysis"])
-
-    # Extract parameters
-    annotation_columns = [
-        params.get("Source_Annotation_Name", "None"), 
-        params.get("Target_Annotation_Name", "None")
-    ]
-    dpi = params.get("Figure_DPI", 300)
-    width_in = params.get("Figure_Width_inch", 8)
-    height_in = params.get("Figure_Height_inch", 10)
-    width_px = width_in * 96
-    print(width_px)
-    height_px = height_in * 96
-    print(height_px)
+    save_to_disk: bool = True,
+    output_dir: str = None
+) -> Union[Dict, Tuple]:
+    """Execute Relational Heatmap with color-matched outputs."""
     
-    scale = dpi / 96
+    params = parse_params(json_path)
+    
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+    
+    if "outputs" not in params:
+        params["outputs"] = {
+            "figures": {"type": "directory", "name": "figures_dir"},
+            "html": {"type": "directory", "name": "html_dir"},
+            "dataframe": {"type": "file", "name": "dataframe.csv"}
+        }
 
-    font_size = params.get("Font_Size", 8)
+    # Load data
+    adata = load_input(params["Upstream_Analysis"])
+    print(f"Data loaded: {adata.shape[0]} cells, {adata.shape[1]} genes")
+
+    # Parameters
+    source_annotation = text_to_value(params.get("Source_Annotation_Name", "None"))
+    target_annotation = text_to_value(params.get("Target_Annotation_Name", "None"))
+    
+    dpi = float(params.get("Figure_DPI", 300))
+    width_in = float(params.get("Figure_Width_inch", 8))
+    height_in = float(params.get("Figure_Height_inch", 10))
+    font_size = float(params.get("Font_Size", 8))
     colormap = params.get("Colormap", "darkmint")
 
-    source_annotation = text_to_value(annotation_columns[0])
+    print(f"Creating heatmap: {source_annotation} vs {target_annotation}")
 
-    target_annotation = text_to_value(annotation_columns[1]) 
-
+    # Run SPAC relational heatmap
     result_dict = relational_heatmap(
         adata=adata,
         source_annotation=source_annotation,
@@ -86,84 +170,56 @@ def run_from_json(
         font_size=font_size
     )
     
-    # extract results from function return
-    rhmap_file_name = result_dict['file_name']
     rhmap_data = result_dict['data']
-    fig = result_dict['figure']
-
-    # Generate temporary image name for Plotly export
-    import tempfile
-    with tempfile.NamedTemporaryFile(
-        delete=False, suffix='.png'
-    ) as tmp_file:
-        tmp_image_name = tmp_file.name
+    plotly_fig = result_dict['figure']
     
-    pio.write_image(
-        fig,
-        tmp_image_name,
-        width=width_px,  # Specify the width in pixels
-        height=height_px,
-        engine='kaleido',  # Use the 'kaleido' engine for high DPI images
-        scale=scale
-    )
-
-    img = plt.imread(tmp_image_name)
-    static, axs = plt.subplots(
-        1, 1, figsize=(width_in, height_in), dpi=dpi
-    )
-
-    # Load and display the image using Matplotlib
-    axs.imshow(img)
-    axs.axis('off')
-    
-    # Display the matplotlib static figure
-    plt.show()
-
-    # Clean up temp file
-    if os.path.exists(tmp_image_name):
-        os.remove(tmp_image_name)
-
-    # Display the Plotly interactive figure
-    fig.show()
-
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", rhmap_file_name)
-        if not output_file.endswith('.csv'):
-            output_file = output_file + '.csv'
-        
-        saved_files = save_outputs({output_file: rhmap_data})
-        
-        # Also save the static plot
-        plot_file = output_file.replace('.csv', '.png')
-        static.savefig(plot_file, dpi=dpi, bbox_inches='tight')
-        saved_files[plot_file] = plot_file
-        
-        print(
-            f"Relational Heatmap completed → {list(saved_files.keys())}"
+    # Update Plotly figure
+    if plotly_fig:
+        plotly_fig.update_layout(
+            width=width_in * 96,
+            height=height_in * 96,
+            font=dict(size=font_size)
         )
+    
+    # Create matplotlib figure that matches Plotly's colors
+    print("Creating color-matched matplotlib figure...")
+    static_fig = create_matplotlib_heatmap_matching_plotly(
+        rhmap_data,
+        plotly_fig,
+        source_annotation,
+        target_annotation,
+        colormap,
+        (width_in, height_in),
+        int(dpi),
+        int(font_size)
+    )
+    
+    if save_to_disk:
+        results_dict = {
+            "figures": {"relational_heatmap": static_fig},
+            "html": {"relational_heatmap": pio.to_html(plotly_fig, full_html=True, include_plotlyjs='cdn')},
+            "dataframe": rhmap_data
+        }
+        
+        saved_files = save_results(results_dict, params, output_base_dir=output_dir)
+        plt.close(static_fig)
+        
+        print("✓ Relational Heatmap completed")
         return saved_files
     else:
-        # Return the figure and dataframe directly for in-memory workflows
-        print("Returning figure and dataframe (not saving to file)")
-        return static, rhmap_data
+        return plotly_fig, rhmap_data
 
 
-# CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(
-            "Usage: python relational_heatmap_template.py <params.json>",
-            file=sys.stderr
-        )
+    if len(sys.argv) < 2:
+        print("Usage: python relational_heatmap_template.py <params.json>", file=sys.stderr)
         sys.exit(1)
-
-    result = run_from_json(sys.argv[1])
-
-    if isinstance(result, dict):
-        print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
-    else:
-        print("\nReturned figure and dataframe")
+    
+    try:
+        run_from_json(sys.argv[1], save_to_disk=True)
+        sys.exit(0)
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

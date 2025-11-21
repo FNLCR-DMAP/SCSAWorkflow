@@ -20,7 +20,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.spatial_analysis import neighborhood_profile
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -28,7 +28,8 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_to_disk: bool = True,
+    output_dir: Union[str, Path] = None
 ) -> Union[Dict[str, str], Dict[Tuple[str, str], pd.DataFrame]]:
     """
     Execute Neighborhood Profile analysis with parameters from JSON.
@@ -38,19 +39,32 @@ def run_from_json(
     ----------
     json_path : str, Path, or dict
         Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
+    save_to_disk : bool, optional
         Whether to save results to file. If False, returns the dataframes
         directly for in-memory workflows. Default is True.
+    output_dir : str or Path, optional
+        Output directory for results. If None, uses params['Output_Directory'] or '.'
 
     Returns
     -------
     dict
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Dictionary of (anchor, neighbor) tuples 
+        If save_to_disk=True: Dictionary of saved file paths
+        If save_to_disk=False: Dictionary of (anchor, neighbor) tuples 
         to DataFrames
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+    
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+    
+    # Ensure outputs configuration exists with standardized defaults
+    # Neighborhood Profile dataframes use directory type per special case in template_utils
+    if "outputs" not in params:
+        params["outputs"] = {
+            "dataframe": {"type": "directory", "name": "dataframe_dir"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -69,9 +83,7 @@ def run_from_json(
     ]
 
     # Call the spatial umap calculation
-
     bins = [float(radius) for radius in bins]
-
     slide_names = text_to_value(slide_names)
 
     neighborhood_profile(
@@ -97,26 +109,35 @@ def run_from_json(
         output_table
     )
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        saved_files = {}
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Package dataframes in a dictionary for directory saving
+        # This ensures they're saved in a directory per standardized schema
+        results_dict = {}
         
+        # Create a dictionary of dataframes with their filenames as keys
+        dataframe_dict = {}
         for (anchor_label, neighbor_label), filename in zip(
             dataframes.keys(), filenames
         ):
             df = dataframes[(anchor_label, neighbor_label)]
-            saved_files[filename] = df
-
-        # Save all CSV files
-        saved_files = save_outputs(saved_files)
+            # Remove .csv extension as save_results will add it
+            key = filename.replace('.csv', '')
+            dataframe_dict[key] = df
         
-        for filename in saved_files:
-            print(f"Saved: {filename}")
+        # Store in results with "dataframe" key to match outputs config
+        if "dataframe" in params["outputs"]:
+            results_dict["dataframe"] = dataframe_dict
         
-        print(
-            f"Neighborhood Profile completed → {len(saved_files)} files"
+        # Use centralized save_results function
+        # All file handling and logging is now done by save_results
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
         )
+        
+        print(f"Neighborhood Profile completed → {len(saved_files.get('dataframe', []))} files")
         return saved_files
     else:
         # Return the dataframes directly for in-memory workflows
@@ -220,18 +241,32 @@ def neighborhood_profiles_for_pairs(
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python neighborhood_profile_template.py <params.json>",
+            "Usage: python neighborhood_profile_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths[:3]:  # Show first 3 files
+                    print(f"    - {path}")
+                if len(paths) > 3:
+                    print(f"    ... and {len(paths) - 3} more files")
+            else:
+                print(f"  {key}: {paths}")
     else:
-        print("\nReturned dataframes")
+        print("\nReturned dataframes for in-memory use")

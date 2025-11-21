@@ -2,6 +2,9 @@
 Platform-agnostic Spatial Interaction template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Follows standardized output schema where figures are saved as directories.
+
 Usage
 -----
 >>> from spac.templates.spatial_interaction_template import run_from_json
@@ -10,7 +13,7 @@ Usage
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, List, Optional
+from typing import Any, Dict, Union, List, Optional, Tuple
 import pandas as pd
 import numpy as np
 from PIL import Image
@@ -23,7 +26,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.spatial_analysis import spatial_interaction
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -31,9 +34,10 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plot: bool = True
-) -> Union[Dict[str, str], None]:
+    save_to_disk: bool = True,
+    show_plot: bool = True,
+    output_dir: str = None,
+) -> Union[Dict[str, Union[str, List[str]]], Tuple[List[Any], Dict[str, pd.DataFrame]]]:
     """
     Execute Spatial Interaction analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -41,19 +45,30 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. Default is True.
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/data.pickle",
+            "Annotation": "cell_type",
+            "Spatial_Analysis_Method": "Neighborhood Enrichment",
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+                "dataframe": {"type": "file", "name": "dataframe.csv"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If True, saves figures to a directory
+        and matrices to CSV files using centralized save_results. Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
+    output_dir : str or Path, optional
+        Base directory for outputs. If None, uses params['Output_Directory'] or '.'
 
     Returns
     -------
-    dict or None
-        If save_results=True: Dictionary of saved file paths containing:
-            - PNG files: Heatmap visualizations of spatial interactions
-            - CSV files: Matrices with interaction scores/counts between cell types
-        If save_results=False: None (plots are displayed only)
+    dict or tuple
+        If save_to_disk=True: Dictionary mapping output types to saved file paths
+        If save_to_disk=False: Tuple of (figures_list, matrices_dict) for in-memory use
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -95,7 +110,9 @@ def run_from_json(
             print(file_name)
             print(data_df)
             # In SPAC, collect matrices for later saving instead of 
-            # direct file write
+            # direct file write. Store them with proper extension if missing.
+            if not file_name.endswith('.csv'):
+                file_name = f"{file_name}.csv"
             matrices[file_name] = data_df
 
     def update_nidap_display(
@@ -218,56 +235,90 @@ def run_from_json(
             save_matrix(matrix)      
 
     # Handle saving if requested (separate from NIDAP logic)
-    if save_results and (figures or matrices):
-        saved_files = {}
-        output_prefix = params.get("Output_File", "spatial_interaction")
+    if save_to_disk:
+        # Ensure outputs configuration exists
+        if "outputs" not in params:
+            # Provide default outputs config if not present
+            params["outputs"] = {
+                "figures": {"type": "directory", "name": "figures"},
+                "dataframes": {"type": "directory", "name": "matrices"}
+            }
         
-        # Save figures
+        # Prepare results dictionary
+        results_dict = {}
+        
+        # Package figures in a dictionary for directory saving
         if figures:
-            if len(figures) == 1:
-                output_file = f"{output_prefix}.png"
-                figures[0].savefig(
-                    output_file, dpi=dpi, bbox_inches='tight')
-                saved_files[output_file] = output_file
-            else:
-                for i, fig in enumerate(figures):
-                    output_file = f"{output_prefix}_plot_{i+1}.png"
-                    fig.savefig(
-                        output_file, dpi=dpi, bbox_inches='tight')
-                    saved_files[output_file] = output_file
+            # Store figures with meaningful names  
+            figures_dict = {}
+            for i, fig in enumerate(figures):
+                # Extract title if available for better naming
+                try:
+                    ax = fig.axes[0] if fig.axes else None
+                    title = ax.get_title() if ax and ax.get_title() else f"interaction_plot_{i+1}"
+                    # Clean title for filename
+                    title = title.replace(" ", "_").replace("/", "_").replace(":", "")
+                    figures_dict[f"{title}.png"] = fig
+                except:
+                    figures_dict[f"interaction_plot_{i+1}.png"] = fig
+            
+            results_dict["figures"] = figures_dict
         
-        # Save matrices
-        for file_name, df in matrices.items():
-            saved_files.update(save_outputs({file_name: df}))
+        # Add matrices (already have .csv extension added)
+        if matrices:
+            results_dict["dataframes"] = matrices
         
-        # Close figures after saving
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+        
+        # Close figures after saving to free memory
         for fig in figures:
             plt.close(fig)
             
         print(
-            f"Spatial Interaction completed → "
+            f"Spatial Interaction completed -> "
             f"{list(saved_files.keys())}"
         )
         return saved_files
-    
-    return None
+    else:
+        # Return objects directly for in-memory workflows
+        return figures, matrices
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python spatial_interaction_template.py "
-            "<params.json>",
+            "Usage: python spatial_interaction_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
+    # Display results based on return type
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"  {key}: {paths}")
     else:
-        print("\nReturned data object")
+        figures_list, matrices_dict = result
+        print("\nReturned figures and matrices for in-memory use")
+        print(f"Number of figures: {len(figures_list)}")
+        print(f"Number of matrices: {len(matrices_dict)}")
