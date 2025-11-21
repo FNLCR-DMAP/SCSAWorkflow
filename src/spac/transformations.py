@@ -16,15 +16,12 @@ from sklearn.preprocessing import LabelEncoder
 import multiprocessing
 import parmap
 from spac.utag_functions import utag
-<<<<<<< HEAD
 from anndata import AnnData
 from spac.utils import compute_summary_qc_stats
 from typing import List, Optional
-=======
 import plotly.express as px
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.metrics.cluster import normalized_mutual_info_score
->>>>>>> pr-336
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1296,7 +1293,6 @@ def run_utag_clustering(
     adata.obs[output_annotation] = cluster_list.copy()
     adata.uns["utag_features"] = features
 
-<<<<<<< HEAD
 # add QC metrics to AnnData object
 def add_qc_metrics(adata, 
                    organism="hs", 
@@ -1472,7 +1468,6 @@ def get_qc_summary_table(
     # Reset index and store in adata.uns
     summary_table = summary_table.reset_index(drop=True)
     adata.uns["qc_summary_table"] = summary_table
-=======
 def compare_annotations(adata, annotation_list, metric="adjusted_rand_score"):
     """
     Create matrix storing metric information with every combination of annotations given
@@ -1552,4 +1547,3 @@ def compare_annotations(adata, annotation_list, metric="adjusted_rand_score"):
     adata.uns["compare_annotations_list"] = annotation_list
  
     return fig
->>>>>>> pr-336
