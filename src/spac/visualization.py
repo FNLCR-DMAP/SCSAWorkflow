@@ -265,7 +265,6 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            # Combine colors from multiple colormaps
             cmap1 = plt.get_cmap('tab20')
             cmap2 = plt.get_cmap('tab20b')
             cmap3 = plt.get_cmap('tab20c')
