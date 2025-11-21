@@ -761,9 +761,10 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
+
 def histogram(adata, feature=None, annotation=None, layer=None,
-              group_by=None, together=False, ax=None,
-              x_log_scale=False, y_log_scale=False, facet=False, **kwargs):
+              group_by=None, together=False, ax=None, x_log_scale=False,
+              y_log_scale=False, facet=False, defined_color_map=None, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
     or annotation from adata.obs.
@@ -807,6 +808,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     facet : bool, default False
         If True, group by function outputs facet plots
+    defined_color_map : str, optional, default=None
+        Key in adata.uns used to retrieve a color mapping dictionary to
+        color code the histogram.
 
     **kwargs
         Additional keyword arguments passed to seaborn histplot function.
@@ -856,7 +860,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             DataFrame containing the data used for plotting the histogram.
 
     """
-
     # If no feature or annotation is specified, apply default behavior
     if feature is None and annotation is None:
         # Default to the first feature in adata.var_names
@@ -890,6 +893,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         layer = 'Original'
 
     df = pd.concat([df, adata.obs], axis=1)
+
+    if defined_color_map:
+        color_dict = get_defined_color_map(adata, defined_color_map)
+        kwargs.setdefault("palette", color_dict)
 
     if feature and annotation:
         raise ValueError("Cannot pass both feature and annotation,"
@@ -1021,8 +1028,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
-
-
+            
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
@@ -1091,6 +1097,19 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 # Titles for each facet
                 hist.set_titles("{col_name}")
+                # If defined_color_map provided, retrieves color map
+                group_color = None
+                if defined_color_map:
+                    group_color = color_dict.get(group, None)
+
+                sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                             weights='count', color=group_color, **kwargs)
+
+                # If plotting feature specify which layer
+                if feature:
+                    ax_i.set_title(f'{groups[i]} with Layer: {layer}')
+                else:
+                    ax_i.set_title(f'{groups[i]}')
 
                 # Ajust top margin
                 hist.figure.subplots_adjust(left=.1,
@@ -1109,6 +1128,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_xlim(hist_data['bin_left'].min(),
                         hist_data['bin_right'].max())
 
+        # Set default color from custom color map if available
+        if defined_color_map:
+            color_dict = get_defined_color_map(adata,defined_color_map)
+            default_color = list(color_dict.values())[0]
+            kwargs['color'] = default_color
 
         sns.histplot(
             data=hist_data,
