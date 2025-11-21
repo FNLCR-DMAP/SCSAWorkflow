@@ -38,7 +38,14 @@ conda config --set ssl_verify true
 
 ## Using SPAC with Docker
 
-For a reproducible environment, you can use Docker to run SPAC:
+For a reproducible environment, you can use Docker to run SPAC.
+
+**📘 For detailed Docker documentation including development mode with live code mounting, see [`docker/README.md`](docker/README.md)**
+
+**Quick commands:**
+- Production: `make build` → `make run`
+- Development: `make dev` (changes to `src/` reflected immediately!)
+- Help: `make help`
 
 ### Build the Docker Image
 ```bash
