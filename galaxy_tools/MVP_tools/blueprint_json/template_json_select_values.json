@@ -8,7 +8,7 @@
   "status": "RELEASED",
   "inputDatasets": [
     {
-      "key": "Upstream_Analysis",
+      "key": "Upstream_Dataset",
       "displayName": "Upstream Analysis",
       "description": "Link to prior processed analysis in the analysis.",
       "paramGroup": null,

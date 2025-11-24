@@ -14,6 +14,7 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
 
 ]]></command>
     <inputs>
+        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Analysis" help="Link to prior processed analysis in the analysis."/>
         <param name="Annotation_of_Interest" type="text" label="Annotation of Interest" help="Annotation of interest to select values from."/>
     </inputs>
     <outputs>

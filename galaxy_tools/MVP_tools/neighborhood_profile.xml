@@ -14,6 +14,7 @@ echo '{"dataframe": {"type": "directory", "name": "dataframe_dir"}}' > outputs_c
 
 ]]></command>
     <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to define cell labels."/>
         <repeat name="Bins_repeat" title="Bins">
             <param name="value" type="text" label="Value" help="Radii in micro meter that form the bands around the center phenotype to count the neighbor cells"/>

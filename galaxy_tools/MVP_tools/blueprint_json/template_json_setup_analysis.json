@@ -23,7 +23,7 @@
       "displayName": "Feature Regex",
       "description": "A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with \"Intensity\", use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string.",
       "paramType": "LIST",
-      "paramGroup": "Advanced",
+      "paramGroup": "Advanced Parameters",
       "paramValues": null,
       "defaultValue": null,      "condition": null,
       "content": null,

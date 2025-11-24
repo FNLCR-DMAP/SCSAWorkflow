@@ -69,7 +69,7 @@
   ],
   "columns": [],
   "orderedMustacheKeys": [
-    "neighborhood_profile",
+    "Upstream_Analysis",
     "Annotation_of_interest",
     "Bins",
     "Stratify_By",
