@@ -15,12 +15,14 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
 ]]></command>
     <inputs>
         <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
-        <param name="X_Centroid_Name" type="text" label="X Centroid Name" value="XCentroid" help="Name of column containing X centroid, default XCentroid."/>
-        <param name="Y_Centroid_Name" type="text" label="Y Centroid Name" value="YCentroid" help="Name of column containing Y centroid, default YCentroid."/>
         <param name="Min_X_Coordinate_Column_Name" type="text" label="Min X Coordinate Column Name" help="Name of column containing minimum X coordinate."/>
         <param name="Max_X_Coordinate_Column_Name" type="text" label="Max X Coordinate Column Name" help="Name of column containing maximum X coordinate."/>
         <param name="Min_Y_Coordinate_Column_Name" type="text" label="Min Y Coordinate Column Name" help="Name of column containing minimum Y coordinate."/>
         <param name="Max_Y_Coordinate_Column_Name" type="text" label="Max Y Coordinate Column Name" help="Name of column containing maximum Y coordinate."/>
+        <section name="optional" title="Optional" expanded="false">
+            <param name="X_Centroid_Name" type="text" label="X Centroid Name" value="XCentroid" help="Name of column containing X centroid, default XCentroid."/>
+            <param name="Y_Centroid_Name" type="text" label="Y Centroid Name" value="YCentroid" help="Name of column containing Y centroid, default YCentroid."/>
+        </section>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>

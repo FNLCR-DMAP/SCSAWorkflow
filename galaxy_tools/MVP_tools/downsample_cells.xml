@@ -14,15 +14,14 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
 
 ]]></command>
     <inputs>
-        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
+        <repeat name="Annotations_List_repeat" title="Annotations List">
+            <param name="value" type="text" label="Value" help="Choose one or more annotations for creating a smaller, representative sample of dataset."/>
+        </repeat>
         <param name="Number_of_Samples" type="integer" label="Number of Samples" value="100000" help="Specifies how many cells to include in the downsampled dataset. When &quot;Stratify Option&quot; is off, it selects this number of cells from each label or from each unique combination of labels across multiple annotations. When &quot;Stratify Option&quot; is on,  it distributes this total number of cells across all labels or label combinations, in proportion to their frequencies in the full dataset."/>
         <param name="Stratify_Option" type="boolean" label="Stratify Option" truevalue="True" falsevalue="False" checked="false" help="If true, samples are chosen to reflect the original dataset's label distribution across the selected annotations. If false, an equal number of cells will be selected from each label or unique label combination across selected annotations, regardless of their original frequency."/>
         <param name="Random_Selection" type="boolean" label="Random Selection" truevalue="True" falsevalue="False" checked="true" help="If this toggle is True, and &quot;Stratify Option&quot; is set to True, randomly select the returned cells within each annotation labels. Otherwise, choose the first cells up to &quot;Number_of_Samples&quot; from selected annotation(s)."/>
         <param name="New_Combined_Annotation_Name" type="text" label="New Combined Annotation Name" value="_combined_" help="This is the name for a new annotation created when multiple annotations are selected. The values of this new annotation are the specific combinations of labels from the selected annotations, such as 'Region1_Day3'."/>
         <param name="Minimum_Threshold" type="float" label="Minimum Threshold" value="5" help="Determine the lowest count of cells an annotation label must be included in the downsampled data. Annotation labels with fewer cells than this threshold will be excluded to ensure meaningful representation."/>
-        <repeat name="Annotations_List_repeat" title="Annotations List">
-            <param name="value" type="text" label="Value" help="Choose one or more annotations for creating a smaller, representative sample of dataset."/>
-        </repeat>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>

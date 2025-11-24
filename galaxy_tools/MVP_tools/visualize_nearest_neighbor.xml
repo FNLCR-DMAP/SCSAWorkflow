@@ -33,17 +33,21 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
         </param>
         <param name="Source_Anchor_Cell_Label" type="text" label="Source &quot;Anchor&quot; Cell Label" value="" help="The phenotype from which distances are measured."/>
         <param name="Target_Cell_Label" type="text" label="Target Cell Label" value="All" help="The phenotype(s) being measured against. Use &quot;All&quot; to include every phenotype."/>
-        <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated."/>
         <param name="Log_Scale" type="boolean" label="Log Scale" truevalue="True" falsevalue="False" checked="false" help="Display the distance in log scale. Default is False."/>
-        <param name="Facet_Plot" type="boolean" label="Facet Plot" truevalue="True" falsevalue="False" checked="false" help="If set to “True,” each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample."/>
-        <param name="X_Axis_Label_Rotation" type="float" label="X Axis Label Rotation" value="0" help="The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right)."/>
-        <param name="Shared_X_Axis_Title_" type="boolean" label="Shared X Axis Title " truevalue="True" falsevalue="False" checked="true" help="For faceted plots, use one shared x-axis title at the bottom. Default is &quot;ON&quot;."/>
-        <param name="X_Axis_Title_Font_Size" type="text" label="X Axis Title Font Size" value="None" help="Font size for x-axis title. If &quot;None &quot;, use figure font size."/>
-        <param name="Defined_Color_Mapping" type="text" label="Defined Color Mapping" value="None" help="Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default &quot;None&quot; will allow the visualization to determine the color of labels automatically."/>
-        <param name="Figure_Width" type="float" label="Figure Width" value="12"/>
-        <param name="Figure_Height" type="float" label="Figure Height" value="6"/>
-        <param name="FIgure_DPI" type="float" label="FIgure DPI" value="300"/>
-        <param name="Font_Size" type="float" label="Font Size" value="12"/>
+        <section name="advanced_analysis_setting" title="Advanced Analysis Setting" expanded="false">
+            <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated."/>
+        </section>
+        <section name="figure_configurations" title="Figure Configurations" expanded="false">
+            <param name="Facet_Plot" type="boolean" label="Facet Plot" truevalue="True" falsevalue="False" checked="false" help="If set to “True,” each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample."/>
+            <param name="X_Axis_Label_Rotation" type="float" label="X Axis Label Rotation" value="0" help="The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right)."/>
+            <param name="Shared_X_Axis_Title_" type="boolean" label="Shared X Axis Title " truevalue="True" falsevalue="False" checked="true" help="For faceted plots, use one shared x-axis title at the bottom. Default is &quot;ON&quot;."/>
+            <param name="X_Axis_Title_Font_Size" type="text" label="X Axis Title Font Size" value="None" help="Font size for x-axis title. If &quot;None &quot;, use figure font size."/>
+            <param name="Defined_Color_Mapping" type="text" label="Defined Color Mapping" value="None" help="Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default &quot;None&quot; will allow the visualization to determine the color of labels automatically."/>
+            <param name="Figure_Width" type="float" label="Figure Width" value="12"/>
+            <param name="Figure_Height" type="float" label="Figure Height" value="6"/>
+            <param name="FIgure_DPI" type="float" label="FIgure DPI" value="300"/>
+            <param name="Font_Size" type="float" label="Font Size" value="12"/>
+        </section>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>

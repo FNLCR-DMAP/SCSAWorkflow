@@ -15,7 +15,7 @@ echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <repeat name="Radii_repeat" title="Radii">
-            <param name="value" type="text" label="Value" help="Radii around the center phenotype to calculate the Ripley L statistic"/>
+            <param name="value" type="text" label="Value" help="Radii around the center phenotype to calculate the Ripley L statistic" value="0"/>
         </repeat>
         <param name="Annotation" type="text" label="Annotation" value="" help="Annotation name to be used in specifying phenotypes"/>
         <param name="Center_Phenotype" type="text" label="Center Phenotype" value="" help="The phenotype of the anchors cells."/>

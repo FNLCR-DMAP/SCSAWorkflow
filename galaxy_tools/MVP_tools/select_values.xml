@@ -14,10 +14,6 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
 
 ]]></command>
     <inputs>
-        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
-        <repeat name="Labels_of_Interest_repeat" title="Label(s) of Interest">
-            <param name="value" type="text" label="Value" help="Label(s) of interest to include from the selected annotation."/>
-        </repeat>
         <param name="Annotation_of_Interest" type="text" label="Annotation of Interest" help="Annotation of interest to select values from."/>
     </inputs>
     <outputs>

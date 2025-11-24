@@ -17,7 +17,7 @@ echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis"/>
         <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to select labels from."/>
         <repeat name="Labels_repeat" title="Labels">
-            <param name="value" type="text" label="Value" help="Label(s) of interest to be included/excluded from the selected annotation."/>
+            <param name="value" type="text" label="Value" help="Label(s) of interest to be included/excluded from the selected annotation." value=""/>
         </repeat>
         <param name="Include_Exclude" type="select" label="Include / Exclude" help="Set the functionality to either &quot;Include&quot; or &quot;Exclude&quot; selected labels">
             <option value="Include Selected Labels" selected="true">Include Selected Labels</option>

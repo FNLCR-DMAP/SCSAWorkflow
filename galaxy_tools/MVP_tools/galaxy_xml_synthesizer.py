@@ -2,17 +2,21 @@
 """
 Galaxy XML Synthesizer - Generates Galaxy tool XML from blueprint JSON files.
 
-This synthesizer properly handles all parameter types:
-- Numeric types (INTEGER, NUMBER, FLOAT) with min/max bounds → Galaxy numeric types
+Version: 2.4 - Integrated sanitizer and section support
+Features:
+- Automatic section creation from paramGroup
+- Sanitizer support for special characters
+- Proper type mapping (INTEGER->integer, NUMBER->float, etc.)
+- Fixed commands with proper && chaining
+
+This synthesizer properly handles all parameter types with sanitizer support:
+- Numeric types with min/max bounds → Galaxy numeric types
 - Boolean parameters → Galaxy boolean checkboxes  
 - SELECT dropdowns → Galaxy select with options
-- LIST parameters → Galaxy repeat structures
-- Multi-value columns (isMulti=true) → Galaxy repeat structures
-- Single-value columns → Galaxy text inputs
+- LIST parameters → Galaxy repeat structures with sanitizer support
+- Multi-value columns → Galaxy repeat structures
 - String parameters → Galaxy text inputs
 
-Version: 2.2 - Fixed setup_analysis Features_to_Analyze repeat structure issue
-Fixed: Multi-value columns now correctly generate repeat structures instead of textareas
 Author: FNLCR-DMAP Team
 """
 
@@ -20,17 +24,27 @@ import json
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 import re
 import argparse
 import sys
+from collections import OrderedDict
 
 
 class GalaxyXMLSynthesizer:
     """
-    Synthesize Galaxy XML purely from blueprint JSON.
-    NO special cases, NO tool-specific logic.
+    Synthesize Galaxy XML from blueprint JSON with sanitizer and section support.
+    Handles special characters in parameters and automatic section grouping.
     """
+    
+    # Parameters that need special sanitizer configuration
+    SANITIZER_CONFIG = {
+        'Anchor_Neighbor_List': {
+            'allowed_chars': [';', '+', '/', '[', ']', '{', '}', '<', '>', '=', "'"],
+            'description': 'Allows semicolon separator and biological nomenclature characters'
+        },
+        # Add other parameters that need special characters here
+    }
     
     def __init__(self, blueprint: Dict[str, Any], docker_image: str = "spac:latest"):
         self.blueprint = blueprint
@@ -67,7 +81,7 @@ class GalaxyXMLSynthesizer:
         # Command
         self._add_command(tool, tool_id)
         
-        # Inputs
+        # Inputs with section support
         self._add_inputs(tool)
         
         # Outputs - directly from blueprint, no inference
@@ -97,6 +111,51 @@ class GalaxyXMLSynthesizer:
         text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
         text = text.replace('\\n', ' ')
         return text.strip()
+    
+    def _add_sanitizer(self, param: ET.Element, param_key: str, 
+                      custom_config: Optional[Dict[str, Any]] = None):
+        """
+        Add sanitizer configuration to a parameter.
+        
+        Parameters
+        ----------
+        param : ET.Element
+            The parameter element to add sanitizer to
+        param_key : str
+            The parameter key to check for special sanitizer needs
+        custom_config : dict, optional
+            Custom sanitizer configuration from blueprint
+        """
+        # Check if this parameter needs special sanitizer configuration
+        config = custom_config or self.SANITIZER_CONFIG.get(param_key)
+        
+        if config:
+            sanitizer = ET.SubElement(param, 'sanitizer')
+            valid = ET.SubElement(sanitizer, 'valid')
+            valid.set('initial', 'default')
+            
+            # Add allowed special characters
+            allowed_chars = config.get('allowed_chars', [])
+            for char in allowed_chars:
+                add_elem = ET.SubElement(valid, 'add')
+                # Handle special XML characters
+                if char == '<':
+                    add_elem.set('value', '&lt;')
+                elif char == '>':
+                    add_elem.set('value', '&gt;')
+                elif char == '&':
+                    add_elem.set('value', '&amp;')
+                else:
+                    add_elem.set('value', char)
+        
+        # Also check if parameter description mentions semicolon separator
+        elif param_key and ';' in param.get('help', ''):
+            # Auto-detect need for semicolon sanitizer
+            sanitizer = ET.SubElement(param, 'sanitizer')
+            valid = ET.SubElement(sanitizer, 'valid')
+            valid.set('initial', 'default')
+            add_elem = ET.SubElement(valid, 'add')
+            add_elem.set('value', ';')
     
     def _add_command(self, tool: ET.Element, tool_id: str):
         """Add command section - FIXED to use single-line commands."""
@@ -152,50 +211,182 @@ class GalaxyXMLSynthesizer:
         
         command = ET.SubElement(tool, 'command')
         command.set('detect_errors', 'exit_code')
-        command.text = f"<![CDATA[\n{full_command}\n]]>"
+        command.text = f"<![CDATA[\n\n{full_command}\n\n]]>"
+    
+    def _group_parameters(self) -> Dict[Optional[str], List[Dict]]:
+        """Group parameters by their paramGroup field."""
+        groups = OrderedDict()
+        
+        # Process parameters maintaining order
+        for param_def in self.blueprint.get('parameters', []):
+            group = param_def.get('paramGroup')
+            if group not in groups:
+                groups[group] = []
+            groups[group].append(param_def)
+        
+        return groups
+    
+    def _make_section_id(self, group_name: str) -> str:
+        """Convert group name to valid section ID."""
+        # Convert to lowercase and replace spaces with underscores
+        section_id = group_name.lower().replace(' ', '_')
+        # Remove special characters
+        section_id = re.sub(r'[^a-z0-9_]', '', section_id)
+        return section_id
+    
+    def _get_galaxy_param_type(self, param_type: str) -> str:
+        """Map blueprint paramType to Galaxy param type."""
+        type_mapping = {
+            'BOOLEAN': 'boolean',
+            'INTEGER': 'integer',
+            'INT': 'integer',
+            'Positive integer': 'integer',  # Special case
+            'NUMBER': 'float',
+            'FLOAT': 'float',
+            'SELECT': 'select',
+            'STRING': 'text',
+            'TEXT': 'text',
+            'FILE': 'data',
+            'LIST': 'repeat',  # Special case, handled separately
+        }
+        return type_mapping.get(param_type, 'text')
     
     def _add_inputs(self, tool: ET.Element):
-        """Add inputs section."""
+        """
+        Add inputs section with automatic section grouping.
+        
+        Follows supervisor's logic:
+        1. Parameters without groups should be listed first
+        2. Then parameters within groups
+        3. Groups should be ordered based on their first appearance in orderedMustacheKeys
+        """
         inputs = ET.SubElement(tool, 'inputs')
         
-        # Input datasets
-        for dataset in self.blueprint.get('inputDatasets', []):
-            param = ET.SubElement(inputs, 'param')
-            param.set('name', dataset['key'])
-            param.set('type', 'data')
+        # Build lookup dictionaries for all parameter types
+        datasets_dict = {d['key']: d for d in self.blueprint.get('inputDatasets', [])}
+        params_dict = {p['key']: p for p in self.blueprint.get('parameters', [])}
+        columns_dict = {c['key']: c for c in self.blueprint.get('columns', [])}
+        
+        # Get ordered keys or fall back to natural order
+        ordered_keys = self.blueprint.get('orderedMustacheKeys', [])
+        
+        if not ordered_keys:
+            # Fall back to original order if no orderedMustacheKeys
+            # First datasets, then params, then columns
+            ordered_keys = []
+            ordered_keys.extend([d['key'] for d in self.blueprint.get('inputDatasets', [])])
+            ordered_keys.extend([p['key'] for p in self.blueprint.get('parameters', [])])
+            ordered_keys.extend([c['key'] for c in self.blueprint.get('columns', [])])
+        
+        # Track what we've processed
+        processed_keys = set()
+        
+        # Collect ungrouped and grouped parameters while maintaining order
+        ungrouped_params = []
+        sections = OrderedDict()  # Will maintain order of first appearance
+        section_first_index = {}  # Track first appearance index for each section
+        
+        # Process in orderedMustacheKeys order
+        for idx, key in enumerate(ordered_keys):
+            if key in processed_keys:
+                continue
+                
+            # Find the item
+            item = None
+            item_type = None
             
-            # Map data types
-            data_type = dataset.get('dataType', '')
-            if 'DATAFRAME' in data_type.upper():
-                param.set('format', 'tabular,csv,tsv,txt')
-            elif 'PYTHON' in data_type.upper() or 'ANNDATA' in data_type.upper():
-                param.set('format', 'h5ad,binary,pickle')
+            if key in datasets_dict:
+                item = datasets_dict[key]
+                item_type = 'dataset'
+            elif key in params_dict:
+                item = params_dict[key]
+                item_type = 'param'
+            elif key in columns_dict:
+                item = columns_dict[key]
+                item_type = 'column'
+            
+            if not item:
+                continue  # Skip unknown keys
+            
+            processed_keys.add(key)
+            
+            # Input datasets always go first (no sections)
+            if item_type == 'dataset':
+                self._add_dataset_param(inputs, item)
             else:
-                param.set('format', 'binary')
+                # Check if it has a paramGroup
+                group = item.get('paramGroup')
+                
+                if not group:
+                    # No group - add to ungrouped list
+                    ungrouped_params.append((item, item_type))
+                else:
+                    # Has a group - add to appropriate section
+                    if group not in sections:
+                        sections[group] = []
+                        section_first_index[group] = idx  # Track first appearance
+                    sections[group].append((item, item_type))
+        
+        # Add ungrouped parameters (after datasets, before sections)
+        for item, item_type in ungrouped_params:
+            if item_type == 'param':
+                self._add_parameter(inputs, item)
+            elif item_type == 'column':
+                self._add_column(inputs, item)
+        
+        # Sort sections by their first appearance in orderedMustacheKeys
+        sorted_sections = sorted(sections.items(), 
+                               key=lambda x: section_first_index.get(x[0], float('inf')))
+        
+        # Add grouped parameters in sections
+        for group_name, items in sorted_sections:
+            # Create section for this group
+            section = ET.SubElement(inputs, 'section')
+            section_id = self._make_section_id(group_name)
+            section.set('name', section_id)
+            section.set('title', group_name)
+            section.set('expanded', 'false')
             
-            param.set('label', dataset.get('displayName', dataset['key']))
-            if dataset.get('description'):
-                param.set('help', dataset['description'])
-        
-        # Parameters
-        for param_def in self.blueprint.get('parameters', []):
-            self._add_parameter(inputs, param_def)
-        
-        # Columns - treat consistently
-        for column in self.blueprint.get('columns', []):
-            self._add_column(inputs, column)
+            # Add parameters to section
+            for item, item_type in items:
+                if item_type == 'param':
+                    self._add_parameter(section, item)
+                elif item_type == 'column':
+                    self._add_column(section, item)
     
-    def _add_parameter(self, inputs: ET.Element, param_def: Dict[str, Any]):
-        """Add parameter based on type with proper datatype handling."""
+    def _add_dataset_param(self, parent: ET.Element, dataset: Dict[str, Any]):
+        """Add dataset parameter."""
+        param = ET.SubElement(parent, 'param')
+        param.set('name', dataset['key'])
+        param.set('type', 'data')
+        
+        # Map data types
+        data_type = dataset.get('dataType', '')
+        if 'DATAFRAME' in data_type.upper():
+            param.set('format', 'tabular,csv,tsv,txt')
+        elif 'PYTHON' in data_type.upper() or 'ANNDATA' in data_type.upper():
+            param.set('format', 'h5ad,binary,pickle')
+        else:
+            param.set('format', 'binary')
+        
+        param.set('label', dataset.get('displayName', dataset['key']))
+        if dataset.get('description'):
+            param.set('help', dataset['description'])
+    
+    def _add_parameter(self, parent: ET.Element, param_def: Dict[str, Any]):
+        """Add parameter based on type with proper datatype handling and sanitizer support."""
         param_type = param_def.get('paramType', 'STRING')
         param_key = param_def.get('key')
         display_name = param_def.get('displayName', param_key)
         description = param_def.get('description', '')
         default_value = param_def.get('defaultValue')
         
+        # Check for custom sanitizer config in parameter definition
+        sanitizer_config = param_def.get('sanitizer')
+        
         if param_type == 'LIST':
             # Use Galaxy repeat for lists
-            repeat = ET.SubElement(inputs, 'repeat')
+            repeat = ET.SubElement(parent, 'repeat')
             repeat.set('name', f"{param_key}_repeat")
             repeat.set('title', display_name)
             
@@ -205,14 +396,27 @@ class GalaxyXMLSynthesizer:
             param.set('label', 'Value')
             param.set('help', description)
             
+            # Add sanitizer for LIST parameters that need special characters
+            self._add_sanitizer(param, param_key, sanitizer_config)
+            
             # Add default values if specified
-            if default_value and isinstance(default_value, list):
-                for val in default_value:
-                    param.set('value', str(val))
-                    break  # Only first default for repeat structure
+            if default_value:
+                if isinstance(default_value, str):
+                    # Parse string that looks like a list
+                    if default_value.startswith('[') and default_value.endswith(']'):
+                        try:
+                            default_list = json.loads(default_value)
+                            if default_list and len(default_list) > 0:
+                                param.set('value', str(default_list[0]))
+                        except:
+                            param.set('value', default_value)
+                    else:
+                        param.set('value', default_value)
+                elif isinstance(default_value, list) and default_value:
+                    param.set('value', str(default_value[0]))
         
         elif param_type == 'BOOLEAN':
-            param = ET.SubElement(inputs, 'param')
+            param = ET.SubElement(parent, 'param')
             param.set('name', param_key)
             param.set('type', 'boolean')
             param.set('label', display_name)
@@ -237,7 +441,7 @@ class GalaxyXMLSynthesizer:
         
         elif param_type == 'SELECT':
             # Handle SELECT type parameters
-            param = ET.SubElement(inputs, 'param')
+            param = ET.SubElement(parent, 'param')
             param.set('name', param_key)
             param.set('type', 'select')
             param.set('label', display_name)
@@ -257,15 +461,12 @@ class GalaxyXMLSynthesizer:
         
         elif param_type in ['NUMBER', 'INTEGER', 'Positive integer', 'FLOAT', 'INT']:
             # Handle numeric types with proper Galaxy types
-            param = ET.SubElement(inputs, 'param')
+            param = ET.SubElement(parent, 'param')
             param.set('name', param_key)
             
             # Map blueprint types to Galaxy types
-            if param_type in ['NUMBER', 'FLOAT']:
-                param.set('type', 'float')
-            elif param_type in ['INTEGER', 'INT', 'Positive integer']:
-                param.set('type', 'integer')
-            
+            galaxy_type = self._get_galaxy_param_type(param_type)
+            param.set('type', galaxy_type)
             param.set('label', display_name)
             
             # Handle min/max bounds
@@ -290,13 +491,16 @@ class GalaxyXMLSynthesizer:
                 param.set('value', str(default_value))
             elif not param_def.get('optional'):
                 # Provide type-appropriate defaults for non-optional params
-                param.set('value', '0')
+                if galaxy_type == 'integer':
+                    param.set('value', '0')
+                elif galaxy_type == 'float':
+                    param.set('value', '0.0')
             
             if description:
                 param.set('help', description)
         
         else:  # STRING and other text types
-            param = ET.SubElement(inputs, 'param')
+            param = ET.SubElement(parent, 'param')
             param.set('name', param_key)
             param.set('type', 'text')
             param.set('label', display_name)
@@ -313,17 +517,21 @@ class GalaxyXMLSynthesizer:
             
             if description:
                 param.set('help', description)
+            
+            # Check if this STRING parameter needs special sanitizer
+            self._add_sanitizer(param, param_key, sanitizer_config)
     
-    def _add_column(self, inputs: ET.Element, column: Dict[str, Any]):
-        """Add column parameter - using repeat for multi-value columns."""
+    def _add_column(self, parent: ET.Element, column: Dict[str, Any]):
+        """Add column parameter - using repeat for multi-value columns with sanitizer support."""
         param_key = column.get('key')
         display_name = column.get('displayName', param_key)
         description = column.get('description', '')
         is_multi = column.get('isMulti', False)
+        sanitizer_config = column.get('sanitizer')
         
         if is_multi:
             # Multi-value column: use Galaxy repeat structure (like LIST params)
-            repeat = ET.SubElement(inputs, 'repeat')
+            repeat = ET.SubElement(parent, 'repeat')
             repeat.set('name', f"{param_key}_repeat")
             repeat.set('title', display_name)
             
@@ -332,6 +540,9 @@ class GalaxyXMLSynthesizer:
             param.set('type', 'text')
             param.set('label', 'Value')
             param.set('help', description)
+            
+            # Add sanitizer if needed
+            self._add_sanitizer(param, param_key, sanitizer_config)
             
             # Default values if specified
             default_value = column.get('defaultValue', [])
@@ -343,7 +554,7 @@ class GalaxyXMLSynthesizer:
                     param.set('value', str(default_value))
         else:
             # Single-value column: regular text input
-            param = ET.SubElement(inputs, 'param')
+            param = ET.SubElement(parent, 'param')
             param.set('name', param_key)
             param.set('type', 'text')
             param.set('label', display_name)
@@ -357,6 +568,9 @@ class GalaxyXMLSynthesizer:
             
             if description:
                 param.set('help', description)
+            
+            # Add sanitizer if needed
+            self._add_sanitizer(param, param_key, sanitizer_config)
     
     def _add_outputs(self, tool: ET.Element):
         """Add outputs section - directly from blueprint."""
@@ -418,17 +632,53 @@ class GalaxyXMLSynthesizer:
                 data.set('label', f'${{tool.name}} on ${{on_string}}: {key.title()}')
     
     def _generate_help(self) -> str:
-        """Generate help text."""
+        """Generate help text with sanitizer info for special parameters."""
         title = self.blueprint.get('title', 'Tool')
         desc = self._clean_text(self.blueprint.get('description', ''))
         
         help_lines = [
             f"**{title}**",
-            "",
-            desc,
-            "",
-            "**Outputs:**"
+            desc
         ]
+        
+        # Check if we have parameters that need special characters
+        has_special_params = False
+        for param in self.blueprint.get('parameters', []):
+            if param.get('key') in self.SANITIZER_CONFIG:
+                has_special_params = True
+                break
+        
+        if has_special_params:
+            help_lines.extend([
+                "",
+                "**Special Characters Allowed:**",
+                ""
+            ])
+            
+            # Document Anchor_Neighbor_List specifically
+            if 'Anchor_Neighbor_List' in [p.get('key') for p in self.blueprint.get('parameters', [])]:
+                help_lines.extend([
+                    "**Anchor Neighbor List Format:**",
+                    "Enter anchor and neighbor cell types separated by semicolon (;)",
+                    "Examples:",
+                    "- T cells; B cells",
+                    "- CD4+; CD8+",
+                    "- FOXP3+/CD25+; Tregs",
+                    "- PD-1high; PD-L1+",
+                    "",
+                    "The following special characters are allowed:",
+                    "- Semicolon (;) - as separator between anchor and neighbor",
+                    "- Plus (+) - for positive markers (CD4+, FOXP3+)",
+                    "- Slash (/) - for combinations (CD4/CD8, FOXP3/CD25)",
+                    "- Brackets [] {} - for concentrations or sets",
+                    "- Comparison operators (<, >, =)",
+                    "- Apostrophe (') - for 5' or 3' notation",
+                    ""
+                ])
+        
+        help_lines.extend([
+            "**Outputs:**"
+        ])
         
         outputs = self.blueprint.get('outputs', {})
         for key, config in outputs.items():
@@ -504,9 +754,25 @@ def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str 
     
     print(f"  -> Generated: {xml_path.name}")
     
-    # Verify command format
-    if '\n&&\n' in xml_content or '\n    &&\n' in xml_content:
-        print(f"  WARNING: Multi-line command detected in {xml_path.name}")
+    # Report on features used
+    features = []
+    
+    # Check if sanitizer was added
+    if 'Anchor_Neighbor_List' in xml_content and '<sanitizer>' in xml_content:
+        features.append("sanitizer")
+    
+    # Check if sections were added
+    if '<section' in xml_content:
+        features.append("sections")
+    
+    # Check for numeric types
+    if 'type="integer"' in xml_content:
+        features.append("integer params")
+    if 'type="float"' in xml_content:
+        features.append("float params")
+    
+    if features:
+        print(f"  -> Features: {', '.join(features)}")
     
     return xml_path
 
@@ -537,10 +803,30 @@ def batch_process(input_pattern: str, output_dir: str, docker_image: str = "spac
     print("=" * 60)
     
     generated_files = []
+    feature_summary = {
+        'sanitizer': [],
+        'sections': [],
+        'integer': [],
+        'float': []
+    }
+    
     for blueprint_file in sorted(blueprint_files):
         try:
             xml_file = process_blueprint(blueprint_file, output_path, docker_image)
             generated_files.append(xml_file)
+            
+            # Check features in generated XML
+            with open(xml_file, 'r') as f:
+                content = f.read()
+                if '<sanitizer>' in content:
+                    feature_summary['sanitizer'].append(blueprint_file.stem)
+                if '<section' in content:
+                    feature_summary['sections'].append(blueprint_file.stem)
+                if 'type="integer"' in content:
+                    feature_summary['integer'].append(blueprint_file.stem)
+                if 'type="float"' in content:
+                    feature_summary['float'].append(blueprint_file.stem)
+                    
         except Exception as e:
             print(f"  ERROR processing {blueprint_file.name}: {e}")
             import traceback
@@ -549,13 +835,25 @@ def batch_process(input_pattern: str, output_dir: str, docker_image: str = "spac
     print("=" * 60)
     print(f"Successfully generated {len(generated_files)} Galaxy XML files")
     
+    # Print feature summary
+    if any(feature_summary.values()):
+        print("\nFeature Summary:")
+        if feature_summary['sections']:
+            print(f"  Tools with sections: {len(feature_summary['sections'])}")
+        if feature_summary['sanitizer']:
+            print(f"  Tools with sanitizers: {len(feature_summary['sanitizer'])}")
+        if feature_summary['integer']:
+            print(f"  Tools with integer params: {len(feature_summary['integer'])}")
+        if feature_summary['float']:
+            print(f"  Tools with float params: {len(feature_summary['float'])}")
+    
     return 0
 
 
 def main():
     """Main entry point for the synthesizer."""
     parser = argparse.ArgumentParser(
-        description="Generate Galaxy tool XML from SPAC blueprint JSON files"
+        description="Generate Galaxy tool XML from SPAC blueprint JSON files with sanitizer and section support"
     )
     parser.add_argument(
         "blueprint",

@@ -14,21 +14,26 @@ echo '{"dataframe": {"type": "directory", "name": "dataframe_dir"}}' > outputs_c
 
 ]]></command>
     <inputs>
-        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis"/>
         <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to define cell labels."/>
         <repeat name="Bins_repeat" title="Bins">
             <param name="value" type="text" label="Value" help="Radii in micro meter that form the bands around the center phenotype to count the neighbor cells"/>
         </repeat>
         <param name="Stratify_By" type="text" label="Stratify By" value="" help="The annotation to stratify the dataset when generating the profiles (e.g., slide name). If a value other than &quot;None&quot; is passed, the dataset will be stratified by the unique labels in the annotation column. Use &quot;None&quot; without quotes to disable (e.g., all cells are from one region or slide)"/>
         <repeat name="Anchor_Neighbor_List_repeat" title="Anchor Neighbor List">
-            <param name="value" type="text" label="Value" help="A list of anchor;neighbor cell labels to generate the results. The two types should be separated with a ';'. For example, if the anchor is &quot;T cells&quot; and the neighbor is &quot;B cells&quot;, enter the value: &quot;T cells; B cells&quot; without the quotes.">
+            <param name="value" type="text" label="Value" help="A list of anchor;neighbor cell labels to generate the results. The two types should be separated with a ';'. For example, if  if the anchor is &quot;T cells&quot; and the neighbor is &quot;B cells&quot;, enter the value: &quot;T cells; B cells&quot; without the quotes.">
                 <sanitizer>
                     <valid initial="default">
-                        <!-- Allow semicolon for separator -->
                         <add value=";"/>
-                        <!-- Allow additional characters common in biological nomenclature -->
-                        <add value="+"/>  <!-- For CD4+, CD8+, FOXP3+ -->
-                        <add value="/"/>  <!-- For CD4/CD8 ratios, FOXP3/CD25 -->
+                        <add value="+"/>
+                        <add value="/"/>
+                        <add value="["/>
+                        <add value="]"/>
+                        <add value="{"/>
+                        <add value="}"/>
+                        <add value="&amp;lt;"/>
+                        <add value="&amp;gt;"/>
+                        <add value="="/>
+                        <add value="'"/>
                     </valid>
                 </sanitizer>
             </param>
@@ -46,7 +51,7 @@ echo '{"dataframe": {"type": "directory", "name": "dataframe_dir"}}' > outputs_c
 **Neighborhood Profile [SPAC][DMAP]**
 Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\
 Please refer to DUET Documentation, GitHub Documentation for further information.
-
+**Special Characters Allowed:**
 **Anchor Neighbor List Format:**
 Enter anchor and neighbor cell types separated by semicolon (;)
 Examples:
@@ -54,18 +59,15 @@ Examples:
 - CD4+; CD8+
 - FOXP3+/CD25+; Tregs
 - PD-1high; PD-L1+
-
-**Special Characters Allowed:**
-The following special characters are allowed in cell type names:
+The following special characters are allowed:
 - Semicolon (;) - as separator between anchor and neighbor
 - Plus (+) - for positive markers (CD4+, FOXP3+)
 - Slash (/) - for combinations (CD4/CD8, FOXP3/CD25)
 - Brackets [] {} - for concentrations or sets
 - Comparison operators (<, >, =)
 - Apostrophe (') - for 5' or 3' notation
-
 **Outputs:**
-- dataframe: directory containing CSV files for each anchor-neighbor pair
+- dataframe: directory (dataframe_dir)
 
 ]]></help>
     <citations>

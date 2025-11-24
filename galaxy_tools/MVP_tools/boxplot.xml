@@ -10,32 +10,36 @@ Please refer to DUET Documentation,  GitHub Documentation</description>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figure_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Value_Axis_Log_Scale Horizontal_Plot Keep_Outliers --list-values Feature_s_to_Plot --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Value_Axis_Log_Scale Horizontal_Plot Keep_Outliers --list-values Feature_s_to_Plot --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
 
 ]]></command>
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <param name="Table_to_Visualize" type="text" label="Table to Visualize" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
         <repeat name="Feature_s_to_Plot_repeat" title="Feature(s) to Plot">
-            <param name="value" type="text" label="Value" help="The feature(s) to plot in the box plot. Default &quot;All&quot; will plot all features."/>
+            <param name="value" type="text" label="Value" help="The feature(s) to plot in the box plot. Default &quot;All&quot; will plot all features." value="All"/>
         </repeat>
         <param name="Primary_Annotation" type="text" label="Primary Annotation" value="None" help="The annotation to group the visualizations. Use &quot;None&quot; to disable."/>
         <param name="Secondary_Annotation" type="text" label="Secondary Annotation" value="None" help="Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is &quot;None&quot;."/>
-        <param name="Value_Axis_Log_Scale" type="boolean" label="Value Axis Log Scale" truevalue="True" falsevalue="False" checked="false" help="Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale."/>
-        <param name="Figure_Title" type="text" label="Figure Title" value="BoxPlot" help="Title of the figure"/>
-        <param name="Horizontal_Plot" type="boolean" label="Horizontal Plot" truevalue="True" falsevalue="False" checked="false" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
-        <param name="Figure_Width" type="float" label="Figure Width" value="12" help="Width of the figure, inch."/>
-        <param name="Figure_Height" type="float" label="Figure Height" value="8" help="Height of the figure, inch."/>
-        <param name="Figure_DPI" type="float" label="Figure DPI" value="300" help="Higher the DPI, clearer the image."/>
-        <param name="Font_Size" type="float" label="Font Size" value="10" help="Figure font size."/>
-        <param name="Keep_Outliers" type="boolean" label="Keep Outliers" truevalue="True" falsevalue="False" checked="true" help="True to keep the outliers for every feature, False to remove them"/>
+        <section name="value_axis_configuration" title="Value Axis Configuration" expanded="false">
+            <param name="Value_Axis_Log_Scale" type="boolean" label="Value Axis Log Scale" truevalue="True" falsevalue="False" checked="false" help="Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale."/>
+            <param name="Keep_Outliers" type="boolean" label="Keep Outliers" truevalue="True" falsevalue="False" checked="true" help="True to keep the outliers for every feature, False to remove them"/>
+        </section>
+        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+            <param name="Figure_Title" type="text" label="Figure Title" value="BoxPlot" help="Title of the figure"/>
+            <param name="Horizontal_Plot" type="boolean" label="Horizontal Plot" truevalue="True" falsevalue="False" checked="false" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
+            <param name="Figure_Width" type="float" label="Figure Width" value="12" help="Width of the figure, inch."/>
+            <param name="Figure_Height" type="float" label="Figure Height" value="8" help="Height of the figure, inch."/>
+            <param name="Figure_DPI" type="float" label="Figure DPI" value="300" help="Higher the DPI, clearer the image."/>
+            <param name="Font_Size" type="float" label="Font Size" value="10" help="Figure font size."/>
+        </section>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
         <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
         <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
         <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
-            <discover_datasets pattern="__name_and_ext__" directory="figure_dir"/>
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
         </collection>
     </outputs>
     <help><![CDATA[
@@ -45,7 +49,7 @@ Create a boxplot visualization of the features in the analysis dataset.\
 Please refer to DUET Documentation,  GitHub Documentation
 **Outputs:**
 - dataframe: file (dataframe.csv)
-- figures: directory (figure_dir)
+- figures: directory (figures_dir)
 
 ]]></help>
     <citations>
