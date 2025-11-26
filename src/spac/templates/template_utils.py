@@ -272,7 +272,17 @@ def _save_single_object(obj: Any, name: str, output_dir: Path) -> Path:
         Path to saved file
     """
     # Determine file format based on object type
-    if isinstance(obj, pd.DataFrame):
+    if isinstance(obj, bytes):
+        # Raw bytes (e.g., PNG image data from Plotly)
+        # Determine extension from name or default to .png
+        image_exts = ['.png', '.jpg', '.jpeg', '.pdf', '.svg']
+        if not any(name.endswith(ext) for ext in image_exts):
+            name = f"{name}.png"
+        filepath = output_dir / name
+        with open(filepath, 'wb') as f:
+            f.write(obj)
+    
+    elif isinstance(obj, pd.DataFrame):
         # DataFrames -> CSV
         if not name.endswith('.csv'):
             name = f"{name}.csv"
@@ -287,7 +297,9 @@ def _save_single_object(obj: Any, name: str, output_dir: Path) -> Path:
         obj.savefig(filepath, dpi=300, bbox_inches='tight')
         plt.close(obj)  # Close figure to free memory
         
-    elif isinstance(obj, str) and ('<html' in obj.lower() or name.endswith('.html')):
+    elif isinstance(obj, str) and (
+        '<html' in obj.lower() or name.endswith('.html')
+    ):
         # HTML content
         if not name.endswith('.html'):
             name = f"{name}.html"
