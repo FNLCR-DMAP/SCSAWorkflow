@@ -623,21 +623,48 @@ def spell_out_special_characters(text: str) -> str:
     return text
 
 
+def clean_column_name(column_name: str) -> str:
+    """
+    Clean a single column name using spell_out_special_characters.
+    
+    Parameters
+    ----------
+    column_name : str
+        Original column name
+        
+    Returns
+    -------
+    str
+        Cleaned column name
+    """
+    original = column_name
+    cleaned = spell_out_special_characters(column_name)
+    # Ensure doesn't start with digit
+    if cleaned and cleaned[0].isdigit():
+        cleaned = f'col_{cleaned}'
+    if original != cleaned:
+        logger.info(f'Column Name Updated: "{original}" -> "{cleaned}"')
+    return cleaned
+
+
 def load_csv_files(
-    csv_dir: Union[str, Path],
+    csv_input: Union[str, Path, List[str]],
     files_config: pd.DataFrame,
     string_columns: Optional[List[str]] = None
 ) -> pd.DataFrame:
     """
     Load and combine CSV files based on configuration.
+    
+    Supports both:
+    - Galaxy input: list of file paths
+    - NIDAP input: directory path
 
     Parameters
     ----------
-    csv_dir : str or Path
-        Directory containing CSV files
+    csv_input : str, Path, or list
+        Either a directory path (NIDAP) or list of file paths (Galaxy)
     files_config : pd.DataFrame
-        Configuration dataframe with 'file_name' column and optional 
-        metadata
+        Configuration dataframe with 'file_name' column and optional metadata
     string_columns : list, optional
         Columns to force as string type
 
@@ -647,11 +674,19 @@ def load_csv_files(
         Combined dataframe with all CSV data
     """
     import pprint
-    from spac.data_utils import combine_dfs
-    from spac.utils import check_list_in_list
 
-    csv_dir = Path(csv_dir)
-    filename = "file_name"
+    filename_col = "file_name"
+
+    # Build file path mapping based on input type
+    if isinstance(csv_input, list):
+        # Galaxy: list of file paths
+        file_path_map = {Path(p).name: Path(p) for p in csv_input}
+        logger.info(f"Galaxy mode: {len(file_path_map)} files provided")
+    else:
+        # NIDAP: directory path
+        csv_dir = Path(csv_input)
+        file_path_map = {p.name: p for p in csv_dir.glob("*.csv")}
+        logger.info(f"NIDAP mode: {len(file_path_map)} CSV files in {csv_dir}")
 
     # Clean configuration
     files_config = files_config.applymap(
@@ -660,8 +695,8 @@ def load_csv_files(
 
     # Get column names
     all_column_names = files_config.columns.tolist()
-    filtered_column_names = [
-        col for col in all_column_names if col not in [filename]
+    metadata_columns = [
+        col for col in all_column_names if col != filename_col
     ]
 
     # Validate string_columns
@@ -681,33 +716,18 @@ def load_csv_files(
     # Extract data types
     dtypes = files_config.dtypes.to_dict()
 
-    # Clean column names
-    def clean_column_name(column_name):
-        original = column_name
-        cleaned = spell_out_special_characters(column_name)
-        # Ensure doesn't start with digit
-        if cleaned and cleaned[0].isdigit():
-            cleaned = f'col_{cleaned}'
-        if original != cleaned:
-            print(f'Column Name Updated: "{original}" -> "{cleaned}"')
-        return cleaned
-
     # Get files to process
     files_config = files_config.astype(str)
     files_to_use = [
-        f.strip() for f in files_config[filename].tolist()
+        f.strip() for f in files_config[filename_col].tolist()
     ]
 
     # Check all files exist
-    missing_files = []
-    for file_name in files_to_use:
-        if not (csv_dir / file_name).exists():
-            missing_files.append(file_name)
-
+    missing_files = [f for f in files_to_use if f not in file_path_map]
     if missing_files:
-        raise TypeError(
-            f"The following files are not found: "
-            f"{', '.join(missing_files)}"
+        raise FileNotFoundError(
+            f"Files not found: {', '.join(missing_files)}\n"
+            f"Available: {', '.join(file_path_map.keys())}"
         )
 
     # Prepare dtype override
@@ -717,60 +737,35 @@ def load_csv_files(
 
     # Process files
     processed_df_list = []
-    first_file = True
 
     for file_name in files_to_use:
-        file_path = csv_dir / file_name
-        file_locations = files_config[
-            files_config[filename] == file_name
-        ].index.tolist()
-
-        # Check for duplicate file names
-        if len(file_locations) > 1:
-            print(
-                f'Multiple entries for file: "{file_name}", exiting...'
-            )
-            return None
+        file_path = file_path_map[file_name]
 
         try:
             current_df = pd.read_csv(file_path, dtype=dtype_override)
-            print(f'\nProcessing file: "{file_name}"')
+            logger.info(f'Processing: "{file_name}"')
             current_df.columns = [
                 clean_column_name(col) for col in current_df.columns
             ]
 
-            # Validate string_columns exist
-            if first_file and string_columns:
-                check_list_in_list(
-                    input=string_columns,
-                    input_name='string_columns',
-                    input_type='column',
-                    target_list=list(current_df.columns),
-                    need_exist=True,
-                    warning=False
-                )
-                first_file = False
-
         except pd.errors.EmptyDataError:
-            raise TypeError(f'The file: "{file_name}" is empty.')
+            raise ValueError(f'File "{file_name}" is empty.')
         except pd.errors.ParserError:
-            raise TypeError(
-                f'The file "{file_name}" could not be parsed. '
-                'Please check that the file is a valid CSV.'
+            raise ValueError(
+                f'File "{file_name}" could not be parsed as CSV.'
             )
 
-        current_df[filename] = file_name
+        current_df[filename_col] = file_name
 
-        # Reorder columns
-        cols = current_df.columns.tolist()
-        cols.insert(0, cols.pop(cols.index(filename)))
+        # Reorder columns: filename first
+        cols = [filename_col] + [c for c in current_df.columns if c != filename_col]
         current_df = current_df[cols]
 
         processed_df_list.append(current_df)
-        print(f'File: "{file_name}" Processed!\n')
+        logger.info(f'File "{file_name}" processed: {current_df.shape}')
 
     # Combine dataframes
-    final_df = combine_dfs(processed_df_list)
+    final_df = pd.concat(processed_df_list, ignore_index=True)
 
     # Ensure string columns remain strings
     for col in string_columns:
@@ -778,22 +773,18 @@ def load_csv_files(
             final_df[col] = final_df[col].astype(str)
 
     # Add metadata columns
-    if filtered_column_names:
-        for column in filtered_column_names:
-            # Map values from config
+    if metadata_columns:
+        for column in metadata_columns:
             file_to_value = (
-                files_config.set_index(filename)[column].to_dict()
+                files_config.set_index(filename_col)[column].to_dict()
             )
-            final_df[column] = final_df[filename].map(file_to_value)
-            # Ensure correct dtype
+            final_df[column] = final_df[filename_col].map(file_to_value)
             final_df[column] = final_df[column].astype(dtypes[column])
 
-            print(f'\n\nColumn "{column}" Mapping: ')
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(file_to_value)
+            logger.info(f'Added metadata column "{column}"')
+            logger.debug(f'Mapping: {file_to_value}')
 
-    print("\n\nFinal Dataframe Info")
-    print(final_df.info())
+    logger.info(f"Combined {len(processed_df_list)} files -> {final_df.shape}")
 
     return final_df
 

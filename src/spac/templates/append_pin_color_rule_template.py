@@ -1,32 +1,30 @@
 """
-Platform-agnostic Summarize Annotation's Statistics template converted from 
-NIDAP. Maintains the exact logic from the NIDAP template.
+Platform-agnostic Append Pin Color Rule template converted from NIDAP.
+Maintains the exact logic from the NIDAP template.
 
 Refactored to use centralized save_results from template_utils.
 Reads outputs configuration from blueprint JSON file.
 
 Usage
 -----
->>> from spac.templates.summarize_annotation_statistics_template import \
-...     run_from_json
->>> run_from_json("examples/summarize_annotation_statistics_params.json")
+>>> from spac.templates.add_pin_color_rule_template import run_from_json
+>>> run_from_json("examples/add_pin_color_rule_params.json")
 """
 import json
 import sys
 import logging
 from pathlib import Path
-from typing import Any, Dict, Union, List, Optional
-import pandas as pd
+from typing import Any, Dict, Union
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from spac.transformations import get_cluster_info
+from spac.data_utils import add_pin_color_rules
 from spac.templates.template_utils import (
     load_input,
     save_results,
     parse_params,
-    text_to_value,
+    string_list_to_dictionary,
 )
 
 logger = logging.getLogger(__name__)
@@ -36,10 +34,10 @@ def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
     save_to_disk: bool = True,
     output_dir: str = None,
-) -> Union[Dict[str, str], pd.DataFrame]:
+) -> Union[Dict[str, str], Any]:
     """
-    Execute Summarize Annotation's Statistics analysis with parameters from 
-    JSON. Replicates the NIDAP template functionality exactly.
+    Execute Append Pin Color Rule analysis with parameters from JSON.
+    Replicates the NIDAP template functionality exactly.
 
     Parameters
     ----------
@@ -48,15 +46,15 @@ def run_from_json(
         Expected JSON structure:
         {
             "Upstream_Analysis": "path/to/data.pickle",
-            "Table_to_Process": "Original",
-            "Annotation": "phenotype",
-            "Feature_s_": ["All"],
+            "Label_Color_Map": ["label1:red", "label2:blue"],
+            "Color_Map_Name": "_spac_colors",
+            "Overwrite_Previous_Color_Map": true,
             "outputs": {
-                "dataframe": {"type": "file", "name": "dataframe.csv"}
+                "analysis": {"type": "file", "name": "output.pickle"}
             }
         }
     save_to_disk : bool, optional
-        Whether to save results to disk. If False, returns the dataframe
+        Whether to save results to disk. If False, returns the adata object
         directly for in-memory workflows. Default is True.
     output_dir : str, optional
         Base directory for outputs. If None, uses params['Output_Directory']
@@ -64,16 +62,16 @@ def run_from_json(
 
     Returns
     -------
-    dict or DataFrame
+    dict or AnnData
         If save_to_disk=True: Dictionary of saved file paths with structure:
-            {"dataframe": "path/to/dataframe.csv"}
-        If save_to_disk=False: The processed DataFrame
+            {"analysis": "path/to/output.pickle"}
+        If save_to_disk=False: The processed AnnData object
 
     Notes
     -----
     Output Structure:
-    - DataFrame is saved as a single CSV file
-    - When save_to_disk=False, the DataFrame is returned for programmatic use
+    - Analysis output is saved as a single pickle file
+    - When save_to_disk=False, the AnnData object is returned for programmatic use
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -85,50 +83,38 @@ def run_from_json(
     # Ensure outputs configuration exists with standardized defaults
     if "outputs" not in params:
         params["outputs"] = {
-            "dataframe": {"type": "file", "name": "dataframe.csv"}
+            "analysis": {"type": "file", "name": "output.pickle"}
         }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
 
     # Extract parameters
-    layer = params.get("Table_to_Process", "Original")
-    features = params.get("Feature_s_", ["All"])
-    annotation = params.get("Annotation", "None")
+    color_dict_string_list = params.get("Label_Color_Map", [])
+    color_map_name = params.get("Color_Map_Name", "_spac_colors")
+    overwrite = params.get("Overwrite_Previous_Color_Map", True)
 
-    if layer == "Original":
-        layer = None
-
-    if len(features) == 1 and features[0] == "All":
-        features = None
-
-    if annotation == "None":
-        annotation = None
-
-    info = get_cluster_info(
-        adata=adata,
-        layer=layer,
-        annotation=annotation,
-        features=features
+    color_dict = string_list_to_dictionary(
+        color_dict_string_list,
+        key_name="label",
+        value_name="color"
     )
 
-    df = pd.DataFrame(info)
-
-    # Renaming columns to avoid spaces and special characters
-    df.columns = [
-        col.replace(" ", "_").replace("-", "_") for col in df.columns
-    ]
-
-    # Get summary statistics of returned dataset
-    logger.info(f"Summary statistics of the dataset:\n{df.describe()}")
+    add_pin_color_rules(
+        adata,
+        label_color_dict=color_dict,
+        color_map_name=color_map_name,
+        overwrite=overwrite
+    )
+    logger.info(f"{adata.uns[f'{color_map_name}_summary']}")
 
     # Handle results based on save_to_disk flag
     if save_to_disk:
         # Prepare results dictionary based on outputs config
         results_dict = {}
 
-        if "dataframe" in params["outputs"]:
-            results_dict["dataframe"] = df
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = adata
 
         # Use centralized save_results function
         saved_files = save_results(
@@ -137,22 +123,20 @@ def run_from_json(
             output_base_dir=output_dir
         )
 
-        logger.info(
-            "Summarize Annotation's Statistics analysis completed successfully."
-        )
+        logger.info("Append Pin Color Rule analysis completed successfully.")
         return saved_files
     else:
-        # Return the dataframe directly for in-memory workflows
-        logger.info("Returning DataFrame for in-memory use")
-        return df
+        # Return the adata object directly for in-memory workflows
+        logger.info("Returning AnnData object for in-memory use")
+        return adata
 
 
 # CLI interface
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(
-            "Usage: python summarize_annotation_statistics_template.py "
-            "<params.json> [output_dir]",
+            "Usage: python add_pin_color_rule_template.py <params.json> "
+            "[output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
@@ -181,5 +165,4 @@ if __name__ == "__main__":
             else:
                 print(f"  {key}: {paths}")
     else:
-        print("\nReturned DataFrame")
-        print(f"DataFrame shape: {result.shape}")
+        print("\nReturned AnnData object")

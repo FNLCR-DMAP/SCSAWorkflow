@@ -2,6 +2,9 @@
 Platform-agnostic Spatial Plot template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Reads outputs configuration from blueprint JSON file.
+
 Usage
 -----
 >>> from spac.templates.spatial_plot_template import run_from_json
@@ -13,6 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, Union, List, Optional
 import matplotlib.pyplot as plt
 from functools import partial
+import logging
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -22,6 +26,7 @@ from spac.data_utils import select_values
 from spac.utils import check_annotation
 from spac.templates.template_utils import (
     load_input,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -29,9 +34,10 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plots: bool = True
-) -> Union[Dict[str, str], None]:
+    save_to_disk: bool = True,
+    show_plots: bool = True,
+    output_dir: str = None,
+) -> Union[Dict[str, Union[str, List[str]]], List[plt.Figure]]:
     """
     Execute Spatial Plot analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -39,51 +45,81 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns None.
-        Default is True.
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/data.pickle",
+            "Stratify": true,
+            "Stratify_By": ["slide_id"],
+            "Color_By": "Annotation",
+            ...
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If False, returns the figures
+        directly for in-memory workflows. Default is True.
     show_plots : bool, optional
         Whether to display the plots. Default is True.
+    output_dir : str, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory.
 
     Returns
     -------
-    dict or None
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: None
+    dict or list
+        If save_to_disk=True: Dictionary of saved file paths
+        If save_to_disk=False: List of matplotlib figures
     """
+    # Set up logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+
+    # Ensure outputs configuration exists with standardized defaults
+    if "outputs" not in params:
+        params["outputs"] = {
+            "figures": {"type": "directory", "name": "figures_dir"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
 
     # Extract parameters exactly as in NIDAP template
-    annotation = params["Annotation_to_Highlight"]
-    feature = params["Feature_to_Highlight"]
-    layer = params["Table"]
+    annotation = params.get("Annotation_to_Highlight", "None")
+    feature = params.get("Feature_to_Highlight", "")
+    layer = params.get("Table", "Original")
     
-    alpha = params["Dot_Transparency"]
-    spot_size = params["Dot_Size"]
-    image_height = params["Figure_Height"]
-    image_width = params["Figure_Width"]
-    dpi = params["Figure_DPI"]
-    font_size = params["Font_Size"]
-    vmin = params["Lower_Colorbar_Bound"]
-    vmax = params["Upper_Colorbar_Bound"]
-    color_by = params["Color_By"]
-    stratify = params["Stratify"]
-    stratify_by = params["Stratify_By"]
+    alpha = params.get("Dot_Transparency", 0.5)
+    spot_size = params.get("Dot_Size", 25)
+    image_height = params.get("Figure_Height", 6)
+    image_width = params.get("Figure_Width", 12)
+    dpi = params.get("Figure_DPI", 200)
+    font_size = params.get("Font_Size", 12)
+    vmin = params.get("Lower_Colorbar_Bound", 999)
+    vmax = params.get("Upper_Colorbar_Bound", -999)
+    color_by = params.get("Color_By", "Annotation")
+    stratify = params.get("Stratify", True)
+    stratify_by = params.get("Stratify_By", [])
 
     if stratify and len(stratify_by) == 0:
         raise ValueError(
             'Please set at least one annotation in the "Stratify By" '
             'option, or set the "Stratify" to False.'
         )
-    check_annotation(
-        adata,
-        annotations=stratify_by
-    )
+    
+    if stratify:
+        check_annotation(
+            adata,
+            annotations=stratify_by
+        )
 
     # Process feature and annotation with text_to_value
     feature = text_to_value(feature)
@@ -107,8 +143,8 @@ def run_from_json(
         layer=layer
     )
 
-    # Track figures for optional saving
-    figures = []
+    # Track figures for saving
+    figures_dict = {}
 
     if not stratify:
         plt.rcParams['font.size'] = font_size
@@ -124,7 +160,7 @@ def run_from_json(
             title = f'Table:"{layer}" \n Feature:"{feature}"'
         ax[0].set_title(title)
 
-        figures.append(fig)
+        figures_dict["spatial_plot"] = fig
         
         if show_plots:
             plt.show()
@@ -137,16 +173,16 @@ def run_from_json(
 
         unique_values = adata.obs[combined_label].unique()
 
-        print(unique_values)
+        logger.info(f"Unique stratification values: {unique_values}")
 
         max_length = min(len(unique_values), 20)
         if len(unique_values) > 20:
-            print(
-                f'WARNING: There are "{len(unique_values)}" unique plots, '
+            logger.warning(
+                f'There are "{len(unique_values)}" unique plots, '
                 'displaying only the first 20 plots.'
             )
 
-        for value in unique_values[:max_length]:
+        for idx, value in enumerate(unique_values[:max_length]):
             filtered_adata = select_values(
                 data=adata, annotation=combined_label, values=value
             )
@@ -164,48 +200,72 @@ def run_from_json(
             title = f'{title}\n Stratify by: {value}'
             ax[0].set_title(title)
 
-            figures.append(fig)
+            # Use sanitized value for figure name
+            safe_value = str(value).replace('/', '_').replace('\\', '_')
+            figures_dict[f"spatial_plot_{safe_value}"] = fig
             
             if show_plots:
                 plt.show()
 
-    # Handle saving if requested (separate from NIDAP logic)
-    if save_results and figures:
-        saved_files = {}
-        output_prefix = params.get("Output_File", "spatial_plot")
-        
-        if len(figures) == 1:
-            output_file = f"{output_prefix}.png"
-            figures[0].savefig(output_file, dpi=dpi, bbox_inches='tight')
-            saved_files[output_file] = output_file
-        else:
-            for i, fig in enumerate(figures):
-                output_file = f"{output_prefix}_plot_{i+1}.png"
-                fig.savefig(output_file, dpi=dpi, bbox_inches='tight')
-                saved_files[output_file] = output_file
-        
-        # Close figures after saving
-        for fig in figures:
-            plt.close(fig)
-            
-        print(f"Spatial Plot completed → {list(saved_files.keys())}")
-        return saved_files
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
 
-    return None
+        # Check for figures output
+        if "figures" in params["outputs"]:
+            results_dict["figures"] = figures_dict
+
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+
+        # Close figures after saving
+        for fig in figures_dict.values():
+            plt.close(fig)
+
+        logger.info("Spatial Plot analysis completed successfully.")
+        return saved_files
+    else:
+        # Return the figures directly for in-memory workflows
+        logger.info("Returning figures for in-memory use")
+        return list(figures_dict.values())
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python spatial_plot_template.py <params.json>",
+            "Usage: python spatial_plot_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
-    
-    if result:
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
+
+    if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"  {key}: {paths}")
+    else:
+        print(f"\nReturned {len(result)} figures")
