@@ -35,4 +35,5 @@ dependencies:
     - gendocs
     - parmap==1.7.0
     - combat==0.3.3             # Batch correction (required by scimap)
-    - scimap
+    # NOTE: scimap removed from pip section to preserve conda-installed
+    # scimap=2.1.3_dmap_pandas153 which requires pandas 1.5.3
