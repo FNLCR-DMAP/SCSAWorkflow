@@ -2,14 +2,14 @@
 <tool id="spac_ripley_l_calculation" name="Ripley L Calculation [SPAC][DMAP]" version="2.0.0" profile="24.2">
     <description>Calculates the Ripley L statistic that measures the amount of clustering/dispersion between two cell phenotypes at different radii.  Compares that metric with a baseline where cells are assumed to fre</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Edge_Correction --list-values Radii --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/ripley_l_calculation_template.py' 'cleaned_params.json'
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Edge_Correction --list-values Radii --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.ripley_l_calculation_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -41,6 +41,13 @@ Please refer to DUET Documentation, GitHub Documentation for further information
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<tool id="spac_summarize_annotation_statistics" name="Summarize Annotation Statistics [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Calculates aggregate statistics for each cluster or label from specific annotation against selected features. To view the results, please click on 'Preview.'\
+Please refer to DUET Documentation, and G</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Feature_s_ --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.summarize_annotation_statistics_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original" help="Source table to perform the computation. Original refers to the raw dataset."/>
+        <param name="Annotation" type="text" label="Annotation" value="None" help="The annotation to extract label info."/>
+        <repeat name="Feature_s__repeat" title="Feature(s)">
+            <param name="value" type="text" label="Value" help="Specifies features (e.g., biomarkers) for annotation metrics. Add multiple features by selecting &quot;Add item&quot; for each. The default 'All' includes all dataset features." value="All"/>
+        </repeat>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+    </outputs>
+    <help><![CDATA[
+
+**Summarize Annotation Statistics [SPAC] [DMAP]**
+Calculates aggregate statistics for each cluster or label from specific annotation against selected features. To view the results, please click on 'Preview.'\
+Please refer to DUET Documentation, and GitHub Documentation for further information.
+**Outputs:**
+- dataframe: file (dataframe.csv)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

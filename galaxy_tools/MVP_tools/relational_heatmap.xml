@@ -2,14 +2,14 @@
 <tool id="spac_relational_heatmap" name="Relational Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Relation Heatmap displays the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annota</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}, "dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/relational_heatmap_template.py' 'cleaned_params.json'
+echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}, "dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.relational_heatmap_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -112,7 +112,7 @@ echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type":
             <option value="ylorbr">ylorbr</option>
             <option value="ylorrd">ylorrd</option>
         </param>
-        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
             <param name="Figure_Width_inch" type="float" label="Figure Width, inch" value="8" help="Figure Width, inch"/>
             <param name="Figure_Height_inch" type="float" label="Figure Height, inch" value="10" help="Figure Height, inch"/>
             <param name="Figure_DPI" type="integer" label="Figure DPI" value="300" help="Dots Per squared Inch, higher the value, better the image quality"/>
@@ -141,6 +141,13 @@ Relation Heatmap displays the relations between source and target annotation lab
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

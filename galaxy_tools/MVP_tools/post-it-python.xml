@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<tool id="spac_post_it_python" name="Post-It-Python [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Adapted from Aleksandra's R post it</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Label_Bold --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.post_it_python_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Label" type="text" label="Label" value="Post-It"/>
+        <param name="Label_font_size" type="float" label="Label font size" value="80"/>
+        <param name="Label_font_type" type="select" label="Label font type">
+            <option value="normal" selected="true">normal</option>
+            <option value="italic">italic</option>
+        </param>
+        <param name="Label_Bold" type="boolean" label="Label Bold" truevalue="True" falsevalue="False" checked="false"/>
+        <param name="Label_font_color" type="select" label="Label font color">
+            <option value="White">White</option>
+            <option value="LightGrey">LightGrey</option>
+            <option value="Grey">Grey</option>
+            <option value="Black" selected="true">Black</option>
+            <option value="Red1">Red1</option>
+            <option value="Red2">Red2</option>
+            <option value="Red3">Red3</option>
+            <option value="Orange1">Orange1</option>
+            <option value="Orange2">Orange2</option>
+            <option value="Orange3">Orange3</option>
+            <option value="Yellow1">Yellow1</option>
+            <option value="Yellow2">Yellow2</option>
+            <option value="Yellow3">Yellow3</option>
+            <option value="YellowGreen1">YellowGreen1</option>
+            <option value="YellowGreen2">YellowGreen2</option>
+            <option value="Yellowgreen3">Yellowgreen3</option>
+            <option value="Green1">Green1</option>
+            <option value="Green2">Green2</option>
+            <option value="Green3">Green3</option>
+            <option value="Teal1">Teal1</option>
+            <option value="Teal2">Teal2</option>
+            <option value="Teal3">Teal3</option>
+            <option value="Blue1">Blue1</option>
+            <option value="Blue2">Blue2</option>
+            <option value="Blue3">Blue3</option>
+            <option value="Purple1">Purple1</option>
+            <option value="Purple2">Purple2</option>
+            <option value="Purple3">Purple3</option>
+            <option value="Magenta1">Magenta1</option>
+            <option value="Magenta2">Magenta2</option>
+            <option value="Magenta3">Magenta3</option>
+        </param>
+        <param name="Label_font_family" type="select" label="Label font family">
+            <option value="Arial" selected="true">Arial</option>
+            <option value="Keyboard">Keyboard</option>
+            <option value="Adobe Arabic">Adobe Arabic</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Impact">Impact</option>
+            <option value="Kailasa">Kailasa</option>
+            <option value="Serif">Serif</option>
+        </param>
+        <param name="Background_fill_color" type="select" label="Background fill color">
+            <option value="White">White</option>
+            <option value="LightGrey">LightGrey</option>
+            <option value="Grey">Grey</option>
+            <option value="Black">Black</option>
+            <option value="Red1">Red1</option>
+            <option value="Red2">Red2</option>
+            <option value="Red3">Red3</option>
+            <option value="Orange1">Orange1</option>
+            <option value="Orange2">Orange2</option>
+            <option value="Orange3">Orange3</option>
+            <option value="Yellow1" selected="true">Yellow1</option>
+            <option value="Yellow2">Yellow2</option>
+            <option value="Yellow3">Yellow3</option>
+            <option value="YellowGreen1">YellowGreen1</option>
+            <option value="YellowGreen2">YellowGreen2</option>
+            <option value="Yellowgreen3">Yellowgreen3</option>
+            <option value="Green1">Green1</option>
+            <option value="Green2">Green2</option>
+            <option value="Green3">Green3</option>
+            <option value="Teal1">Teal1</option>
+            <option value="Teal2">Teal2</option>
+            <option value="Teal3">Teal3</option>
+            <option value="Blue1">Blue1</option>
+            <option value="Blue2">Blue2</option>
+            <option value="Blue3">Blue3</option>
+            <option value="Purple1">Purple1</option>
+            <option value="Purple2">Purple2</option>
+            <option value="Purple3">Purple3</option>
+            <option value="Magenta1">Magenta1</option>
+            <option value="Magenta2">Magenta2</option>
+            <option value="Magenta3">Magenta3</option>
+        </param>
+        <param name="Background_fill_opacity" type="float" label="Background fill opacity" value="10"/>
+        <param name="Page_width" type="float" label="Page width" value="18"/>
+        <param name="Page_height" type="float" label="Page height" value="6"/>
+        <param name="Page_DPI" type="float" label="Page DPI" value="300"/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Post-It-Python [SPAC] [DMAP]**
+Adapted from Aleksandra's R post it
+**Outputs:**
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

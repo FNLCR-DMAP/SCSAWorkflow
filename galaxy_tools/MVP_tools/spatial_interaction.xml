@@ -3,14 +3,14 @@
     <description>Performs advanced spatial statistical analyses , instead of visualization of spatial distribution, to  evaluate neighborhood enrichments or cluster interactions.\
 Please refer to DUET Documentation an</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Stratify_By --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/spatial_interaction_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Stratify_By --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.spatial_interaction_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -25,7 +25,7 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
         </repeat>
         <param name="Radius" type="text" label="Radius" value="None" help="The maximum distance in spatial coordinates to create an edge between two cells. Takes priority over KNN. Use &quot;None&quot; without quotes to disable."/>
         <param name="K_Nearest_Neighbors" type="integer" label="K-Nearest Neighbors" value="6" help="Default is 6. Number of neighbors for KNN."/>
-        <section name="advanced_analysis_setting" title="Advanced Analysis Setting" expanded="false">
+        <section name="advanced_analysis_setting_parameters" title="Advanced Analysis Setting parameters" expanded="false">
             <param name="Coordinate_Type" type="select" label="Coordinate Type" help="Type of coordinate system used in computing spatial neighbors. Should be 'generic' for general dataset. Default is None, decided by the squidy pacakge.">
                 <option value="None" selected="true">None</option>
                 <option value="generic">generic</option>
@@ -33,7 +33,7 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
             <param name="Seed" type="text" label="Seed" value="None" help="Random seed for reproducibility, used in Neighborhood Enrichment Analysis."/>
             <param name="Color_Bar_Range" type="text" label="Color Bar Range" value="Automatic" help="The color bar range defines the even lower and upper color bar limit to allow center of the color bar remains 0. For example, enter the single value &quot;100&quot; without the quotes to create a color range from -100:100. Default Automatic will allow the color bar to be defined automatically."/>
         </section>
-        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
             <param name="Figure_Width" type="float" label="Figure Width" value="15" help="The width of the figure in inch."/>
             <param name="Figure_Height" type="float" label="Figure Height" value="12" help="The height of the figure in inch."/>
             <param name="Figure_DPI" type="float" label="Figure DPI" value="200" help="Higher the DPI, clearer the image."/>
@@ -59,6 +59,13 @@ Please refer to DUET Documentation and GitHub Documentation for further informat
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

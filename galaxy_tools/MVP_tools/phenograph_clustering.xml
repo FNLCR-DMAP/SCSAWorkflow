@@ -3,14 +3,14 @@
     <description>Calculate automatic phenotypes using PhenoGraph. The unsupervised clusters will be stored in annotation: &quot;phenograph&quot; by default in the analysis. \
 Please refer to DUET Documentation and GitHub Docume</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Run_on_HPC Profiling Batch_Mode --list-values Resolution_List --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/phenograph_clustering_template.py' 'cleaned_params.json'
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Run_on_HPC Profiling Batch_Mode --list-values Resolution_List --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.phenograph_clustering_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -22,13 +22,13 @@ echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.
         <param name="Resolution_Parameter" type="float" label="Resolution Parameter" min="0" value="1" help="The resolution parameter (&gt;0) adjusts the level of granularity in identifying clusters within a dataset, with higher values promoting the detection of a larger number of clusters (e.g., more distinct clusters), while lower values emphasize a smaller number of clusters (e.g., more inclusive clusters)."/>
         <param name="Output_Annotation_Name" type="text" label="Output Annotation Name" value="phenograph" help="The output annotation name from Phenograph clustering to be added to the analysis. Default is &quot;phenograph&quot;."/>
         <param name="Number_of_Iterations" type="integer" label="Number of Iterations" min="1" value="100" help="Number of iterations to run the Leiden graph clustering algorithm. If the number of iterations is negative, the Leiden algorithm is run until an iteration in which there was no improvement. Default is 100."/>
-        <section name="resolution_profiling" title="Resolution Profiling" expanded="false">
+        <section name="resolution_profiling_parameters" title="Resolution Profiling parameters" expanded="false">
             <param name="Profiling" type="boolean" label="Profiling" truevalue="True" falsevalue="False" checked="false" help="Available on HPC only. If on, the template will run through all the resolutions defined in the resolution parameters only in GPU mode."/>
             <repeat name="Resolution_List_repeat" title="Resolution List">
                 <param name="value" type="text" label="Value" help="List of resolutions used when the Profiling is True."/>
             </repeat>
         </section>
-        <section name="hpc_configurations" title="HPC Configurations" expanded="false">
+        <section name="hpc_configuration_parameters" title="HPC Configuration parameters" expanded="false">
             <param name="HPC_Compute_Mode" type="select" label="HPC Compute Mode" help="The compute mode for this submission. Available options are CPU and GPU, which run the compute on CPU or GPU, respectively. Please remind that if Profiling option is true, the default mode is set as GPU">
                 <option value="CPU" selected="true">CPU</option>
                 <option value="GPU">GPU</option>
@@ -60,6 +60,13 @@ Please refer to DUET Documentation and GitHub Documentation for further informat
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

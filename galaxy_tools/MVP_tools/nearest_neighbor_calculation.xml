@@ -3,14 +3,14 @@
     <description>Computes the shortest distance from each cell to the nearest cell of each phenotype. The distance table is stored with the key name &quot;Label&quot;. \
 Please refer to DUET Documentation, GitHub Documentation </description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Verbose --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/nearest_neighbor_calculation_template.py' 'cleaned_params.json'
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Verbose --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.nearest_neighbor_calculation_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -18,7 +18,7 @@ echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.
         <param name="Annotation" type="text" label="Annotation" value="" help="Annotation name specifying phenotypes."/>
         <param name="ImageID" type="text" label="ImageID" value="None" help="If multiple images are in the dataset, specify the annotation with image IDs. Otherwise, use &quot;None&quot; to treat the dataset as a single image."/>
         <param name="Verbose" type="boolean" label="Verbose" truevalue="True" falsevalue="False" checked="true" help="Indicates whether to print progress messages."/>
-        <section name="advanced_analysis_setting" title="Advanced Analysis Setting" expanded="false">
+        <section name="advanced_analysis_setting_parameters" title="Advanced Analysis Setting parameters" expanded="false">
             <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="Key name to store the calculated distances. Default is &quot;spatial_distance&quot;."/>
         </section>
     </inputs>
@@ -37,6 +37,13 @@ Please refer to DUET Documentation, GitHub Documentation for further information
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

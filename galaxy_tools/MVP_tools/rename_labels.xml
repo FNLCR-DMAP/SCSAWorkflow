@@ -3,14 +3,14 @@
     <description>Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\
 Please refer to DUET Documentation, GitHub Documentation</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/rename_labels_template.py' 'cleaned_params.json'
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.rename_labels_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -34,6 +34,13 @@ Please refer to DUET Documentation, GitHub Documentation
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

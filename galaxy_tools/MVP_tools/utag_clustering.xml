@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<tool id="spac_utag_clustering" name="UTAG Clustering [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Discover spatial tissue domains (tissue micro‑environments) by combining phenotypes (feature intensities) and spatial proximity of cells with UTAG (Unsupervised discovery of Tissue Architecture by Gra</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Parellel_Processes --list-values Features --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.utag_clustering_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original" help="Source table to perform the computation. The default value &quot;Original&quot; will use the raw dataset."/>
+        <repeat name="Features_repeat" title="Features">
+            <param name="value" type="text" label="Value" help="List specific features for clustering. Default &quot;All&quot; will use all features" value="All"/>
+        </repeat>
+        <param name="Slide_Annotation" type="text" label="Slide Annotation" value="None" help="Name of the annotation column that identifies each image/slide. Default is &quot;None&quot; if not applicable."/>
+        <param name="PCA_Components" type="text" label="PCA Components" value="None" help="Number of principal components to keep. Default is &quot;None&quot; to skip PCA (good for small datasets)."/>
+        <param name="K_Nearest_Neighbors" type="integer" label="K-Nearest Neighbors" min="1" value="15" help="Number of nearest neighbors used when building the graph for clustering."/>
+        <param name="Resolution_Parameter" type="float" label="Resolution Parameter" value="1" help="Higher values give more, smaller clusters; lower values give fewer, larger clusters."/>
+        <param name="Distance_Threshold" type="float" label="Distance Threshold" value="20.0" help="How far (in micrometres) two cells can be apart and still be considered neighbors."/>
+        <param name="Random_Seed" type="integer" label="Random Seed" min="1" value="42" help="Ensures results are reproducible when re‑run the template."/>
+        <param name="Leiden_Iterations" type="integer" label="Leiden Iterations" min="1" value="5" help="How many times the Leiden algorithm refines the clusters."/>
+        <param name="Output_Annotation_Name" type="text" label="Output Annotation Name" value="UTAG" help="The new column that will store the UTAG domain labels."/>
+        <section name="parellel_jobs_parameters" title="Parellel Jobs parameters" expanded="false">
+            <param name="Parellel_Processes" type="boolean" label="Parellel Processes" truevalue="True" falsevalue="False" checked="false" help="For multiple slides (images) and several CPU cores, split the data by Slide and run the message‑passing step for each slide in parallel. Default is False."/>
+            <param name="N_Jobs" type="integer" label="N-Jobs" min="1" value="1" help="When Parallel Processes is True,  the number of jobs to run in parallel. Default is 1."/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**UTAG Clustering [SPAC] [DMAP]**
+Discover spatial tissue domains (tissue micro‑environments) by combining phenotypes (feature intensities) and spatial proximity of cells with UTAG (Unsupervised discovery of Tissue Architecture by Graph message passing). Clusters are stored in the analysis as the annotation “UTAG”.\
+Please refer to DUET Documentation, GitHub Documentation for further information.
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

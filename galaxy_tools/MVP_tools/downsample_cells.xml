@@ -3,14 +3,14 @@
     <description>This template  reduces  number of cells based on one or more annotations. \
 Please refer to DUET Documentation, GitHub Documentation for further information.</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Stratify_Option Random_Selection --list-values Annotations_List --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/downsample_cells_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Stratify_Option Random_Selection --list-values Annotations_List --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.downsample_cells_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -38,6 +38,13 @@ Please refer to DUET Documentation, GitHub Documentation for further information
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

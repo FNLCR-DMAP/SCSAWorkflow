@@ -3,14 +3,14 @@
     <description>Create a boxplot visualization of the features in the analysis dataset.\
 Please refer to DUET Documentation,  GitHub Documentation</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Value_Axis_Log_Scale Horizontal_Plot Keep_Outliers --list-values Feature_s_to_Plot --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Value_Axis_Log_Scale Horizontal_Plot Keep_Outliers --list-values Feature_s_to_Plot --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.boxplot_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -21,11 +21,11 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
         </repeat>
         <param name="Primary_Annotation" type="text" label="Primary Annotation" value="None" help="The annotation to group the visualizations. Use &quot;None&quot; to disable."/>
         <param name="Secondary_Annotation" type="text" label="Secondary Annotation" value="None" help="Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is &quot;None&quot;."/>
-        <section name="value_axis_configuration" title="Value Axis Configuration" expanded="false">
+        <section name="value_axis_configuration_parameters" title="Value Axis Configuration parameters" expanded="false">
             <param name="Value_Axis_Log_Scale" type="boolean" label="Value Axis Log Scale" truevalue="True" falsevalue="False" checked="false" help="Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale."/>
             <param name="Keep_Outliers" type="boolean" label="Keep Outliers" truevalue="True" falsevalue="False" checked="true" help="True to keep the outliers for every feature, False to remove them"/>
         </section>
-        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
             <param name="Figure_Title" type="text" label="Figure Title" value="BoxPlot" help="Title of the figure"/>
             <param name="Horizontal_Plot" type="boolean" label="Horizontal Plot" truevalue="True" falsevalue="False" checked="false" help="To plot the boxplot in horizontal orientation. Default is vertical."/>
             <param name="Figure_Width" type="float" label="Figure Width" value="12" help="Width of the figure, inch."/>
@@ -53,6 +53,13 @@ Please refer to DUET Documentation,  GitHub Documentation
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

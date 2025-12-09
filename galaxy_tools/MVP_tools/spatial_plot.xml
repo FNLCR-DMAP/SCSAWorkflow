@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<tool id="spac_spatial_plot" name="Spatial Plot [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Generates static spatial visualizations of single-cell data, providing a snapshot of cellular features or annotations across a sample. \
+Please refer to DUET Documentation and GitHub Documentation for</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Stratify --list-values Stratify_By --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.spatial_plot_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Stratify" type="boolean" label="Stratify" truevalue="True" falsevalue="False" checked="true" help="Set to False if all cells belong to a single slide, and True to define the annotation specified the slide/plot in Stratify By"/>
+        <repeat name="Stratify_By_repeat" title="Stratify By">
+            <param name="value" type="text" label="Value" help="The annotation(s) to stratify the dataset when generating the spatial plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. If n (n&gt;=2) annotations are passed, the function will be stratified based on existing combination of labels in the passed annotations."/>
+        </repeat>
+        <section name="color_by_parameters" title="Color by parameters" expanded="false">
+            <param name="Color_By" type="select" label="Color By" help="Color the points in the plot by either their corresponding feature or annotation">
+                <option value="Annotation" selected="true">Annotation</option>
+                <option value="Feature">Feature</option>
+            </param>
+            <param name="Annotation_to_Highlight" type="text" label="Annotation to Highlight" value="None" help="Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature."/>
+            <param name="Table" type="text" label="Table" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+            <param name="Feature_to_Highlight" type="text" label="Feature to Highlight" value="" help="Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation."/>
+        </section>
+        <section name="colorbar_range_parameters" title="Colorbar Range parameters" expanded="false">
+            <param name="Upper_Colorbar_Bound" type="integer" label="Upper Colorbar Bound" value="-999" help="The upper bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset."/>
+            <param name="Lower_Colorbar_Bound" type="integer" label="Lower Colorbar Bound" value="999" help="The lower bound of the colorbar scale. The default 999 will set the lower bound to the minimum of the dataset."/>
+        </section>
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
+            <param name="Dot_Size" type="integer" label="Dot Size" value="25" help="Size of the dot of scatter plot."/>
+            <param name="Figure_Height" type="float" label="Figure Height" value="6"/>
+            <param name="Dot_Transparency" type="float" label="Dot Transparency" value="0.5" help="Transparency of the dot, 0 being transparent and 1 being opaque"/>
+            <param name="Font_Size" type="float" label="Font Size" value="12" help="Font size of the figure"/>
+            <param name="Figure_Width" type="float" label="Figure Width" value="12"/>
+            <param name="Figure_DPI" type="integer" label="Figure DPI" min="1" value="200" help="Higher the DPI, clearer the image."/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Spatial Plot [SPAC] [DMAP]**
+Generates static spatial visualizations of single-cell data, providing a snapshot of cellular features or annotations across a sample. \
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

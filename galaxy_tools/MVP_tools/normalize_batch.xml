@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<tool id="spac_normalize_batch" name="Normalize Batch [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Adjust the intensity of every feature by correcting for batch effect using a normalization method.\
+Please refer to DUET Documentation and GitHub Documentation for further information.</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Need_Normalization Take_Log --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.normalize_batch_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Need_Normalization" type="boolean" label="Need Normalization" truevalue="True" falsevalue="False" checked="false" help="If the data is already corrected for,  or does not need to correct for batch effect, please toggle it to False to skip normalization.
+Otherwise, toggle this to True please find normalization options under the &quot;Normalization Settings&quot; category."/>
+        <section name="normalization_settings_parameters" title="Normalization Settings parameters" expanded="false">
+            <param name="Input_Table_Name" type="text" label="Input Table Name" value="Original" help="Name of the table to be imported and used for batch nomalization. Default is Original, referring to the raw dataset."/>
+            <param name="Output_Table_Name" type="text" label="Output Table Name" value="batch_normalized_table" help="Name of the table to be added to the analysis. Default is batch_normalized_table."/>
+            <param name="Annotation" type="text" label="Annotation" value="" help="The annotation name that define batches. Every set of cells who have the same labels for that annotation will be considered in one batch."/>
+            <param name="Normalization_Method" type="select" label="Normalization Method" help="The normlalization method to use.">
+                <option value="median" selected="true">median</option>
+                <option value="Q50">Q50</option>
+                <option value="Q75">Q75</option>
+                <option value="z-score">z-score</option>
+            </param>
+            <param name="Take_Log" type="boolean" label="Take Log" truevalue="True" falsevalue="False" checked="false" help="If True, take the log2 of intensities before normalization."/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Normalize Batch [SPAC] [DMAP]**
+Adjust the intensity of every feature by correcting for batch effect using a normalization method.\
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

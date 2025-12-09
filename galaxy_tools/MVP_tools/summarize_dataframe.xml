@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<tool id="spac_summarize_dataframe" name="Summarize DataFrame [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Creates a statistical summary of selected columns in the input dataframe, and generates an interactive report flagging the missing values (optionally listing their row indices).\
+Please refer to DUET </description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Print_Missing_Location --list-values Columns --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.summarize_dataframe_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
+        <repeat name="Columns_repeat" title="Columns">
+            <param name="value" type="text" label="Value" help="Columns to summarize"/>
+        </repeat>
+        <param name="Print_Missing_Location" type="boolean" label="Print Missing Location" truevalue="True" falsevalue="False" checked="false" help="Print the indices of missing values for a specific column"/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="html" type="list" label="${tool.name} on ${on_string}: Html">
+            <discover_datasets pattern="__name_and_ext__" directory="html_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Summarize DataFrame [SPAC][DMAP]**
+Creates a statistical summary of selected columns in the input dataframe, and generates an interactive report flagging the missing values (optionally listing their row indices).\
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- html: directory (html_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

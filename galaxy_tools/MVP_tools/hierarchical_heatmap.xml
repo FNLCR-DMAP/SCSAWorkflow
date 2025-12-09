@@ -2,14 +2,14 @@
 <tool id="spac_hierarchical_heatmap" name="Hierarchical Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensi</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Feature_Dendrogram Annotation_Dendrogram Swap_Axes Rotate_Label_ --list-values Feature_s_ --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/hierarchical_heatmap_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Feature_Dendrogram Annotation_Dendrogram Swap_Axes Rotate_Label_ --list-values Feature_s_ --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.hierarchical_heatmap_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -31,7 +31,7 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
             <option value="0">0</option>
             <option value="1">1</option>
         </param>
-        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
             <param name="Swap_Axes" type="boolean" label="Swap Axes" truevalue="True" falsevalue="False" checked="false" help="By default (when False), annotations are on the vertical axis (rows) and features are on the horizontal axis (columns). When set to True, features will be on the vertical axis and annotations on the horizontal axis."/>
             <param name="Rotate_Label_" type="boolean" label="Rotate Label " truevalue="True" falsevalue="False" checked="false" help="If True, rotate x-axis labels by 45 degrees. Default is False."/>
             <param name="Figure_Title" type="text" label="Figure Title" value="Hierarchical Heatmap"/>
@@ -74,6 +74,13 @@ Please refer to DUET Documentation and GitHub Documentation for further informat
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

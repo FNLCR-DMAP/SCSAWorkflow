@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<tool id="spac_manual_phenotyping" name="Manual Phenotyping [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Define and apply manual phenotypes to a dataset.  A new column with the annotation &quot;Manual Annotation Name&quot; will be added. \
+Please refer to DUET Documentation, GitHub Documentation for further inform</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Allow_Multiple_Phenotypes --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.manual_phenotyping_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Dataset" help="Link to prior processed dataset in the analysis."/>
+        <param name="Phenotypes_Code" type="data" format="tabular,csv,tsv,txt" label="Phenotypes Code" help="The manual table with two columns: &quot;phenotype_code&quot; and &quot;phenotype_name&quot;. The &quot;phenotype_code&quot; column is a logic expression specifying the features (markers) that should be positive '+' or negative '-' in a given phenotype. For example &quot;CD4+CD8-&quot;.  Features not specified in the code can be positive or negative. &quot;phenotype_name&quot; should be any alphanumeric string that represent that phenotype."/>
+        <param name="Classification_Column_Prefix" type="text" label="Classification Column Prefix" value="" help="The prefix to prepend to a feature (marker) name in &quot;phenotype_code&quot;. Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be &quot;marker_CD4_classification&quot;. In this case, the prefix is &quot;marker_&quot; and the suffix is &quot;_classification&quot;, and the code should only mention CD4+ or CD4-."/>
+        <param name="Classification_Column_Suffix" type="text" label="Classification Column Suffix" value="" help="The suffix to append to a feature (marker) name in &quot;phenotype_code&quot;. Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be &quot;marker_CD4_classification&quot;. In this case, the prefix is &quot;marker_&quot; and the suffix is &quot;_classification&quot;, and the code should only mention CD4+ or CD4-."/>
+        <param name="Allow_Multiple_Phenotypes" type="boolean" label="Allow Multiple Phenotypes" truevalue="True" falsevalue="False" checked="true" help="Allow a given cell to match multiple phenotype_code. The resulting label will join all the &quot;phenotype_name&quot; using a ','. If set to False, the resulting cell will be marked as &quot;no_label&quot;"/>
+        <param name="Manual_Annotation_Name" type="text" label="Manual Annotation Name" value="manual_phenotype" help="The name of the new column (annotation) to be added to the dataset with the defined &quot;phenotype_name&quot;s as values. Cells that do not match any defined phenotype will be assiged &quot;no_label&quot;."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+    </outputs>
+    <help><![CDATA[
+
+**Manual Phenotyping [SPAC] [DMAP]**
+Define and apply manual phenotypes to a dataset.  A new column with the annotation "Manual Annotation Name" will be added. \
+Please refer to DUET Documentation, GitHub Documentation for further information.
+**Outputs:**
+- dataframe: file (dataframe.csv)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

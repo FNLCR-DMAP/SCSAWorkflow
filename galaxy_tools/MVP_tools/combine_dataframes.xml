@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<tool id="spac_select_values" name="Select Values [SPAC] [DMAP]" version="2.0.0" profile="24.2">
-    <description>Selects the rows containing the label(s) of interest in a given annotation from the dataset.\
-Please refer to DUET Documentation, GitHub Documentation</description>
+<tool id="spac_combine_dataframes" name="Combine DataFrames [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Combine two dataframes into one for downstream processes.\
+Please refer to DUET Documentation, GitHub Documentation for further information.</description>
     <requirements>
         <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
@@ -10,12 +10,12 @@ Please refer to DUET Documentation, GitHub Documentation</description>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Labels_of_Interest --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.select_values_template import run_from_json; run_from_json('cleaned_params.json')"
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.combine_dataframes_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
-        <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Analysis" help="Link to prior processed analysis in the analysis."/>
-        <param name="Annotation_of_Interest" type="text" label="Annotation of Interest" help="Annotation of interest to select values from."/>
+        <param name="First_Dataframe" type="data" format="tabular,csv,tsv,txt" label="First Dataframe" help="First dataframe to merge"/>
+        <param name="Second_Dataframe" type="data" format="tabular,csv,tsv,txt" label="Second Dataframe" help="Second dataframe to merge"/>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
@@ -24,9 +24,9 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
     </outputs>
     <help><![CDATA[
 
-**Select Values [SPAC] [DMAP]**
-Selects the rows containing the label(s) of interest in a given annotation from the dataset.\
-Please refer to DUET Documentation, GitHub Documentation
+**Combine DataFrames [SPAC] [DMAP]**
+Combine two dataframes into one for downstream processes.\
+Please refer to DUET Documentation, GitHub Documentation for further information.
 **Outputs:**
 - dataframe: file (dataframe.csv)
 

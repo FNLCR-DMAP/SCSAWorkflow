@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<tool id="spac_combine_annotations" name="Combine Annotations [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Combine multiple annotations into a new annotation using a defined separator.\
+Please refer to DUET Documentation,  GitHub Documentation</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Annotations_Names --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.combine_annotations_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <repeat name="Annotations_Names_repeat" title="Annotations Names">
+            <param name="value" type="text" label="Value" help="List of annotations to be combined."/>
+        </repeat>
+        <param name="New_Annotation_Name" type="text" label="New Annotation Name" value="combined_annotation" help="Annotation to be added to the dataset, containing the new labels after concatenation."/>
+        <param name="Separator" type="text" label="Separator" value="_" help="A string to add between labels during concatenations."/>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Combine Annotations [SPAC][DMAP]**
+Combine multiple annotations into a new annotation using a defined separator.\
+Please refer to DUET Documentation,  GitHub Documentation
+**Outputs:**
+- dataframe: file (dataframe.csv)
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

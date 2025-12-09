@@ -3,20 +3,20 @@
     <description>Creates interactive, real-time visual explorations of single-cell spatial data for in-depth analysis. For color map strings, please refer to Built-in Continuous Color Scales in Python.\
 Please refer t</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Flip_Vertical_Axis --list-values Annotation_s_to_Highlight --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/interactive_spatial_plot_template.py' 'cleaned_params.json'
+echo '{"html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Flip_Vertical_Axis --list-values Annotation_s_to_Highlight --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.interactive_spatial_plot_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <param name="Stratify_By" type="text" label="Stratify By" value="None" help="The annotation to stratify the dataset when generating interaction plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. Use &quot;None&quot; without quotes to disable."/>
-        <section name="color_by" title="Color by" expanded="false">
+        <section name="color_by_parameters" title="Color by parameters" expanded="false">
             <param name="Color_By" type="select" label="Color By" help="Color the points in the plot by either their corresponding feature or annotation">
                 <option value="Annotation" selected="true">Annotation</option>
                 <option value="Feature">Feature</option>
@@ -27,7 +27,7 @@ echo '{"html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json
             <param name="Feature_to_Highlight" type="text" label="Feature to Highlight" value="None" help="Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation."/>
             <param name="Table" type="text" label="Table" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
         </section>
-        <section name="figure_configuration" title="Figure Configuration" expanded="false">
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
             <param name="Font_Size" type="float" label="Font Size" value="12"/>
             <param name="Dot_Size" type="float" label="Dot Size" value="1.5" help="Size of dot in the plot."/>
             <param name="Dot_Transparency" type="float" label="Dot Transparency" value="0.75" help="Transparency of the dot in the plot."/>
@@ -41,7 +41,7 @@ echo '{"html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json
                 <option value="Picnic">Picnic</option>
             </param>
         </section>
-        <section name="colorbar_range" title="Colorbar Range" expanded="false">
+        <section name="colorbar_range_parameters" title="Colorbar Range parameters" expanded="false">
             <param name="Lower_Colorbar_Bound" type="float" label="Lower Colorbar Bound" value="999" help="The lower bound of the colorbar scale. The default 999 will set the upper bound to the minimum of the dataset."/>
             <param name="Upper_Colorbar_Bound" type="float" label="Upper Colorbar Bound" value="-999" help="The lower bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset."/>
         </section>
@@ -63,6 +63,13 @@ Please refer to DUET Documentation and GitHub Documentation for further informat
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>

@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<tool id="spac_umap_transformation" name="UMAP Transformation [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Perform UMAP dimensionality reduction using a specific table.\
+Please refer to DUET Documentation and GitHub Documentation for further information.</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Run_on_HPC Batch_Mode --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.umap_transformation_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Run_on_HPC" type="boolean" label="Run on HPC" truevalue="True" falsevalue="False" checked="false" help="If toggled on, this template will launch a computational task on HPC cluster with resource specified in the &quot;HPC Configuration&quot; parameters group. The computational result will be available one the HPC task is completed."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original" help="Source table to perform the computation. Default &quot;Original&quot; refers to the raw dataset."/>
+        <param name="Number_of_Neighbors" type="integer" label="Number of Neighbors" min="1" value="75" help="Number of neighbors to consider when constructing the UMAP. This influences the balance between preserving local and global structures in the data."/>
+        <param name="Target_Dimension_Number" type="integer" label="Target Dimension Number" min="1" value="2" help="Number of dimensions for embedding to convert to. Default is 2 (plane)."/>
+        <param name="Minimum_Distance_between_Points" type="float" label="Minimum Distance between Points" value="0.1" help="Minimum distance between points in the UMAP space. Controls how tightly the embedding is allowed to compress points together."/>
+        <param name="Computational_Metric" type="select" label="Computational Metric" help="Metric to compute distances in high dimensional space.  Check `https://umap-learn.readthedocs.io/en/latest/api.html` for more information. The default is 'euclidean'.">
+            <option value="euclidean" selected="true">euclidean</option>
+            <option value="manhattan">manhattan</option>
+            <option value="chebyshev">chebyshev</option>
+            <option value="minkowski">minkowski</option>
+            <option value="canberra">canberra</option>
+            <option value="braycurtis">braycurtis</option>
+            <option value="mahalanobis">mahalanobis</option>
+            <option value="wminkowski">wminkowski</option>
+            <option value="seuclidean">seuclidean</option>
+            <option value="cosine">cosine</option>
+            <option value="correlation">correlation</option>
+            <option value="haversine">haversine</option>
+            <option value="hamming">hamming</option>
+            <option value="jaccard">jaccard</option>
+            <option value="dice">dice</option>
+            <option value="russelrao">russelrao</option>
+            <option value="kulsinski">kulsinski</option>
+            <option value="ll_dirichlet">ll_dirichlet</option>
+            <option value="hellinger">hellinger</option>
+            <option value="rogerstanimoto">rogerstanimoto</option>
+            <option value="sokalmichener">sokalmichener</option>
+            <option value="sokalsneath">sokalsneath</option>
+            <option value="yule">yule</option>
+        </param>
+        <section name="random_state_control_parameters" title="Random State Control parameters" expanded="false">
+            <param name="Transform_Seed" type="integer" label="Transform Seed" min="1" value="42" help="This parameter sets a deterministic starting point for the UMAP transformation process, ensuring reproducibility of results. When the same dataset and 'Transform Seed' are used, the outcome of the analysis remains consistent. The default value is 42."/>
+            <param name="Random_State" type="integer" label="Random State" value="0" help="This parameter initializes the random number generator used during the UMAP fitting procedure, functioning as a control for the randomness inherent in the analysis. It guarantees that identical inputs and 'Random State' values will produce identical results, facilitating the verification of the analysis. The default setting is 0."/>
+        </section>
+        <section name="hpc_configuration_parameters" title="HPC Configuration parameters" expanded="false">
+            <param name="Batch_Mode" type="boolean" label="Batch Mode" truevalue="True" falsevalue="False" checked="false" help="If set to True, this HPC run will launch in batch mode showing the template status as successful once the job is submitted to the HPC cluster. the results will be written after the HPC job completes. Avoid submitting twice before completion to prevent race conditions."/>
+            <param name="Partition" type="select" label="Partition" help="Biowulf nodes are grouped into partitions. A partition can be specified when submitting a job. Please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for more details">
+                <option value="quick" selected="true">quick</option>
+                <option value="norm">norm</option>
+                <option value="gpu">gpu</option>
+                <option value="largemem">largemem</option>
+            </param>
+            <param name="Number_of_CPUs" type="integer" label="Number of CPUs" min="1" value="2" help="Number of CPUs requested for this HPC submission"/>
+            <param name="Memory_GB" type="integer" label="Memory, GB" min="1" value="10" help="Amount of memory in gigabytes requested for this HPC submission"/>
+            <param name="Request_Time" type="text" label="Request Time" value="00:20:00" help="Amount of time requested for this HPC submission. Please provide the time in the format of hh:mm:ss. For example, 2 hour 30 minute job would be 02:30:00. Please remind that different partition has different time limit, please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for further details."/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle" label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**UMAP Transformation [SPAC] [DMAP]**
+Perform UMAP dimensionality reduction using a specific table.\
+Please refer to DUET Documentation and GitHub Documentation for further information.
+**Outputs:**
+- analysis: file (output.pickle)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

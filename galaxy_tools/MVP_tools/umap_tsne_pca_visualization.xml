@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<tool id="spac_umap_tsne_pca_visualization" name="UMAP\tSNE\PCA Visualization [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Generate scatter plot for PCA, t-SNE and UMAP.\
+Please refer to DUET Documentation, GitHub Documentation</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.umap_tsne_pca_visualization_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Dimension_Reduction_Method" type="select" label="Dimension Reduction Method" help="Dimensionality reduction method to visualize. Choose from 'tsne' or 'umap'.">
+            <option value="tsne">tsne</option>
+            <option value="umap" selected="true">umap</option>
+        </param>
+        <section name="color_by_parameters" title="Color by parameters" expanded="false">
+            <param name="Color_By" type="select" label="Color By" help="Color the points in the plot by either their corresponding feature or annotation.">
+                <option value="Annotation" selected="true">Annotation</option>
+                <option value="Feature">Feature</option>
+            </param>
+            <param name="Annotation_to_Highlight" type="text" label="Annotation to Highlight" value="None" help="Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature."/>
+            <param name="Table" type="text" label="Table" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+            <param name="Feature_to_Highlight" type="text" label="Feature to Highlight" value="None" help="Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation."/>
+        </section>
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
+            <param name="Dot_Size" type="float" label="Dot Size" value="1" help="Size of the dot of scatter plot."/>
+            <param name="Figure_Width" type="float" label="Figure Width" value="12" help="Figure width, inch"/>
+            <param name="Figure_Height" type="float" label="Figure Height" value="12" help="Figure height, inch"/>
+            <param name="Font_Size" type="float" label="Font Size" value="12" help="Global font size in figure."/>
+            <param name="Figure_DPI" type="float" label="Figure DPI" value="300" help="Higher the DPI, clearer the image."/>
+            <param name="Legend_Location" type="select" label="Legend Location" help="Location of the Legend">
+                <option value="best" selected="true">best</option>
+                <option value="upper left">upper left</option>
+                <option value="center left">center left</option>
+            </param>
+            <param name="Legend_Font_Size" type="float" label="Legend Font Size" value="16" help="Font size of the legend labels"/>
+            <param name="Legend_Marker_Size" type="float" label="Legend Marker Size" value="5.0" help="Dot size of the legend markers"/>
+            <param name="Value_Min" type="text" label="Value Min" value="None" help="The minimum value of the color bar"/>
+            <param name="Value_Max" type="text" label="Value Max" value="None" help="The maximum value of the color bar"/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**UMAP\tSNE\PCA Visualization [SPAC] [DMAP]**
+Generate scatter plot for PCA, t-SNE and UMAP.\
+Please refer to DUET Documentation, GitHub Documentation
+**Outputs:**
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

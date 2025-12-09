@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<tool id="spac_histogram" name="Histogram [SPAC] [DMAP]" version="2.0.0" profile="24.2">
+    <description>Plot the histogram of cells based on a specific feature or annotation. \
+Please refer to DUET Documentation, and GitHub Documentation for further information.</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v2-dev</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Together Take_Y_log Take_X_Log Legend_in_Figure --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.histogram_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <section name="plot_by_parameters" title="Plot by parameters" expanded="false">
+            <param name="Plot_By" type="select" label="Plot By" help="Plot the histogram on the feature or annotation">
+                <option value="Annotation" selected="true">Annotation</option>
+                <option value="Feature">Feature</option>
+            </param>
+            <param name="Annotation" type="text" label="Annotation" value="None" help="Annotation name in the analysis to plot histogram. Can't be used with Feature."/>
+            <param name="Table" type="text" label="Table" value="Original" help="Source table to perform the visualization. Default is Original, referring to the raw dataset."/>
+            <param name="Feature" type="text" label="Feature" value="None" help="Feature name in the analysis to plot histogram.
+Can't be used with Annotation."/>
+            <param name="Group_by" type="text" label="Group by" value="None" help="Choose either to group the histogram by another annotation. Default is None to disable this option."/>
+            <param name="Together" type="boolean" label="Together" truevalue="True" falsevalue="False" checked="true" help="If Together is True, and Group by is not None, create one plot for all groups. Otherwise, divide every histogram by the number of elements."/>
+        </section>
+        <section name="figure_aesthetics_parameters" title="Figure Aesthetics parameters" expanded="false">
+            <param name="Multiple" type="select" label="Multiple" help="Approach for showing multiple labels when &quot;Group By&quot; and &quot;Together&quot; are on. Existing methods are: layer, dodge, stack, and fill.">
+                <option value="layer">layer</option>
+                <option value="dodge" selected="true">dodge</option>
+                <option value="stack">stack</option>
+                <option value="fill">fill</option>
+            </param>
+            <param name="Take_Y_log" type="boolean" label="Take Y log" truevalue="True" falsevalue="False" checked="false" help="Set Y axis scale to log 10.  Default &quot;False&quot; will present linear axis scale."/>
+            <param name="Take_X_Log" type="boolean" label="Take X Log" truevalue="True" falsevalue="False" checked="false" help="Set X axis scale to log 10.  Default &quot;False&quot; will present linear axis scale. Only applies to feature."/>
+            <param name="Bins" type="text" label="Bins" value="auto" help="The number of bins in the histogram. Default &quot;auto&quot; will set it automatically. Only applies to feature."/>
+            <param name="Stat" type="select" label="Stat" help="Determines the statistical transformation for histogram bins. Default is &quot;count&quot;. Options: &quot;count&quot; displays the count of cells in each bin; &quot;frequency&quot; shows the number of cells per bin, normalized by bin width;  &quot;density&quot; normalizes the histogram so that the total area equals 1; &quot;probability&quot; normalize such that bar heights sum to 1, bar height reflects the probability of observing each bin; &quot;percent&quot; normalize such that bar heights sum to 100, each bin's height shows the percentage of total cells it contains.">
+                <option value="count" selected="true">count</option>
+                <option value="density">density</option>
+                <option value="percent">percent</option>
+                <option value="probability">probability</option>
+                <option value="frequency">frequency</option>
+            </param>
+        </section>
+        <section name="figure_configurations_parameters" title="Figure Configurations parameters" expanded="false">
+            <param name="Shrink_Number" type="float" label="Shrink Number" value="1" help="Scale the width of each bar or a group of bars relative to the bin width."/>
+            <param name="Figure_Width" type="float" label="Figure Width" value="8" help="Width of the figure."/>
+            <param name="Figure_Height" type="float" label="Figure Height" value="6" help="Height of the figure."/>
+            <param name="Font_Size" type="float" label="Font Size" value="12" help="Font size of the figure."/>
+            <param name="Figure_DPI" type="float" label="Figure DPI" value="300" help="Higher the DPI, clearer the image."/>
+            <param name="Legend_in_Figure" type="boolean" label="Legend in Figure" truevalue="True" falsevalue="False" checked="false" help="Display legend inside the plotting area."/>
+            <param name="Legend_Location" type="select" label="Legend Location" help="Location of legend.">
+                <option value="best" selected="true">best</option>
+                <option value="upper right">upper right</option>
+                <option value="upper left">upper left</option>
+                <option value="lower right">lower right</option>
+                <option value="lower left">lower left</option>
+                <option value="right">right</option>
+                <option value="center left">center left</option>
+                <option value="center right">center right</option>
+                <option value="lower center">lower center</option>
+                <option value="upper center">upper center</option>
+                <option value="center">center</option>
+            </param>
+            <param name="Bin_Transparency" type="float" label="Bin Transparency" value="0.75" help="Transparency of bins"/>
+            <param name="X_Axis_Label_Rotation" type="float" label="X Axis Label Rotation" value="0" help="The degree of rotation of X labels. Default is 0 (horizontal, text starting from left to right)"/>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="dataframe" format="csv" from_work_dir="dataframe.csv" label="${tool.name} on ${on_string}: Dataframe"/>
+        <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
+            <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Histogram [SPAC] [DMAP]**
+Plot the histogram of cells based on a specific feature or annotation. \
+Please refer to DUET Documentation, and GitHub Documentation for further information.
+**Outputs:**
+- dataframe: file (dataframe.csv)
+- figures: directory (figures_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

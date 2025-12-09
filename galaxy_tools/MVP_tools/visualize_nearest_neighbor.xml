@@ -3,14 +3,14 @@
     <description>Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\
 Please refer to DUET Document</description>
     <requirements>
-        <container type="docker">spac:mvp</container>
+        <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Log_Scale Facet_Plot Shared_X_Axis_Title_ --inject-outputs --outputs-config outputs_config.json && python '$__tool_directory__/visualize_nearest_neighbor_template.py' 'cleaned_params.json'
+echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type": "directory", "name": "figures_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Log_Scale Facet_Plot Shared_X_Axis_Title_ --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.visualize_nearest_neighbor_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
     <inputs>
@@ -34,11 +34,11 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}, "figures": {"type
         <param name="Source_Anchor_Cell_Label" type="text" label="Source &quot;Anchor&quot; Cell Label" value="" help="The phenotype from which distances are measured."/>
         <param name="Target_Cell_Label" type="text" label="Target Cell Label" value="All" help="The phenotype(s) being measured against. Use &quot;All&quot; to include every phenotype."/>
         <param name="Log_Scale" type="boolean" label="Log Scale" truevalue="True" falsevalue="False" checked="false" help="Display the distance in log scale. Default is False."/>
-        <section name="advanced_analysis_setting" title="Advanced Analysis Setting" expanded="false">
+        <section name="advanced_analysis_setting_parameters" title="Advanced Analysis Setting parameters" expanded="false">
             <param name="Nearest_Neighbor_Associated_Table" type="text" label="Nearest Neighbor Associated Table" value="spatial_distance" help="The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated."/>
         </section>
-        <section name="figure_configurations" title="Figure Configurations" expanded="false">
-            <param name="Facet_Plot" type="boolean" label="Facet Plot" truevalue="True" falsevalue="False" checked="false" help="If set to “True,” each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample."/>
+        <section name="figure_configuration_parameters" title="Figure Configuration parameters" expanded="false">
+            <param name="Facet_Plot" type="boolean" label="Facet Plot" truevalue="True" falsevalue="False" checked="false" help="If set to &quot;True,&quot; each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample."/>
             <param name="X_Axis_Label_Rotation" type="float" label="X Axis Label Rotation" value="0" help="The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right)."/>
             <param name="Shared_X_Axis_Title_" type="boolean" label="Shared X Axis Title " truevalue="True" falsevalue="False" checked="true" help="For faceted plots, use one shared x-axis title at the bottom. Default is &quot;ON&quot;."/>
             <param name="X_Axis_Title_Font_Size" type="text" label="X Axis Title Font Size" value="None" help="Font size for x-axis title. If &quot;None &quot;, use figure font size."/>
@@ -68,6 +68,13 @@ Please refer to DUET Documentation,  and GitHub Documentation  for further infor
 
 ]]></help>
     <citations>
-        <citation type="doi">10.1038/s41586-019-1876-x</citation>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
     </citations>
 </tool>
