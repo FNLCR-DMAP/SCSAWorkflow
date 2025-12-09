@@ -115,6 +115,8 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     python -c "import scimap; print('scimap imported successfully')" && \
     echo "Test 5: Check templates location" && \
     python -c "import spac; import os; templates_dir = os.path.join(os.path.dirname(spac.__file__), 'templates'); print(f'Templates dir: {templates_dir}'); print('Templates exist:', os.path.exists(templates_dir))" && \
+    echo "Test 6: Verify UMAP compatibility with scikit-learn" && \
+    python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
     echo "=== ALL TESTS PASSED ===" || \
     echo "Some import issues detected but proceeding"
 
