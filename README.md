@@ -4,8 +4,13 @@ SPAC is a scalable, automated pipeline, under the Single Cell Spatial Analysis W
 This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. Spac offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc.
 
 This repository is the official home of the SPAC Python package, part of the broader SPAC ecosystem for single-cell spatial analysis.
-SPAC Ecosystem
-ComponentDescriptionRepositorySPAC Python PackageCore analysis libraryThis repositorySPAC ShinyInteractive web applicationFNLCR-DMAP/SPAC_Shiny
+
+## SPAC Ecosystem
+
+| Component | Description | Repository |
+|-----------|-------------|------------|
+| **SPAC Python Package** | Core analysis library | This repository |
+| **SPAC Shiny** | Interactive web application | [FNLCR-DMAP/SPAC_Shiny](https://github.com/FNLCR-DMAP/SPAC_Shiny) |
 
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
