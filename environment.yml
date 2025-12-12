@@ -15,6 +15,7 @@ dependencies:
   - numba=0.58.1                # Data Manipulation and Analysis
   - phenograph=1.5.7            # Data Manipulation and Analysis
   - scikit-learn=1.5.2          # Machine Learning and Statistics
+  - umap-learn=0.5.7            # Dimensionality Reduction (compatible with scikit-learn 1.5.x)
   - matplotlib=3.9.2            # Visualization and Plotting
   - seaborn=0.13.2              # Visualization and Plotting
   - datashader=0.16.3           # Visualization and Plotting
@@ -35,4 +36,5 @@ dependencies:
     - gendocs
     - parmap==1.7.0
     - combat==0.3.3             # Batch correction (required by scimap)
-    - scimap
+    # NOTE: scimap removed from pip section to preserve conda-installed
+    # scimap=2.1.3_dmap_pandas153 which requires pandas 1.5.3
