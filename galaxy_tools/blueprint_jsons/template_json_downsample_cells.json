@@ -8,9 +8,9 @@
   "status": "RELEASED",
   "inputDatasets": [
     {
-      "key": "Upstream_Analysis",
-      "displayName": "Upstream Analysis",
-      "description": "Link to prior processed analysis in the analysis.",
+      "key": "Upstream_Dataset",
+      "displayName": "Upstream Dataset",
+      "description": "Link to prior processed dataset in the analysis.",
       "paramGroup": null,
       "anchorDataset": null,
       "dataType": "PANDAS_DATAFRAME",

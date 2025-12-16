@@ -46,7 +46,7 @@
   "orderedMustacheKeys": [
     "Upstream_Dataset",
     "Annotation_of_Interest",
-    "Label_s_of_Interest"
+    "Labels_of_Interest"
   ],
   "contents": {
     "type": "code",

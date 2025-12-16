@@ -16,6 +16,9 @@ echo '{"dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config
     <inputs>
         <param name="Upstream_Dataset" type="data" format="tabular,csv,tsv,txt" label="Upstream Analysis" help="Link to prior processed analysis in the analysis."/>
         <param name="Annotation_of_Interest" type="text" label="Annotation of Interest" help="Annotation of interest to select values from."/>
+        <repeat name="Labels_of_Interest_repeat" title="Label(s) of Interest">
+            <param name="value" type="text" label="Value" help="Label(s) of interest to include from the selected annotation." value=""/>
+        </repeat>
     </inputs>
     <outputs>
         <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
