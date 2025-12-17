@@ -50,7 +50,8 @@ The pipeline converts a NIDAP blueprint into a Galaxy tool through these steps:
                         │              At Runtime in Galaxy:               │
                         │                                                  │
                         │  galaxy_params.json ──▶ format_values.py ──▶     │
-                        │  cleaned_params.json ──▶ template.py ──▶ outputs │
+                        │  cleaned_params.json ──▶ spac.templates ──▶      │
+                        │  outputs                                         │
                         └──────────────────────────────────────────────────┘
 ```
 
@@ -61,7 +62,7 @@ The pipeline converts a NIDAP blueprint into a Galaxy tool through these steps:
 | `blueprint JSON` | Defines tool parameters, inputs, and **outputs** |
 | `galaxy_xml_synthesizer.py` | Converts blueprint → Galaxy XML |
 | `format_values.py` | Normalizes Galaxy's raw JSON → clean JSON for templates |
-| `*_template.py` | Python script that performs the actual analysis |
+| `spac.templates.*_template` | Python modules in `src/spac/templates/` that perform the actual analysis |
 
 ---
 
@@ -174,23 +175,23 @@ Once your blueprint has the `outputs` section, generate the Galaxy XML.
 ### Basic Usage
 
 ```bash
-# Navigate to MVP_tools directory
-cd galaxy_tools/MVP_tools
+# Navigate to galaxy_tools directory
+cd galaxy_tools
 
 # Generate XML from a single blueprint
-python galaxy_xml_synthesizer.py blueprint_json/template_json_boxplot.json -o .
+python galaxy_xml_synthesizer.py blueprint_jsons/template_json_boxplot.json -o MVP_tools
 ```
 
-This creates `boxplot.xml` in the current directory.
+This creates `boxplot.xml` in the MVP_tools directory.
 
 ### Batch Processing
 
 ```bash
 # Process all blueprints in a directory
-python galaxy_xml_synthesizer.py blueprint_json/ -o .
+python galaxy_xml_synthesizer.py blueprint_jsons/ -o MVP_tools
 
 # Or use a glob pattern
-python galaxy_xml_synthesizer.py "blueprint_json/template_json_*.json" -o .
+python galaxy_xml_synthesizer.py "blueprint_jsons/template_json_*.json" -o MVP_tools
 ```
 
 ### Command Line Options
@@ -203,7 +204,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            Show help message
-  -o, --output OUTPUT   Output directory for XML files (default: galaxy_tools)
+  -o, --output OUTPUT   Output directory for XML files (default: MVP_tools)
   --docker DOCKER       Docker image name (default: spac:mvp)
   --debug               Enable debug output with feature summary
 ```
@@ -227,7 +228,7 @@ python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_para
     --bool-values Horizontal_Plot Keep_Outliers Value_Axis_Log_Scale \
     --list-values Feature_s_to_Plot \
     --inject-outputs --outputs-config outputs_config.json && \
-python '$__tool_directory__/boxplot_template.py' 'cleaned_params.json'
+python -c "from spac.templates.boxplot_template import run_from_json; run_from_json('cleaned_params.json')"
 
 ]]></command>
 ```
@@ -350,7 +351,8 @@ Here's the complete flow from blueprint to Galaxy execution:
    │   ├── Fixes:  booleans, lists, injects outputs
    │   └── Output: cleaned_params.json
    │
-   └── template.py runs:
+   └── spac.templates.*_template.run_from_json() runs:
+       ├── Imported from: src/spac/templates/
        ├── Input:  cleaned_params.json
        ├── Executes analysis logic
        └── Output: files defined in outputs section
@@ -358,22 +360,58 @@ Here's the complete flow from blueprint to Galaxy execution:
 
 ---
 
+## Template Access
+
+All template functions are located in `src/spac/templates/` and can be accessed via the `spac.templates` module:
+
+```python
+# Import and run a template
+from spac.templates.boxplot_template import run_from_json
+run_from_json('cleaned_params.json')
+
+# Or for other templates:
+from spac.templates.select_values_template import run_from_json
+from spac.templates.downsample_cells_template import run_from_json
+```
+
+Each template module provides a `run_from_json()` function that:
+1. Reads the cleaned parameters JSON file
+2. Executes the analysis logic
+3. Saves outputs as specified in the outputs configuration
+
+---
+
 ## Directory Structure
 
 ```
-MVP_tools/
-├── galaxy_xml_synthesizer.py    # Converts blueprint → Galaxy XML
-├── format_values.py             # Runtime: normalizes Galaxy params
-├── template_utils.py            # Shared utilities for templates
+galaxy_tools/
+├── galaxy_xml_synthesizer.py        # Build-time: converts blueprint → Galaxy XML
+├── README.md
 │
-├── blueprint_json/              # Input: NIDAP blueprints (with outputs added)
+├── MVP_tools/                        # Deployable Galaxy tools
+│   ├── format_values.py              # Runtime: normalizes Galaxy params
+│   ├── boxplot.xml                   # Generated Galaxy XML
+│   ├── select_values.xml
+│   └── ...                           # Other generated Galaxy tools (39 total)
+│
+├── blueprint_jsons/                  # Input: NIDAP blueprints (with outputs added)
 │   ├── template_json_boxplot.json
 │   ├── template_json_arcsinh_normalization.json
 │   └── ...
-│
-├── boxplot_template.py          # Python analysis template
-├── boxplot.xml                  # Generated Galaxy XML
-└── ...
+
+src/spac/templates/                   # Template functions (accessed via spac.templates)
+├── __init__.py
+├── template_utils.py                 # Shared utilities for templates
+├── boxplot_template.py               # Python analysis template
+├── select_values_template.py
+├── downsample_cells_template.py
+└── ...                               # Other template modules
+```
+
+**Note:** Template functions are part of the `spac` package and can be imported as:
+```python
+from spac.templates.boxplot_template import run_from_json
+from spac.templates.select_values_template import run_from_json
 ```
 
 ---
@@ -397,14 +435,24 @@ The synthesizer maps blueprint parameter types to Galaxy types:
 
 | Tool | Description |
 |------|-------------|
+| `analysis_to_csv` | Export analysis results to CSV format |
+| `append_annotation` | Append new annotations to dataset |
+| `append_pin_color_rule` | Add pin color rules for visualization |
 | `arcsinh_normalization` | Arcsinh transformation for data normalization |
+| `binary_to_categorical_annotation` | Convert binary annotations to categorical |
 | `boxplot` | Create boxplot visualizations |
 | `calculate_centroid` | Calculate cell centroids |
+| `combine_annotations` | Combine multiple annotations |
+| `combine_dataframes` | Merge multiple dataframes |
 | `downsample_cells` | Downsample cell populations |
 | `hierarchical_heatmap` | Generate hierarchical heatmaps |
+| `histogram` | Create histogram visualizations |
 | `interactive_spatial_plot` | Interactive spatial visualizations |
+| `load_csv_files` | Load CSV files into analysis |
+| `manual_phenotyping` | Manual cell phenotyping |
 | `nearest_neighbor_calculation` | Calculate nearest neighbors |
 | `neighborhood_profile` | Generate neighborhood profiles |
+| `normalize_batch` | Batch normalization of data |
 | `phenograph_clustering` | PhenoGraph clustering analysis |
 | `quantile_scaling` | Quantile-based data scaling |
 | `relational_heatmap` | Create relational heatmaps |
@@ -414,7 +462,14 @@ The synthesizer maps blueprint parameter types to Galaxy types:
 | `select_values` | Select/filter data values |
 | `setup_analysis` | Initialize analysis workspace |
 | `spatial_interaction` | Spatial interaction analysis |
+| `spatial_plot` | Static spatial plot visualization |
 | `subset_analysis` | Subset data for analysis |
+| `summarize_annotation_statistics` | Summarize annotation statistics |
+| `summarize_dataframe` | Generate dataframe summaries |
+| `tsne_analysis` | t-SNE dimensionality reduction |
+| `umap_transformation` | UMAP dimensionality reduction |
+| `umap_tsne_pca_visualization` | Visualize UMAP/t-SNE/PCA results |
+| `utag_clustering` | UTAG spatial clustering |
 | `visualize_nearest_neighbor` | Visualize nearest neighbor results |
 | `visualize_ripley_l` | Visualize Ripley's L results |
 | `z-score_normalization` | Z-score normalization |
@@ -444,7 +499,7 @@ The synthesizer maps blueprint parameter types to Galaxy types:
 ### Debug Mode
 
 ```bash
-python galaxy_xml_synthesizer.py blueprint_json/ -o . --debug
+python galaxy_xml_synthesizer.py blueprint_jsons/ -o MVP_tools --debug
 ```
 
 Shows feature summary for all generated tools.
@@ -456,7 +511,7 @@ Shows feature summary for all generated tools.
 echo '{"Horizontal_Plot": "True", "Feature_s_to_Plot_repeat": [{"value": "CD4"}]}' > test_input.json
 
 # Run format_values.py
-python format_values.py test_input.json test_output.json \
+python MVP_tools/format_values.py test_input.json test_output.json \
     --bool-values Horizontal_Plot \
     --list-values Feature_s_to_Plot \
     --debug
