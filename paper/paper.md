@@ -10,8 +10,10 @@ authors:
     orcid: 0000-0002-4283-8325
     affiliation: 1
   - name: Rui He
+    orcid: 0000-0002-2610-1411
     affiliation: 2
   - name: Andrei Bombin
+    orcid: 0000-0003-2445-304X
     affiliation: 3
   - name: Ahmad B. Abdallah
     affiliation: 4
@@ -52,7 +54,7 @@ Despite this progress, biologists without coding expertise face steep barriers w
 
 SPAC is a Python package for downstream analysis of single-cell multiplexed imaging data following segmentation. It ingests per-cell tables (CSV/H5AD/tabular) with spatial coordinates and marker intensities and exposes a reproducible, AnnData‑compliant Python API; all analysis artifacts and figures are preserved to support sharing, reruns, and downstream reuse. As the core analytical layer of the broader SPAC ecosystem [@Liu:2025], the package connects to interactive pipelines and real‑time dashboards on enterprise platforms through a modular, layered architecture. This design enables large‑scale analyses without requiring users to write code. Its purpose is to lower the barrier for non‑programmers while preserving rigorous, reusable workflows. For example, SPAC uses biologist-friendly terminology (e.g., "cells," "features," "tables," "associated tables," and "annotations") and clear messaging so users can interpret results and diagnostics without a bioinformatics analyst's assistance.
 
-To address real-time scalability for datasets exceeding 10 million cells, SPAC integrates optimized numerical routines from NumPy's compiled, C-based backend. These optimizations make common plotting and summarization tasks (e.g., histograms, box plots) substantially faster—more than 5× faster than comparable Seaborn‑based workflows in our tests—reducing typical runtimes from tens of seconds to a few seconds. This responsiveness supports iterative Exploratory Data Analysis (EDA) and figure generation on very large cohorts without sacrificing reproducibility.
+To address real-time scalability for datasets exceeding 10 million cells, SPAC integrates optimized numerical routines from NumPy's compiled, C-based backend. These optimizations make common plotting and summarization tasks (e.g., histograms, box plots) substantially faster—more than 5× faster than comparable Seaborn‑based workflows in our tests—reducing typical runtimes from tens of seconds to a few seconds. This responsiveness supports iterative exploratory data analysis and figure generation on very large cohorts without sacrificing reproducibility.
 
 SPAC provides customizable visualization methods. Pinning colors to annotations maintains consistent color mapping across figures and sessions. Interactive spatial plots (Plotly) allow users to toggle features (e.g., biomarkers) on and off and to switch among multiple annotations simultaneously, enabling intuitive exploration of spatial relationships and patterns. Stratified and gridded plotting with optimized statistical summaries makes subgroup comparisons (e.g., across conditions or phenotypes) clear within a single view.
 
