@@ -68,7 +68,7 @@ At the architectural level, the SPAC package serves as a foundation layer that b
 
 SPAC adheres to enterprise-level software engineering standards, featuring extensive unit testing, rigorous edge-case evaluation, comprehensive logging, and clear, context-rich error handling. These practices ensure reliability, adaptability, and ease of use across various deployment environments, including interactive Jupyter notebooks, analytic platforms (e.g., Code Ocean [@CodeOcean], Palantir Foundry [@PalantirTechnologies]), Galaxy [@Jalili:2020], and real-time dashboards. Emphasizing readability and maintainability, SPAC provides a versatile and enhanced analytical solution for spatial single-cell analyses. To date, SPAC has been used in the analysis of more than eight datasets comprising over 30 million cells across diverse studies [@Keretsu:2025].
 
-![Overview of the SPAC workflow. The schematic presents an integrated pipeline for spatial single-cell analysis. Segmented cell data with spatial coordinates from various imaging platforms are ingested, normalized, clustered, phenotyped, and analyzed spatially to assess cell distributions and interactions while maintaining consistent data lineage.\label{fig:workflow}](figure.tif)
+![Overview of the SPAC workflow. The schematic presents an integrated pipeline for spatial single-cell analysis. Segmented cell data with spatial coordinates from various imaging platforms are ingested, normalized, clustered, phenotyped, and analyzed spatially to assess cell distributions and interactions while maintaining consistent data lineage.\label{fig:workflow}](figure.png)
 
 # Acknowledgements
 
