@@ -22,6 +22,9 @@ setup(
     url='https://github.com/FNLCR-DMAP/SCSAWorkflow',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
+    package_data={
+        'spac': ['templates/*.py'],
+    },
     install_requires=[
         'pandas',
         'anndata',
