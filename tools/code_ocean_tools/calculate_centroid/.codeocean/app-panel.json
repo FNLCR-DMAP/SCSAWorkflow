@@ -1,0 +1,38 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Calculate Centroid [SPAC] [DMAP]",
+		"instructions": "Calculate the centroid of bonding box of the cell. \\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [
+		{
+			"id": "optional_parameters",
+			"name": "Optional parameters",
+			"help_text": "Parameters for Optional parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "fbffdf5f807f4a29",
+			"name": "X Centroid Name",
+			"param_name": "X_Centroid_Name",
+			"description": "Name of column containing X centroid, default XCentroid.",
+			"type": "text",
+			"value_type": "string",
+			"category": "optional_parameters",
+			"default_value": "XCentroid"
+		},
+		{
+			"id": "4cb2d876d3c24356",
+			"name": "Y Centroid Name",
+			"param_name": "Y_Centroid_Name",
+			"description": "Name of column containing Y centroid, default YCentroid.",
+			"type": "text",
+			"value_type": "string",
+			"category": "optional_parameters",
+			"default_value": "YCentroid"
+		}
+	]
+}

@@ -1,0 +1,80 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Quantile Scaling [SPAC] [DMAP]",
+		"instructions": "Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\\\nx' = (x- quantile min)/(quantile max - quantile min), x'=0 if x <= quantile min, x'=1 if x >= quantile max\\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "b87d12ac21984117",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation, \"Original\" table refers to the raw data.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "bf408b0558af4956",
+			"name": "Low Quantile",
+			"param_name": "Low_Quantile",
+			"description": "Low quantile to be used as min.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "0.02"
+		},
+		{
+			"id": "afef892913d34f27",
+			"name": "High Quantile",
+			"param_name": "High_Quantile",
+			"description": "High quantile to be used as max.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "0.98"
+		},
+		{
+			"id": "8e4a5ff75a6742d8",
+			"name": "Interpolation",
+			"param_name": "Interpolation",
+			"description": "The interpolation method to use when selecting the value for low and high quantile. Values can be \"nearest\" or \"linear\"",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "nearest",
+			"extra_data": [
+				"nearest",
+				"linear"
+			]
+		},
+		{
+			"id": "ef8d0065a30d4a5e",
+			"name": "Output Table Name",
+			"param_name": "Output_Table_Name",
+			"description": "Name of the table to be added to the analysis.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "normalized_feature"
+		},
+		{
+			"id": "4fa314194ca9424e",
+			"name": "Per Batch",
+			"param_name": "Per_Batch",
+			"description": "Whether to apply the transformation per batch. If \"True\", the transformation is applied per batch.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "f0f0ba63327e49ea",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "The name of the annotation to define batches. Required if Per Batch is \"True\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		}
+	]
+}

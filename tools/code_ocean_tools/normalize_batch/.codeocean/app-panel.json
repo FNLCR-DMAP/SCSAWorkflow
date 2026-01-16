@@ -1,0 +1,85 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Normalize Batch [SPAC] [DMAP]",
+		"instructions": "Adjust the intensity of every feature by correcting for batch effect using a normalization method.\\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [
+		{
+			"id": "normalization_settings_parameters",
+			"name": "Normalization Settings parameters",
+			"help_text": "Parameters for Normalization Settings parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "364881ba941d4d9d",
+			"name": "Need Normalization",
+			"param_name": "Need_Normalization",
+			"description": "If the data is already corrected for,  or does not need to correct for batch effect, please toggle it to False to skip normalization.\nOtherwise, toggle this to True please find normalization options under the \"Normalization Settings\" category.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "0439b20d58394cc5",
+			"name": "Input Table Name",
+			"param_name": "Input_Table_Name",
+			"description": "Name of the table to be imported and used for batch nomalization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"category": "normalization_settings_parameters",
+			"default_value": "Original"
+		},
+		{
+			"id": "19530c124ce64064",
+			"name": "Output Table Name",
+			"param_name": "Output_Table_Name",
+			"description": "Name of the table to be added to the analysis. Default is batch_normalized_table.",
+			"type": "text",
+			"value_type": "string",
+			"category": "normalization_settings_parameters",
+			"default_value": "batch_normalized_table"
+		},
+		{
+			"id": "04f28fe5e0e64003",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "The annotation name that define batches. Every set of cells who have the same labels for that annotation will be considered in one batch.",
+			"type": "text",
+			"value_type": "string",
+			"category": "normalization_settings_parameters",
+			"default_value": ""
+		},
+		{
+			"id": "2a083aaf983e4cda",
+			"name": "Normalization Method",
+			"param_name": "Normalization_Method",
+			"description": "The normlalization method to use.",
+			"type": "list",
+			"value_type": "string",
+			"category": "normalization_settings_parameters",
+			"default_value": "median",
+			"extra_data": [
+				"median",
+				"Q50",
+				"Q75",
+				"z-score"
+			]
+		},
+		{
+			"id": "3c59ba057d074542",
+			"name": "Take Log",
+			"param_name": "Take_Log",
+			"description": "If True, take the log2 of intensities before normalization.",
+			"type": "list",
+			"value_type": "boolean",
+			"category": "normalization_settings_parameters",
+			"default_value": "False",
+			"extra_data": []
+		}
+	]
+}

@@ -1,0 +1,46 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Neighborhood Profile [SPAC][DMAP]",
+		"instructions": "Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "a2538cd181cc4888",
+			"name": "Annotation of interest",
+			"param_name": "Annotation_of_interest",
+			"description": "Annotation of interest to define cell labels.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "66ff03032408489a",
+			"name": "Bins",
+			"param_name": "Bins",
+			"description": "Radii in micro meter that form the bands around the center phenotype to count the neighbor cells",
+			"type": "text",
+			"value_type": "string"
+		},
+		{
+			"id": "a4b6222aa65946f1",
+			"name": "Stratify By",
+			"param_name": "Stratify_By",
+			"description": "The annotation to stratify the dataset when generating the profiles (e.g., slide name). If a value other than \"None\" is passed, the dataset will be stratified by the unique labels in the annotation column. Use \"None\" without quotes to disable (e.g., all cells are from one region or slide)",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "4e58ca62db744c2b",
+			"name": "Anchor Neighbor List",
+			"param_name": "Anchor_Neighbor_List",
+			"description": "A list of anchor;neighbor cell labels to generate the results. The two types should be separated with a ';'. For example, if  if the anchor is \"T cells\" and the neighbor is \"B cells\", enter the value: \"T cells; B cells\" without the quotes.",
+			"type": "text",
+			"value_type": "string"
+		}
+	]
+}

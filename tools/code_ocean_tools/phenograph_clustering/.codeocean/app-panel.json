@@ -1,0 +1,179 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Phenograph Clustering [SPAC] [DMAP]",
+		"instructions": "Calculate automatic phenotypes using PhenoGraph. The unsupervised clusters will be stored in annotation: \"phenograph\" by default in the analysis. \\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [
+		{
+			"id": "resolution_profiling_parameters",
+			"name": "Resolution Profiling parameters",
+			"help_text": "Parameters for Resolution Profiling parameters"
+		},
+		{
+			"id": "hpc_configuration_parameters",
+			"name": "HPC Configuration parameters",
+			"help_text": "Parameters for HPC Configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "7d51de46b46b4e7f",
+			"name": "Run on HPC",
+			"param_name": "Run_on_HPC",
+			"description": "If toggled on, this template will launch a computational task on HPC cluster with resource specified in the \"HPC Configuration\" parameters group. The computational result will be available one the HPC task is completed.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "69a73dc074ad4440",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. The default value \"Original\" will use the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "3ee7dbfed4864aa2",
+			"name": "K-Nearest Neighbors",
+			"param_name": "K_Nearest_Neighbors",
+			"description": "The number of nearest neighbors to be used in creating the features neighborhood graph.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "30"
+		},
+		{
+			"id": "16697e202d69456a",
+			"name": "Seed",
+			"param_name": "Seed",
+			"description": "Random seed for reproducibility.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "42"
+		},
+		{
+			"id": "aa37ca82a3f44bdb",
+			"name": "Resolution Parameter",
+			"param_name": "Resolution_Parameter",
+			"description": "The resolution parameter (>0) adjusts the level of granularity in identifying clusters within a dataset, with higher values promoting the detection of a larger number of clusters (e.g., more distinct clusters), while lower values emphasize a smaller number of clusters (e.g., more inclusive clusters).",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "1"
+		},
+		{
+			"id": "d7f179363e5e452a",
+			"name": "Output Annotation Name",
+			"param_name": "Output_Annotation_Name",
+			"description": "The output annotation name from Phenograph clustering to be added to the analysis. Default is \"phenograph\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "phenograph"
+		},
+		{
+			"id": "e28cd8b31a6941fd",
+			"name": "Number of Iterations",
+			"param_name": "Number_of_Iterations",
+			"description": "Number of iterations to run the Leiden graph clustering algorithm. If the number of iterations is negative, the Leiden algorithm is run until an iteration in which there was no improvement. Default is 100.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "100"
+		},
+		{
+			"id": "6efec5b75aff4791",
+			"name": "Profiling",
+			"param_name": "Profiling",
+			"description": "Available on HPC only. If on, the template will run through all the resolutions defined in the resolution parameters only in GPU mode.",
+			"type": "list",
+			"value_type": "boolean",
+			"category": "resolution_profiling_parameters",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "d76151315db647d2",
+			"name": "Resolution List",
+			"param_name": "Resolution_List",
+			"description": "List of resolutions used when the Profiling is True.",
+			"type": "text",
+			"value_type": "string",
+			"category": "resolution_profiling_parameters",
+			"default_value": "[]"
+		},
+		{
+			"id": "09c3b5be055c4aff",
+			"name": "HPC Compute Mode",
+			"param_name": "HPC_Compute_Mode",
+			"description": "The compute mode for this submission. Available options are CPU and GPU, which run the compute on CPU or GPU, respectively. Please remind that if Profiling option is true, the default mode is set as GPU",
+			"type": "list",
+			"value_type": "string",
+			"category": "hpc_configuration_parameters",
+			"default_value": "CPU",
+			"extra_data": [
+				"CPU",
+				"GPU"
+			]
+		},
+		{
+			"id": "561288b603164946",
+			"name": "Batch Mode",
+			"param_name": "Batch_Mode",
+			"description": "If set to True, this HPC run will launch in batch mode showing the template status as successful once the job is submitted to the HPC cluster. the results will be written after the HPC job completes. Avoid submitting twice before completion to prevent race conditions.",
+			"type": "list",
+			"value_type": "boolean",
+			"category": "hpc_configuration_parameters",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "545e64f184ed42ff",
+			"name": "Partition",
+			"param_name": "Partition",
+			"description": "Biowulf nodes are grouped into partitions. A partition can be specified when submitting a job. Please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for more details",
+			"type": "list",
+			"value_type": "string",
+			"category": "hpc_configuration_parameters",
+			"default_value": "quick",
+			"extra_data": [
+				"quick",
+				"norm",
+				"gpu",
+				"largemem"
+			]
+		},
+		{
+			"id": "2a7399d5469f4293",
+			"name": "Number of CPUs",
+			"param_name": "Number_of_CPUs",
+			"description": "Number of CPUs requested for this HPC submission",
+			"type": "text",
+			"value_type": "number",
+			"category": "hpc_configuration_parameters",
+			"default_value": "2"
+		},
+		{
+			"id": "74d8e605a0274aa4",
+			"name": "Memory, GB",
+			"param_name": "Memory_GB",
+			"description": "Amount of memory in gigabytes requested for this HPC submission",
+			"type": "text",
+			"value_type": "number",
+			"category": "hpc_configuration_parameters",
+			"default_value": "10"
+		},
+		{
+			"id": "793e3415e69945c0",
+			"name": "Request Time",
+			"param_name": "Request_Time",
+			"description": "Amount of time requested for this HPC submission. Please provide the time in the format of hh:mm:ss. For example, 2 hour 30 minute job would be 02:30:00. Please remind that different partition has different time limit, please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for further details.",
+			"type": "text",
+			"value_type": "string",
+			"category": "hpc_configuration_parameters",
+			"default_value": "00:20:00"
+		}
+	]
+}

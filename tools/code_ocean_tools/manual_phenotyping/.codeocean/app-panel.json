@@ -1,0 +1,49 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Manual Phenotyping [SPAC] [DMAP]",
+		"instructions": "Define and apply manual phenotypes to a dataset.  A new column with the annotation \"Manual Annotation Name\" will be added. \\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "0fd60bfc690845c4",
+			"name": "Classification Column Prefix",
+			"param_name": "Classification_Column_Prefix",
+			"description": "The prefix to prepend to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "3dfe3690134540ab",
+			"name": "Classification Column Suffix",
+			"param_name": "Classification_Column_Suffix",
+			"description": "The suffix to append to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "1801a772979b4434",
+			"name": "Allow Multiple Phenotypes",
+			"param_name": "Allow_Multiple_Phenotypes",
+			"description": "Allow a given cell to match multiple phenotype_code. The resulting label will join all the \"phenotype_name\" using a ','. If set to False, the resulting cell will be marked as \"no_label\"",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "19fff6908ba84e24",
+			"name": "Manual Annotation Name",
+			"param_name": "Manual_Annotation_Name",
+			"description": "The name of the new column (annotation) to be added to the dataset with the defined \"phenotype_name\"s as values. Cells that do not match any defined phenotype will be assiged \"no_label\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "manual_phenotype"
+		}
+	]
+}

@@ -1,0 +1,6 @@
+CellID,CD45,CD3D,X_centroid,Y_centroid,cell_type
+1,10.5,5.2,100,100,T cell
+2,20.3,8.1,150,120,B cell
+3,15.7,3.4,200,140,T cell
+4,8.2,12.3,250,160,Macrophage
+5,12.4,6.7,300,180,B cell

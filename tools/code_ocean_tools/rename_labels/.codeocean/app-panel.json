@@ -1,0 +1,30 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Rename Labels [SPAC] [DMAP]",
+		"instructions": "Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\\\nPlease refer to DUET Documentation, GitHub Documentation"
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "93b98f6810d949b3",
+			"name": "Source Annotation",
+			"param_name": "Source_Annotation",
+			"description": "Annotation in the current dataset containing the original labels to be renamed.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "8625a6d427e84c5e",
+			"name": "New Annotation",
+			"param_name": "New_Annotation",
+			"description": "Annotation to be added to the dataset, containing the new labels after renaming.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		}
+	]
+}

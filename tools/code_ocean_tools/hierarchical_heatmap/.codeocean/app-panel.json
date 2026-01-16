@@ -1,0 +1,233 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Hierarchical Heatmap [SPAC] [DMAP]",
+		"instructions": "Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensities for each feature. \\\nFor color maps definitions, refer to this page \\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Parameters for Figure Configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "c3a0d99a9b5942f2",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "Annotation to visualize in the heatmap.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "1a0699f62ae84085",
+			"name": "Table to Visualize",
+			"param_name": "Table_to_Visualize",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "be1cac4b10af4d09",
+			"name": "Feature Dendrogram",
+			"param_name": "Feature_Dendrogram",
+			"description": "If True, a dendrogram based on the feature will be generated.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "ec0c9131d9094165",
+			"name": "Annotation Dendrogram",
+			"param_name": "Annotation_Dendrogram",
+			"description": "If True, a dendrogram based on the annotation will be generated.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "052bc780bd3644b5",
+			"name": "Z Score",
+			"param_name": "Z_Score",
+			"description": "Specifies the axis for z-score normalization. Can be \"feature\" or \"annotation\" or \"None\". Default is \"None\".",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "None",
+			"extra_data": [
+				"feature",
+				"annotation",
+				"None"
+			]
+		},
+		{
+			"id": "0c436540c69c4f24",
+			"name": "Swap Axes",
+			"param_name": "Swap_Axes",
+			"description": "By default (when False), annotations are on the vertical axis (rows) and features are on the horizontal axis (columns). When set to True, features will be on the vertical axis and annotations on the horizontal axis.",
+			"type": "list",
+			"value_type": "boolean",
+			"category": "figure_configuration_parameters",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "6f81e41013ea4f77",
+			"name": "Feature(s)",
+			"param_name": "Feature_s_",
+			"description": "Need Swap Axes to be True, otherwise will always return all features. List of feature name(s) (e.g., markers) to be included in the visualization. If All, all features are used. Default is All.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[\"All\"]"
+		},
+		{
+			"id": "7a07a22b668c4af4",
+			"name": "Rotate Label ",
+			"param_name": "Rotate_Label_",
+			"description": "If True, rotate x-axis labels by 45 degrees. Default is False.",
+			"type": "list",
+			"value_type": "boolean",
+			"category": "figure_configuration_parameters",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "ee63ba25850d4a35",
+			"name": "Figure Title",
+			"param_name": "Figure_Title",
+			"description": "",
+			"type": "text",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "Hierarchical Heatmap"
+		},
+		{
+			"id": "5705ed5624b54c35",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "8"
+		},
+		{
+			"id": "5470d4aca5cf4ad0",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "8"
+		},
+		{
+			"id": "c20b075d0eb34e0f",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "300"
+		},
+		{
+			"id": "5e3f8acf389b4f9c",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "10"
+		},
+		{
+			"id": "a1326842177b455d",
+			"name": "Matrix Plot Ratio",
+			"param_name": "Matrix_Plot_Ratio",
+			"description": "0~1, the image size of matrix plot in the figure.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "0.8"
+		},
+		{
+			"id": "98737395464141bd",
+			"name": "Standard Scale ",
+			"param_name": "Standard_Scale_",
+			"description": "Whether to standard scale data (0: row-wise or 1: column-wise). Default is None.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "None",
+			"extra_data": [
+				"None",
+				"0",
+				"1"
+			]
+		},
+		{
+			"id": "7e472afa98084c85",
+			"name": "Horizontal Dendrogram Display Ratio",
+			"param_name": "Horizontal_Dendrogram_Display_Ratio",
+			"description": "The ratio of plotting space for the horizontal dendrogram. Range from 0 to 1, default is 0.2.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "0.2"
+		},
+		{
+			"id": "9e23f824622243ff",
+			"name": "Vertical Dendrogram Display Ratio",
+			"param_name": "Vertical_Dendrogram_Display_Ratio",
+			"description": "The ratio of plotting space for the vertical dendrogram. Range from 0 to 1, default is 0.2.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "0.2"
+		},
+		{
+			"id": "d7775c2af8e24bb4",
+			"name": "Value Min",
+			"param_name": "Value_Min",
+			"description": "The minimum value of the color bar.",
+			"type": "text",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "None"
+		},
+		{
+			"id": "f925c8e206e04f57",
+			"name": "Value Max",
+			"param_name": "Value_Max",
+			"description": "The maximum value of the color bar.",
+			"type": "text",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "None"
+		},
+		{
+			"id": "83f249df89904164",
+			"name": "Color Map",
+			"param_name": "Color_Map",
+			"description": "Color map to be used in the figure. Check: https://matplotlib.org/stable/users/explain/colors/colormaps.html",
+			"type": "list",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "seismic",
+			"extra_data": [
+				"seismic",
+				"bwr",
+				"RdBu",
+				"viridis",
+				"plasma",
+				"coolwarm"
+			]
+		}
+	]
+}

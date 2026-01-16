@@ -1,0 +1,11 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Combine DataFrames [SPAC] [DMAP]",
+		"instructions": "Combine two dataframes into one for downstream processes.\\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": []
+}

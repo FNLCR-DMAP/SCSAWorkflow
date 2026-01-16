@@ -1,0 +1,191 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Post-It-Python [SPAC] [DMAP]",
+		"instructions": "Adapted from Aleksandra's R post it"
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "9ee8286673484c87",
+			"name": "Label",
+			"param_name": "Label",
+			"description": "",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Post-It"
+		},
+		{
+			"id": "20b7639d9d754e8f",
+			"name": "Label font size",
+			"param_name": "Label_font_size",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "80"
+		},
+		{
+			"id": "93355516f48042b4",
+			"name": "Label font type",
+			"param_name": "Label_font_type",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "normal",
+			"extra_data": [
+				"normal",
+				"italic"
+			]
+		},
+		{
+			"id": "d99d41cca43248eb",
+			"name": "Label Bold",
+			"param_name": "Label_Bold",
+			"description": "",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "697626a072de42bc",
+			"name": "Label font color",
+			"param_name": "Label_font_color",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Black",
+			"extra_data": [
+				"White",
+				"LightGrey",
+				"Grey",
+				"Black",
+				"Red1",
+				"Red2",
+				"Red3",
+				"Orange1",
+				"Orange2",
+				"Orange3",
+				"Yellow1",
+				"Yellow2",
+				"Yellow3",
+				"YellowGreen1",
+				"YellowGreen2",
+				"Yellowgreen3",
+				"Green1",
+				"Green2",
+				"Green3",
+				"Teal1",
+				"Teal2",
+				"Teal3",
+				"Blue1",
+				"Blue2",
+				"Blue3",
+				"Purple1",
+				"Purple2",
+				"Purple3",
+				"Magenta1",
+				"Magenta2",
+				"Magenta3"
+			]
+		},
+		{
+			"id": "740d445983f84cd7",
+			"name": "Label font family",
+			"param_name": "Label_font_family",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Arial",
+			"extra_data": [
+				"Arial",
+				"Keyboard",
+				"Adobe Arabic",
+				"Times New Roman",
+				"Impact",
+				"Kailasa",
+				"Serif"
+			]
+		},
+		{
+			"id": "e9e4725dc0194835",
+			"name": "Background fill color",
+			"param_name": "Background_fill_color",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Yellow1",
+			"extra_data": [
+				"White",
+				"LightGrey",
+				"Grey",
+				"Black",
+				"Red1",
+				"Red2",
+				"Red3",
+				"Orange1",
+				"Orange2",
+				"Orange3",
+				"Yellow1",
+				"Yellow2",
+				"Yellow3",
+				"YellowGreen1",
+				"YellowGreen2",
+				"Yellowgreen3",
+				"Green1",
+				"Green2",
+				"Green3",
+				"Teal1",
+				"Teal2",
+				"Teal3",
+				"Blue1",
+				"Blue2",
+				"Blue3",
+				"Purple1",
+				"Purple2",
+				"Purple3",
+				"Magenta1",
+				"Magenta2",
+				"Magenta3"
+			]
+		},
+		{
+			"id": "f86fc7292c8d4775",
+			"name": "Background fill opacity",
+			"param_name": "Background_fill_opacity",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "10"
+		},
+		{
+			"id": "393efc28ae804d25",
+			"name": "Page width",
+			"param_name": "Page_width",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "18"
+		},
+		{
+			"id": "699ad04fa31141a6",
+			"name": "Page height",
+			"param_name": "Page_height",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "6"
+		},
+		{
+			"id": "c1c533c2cab14ce9",
+			"name": "Page DPI",
+			"param_name": "Page_DPI",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": "300"
+		}
+	]
+}

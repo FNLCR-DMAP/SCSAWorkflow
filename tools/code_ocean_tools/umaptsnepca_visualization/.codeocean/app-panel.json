@@ -1,0 +1,185 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "UMAP\\tSNE\\PCA Visualization [SPAC] [DMAP]",
+		"instructions": "Generate scatter plot for PCA, t-SNE and UMAP.\\\nPlease refer to DUET Documentation, GitHub Documentation"
+	},
+	"datasets": [],
+	"categories": [
+		{
+			"id": "color_by_parameters",
+			"name": "Color by parameters",
+			"help_text": "Parameters for Color by parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Parameters for Figure Configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "1020f45873774611",
+			"name": "Color By",
+			"param_name": "Color_By",
+			"description": "Color the points in the plot by either their corresponding feature or annotation.",
+			"type": "list",
+			"value_type": "string",
+			"category": "color_by_parameters",
+			"default_value": "Annotation",
+			"extra_data": [
+				"Annotation",
+				"Feature"
+			]
+		},
+		{
+			"id": "a51bc35d3a0f41f5",
+			"name": "Annotation to Highlight",
+			"param_name": "Annotation_to_Highlight",
+			"description": "Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature.",
+			"type": "text",
+			"value_type": "string",
+			"category": "color_by_parameters",
+			"default_value": "None"
+		},
+		{
+			"id": "a53054371de54c01",
+			"name": "Table",
+			"param_name": "Table",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"category": "color_by_parameters",
+			"default_value": "Original"
+		},
+		{
+			"id": "aede8671549f4c81",
+			"name": "Feature to Highlight",
+			"param_name": "Feature_to_Highlight",
+			"description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+			"type": "text",
+			"value_type": "string",
+			"category": "color_by_parameters",
+			"default_value": "None"
+		},
+		{
+			"id": "28b4deaf81a54502",
+			"name": "Dimension Reduction Method",
+			"param_name": "Dimension_Reduction_Method",
+			"description": "Dimensionality reduction method to visualize. Choose from 'tsne' or 'umap'.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "umap",
+			"extra_data": [
+				"tsne",
+				"umap"
+			]
+		},
+		{
+			"id": "1488edda53ed4c87",
+			"name": "Dot Size",
+			"param_name": "Dot_Size",
+			"description": "Size of the dot of scatter plot.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "1"
+		},
+		{
+			"id": "143b327428d847c0",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "Figure width, inch",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "12"
+		},
+		{
+			"id": "7fb9a1e6dd294bea",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "Figure height, inch",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "12"
+		},
+		{
+			"id": "9b19146c18b74e53",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "Global font size in figure.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "12"
+		},
+		{
+			"id": "c5490b1d140e4b2d",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "300"
+		},
+		{
+			"id": "dff5952d3cf242c4",
+			"name": "Legend Location",
+			"param_name": "Legend_Location",
+			"description": "Location of the Legend",
+			"type": "list",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "best",
+			"extra_data": [
+				"best",
+				"upper left",
+				"center left"
+			]
+		},
+		{
+			"id": "4c829a015bc148b6",
+			"name": "Legend Font Size",
+			"param_name": "Legend_Font_Size",
+			"description": "Font size of the legend labels",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "16"
+		},
+		{
+			"id": "75bcebb4139b4595",
+			"name": "Legend Marker Size",
+			"param_name": "Legend_Marker_Size",
+			"description": "Dot size of the legend markers",
+			"type": "text",
+			"value_type": "number",
+			"category": "figure_configuration_parameters",
+			"default_value": "5.0"
+		},
+		{
+			"id": "86966a47c8384d77",
+			"name": "Value Min",
+			"param_name": "Value_Min",
+			"description": "The minimum value of the color bar",
+			"type": "text",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "None"
+		},
+		{
+			"id": "143f95d52dff45f3",
+			"name": "Value Max",
+			"param_name": "Value_Max",
+			"description": "The maximum value of the color bar",
+			"type": "text",
+			"value_type": "string",
+			"category": "figure_configuration_parameters",
+			"default_value": "None"
+		}
+	]
+}

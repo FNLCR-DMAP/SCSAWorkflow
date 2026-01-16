@@ -1,0 +1,21 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Load CSV Files [SPAC] [DMAP]",
+		"instructions": "Load CSV files from NIDAP dataset and combine them into a single pandas dataframe for downstream processing. Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "c35017a24c9442e1",
+			"name": "String Columns",
+			"param_name": "String_Columns",
+			"description": "List specific columns to be read as string/text.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[]"
+		}
+	]
+}

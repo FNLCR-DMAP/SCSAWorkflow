@@ -1,0 +1,39 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Summarize Annotation Statistics [SPAC] [DMAP]",
+		"instructions": "Calculates aggregate statistics for each cluster or label from specific annotation against selected features. To view the results, please click on 'Preview.'\\\nPlease refer to DUET Documentation, and GitHub Documentation for further information."
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "fb4751f7f9404387",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. Original refers to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "34ec6573634b43e4",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "The annotation to extract label info.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "5ffaf736b02d46a1",
+			"name": "Feature(s)",
+			"param_name": "Feature_s_",
+			"description": "Specifies features (e.g., biomarkers) for annotation metrics. Add multiple features by selecting \"Add item\" for each. The default 'All' includes all dataset features.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "All"
+		}
+	]
+}

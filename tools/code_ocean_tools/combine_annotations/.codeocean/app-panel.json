@@ -1,0 +1,38 @@
+{
+	"version": 1,
+	"named_parameters": false,
+	"general": {
+		"title": "Combine Annotations [SPAC][DMAP]",
+		"instructions": "Combine multiple annotations into a new annotation using a defined separator.\\\nPlease refer to DUET Documentation,  GitHub Documentation"
+	},
+	"datasets": [],
+	"categories": [],
+	"parameters": [
+		{
+			"id": "8a11e6c05f5b4bd8",
+			"name": "Annotations Names",
+			"param_name": "Annotations_Names",
+			"description": "List of annotations to be combined.",
+			"type": "text",
+			"value_type": "string"
+		},
+		{
+			"id": "e6ceda80925e4331",
+			"name": "New Annotation Name",
+			"param_name": "New_Annotation_Name",
+			"description": "Annotation to be added to the dataset, containing the new labels after concatenation.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "combined_annotation"
+		},
+		{
+			"id": "d048d792af654443",
+			"name": "Separator",
+			"param_name": "Separator",
+			"description": "A string to add between labels during concatenations.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "_"
+		}
+	]
+}
