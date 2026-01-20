@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Downsample Cells [SPAC] [DMAP]",
-		"instructions": "This template  reduces  number of cells based on one or more annotations. \\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+		"instructions": "This template  reduces  number of cells based on one or more annotations. \\ Please refer to DUET Documentation, GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "7494c54746484c9c",
+			"id": "9109ad14cf704f",
+			"category": "general",
 			"name": "Number of Samples",
 			"param_name": "Number_of_Samples",
 			"description": "Specifies how many cells to include in the downsampled dataset. When \"Stratify Option\" is off, it selects this number of cells from each label or from each unique combination of labels across multiple annotations. When \"Stratify Option\" is on,  it distributes this total number of cells across all labels or label combinations, in proportion to their frequencies in the full dataset.",
@@ -18,7 +24,8 @@
 			"default_value": "100000"
 		},
 		{
-			"id": "2f835a3e342a419b",
+			"id": "e225394c4f3248",
+			"category": "general",
 			"name": "Stratify Option",
 			"param_name": "Stratify_Option",
 			"description": "If true, samples are chosen to reflect the original dataset's label distribution across the selected annotations. If false, an equal number of cells will be selected from each label or unique label combination across selected annotations, regardless of their original frequency.",
@@ -28,7 +35,8 @@
 			"extra_data": []
 		},
 		{
-			"id": "d8d1dcd8f85b4bf4",
+			"id": "d36b2392dcec4b",
+			"category": "general",
 			"name": "Random Selection",
 			"param_name": "Random_Selection",
 			"description": "If this toggle is True, and \"Stratify Option\" is set to True, randomly select the returned cells within each annotation labels. Otherwise, choose the first cells up to \"Number_of_Samples\" from selected annotation(s).",
@@ -38,7 +46,8 @@
 			"extra_data": []
 		},
 		{
-			"id": "4ff949642c454dae",
+			"id": "dd869256277f4d",
+			"category": "general",
 			"name": "New Combined Annotation Name",
 			"param_name": "New_Combined_Annotation_Name",
 			"description": "This is the name for a new annotation created when multiple annotations are selected. The values of this new annotation are the specific combinations of labels from the selected annotations, such as 'Region1_Day3'.",
@@ -47,7 +56,8 @@
 			"default_value": "_combined_"
 		},
 		{
-			"id": "390eae8af3c24699",
+			"id": "b18135a3d24d4e",
+			"category": "general",
 			"name": "Minimum Threshold",
 			"param_name": "Minimum_Threshold",
 			"description": "Determine the lowest count of cells an annotation label must be included in the downsampled data. Annotation labels with fewer cells than this threshold will be excluded to ensure meaningful representation.",

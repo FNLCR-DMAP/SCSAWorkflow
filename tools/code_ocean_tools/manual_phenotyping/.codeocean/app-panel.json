@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Manual Phenotyping [SPAC] [DMAP]",
-		"instructions": "Define and apply manual phenotypes to a dataset.  A new column with the annotation \"Manual Annotation Name\" will be added. \\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+		"instructions": "Define and apply manual phenotypes to a dataset.  A new column with the annotation \"Manual Annotation Name\" will be added. \\ Please refer to DUET Documentation, GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "0fd60bfc690845c4",
+			"id": "83f4156901c642",
+			"category": "general",
 			"name": "Classification Column Prefix",
 			"param_name": "Classification_Column_Prefix",
 			"description": "The prefix to prepend to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
@@ -18,7 +24,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "3dfe3690134540ab",
+			"id": "c29cefc1e53c45",
+			"category": "general",
 			"name": "Classification Column Suffix",
 			"param_name": "Classification_Column_Suffix",
 			"description": "The suffix to append to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
@@ -27,7 +34,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "1801a772979b4434",
+			"id": "ae1e7ce1c3914f",
+			"category": "general",
 			"name": "Allow Multiple Phenotypes",
 			"param_name": "Allow_Multiple_Phenotypes",
 			"description": "Allow a given cell to match multiple phenotype_code. The resulting label will join all the \"phenotype_name\" using a ','. If set to False, the resulting cell will be marked as \"no_label\"",
@@ -37,7 +45,8 @@
 			"extra_data": []
 		},
 		{
-			"id": "19fff6908ba84e24",
+			"id": "bce83f29c8b34f",
+			"category": "general",
 			"name": "Manual Annotation Name",
 			"param_name": "Manual_Annotation_Name",
 			"description": "The name of the new column (annotation) to be added to the dataset with the defined \"phenotype_name\"s as values. Cells that do not match any defined phenotype will be assiged \"no_label\".",

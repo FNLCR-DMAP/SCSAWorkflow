@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Visualize Ripley L [SPAC][DMAP]",
-		"instructions": "Plot the Ripley L function for two phenotypes, multiple radii, regions, and simulations.\\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+		"instructions": "Plot the Ripley L function for two phenotypes, multiple radii, regions, and simulations.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "13f08be2ee5142de",
+			"id": "39beb8132df64b",
+			"category": "general",
 			"name": "Center Phenotype",
 			"param_name": "Center_Phenotype",
 			"description": "The phenotype of the anchor cells.",
@@ -18,7 +24,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "b16e004ab5b64079",
+			"id": "99ccd25ebac145",
+			"category": "general",
 			"name": "Neighbor Phenotype",
 			"param_name": "Neighbor_Phenotype",
 			"description": "The phenotype of the neighbors cells.",
@@ -27,7 +34,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "787b0b8973114180",
+			"id": "217f5d6a01454d",
+			"category": "general",
 			"name": "Plot Specific Regions",
 			"param_name": "Plot_Specific_Regions",
 			"description": "Set to True to plot Ripley L for specific regions of interest. If True, set the two parameters \"Regions Annotation\"  and \"Regions Labels(s)\"",
@@ -37,7 +45,8 @@
 			"extra_data": []
 		},
 		{
-			"id": "308050e748864294",
+			"id": "c4c704ec3ea244",
+			"category": "general",
 			"name": "Regions Label(s)",
 			"param_name": "Regions_Label_s_",
 			"description": "The label(s) of the region(s) to plot.",
@@ -45,7 +54,8 @@
 			"value_type": "string"
 		},
 		{
-			"id": "8d8bdb93849943d4",
+			"id": "5cc8ee2106c648",
+			"category": "general",
 			"name": "Plot Simulations",
 			"param_name": "Plot_Simulations",
 			"description": "Plot the 95% confidence interval for the poisson point process simulations.",

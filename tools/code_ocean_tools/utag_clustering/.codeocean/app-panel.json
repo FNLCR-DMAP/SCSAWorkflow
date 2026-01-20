@@ -1,21 +1,26 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "UTAG Clustering [SPAC] [DMAP]",
-		"instructions": "Discover spatial tissue domains (tissue micro\u2011environments) by combining phenotypes (feature intensities) and spatial proximity of cells with UTAG (Unsupervised discovery of Tissue Architecture by Graph message passing). Clusters are stored in the analysis as the annotation \u201cUTAG\u201d.\\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+		"instructions": "Discover spatial tissue domains (tissue micro\u2011environments) by combining phenotypes (feature intensities) and spatial proximity of cells with UTAG (Unsupervised discovery of Tissue Architecture by Graph message passing). Clusters are stored in the analysis as the annotation \u201cUTAG\u201d.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
 	},
-	"datasets": [],
 	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
 		{
 			"id": "parellel_jobs_parameters",
 			"name": "Parellel Jobs parameters",
-			"help_text": "Parameters for Parellel Jobs parameters"
+			"help_text": "Configure parellel jobs parameters"
 		}
 	],
 	"parameters": [
 		{
-			"id": "f522dc9b40124d37",
+			"id": "36c825517d424a",
+			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
 			"description": "Source table to perform the computation. The default value \"Original\" will use the raw dataset.",
@@ -24,7 +29,8 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "aa8116c34aaf45d7",
+			"id": "e55e5c44c81c47",
+			"category": "general",
 			"name": "Features",
 			"param_name": "Features",
 			"description": "List specific features for clustering. Default \"All\" will use all features",
@@ -33,7 +39,8 @@
 			"default_value": "All"
 		},
 		{
-			"id": "010b1b6833b741a7",
+			"id": "85c64caef8b44d",
+			"category": "general",
 			"name": "Slide Annotation",
 			"param_name": "Slide_Annotation",
 			"description": "Name of the annotation column that identifies each image/slide. Default is \"None\" if not applicable.",
@@ -42,7 +49,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "f0d43c0e1eb14773",
+			"id": "a163d5292f614c",
+			"category": "general",
 			"name": "PCA Components",
 			"param_name": "PCA_Components",
 			"description": "Number of principal components to keep. Default is \"None\" to skip PCA (good for small datasets).",
@@ -51,7 +59,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "79199308c48e4582",
+			"id": "9296d82ae90745",
+			"category": "general",
 			"name": "K-Nearest Neighbors",
 			"param_name": "K_Nearest_Neighbors",
 			"description": "Number of nearest neighbors used when building the graph for clustering.",
@@ -60,7 +69,8 @@
 			"default_value": "15"
 		},
 		{
-			"id": "8c3c2e9d7f7b4389",
+			"id": "cd11ca19b53248",
+			"category": "general",
 			"name": "Resolution Parameter",
 			"param_name": "Resolution_Parameter",
 			"description": "Higher values give more, smaller clusters; lower values give fewer, larger clusters.",
@@ -69,7 +79,8 @@
 			"default_value": "1"
 		},
 		{
-			"id": "5a0af009eb85430d",
+			"id": "1103c0b1d4274e",
+			"category": "general",
 			"name": "Distance Threshold",
 			"param_name": "Distance_Threshold",
 			"description": "How far (in micrometres) two cells can be apart and still be considered neighbors.",
@@ -78,7 +89,8 @@
 			"default_value": "20.0"
 		},
 		{
-			"id": "f6e0081d672c44f7",
+			"id": "34642200ddf649",
+			"category": "general",
 			"name": "Random Seed",
 			"param_name": "Random_Seed",
 			"description": "Ensures results are reproducible when re\u2011run the template.",
@@ -87,7 +99,8 @@
 			"default_value": "42"
 		},
 		{
-			"id": "a2c6f4f89a0e4d7a",
+			"id": "b4fc059f294044",
+			"category": "general",
 			"name": "Leiden Iterations",
 			"param_name": "Leiden_Iterations",
 			"description": "How many times the Leiden algorithm refines the clusters.",
@@ -96,7 +109,8 @@
 			"default_value": "5"
 		},
 		{
-			"id": "476ae3e6201945cc",
+			"id": "7dff5c8941f94d",
+			"category": "general",
 			"name": "Output Annotation Name",
 			"param_name": "Output_Annotation_Name",
 			"description": "The new column that will store the UTAG domain labels.",
@@ -105,24 +119,24 @@
 			"default_value": "UTAG"
 		},
 		{
-			"id": "1856db927f734458",
+			"id": "daea61a1603848",
+			"category": "parellel_jobs_parameters",
 			"name": "Parellel Processes",
 			"param_name": "Parellel_Processes",
 			"description": "For multiple slides (images) and several CPU cores, split the data by Slide and run the message\u2011passing step for each slide in parallel. Default is False.",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "parellel_jobs_parameters",
 			"default_value": "False",
 			"extra_data": []
 		},
 		{
-			"id": "313fa80ae60e481e",
+			"id": "9716f35011d74b",
+			"category": "parellel_jobs_parameters",
 			"name": "N-Jobs",
 			"param_name": "N_Jobs",
 			"description": "When Parallel Processes is True,  the number of jobs to run in parallel. Default is 1.",
 			"type": "text",
 			"value_type": "number",
-			"category": "parellel_jobs_parameters",
 			"default_value": "1"
 		}
 	]

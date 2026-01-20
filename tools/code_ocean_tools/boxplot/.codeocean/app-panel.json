@@ -1,26 +1,31 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Boxplot [SPAC] [DMAP]",
-		"instructions": "Create a boxplot visualization of the features in the analysis dataset.\\\nPlease refer to DUET Documentation,  GitHub Documentation"
+		"instructions": "Create a boxplot visualization of the features in the analysis dataset.\\ Please refer to DUET Documentation,  GitHub Documentation"
 	},
-	"datasets": [],
 	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
 		{
 			"id": "value_axis_configuration_parameters",
 			"name": "Value Axis Configuration parameters",
-			"help_text": "Parameters for Value Axis Configuration parameters"
+			"help_text": "Configure value axis configuration parameters"
 		},
 		{
 			"id": "figure_configuration_parameters",
 			"name": "Figure Configuration parameters",
-			"help_text": "Parameters for Figure Configuration parameters"
+			"help_text": "Configure figure configuration parameters"
 		}
 	],
 	"parameters": [
 		{
-			"id": "3c453106509a4e2f",
+			"id": "c23297131deb4c",
+			"category": "general",
 			"name": "Table to Visualize",
 			"param_name": "Table_to_Visualize",
 			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
@@ -29,7 +34,8 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "09e5617a668a451a",
+			"id": "1025c15295dd48",
+			"category": "general",
 			"name": "Feature(s) to Plot",
 			"param_name": "Feature_s_to_Plot",
 			"description": "The feature(s) to plot in the box plot. Default \"All\" will plot all features.",
@@ -38,7 +44,8 @@
 			"default_value": "All"
 		},
 		{
-			"id": "8c3f045cec544f54",
+			"id": "347f2c27374746",
+			"category": "general",
 			"name": "Primary Annotation",
 			"param_name": "Primary_Annotation",
 			"description": "The annotation to group the visualizations. Use \"None\" to disable.",
@@ -47,7 +54,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "2f3d4953bb00489b",
+			"id": "8afd7d19d37945",
+			"category": "general",
 			"name": "Secondary Annotation",
 			"param_name": "Secondary_Annotation",
 			"description": "Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is \"None\".",
@@ -56,85 +64,85 @@
 			"default_value": "None"
 		},
 		{
-			"id": "fde914d35d804ebb",
+			"id": "62bea3f7f4be48",
+			"category": "value_axis_configuration_parameters",
 			"name": "Value Axis Log Scale",
 			"param_name": "Value_Axis_Log_Scale",
 			"description": "Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale.",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "value_axis_configuration_parameters",
 			"default_value": "False",
 			"extra_data": []
 		},
 		{
-			"id": "06964a9533e9472e",
+			"id": "dfe9a678b4ad45",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Title",
 			"param_name": "Figure_Title",
 			"description": "Title of the figure",
 			"type": "text",
 			"value_type": "string",
-			"category": "figure_configuration_parameters",
 			"default_value": "BoxPlot"
 		},
 		{
-			"id": "f3f3e2ac67d3425d",
+			"id": "bc0f92e42e7b46",
+			"category": "figure_configuration_parameters",
 			"name": "Horizontal Plot",
 			"param_name": "Horizontal_Plot",
 			"description": "To plot the boxplot in horizontal orientation. Default is vertical.",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "figure_configuration_parameters",
 			"default_value": "False",
 			"extra_data": []
 		},
 		{
-			"id": "77b5cb277cda4dd9",
+			"id": "90daab5b4cfa48",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "Width of the figure, inch.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		},
 		{
-			"id": "c68c6e0e08744cbb",
+			"id": "0ac84c5f684949",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "Height of the figure, inch.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "8"
 		},
 		{
-			"id": "6237d027ac7f46e6",
+			"id": "0a697a0c77a049",
+			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "300"
 		},
 		{
-			"id": "5942fb0b00b74c38",
+			"id": "39ffe88001264d",
+			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Figure font size.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "10"
 		},
 		{
-			"id": "3b6bdf71f07c4255",
+			"id": "929efaa827b24e",
+			"category": "value_axis_configuration_parameters",
 			"name": "Keep Outliers",
 			"param_name": "Keep_Outliers",
 			"description": "True to keep the outliers for every feature, False to remove them",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "value_axis_configuration_parameters",
 			"default_value": "True",
 			"extra_data": []
 		}

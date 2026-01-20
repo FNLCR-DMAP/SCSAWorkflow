@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Quantile Scaling [SPAC] [DMAP]",
-		"instructions": "Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\\\nx' = (x- quantile min)/(quantile max - quantile min), x'=0 if x <= quantile min, x'=1 if x >= quantile max\\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+		"instructions": "Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\\ x' = (x- quantile min)/(quantile max - quantile min), x'=0 if x <= quantile min, x'=1 if x >= quantile max\\ Please refer to DUET Documentation and GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "b87d12ac21984117",
+			"id": "011bd5ace9f540",
+			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
 			"description": "Source table to perform the computation, \"Original\" table refers to the raw data.",
@@ -18,7 +24,8 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "bf408b0558af4956",
+			"id": "f794c3d7fe6044",
+			"category": "general",
 			"name": "Low Quantile",
 			"param_name": "Low_Quantile",
 			"description": "Low quantile to be used as min.",
@@ -27,7 +34,8 @@
 			"default_value": "0.02"
 		},
 		{
-			"id": "afef892913d34f27",
+			"id": "33a0788134ee42",
+			"category": "general",
 			"name": "High Quantile",
 			"param_name": "High_Quantile",
 			"description": "High quantile to be used as max.",
@@ -36,7 +44,8 @@
 			"default_value": "0.98"
 		},
 		{
-			"id": "8e4a5ff75a6742d8",
+			"id": "1a262097acf944",
+			"category": "general",
 			"name": "Interpolation",
 			"param_name": "Interpolation",
 			"description": "The interpolation method to use when selecting the value for low and high quantile. Values can be \"nearest\" or \"linear\"",
@@ -49,7 +58,8 @@
 			]
 		},
 		{
-			"id": "ef8d0065a30d4a5e",
+			"id": "96f11b16361046",
+			"category": "general",
 			"name": "Output Table Name",
 			"param_name": "Output_Table_Name",
 			"description": "Name of the table to be added to the analysis.",
@@ -58,7 +68,8 @@
 			"default_value": "normalized_feature"
 		},
 		{
-			"id": "4fa314194ca9424e",
+			"id": "ad7c0640e3bb41",
+			"category": "general",
 			"name": "Per Batch",
 			"param_name": "Per_Batch",
 			"description": "Whether to apply the transformation per batch. If \"True\", the transformation is applied per batch.",
@@ -68,7 +79,8 @@
 			"extra_data": []
 		},
 		{
-			"id": "f0f0ba63327e49ea",
+			"id": "582f54d74d814b",
+			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
 			"description": "The name of the annotation to define batches. Required if Per Batch is \"True\".",

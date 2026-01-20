@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Append Pin Color Rule [DMAP] [SPAC]",
-		"instructions": "Adds pin color rules to the analysis that can be used in downstream visualization. \\\nThe consistent color representation of the same labels between different visualizations promotes the comprehensiveness of the analysis.  \\\nThe list of available color is defined in this link. \\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+		"instructions": "Adds pin color rules to the analysis that can be used in downstream visualization. \\ The consistent color representation of the same labels between different visualizations promotes the comprehensiveness of the analysis.  \\ The list of available color is defined in this link. \\ Please refer to DUET Documentation and GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "52f8c9a963c24247",
+			"id": "45031e57fa414a",
+			"category": "general",
 			"name": "Label Color Map",
 			"param_name": "Label_Color_Map",
 			"description": "List of string pairs representing the label and its assigned color. Each pair should have this format: <label>:<color> (without the '<' '>'). Example: b-cells:red. The values must be a single color string from the link provided in the description",
@@ -18,7 +24,8 @@
 			"default_value": "[]"
 		},
 		{
-			"id": "83c35c9e40494288",
+			"id": "e40affe67f3c40",
+			"category": "general",
 			"name": "Color Map Name",
 			"param_name": "Color_Map_Name",
 			"description": "Name of the color map to be stored in the analysis. Default is \"_spac_colors\".",
@@ -27,7 +34,8 @@
 			"default_value": "_spac_colors"
 		},
 		{
-			"id": "58fc96a250264c95",
+			"id": "887ccbce916648",
+			"category": "general",
 			"name": "Overwrite Previous Color Map",
 			"param_name": "Overwrite_Previous_Color_Map",
 			"description": "When True, if a color map with name defined in the \"Color Map Name\" option already exists in the analysis, the current color mapping rule run will replace existing ones.",

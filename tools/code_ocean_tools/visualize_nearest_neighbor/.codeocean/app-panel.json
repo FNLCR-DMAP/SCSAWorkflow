@@ -1,26 +1,31 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Visualize Nearest Neighbor [SPAC][DMAP]",
-		"instructions": "Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\\\nPlease refer to DUET Documentation,  and GitHub Documentation  for further information."
+		"instructions": "Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\\ Please refer to DUET Documentation,  and GitHub Documentation  for further information."
 	},
-	"datasets": [],
 	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
 		{
 			"id": "advanced_analysis_setting_parameters",
 			"name": "Advanced Analysis Setting parameters",
-			"help_text": "Parameters for Advanced Analysis Setting parameters"
+			"help_text": "Configure advanced analysis setting parameters"
 		},
 		{
 			"id": "figure_configuration_parameters",
 			"name": "Figure Configuration parameters",
-			"help_text": "Parameters for Figure Configuration parameters"
+			"help_text": "Configure figure configuration parameters"
 		}
 	],
 	"parameters": [
 		{
-			"id": "a8c7a1fd8a84401c",
+			"id": "cb6dc63d843f4c",
+			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
 			"description": "Annotation name specifying phenotypes. Must match name used when the distances were originally calculated.",
@@ -29,7 +34,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "36254eb732994173",
+			"id": "24f7d4c5544642",
+			"category": "general",
 			"name": "ImageID",
 			"param_name": "ImageID",
 			"description": "The annotation name used to distinguish different images or samples. If there's only one image, set to \"None.\"",
@@ -38,7 +44,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "c8725b18ea644dbc",
+			"id": "69981d35f29f4c",
+			"category": "general",
 			"name": "Plot Method",
 			"param_name": "Plot_Method",
 			"description": "Determines the plotting style- Catplots (\"numeric\" ) show relationship between a numerical and one or more categorical variables, e.g., \"violin\", \"box\", \"strip\"; Displots (\"distribution\") visualize the distribution of single variables, e.g., \"kdeplot\", \"ecdfplot\". Default is \"numeric\".",
@@ -51,7 +58,8 @@
 			]
 		},
 		{
-			"id": "90ca5fb5a8f240a6",
+			"id": "3877790f3f3b4f",
+			"category": "general",
 			"name": "Plot Type",
 			"param_name": "Plot_Type",
 			"description": "Specific plot used to display the distances. If Method=\"numeric\", use options such as \"box\", \"violin\", \"strip\", \"swarm\", or \"boxen\". If Method=\"distribution\", choose \"hist\", \"kde\", or \"ecdf\". Default-  \"boxen\" for \"numeric\", \"kde\" for \"distribution\".",
@@ -70,7 +78,8 @@
 			]
 		},
 		{
-			"id": "60cfeb009af04478",
+			"id": "36c28c051d7b47",
+			"category": "general",
 			"name": "Source \"Anchor\" Cell Label",
 			"param_name": "Source_Anchor_Cell_Label",
 			"description": "The phenotype from which distances are measured.",
@@ -79,7 +88,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "d28e5255f0f74eaf",
+			"id": "18f915fbe7dd4a",
+			"category": "general",
 			"name": "Target Cell Label",
 			"param_name": "Target_Cell_Label",
 			"description": "The phenotype(s) being measured against. Use \"All\" to include every phenotype.",
@@ -88,17 +98,18 @@
 			"default_value": "All"
 		},
 		{
-			"id": "9e68a7a99e0e4efc",
+			"id": "d96e0d0751254b",
+			"category": "advanced_analysis_setting_parameters",
 			"name": "Nearest Neighbor Associated Table",
 			"param_name": "Nearest_Neighbor_Associated_Table",
 			"description": "The name used to retrieve the stored distance table from the prior step. Must match what was used when the distances were calculated.",
 			"type": "text",
 			"value_type": "string",
-			"category": "advanced_analysis_setting_parameters",
 			"default_value": "spatial_distance"
 		},
 		{
-			"id": "64f5c356c49247c9",
+			"id": "6bfde759872148",
+			"category": "general",
 			"name": "Log Scale",
 			"param_name": "Log_Scale",
 			"description": "Display the distance in log scale. Default is False.",
@@ -108,95 +119,95 @@
 			"extra_data": []
 		},
 		{
-			"id": "912c8315f5e74a07",
+			"id": "0b7ea50b25514f",
+			"category": "figure_configuration_parameters",
 			"name": "Facet Plot",
 			"param_name": "Facet_Plot",
 			"description": "If set to \u201cTrue,\u201d each image or sample (based on ImageID) appears in its own subplot within a single figure. One subplot will be shown if only one image or sample.",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "figure_configuration_parameters",
 			"default_value": "False",
 			"extra_data": []
 		},
 		{
-			"id": "eabf4b8c89d8440f",
+			"id": "71a6eecc56594b",
+			"category": "figure_configuration_parameters",
 			"name": "X Axis Label Rotation",
 			"param_name": "X_Axis_Label_Rotation",
 			"description": "The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right).",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "0"
 		},
 		{
-			"id": "8af7e6b153734eb7",
+			"id": "306f011785d64c",
+			"category": "figure_configuration_parameters",
 			"name": "Shared X Axis Title ",
 			"param_name": "Shared_X_Axis_Title_",
 			"description": "For faceted plots, use one shared x-axis title at the bottom. Default is \"ON\".",
 			"type": "list",
 			"value_type": "boolean",
-			"category": "figure_configuration_parameters",
 			"default_value": "True",
 			"extra_data": []
 		},
 		{
-			"id": "4f3a0b5c82ed4a82",
+			"id": "2f6e21fdaba942",
+			"category": "figure_configuration_parameters",
 			"name": "X Axis Title Font Size",
 			"param_name": "X_Axis_Title_Font_Size",
 			"description": "Font size for x-axis title. If \"None \", use figure font size.",
 			"type": "text",
 			"value_type": "string",
-			"category": "figure_configuration_parameters",
 			"default_value": "None"
 		},
 		{
-			"id": "8f2c1fc3735a49ed",
+			"id": "7154becbb18e4e",
+			"category": "figure_configuration_parameters",
 			"name": "Defined Color Mapping",
 			"param_name": "Defined_Color_Mapping",
 			"description": "Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default \"None\" will allow the visualization to determine the color of labels automatically.",
 			"type": "text",
 			"value_type": "string",
-			"category": "figure_configuration_parameters",
 			"default_value": "None"
 		},
 		{
-			"id": "881018d7269c4608",
+			"id": "bf9bc64823fa42",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		},
 		{
-			"id": "69fcd6fd9784486c",
+			"id": "0a3d741da67a4b",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "6"
 		},
 		{
-			"id": "6deb27fd25a14509",
+			"id": "975e3cfde3fc49",
+			"category": "figure_configuration_parameters",
 			"name": "FIgure DPI",
 			"param_name": "FIgure_DPI",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "300"
 		},
 		{
-			"id": "333d8c556e3e4154",
+			"id": "b2afca3e3f764d",
+			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		}
 	]

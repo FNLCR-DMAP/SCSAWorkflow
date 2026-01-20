@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Select Values [SPAC] [DMAP]",
-		"instructions": "Selects the rows containing the label(s) of interest in a given annotation from the dataset.\\\nPlease refer to DUET Documentation, GitHub Documentation"
+		"instructions": "Selects the rows containing the label(s) of interest in a given annotation from the dataset.\\ Please refer to DUET Documentation, GitHub Documentation"
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "e7bf583de74f424c",
+			"id": "fbe8e8bfba2c47",
+			"category": "general",
 			"name": "Label(s) of Interest",
 			"param_name": "Labels_of_Interest",
 			"description": "Label(s) of interest to include from the selected annotation.",

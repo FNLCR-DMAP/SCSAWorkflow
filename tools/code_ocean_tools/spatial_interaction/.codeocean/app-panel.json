@@ -1,26 +1,31 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Spatial Interaction [SPAC] [DMAP]",
-		"instructions": "Performs advanced spatial statistical analyses , instead of visualization of spatial distribution, to  evaluate neighborhood enrichments or cluster interactions.\\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+		"instructions": "Performs advanced spatial statistical analyses , instead of visualization of spatial distribution, to  evaluate neighborhood enrichments or cluster interactions.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
 	},
-	"datasets": [],
 	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
 		{
 			"id": "advanced_analysis_setting_parameters",
 			"name": "Advanced Analysis Setting parameters",
-			"help_text": "Parameters for Advanced Analysis Setting parameters"
+			"help_text": "Configure advanced analysis setting parameters"
 		},
 		{
 			"id": "figure_configuration_parameters",
 			"name": "Figure Configuration parameters",
-			"help_text": "Parameters for Figure Configuration parameters"
+			"help_text": "Configure figure configuration parameters"
 		}
 	],
 	"parameters": [
 		{
-			"id": "23dc90eba7764564",
+			"id": "028f94ccc58c40",
+			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
 			"description": "Annotation to be used in calculating spatial interactions between cells.",
@@ -29,7 +34,8 @@
 			"default_value": ""
 		},
 		{
-			"id": "8930c3fd08874733",
+			"id": "0828933b9b3b41",
+			"category": "general",
 			"name": "Spatial Analysis Method",
 			"param_name": "Spatial_Analysis_Method",
 			"description": "Spatial analysis method provided by the squidpy package.",
@@ -42,7 +48,8 @@
 			]
 		},
 		{
-			"id": "dbf1d667cddb436e",
+			"id": "8fd6b48de5674b",
+			"category": "general",
 			"name": "Stratify By",
 			"param_name": "Stratify_By",
 			"description": "The annotation(s) to stratify the dataset when generating interaction plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. If n (n>=2) annotations are passed, the function will be stratified based on existing combination of labels in the passed annotations. Use \"None\" without quotes to disable.",
@@ -51,13 +58,13 @@
 			"default_value": "[\"None\"]"
 		},
 		{
-			"id": "029161115a994374",
+			"id": "d4a1d863192344",
+			"category": "advanced_analysis_setting_parameters",
 			"name": "Coordinate Type",
 			"param_name": "Coordinate_Type",
 			"description": "Type of coordinate system used in computing spatial neighbors. Should be 'generic' for general dataset. Default is None, decided by the squidy pacakge.",
 			"type": "list",
 			"value_type": "string",
-			"category": "advanced_analysis_setting_parameters",
 			"default_value": "None",
 			"extra_data": [
 				"None",
@@ -65,17 +72,18 @@
 			]
 		},
 		{
-			"id": "b5c9dcfd44574bb3",
+			"id": "7254b3738ab342",
+			"category": "advanced_analysis_setting_parameters",
 			"name": "Seed",
 			"param_name": "Seed",
 			"description": "Random seed for reproducibility, used in Neighborhood Enrichment Analysis.",
 			"type": "text",
 			"value_type": "string",
-			"category": "advanced_analysis_setting_parameters",
 			"default_value": "None"
 		},
 		{
-			"id": "9d0033997b504322",
+			"id": "b29cb5841aff43",
+			"category": "general",
 			"name": "Radius",
 			"param_name": "Radius",
 			"description": "The maximum distance in spatial coordinates to create an edge between two cells. Takes priority over KNN. Use \"None\" without quotes to disable.",
@@ -84,7 +92,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "10633397a7db471b",
+			"id": "b2bbb6382f3e49",
+			"category": "general",
 			"name": "K-Nearest Neighbors",
 			"param_name": "K_Nearest_Neighbors",
 			"description": "Default is 6. Number of neighbors for KNN.",
@@ -93,53 +102,53 @@
 			"default_value": "6"
 		},
 		{
-			"id": "d5d6c7123a42415c",
+			"id": "b42c1aa6667b4e",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "The width of the figure in inch.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "15"
 		},
 		{
-			"id": "f325c4d485a64881",
+			"id": "e77bf5128ee94d",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "The height of the figure in inch.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		},
 		{
-			"id": "ed24d4af14484a00",
+			"id": "1e3ccf28bc2843",
+			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "200"
 		},
 		{
-			"id": "93817f4b3a9e4827",
+			"id": "0ce9c0abf37541",
+			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		},
 		{
-			"id": "44ffa5aa60cd44e7",
+			"id": "5f418ea627bb44",
+			"category": "advanced_analysis_setting_parameters",
 			"name": "Color Bar Range",
 			"param_name": "Color_Bar_Range",
 			"description": "The color bar range defines the even lower and upper color bar limit to allow center of the color bar remains 0. For example, enter the single value \"100\" without the quotes to create a color range from -100:100. Default Automatic will allow the color bar to be defined automatically.",
 			"type": "text",
 			"value_type": "string",
-			"category": "advanced_analysis_setting_parameters",
 			"default_value": "Automatic"
 		}
 	]

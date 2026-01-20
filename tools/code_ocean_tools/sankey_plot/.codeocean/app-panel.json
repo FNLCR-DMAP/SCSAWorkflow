@@ -1,21 +1,26 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Sankey Plot [SPAC] [DMAP]",
-		"instructions": "Generates a static and an interactive Sankey plot to visualize annotation relationships.  A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.\\\nPlease refer to DUET Documentation and GitHub Documentation for further information."
+		"instructions": "Generates a static and an interactive Sankey plot to visualize annotation relationships.  A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
 	},
-	"datasets": [],
 	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
 		{
 			"id": "figure_configuration_parameters",
 			"name": "Figure Configuration parameters",
-			"help_text": "Parameters for Figure Configuration parameters"
+			"help_text": "Configure figure configuration parameters"
 		}
 	],
 	"parameters": [
 		{
-			"id": "4c89fdc52e9d42d8",
+			"id": "ebd1277ea8f54c",
+			"category": "general",
 			"name": "Source Annotation Name",
 			"param_name": "Source_Annotation_Name",
 			"description": "Name of the source annotation column. Display at the left of the Sankey plot.",
@@ -24,7 +29,8 @@
 			"default_value": "None"
 		},
 		{
-			"id": "ce1f0b7eb55149c5",
+			"id": "92025fd254cc44",
+			"category": "general",
 			"name": "Target Annotation Name",
 			"param_name": "Target_Annotation_Name",
 			"description": "Name of the target annotation column. Display at the right of the Sankey plot.",
@@ -33,10 +39,11 @@
 			"default_value": "None"
 		},
 		{
-			"id": "35097d284893469d",
+			"id": "bc0bc16152a743",
+			"category": "general",
 			"name": "Source Annotation Color Map",
 			"param_name": "Source_Annotation_Color_Map",
-			"description": "Colormap of source annotation, default is tab20. Please refer to [Matplotlib Colormap](https://matplotlib.org/stable/users/explain/colors/colormaps.html) for further information",
+			"description": "Colormap of source annotation, default is tab20. Please refer to Matplotlib Colormap for further information",
 			"type": "list",
 			"value_type": "string",
 			"default_value": "tab20",
@@ -95,10 +102,11 @@
 			]
 		},
 		{
-			"id": "a81b5162d22d4748",
+			"id": "dd0f69d2de644f",
+			"category": "general",
 			"name": "Target Annotation Color Map",
 			"param_name": "Target_Annotation_Color_Map",
-			"description": "Colormap of target annotation, default is tab20b. Please refer to [Matplotlib Colormap](https://matplotlib.org/stable/users/explain/colors/colormaps.html) for further information",
+			"description": "Colormap of target annotation, default is tab20b. Please refer to Matplotlib Colormap for further information",
 			"type": "list",
 			"value_type": "string",
 			"default_value": "tab20b",
@@ -157,43 +165,43 @@
 			]
 		},
 		{
-			"id": "a674cef53b3a4d4f",
+			"id": "acfba259129047",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Width, inch",
 			"param_name": "Figure_Width_inch",
 			"description": "Figure Width, inch",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "6"
 		},
 		{
-			"id": "5390262456e64679",
+			"id": "aaa43e6d90e144",
+			"category": "figure_configuration_parameters",
 			"name": "Figure Height, inch",
 			"param_name": "Figure_Height_inch",
 			"description": "Figure Height, inch",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "6"
 		},
 		{
-			"id": "602c428f2ece4cf0",
+			"id": "eeb4c8f63b5b47",
+			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Dots Per squared Inch, higher the value, better the image quality",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "300"
 		},
 		{
-			"id": "ffe8a09510434eab",
+			"id": "b360e7f3aab945",
+			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Font Size",
 			"type": "text",
 			"value_type": "number",
-			"category": "figure_configuration_parameters",
 			"default_value": "12"
 		}
 	]

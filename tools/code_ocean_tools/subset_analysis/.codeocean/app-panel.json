@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Subset Analysis [SPAC] [DMAP]",
-		"instructions": "Chooses cells that either include or exclude specific label(s) within a designated annotation for downstream analysis.\\\nPlease refer to DUET Documentation, GitHub Documentation"
+		"instructions": "Chooses cells that either include or exclude specific label(s) within a designated annotation for downstream analysis.\\ Please refer to DUET Documentation, GitHub Documentation"
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "34307335339a42d1",
+			"id": "f007dede333642",
+			"category": "general",
 			"name": "Annotation of interest",
 			"param_name": "Annotation_of_interest",
 			"description": "Annotation of interest to select labels from.",
@@ -17,7 +23,8 @@
 			"value_type": "string"
 		},
 		{
-			"id": "af2795ba6e5540e9",
+			"id": "51869a0621f74c",
+			"category": "general",
 			"name": "Labels",
 			"param_name": "Labels",
 			"description": "Label(s) of interest to be included/excluded from the selected annotation.",
@@ -26,7 +33,8 @@
 			"default_value": "[\"\"]"
 		},
 		{
-			"id": "29532d12a4b34523",
+			"id": "892d8c3d0fc641",
+			"category": "general",
 			"name": "Include / Exclude",
 			"param_name": "Include_Exclude",
 			"description": "Set the functionality to either \"Include\" or \"Exclude\" selected labels",

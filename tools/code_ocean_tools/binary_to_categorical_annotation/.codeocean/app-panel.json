@@ -1,15 +1,21 @@
 {
 	"version": 1,
-	"named_parameters": false,
+	"named_parameters": true,
 	"general": {
 		"title": "Binary to Categorical Annotation [SPAC] [DMAP]",
-		"instructions": "Convert mutually exclusive binary annotation columns to one new categorical annotation column.\\\nPlease refer to DUET Documentation, GitHub Documentation for further information."
+		"instructions": "Convert mutually exclusive binary annotation columns to one new categorical annotation column.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
 	},
-	"datasets": [],
-	"categories": [],
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
 	"parameters": [
 		{
-			"id": "191185c2ca4b4d99",
+			"id": "6586a790989344",
+			"category": "general",
 			"name": "New Annotation Name",
 			"param_name": "New_Annotation_Name",
 			"description": "Name of the column to create with the new annotation.",
