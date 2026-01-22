@@ -123,7 +123,7 @@
 │   format_values.py normalizes → cleaned_params.json                                     │
 │            │                                                                            │
 │            ▼                                                                            │
-│   python -c "from spac.templates.boxplot_template import run_from_json; ..."           │
+│   python -c "from spac.templates.boxplot_template import run_from_json; ..."            │
 │            │                                                                            │
 │            ▼                                                                            │
 │   Outputs collected by Galaxy (based on <outputs> XML)                                  │
@@ -137,7 +137,7 @@
 │   User fills App Panel                                                                  │
 │            │                                                                            │
 │            ▼                                                                            │
-│   Code Ocean executes: bash run.sh --Figure_Width=12 --Keep_Outliers=False ...         │
+│   Code Ocean executes: bash run.sh --Figure_Width=12 --Keep_Outliers=False ...          │
 │            │                                                                            │
 │            ▼                                                                            │
 │   run.sh parses args → /results/jsons/params.json                                       │
@@ -146,7 +146,7 @@
 │   format_values.py normalizes → /results/jsons/cleaned_params.json                      │
 │            │                                                                            │
 │            ▼                                                                            │
-│   python -c "from spac.templates.boxplot_template import run_from_json; ..."           │
+│   python -c "from spac.templates.boxplot_template import run_from_json; ..."            │
 │            │                                                                            │
 │            ▼                                                                            │
 │   Results saved to /results/ (figures/, jsons/, CSVs)                                   │
