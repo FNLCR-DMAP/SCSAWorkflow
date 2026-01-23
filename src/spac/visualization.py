@@ -1019,7 +1019,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
-
+        # Define hist_data variable to store histogram dataframes
+        hist_data = []
+        
         if together:
             # Compute global bin edges based on the entire dataset
             if pd.api.types.is_numeric_dtype(plot_data[data_column]):
@@ -1029,7 +1031,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             else:
                 global_bin_edges = plot_data[data_column].unique()
 
-            hist_data = []
             # Compute histograms for each group separately and combine them
             for group in groups:
                 group_data = plot_data[
@@ -1053,7 +1054,46 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             axs.append(ax)
 
         else:
-            if not facet:
+            if facet:
+                # Use seaborn's FacetGrid to automatically create histogram subplots for each group
+                hist = sns.FacetGrid(plot_data, col=group_by)
+                
+                # Map the histogram function to the grid
+                hist.map(sns.histplot, data_column, **kwargs)
+
+                # Set rotation of label
+                hist.set_xticklabels(rotation=20, ha='right')
+
+                # Titles for each facet
+                hist.set_titles("{col_name}")
+                
+                # The following code has been commented out because the variables ax_i and group are not defined
+                # They are also not necessary when using FacetGrid to create histograms
+                
+                # # If defined_color_map provided, retrieves color map
+                # group_color = None
+                # if defined_color_map:
+                #     group_color = color_dict.get(group, None)
+
+                # sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                #              weights='count', color=group_color, **kwargs)
+
+                # # If plotting feature specify which layer
+                # if feature:
+                #     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
+                # else:
+                #     ax_i.set_title(f'{groups[i]}')
+
+                # Ajust top margin
+                hist.figure.subplots_adjust(left=.1,
+                                            top=0.85,
+                                            bottom=0.15,
+                                            hspace=0.3)
+
+                fig = hist.figure
+                axs.extend(hist.axes.flat)
+                hist_data = plot_data
+            else:
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)
                 )
@@ -1103,39 +1143,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                         ylabel = f'log({ylabel})'
                     ax_i.set_ylabel(ylabel)
                     axs.append(ax_i)
-            else:
-                hist = sns.FacetGrid(plot_data, col=group_by)
-                # Map the histogram function to the grid
-                hist.map(sns.histplot, data_column, **kwargs)
-
-                # Set rotation of label
-                hist.set_xticklabels(rotation=20, ha='right')
-
-                # Titles for each facet
-                hist.set_titles("{col_name}")
-                # If defined_color_map provided, retrieves color map
-                group_color = None
-                if defined_color_map:
-                    group_color = color_dict.get(group, None)
-
-                sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
-                             weights='count', color=group_color, **kwargs)
-
-                # If plotting feature specify which layer
-                if feature:
-                    ax_i.set_title(f'{groups[i]} with Layer: {layer}')
-                else:
-                    ax_i.set_title(f'{groups[i]}')
-
-                # Ajust top margin
-                hist.figure.subplots_adjust(left=.1,
-                                            top=0.85,
-                                            bottom=0.15,
-                                            hspace=0.3)
-
-                fig = hist.figure
-                axs.extend(hist.axes.flat)
-                hist_data = plot_data
 
     else:
         # Precompute histogram data for single plot
