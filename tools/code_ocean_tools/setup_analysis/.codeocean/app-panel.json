@@ -19,13 +19,54 @@
 	],
 	"parameters": [
 		{
+			"id": "x_coord_col",
+			"category": "general",
+			"name": "X Coordinate Column",
+			"param_name": "X_Coordinate_Column",
+			"description": "The name of the column containing the X coordinate, default is XMax.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "XMax"
+		},
+		{
+			"id": "y_coord_col",
+			"category": "general",
+			"name": "Y Coordinate Column",
+			"param_name": "Y_Coordinate_Column",
+			"description": "The name of the column containing the Y coordinate, default is YMax.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "YMax"
+		},
+		{
+			"id": "annotations",
+			"category": "general",
+			"name": "Annotation(s)",
+			"param_name": "Annotation_s_",
+			"description": "The annotation(s) of interest to include in downstream analysis. Comma-separated list or 'None'.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "features",
+			"category": "general",
+			"name": "Features to Analyze",
+			"param_name": "Features_to_Analyze",
+			"description": "A list of feature name(s) for downstream analysis. Comma-separated list.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
 			"id": "0010a8b7acbe4f",
 			"category": "advanced_parameters",
 			"name": "Feature Regex",
 			"param_name": "Feature_Regex",
-			"description": "A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with \"Intensity\", use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string.",
+			"description": "A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with 'Intensity', use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string.",
 			"type": "text",
-			"value_type": "string"
+			"value_type": "string",
+			"default_value": ""
 		}
 	]
 }

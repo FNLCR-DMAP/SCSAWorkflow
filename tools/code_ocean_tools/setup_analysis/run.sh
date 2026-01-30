@@ -11,6 +11,10 @@ echo "=== Setup Analysis [SPAC] [DMAP] ==="
 cp ../format_values.py . 2>/dev/null || true
 
 # Initialize parameters with default values
+X_Coordinate_Column="XMax"
+Y_Coordinate_Column="YMax"
+Annotation_s_="None"
+Features_to_Analyze=""
 Feature_Regex=""
 
 # Print received arguments for debugging
@@ -34,10 +38,14 @@ for arg in "$@"; do
 done
 
 # Debug: Print parsed parameter values
+echo "X_Coordinate_Column: $X_Coordinate_Column"
+echo "Y_Coordinate_Column: $Y_Coordinate_Column"
+echo "Annotation_s_: $Annotation_s_"
+echo "Features_to_Analyze: $Features_to_Analyze"
 echo "Feature_Regex: $Feature_Regex"
 
 # Find input data
-INPUT=$(find -L ../data -type f \( -name "*.pickle" -o -name "*.pkl" -o -name "*.h5ad" \) 2>/dev/null | head -n 1)
+INPUT=$(find -L ../data -type f \( -name "*.csv" -o -name "*.tsv" \) 2>/dev/null | head -n 1)
 if [ -z "$INPUT" ]; then echo "ERROR: No input file found in ../data"; exit 1; fi
 echo "Input: $INPUT"
 
@@ -47,7 +55,11 @@ mkdir -p /results/figures /results/jsons
 # Create parameters JSON
 cat > /results/jsons/params.json << EOF
 {
-    "Upstream_Analysis": "$INPUT",
+    "Upstream_Dataset": "$INPUT",
+    "X_Coordinate_Column": "$X_Coordinate_Column",
+    "Y_Coordinate_Column": "$Y_Coordinate_Column",
+    "Annotation_s_": "$Annotation_s_",
+    "Features_to_Analyze": "$Features_to_Analyze",
     "Feature_Regex": "$Feature_Regex"
 }
 EOF
@@ -55,7 +67,7 @@ EOF
 echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > /results/jsons/outputs_config.json
 
 # Normalize parameters
-python format_values.py /results/jsons/params.json /results/jsons/cleaned_params.json --list-values Feature_Regex --inject-outputs --outputs-config /results/jsons/outputs_config.json
+python format_values.py /results/jsons/params.json /results/jsons/cleaned_params.json --list-values Features_to_Analyze Feature_Regex Annotation_s_ --inject-outputs --outputs-config /results/jsons/outputs_config.json
 
 echo "Normalized: /results/jsons/params.json -> /results/jsons/cleaned_params.json"
 

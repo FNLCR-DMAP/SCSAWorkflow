@@ -11,6 +11,8 @@ echo "=== Load CSV Files [SPAC] [DMAP] ==="
 cp ../format_values.py . 2>/dev/null || true
 
 # Initialize parameters with default values
+CSV_Files_Pattern="*.csv"
+Config_File="*config*.csv"
 String_Columns="[]"
 
 # Print received arguments for debugging
@@ -34,20 +36,34 @@ for arg in "$@"; do
 done
 
 # Debug: Print parsed parameter values
+echo "CSV_Files_Pattern: $CSV_Files_Pattern"
+echo "Config_File: $Config_File"
 echo "String_Columns: $String_Columns"
 
-# Find input data
-INPUT=$(find -L ../data -type f \( -name "*.pickle" -o -name "*.pkl" -o -name "*.h5ad" \) 2>/dev/null | head -n 1)
-if [ -z "$INPUT" ]; then echo "ERROR: No input file found in ../data"; exit 1; fi
-echo "Input: $INPUT"
+# Find CSV data files (excluding config file)
+echo "Searching for CSV files matching pattern: $CSV_Files_Pattern"
+CSV_FILES=$(find -L ../data -type f -name "$CSV_Files_Pattern" ! -name "$Config_File" 2>/dev/null | sort)
+if [ -z "$CSV_FILES" ]; then echo "ERROR: No CSV data files found in ../data matching pattern: $CSV_Files_Pattern"; exit 1; fi
+echo "CSV Files found:"
+echo "$CSV_FILES"
+
+# Find configuration file
+echo "Searching for config file matching pattern: $Config_File"
+CONFIG_INPUT=$(find -L ../data -type f -name "$Config_File" 2>/dev/null | head -n 1)
+if [ -z "$CONFIG_INPUT" ]; then echo "ERROR: No configuration file found in ../data matching pattern: $Config_File"; exit 1; fi
+echo "Config file: $CONFIG_INPUT"
 
 # Create output directories
 mkdir -p /results/figures /results/jsons
 
 # Create parameters JSON
+# Convert CSV_FILES (newline-separated) to JSON array
+CSV_FILES_JSON=$(echo "$CSV_FILES" | awk 'BEGIN{printf "["} NR>1{printf ","} {printf "\"%s\"",$0} END{printf "]"}')
+
 cat > /results/jsons/params.json << EOF
 {
-    "Upstream_Analysis": "$INPUT",
+    "CSV_Files": $CSV_FILES_JSON,
+    "CSV_Files_Configuration": "$CONFIG_INPUT",
     "String_Columns": "$String_Columns"
 }
 EOF
