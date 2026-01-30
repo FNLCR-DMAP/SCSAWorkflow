@@ -14,17 +14,17 @@
 	],
 	"parameters": [
 		{
-			"id": "9109ad14cf704f",
+			"id": "0077e6b4d66441",
 			"category": "general",
 			"name": "Number of Samples",
 			"param_name": "Number_of_Samples",
 			"description": "Specifies how many cells to include in the downsampled dataset. When \"Stratify Option\" is off, it selects this number of cells from each label or from each unique combination of labels across multiple annotations. When \"Stratify Option\" is on,  it distributes this total number of cells across all labels or label combinations, in proportion to their frequencies in the full dataset.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "100000"
+			"default_value": 100000
 		},
 		{
-			"id": "e225394c4f3248",
+			"id": "bb4c88f9092e4b",
 			"category": "general",
 			"name": "Stratify Option",
 			"param_name": "Stratify_Option",
@@ -35,7 +35,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "d36b2392dcec4b",
+			"id": "de1d6057dedb45",
 			"category": "general",
 			"name": "Random Selection",
 			"param_name": "Random_Selection",
@@ -46,7 +46,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "dd869256277f4d",
+			"id": "9435aa8ac21049",
 			"category": "general",
 			"name": "New Combined Annotation Name",
 			"param_name": "New_Combined_Annotation_Name",
@@ -56,14 +56,14 @@
 			"default_value": "_combined_"
 		},
 		{
-			"id": "b18135a3d24d4e",
+			"id": "6acfba60b9c243",
 			"category": "general",
 			"name": "Minimum Threshold",
 			"param_name": "Minimum_Threshold",
 			"description": "Determine the lowest count of cells an annotation label must be included in the downsampled data. Annotation labels with fewer cells than this threshold will be excluded to ensure meaningful representation.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "5"
+			"default_value": 5
 		}
 	]
 }

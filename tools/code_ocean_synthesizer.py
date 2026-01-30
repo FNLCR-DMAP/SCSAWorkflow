@@ -2,7 +2,7 @@
 """
 Code Ocean Synthesizer - Generates Code Ocean capsule files from blueprint JSON.
 
-Version: 8.0 
+Version: 9.0 
 Features:
 - Generates .codeocean/app-panel.json with named_parameters: true
 - Generates SINGLE run.sh file (combined entry point + parameter parsing)
@@ -11,13 +11,25 @@ Features:
 - Proper type handling: numeric values written WITHOUT quotes in JSON
 - Correct output directory: passes output_dir='/results' to templates
 - Automatic category creation from paramGroup
-- Shared format_values.py generated once at root level
+- Shared format_values.py generated once at root output directory
 - Docker container: nciccbr/spac:v2-dev
+- **v9.0**: Smart input detection based on inputDatasets from blueprint
+  - Detects dataType from blueprint (PYTHON_TRANSFORM_INPUT, PANDAS_DATAFRAME, etc.)
+  - Single vs multiple input handling
+  - Generates app-panel parameters for multi-input tools
+  - Correct file discovery based on dataType:
+    - PYTHON_TRANSFORM_INPUT -> pickle/pkl/h5ad (downstream tools)
+    - PANDAS_DATAFRAME, CSV, TABULAR -> csv/tsv (entry-point tools)
 
-Key Changes in v8.0:
-1. Combined run.sh + main.sh into single run.sh
-2. Cleaner structure - one less file per capsule
-3. "Set file to run" only recognizes run.sh anyway
+Key Changes in v9.0:
+1. Input detection from blueprint's inputDatasets
+2. Multi-input tools get app-panel parameters for file patterns
+3. Correct dataType to file format mapping:
+   - PYTHON_TRANSFORM_INPUT -> .pickle/.pkl/.h5ad (most common - 28 tools)
+   - PANDAS_DATAFRAME -> .csv/.tsv (entry-point tools - 11 tools)
+   - CSV, TABULAR, PYSPARK_DATAFRAME -> .csv/.tsv
+4. "load_csv_files" pattern for multiple CSV inputs
+5. "setup_analysis" pattern for single PANDAS_DATAFRAME input (csv/tsv)
 
 Type Mapping (Blueprint -> Code Ocean App Panel):
 - STRING -> type: "text", value_type: "string"
@@ -45,16 +57,67 @@ class CodeOceanSynthesizer:
     - .codeocean/app-panel.json (UI configuration with named parameters)
     - run.sh (SINGLE file: entry point + parameter parsing + execution)
     
-    Note: v8.0 removes separate main.sh - everything is in run.sh
+    Note: v9.0 adds smart input detection from inputDatasets
     """
     
     # Parameter types that should be written as numbers (no quotes in JSON)
     NUMERIC_TYPES = {'NUMBER', 'FLOAT', 'INTEGER', 'INT', 'INTERGER', 'Positive integer'}
     
+    # Input data types that indicate CSV/tabular files (entry-point tools)
+    # PANDAS_DATAFRAME = .csv/.tsv files
+    # CSV, TABULAR, PYSPARK_DATAFRAME = .csv/.tsv files
+    CSV_DATA_TYPES = {'CSV', 'CSV, TABULAR', 'TABULAR', 'PYSPARK_DATAFRAME', 'PANDAS_DATAFRAME'}
+    
+    # Input data types that indicate pickle/pkl/h5ad files (downstream tools)
+    # PYTHON_TRANSFORM_INPUT = .pickle/.pkl/.h5ad files (most common)
+    PICKLE_DATA_TYPES = {'PYTHON_TRANSFORM_INPUT'}
+    
     def __init__(self, blueprint: Dict[str, Any], docker_image: str = "nciccbr/spac:v2-dev"):
         self.blueprint = blueprint
         self.docker_image = docker_image
         self._parameter_order = []  # Track parameter order
+        self._input_datasets = []   # Track input datasets info
+        self._analyze_input_datasets()
+    
+    def _analyze_input_datasets(self):
+        """
+        Analyze inputDatasets from blueprint to determine input handling strategy.
+        
+        Sets self._input_datasets with analyzed info:
+        - key: parameter key
+        - displayName: display name
+        - dataType: original data type
+        - isMultiple: whether multiple files expected
+        - inputCategory: 'csv_only' or 'analysis_object' based on dataType
+        
+        Data type mapping:
+        - PANDAS_DATAFRAME, CSV, TABULAR, PYSPARK_DATAFRAME -> csv_only (.csv/.tsv)
+        - PYTHON_TRANSFORM_INPUT -> analysis_object (.pickle/.pkl/.h5ad)
+        """
+        self._input_datasets = []
+        
+        for ds in self.blueprint.get('inputDatasets', []):
+            data_type = (ds.get('dataType') or '').upper()
+            is_multiple = ds.get('isMultiple', False)
+            
+            # Determine input category based on dataType
+            # PYTHON_TRANSFORM_INPUT -> analysis_object (.pickle/.pkl/.h5ad - most common - downstream tools)
+            # PANDAS_DATAFRAME, CSV, TABULAR -> csv_only (.csv/.tsv - entry-point tools)
+            if 'PYTHON_TRANSFORM_INPUT' in data_type:
+                input_category = 'analysis_object'
+            elif any(t in data_type for t in ['CSV', 'TABULAR', 'PYSPARK', 'PANDAS']):
+                input_category = 'csv_only'
+            else:
+                input_category = 'analysis_object'  # Default to analysis object for unknown types
+            
+            self._input_datasets.append({
+                'key': ds.get('key'),
+                'displayName': ds.get('displayName', ds.get('key')),
+                'description': ds.get('description', ''),
+                'dataType': data_type,
+                'isMultiple': is_multiple,
+                'inputCategory': input_category
+            })
         
     def synthesize(self) -> Dict[str, str]:
         """
@@ -66,11 +129,10 @@ class CodeOceanSynthesizer:
             Dictionary mapping filename to content:
             {
                 ".codeocean/app-panel.json": "...",
-                "run.sh": "...",
-                "format_values.py": "..."
+                "run.sh": "..."
             }
             
-        Note: v8.0 generates 3 files per tool (format_values.py in same directory as run.sh)
+        Note: format_values.py is generated once at the root output directory
         """
         files = {}
         
@@ -80,9 +142,6 @@ class CodeOceanSynthesizer:
         
         # Generate combined run.sh (entry point + parameter parsing + execution)
         files["run.sh"] = self._generate_run_sh()
-        
-        # Generate format_values.py (in same directory as run.sh)
-        files["format_values.py"] = generate_format_values_py()
         
         return files
     
@@ -246,24 +305,100 @@ class CodeOceanSynthesizer:
                 'default': default_value
             })
         
+        # v9.0: Add input dataset parameters for multi-input or CSV tools
+        # This allows users to specify file patterns in the app panel
+        input_params = self._generate_input_dataset_params()
+        parameters = input_params + parameters  # Input params first
+        
         app_panel["parameters"] = parameters
         
         return app_panel
+    
+    def _generate_input_dataset_params(self) -> List[Dict[str, Any]]:
+        """
+        Generate app-panel parameters for input dataset file selection.
+        
+        v9.0: Creates parameters for tools that need file pattern selection:
+        - Multi-input CSV tools (like load_csv_files, combine_dataframes)
+        - Tools with CSV + config file inputs
+        
+        Returns
+        -------
+        list
+            List of parameter dicts for app-panel.json
+        """
+        params = []
+        
+        # Check if we need input parameters
+        csv_inputs = [ds for ds in self._input_datasets if ds['inputCategory'] == 'csv_only']
+        multi_inputs = [ds for ds in self._input_datasets if ds['isMultiple']]
+        
+        # Special case: load_csv_files pattern (multiple CSVs + config)
+        if len(csv_inputs) >= 2 or multi_inputs:
+            for ds in self._input_datasets:
+                if ds['inputCategory'] == 'csv_only':
+                    if ds['isMultiple']:
+                        # Multiple CSV files - need a pattern
+                        params.append({
+                            "id": self._generate_unique_id(),
+                            "category": "general",
+                            "name": f"{ds['displayName']} Pattern",
+                            "param_name": f"{ds['key']}_Pattern",
+                            "description": f"Glob pattern to match {ds['displayName'].lower()} files (e.g., '*.csv').",
+                            "type": "text",
+                            "value_type": "string",
+                            "default_value": "*.csv"
+                        })
+                    else:
+                        # Single config file - need a pattern to identify it
+                        params.append({
+                            "id": self._generate_unique_id(),
+                            "category": "general",
+                            "name": f"{ds['displayName']} Pattern",
+                            "param_name": f"{ds['key']}_Pattern",
+                            "description": f"Filename pattern to match the {ds['displayName'].lower()} file.",
+                            "type": "text",
+                            "value_type": "string",
+                            "default_value": "*config*.csv"
+                        })
+        
+        # Multi-input tools (like combine_dataframes, manual_phenotyping)
+        elif len(self._input_datasets) > 1:
+            multi_inputs = [ds for ds in self._input_datasets if ds['inputCategory'] == 'csv_only']
+            if len(multi_inputs) > 1:
+                for i, ds in enumerate(pandas_inputs):
+                    params.append({
+                        "id": self._generate_unique_id(),
+                        "category": "general",
+                        "name": f"{ds['displayName']} Pattern",
+                        "param_name": f"{ds['key']}_Pattern",
+                        "description": f"Filename pattern to match the {ds['displayName'].lower()} file.",
+                        "type": "text",
+                        "value_type": "string",
+                        "default_value": f"*input{i+1}*" if i > 0 else "*"
+                    })
+        
+        return params
     
     def _generate_run_sh(self) -> str:
         """
         Generate COMBINED run.sh with all logic.
         
-        v8.0: Single file approach per Conor's recommendation:
-        "run.sh is the only requirement to run a capsule"
+        v9.0: Smart input detection based on inputDatasets from blueprint.
+        
+        Input handling strategies:
+        1. Single input: auto-find csv/tsv files
+        2. Multiple CSV inputs (load_csv pattern): use file patterns from app-panel
+        3. Multiple inputs: use file patterns from app-panel
         
         Includes:
         1. Copy shared format_values.py
-        2. Initialize parameters with defaults
+        2. Initialize parameters with defaults (including input patterns)
         3. Parse named arguments (--param_name=value)
-        4. Create parameters JSON
-        5. Normalize with format_values.py
-        6. Run SPAC template
+        4. Find input files based on patterns/types
+        5. Create parameters JSON
+        6. Normalize with format_values.py
+        7. Run SPAC template
         """
         title = self.blueprint.get('title', 'SPAC Tool')
         tool_id = self._make_tool_id(title)
@@ -285,22 +420,33 @@ class CodeOceanSynthesizer:
             elif self._is_numeric_type(param_type):
                 numeric_params.append(param_key)
         
+        # Determine input handling strategy
+        input_strategy = self._determine_input_strategy()
+        
         # Build script
         lines = [
             '#!/usr/bin/env bash',
             'set -euo pipefail',
             '',
             f'# {title}',
-            '# Generated by code_ocean_synthesizer.py v8.0 (Single run.sh)',
+            '# Generated by code_ocean_synthesizer.py v9.0 (Single run.sh)',
             '# Named argument parsing: --param_name=value format',
             '',
             f'echo "=== {title} ==="',
+            '',
+            '# Copy shared format_values.py from parent directory (if exists)',
+            'cp ../format_values.py . 2>/dev/null || true',
             ''
         ]
         
-        # Initialize variables with defaults
+        # Initialize variables with defaults - include input pattern params
         lines.append('# Initialize parameters with default values')
         
+        # Add input pattern defaults based on strategy
+        for init_line in input_strategy['init_lines']:
+            lines.append(init_line)
+        
+        # Add regular parameter defaults
         for param_info in self._parameter_order:
             key = param_info['key']
             default = param_info['default']
@@ -321,7 +467,7 @@ class CodeOceanSynthesizer:
             else:
                 lines.append(f'{key}="{default_str}"')
         
-        # Dynamic named argument parsing (Conor's approach)
+        # Dynamic named argument parsing
         lines.extend([
             '',
             '# Print received arguments for debugging',
@@ -332,7 +478,7 @@ class CodeOceanSynthesizer:
             'done',
             '',
             '# Parse named arguments dynamically (--param_name=value format)',
-            '# Based on Conor\'s example: single pattern handles all --key=value arguments',
+            '# Single pattern handles all --key=value arguments',
             'for arg in "$@"; do',
             '    case "$arg" in',
             '        --*=*)',
@@ -346,36 +492,35 @@ class CodeOceanSynthesizer:
             ''
         ])
         
-        # Debug: print parsed values
+        # Debug: print parsed values (include input patterns)
         lines.append('# Debug: Print parsed parameter values')
+        for debug_line in input_strategy['debug_lines']:
+            lines.append(debug_line)
         for param_info in self._parameter_order:
             key = param_info['key']
             lines.append(f'echo "{key}: ${key}"')
         
-        # Find input data
-        lines.extend([
-            '',
-            '# Find input data',
-            'INPUT=$(find -L ../data -type f \\( -name "*.pickle" -o -name "*.pkl" -o -name "*.h5ad" \\) 2>/dev/null | head -n 1)',
-            'if [ -z "$INPUT" ]; then echo "ERROR: No input file found in ../data"; exit 1; fi',
-            'echo "Input: $INPUT"',
-            ''
-        ])
+        # Input discovery - strategy-specific
+        lines.append('')
+        for input_line in input_strategy['input_lines']:
+            lines.append(input_line)
         
-        # Create output directories
-        lines.extend([
-            '# Create output directories',
-            'mkdir -p /results/figures /results/jsons',
-            ''
-        ])
+        # Create output directories (skip if strategy already included it)
+        if not input_strategy.get('skip_mkdir', False):
+            lines.extend([
+                '',
+                '# Create output directories',
+                'mkdir -p /results/figures /results/jsons',
+                ''
+            ])
         
         # Build JSON - numeric values WITHOUT quotes
         lines.append('# Create parameters JSON')
         lines.append('cat > /results/jsons/params.json << EOF')
         lines.append('{')
         
-        # First add input path (always string)
-        json_lines = ['    "Upstream_Analysis": "$INPUT"']
+        # Add input paths based on strategy
+        json_lines = input_strategy['json_lines'].copy()
         
         # Add each parameter with proper quoting
         for param_info in self._parameter_order:
@@ -401,9 +546,9 @@ class CodeOceanSynthesizer:
             lines.append(f"echo '{outputs_json}' > /results/jsons/outputs_config.json")
             lines.append('')
         
-        # Normalize parameters with format_values.py (in same code/ directory)
+        # Normalize parameters with format_values.py
         lines.append('# Normalize parameters')
-        format_cmd = 'python ./format_values.py /results/jsons/params.json /results/jsons/cleaned_params.json'
+        format_cmd = 'python format_values.py /results/jsons/params.json /results/jsons/cleaned_params.json'
         
         if bool_params:
             format_cmd += f" --bool-values {' '.join(bool_params)}"
@@ -426,6 +571,214 @@ class CodeOceanSynthesizer:
         lines.append('echo "=== Completed. Outputs in /results/ ==="')
         
         return '\n'.join(lines)
+    
+    def _determine_input_strategy(self) -> Dict[str, List[str]]:
+        """
+        Determine the input handling strategy based on inputDatasets.
+        
+        Returns a dict with:
+        - init_lines: bash lines for initializing input pattern variables
+        - debug_lines: bash lines for debugging input patterns
+        - input_lines: bash lines for finding/validating input files
+        - json_lines: JSON lines for params.json input paths
+        
+        Strategies:
+        1. load_csv_files: Has isMultiple=True dataset (multiple CSV files)
+        2. multi_inputs: Multiple single-file inputs (combine_dataframes, manual_phenotyping)
+        3. single_input: Single input auto-discovery (most common)
+        """
+        multi_inputs = [ds for ds in self._input_datasets if ds['isMultiple']]
+        
+        # Strategy 1: load_csv_files pattern (has isMultiple=True dataset)
+        if multi_inputs:
+            return self._strategy_load_csv_files()
+        
+        # Strategy 2: Multi-input tools (multiple single-file inputs)
+        elif len(self._input_datasets) > 1:
+            return self._strategy_multi_inputs()
+        
+        # Strategy 3: Single input (most common case)
+        else:
+            return self._strategy_single_input()
+    
+    def _strategy_load_csv_files(self) -> Dict[str, List[str]]:
+        """
+        Strategy for load_csv_files pattern: multiple CSV files + config file.
+        Uses app-panel parameters for file patterns.
+        """
+        init_lines = []
+        debug_lines = []
+        input_lines = []
+        json_lines = []
+        
+        csv_files_ds = None
+        config_ds = None
+        
+        for ds in self._input_datasets:
+            if ds['isMultiple']:
+                csv_files_ds = ds
+                init_lines.append(f'{ds["key"]}_Pattern="*.csv"')
+                debug_lines.append(f'echo "{ds["key"]}_Pattern: ${ds["key"]}_Pattern"')
+            else:
+                config_ds = ds
+                init_lines.append(f'{ds["key"]}_Pattern="*config*.csv"')
+                debug_lines.append(f'echo "{ds["key"]}_Pattern: ${ds["key"]}_Pattern"')
+        
+        # Find CSV files (excluding config)
+        if csv_files_ds and config_ds:
+            input_lines.extend([
+                f'# Find CSV data files (excluding config file)',
+                f'echo "Searching for CSV files matching pattern: ${csv_files_ds["key"]}_Pattern"',
+                f'CSV_FILES=$(find -L ../data -type f -name "${csv_files_ds["key"]}_Pattern" ! -name "${config_ds["key"]}_Pattern" 2>/dev/null | sort)',
+                f'if [ -z "$CSV_FILES" ]; then echo "ERROR: No CSV data files found in ../data matching pattern: ${csv_files_ds["key"]}_Pattern"; exit 1; fi',
+                f'echo "CSV Files found:"',
+                f'echo "$CSV_FILES"',
+                '',
+                f'# Find configuration file',
+                f'echo "Searching for config file matching pattern: ${config_ds["key"]}_Pattern"',
+                f'CONFIG_INPUT=$(find -L ../data -type f -name "${config_ds["key"]}_Pattern" 2>/dev/null | head -n 1)',
+                f'if [ -z "$CONFIG_INPUT" ]; then echo "ERROR: No configuration file found in ../data matching pattern: ${config_ds["key"]}_Pattern"; exit 1; fi',
+                f'echo "Config file: $CONFIG_INPUT"',
+            ])
+            
+            # JSON with CSV_FILES as array
+            json_lines.append(f'    "{csv_files_ds["key"]}": $CSV_FILES_JSON')
+            json_lines.append(f'    "{config_ds["key"]}": "$CONFIG_INPUT"')
+            
+            # Need to convert CSV_FILES to JSON array before creating params.json
+            input_lines.extend([
+                '',
+                '# Create output directories',
+                'mkdir -p /results/figures /results/jsons',
+                '',
+                '# Create parameters JSON',
+                '# Convert CSV_FILES (newline-separated) to JSON array',
+                'CSV_FILES_JSON=$(echo "$CSV_FILES" | awk \'BEGIN{printf "["} NR>1{printf ","} {printf "\\"%s\\"",$0} END{printf "]"}\')',
+                '',
+            ])
+            
+            # Return early with modified structure
+            return {
+                'init_lines': init_lines,
+                'debug_lines': debug_lines,
+                'input_lines': input_lines,
+                'json_lines': json_lines,
+                'skip_mkdir': True  # Already included in input_lines
+            }
+        
+        return {
+            'init_lines': init_lines,
+            'debug_lines': debug_lines,
+            'input_lines': input_lines,
+            'json_lines': json_lines
+        }
+    
+    def _strategy_multi_inputs(self) -> Dict[str, List[str]]:
+        """
+        Strategy for multi-input tools (combine_dataframes, manual_phenotyping).
+        Uses app-panel parameters for file patterns to distinguish inputs.
+        """
+        init_lines = []
+        debug_lines = []
+        input_lines = []
+        json_lines = []
+        
+        for i, ds in enumerate(self._input_datasets):
+            var_name = f'INPUT_{i+1}'
+            pattern_var = f'{ds["key"]}_Pattern'
+            
+            # Default pattern: first input is *, others need explicit patterns
+            if i == 0:
+                default_pattern = "*"
+            else:
+                default_pattern = f"*input{i+1}*"
+            
+            init_lines.append(f'{pattern_var}="{default_pattern}"')
+            debug_lines.append(f'echo "{pattern_var}: ${pattern_var}"')
+            
+            # Input discovery based on inputCategory
+            if ds['inputCategory'] == 'csv_only':
+                # PANDAS_DATAFRAME, CSV, TABULAR -> csv/tsv files
+                input_lines.extend([
+                    f'# Find {ds["displayName"]} (CSV/TSV)',
+                    f'echo "Searching for {ds["displayName"]} matching pattern: ${pattern_var}"',
+                    f'{var_name}=$(find -L ../data -type f \\( -name "${pattern_var}.csv" -o -name "${pattern_var}.tsv" \\) 2>/dev/null | head -n 1)',
+                    f'# Fallback: try pattern as-is',
+                    f'if [ -z "${var_name}" ]; then {var_name}=$(find -L ../data -type f -name "${pattern_var}" 2>/dev/null | head -n 1); fi',
+                    f'if [ -z "${var_name}" ]; then echo "ERROR: No {ds["displayName"]} found matching pattern: ${pattern_var}"; exit 1; fi',
+                    f'echo "{ds["displayName"]}: ${var_name}"',
+                    ''
+                ])
+            else:
+                # PYTHON_TRANSFORM_INPUT -> pickle/pkl/h5ad files
+                input_lines.extend([
+                    f'# Find {ds["displayName"]} (pickle/pkl/h5ad)',
+                    f'echo "Searching for {ds["displayName"]} matching pattern: ${pattern_var}"',
+                    f'{var_name}=$(find -L ../data -type f \\( -name "${pattern_var}.pickle" -o -name "${pattern_var}.pkl" -o -name "${pattern_var}.h5ad" \\) 2>/dev/null | head -n 1)',
+                    f'# Fallback: try pattern as-is',
+                    f'if [ -z "${var_name}" ]; then {var_name}=$(find -L ../data -type f -name "${pattern_var}" 2>/dev/null | head -n 1); fi',
+                    f'if [ -z "${var_name}" ]; then echo "ERROR: No {ds["displayName"]} found matching pattern: ${pattern_var}"; exit 1; fi',
+                    f'echo "{ds["displayName"]}: ${var_name}"',
+                    ''
+                ])
+            
+            json_lines.append(f'    "{ds["key"]}": "${var_name}"')
+        
+        return {
+            'init_lines': init_lines,
+            'debug_lines': debug_lines,
+            'input_lines': input_lines,
+            'json_lines': json_lines
+        }
+    
+    def _strategy_single_input(self) -> Dict[str, List[str]]:
+        """
+        Strategy for single-input tools (most common case).
+        Auto-discovers input file based on dataType.
+        """
+        init_lines = []
+        debug_lines = []
+        input_lines = []
+        json_lines = []
+        
+        if not self._input_datasets:
+            # No input datasets defined - default to pickle (most common)
+            input_lines.extend([
+                '# Find input data (pickle/pkl/h5ad)',
+                'INPUT=$(find -L ../data -type f \\( -name "*.pickle" -o -name "*.pkl" -o -name "*.h5ad" \\) 2>/dev/null | head -n 1)',
+                'if [ -z "$INPUT" ]; then echo "ERROR: No pickle/pkl/h5ad file found in ../data"; exit 1; fi',
+                'echo "Input: $INPUT"'
+            ])
+            json_lines.append('    "Upstream_Analysis": "$INPUT"')
+        else:
+            ds = self._input_datasets[0]
+            key = ds['key']
+            
+            if ds['inputCategory'] == 'csv_only':
+                # PANDAS_DATAFRAME, CSV, TABULAR -> csv/tsv files
+                input_lines.extend([
+                    '# Find input data (CSV/TSV)',
+                    'INPUT=$(find -L ../data -type f \\( -name "*.csv" -o -name "*.tsv" \\) 2>/dev/null | head -n 1)',
+                    'if [ -z "$INPUT" ]; then echo "ERROR: No CSV/TSV file found in ../data"; exit 1; fi',
+                    'echo "Input: $INPUT"'
+                ])
+            else:
+                # PYTHON_TRANSFORM_INPUT -> pickle/pkl/h5ad files (most common)
+                input_lines.extend([
+                    '# Find input data (pickle/pkl/h5ad)',
+                    'INPUT=$(find -L ../data -type f \\( -name "*.pickle" -o -name "*.pkl" -o -name "*.h5ad" \\) 2>/dev/null | head -n 1)',
+                    'if [ -z "$INPUT" ]; then echo "ERROR: No pickle/pkl/h5ad file found in ../data"; exit 1; fi',
+                    'echo "Input: $INPUT"'
+                ])
+            
+            json_lines.append(f'    "{key}": "$INPUT"')
+        
+        return {
+            'init_lines': init_lines,
+            'debug_lines': debug_lines,
+            'input_lines': input_lines,
+            'json_lines': json_lines
+        }
 
 
 def _sanitize_filename(title: str) -> str:
@@ -750,6 +1103,12 @@ def batch_process(input_pattern: str, output_dir: str, docker_image: str = "ncic
     print(f"Using v8.0: Named parameters + Single run.sh")
     print("=" * 60)
     
+    # Generate shared format_values.py once at root level
+    format_values_path = output_path / "format_values.py"
+    with open(format_values_path, 'w') as f:
+        f.write(generate_format_values_py())
+    print(f"Generated shared: format_values.py")
+    
     generated_dirs = []
     
     for blueprint_file in sorted(blueprint_files):
@@ -767,14 +1126,17 @@ def batch_process(input_pattern: str, output_dir: str, docker_image: str = "ncic
     print("Key changes in v8.0:")
     print("  - Single run.sh file (no separate main.sh)")
     print("  - Named parameters: --param_name=value format")
-    print("  - format_values.py in same directory as run.sh")
+    print("  - Shared format_values.py at root level")
     print("")
-    print("Generated structure per capsule:")
-    print("  tool_name/")
-    print("  ├── .codeocean/")
-    print("  │   └── app-panel.json")
-    print("  ├── format_values.py")
-    print("  └── run.sh")
+    print("Generated structure:")
+    print("  output_dir/")
+    print("  ├── format_values.py  (shared)")
+    print("  ├── tool_name_1/")
+    print("  │   ├── .codeocean/")
+    print("  │   │   └── app-panel.json")
+    print("  │   └── run.sh")
+    print("  └── tool_name_2/")
+    print("      └── ...")
     print("")
     print("Next steps:")
     print("1. Push each tool folder to a separate Git repository")

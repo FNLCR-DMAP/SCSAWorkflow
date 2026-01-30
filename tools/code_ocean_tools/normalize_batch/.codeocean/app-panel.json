@@ -19,7 +19,7 @@
 	],
 	"parameters": [
 		{
-			"id": "d3ae2750cb034d",
+			"id": "08eaf40b3f2744",
 			"category": "general",
 			"name": "Need Normalization",
 			"param_name": "Need_Normalization",
@@ -30,7 +30,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "f0cc8f153c4d4a",
+			"id": "66bb8735ca9c4d",
 			"category": "normalization_settings_parameters",
 			"name": "Input Table Name",
 			"param_name": "Input_Table_Name",
@@ -40,7 +40,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "61581a5c300444",
+			"id": "d121c907ff4445",
 			"category": "normalization_settings_parameters",
 			"name": "Output Table Name",
 			"param_name": "Output_Table_Name",
@@ -50,7 +50,7 @@
 			"default_value": "batch_normalized_table"
 		},
 		{
-			"id": "0981baa1258d42",
+			"id": "524b836cd37143",
 			"category": "normalization_settings_parameters",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -60,7 +60,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "81688509544c4d",
+			"id": "f1fba383efde4d",
 			"category": "normalization_settings_parameters",
 			"name": "Normalization Method",
 			"param_name": "Normalization_Method",
@@ -76,7 +76,7 @@
 			]
 		},
 		{
-			"id": "c94bb92e250144",
+			"id": "f9239491aaf140",
 			"category": "normalization_settings_parameters",
 			"name": "Take Log",
 			"param_name": "Take_Log",

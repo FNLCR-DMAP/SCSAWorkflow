@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "a91afacecd6a4b",
+			"id": "2d5ccbf9e6a843",
 			"category": "general",
 			"name": "Run on HPC",
 			"param_name": "Run_on_HPC",
@@ -35,7 +35,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "aa830169ff774b",
+			"id": "82efd8253dec49",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -45,37 +45,37 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "135888b4855041",
+			"id": "b7c9eebd85d24d",
 			"category": "general",
 			"name": "K-Nearest Neighbors",
 			"param_name": "K_Nearest_Neighbors",
 			"description": "The number of nearest neighbors to be used in creating the features neighborhood graph.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "30"
+			"default_value": 30
 		},
 		{
-			"id": "4927ec7e017e43",
+			"id": "fd455103daf141",
 			"category": "general",
 			"name": "Seed",
 			"param_name": "Seed",
 			"description": "Random seed for reproducibility.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "42"
+			"default_value": 42
 		},
 		{
-			"id": "9f8dc5a523984e",
+			"id": "8137d22bf0b144",
 			"category": "general",
 			"name": "Resolution Parameter",
 			"param_name": "Resolution_Parameter",
 			"description": "The resolution parameter (>0) adjusts the level of granularity in identifying clusters within a dataset, with higher values promoting the detection of a larger number of clusters (e.g., more distinct clusters), while lower values emphasize a smaller number of clusters (e.g., more inclusive clusters).",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		},
 		{
-			"id": "31665592247d4b",
+			"id": "2e249a4f4b344b",
 			"category": "general",
 			"name": "Output Annotation Name",
 			"param_name": "Output_Annotation_Name",
@@ -85,17 +85,17 @@
 			"default_value": "phenograph"
 		},
 		{
-			"id": "17bfcc8068ff4e",
+			"id": "850d3f3f4f404f",
 			"category": "general",
 			"name": "Number of Iterations",
 			"param_name": "Number_of_Iterations",
 			"description": "Number of iterations to run the Leiden graph clustering algorithm. If the number of iterations is negative, the Leiden algorithm is run until an iteration in which there was no improvement. Default is 100.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "100"
+			"default_value": 100
 		},
 		{
-			"id": "df35da4ba9f94e",
+			"id": "8e03f5cbbdd146",
 			"category": "resolution_profiling_parameters",
 			"name": "Profiling",
 			"param_name": "Profiling",
@@ -106,7 +106,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "70592f9f98e542",
+			"id": "cfe0e22127994f",
 			"category": "resolution_profiling_parameters",
 			"name": "Resolution List",
 			"param_name": "Resolution_List",
@@ -116,7 +116,7 @@
 			"default_value": "[]"
 		},
 		{
-			"id": "4aeb9e70c5bc4d",
+			"id": "c43b46eee02547",
 			"category": "hpc_configuration_parameters",
 			"name": "HPC Compute Mode",
 			"param_name": "HPC_Compute_Mode",
@@ -130,7 +130,7 @@
 			]
 		},
 		{
-			"id": "0efa3ede58984c",
+			"id": "f3ba59ed6edd43",
 			"category": "hpc_configuration_parameters",
 			"name": "Batch Mode",
 			"param_name": "Batch_Mode",
@@ -141,7 +141,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "ca03dd66386b49",
+			"id": "6c457edbfb4c4b",
 			"category": "hpc_configuration_parameters",
 			"name": "Partition",
 			"param_name": "Partition",
@@ -157,27 +157,27 @@
 			]
 		},
 		{
-			"id": "062f676412ae47",
+			"id": "7460795ccdfd47",
 			"category": "hpc_configuration_parameters",
 			"name": "Number of CPUs",
 			"param_name": "Number_of_CPUs",
 			"description": "Number of CPUs requested for this HPC submission",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "2"
+			"default_value": 2
 		},
 		{
-			"id": "d59fc892f15b4e",
+			"id": "ea09ddb2286541",
 			"category": "hpc_configuration_parameters",
 			"name": "Memory, GB",
 			"param_name": "Memory_GB",
 			"description": "Amount of memory in gigabytes requested for this HPC submission",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "10"
+			"default_value": 10
 		},
 		{
-			"id": "0b6810697d7045",
+			"id": "a2cd02ac54f44e",
 			"category": "hpc_configuration_parameters",
 			"name": "Request Time",
 			"param_name": "Request_Time",

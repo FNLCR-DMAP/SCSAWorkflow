@@ -19,7 +19,7 @@
 	],
 	"parameters": [
 		{
-			"id": "da0ab4e250e745",
+			"id": "96067722487342",
 			"category": "optional_parameters",
 			"name": "X Centroid Name",
 			"param_name": "X_Centroid_Name",
@@ -29,7 +29,7 @@
 			"default_value": "XCentroid"
 		},
 		{
-			"id": "6c30b526443a40",
+			"id": "a427d584bde94d",
 			"category": "optional_parameters",
 			"name": "Y Centroid Name",
 			"param_name": "Y_Centroid_Name",

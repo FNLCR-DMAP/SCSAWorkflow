@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "45031e57fa414a",
+			"id": "f577c7380f7043",
 			"category": "general",
 			"name": "Label Color Map",
 			"param_name": "Label_Color_Map",
@@ -24,7 +24,7 @@
 			"default_value": "[]"
 		},
 		{
-			"id": "e40affe67f3c40",
+			"id": "1eb4abe04f664b",
 			"category": "general",
 			"name": "Color Map Name",
 			"param_name": "Color_Map_Name",
@@ -34,7 +34,7 @@
 			"default_value": "_spac_colors"
 		},
 		{
-			"id": "887ccbce916648",
+			"id": "b23605b759c24a",
 			"category": "general",
 			"name": "Overwrite Previous Color Map",
 			"param_name": "Overwrite_Previous_Color_Map",

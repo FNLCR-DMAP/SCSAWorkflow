@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "00d355b969f149",
+			"id": "67f63f77284044",
 			"category": "color_by_parameters",
 			"name": "Color By",
 			"param_name": "Color_By",
@@ -38,7 +38,7 @@
 			]
 		},
 		{
-			"id": "e13bcefcb59545",
+			"id": "dbb5163c282744",
 			"category": "color_by_parameters",
 			"name": "Annotation to Highlight",
 			"param_name": "Annotation_to_Highlight",
@@ -48,7 +48,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "a5d9501bad1340",
+			"id": "43ed6687878948",
 			"category": "color_by_parameters",
 			"name": "Table",
 			"param_name": "Table",
@@ -58,7 +58,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "a7a71967f65a4e",
+			"id": "7a9f08c4262244",
 			"category": "color_by_parameters",
 			"name": "Feature to Highlight",
 			"param_name": "Feature_to_Highlight",
@@ -68,7 +68,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "3f482813e70740",
+			"id": "bc4f40cc0acd44",
 			"category": "general",
 			"name": "Dimension Reduction Method",
 			"param_name": "Dimension_Reduction_Method",
@@ -82,57 +82,57 @@
 			]
 		},
 		{
-			"id": "ff26153815b748",
+			"id": "a234df1970a741",
 			"category": "figure_configuration_parameters",
 			"name": "Dot Size",
 			"param_name": "Dot_Size",
 			"description": "Size of the dot of scatter plot.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		},
 		{
-			"id": "8b2bbbca8f2642",
+			"id": "fcbd3e3525ba46",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "Figure width, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "1a0e9790d7c544",
+			"id": "b38b4a158e644d",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "Figure height, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "e58b9d3eb1a24f",
+			"id": "3851f77f1fcb47",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Global font size in figure.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "1d41460538f849",
+			"id": "e5eaf3f9b6294c",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "7aac295df0ff4c",
+			"id": "7ab2f7bbe6eb4f",
 			"category": "figure_configuration_parameters",
 			"name": "Legend Location",
 			"param_name": "Legend_Location",
@@ -147,27 +147,27 @@
 			]
 		},
 		{
-			"id": "6b12fa1406664a",
+			"id": "f5eb7a96b75443",
 			"category": "figure_configuration_parameters",
 			"name": "Legend Font Size",
 			"param_name": "Legend_Font_Size",
 			"description": "Font size of the legend labels",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "16"
+			"default_value": 16
 		},
 		{
-			"id": "7d108eedc4ee48",
+			"id": "de0eec49e8bf47",
 			"category": "figure_configuration_parameters",
 			"name": "Legend Marker Size",
 			"param_name": "Legend_Marker_Size",
 			"description": "Dot size of the legend markers",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "5.0"
+			"default_value": 5
 		},
 		{
-			"id": "720e35296c8c41",
+			"id": "a49f7cb1c3784d",
 			"category": "figure_configuration_parameters",
 			"name": "Value Min",
 			"param_name": "Value_Min",
@@ -177,7 +177,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "011df7c20c2942",
+			"id": "0214c1109d774b",
 			"category": "figure_configuration_parameters",
 			"name": "Value Max",
 			"param_name": "Value_Max",

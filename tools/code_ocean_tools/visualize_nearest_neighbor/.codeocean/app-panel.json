@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "cb6dc63d843f4c",
+			"id": "cfe718989cbe44",
 			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -34,7 +34,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "24f7d4c5544642",
+			"id": "8829362ac8784b",
 			"category": "general",
 			"name": "ImageID",
 			"param_name": "ImageID",
@@ -44,7 +44,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "69981d35f29f4c",
+			"id": "7b9caf5461c245",
 			"category": "general",
 			"name": "Plot Method",
 			"param_name": "Plot_Method",
@@ -58,7 +58,7 @@
 			]
 		},
 		{
-			"id": "3877790f3f3b4f",
+			"id": "85f9555f38a842",
 			"category": "general",
 			"name": "Plot Type",
 			"param_name": "Plot_Type",
@@ -78,7 +78,7 @@
 			]
 		},
 		{
-			"id": "36c28c051d7b47",
+			"id": "b30892247d3748",
 			"category": "general",
 			"name": "Source \"Anchor\" Cell Label",
 			"param_name": "Source_Anchor_Cell_Label",
@@ -88,7 +88,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "18f915fbe7dd4a",
+			"id": "179dc91be03b40",
 			"category": "general",
 			"name": "Target Cell Label",
 			"param_name": "Target_Cell_Label",
@@ -98,7 +98,7 @@
 			"default_value": "All"
 		},
 		{
-			"id": "d96e0d0751254b",
+			"id": "b2b512b5feb349",
 			"category": "advanced_analysis_setting_parameters",
 			"name": "Nearest Neighbor Associated Table",
 			"param_name": "Nearest_Neighbor_Associated_Table",
@@ -108,7 +108,7 @@
 			"default_value": "spatial_distance"
 		},
 		{
-			"id": "6bfde759872148",
+			"id": "2539097d6aab43",
 			"category": "general",
 			"name": "Log Scale",
 			"param_name": "Log_Scale",
@@ -119,7 +119,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "0b7ea50b25514f",
+			"id": "e3e8572d0a134a",
 			"category": "figure_configuration_parameters",
 			"name": "Facet Plot",
 			"param_name": "Facet_Plot",
@@ -130,17 +130,17 @@
 			"extra_data": []
 		},
 		{
-			"id": "71a6eecc56594b",
+			"id": "b3db45e577cf47",
 			"category": "figure_configuration_parameters",
 			"name": "X Axis Label Rotation",
 			"param_name": "X_Axis_Label_Rotation",
 			"description": "The degree of rotation of x-axis labels. Default is 0 (horizontal, text starting from left to right).",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0"
+			"default_value": 0
 		},
 		{
-			"id": "306f011785d64c",
+			"id": "cf32ca5208e34b",
 			"category": "figure_configuration_parameters",
 			"name": "Shared X Axis Title ",
 			"param_name": "Shared_X_Axis_Title_",
@@ -151,7 +151,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "2f6e21fdaba942",
+			"id": "1c796db8eb714e",
 			"category": "figure_configuration_parameters",
 			"name": "X Axis Title Font Size",
 			"param_name": "X_Axis_Title_Font_Size",
@@ -161,7 +161,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "7154becbb18e4e",
+			"id": "3033d020eafe43",
 			"category": "figure_configuration_parameters",
 			"name": "Defined Color Mapping",
 			"param_name": "Defined_Color_Mapping",
@@ -171,44 +171,44 @@
 			"default_value": "None"
 		},
 		{
-			"id": "bf9bc64823fa42",
+			"id": "e809361887d34e",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "0a3d741da67a4b",
+			"id": "d72f18d6418f4a",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "975e3cfde3fc49",
+			"id": "8ef538265dd74c",
 			"category": "figure_configuration_parameters",
 			"name": "FIgure DPI",
 			"param_name": "FIgure_DPI",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "b2afca3e3f764d",
+			"id": "7feacdf6b6224f",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		}
 	]
 }

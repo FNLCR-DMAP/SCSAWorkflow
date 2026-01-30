@@ -14,27 +14,27 @@
 	],
 	"parameters": [
 		{
-			"id": "csv_files_input",
+			"id": "53d81efecfc94c",
 			"category": "general",
 			"name": "CSV Files Pattern",
 			"param_name": "CSV_Files_Pattern",
-			"description": "Glob pattern to match CSV data files (e.g., 'data/*.csv' or specific filenames comma-separated). These are the CSV files to be combined.",
+			"description": "Glob pattern to match csv files files (e.g., '*.csv').",
 			"type": "text",
 			"value_type": "string",
 			"default_value": "*.csv"
 		},
 		{
-			"id": "config_file_input",
+			"id": "a7edb5e304ac42",
 			"category": "general",
-			"name": "Configuration File",
-			"param_name": "Config_File",
-			"description": "Path or filename of the CSV configuration file specifying which files to include and labels to add. Should contain 'config' in the filename.",
+			"name": "CSV Files Configuration Pattern",
+			"param_name": "CSV_Files_Configuration_Pattern",
+			"description": "Filename pattern to match the csv files configuration file.",
 			"type": "text",
 			"value_type": "string",
 			"default_value": "*config*.csv"
 		},
 		{
-			"id": "e6f29198107040",
+			"id": "40f83f6eb04448",
 			"category": "general",
 			"name": "String Columns",
 			"param_name": "String_Columns",

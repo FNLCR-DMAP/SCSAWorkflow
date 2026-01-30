@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "c23297131deb4c",
+			"id": "42196cee00294b",
 			"category": "general",
 			"name": "Table to Visualize",
 			"param_name": "Table_to_Visualize",
@@ -34,7 +34,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "1025c15295dd48",
+			"id": "d5cb477d76014d",
 			"category": "general",
 			"name": "Feature(s) to Plot",
 			"param_name": "Feature_s_to_Plot",
@@ -44,7 +44,7 @@
 			"default_value": "All"
 		},
 		{
-			"id": "347f2c27374746",
+			"id": "e519f34321b846",
 			"category": "general",
 			"name": "Primary Annotation",
 			"param_name": "Primary_Annotation",
@@ -54,7 +54,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "8afd7d19d37945",
+			"id": "72d8315aa7f049",
 			"category": "general",
 			"name": "Secondary Annotation",
 			"param_name": "Secondary_Annotation",
@@ -64,7 +64,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "62bea3f7f4be48",
+			"id": "5fe6bc1238364b",
 			"category": "value_axis_configuration_parameters",
 			"name": "Value Axis Log Scale",
 			"param_name": "Value_Axis_Log_Scale",
@@ -75,7 +75,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "dfe9a678b4ad45",
+			"id": "04392e91acd747",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Title",
 			"param_name": "Figure_Title",
@@ -85,7 +85,7 @@
 			"default_value": "BoxPlot"
 		},
 		{
-			"id": "bc0f92e42e7b46",
+			"id": "920428328be346",
 			"category": "figure_configuration_parameters",
 			"name": "Horizontal Plot",
 			"param_name": "Horizontal_Plot",
@@ -96,47 +96,47 @@
 			"extra_data": []
 		},
 		{
-			"id": "90daab5b4cfa48",
+			"id": "50fb0ba8329f45",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "Width of the figure, inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "0ac84c5f684949",
+			"id": "8d69461c017344",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "Height of the figure, inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "8"
+			"default_value": 8
 		},
 		{
-			"id": "0a697a0c77a049",
+			"id": "4224e6e427af4d",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "39ffe88001264d",
+			"id": "e9fadce3001d44",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Figure font size.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "10"
+			"default_value": 10
 		},
 		{
-			"id": "929efaa827b24e",
+			"id": "e82188cdea1848",
 			"category": "value_axis_configuration_parameters",
 			"name": "Keep Outliers",
 			"param_name": "Keep_Outliers",

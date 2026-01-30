@@ -29,7 +29,7 @@
 	],
 	"parameters": [
 		{
-			"id": "bd559cc0a6434b",
+			"id": "b60e28a5b42848",
 			"category": "general",
 			"name": "Stratify By",
 			"param_name": "Stratify_By",
@@ -39,7 +39,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "9ea77b1391ec44",
+			"id": "05c300b8ad0a49",
 			"category": "color_by_parameters",
 			"name": "Color By",
 			"param_name": "Color_By",
@@ -53,7 +53,7 @@
 			]
 		},
 		{
-			"id": "fe3ea5d7575544",
+			"id": "7b534067ca5a4f",
 			"category": "color_by_parameters",
 			"name": "Annotation(s) to Highlight",
 			"param_name": "Annotation_s_to_Highlight",
@@ -63,7 +63,7 @@
 			"default_value": "[\"\"]"
 		},
 		{
-			"id": "12e3d439883042",
+			"id": "447ff20372f448",
 			"category": "color_by_parameters",
 			"name": "Feature to Highlight",
 			"param_name": "Feature_to_Highlight",
@@ -73,7 +73,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "d4aa301a634542",
+			"id": "56cb1ef33ceb4c",
 			"category": "color_by_parameters",
 			"name": "Table",
 			"param_name": "Table",
@@ -83,37 +83,37 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "f4f89f0923a54c",
+			"id": "3b1a71e0b0d84a",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "b2e2bf5ca5ed4e",
+			"id": "be9d96dd233844",
 			"category": "figure_configuration_parameters",
 			"name": "Dot Size",
 			"param_name": "Dot_Size",
 			"description": "Size of dot in the plot.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1.5"
+			"default_value": 1.5
 		},
 		{
-			"id": "ac8d672ee22842",
+			"id": "b5774bcfb9e848",
 			"category": "figure_configuration_parameters",
 			"name": "Dot Transparency",
 			"param_name": "Dot_Transparency",
 			"description": "Transparency of the dot in the plot.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0.75"
+			"default_value": 0.75
 		},
 		{
-			"id": "3c7cf2115c0348",
+			"id": "73e4bbc83b574a",
 			"category": "figure_configuration_parameters",
 			"name": "Flip Vertical Axis",
 			"param_name": "Flip_Vertical_Axis",
@@ -124,27 +124,27 @@
 			"extra_data": []
 		},
 		{
-			"id": "fea5d6f3ff5b46",
+			"id": "ddcfcaeb1eab44",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "Figure width in inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "ee680457013f45",
+			"id": "dff0405dad0848",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "Figure height in inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "4"
+			"default_value": 4
 		},
 		{
-			"id": "98af28d8c99e42",
+			"id": "b10927dc1df84e",
 			"category": "figure_configuration_parameters",
 			"name": "Define Label Color Mapping",
 			"param_name": "Define_Label_Color_Mapping",
@@ -154,17 +154,17 @@
 			"default_value": "None"
 		},
 		{
-			"id": "e089c673ff314a",
+			"id": "70b31c92133847",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "The higher the DPI, the higher the image resolution.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "200"
+			"default_value": 200
 		},
 		{
-			"id": "1d6f3cf0ad014b",
+			"id": "c5a86397bb3344",
 			"category": "figure_configuration_parameters",
 			"name": "Feature Color Scale",
 			"param_name": "Feature_Color_Scale",
@@ -178,24 +178,24 @@
 			]
 		},
 		{
-			"id": "74c7cc3c002e4b",
+			"id": "8dc6205d1f9b40",
 			"category": "colorbar_range_parameters",
 			"name": "Lower Colorbar Bound",
 			"param_name": "Lower_Colorbar_Bound",
 			"description": "The lower bound of the colorbar scale. The default 999 will set the upper bound to the minimum of the dataset.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "999"
+			"default_value": 999
 		},
 		{
-			"id": "301ec4bedc9043",
+			"id": "a775a3645a9742",
 			"category": "colorbar_range_parameters",
 			"name": "Upper Colorbar Bound",
 			"param_name": "Upper_Colorbar_Bound",
 			"description": "The lower bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "-999"
+			"default_value": -999
 		}
 	]
 }

@@ -29,7 +29,7 @@
 	],
 	"parameters": [
 		{
-			"id": "f45bbfdc9ce746",
+			"id": "a73216801d2448",
 			"category": "plot_by_parameters",
 			"name": "Plot By",
 			"param_name": "Plot_By",
@@ -43,7 +43,7 @@
 			]
 		},
 		{
-			"id": "55d5d74eb7e74a",
+			"id": "12ad132d43d64b",
 			"category": "plot_by_parameters",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -53,7 +53,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "6e040515eb4545",
+			"id": "1327c07f087d4a",
 			"category": "plot_by_parameters",
 			"name": "Table",
 			"param_name": "Table",
@@ -63,7 +63,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "31f32ad9136d4f",
+			"id": "f68e1862e0154c",
 			"category": "plot_by_parameters",
 			"name": "Feature",
 			"param_name": "Feature",
@@ -73,7 +73,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "835ec13985e849",
+			"id": "0151a5e0303448",
 			"category": "plot_by_parameters",
 			"name": "Group by",
 			"param_name": "Group_by",
@@ -83,7 +83,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "110872c0983b40",
+			"id": "fb400c8c2cfb43",
 			"category": "plot_by_parameters",
 			"name": "Together",
 			"param_name": "Together",
@@ -94,7 +94,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "50d33269dc7e4f",
+			"id": "cd371d74d7ea46",
 			"category": "figure_aesthetics_parameters",
 			"name": "Multiple",
 			"param_name": "Multiple",
@@ -110,7 +110,7 @@
 			]
 		},
 		{
-			"id": "d968c1bae6f349",
+			"id": "77afb68984d542",
 			"category": "figure_aesthetics_parameters",
 			"name": "Take Y log",
 			"param_name": "Take_Y_log",
@@ -121,7 +121,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "7102c6de6e1d46",
+			"id": "c6c72674f3944a",
 			"category": "figure_aesthetics_parameters",
 			"name": "Take X Log",
 			"param_name": "Take_X_Log",
@@ -132,7 +132,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "6e0b93e2500b47",
+			"id": "f83d569198c940",
 			"category": "figure_aesthetics_parameters",
 			"name": "Bins",
 			"param_name": "Bins",
@@ -142,57 +142,57 @@
 			"default_value": "auto"
 		},
 		{
-			"id": "20403b158db74a",
+			"id": "b022bad10ec84d",
 			"category": "figure_configurations_parameters",
 			"name": "Shrink Number",
 			"param_name": "Shrink_Number",
 			"description": "Scale the width of each bar or a group of bars relative to the bin width.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		},
 		{
-			"id": "b516f7e4f0f047",
+			"id": "e12f912359df4c",
 			"category": "figure_configurations_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "Width of the figure.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "8"
+			"default_value": 8
 		},
 		{
-			"id": "6dfd2af98b3c46",
+			"id": "652a6b3621e844",
 			"category": "figure_configurations_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "Height of the figure.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "20403f9d8b5647",
+			"id": "554366cf34614d",
 			"category": "figure_configurations_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Font size of the figure.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "f085b60c4c8f46",
+			"id": "17f90ff97faa4a",
 			"category": "figure_configurations_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "75864f8389654a",
+			"id": "e83af7e7acd841",
 			"category": "figure_configurations_parameters",
 			"name": "Legend in Figure",
 			"param_name": "Legend_in_Figure",
@@ -203,7 +203,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "28e320d92b6f49",
+			"id": "ca3a787d43a641",
 			"category": "figure_configurations_parameters",
 			"name": "Legend Location",
 			"param_name": "Legend_Location",
@@ -226,17 +226,17 @@
 			]
 		},
 		{
-			"id": "42270663ff074b",
+			"id": "e4dacf26c50040",
 			"category": "figure_configurations_parameters",
 			"name": "Bin Transparency",
 			"param_name": "Bin_Transparency",
 			"description": "Transparency of bins",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0.75"
+			"default_value": 0.75
 		},
 		{
-			"id": "b591f0331a8b4b",
+			"id": "266417a80d924c",
 			"category": "figure_aesthetics_parameters",
 			"name": "Stat",
 			"param_name": "Stat",
@@ -253,14 +253,14 @@
 			]
 		},
 		{
-			"id": "9ffa0e27124045",
+			"id": "fe775c08882b48",
 			"category": "figure_configurations_parameters",
 			"name": "X Axis Label Rotation",
 			"param_name": "X_Axis_Label_Rotation",
 			"description": "The degree of rotation of X labels. Default is 0 (horizontal, text starting from left to right)",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0"
+			"default_value": 0
 		}
 	]
 }

@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "4fff23cd409a40",
+			"id": "f8ffe8bfdda14a",
 			"category": "general",
 			"name": "Annotation of interest",
 			"param_name": "Annotation_of_interest",
@@ -24,7 +24,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "d7c273b9c6bc41",
+			"id": "af15b8258ef548",
 			"category": "general",
 			"name": "Bins",
 			"param_name": "Bins",
@@ -33,7 +33,7 @@
 			"value_type": "string"
 		},
 		{
-			"id": "5042683191e248",
+			"id": "c60ecc47f95c4b",
 			"category": "general",
 			"name": "Stratify By",
 			"param_name": "Stratify_By",
@@ -43,7 +43,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "5217682e199242",
+			"id": "c5a905b1bf2d43",
 			"category": "general",
 			"name": "Anchor Neighbor List",
 			"param_name": "Anchor_Neighbor_List",

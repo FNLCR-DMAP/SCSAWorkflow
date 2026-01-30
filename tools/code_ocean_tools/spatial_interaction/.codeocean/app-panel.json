@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "028f94ccc58c40",
+			"id": "8abbb198876d4e",
 			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -34,7 +34,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "0828933b9b3b41",
+			"id": "659c2a1dc7a14f",
 			"category": "general",
 			"name": "Spatial Analysis Method",
 			"param_name": "Spatial_Analysis_Method",
@@ -48,7 +48,7 @@
 			]
 		},
 		{
-			"id": "8fd6b48de5674b",
+			"id": "d31a7ea7307d48",
 			"category": "general",
 			"name": "Stratify By",
 			"param_name": "Stratify_By",
@@ -58,7 +58,7 @@
 			"default_value": "[\"None\"]"
 		},
 		{
-			"id": "d4a1d863192344",
+			"id": "6829336a456c46",
 			"category": "advanced_analysis_setting_parameters",
 			"name": "Coordinate Type",
 			"param_name": "Coordinate_Type",
@@ -72,7 +72,7 @@
 			]
 		},
 		{
-			"id": "7254b3738ab342",
+			"id": "09fe3d7e8c8c41",
 			"category": "advanced_analysis_setting_parameters",
 			"name": "Seed",
 			"param_name": "Seed",
@@ -82,7 +82,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "b29cb5841aff43",
+			"id": "a39b98b9a9d545",
 			"category": "general",
 			"name": "Radius",
 			"param_name": "Radius",
@@ -92,57 +92,57 @@
 			"default_value": "None"
 		},
 		{
-			"id": "b2bbb6382f3e49",
+			"id": "c5465dd1804342",
 			"category": "general",
 			"name": "K-Nearest Neighbors",
 			"param_name": "K_Nearest_Neighbors",
 			"description": "Default is 6. Number of neighbors for KNN.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "b42c1aa6667b4e",
+			"id": "11bf98e209324c",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width",
 			"param_name": "Figure_Width",
 			"description": "The width of the figure in inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "15"
+			"default_value": 15
 		},
 		{
-			"id": "e77bf5128ee94d",
+			"id": "676239f4364b41",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height",
 			"param_name": "Figure_Height",
 			"description": "The height of the figure in inch.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "1e3ccf28bc2843",
+			"id": "de1ff75f65e94d",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Higher the DPI, clearer the image.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "200"
+			"default_value": 200
 		},
 		{
-			"id": "0ce9c0abf37541",
+			"id": "478c15b852204a",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		},
 		{
-			"id": "5f418ea627bb44",
+			"id": "49f90e282eca47",
 			"category": "advanced_analysis_setting_parameters",
 			"name": "Color Bar Range",
 			"param_name": "Color_Bar_Range",

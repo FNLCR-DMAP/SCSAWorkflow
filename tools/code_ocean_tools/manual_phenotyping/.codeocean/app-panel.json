@@ -14,7 +14,27 @@
 	],
 	"parameters": [
 		{
-			"id": "83f4156901c642",
+			"id": "cc8f10a4622c4c",
+			"category": "general",
+			"name": "Upstream Dataset Pattern",
+			"param_name": "Upstream_Dataset_Pattern",
+			"description": "Filename pattern to match the upstream dataset file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*.csv"
+		},
+		{
+			"id": "97204ef5fb8f42",
+			"category": "general",
+			"name": "Phenotypes Code Pattern",
+			"param_name": "Phenotypes_Code_Pattern",
+			"description": "Filename pattern to match the phenotypes code file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*config*.csv"
+		},
+		{
+			"id": "e192e41e6e3a48",
 			"category": "general",
 			"name": "Classification Column Prefix",
 			"param_name": "Classification_Column_Prefix",
@@ -24,7 +44,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "c29cefc1e53c45",
+			"id": "c984897c9a1243",
 			"category": "general",
 			"name": "Classification Column Suffix",
 			"param_name": "Classification_Column_Suffix",
@@ -34,7 +54,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "ae1e7ce1c3914f",
+			"id": "e448d985dd2043",
 			"category": "general",
 			"name": "Allow Multiple Phenotypes",
 			"param_name": "Allow_Multiple_Phenotypes",
@@ -45,7 +65,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "bce83f29c8b34f",
+			"id": "724868ef073f4f",
 			"category": "general",
 			"name": "Manual Annotation Name",
 			"param_name": "Manual_Annotation_Name",

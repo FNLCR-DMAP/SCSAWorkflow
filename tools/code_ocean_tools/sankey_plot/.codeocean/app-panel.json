@@ -19,7 +19,7 @@
 	],
 	"parameters": [
 		{
-			"id": "ebd1277ea8f54c",
+			"id": "521e2c7f70bd49",
 			"category": "general",
 			"name": "Source Annotation Name",
 			"param_name": "Source_Annotation_Name",
@@ -29,7 +29,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "92025fd254cc44",
+			"id": "fcb6bb6591a140",
 			"category": "general",
 			"name": "Target Annotation Name",
 			"param_name": "Target_Annotation_Name",
@@ -39,7 +39,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "bc0bc16152a743",
+			"id": "246044faeb174a",
 			"category": "general",
 			"name": "Source Annotation Color Map",
 			"param_name": "Source_Annotation_Color_Map",
@@ -102,7 +102,7 @@
 			]
 		},
 		{
-			"id": "dd0f69d2de644f",
+			"id": "028c45ffe9c54c",
 			"category": "general",
 			"name": "Target Annotation Color Map",
 			"param_name": "Target_Annotation_Color_Map",
@@ -165,44 +165,44 @@
 			]
 		},
 		{
-			"id": "acfba259129047",
+			"id": "d9c428841c6745",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width, inch",
 			"param_name": "Figure_Width_inch",
 			"description": "Figure Width, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "aaa43e6d90e144",
+			"id": "1ccb849e529e41",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height, inch",
 			"param_name": "Figure_Height_inch",
 			"description": "Figure Height, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "6"
+			"default_value": 6
 		},
 		{
-			"id": "eeb4c8f63b5b47",
+			"id": "7767849817ca46",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Dots Per squared Inch, higher the value, better the image quality",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "b360e7f3aab945",
+			"id": "aa7ea31a1d0f46",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Font Size",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "12"
+			"default_value": 12
 		}
 	]
 }

@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "27fea51dd57c4b",
+			"id": "a61d08ea22f54f",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -24,7 +24,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "11f10b8f6dbf43",
+			"id": "95d061fe34bb49",
 			"category": "general",
 			"name": "Output Table Name",
 			"param_name": "Output_Table_Name",

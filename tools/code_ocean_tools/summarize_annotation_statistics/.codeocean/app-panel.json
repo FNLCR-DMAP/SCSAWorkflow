@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "c721cf9cd4044b",
+			"id": "3827b384921446",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -24,7 +24,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "783f4ce12f1444",
+			"id": "0b9dfaea88ef4d",
 			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -34,7 +34,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "4721e5bee0464a",
+			"id": "fdf2dac79ddc46",
 			"category": "general",
 			"name": "Feature(s)",
 			"param_name": "Feature_s_",

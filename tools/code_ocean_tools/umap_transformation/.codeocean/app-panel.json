@@ -24,7 +24,7 @@
 	],
 	"parameters": [
 		{
-			"id": "b9ccf962ce674b",
+			"id": "c022b0c7357d42",
 			"category": "general",
 			"name": "Run on HPC",
 			"param_name": "Run_on_HPC",
@@ -35,7 +35,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "a863149e982d40",
+			"id": "e2999830d3184f",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -45,37 +45,37 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "67f5ab1d1ba74a",
+			"id": "91dae55f65fd49",
 			"category": "general",
 			"name": "Number of Neighbors",
 			"param_name": "Number_of_Neighbors",
 			"description": "Number of neighbors to consider when constructing the UMAP. This influences the balance between preserving local and global structures in the data.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "75"
+			"default_value": 75
 		},
 		{
-			"id": "912038a57a1542",
+			"id": "b5a64398fdb24c",
 			"category": "general",
 			"name": "Target Dimension Number",
 			"param_name": "Target_Dimension_Number",
 			"description": "Number of dimensions for embedding to convert to. Default is 2 (plane).",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "2"
+			"default_value": 2
 		},
 		{
-			"id": "f09c2d28774745",
+			"id": "c533114adcd347",
 			"category": "general",
 			"name": "Minimum Distance between Points",
 			"param_name": "Minimum_Distance_between_Points",
 			"description": "Minimum distance between points in the UMAP space. Controls how tightly the embedding is allowed to compress points together.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0.1"
+			"default_value": 0.1
 		},
 		{
-			"id": "618a0375019d42",
+			"id": "9575a4dfbddb46",
 			"category": "general",
 			"name": "Computational Metric",
 			"param_name": "Computational_Metric",
@@ -110,27 +110,27 @@
 			]
 		},
 		{
-			"id": "e978a2733d324b",
+			"id": "45c9df537cf349",
 			"category": "random_state_control_parameters",
 			"name": "Transform Seed",
 			"param_name": "Transform_Seed",
 			"description": "This parameter sets a deterministic starting point for the UMAP transformation process, ensuring reproducibility of results. When the same dataset and 'Transform Seed' are used, the outcome of the analysis remains consistent. The default value is 42.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "42"
+			"default_value": 42
 		},
 		{
-			"id": "98e9d4efa3a043",
+			"id": "9ae08986566e4c",
 			"category": "random_state_control_parameters",
 			"name": "Random State",
 			"param_name": "Random_State",
 			"description": "This parameter initializes the random number generator used during the UMAP fitting procedure, functioning as a control for the randomness inherent in the analysis. It guarantees that identical inputs and 'Random State' values will produce identical results, facilitating the verification of the analysis. The default setting is 0.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0"
+			"default_value": 0
 		},
 		{
-			"id": "11160897bcfe47",
+			"id": "2ba9b9e0ccae44",
 			"category": "hpc_configuration_parameters",
 			"name": "Batch Mode",
 			"param_name": "Batch_Mode",
@@ -141,7 +141,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "5cc7fbb5d7504e",
+			"id": "19b6c667592f44",
 			"category": "hpc_configuration_parameters",
 			"name": "Partition",
 			"param_name": "Partition",
@@ -157,27 +157,27 @@
 			]
 		},
 		{
-			"id": "6936c98790784a",
+			"id": "227a364d5f3749",
 			"category": "hpc_configuration_parameters",
 			"name": "Number of CPUs",
 			"param_name": "Number_of_CPUs",
 			"description": "Number of CPUs requested for this HPC submission",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "2"
+			"default_value": 2
 		},
 		{
-			"id": "a8f300eded9342",
+			"id": "f2413461dad743",
 			"category": "hpc_configuration_parameters",
 			"name": "Memory, GB",
 			"param_name": "Memory_GB",
 			"description": "Amount of memory in gigabytes requested for this HPC submission",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "10"
+			"default_value": 10
 		},
 		{
-			"id": "fb07c15fd8eb47",
+			"id": "81d3c7437add48",
 			"category": "hpc_configuration_parameters",
 			"name": "Request Time",
 			"param_name": "Request_Time",

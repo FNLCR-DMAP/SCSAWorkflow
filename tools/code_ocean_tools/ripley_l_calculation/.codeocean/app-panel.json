@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "c351db52ddf14f",
+			"id": "f1f790931bb84f",
 			"category": "general",
 			"name": "Radii",
 			"param_name": "Radii",
@@ -24,7 +24,7 @@
 			"default_value": "[\"0\",\"5\",\"10\"]"
 		},
 		{
-			"id": "afb7ba14650042",
+			"id": "9eb6e0e5cc634f",
 			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",
@@ -34,7 +34,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "06e8cb4d1b2d4e",
+			"id": "3033a16dfa1d4e",
 			"category": "general",
 			"name": "Center Phenotype",
 			"param_name": "Center_Phenotype",
@@ -44,7 +44,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "d246da0ab67e49",
+			"id": "1d70650666ed4d",
 			"category": "general",
 			"name": "Neighbor Phenotype",
 			"param_name": "Neighbor_Phenotype",
@@ -54,7 +54,7 @@
 			"default_value": ""
 		},
 		{
-			"id": "e91b73aa2f6040",
+			"id": "3e7ac5647e054c",
 			"category": "general",
 			"name": "Stratify By",
 			"param_name": "Stratify_By",
@@ -64,17 +64,17 @@
 			"default_value": "None"
 		},
 		{
-			"id": "a045afaf7b734c",
+			"id": "4056f6d3e8b843",
 			"category": "general",
 			"name": "Number of Simulations",
 			"param_name": "Number_of_Simulations",
 			"description": "Number of simulation for the poisson point process where the Ripley L measure is estimated by shuffling the positions of the center and neighbor cells in the region of interest. The region of interest is defined as the convex hull that encapsulates all the cells in the region.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		},
 		{
-			"id": "3fb477e49a7741",
+			"id": "9f77086b020540",
 			"category": "general",
 			"name": "Area",
 			"param_name": "Area",
@@ -84,17 +84,17 @@
 			"default_value": "None"
 		},
 		{
-			"id": "22987174018845",
+			"id": "ced229e0f0644a",
 			"category": "general",
 			"name": "Seed",
 			"param_name": "Seed",
 			"description": "Random seed for reproducibility, used in simulating the poisson point process.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "42"
+			"default_value": 42
 		},
 		{
-			"id": "bb3aa98bac4f49",
+			"id": "c5f497b22b8f46",
 			"category": "general",
 			"name": "Edge Correction",
 			"param_name": "Edge_Correction",

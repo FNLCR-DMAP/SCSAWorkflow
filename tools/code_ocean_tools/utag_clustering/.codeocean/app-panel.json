@@ -19,7 +19,7 @@
 	],
 	"parameters": [
 		{
-			"id": "36c825517d424a",
+			"id": "0760d971759044",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -29,7 +29,7 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "e55e5c44c81c47",
+			"id": "1fb5ad9b755a41",
 			"category": "general",
 			"name": "Features",
 			"param_name": "Features",
@@ -39,7 +39,7 @@
 			"default_value": "All"
 		},
 		{
-			"id": "85c64caef8b44d",
+			"id": "faf702f87cf240",
 			"category": "general",
 			"name": "Slide Annotation",
 			"param_name": "Slide_Annotation",
@@ -49,7 +49,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "a163d5292f614c",
+			"id": "116b3a54bb1443",
 			"category": "general",
 			"name": "PCA Components",
 			"param_name": "PCA_Components",
@@ -59,57 +59,57 @@
 			"default_value": "None"
 		},
 		{
-			"id": "9296d82ae90745",
+			"id": "ef22de0843974c",
 			"category": "general",
 			"name": "K-Nearest Neighbors",
 			"param_name": "K_Nearest_Neighbors",
 			"description": "Number of nearest neighbors used when building the graph for clustering.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "15"
+			"default_value": 15
 		},
 		{
-			"id": "cd11ca19b53248",
+			"id": "696aa3d1f0484c",
 			"category": "general",
 			"name": "Resolution Parameter",
 			"param_name": "Resolution_Parameter",
 			"description": "Higher values give more, smaller clusters; lower values give fewer, larger clusters.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		},
 		{
-			"id": "1103c0b1d4274e",
+			"id": "1af6368758894d",
 			"category": "general",
 			"name": "Distance Threshold",
 			"param_name": "Distance_Threshold",
 			"description": "How far (in micrometres) two cells can be apart and still be considered neighbors.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "20.0"
+			"default_value": 20
 		},
 		{
-			"id": "34642200ddf649",
+			"id": "878d6ef1601e4c",
 			"category": "general",
 			"name": "Random Seed",
 			"param_name": "Random_Seed",
 			"description": "Ensures results are reproducible when re\u2011run the template.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "42"
+			"default_value": 42
 		},
 		{
-			"id": "b4fc059f294044",
+			"id": "0be559d79e5441",
 			"category": "general",
 			"name": "Leiden Iterations",
 			"param_name": "Leiden_Iterations",
 			"description": "How many times the Leiden algorithm refines the clusters.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "5"
+			"default_value": 5
 		},
 		{
-			"id": "7dff5c8941f94d",
+			"id": "fc293c19348e44",
 			"category": "general",
 			"name": "Output Annotation Name",
 			"param_name": "Output_Annotation_Name",
@@ -119,7 +119,7 @@
 			"default_value": "UTAG"
 		},
 		{
-			"id": "daea61a1603848",
+			"id": "03e0da8e72884c",
 			"category": "parellel_jobs_parameters",
 			"name": "Parellel Processes",
 			"param_name": "Parellel_Processes",
@@ -130,14 +130,14 @@
 			"extra_data": []
 		},
 		{
-			"id": "9716f35011d74b",
+			"id": "5ae9bc13644c4b",
 			"category": "parellel_jobs_parameters",
 			"name": "N-Jobs",
 			"param_name": "N_Jobs",
 			"description": "When Parallel Processes is True,  the number of jobs to run in parallel. Default is 1.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "1"
+			"default_value": 1
 		}
 	]
 }

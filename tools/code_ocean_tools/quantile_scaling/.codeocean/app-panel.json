@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "011bd5ace9f540",
+			"id": "466d9bb17b5141",
 			"category": "general",
 			"name": "Table to Process",
 			"param_name": "Table_to_Process",
@@ -24,27 +24,27 @@
 			"default_value": "Original"
 		},
 		{
-			"id": "f794c3d7fe6044",
+			"id": "a18650ac6f8a46",
 			"category": "general",
 			"name": "Low Quantile",
 			"param_name": "Low_Quantile",
 			"description": "Low quantile to be used as min.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0.02"
+			"default_value": 0.02
 		},
 		{
-			"id": "33a0788134ee42",
+			"id": "bf7b6d8d867740",
 			"category": "general",
 			"name": "High Quantile",
 			"param_name": "High_Quantile",
 			"description": "High quantile to be used as max.",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "0.98"
+			"default_value": 0.98
 		},
 		{
-			"id": "1a262097acf944",
+			"id": "cdac8e875d6840",
 			"category": "general",
 			"name": "Interpolation",
 			"param_name": "Interpolation",
@@ -58,7 +58,7 @@
 			]
 		},
 		{
-			"id": "96f11b16361046",
+			"id": "6cbcfe2f2b6e41",
 			"category": "general",
 			"name": "Output Table Name",
 			"param_name": "Output_Table_Name",
@@ -68,7 +68,7 @@
 			"default_value": "normalized_feature"
 		},
 		{
-			"id": "ad7c0640e3bb41",
+			"id": "7ebd407985bc49",
 			"category": "general",
 			"name": "Per Batch",
 			"param_name": "Per_Batch",
@@ -79,7 +79,7 @@
 			"extra_data": []
 		},
 		{
-			"id": "582f54d74d814b",
+			"id": "018303b5283d41",
 			"category": "general",
 			"name": "Annotation",
 			"param_name": "Annotation",

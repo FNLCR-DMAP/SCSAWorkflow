@@ -19,7 +19,7 @@
 	],
 	"parameters": [
 		{
-			"id": "5debf3988b6c4c",
+			"id": "1868ecd3968145",
 			"category": "general",
 			"name": "Source Annotation Name",
 			"param_name": "Source_Annotation_Name",
@@ -29,7 +29,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "4ec2ca05a3c547",
+			"id": "eb79677656584f",
 			"category": "general",
 			"name": "Target Annotation Name",
 			"param_name": "Target_Annotation_Name",
@@ -39,7 +39,7 @@
 			"default_value": "None"
 		},
 		{
-			"id": "cd7e53ef372348",
+			"id": "9b769025a0054c",
 			"category": "general",
 			"name": "Colormap",
 			"param_name": "Colormap",
@@ -145,44 +145,44 @@
 			]
 		},
 		{
-			"id": "8b9493da27f946",
+			"id": "cfbde766358841",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Width, inch",
 			"param_name": "Figure_Width_inch",
 			"description": "Figure Width, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "8"
+			"default_value": 8
 		},
 		{
-			"id": "8df399f3504b4f",
+			"id": "dbbbb8d24b464f",
 			"category": "figure_configuration_parameters",
 			"name": "Figure Height, inch",
 			"param_name": "Figure_Height_inch",
 			"description": "Figure Height, inch",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "10"
+			"default_value": 10
 		},
 		{
-			"id": "f3596d0533cb41",
+			"id": "049e5913a3e045",
 			"category": "figure_configuration_parameters",
 			"name": "Figure DPI",
 			"param_name": "Figure_DPI",
 			"description": "Dots Per squared Inch, higher the value, better the image quality",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "300"
+			"default_value": 300
 		},
 		{
-			"id": "fcaecdcbfba647",
+			"id": "d4d06910cf1e49",
 			"category": "figure_configuration_parameters",
 			"name": "Font Size",
 			"param_name": "Font_Size",
 			"description": "Font Size",
 			"type": "text",
 			"value_type": "number",
-			"default_value": "8"
+			"default_value": 8
 		}
 	]
 }

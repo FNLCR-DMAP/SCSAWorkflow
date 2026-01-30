@@ -14,7 +14,7 @@
 	],
 	"parameters": [
 		{
-			"id": "1056efa84b8042",
+			"id": "5f89945796ee45",
 			"category": "general",
 			"name": "Annotations Names",
 			"param_name": "Annotations_Names",
@@ -23,7 +23,7 @@
 			"value_type": "string"
 		},
 		{
-			"id": "e4303746d7e84c",
+			"id": "4469b197e79b4e",
 			"category": "general",
 			"name": "New Annotation Name",
 			"param_name": "New_Annotation_Name",
@@ -33,7 +33,7 @@
 			"default_value": "combined_annotation"
 		},
 		{
-			"id": "946fd46da22f48",
+			"id": "cdac3e4b465c44",
 			"category": "general",
 			"name": "Separator",
 			"param_name": "Separator",
