@@ -100,8 +100,7 @@ class TestBoxplotTemplate(unittest.TestCase):
         End-to-end I/O test: run boxplot template and verify output
         artifacts.
 
-        Validates in a single test (per team rule — one I/O test with
-        multiple assertions):
+        Validates:
         1. saved_files is a dict with 'figures' and 'dataframe' keys
         2. A figures directory is created containing a non-empty PNG
         3. The figure title matches the "Figure_Title" param
