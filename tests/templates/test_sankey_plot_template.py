@@ -52,10 +52,10 @@ class TestSankeyPlotTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Analysis": self.in_file,
-            "Left_Annotation": "cell_type",
-            "Right_Annotation": "cluster",
-            "Figure_Width": 600,
-            "Figure_Height": 400,
+            "Source_Annotation_Name": "cell_type",
+            "Target_Annotation_Name": "cluster",
+            "Figure_Width_inch": 6,
+            "Figure_Height_inch": 6,
             "Font_Size": 10,
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
@@ -82,7 +82,6 @@ class TestSankeyPlotTemplate(unittest.TestCase):
         saved_files = run_from_json(
             self.json_file,
             save_to_disk=True,
-            show_plot=False,
             output_dir=self.tmp_dir.name,
         )
 
