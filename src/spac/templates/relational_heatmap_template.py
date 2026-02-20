@@ -129,9 +129,25 @@ def create_matplotlib_heatmap_matching_plotly(
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
     save_to_disk: bool = True,
-    output_dir: str = None
+    output_dir: str = None,
+    show_static_image: bool = False
 ) -> Union[Dict, Tuple]:
-    """Execute Relational Heatmap with color-matched outputs."""
+    """Execute Relational Heatmap with color-matched outputs.
+
+    Parameters
+    ----------
+    json_path : str, Path, or dict
+        Path to parameters JSON file or dict of parameters.
+    save_to_disk : bool, default True
+        Whether to save results to disk.
+    output_dir : str, optional
+        Output directory. If None, read from params.
+    show_static_image : bool, default False
+        When True, generate a static PNG figure using matplotlib.
+        When False (default), only produce interactive HTML output.
+        Disabled by default because Plotly HTML-to-PNG conversion
+        hangs inside the Galaxy container environment.
+    """
     
     params = parse_params(json_path)
     
@@ -180,30 +196,35 @@ def run_from_json(
             height=height_in * 96,
             font=dict(size=font_size)
         )
-    
-    # Create matplotlib figure that matches Plotly's colors
-    print("Creating color-matched matplotlib figure...")
-    static_fig = create_matplotlib_heatmap_matching_plotly(
-        rhmap_data,
-        plotly_fig,
-        source_annotation,
-        target_annotation,
-        colormap,
-        (width_in, height_in),
-        int(dpi),
-        int(font_size)
-    )
-    
+
     if save_to_disk:
         results_dict = {
-            "figures": {"relational_heatmap": static_fig},
             "html": {"relational_heatmap": pio.to_html(plotly_fig, full_html=True, include_plotlyjs='cdn')},
             "dataframe": rhmap_data
         }
-        
+
+        if show_static_image:
+            # Generate static matplotlib figure matching Plotly colors.
+            # Disabled by default on Galaxy because Plotly HTML-to-PNG
+            # conversion hangs in the Galaxy container environment.
+            print("Creating color-matched matplotlib figure...")
+            static_fig = create_matplotlib_heatmap_matching_plotly(
+                rhmap_data,
+                plotly_fig,
+                source_annotation,
+                target_annotation,
+                colormap,
+                (width_in, height_in),
+                int(dpi),
+                int(font_size)
+            )
+            results_dict["figures"] = {"relational_heatmap": static_fig}
+
         saved_files = save_results(results_dict, params, output_base_dir=output_dir)
-        plt.close(static_fig)
-        
+
+        if show_static_image:
+            plt.close(static_fig)
+
         print("✓ Relational Heatmap completed")
         return saved_files
     else:

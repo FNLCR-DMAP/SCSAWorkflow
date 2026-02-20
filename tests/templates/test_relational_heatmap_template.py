@@ -74,11 +74,13 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
 
     def test_relational_heatmap_produces_expected_outputs(self) -> None:
         """
-        End-to-end I/O test: run relational heatmap and verify outputs.
+        End-to-end I/O test: run relational heatmap with show_static_image=False
+        (default).
 
         Validates:
-        1. saved_files dict has 'figures' key
-        2. Figure/HTML files exist and are non-empty
+        1. saved_files dict has 'html' key (interactive HTML is default output)
+        2. HTML file exists and is non-empty
+        3. No 'figures' key when show_static_image=False
         """
         saved_files = run_from_json(
             self.json_file,
@@ -87,7 +89,36 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
         )
 
         self.assertIsInstance(saved_files, dict)
+        self.assertIn("html", saved_files)
+
+        html_paths = saved_files["html"]
+        self.assertGreaterEqual(len(html_paths), 1)
+        for html_path in html_paths:
+            html_file = Path(html_path)
+            self.assertTrue(html_file.exists())
+            self.assertGreater(html_file.stat().st_size, 0)
+
+        # When show_static_image defaults to False, no figures produced
+        self.assertNotIn("figures", saved_files)
+
+    def test_relational_heatmap_with_static_image(self) -> None:
+        """
+        End-to-end I/O test: run relational heatmap with show_static_image=True.
+
+        Validates:
+        1. saved_files dict has both 'figures' and 'html' keys
+        2. Figure PNG and HTML files exist and are non-empty
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+            show_static_image=True,
+        )
+
+        self.assertIsInstance(saved_files, dict)
         self.assertIn("figures", saved_files)
+        self.assertIn("html", saved_files)
 
         figure_paths = saved_files["figures"]
         self.assertGreaterEqual(len(figure_paths), 1)
@@ -95,6 +126,13 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
             fig_file = Path(fig_path)
             self.assertTrue(fig_file.exists())
             self.assertGreater(fig_file.stat().st_size, 0)
+
+        html_paths = saved_files["html"]
+        self.assertGreaterEqual(len(html_paths), 1)
+        for html_path in html_paths:
+            html_file = Path(html_path)
+            self.assertTrue(html_file.exists())
+            self.assertGreater(html_file.stat().st_size, 0)
 
 
 if __name__ == "__main__":
