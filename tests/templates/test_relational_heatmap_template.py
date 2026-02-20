@@ -51,11 +51,10 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Analysis": self.in_file,
-            "Primary_Annotation": "cell_type",
-            "Table_to_Visualize": "Original",
-            "Features_to_Visualize": ["All"],
-            "Figure_Width": 6,
-            "Figure_Height": 4,
+            "Source_Annotation_Name": "cell_type",
+            "Target_Annotation_Name": "cell_type",
+            "Figure_Width_inch": 6,
+            "Figure_Height_inch": 4,
             "Figure_DPI": 72,
             "Font_Size": 8,
             "Output_Directory": self.tmp_dir.name,
@@ -84,7 +83,6 @@ class TestRelationalHeatmapTemplate(unittest.TestCase):
         saved_files = run_from_json(
             self.json_file,
             save_to_disk=True,
-            show_plot=False,
             output_dir=self.tmp_dir.name,
         )
 
