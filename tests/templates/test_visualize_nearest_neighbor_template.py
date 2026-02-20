@@ -74,6 +74,7 @@ class TestVisualizeNearestNeighborTemplate(unittest.TestCase):
         params = {
             "Upstream_Analysis": self.in_file,
             "Annotation": "cell_type",
+            "Source_Anchor_Cell_Label": "A",
             "Nearest_Neighbor_Associated_Table": "spatial_distance",
             "Figure_Width": 6,
             "Figure_Height": 4,
