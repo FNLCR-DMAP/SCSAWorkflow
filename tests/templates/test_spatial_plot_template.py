@@ -55,14 +55,15 @@ class TestSpatialPlotTemplate(unittest.TestCase):
         params = {
             "Upstream_Analysis": self.in_file,
             "Color_By": "Annotation",
-            "Annotation": "cell_type",
-            "Feature": "None",
-            "Stratify_By": "None",
+            "Annotation_to_Highlight": "cell_type",
+            "Feature_to_Highlight": "None",
+            "Stratify": False,
+            "Stratify_By": [],
             "Figure_Width": 6,
             "Figure_Height": 4,
             "Figure_DPI": 72,
             "Font_Size": 10,
-            "Spot_Size": 50,
+            "Dot_Size": 50,
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "figures": {"type": "directory", "name": "figures_dir"},
@@ -87,7 +88,7 @@ class TestSpatialPlotTemplate(unittest.TestCase):
         saved_files = run_from_json(
             self.json_file,
             save_to_disk=True,
-            show_plot=False,
+            show_plots=False,
             output_dir=self.tmp_dir.name,
         )
 
