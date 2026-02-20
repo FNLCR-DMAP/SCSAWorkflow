@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <tool id="spac_sankey_plot" name="Sankey Plot [SPAC] [DMAP]" version="2.0.0" profile="24.2">
-    <description>Generates a static and an interactive Sankey plot to visualize annotation relationships.  A relationship is defined as a unique pair of values, one from the source annotation and one from the target a</description>
+    <description>Generates an interactive Sankey plot to visualize annotation relationships. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.</description>
     <requirements>
         <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
@@ -9,13 +9,14 @@
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.sankey_plot_template import run_from_json; run_from_json('cleaned_params.json')"
+echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Show_Static_Image --inject-outputs --outputs-config outputs_config.json && python -c "import json; params=json.load(open('cleaned_params.json')); from spac.templates.sankey_plot_template import run_from_json; run_from_json('cleaned_params.json', show_static_image=params.get('Show_Static_Image', False))"
 
 ]]></command>
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <param name="Source_Annotation_Name" type="text" label="Source Annotation Name" value="None" help="Name of the source annotation column. Display at the left of the Sankey plot."/>
         <param name="Target_Annotation_Name" type="text" label="Target Annotation Name" value="None" help="Name of the target annotation column. Display at the right of the Sankey plot."/>
+        <param name="Show_Static_Image" type="boolean" label="Show Static Image" truevalue="True" falsevalue="False" checked="false" help="When enabled, generate a static PNG placeholder figure in addition to the interactive HTML output. Disabled by default because Plotly-to-PNG conversion may hang in some container environments."/>
         <param name="Source_Annotation_Color_Map" type="select" label="Source Annotation Color Map" help="Colormap of source annotation, default is tab20. Please refer to [Matplotlib Colormap](https://matplotlib.org/stable/users/explain/colors/colormaps.html) for further information">
             <option value="Pastel1">Pastel1</option>
             <option value="Pastel2">Pastel2</option>
@@ -134,6 +135,7 @@ echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type":
         <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
         <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
             <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+            <filter>Show_Static_Image</filter>
         </collection>
         <collection name="html" type="list" label="${tool.name} on ${on_string}: Html">
             <discover_datasets pattern="__name_and_ext__" directory="html_dir"/>
@@ -142,11 +144,11 @@ echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type":
     <help><![CDATA[
 
 **Sankey Plot [SPAC] [DMAP]**
-Generates a static and an interactive Sankey plot to visualize annotation relationships.  A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.\
+Generates an interactive Sankey plot to visualize annotation relationships. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.\
 Please refer to DUET Documentation and GitHub Documentation for further information.
 **Outputs:**
-- figures: directory (figures_dir)
-- html: directory (html_dir)
+- figures: directory (figures_dir) — static PNG placeholder (only when Show Static Image is enabled)
+- html: directory (html_dir) — interactive Plotly Sankey diagram
 
 ]]></help>
     <citations>
