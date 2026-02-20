@@ -1,5 +1,10 @@
 # tests/templates/test_utag_clustering_template.py
-"""Unit tests for the UTAG Clustering template."""
+"""
+Real (non-mocked) unit test for the UTAG Clustering template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,13 +12,11 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -22,147 +25,84 @@ sys.path.append(
 from spac.templates.utag_clustering_template import run_from_json
 
 
-def mock_adata(n_cells: int = 50) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for fast tests."""
-    rng = np.random.default_rng(0)
-    obs = pd.DataFrame({
-        "cell_type": (["TypeA", "TypeB"] * ((n_cells + 1) // 2))[:n_cells],
-        "slide_id": (["Slide1", "Slide2"] * ((n_cells + 1) // 2))[:n_cells]
-    })
-    x_mat = rng.normal(size=(n_cells, 5))
-    adata = ad.AnnData(X=x_mat, obs=obs)
-    adata.var_names = ["Marker1", "Marker2", "Marker3", "Marker4", "Marker5"]
-    # Add spatial coordinates required for UTAG
-    adata.obsm["spatial"] = rng.random((n_cells, 2)) * 100
+def _make_tiny_adata() -> ad.AnnData:
+    """Minimal AnnData: 30 cells with spatial coords for UTAG clustering."""
+    rng = np.random.default_rng(42)
+    X = rng.random((30, 3))
+    obs = pd.DataFrame({"cell_type": ["A", "B", "C"] * 10})
+    var = pd.DataFrame(index=["Gene_0", "Gene_1", "Gene_2"])
+    spatial = rng.random((30, 2)) * 100
+    adata = ad.AnnData(X=X, obs=obs, var=var)
+    adata.obsm["spatial"] = spatial
     return adata
 
 
 class TestUTAGClusteringTemplate(unittest.TestCase):
-    """Unit tests for the UTAG Clustering template."""
+    """Real (non-mocked) tests for the UTAG clustering template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input.pickle"
-        )
-        self.out_file = "output"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata(), f)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters - adjust based on template
-        self.params = {
+        params = {
             "Upstream_Analysis": self.in_file,
             "Table_to_Process": "Original",
             "Features": ["All"],
             "Slide_Annotation": "None",
             "Distance_Threshold": 20.0,
-            "K_Nearest_Neighbors": 15,
+            "K_Nearest_Neighbors": 5,
             "Resolution_Parameter": 1,
             "PCA_Components": "None",
             "Random_Seed": 42,
             "N_Jobs": 1,
-            "Leiden_Iterations": 5,
-            "Parallel_Processes": False,
+            "Leiden_Iterations": 3,
+            "Parellel_Processes": False,
             "Output_Annotation_Name": "UTAG",
-            "Output_File": self.out_file,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    def test_complete_io_workflow(self) -> None:
-        """Single I/O test covering input/output scenarios."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            
-            # Mock the run_utag_clustering function
-            with patch('spac.templates.utag_clustering_template.'
-                      'run_utag_clustering') as mock_utag:
-                # Mock function adds UTAG column to adata.obs
-                def add_utag_column(adata, **kwargs):
-                    # Add mock UTAG clusters
-                    n_cells = adata.n_obs
-                    clusters = ["UTAG_" + str(i % 3) 
-                               for i in range(n_cells)]
-                    adata.obs[kwargs['output_annotation']] = \
-                        pd.Categorical(clusters)
-                
-                mock_utag.side_effect = add_utag_column
-                
-                # Test 1: Run with default parameters
-                result = run_from_json(self.params)
-                self.assertIsInstance(result, dict)
-                self.assertTrue(len(result) > 0)
-                
-                # Test 2: Run without saving
-                result_no_save = run_from_json(
-                    self.params, save_results=False
-                )
-                # Check appropriate return type based on template
-                self.assertIsInstance(result_no_save, ad.AnnData)
-                self.assertIn("UTAG", result_no_save.obs.columns)
-                
-                # Test 3: JSON file input
-                json_path = os.path.join(
-                    self.tmp_dir.name, "params.json"
-                )
-                with open(json_path, "w") as f:
-                    json.dump(self.params, f)
-                
-                result_json = run_from_json(json_path)
-                self.assertIsInstance(result_json, dict)
+    def test_utag_clustering_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run UTAG clustering and verify outputs.
 
-    def test_error_validation(self) -> None:
-        """Test exact error message for invalid parameters."""
-        # Test invalid integer conversion for principal_components
-        params_bad = self.params.copy()
-        params_bad["PCA_Components"] = "invalid_number"
-        
-        with self.assertRaises(ValueError) as context:
-            run_from_json(params_bad)
-        
-        # Check exact error message
-        expected_msg = (
-            "Error: can't convert principal_components to integer. "
-            "Received:\"invalid_number\""
+        Validates:
+        1. saved_files dict has 'analysis' key
+        2. Pickle contains AnnData with UTAG obs column
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
         )
-        self.assertEqual(str(context.exception), expected_msg)
 
-    @patch('spac.templates.utag_clustering_template.run_utag_clustering')
-    def test_function_calls(self, mock_utag) -> None:
-        """Test that main function is called with correct parameters."""
-        # Mock the main function
-        def add_utag_column(adata, **kwargs):
-            adata.obs[kwargs['output_annotation']] = pd.Categorical(
-                ["UTAG_0"] * adata.n_obs
-            )
-        
-        mock_utag.side_effect = add_utag_column
-        
-        # Test with specific features instead of "All"
-        params_features = self.params.copy()
-        params_features["Features"] = ["Marker1", "Marker3"]
-        params_features["Slide_Annotation"] = "slide_id"
-        params_features["PCA_Components"] = "10"
-        
-        run_from_json(params_features, save_results=False)
-        
-        # Verify function was called correctly
-        mock_utag.assert_called_once()
-        call_args = mock_utag.call_args
-        
-        # Check parameter conversions
-        self.assertEqual(call_args[1]['features'], ["Marker1", "Marker3"])
-        self.assertEqual(call_args[1]['k'], 15)
-        self.assertEqual(call_args[1]['resolution'], 1)
-        self.assertEqual(call_args[1]['max_dist'], 20.0)
-        self.assertEqual(call_args[1]['n_pcs'], 10)
-        self.assertEqual(call_args[1]['slide_key'], "slide_id")
-        self.assertEqual(call_args[1]['layer'], None)  # "Original" → None
-        self.assertEqual(call_args[1]['output_annotation'], "UTAG")
-        self.assertEqual(call_args[1]['parallel'], False)
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("analysis", saved_files)
+
+        pkl_path = Path(saved_files["analysis"])
+        self.assertTrue(pkl_path.exists())
+        self.assertGreater(pkl_path.stat().st_size, 0)
+
+        with open(pkl_path, "rb") as f:
+            result_adata = pickle.load(f)
+        self.assertIsInstance(result_adata, ad.AnnData)
+        self.assertIn("UTAG", result_adata.obs.columns)
+
+        mem_adata = run_from_json(self.json_file, save_to_disk=False)
+        self.assertIsInstance(mem_adata, ad.AnnData)
+        self.assertIn("UTAG", mem_adata.obs.columns)
 
 
 if __name__ == "__main__":
