@@ -42,6 +42,7 @@ class TestSummarizeDataFrameTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Dataset": self.in_file,
+            "Columns": ["cell_type", "marker_1", "marker_2"],
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "html": {"type": "directory", "name": "html_dir"},
