@@ -51,10 +51,10 @@ class TestSetupAnalysisTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Dataset": self.in_file,
-            "Features": ["Gene_0", "Gene_1"],
-            "Annotations": ["cell_type"],
-            "X_Coordinate": "X_coord",
-            "Y_Coordinate": "Y_coord",
+            "Features_to_Analyze": ["Gene_0", "Gene_1"],
+            "Annotation_s_": ["cell_type"],
+            "X_Coordinate_Column": "X_coord",
+            "Y_Coordinate_Column": "Y_coord",
             "Output_File": "output.pickle",
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
