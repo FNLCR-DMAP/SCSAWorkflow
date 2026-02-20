@@ -46,6 +46,8 @@ class TestZScoreNormalizationTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Analysis": self.in_file,
+            "Table_to_Process": "Original",
+            "Output_Table_Name": "zscore",
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "analysis": {"type": "file", "name": "output.pickle"},
