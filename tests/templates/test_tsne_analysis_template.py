@@ -26,10 +26,10 @@ from spac.templates.tsne_analysis_template import run_from_json
 
 
 def _make_tiny_adata() -> ad.AnnData:
-    """Minimal AnnData: 20 cells, 5 genes for tSNE (needs enough cells)."""
+    """Minimal AnnData: 50 cells, 5 genes for tSNE (needs enough cells)."""
     rng = np.random.default_rng(42)
-    X = rng.random((20, 5))
-    obs = pd.DataFrame({"cell_type": ["A", "B"] * 10})
+    X = rng.random((50, 5))
+    obs = pd.DataFrame({"cell_type": ["A", "B"] * 25})
     var = pd.DataFrame(index=[f"Gene_{i}" for i in range(5)])
     return ad.AnnData(X=X, obs=obs, var=var)
 
