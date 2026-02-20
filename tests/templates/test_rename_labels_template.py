@@ -46,17 +46,17 @@ class TestRenameLabelsTemplate(unittest.TestCase):
 
         # Create mapping CSV: old_label -> new_label
         mapping_df = pd.DataFrame({
-            "old_label": ["A", "B"],
-            "new_label": ["Alpha", "Beta"],
+            "Original": ["A", "B"],
+            "New": ["Alpha", "Beta"],
         })
         self.mapping_file = os.path.join(self.tmp_dir.name, "mapping.csv")
         mapping_df.to_csv(self.mapping_file, index=False)
 
         params = {
             "Upstream_Analysis": self.in_file,
-            "Annotation_to_Rename": "cell_type",
-            "Mapping_CSV": self.mapping_file,
-            "New_Annotation_Name": "cell_type_renamed",
+            "Source_Annotation": "cell_type",
+            "Cluster_Mapping_Dictionary": self.mapping_file,
+            "New_Annotation": "cell_type_renamed",
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "analysis": {"type": "file", "name": "output.pickle"},
