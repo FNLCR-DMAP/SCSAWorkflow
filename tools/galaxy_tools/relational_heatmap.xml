@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <tool id="spac_relational_heatmap" name="Relational Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
-    <description>Relation Heatmap displays the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annota</description>
+    <description>Generates an interactive Relational Heatmap displaying the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.</description>
     <requirements>
         <container type="docker">nciccbr/spac:v2-dev</container>
     </requirements>
@@ -9,13 +9,14 @@
     </configfiles>
     <command detect_errors="exit_code"><![CDATA[
 
-echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}, "dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.relational_heatmap_template import run_from_json; run_from_json('cleaned_params.json')"
+echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type": "directory", "name": "html_dir"}, "dataframe": {"type": "file", "name": "dataframe.csv"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Show_Static_Image --inject-outputs --outputs-config outputs_config.json && python -c "import json; params=json.load(open('cleaned_params.json')); from spac.templates.relational_heatmap_template import run_from_json; run_from_json('cleaned_params.json', show_static_image=params.get('Show_Static_Image', False))"
 
 ]]></command>
     <inputs>
         <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
         <param name="Source_Annotation_Name" type="text" label="Source Annotation Name" value="None" help="Name of the source annotation. Display as vertical axis in the heatmap."/>
         <param name="Target_Annotation_Name" type="text" label="Target Annotation Name" value="None" help="Name of the source annotation. Display as horizontal axis in the heatmap."/>
+        <param name="Show_Static_Image" type="boolean" label="Show Static Image" truevalue="True" falsevalue="False" checked="false" help="When enabled, generate a static PNG figure in addition to the interactive HTML output. Disabled by default because Plotly-to-PNG conversion may hang in some container environments."/>
         <param name="Colormap" type="select" label="Colormap" help="Colormap of annotation, default is &quot;darkmint&quot;. Please refer to [Matplotlib Colormap](https://matplotlib.org/stable/users/explain/colors/colormaps.html) for further information">
             <option value="aggrnyl">aggrnyl</option>
             <option value="agsunset">agsunset</option>
@@ -124,6 +125,7 @@ echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type":
         <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
         <collection name="figures" type="list" label="${tool.name} on ${on_string}: Figures">
             <discover_datasets pattern="__name_and_ext__" directory="figures_dir"/>
+            <filter>Show_Static_Image</filter>
         </collection>
         <collection name="html" type="list" label="${tool.name} on ${on_string}: Html">
             <discover_datasets pattern="__name_and_ext__" directory="html_dir"/>
@@ -133,10 +135,10 @@ echo '{"figures": {"type": "directory", "name": "figures_dir"}, "html": {"type":
     <help><![CDATA[
 
 **Relational Heatmap [SPAC] [DMAP]**
-Relation Heatmap displays the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation. Please refer to DUET Documentation and GitHub Documentation for further information.
+Generates an interactive Relational Heatmap displaying the relations between source and target annotation labels. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation. Please refer to DUET Documentation and GitHub Documentation for further information.
 **Outputs:**
-- figures: directory (figures_dir)
-- html: directory (html_dir)
+- figures: directory (figures_dir) — static PNG heatmap (only when Show Static Image is enabled)
+- html: directory (html_dir) — interactive Plotly heatmap
 - dataframe: file (dataframe.csv)
 
 ]]></help>
