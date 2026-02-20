@@ -52,9 +52,9 @@ class TestInteractiveSpatialPlotTemplate(unittest.TestCase):
         params = {
             "Upstream_Analysis": self.in_file,
             "Color_By": "Annotation",
-            "Annotation": "cell_type",
-            "Feature": "None",
-            "Spot_Size": 5,
+            "Annotation_s_to_Highlight": ["cell_type"],
+            "Feature_to_Highlight": "None",
+            "Dot_Size": 5,
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "html": {"type": "directory", "name": "html_dir"},
@@ -79,7 +79,6 @@ class TestInteractiveSpatialPlotTemplate(unittest.TestCase):
         saved_files = run_from_json(
             self.json_file,
             save_to_disk=True,
-            show_plot=False,
             output_dir=self.tmp_dir.name,
         )
 
