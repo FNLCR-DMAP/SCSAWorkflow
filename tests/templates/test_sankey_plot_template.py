@@ -73,11 +73,13 @@ class TestSankeyPlotTemplate(unittest.TestCase):
 
     def test_sankey_plot_produces_expected_outputs(self) -> None:
         """
-        End-to-end I/O test: run sankey plot and verify outputs.
+        End-to-end I/O test: run sankey plot with show_static_image=False
+        (default).
 
         Validates:
-        1. saved_files dict has 'figures' and/or 'html' keys
-        2. Output files exist and are non-empty
+        1. saved_files dict has 'html' key (interactive HTML is default)
+        2. HTML output files exist and are non-empty
+        3. No 'figures' key when show_static_image=False
         """
         saved_files = run_from_json(
             self.json_file,
@@ -86,18 +88,44 @@ class TestSankeyPlotTemplate(unittest.TestCase):
         )
 
         self.assertIsInstance(saved_files, dict)
-        # Sankey produces HTML (interactive) and/or static figures
-        has_output = "html" in saved_files or "figures" in saved_files
-        self.assertTrue(has_output, "No output files found")
+        self.assertIn("html", saved_files)
+
+        html_paths = saved_files["html"]
+        self.assertGreaterEqual(len(html_paths), 1)
+        for p in html_paths:
+            pf = Path(p)
+            self.assertTrue(pf.exists())
+            self.assertGreater(pf.stat().st_size, 0)
+
+        # When show_static_image defaults to False, no figures produced
+        self.assertNotIn("figures", saved_files)
+
+    def test_sankey_plot_with_static_image(self) -> None:
+        """
+        End-to-end I/O test: run sankey plot with show_static_image=True.
+
+        Validates:
+        1. saved_files dict has both 'figures' and 'html' keys
+        2. Figure PNG and HTML files exist and are non-empty
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+            show_static_image=True,
+        )
+
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("figures", saved_files)
+        self.assertIn("html", saved_files)
 
         for key in ["html", "figures"]:
-            if key in saved_files:
-                paths = saved_files[key]
-                self.assertGreaterEqual(len(paths), 1)
-                for p in paths:
-                    pf = Path(p)
-                    self.assertTrue(pf.exists())
-                    self.assertGreater(pf.stat().st_size, 0)
+            paths = saved_files[key]
+            self.assertGreaterEqual(len(paths), 1)
+            for p in paths:
+                pf = Path(p)
+                self.assertTrue(pf.exists())
+                self.assertGreater(pf.stat().st_size, 0)
 
 
 if __name__ == "__main__":

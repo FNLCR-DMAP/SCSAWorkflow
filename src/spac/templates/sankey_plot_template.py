@@ -30,15 +30,24 @@ def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
     save_to_disk: bool = True,  # Always True for Galaxy
     output_dir: str = None,
+    show_static_image: bool = False,
 ) -> Union[Dict[str, Union[str, List[str]]], None]:
     """
     Execute Sankey Plot analysis for Galaxy.
-    
-    Per supervisor's guidance:
-    - No show() calls
-    - Save files only  
-    - Skip problematic Plotly PNG export
-    - Save HTML directly
+
+    Parameters
+    ----------
+    json_path : str, Path, or dict
+        Path to parameters JSON file or dict of parameters.
+    save_to_disk : bool, default True
+        Whether to save results to disk. Always True for Galaxy.
+    output_dir : str, optional
+        Output directory. If None, read from params.
+    show_static_image : bool, default False
+        When True, generate a static PNG placeholder figure.
+        When False (default), only produce interactive HTML output.
+        Disabled by default because Plotly HTML-to-PNG conversion
+        hangs inside the Galaxy container environment.
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -111,50 +120,58 @@ def run_from_json(
     
     print("Sankey plot generated")
 
-    # Create a simple matplotlib figure instead of Plotly PNG export
-    # This avoids the kaleido hanging issue
-    print("Creating matplotlib figure...")
-    static_fig, ax = plt.subplots(figsize=(width_num, height_num), dpi=dpi)
-    
-    # Create a placeholder visualization
-    # (Sankey diagrams are complex and best viewed in interactive HTML)
-    ax.text(0.5, 0.6, 'Sankey Diagram', 
-           ha='center', va='center', transform=ax.transAxes,
-           fontsize=16, fontweight='bold')
-    ax.text(0.5, 0.5, f'{source_annotation} → {target_annotation}', 
-           ha='center', va='center', transform=ax.transAxes,
-           fontsize=12)
-    ax.text(0.5, 0.3, 'View HTML output for interactive diagram', 
-           ha='center', va='center', transform=ax.transAxes,
-           fontsize=10, style='italic')
-    ax.axis('off')
-    
-    # Add border
-    ax.add_patch(plt.Rectangle((0.1, 0.2), 0.8, 0.5, 
-                              fill=False, edgecolor='gray', linewidth=1,
-                              transform=ax.transAxes))
-    
-    # IMPORTANT: No show() calls as per supervisor's guidance
-    # plt.show() - REMOVED - causes hang in Galaxy
-    # fig.show() - REMOVED - causes hang in Galaxy
-    
-    # Handle saving - always save to disk for Galaxy
+    # IMPORTANT: No show() calls — causes hang in Galaxy
+    # plt.show() - REMOVED
+    # fig.show() - REMOVED
+
+    # Handle saving — always save to disk for Galaxy
     if save_to_disk:
         # Prepare results dictionary
         results_dict = {}
-        
-        # Save matplotlib figure (placeholder)
-        if "figures" in params["outputs"]:
-            results_dict["figures"] = {"sankey_plot": static_fig}
-            print("Matplotlib figure prepared for saving")
-        
+
         # Save Plotly HTML (the actual interactive Sankey diagram)
         if "html" in params["outputs"]:
-            # Save the interactive Plotly figure as HTML
             html_content = pio.to_html(fig, full_html=True, include_plotlyjs='cdn')
             results_dict["html"] = {"sankey_plot": html_content}
             print("Plotly HTML prepared for saving")
-        
+
+        if show_static_image:
+            # Generate a static matplotlib placeholder figure.
+            # Disabled by default on Galaxy because Plotly HTML-to-PNG
+            # conversion hangs in the Galaxy container environment.
+            # The interactive HTML is the first-class output.
+            print("Creating matplotlib figure...")
+            static_fig, ax = plt.subplots(
+                figsize=(width_num, height_num), dpi=dpi
+            )
+            ax.text(
+                0.5, 0.6, 'Sankey Diagram',
+                ha='center', va='center', transform=ax.transAxes,
+                fontsize=16, fontweight='bold'
+            )
+            ax.text(
+                0.5, 0.5,
+                f'{source_annotation} → {target_annotation}',
+                ha='center', va='center', transform=ax.transAxes,
+                fontsize=12
+            )
+            ax.text(
+                0.5, 0.3,
+                'View HTML output for interactive diagram',
+                ha='center', va='center', transform=ax.transAxes,
+                fontsize=10, style='italic'
+            )
+            ax.axis('off')
+            ax.add_patch(plt.Rectangle(
+                (0.1, 0.2), 0.8, 0.5,
+                fill=False, edgecolor='gray', linewidth=1,
+                transform=ax.transAxes
+            ))
+
+            if "figures" in params["outputs"]:
+                results_dict["figures"] = {"sankey_plot": static_fig}
+                print("Matplotlib figure prepared for saving")
+
         # Use centralized save_results function
         print("Saving all results...")
         saved_files = save_results(
@@ -162,18 +179,17 @@ def run_from_json(
             params=params,
             output_base_dir=output_dir
         )
-        
-        # Close matplotlib figure to free memory
-        plt.close(static_fig)
-        
+
+        if show_static_image:
+            plt.close(static_fig)
+
         print(f"✓ Sankey Plot completed successfully")
         print(f"  Outputs saved: {list(saved_files.keys())}")
-        
+
         return saved_files
     else:
         # For non-Galaxy use (testing)
         print("Returning None (display mode not supported)")
-        plt.close(static_fig)
         return None
 
 
