@@ -28,7 +28,10 @@ class TestLoadCSVFilesWithConfig(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
 
-        # Create two simple CSV data files
+        # Create CSV data directory
+        csv_dir = os.path.join(self.tmp_dir.name, "csv_data")
+        os.makedirs(csv_dir)
+
         df1 = pd.DataFrame({
             "Feature_A": [1.0, 2.0],
             "Feature_B": [3.0, 4.0],
@@ -40,22 +43,20 @@ class TestLoadCSVFilesWithConfig(unittest.TestCase):
             "ID": ["cell_3", "cell_4"],
         })
 
-        self.csv1 = os.path.join(self.tmp_dir.name, "data1.csv")
-        self.csv2 = os.path.join(self.tmp_dir.name, "data2.csv")
-        df1.to_csv(self.csv1, index=False)
-        df2.to_csv(self.csv2, index=False)
+        df1.to_csv(os.path.join(csv_dir, "data1.csv"), index=False)
+        df2.to_csv(os.path.join(csv_dir, "data2.csv"), index=False)
 
-        # Create configuration CSV
+        # Configuration CSV with file_name column + metadata
         config_df = pd.DataFrame({
-            "column_name": ["Feature_A", "Feature_B", "ID"],
-            "column_type": ["feature", "feature", "string"],
+            "file_name": ["data1.csv", "data2.csv"],
+            "experiment": ["Exp1", "Exp2"],
         })
-        self.config_file = os.path.join(self.tmp_dir.name, "config.csv")
-        config_df.to_csv(self.config_file, index=False)
+        config_file = os.path.join(self.tmp_dir.name, "config.csv")
+        config_df.to_csv(config_file, index=False)
 
         params = {
-            "CSV_Files": [self.csv1, self.csv2],
-            "CSV_Files_Configuration": self.config_file,
+            "CSV_Files": csv_dir,
+            "CSV_Files_Configuration": config_file,
             "String_Columns": ["ID"],
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
