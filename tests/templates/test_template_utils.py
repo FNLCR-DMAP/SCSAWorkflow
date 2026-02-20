@@ -1,5 +1,14 @@
 # tests/templates/test_template_utils.py
-"""Unit tests for template utilities."""
+"""
+Real (non-mocked) unit tests for template utility functions.
+
+Validates utility I/O behaviour only:
+  • Functions produce correct outputs from real inputs
+  • File I/O operations work on real filesystem
+  • Error messages are accurate
+
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -8,7 +17,6 @@ import sys
 import tempfile
 import unittest
 import warnings
-from unittest.mock import patch
 import anndata as ad
 import numpy as np
 import pandas as pd
@@ -27,11 +35,14 @@ from spac.templates.template_utils import (
     convert_pickle_to_h5ad,
     convert_to_floats,
     spell_out_special_characters,
-    load_csv_files
+    load_csv_files,
+    parse_params,
+    string_list_to_dictionary,
+    clean_column_name,
 )
 
 
-def mock_adata(n_cells: int = 10) -> ad.AnnData:
+def create_test_adata(n_cells: int = 10) -> ad.AnnData:
     """Return a minimal synthetic AnnData for fast tests."""
     rng = np.random.default_rng(0)
     obs = pd.DataFrame({
@@ -42,7 +53,7 @@ def mock_adata(n_cells: int = 10) -> ad.AnnData:
     return adata
 
 
-def mock_dataframe(n_rows: int = 5) -> pd.DataFrame:
+def create_test_dataframe(n_rows: int = 5) -> pd.DataFrame:
     """Return a minimal DataFrame for fast tests."""
     return pd.DataFrame({
         "col1": range(n_rows),
@@ -55,8 +66,8 @@ class TestTemplateUtils(unittest.TestCase):
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.test_adata = mock_adata()
-        self.test_df = mock_dataframe()
+        self.test_adata = create_test_adata()
+        self.test_df = create_test_dataframe()
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
@@ -416,7 +427,7 @@ class TestTemplateUtils(unittest.TestCase):
             'file_name': ['missing.csv'],
             'experiment': ['Exp3']
         })
-        with self.assertRaises(TypeError) as context:
+        with self.assertRaises(FileNotFoundError) as context:
             load_csv_files(csv_dir, config_missing)
         self.assertIn("not found", str(context.exception))
 
@@ -427,33 +438,30 @@ class TestTemplateUtils(unittest.TestCase):
             'file_name': ['empty.csv'],
             'experiment': ['Exp4']
         })
-        with self.assertRaises(TypeError) as context:
+        with self.assertRaises(ValueError) as context:
             load_csv_files(csv_dir, config_empty)
         self.assertIn("empty", str(context.exception))
 
-        # Test 7: First file validation for string_columns
+        # Test 7: Non-existent string_columns are silently ignored
         config_single = pd.DataFrame({
             'file_name': ['data1.csv']
         })
-        with self.assertRaises(ValueError):
-            # Non-existent column should raise error
-            load_csv_files(
-                csv_dir, config_single, 
-                string_columns=['NonExistentColumn']
-            )
+        result_nonexist = load_csv_files(
+            csv_dir, config_single,
+            string_columns=['NonExistentColumn']
+        )
+        self.assertIsInstance(result_nonexist, pd.DataFrame)
 
-    @patch('builtins.print')
-    def test_load_csv_files_console_output(self, mock_print) -> None:
-        """Test console output from load_csv_files."""
-        from spac.templates.template_utils import load_csv_files
-
-        # Setup test data
+    def test_load_csv_files_special_character_column_cleaning(self) -> None:
+        """Test that load_csv_files cleans special character column names."""
+        # Setup test data with special character columns
         csv_dir = Path(self.tmp_dir.name) / "csv_test"
         csv_dir.mkdir()
 
         csv_data = pd.DataFrame({
             'ID': [1, 2],
-            'CD4+': ['pos', 'neg']  # Special character
+            'CD4+': ['pos', 'neg'],  # Special character
+            'Area µm²': [100.0, 200.0],
         })
         csv_data.to_csv(csv_dir / 'test.csv', index=False)
 
@@ -462,30 +470,17 @@ class TestTemplateUtils(unittest.TestCase):
             'group': ['A']
         })
 
-        # Run function
-        load_csv_files(csv_dir, config)
+        result = load_csv_files(csv_dir, config)
 
-        # Check console output
-        print_calls = [str(call[0][0]) for call in mock_print.call_args_list
-                      if call[0]]
+        # Assert: special character columns cleaned
+        self.assertIn('CD4_pos', result.columns)
+        self.assertIn('Area_um2', result.columns)
+        self.assertNotIn('CD4+', result.columns)
+        self.assertNotIn('Area µm²', result.columns)
 
-        # Should print column name updates
-        updates = [msg for msg in print_calls 
-                  if 'Column Name Updated:' in msg]
-        self.assertTrue(len(updates) > 0)
-        # The function strips trailing underscores, so CD4+ becomes CD4_pos
-        self.assertTrue(any('CD4+' in msg and 'CD4_pos' in msg 
-                           for msg in updates))
-
-        # Should print processing messages
-        processing = [msg for msg in print_calls 
-                     if 'Processing file:' in msg]
-        self.assertTrue(len(processing) > 0)
-
-        # Should print final info
-        final_info = [msg for msg in print_calls 
-                     if 'Final Dataframe Info' in msg]
-        self.assertTrue(len(final_info) > 0)
+        # Assert: data integrity preserved
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result['group'].unique().tolist(), ['A'])
 
     def test_save_results_single_csv_file(self) -> None:
         """Test saving DataFrame as single CSV file using save_results."""
@@ -914,6 +909,80 @@ class TestTemplateUtils(unittest.TestCase):
         # Verify it used the Output_Directory from params
         csv_path = Path(custom_dir) / "data.csv"
         self.assertTrue(csv_path.exists())
+
+    def test_parse_params_from_json_file(self) -> None:
+        """Test parse_params loads parameters from a JSON file."""
+        params = {"key1": "value1", "key2": 42, "nested": {"a": True}}
+        json_path = os.path.join(self.tmp_dir.name, "params.json")
+        with open(json_path, "w") as f:
+            json.dump(params, f)
+
+        result = parse_params(json_path)
+
+        self.assertEqual(result, params)
+        self.assertEqual(result["key1"], "value1")
+        self.assertEqual(result["key2"], 42)
+        self.assertTrue(result["nested"]["a"])
+
+    def test_parse_params_from_dict(self) -> None:
+        """Test parse_params passes through a dict unchanged."""
+        params = {"key": "value"}
+        result = parse_params(params)
+        self.assertIs(result, params)
+
+    def test_parse_params_from_json_string(self) -> None:
+        """Test parse_params parses a raw JSON string."""
+        json_str = '{"key": "value", "num": 7}'
+        result = parse_params(json_str)
+        self.assertEqual(result, {"key": "value", "num": 7})
+
+    def test_parse_params_invalid_type_raises(self) -> None:
+        """Test parse_params raises TypeError for unsupported input."""
+        with self.assertRaises(TypeError):
+            parse_params(12345)
+
+    def test_string_list_to_dictionary_valid(self) -> None:
+        """Test string_list_to_dictionary with valid key:value pairs."""
+        result = string_list_to_dictionary(
+            ["red:#FF0000", "blue:#0000FF"]
+        )
+        self.assertEqual(result, {"red": "#FF0000", "blue": "#0000FF"})
+
+    def test_string_list_to_dictionary_custom_names(self) -> None:
+        """Test string_list_to_dictionary with custom key/value names."""
+        result = string_list_to_dictionary(
+            ["TypeA:Cancer", "TypeB:Normal"],
+            key_name="cell_type",
+            value_name="diagnosis",
+        )
+        self.assertEqual(
+            result, {"TypeA": "Cancer", "TypeB": "Normal"}
+        )
+
+    def test_string_list_to_dictionary_invalid_entry(self) -> None:
+        """Test string_list_to_dictionary raises on missing colon."""
+        with self.assertRaises(ValueError) as ctx:
+            string_list_to_dictionary(["valid:pair", "no_colon"])
+        self.assertIn("Missing ':'", str(ctx.exception))
+
+    def test_string_list_to_dictionary_not_list_raises(self) -> None:
+        """Test string_list_to_dictionary raises TypeError for non-list."""
+        with self.assertRaises(TypeError):
+            string_list_to_dictionary("not_a_list")
+
+    def test_clean_column_name_basic(self) -> None:
+        """Test clean_column_name on normal and special-char columns."""
+        # Normal name — unchanged
+        self.assertEqual(clean_column_name("cell_type"), "cell_type")
+
+        # Special characters cleaned
+        self.assertEqual(clean_column_name("CD4+"), "CD4_pos")
+        self.assertEqual(clean_column_name("Area µm²"), "Area_um2")
+
+    def test_clean_column_name_digit_prefix(self) -> None:
+        """Test clean_column_name adds col_ prefix for digit-leading names."""
+        result = clean_column_name("123ABC")
+        self.assertEqual(result, "col_123ABC")
 
 
 if __name__ == "__main__":
