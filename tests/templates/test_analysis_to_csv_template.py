@@ -31,7 +31,9 @@ def _make_tiny_adata() -> ad.AnnData:
     X = rng.random((4, 2))
     obs = pd.DataFrame({"cell_type": ["A", "B", "A", "B"]})
     var = pd.DataFrame(index=["Gene_0", "Gene_1"])
-    return ad.AnnData(X=X, obs=obs, var=var)
+    adata = ad.AnnData(X=X, obs=obs, var=var)
+    adata.obsm["spatial"] = rng.random((4, 2)) * 100
+    return adata
 
 
 class TestAnalysisToCSVTemplate(unittest.TestCase):
