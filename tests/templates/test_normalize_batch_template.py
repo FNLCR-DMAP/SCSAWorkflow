@@ -49,7 +49,7 @@ class TestNormalizeBatchTemplate(unittest.TestCase):
 
         params = {
             "Upstream_Analysis": self.in_file,
-            "Batch_Column": "batch",
+            "Annotation": "batch",
             "Need_Normalization": True,
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
