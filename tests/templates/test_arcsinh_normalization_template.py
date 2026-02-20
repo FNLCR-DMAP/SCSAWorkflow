@@ -47,7 +47,7 @@ class TestArcsinhNormalizationTemplate(unittest.TestCase):
         params = {
             "Upstream_Analysis": self.in_file,
             "Co_Factor": "5",
-            "Percentile": "99.9",
+            "Percentile": "None",
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "analysis": {"type": "file", "name": "output.pickle"},
