@@ -122,15 +122,23 @@ def run_from_json(
         values_to_exclude = labels
 
     with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
         filtered_adata = select_values(
             data=adata,
             annotation=annotation,
             values=values_to_include,
             exclude_values=values_to_exclude
             )
+        # Only process warnings that are relevant to the select_values operation
         if caught_warnings:
             for warning in caught_warnings:
-                raise ValueError(warning.message)
+                # Skip deprecation warnings from numpy/pandas
+                if (hasattr(warning, 'category') and
+                    issubclass(warning.category, DeprecationWarning)):
+                    continue
+                # Raise actual operational warnings as errors
+                if hasattr(warning, 'message'):
+                    raise ValueError(str(warning.message))
     
     logging.info(filtered_adata)
     logging.info("\n")
