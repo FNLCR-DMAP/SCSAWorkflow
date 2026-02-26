@@ -39,6 +39,148 @@ from collections import OrderedDict
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+plt.rcParams["axes.grid"] = False
+
+def spac_datashader_labeled_heatmap(
+    adata,
+    bins_x=10,
+    bins_y=10,
+    x_labels=None,
+    y_labels=None,
+    log_scale=False,
+    decimals=2,
+    cmap="viridis",
+    title="Spatial Heatmap",
+    show_colorbar=True
+):
+
+    if "spatial" in adata.obsm:
+        coords = adata.obsm["spatial"]
+    elif "X_spatial" in adata.obsm:
+        coords = adata.obsm["X_spatial"]
+    else:
+        raise KeyError("No spatial coordinates found in adata.obsm")
+
+    x = coords[:, 0]
+    y = coords[:, 1]
+
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    mask = np.isfinite(x) & np.isfinite(y)
+    x = x[mask]
+    y = y[mask]
+
+    if len(x) == 0:
+        raise ValueError("No valid points to plot.")
+
+    x_min, x_max = float(x.min()), float(x.max())
+    y_min, y_max = float(y.min()), float(y.max())
+
+    cvs = ds.Canvas(
+        plot_width=bins_x,
+        plot_height=bins_y,
+        x_range=(x_min, x_max),
+        y_range=(y_min, y_max),
+    )
+
+    df = pd.DataFrame({"x": x, "y": y})
+
+    agg = cvs.points(df, "x", "y", agg=ds.count())
+    grid = agg.values.astype(float)
+
+    if log_scale:
+        data = np.log10(grid + 1)
+        cbar_label = "log10(count + 1)"
+    else:
+        data = grid
+        cbar_label = "Count"
+
+
+    if x_labels is None:
+        x_labels = [f"X{i}" for i in range(bins_x)]
+
+    if y_labels is None:
+        y_labels = [f"Y{i}" for i in range(bins_y)]
+
+
+    if len(x_labels) != bins_x:
+        raise ValueError("Length of x_labels must equal bins_x")
+
+    if len(y_labels) != bins_y:
+        raise ValueError("Length of y_labels must equal bins_y")
+
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    im = ax.imshow(
+        data,
+        origin="lower",
+        cmap=cmap,
+        interpolation="none",
+        aspect="equal"
+    )
+
+    ax.grid(False)
+    ax.grid(False, which="minor")
+
+
+    if show_colorbar:
+        cbar = ax.figure.colorbar(im, ax=ax)
+        cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
+        cbar.outline.set_visible(False)
+
+
+    ax.set_xticks(
+        range(bins_x),
+        labels=x_labels,
+        rotation=-30,
+        ha="right",
+        rotation_mode="anchor"
+    )
+
+    ax.set_yticks(range(bins_y), labels=y_labels)
+
+
+    ax.tick_params(
+        top=True,
+        bottom=False,
+        labeltop=True,
+        labelbottom=False
+    )
+
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+
+    fmt = matplotlib.ticker.StrMethodFormatter(f"{{x:.{decimals}f}}")
+
+    threshold = im.norm(data.max()) / 2
+
+
+    for i in range(bins_y):
+        for j in range(bins_x):
+
+            color = "white" if im.norm(data[i, j]) > threshold else "black"
+
+            ax.text(
+                j,
+                i,
+                fmt(data[i, j], None),
+                ha="center",
+                va="center",
+                color=color,
+                fontsize=11,
+                fontweight="bold"
+            )
+
+
+    ax.set_title(title, pad=20)
+
+    fig.tight_layout()
+    return fig
+
 def heatmap_datashader(x, y, labels=None, theme=None,
                         x_axis_title="Component 1", y_axis_title="Component 2",
                         plot_title=None, **kwargs):
