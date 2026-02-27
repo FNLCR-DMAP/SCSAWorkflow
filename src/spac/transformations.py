@@ -8,7 +8,7 @@ import scanpy.external as sce
 from spac.utils import check_table, check_annotation, check_feature
 from scipy import stats
 import umap as umap_lib
-from scipy.sparse import issparse
+from scipy.sparse import issparse, csr_matrix
 from typing import List, Union, Optional
 from numpy.lib import NumpyVersion
 from sklearn.neighbors import KNeighborsClassifier
@@ -16,6 +16,9 @@ from sklearn.preprocessing import LabelEncoder
 import multiprocessing
 import parmap
 from spac.utag_functions import utag
+from anndata import AnnData
+from spac.utils import compute_summary_qc_stats
+from typing import List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -1286,3 +1289,179 @@ def run_utag_clustering(
     cluster_list = utag_results.obs[cur_cluster_col].copy()
     adata.obs[output_annotation] = cluster_list.copy()
     adata.uns["utag_features"] = features
+
+# add QC metrics to AnnData object
+def add_qc_metrics(adata, 
+                   organism="hs", 
+                   mt_match_pattern=None, 
+                   layer=None):
+    """
+    Adds quality control (QC) metrics to the AnnData object.
+
+    Parameters:
+    -----------
+    adata : AnnData
+        The AnnData object containing single-cell or spatial 
+        transcriptomics data.
+    organism : str, optional
+        The organism type. Default is "hs" (human). Use "mm" for mouse.
+        Determines the mitochondrial gene prefix 
+        ("MT-" for human, "mt-" for mouse).
+    mt_match_pattern : str, optional
+        A custom pattern to identify mitochondrial genes. If None, it defaults
+        to "MT-" for human or "mt-" for mouse based on the `organism` parameter.
+        Takes precedence over the default patterns.
+        If provided, it should match the prefix of mitochondrial gene names in 
+        `adata.var_names`.
+    layer : str, optional
+        The name of the layer in `adata.layers` to use for calculations. 
+        If None, the default `adata.X` matrix is used.
+
+    Modifies:
+    ---------
+    adata.obs : pandas.DataFrame
+        Adds the following QC metrics as new columns:
+        - "nFeature": Number of genes with non-zero expression for each cell.
+        - "nCount": Total counts (sum of all gene expression values) 
+            for each cell.
+        - "nCount_mt": Total counts for mitochondrial genes for each cell.
+        - "percent.mt": Percentage of counts in mitochondrial genes 
+            for each cell.
+
+    Raises:
+    -------
+    ValueError
+        If the specified `layer` is not found in `adata.layers`.
+
+    Notes:
+    ------
+    - If the input matrix (`adata.X` or the specified layer) is dense, 
+        it is converted to a sparse matrix for efficient computation.
+    - Mitochondrial genes are identified based on the `mt_match_pattern`.
+
+    Example:
+    --------
+    >>> add_qc_metrics(adata, organism="hs")
+    >>> print(adata.obs[["nFeature", "nCount", "nCount_mt", "percent.mt"]])
+    """
+    # identify mitochondrial genes pattern
+    if mt_match_pattern is None:
+        if organism == "hs":
+            mt_match_pattern = "MT-"
+        elif organism == "mm":
+            mt_match_pattern = "mt-"
+        else:
+            raise ValueError(f"Unsupported organism '{organism}'. Supported values are 'hs' and 'mm'.")
+
+    if layer is None:
+        test_matrix = adata.X
+    else:
+        check_table(adata, tables=layer)
+        test_matrix = adata.layers[layer]
+    
+    # Check if adata.X is sparse, and convert if necessary
+    if not issparse(test_matrix):
+        test_matrix = csr_matrix(test_matrix)
+
+    # Calculate total number of genes with values > 0 for each cell
+    adata.obs["nFeature"] = np.array((test_matrix > 0).sum(axis=1)).flatten()
+    # Calculate the sum of counts for all genes for each cell
+    adata.obs["nCount"] = np.array(test_matrix.sum(axis=1)).flatten()
+    # Identify mitochondrial genes based on the match pattern
+    mt_genes = adata.var_names.str.startswith(mt_match_pattern)
+    # Calculate the sum of counts for mitochondrial genes for each cell
+    adata.obs["nCount_mt"] = np.array(test_matrix[:, mt_genes]
+                                      .sum(axis=1)).flatten()
+    # Calculate the percentage of counts in mitochondrial genes for each cell
+    adata.obs["percent.mt"] = (adata.obs["nCount_mt"] / 
+                               adata.obs["nCount"]) * 100
+    # Handle NaN values in percent.mt
+    adata.obs["percent.mt"] = adata.obs["percent.mt"].fillna(0)
+    # Ensure percent.mt is stored as a float
+    adata.obs["percent.mt"] = adata.obs["percent.mt"].astype(float)
+
+# Add the QC summary table to AnnData object
+def get_qc_summary_table(
+    adata: AnnData,
+    n_mad: int = 5,
+    upper_quantile: float = 0.95,
+    lower_quantile: float = 0.05,
+    stat_columns_list: Optional[List[str]] = None,
+    sample_column: str = None
+) -> None:
+    """
+    Compute summary statistics for quality control metrics in an AnnData object 
+    and store the result in adata.uns['qc_summary_table'].
+    If QC columns are not in the adata.obs, run add_qc_metrics first.
+
+    Parameters:
+        adata (AnnData): The AnnData object containing the data.
+        n_mad (int): Number of MADs to use for upper/lower thresholds.
+        upper_quantile (float): Upper quantile to compute (e.g., 0.95).
+        lower_quantile (float): Lower quantile to compute (e.g., 0.05).
+        stat_columns_list (list): List of column names to compute statistics for.
+            If None, defaults to ['nFeature', 'nCount', 'percent.mt'].
+        sample_column (str, optional): Column name to group by sample. 
+        If None, computes for all data.
+
+    Returns:
+        None. The summary table is stored in adata.uns['qc_summary_table'].
+    """
+    # if not provided select default stat columns
+    if stat_columns_list is None:
+        stat_columns_list = ['nFeature', 'nCount', 'percent.mt']
+
+    # Check that required columns exist in adata.obs
+    check_annotation(
+        adata,
+        annotations=stat_columns_list,
+        should_exist=True)
+    
+    # check that stat_column_list is not empty
+    if not stat_columns_list:   # catches [], (), None
+        raise ValueError(
+            'Parameter "stat_columns_list" must contain at least one column name.'
+        )
+    
+    # check grouping column
+    if sample_column is not None:
+        check_annotation(adata, annotations=[sample_column], should_exist=True)
+
+    #  validate numerical parameters input
+    if not 0 <= upper_quantile <= 1:
+        raise ValueError(f'Parameter "upper_quantile" must be between 0 and 1, got "{upper_quantile}"'
+                         )
+    if not 0 <= lower_quantile <= 1:
+        raise ValueError(f'Parameter "lower_quantile" must be between 0 and 1, got "{lower_quantile}"'
+                         )
+    if n_mad < 0:
+        raise ValueError(f'Parameter "n_mad" must be non-negative, got "{n_mad}"')
+
+    obs_df = adata.obs
+    summary_table = pd.DataFrame()
+    # If no sample_column, compute stats for all data
+    if sample_column is None:
+        stat_df = compute_summary_qc_stats(df=obs_df,
+                                           n_mad=n_mad,
+                                           upper_quantile=upper_quantile,
+                                           lower_quantile=lower_quantile,
+                                           stat_columns_list=stat_columns_list)
+        stat_df["Sample"] = "All"
+        summary_table = stat_df
+    else:
+        # Otherwise, compute stats for each sample group
+        samples_list = pd.unique(obs_df[sample_column])
+        stat_dfs = []
+        for current_sample in samples_list:
+            sample_df = obs_df[obs_df[sample_column] == current_sample].copy()
+            stat_df = compute_summary_qc_stats(df=sample_df,
+                                    n_mad=n_mad,
+                                    upper_quantile=upper_quantile,
+                                    lower_quantile=lower_quantile,
+                                    stat_columns_list=stat_columns_list)
+            stat_df["Sample"] = current_sample
+            stat_dfs.append(stat_df)
+        summary_table = pd.concat(stat_dfs, ignore_index=True)
+    # Reset index and store in adata.uns
+    summary_table = summary_table.reset_index(drop=True)
+    adata.uns["qc_summary_table"] = summary_table
