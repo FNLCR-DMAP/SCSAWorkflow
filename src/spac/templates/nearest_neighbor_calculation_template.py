@@ -9,28 +9,30 @@ Usage
 ... )
 >>> run_from_json("examples/nearest_neighbor_calculation_params.json")
 """
-import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any, Dict, Union
-import pandas as pd
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from spac.utils import check_table, check_annotation
 from spac.spatial_analysis import calculate_nearest_neighbor
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
     parse_params,
+    save_results,
     text_to_value,
 )
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_to_disk: bool = True,
+    output_dir: Union[str, Path] = None
 ) -> Union[Dict[str, str], Any]:
     """
     Execute Nearest Neighbor Calculation analysis with parameters from JSON.
@@ -39,19 +41,65 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the adata object
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/input.pickle",
+            "Annotation": "cell_type",
+            "ImageID": "None",
+            "Nearest_Neighbor_Associated_Table": "spatial_distance",
+            "Verbose": true,
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If False, returns the adata object
         directly for in-memory workflows. Default is True.
+    output_dir : str or Path, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory. All outputs will be saved relative to this directory.
 
     Returns
     -------
     dict or AnnData
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: The processed AnnData object
+        If save_to_disk=True: Dictionary of saved file paths with structure:
+            {"analysis": "path/to/output.pickle"}
+        If save_to_disk=False: The processed AnnData object
+
+    Notes
+    -----
+    Output Structure:
+    - Analysis output is saved as a single pickle file (standardized for analysis outputs)
+    - When save_to_disk=False, the AnnData object is returned for programmatic use
+    
+    Examples
+    --------
+    >>> # Save results to disk
+    >>> saved_files = run_from_json("params.json")
+    >>> print(saved_files["analysis"])  # Path to saved pickle file
+    >>> # './output.pickle'
+    
+    >>> # Get results in memory for further processing
+    >>> adata = run_from_json("params.json", save_to_disk=False)
+    >>> # Can now work with adata object directly
+    
+    >>> # Custom output directory
+    >>> saved = run_from_json("params.json", output_dir="/custom/path")
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+    
+    # Ensure outputs configuration exists with standardized defaults
+    # Analysis uses file type per standardized schema
+    if "outputs" not in params:
+        params["outputs"] = {
+            "analysis": {"type": "file", "name": "output.pickle"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -68,14 +116,14 @@ def run_from_json(
     # Convert any string "None" to actual None for Python
     imageid = text_to_value(imageid, default_none_text="None")
 
-    print(
+    logger.info(
         "Running `calculate_nearest_neighbor` with the following parameters:"
     )
-    print(f"  annotation: {annotation}")
-    print(f"  spatial_associated_table: {spatial_associated_table}")
-    print(f"  imageid: {imageid}")
-    print(f"  label: {label}")
-    print(f"  verbose: {verbose}")
+    logger.info(f"  annotation: {annotation}")
+    logger.info(f"  spatial_associated_table: {spatial_associated_table}")
+    logger.info(f"  imageid: {imageid}")
+    logger.info(f"  label: {label}")
+    logger.info(f"  verbose: {verbose}")
 
     # Perform the nearest neighbor calculation
     calculate_nearest_neighbor(
@@ -87,52 +135,73 @@ def run_from_json(
         verbose=verbose
     )
 
-    print("Nearest neighbor calculation complete.")
-    print("adata.obsm keys:", list(adata.obsm.keys()))
+    logger.info("Nearest neighbor calculation complete.")
+    logger.info(f"adata.obsm keys: {list(adata.obsm.keys())}")
     if label in adata.obsm:
-        print(
-            f"Preview of adata.obsm['{label}']:\n",
-            adata.obsm[label].head()
+        logger.info(
+            f"Preview of adata.obsm['{label}']:\n{adata.obsm[label].head()}"
         )
 
-    print(adata)
+    logger.info(f"{adata}")
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format if no recognized extension
-        if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
-            output_file = output_file + '.pickle'
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
         
-        saved_files = save_outputs({output_file: adata})
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = adata
         
-        print(
+        # Use centralized save_results function
+        # All file handling and logging is now done by save_results
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+
+        logger.info(
             f"Nearest Neighbor Calculation completed → "
-            f"{saved_files[output_file]}"
+            f"{saved_files['analysis']}"
         )
         return saved_files
     else:
         # Return the adata object directly for in-memory workflows
-        print("Returning AnnData object (not saving to file)")
+        logger.info("Returning AnnData object (not saving to file)")
         return adata
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
             "Usage: python nearest_neighbor_calculation_template.py "
-            "<params.json>",
+            "<params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
+    # Display results based on return type
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, path in result.items():
+            print(f"  {key}: {path}")
     else:
-        print("\nReturned AnnData object")
+        print("\nReturned AnnData object for in-memory use")
+        print(f"AnnData: {result}")
+        print(f"Shape: {result.shape}")

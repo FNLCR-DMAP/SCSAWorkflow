@@ -2,6 +2,9 @@
 Platform-agnostic Quantile Scaling template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Follows standardized output schema where html outputs are saved as directories.
+
 Usage
 -----
 >>> from spac.templates.quantile_scaling_template import run_from_json
@@ -10,7 +13,8 @@ Usage
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, Tuple
+from typing import Any, Dict, Union, List, Tuple
+import logging
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -20,7 +24,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.transformations import normalize_features
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -28,9 +32,10 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plot: bool = True
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
+    save_to_disk: bool = True,
+    show_plot: bool = True,
+    output_dir: str = None,
+) -> Union[Dict[str, Union[str, List[str]]], Tuple[Any, go.Figure]]:
     """
     Execute Quantile Scaling analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -38,23 +43,45 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the adata object
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/data.pickle",
+            "Low_Quantile": "0.02",
+            "High_Quantile": "0.98",
+            "Interpolation": "nearest",
+            "Table_to_Process": "Original",
+            "Output_Table_Name": "normalized_feature",
+            "Per_Batch": "False",
+            "Annotation": null,
+            "outputs": {
+                "analysis": {"type": "file", "name": "quantile_scaled_data.pickle"},
+                "html": {"type": "directory", "name": "normalization_summary"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If False, returns the adata object
         and figure directly for in-memory workflows. Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
+    output_dir : str, optional
+        Override output directory from params. Default uses params value.
 
     Returns
     -------
     dict or tuple
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (adata, figure)
+        If save_to_disk=True: Dictionary of saved file paths
+        If save_to_disk=False: Tuple of (adata, figure)
     """
+    # Set up logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
     # Parse parameters from JSON
     params = parse_params(json_path)
 
     # Load the upstream analysis data
+    logger.info(f"Loading upstream analysis data from {params['Upstream_Analysis']}")
     adata = load_input(params["Upstream_Analysis"])
 
     # Extract parameters using .get() with defaults from JSON template
@@ -97,16 +124,15 @@ def run_from_json(
         )
     
     # Check if output_layer already exists in adata
-    print(f"Checking if output layer '{output_layer}' exists in adata "
-          f"layers...")
+    logger.info(f"Checking if output layer '{output_layer}' exists in adata layers...")
     if output_layer in adata.layers.keys():
         raise ValueError(
             f"Output Table Name '{output_layer}' already exists, "
             f"please rename it."
         )
     else:
-        print(f"Output layer '{output_layer}' does not exist. "
-              f"Proceeding with normalization.")
+        logger.info(f"Output layer '{output_layer}' does not exist. "
+                   f"Proceeding with normalization.")
     
     def df_as_html(
         df,
@@ -184,8 +210,8 @@ def run_from_json(
     
         return normalization_info
 
-    print(f"High quantile used: {str(high_quantile)}")
-    print(f"Low quantile used: {str(low_quantile)}")
+    logger.info(f"High quantile used: {str(high_quantile)}")
+    logger.info(f"Low quantile used: {str(low_quantile)}")
 
     transformed_data = normalize_features(
         adata=adata,
@@ -198,9 +224,9 @@ def run_from_json(
         annotation=annotation
     )
 
-    print(f"Transformed data stored in layer: {output_layer}")
+    logger.info(f"Transformed data stored in layer: {output_layer}")
     dataframe = pd.DataFrame(transformed_data.layers[output_layer])
-    print(dataframe.describe())
+    logger.info(f"Transform summary:\n{dataframe.describe()}")
 
     normalization_info = create_normalization_info(
         adata,
@@ -224,39 +250,70 @@ def run_from_json(
     if show_plot:
         html_plot.show()
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format if no recognized extension
-        if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
-            output_file = output_file + '.pickle'
-    
-        saved_files = save_outputs({output_file: transformed_data})
-    
-        print(f"Quantile Scaling completed → {saved_files[output_file]}")
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
+        
+        # Add analysis output (single file)
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = transformed_data
+        
+        # Add HTML output (directory)
+        if "html" in params["outputs"]:
+            results_dict["html"] = {"normalization_summary": html_plot}
+        
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+        
+        logger.info("Quantile Scaling analysis completed successfully.")
         return saved_files
     else:
-        # Return the adata object and figure directly for in-memory
-        # workflows
-        print("Returning AnnData object and figure (not saving to file)")
+        # Return the adata object and figure directly for in-memory workflows
+        logger.info("Returning AnnData object and figure for in-memory use")
         return transformed_data, html_plot
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python quantile_scaling_template.py <params.json>",
+            "Usage: python quantile_scaling_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
+    # Display results based on return type
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"  {key}: {paths}")
     else:
-        print("\nReturned AnnData object and figure")
+        adata, html_plot = result
+        print("\nReturned AnnData object and figure for in-memory use")
+        print(f"AnnData shape: {adata.shape}")
+        print(f"Output layer: {list(adata.layers.keys())}")
