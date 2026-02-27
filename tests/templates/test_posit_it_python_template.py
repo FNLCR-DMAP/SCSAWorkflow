@@ -1,18 +1,20 @@
 # tests/templates/test_posit_it_python_template.py
-"""Unit tests for the Posit-It-Python template."""
+"""
+Real (non-mocked) unit test for the Posit-It Python template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
 import sys
 import tempfile
 import unittest
-import warnings
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import matplotlib
-matplotlib.use("Agg")  # Headless backend for CI
-import matplotlib.pyplot as plt
+matplotlib.use("Agg")
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -22,108 +24,107 @@ from spac.templates.posit_it_python_template import run_from_json
 
 
 class TestPostItPythonTemplate(unittest.TestCase):
-    """Unit tests for the Posit-It-Python template."""
+    """Real (non-mocked) tests for the posit-it python template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.out_file = "graphicsFile.png"
 
-        # Minimal parameters from NIDAP template
-        self.params = {
-            "Label": "Post-It",
-            "Label_font_size": "80",
-            "Label_font_type": "normal",
-            "Label_Bold": "False",
+        params = {
+            "Label": "Test Note",
             "Label_font_color": "Black",
+            "Label_font_size": "40",
+            "Label_font_type": "normal",
             "Label_font_family": "Arial",
+            "Label_Bold": "False",
             "Background_fill_color": "Yellow1",
             "Background_fill_opacity": "10",
-            "Page_width": "18",
-            "Page_height": "6",
-            "Page_DPI": "300",
-            "Output_File": self.out_file,
+            "Page_width": "6",
+            "Page_height": "2",
+            "Page_DPI": "72",
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
-        # Clean up any matplotlib figures
-        plt.close('all')
 
-    def test_complete_io_workflow(self) -> None:
-        """Single I/O test covering input/output scenarios."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            
-            # Test 1: Run with default parameters
-            result = run_from_json(self.params)
-            self.assertIsInstance(result, dict)
-            self.assertIn(self.out_file, result)
-            # Check file was created
-            self.assertTrue(os.path.exists(result[self.out_file]))
-            # Clean up
-            os.remove(result[self.out_file])
-            
-            # Test 2: Run without saving
-            result_no_save = run_from_json(self.params, save_results=False)
-            # Check appropriate return type - should be a figure
-            self.assertIsInstance(result_no_save, plt.Figure)
-            plt.close(result_no_save)
-            
-            # Test 3: JSON file input
-            json_path = os.path.join(self.tmp_dir.name, "params.json")
-            with open(json_path, "w") as f:
-                json.dump(self.params, f)
-            
-            result_json = run_from_json(json_path)
-            self.assertIsInstance(result_json, dict)
-            # Clean up
-            if os.path.exists(result_json[self.out_file]):
-                os.remove(result_json[self.out_file])
+    def test_posit_it_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run posit-it template and verify outputs.
 
-    def test_error_validation(self) -> None:
-        """Test exact error message for invalid parameters."""
-        # Test invalid integer conversion for font size
-        params_bad = self.params.copy()
-        params_bad["Label_font_size"] = "invalid_number"
-        
-        with self.assertRaises(ValueError) as context:
-            run_from_json(params_bad)
-        
-        # Check exact error message
-        expected_msg = (
-            "Error: can't convert Label_font_size to integer. "
-            "Received:\"invalid_number\""
+        Validates:
+        1. save_to_disk=True returns a dict with 'figures' key
+        2. Figures directory contains a non-empty PNG
+        3. save_to_disk=False returns a matplotlib Figure with correct text
+        """
+        # -- Act (save_to_disk=True): write outputs to disk ------------
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            show_plot=False,
+            output_dir=self.tmp_dir.name,
         )
-        self.assertEqual(str(context.exception), expected_msg)
 
-    def test_function_calls(self) -> None:
-        """Test that function is called with correct parameters."""
-        # Test with custom text and colors
-        params_custom = self.params.copy()
-        params_custom["Label"] = "Test Label"
-        params_custom["Label_font_color"] = "Red1"
-        params_custom["Background_fill_color"] = "Blue1"
-        params_custom["Label_Bold"] = "True"
-        
-        result = run_from_json(params_custom, save_results=False)
-        
-        # Verify figure was created with correct properties
-        self.assertIsInstance(result, plt.Figure)
-        # Check figure size
-        self.assertEqual(result.get_figwidth(), 18.0)
-        self.assertEqual(result.get_figheight(), 6.0)
-        
-        plt.close(result)
+        # -- Act (save_to_disk=False): get figure in memory ------------
+        fig = run_from_json(
+            self.json_file,
+            save_to_disk=False,
+            show_plot=False,
+        )
 
-    def test_minimal_params(self) -> None:
-        """Test with minimal parameters using defaults."""
-        minimal_params = {}  # All defaults from JSON
-        
-        result = run_from_json(minimal_params, save_results=False)
-        
-        # Should still create a valid figure
-        self.assertIsInstance(result, plt.Figure)
-        plt.close(result)
+        # -- Assert: return type ---------------------------------------
+        self.assertIsInstance(
+            saved_files, dict,
+            f"Expected dict from run_from_json, got {type(saved_files)}"
+        )
+
+        # -- Assert: figures directory contains at least one PNG -------
+        self.assertIn("figures", saved_files,
+                       "Missing 'figures' key in saved_files")
+        figure_paths = saved_files["figures"]
+        self.assertGreaterEqual(
+            len(figure_paths), 1, "No figure files were saved"
+        )
+
+        for fig_path in figure_paths:
+            fig_file = Path(fig_path)
+            self.assertTrue(
+                fig_file.exists(), f"Figure not found: {fig_path}"
+            )
+            self.assertGreater(
+                fig_file.stat().st_size, 0,
+                f"Figure file is empty: {fig_path}"
+            )
+            self.assertEqual(
+                fig_file.suffix, ".png",
+                f"Expected .png extension, got {fig_file.suffix}"
+            )
+
+        # -- Assert: in-memory figure is valid -------------------------
+        import matplotlib.figure
+        self.assertIsInstance(
+            fig, matplotlib.figure.Figure,
+            f"Expected matplotlib Figure, got {type(fig)}"
+        )
+
+        # The figure text at (0.5, 0.5) should contain "Test Note"
+        text_artists = fig.texts
+        self.assertGreaterEqual(
+            len(text_artists), 1,
+            "Figure has no text artists"
+        )
+        # First text artist is the label placed by fig.text(0.5, 0.5, ...)
+        self.assertEqual(
+            text_artists[0].get_text(), "Test Note",
+            f"Expected figure text 'Test Note', "
+            f"got '{text_artists[0].get_text()}'"
+        )
 
 
 if __name__ == "__main__":

@@ -9,10 +9,10 @@ Usage
 ... )
 >>> run_from_json("examples/visualize_nearest_neighbor_params.json")
 """
-import json
+import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, Tuple, List
+from typing import Any, Dict, List, Tuple, Union
 import pandas as pd
 import numpy as np
 from matplotlib.axes import Axes
@@ -25,17 +25,21 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.visualization import visualize_nearest_neighbor
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
     parse_params,
+    save_results,
     text_to_value,
 )
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
+    save_to_disk: bool = True,
+    output_dir: Union[str, Path] = None,
     show_plot: bool = True
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
+) -> Union[Dict[str, Union[str, List[str]]], Tuple[Any, pd.DataFrame]]:
     """
     Execute Visualize Nearest Neighbor analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -43,21 +47,70 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the figure and
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/input.pickle",
+            "Annotation": "cell_type",
+            "Source_Anchor_Cell_Label": "CD4_T",
+            "Target_Cell_Label": "All",
+            "Plot_Method": "numeric",
+            "Plot_Type": "boxen",
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+                "dataframe": {"type": "file", "name": "dataframe.csv"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If False, returns the figure and
         dataframe directly for in-memory workflows. Default is True.
+    output_dir : str or Path, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
 
     Returns
     -------
     dict or tuple
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (figure(s), dataframe)
+        If save_to_disk=True: Dictionary of saved file paths with structure:
+            {"figures": ["path/to/fig1.png", ...], "dataframe": "path/to/df.csv"}
+        If save_to_disk=False: Tuple of (figure(s), dataframe)
+
+    Notes
+    -----
+    Output Structure:
+    - Figures are saved as a directory containing one or more plot files (standardized)
+    - DataFrame is saved as a single CSV file (standardized)
+    - When save_to_disk=False, returns (figure(s), dataframe) for programmatic use
+    
+    Examples
+    --------
+    >>> # Save results to disk
+    >>> saved_files = run_from_json("params.json")
+    >>> print(saved_files["figures"])  # List of figure paths
+    >>> print(saved_files["dataframe"])  # Path to CSV
+    
+    >>> # Get results in memory for further processing
+    >>> figures, df = run_from_json("params.json", save_to_disk=False)
+    
+    >>> # Custom output directory
+    >>> saved = run_from_json("params.json", output_dir="/custom/path")
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+    
+    # Ensure outputs configuration exists with standardized defaults
+    # Figures use directory type, dataframe uses file type per standardized schema
+    if "outputs" not in params:
+        params["outputs"] = {
+            "figures": {"type": "directory", "name": "figures"},
+            "dataframe": {"type": "file", "name": "dataframe.csv"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -126,14 +179,13 @@ def run_from_json(
     # Configure Matplotlib font size
     plt.rcParams.update({'font.size': global_font_size})
 
-    # If facet_plot=True but no valid stratify column => revert to
-    # single figure
+    # If facet_plot=True but no valid stratify column => revert to single figure
     if facet_plot and image_id is None:
         warning_message = (
             "Facet plotting was requested, but there is no annotation "
             "to group by. Switching to a single-figure display."
         )
-        print(warning_message)
+        logger.warning(warning_message)
         facet_plot = False
 
     result_dict = visualize_nearest_neighbor(
@@ -157,8 +209,8 @@ def run_from_json(
     palette_hex = result_dict["palette"]
     axes_out = result_dict["ax"]
 
-    print("Summary statistics of the dataset:")
-    print(df_long.describe())
+    logger.info("Summary statistics of the dataset:")
+    logger.info(f"\n{df_long.describe()}")
 
     # Customize figure legends & X-axis rotation
     legend_labels = (
@@ -256,21 +308,19 @@ def run_from_json(
         n_unique = len(unique_vals)
 
         if n_unique == 0:
-            print(
-                f"[WARNING] The annotation '{image_id}' has 0 unique "
-                f"values or is empty. No data to plot => Potential "
-                f"empty plot."
+            logger.warning(
+                f"The annotation '{image_id}' has 0 unique values or is empty. "
+                "No data to plot => Potential empty plot."
             )
         elif n_unique == 1 and facet_plot:
-            print(
-                f"[INFO] The annotation '{image_id}' has only one unique "
-                f"value ({unique_vals[0]}). Facet plot will resemble a "
-                f"single plot."
+            logger.info(
+                f"The annotation '{image_id}' has only one unique value "
+                f"({unique_vals[0]}). Facet plot will resemble a single plot."
             )
         elif n_unique > 1:
-            print(
-                f"The annotation '{image_id}' has {n_unique} unique "
-                f"values: {unique_vals}"
+            logger.info(
+                f"The annotation '{image_id}' has {n_unique} unique values: "
+                f"{unique_vals}"
             )
 
     # Figure Configuration & Display
@@ -315,24 +365,22 @@ def run_from_json(
         else:
             cat_list = df_long[image_id].unique().tolist()
 
-    # Track figures for optional saving
-    figures = []
+    # Track figures for saving
+    figures_to_save = []
 
     if isinstance(figs_out, list) and not facet_plot and \
             cat_list and len(figs_out) == len(cat_list):
-        # Scenario: Multiple separate figures, one per category
-        # (non-faceted)
-        figures = figs_out
+        # Scenario: Multiple separate figures, one per category (non-faceted)
+        figures_to_save = figs_out
         _label_each_figure(figs_out, cat_list)
         if show_plot:
             plt.show()
     else:
-        # Scenario: Single figure (faceted) or list of figures not
-        # matching categories
+        # Scenario: Single figure (faceted) or list of figures not matching categories
         figures_to_display = (
             figs_out if isinstance(figs_out, list) else [figs_out]
         )
-        figures = figures_to_display
+        figures_to_save = figures_to_display
         for fig_item_to_display in figures_to_display:
             if fig_item_to_display is not None:
                 _title_main(fig_item_to_display, fig_title)
@@ -351,7 +399,7 @@ def run_from_json(
                 if show_plot:
                     plt.show()
 
-    # summary statistics
+    # Summary statistics
     # 1) Per-group summary
     df_summary_group = (
         df_long
@@ -372,11 +420,11 @@ def run_from_json(
         df_summary_group_strat = None
 
     if df_summary_group_strat is not None:
-        print(f"\nSummary by group(target phenotypes) AND '{image_id}':")
-        print(df_summary_group_strat)
+        logger.info(f"\nSummary by group(target phenotypes) AND '{image_id}':")
+        logger.info(f"\n{df_summary_group_strat}")
     else:
-        print("\nSummary: By group(target phenotypes) only")
-        print(df_summary_group)
+        logger.info("\nSummary: By group(target phenotypes) only")
+        logger.info(f"\n{df_summary_group}")
 
     # CSV Output
     final_df = (
@@ -384,46 +432,92 @@ def run_from_json(
         else df_summary_group
     )
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get(
-            "Output_File", "nearest_neighbor_plots.csv"
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
+        
+        # Package figures in a dictionary for directory saving
+        # This ensures they're saved in a directory per standardized schema
+        if "figures" in params["outputs"] and figures_to_save:
+            # Create a dictionary with named figures
+            figures_dict = {}
+            for idx, fig in enumerate(figures_to_save):
+                if fig is not None:
+                    # Name figures appropriately
+                    if cat_list and len(cat_list) == len(figures_to_save):
+                        fig_name = f"nearest_neighbor_{cat_list[idx]}"
+                    else:
+                        fig_name = f"nearest_neighbor_{idx}"
+                    figures_dict[fig_name] = fig
+            results_dict["figures"] = figures_dict  # Dict triggers directory save
+        
+        # Check for DataFrame output (case-insensitive)
+        if any(k.lower() == "dataframe" for k in params["outputs"].keys()):
+            results_dict["dataframe"] = final_df
+        
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
         )
-        saved_files = save_outputs({output_file: final_df})
-
-        print(f"\nSaved summary statistics to '{output_file}'.")
-        print(
-            f"Visualize Nearest Neighbor completed → "
-            f"{saved_files[output_file]}"
-        )
+        
+        logger.info("Visualize Nearest Neighbor completed successfully.")
+        logger.info(f"Saved summary statistics to dataframe output.")
         return saved_files
     else:
-        # Return the figure(s) and dataframe directly for in-memory
-        # workflows
-        print("Returning figure(s) and dataframe (not saving to file)")
+        # Return the figure(s) and dataframe directly for in-memory workflows
+        logger.info("Returning figure(s) and dataframe (not saving to file)")
         # If single figure, return it directly; if multiple, return list
-        if len(figures) == 1:
-            return figures[0], final_df
+        if len(figures_to_save) == 1:
+            return figures_to_save[0], final_df
         else:
-            return figures, final_df
+            return figures_to_save, final_df
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
             "Usage: python visualize_nearest_neighbor_template.py "
-            "<params.json>",
+            "<params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
+    # Display results based on return type
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"  {key}: {paths}")
     else:
-        print("\nReturned figure(s) and dataframe")
+        figures, df = result
+        print("\nReturned figure(s) and dataframe for in-memory use")
+        if isinstance(figures, list):
+            print(f"Number of figures: {len(figures)}")
+        else:
+            print(f"Figure size: {figures.get_size_inches()}")
+        print(f"DataFrame shape: {df.shape}")
+        print("\nSummary statistics preview:")
+        print(df.head())

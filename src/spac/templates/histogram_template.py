@@ -2,6 +2,9 @@
 Platform-agnostic Histogram template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Reads outputs configuration from blueprint JSON file.
+
 Usage
 -----
 >>> from spac.templates.histogram_template import run_from_json
@@ -10,11 +13,11 @@ Usage
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, Optional, Tuple
+from typing import Any, Dict, Union, Optional, Tuple, List
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import warnings
+import logging
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -22,7 +25,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.visualization import histogram
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -30,9 +33,10 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True,
-    show_plot: bool = False
-) -> Union[Dict[str, str], Tuple[Any, pd.DataFrame]]:
+    save_to_disk: bool = True,
+    show_plot: bool = False,
+    output_dir: str = None,
+) -> Union[Dict[str, Union[str, List[str]]], Tuple[Any, pd.DataFrame]]:
     """
     Execute Histogram analysis with parameters from JSON.
     Replicates the NIDAP template functionality exactly.
@@ -40,21 +44,50 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the figure and
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/data.pickle",
+            "Plot_By": "Annotation",
+            "Annotation": "cell_type",
+            ...
+            "outputs": {
+                "dataframe": {"type": "file", "name": "dataframe.csv"},
+                "figures": {"type": "directory", "name": "figures_dir"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If False, returns the figure and
         dataframe directly for in-memory workflows. Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is False.
+    output_dir : str, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory.
 
     Returns
     -------
     dict or tuple
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: Tuple of (figure, dataframe)
+        If save_to_disk=True: Dictionary of saved file paths
+        If save_to_disk=False: Tuple of (figure, dataframe)
     """
+    # Set up logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+
+    # Ensure outputs configuration exists with standardized defaults
+    if "outputs" not in params:
+        params["outputs"] = {
+            "dataframe": {"type": "file", "name": "dataframe.csv"},
+            "figures": {"type": "directory", "name": "figures_dir"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -98,7 +131,7 @@ def run_from_json(
         if histplot_by == "Annotation":
             if adata.obs.columns.size > 0:
                 annotation = adata.obs.columns[0]
-                print(
+                logger.info(
                     f'No annotation specified. Using the first annotation '
                     f'"{annotation}" as default.'
                 )
@@ -109,7 +142,7 @@ def run_from_json(
         else:
             if adata.var_names.size > 0:
                 feature = adata.var_names[0]
-                print(
+                logger.info(
                     f'No feature specified. Using the first feature '
                     f'"{feature}" as default.'
                 )
@@ -136,14 +169,14 @@ def run_from_json(
     elif annotation is not None:
         if take_X_log:
             take_X_log = False
-            print(
-                "Warning: Take X log should only apply to feature. "
+            logger.warning(
+                "Take X log should only apply to feature. "
                 "Setting Take X Log to False."
             )
         if bins != 'auto':
             bins = 'auto'
-            print(
-                "Warning: Bin number should only apply to feature. "
+            logger.warning(
+                "Bin number should only apply to feature. "
                 "Setting bin number calculation to auto."
             )
 
@@ -200,12 +233,12 @@ def run_from_json(
     for num in new_fig_nums:
         if num != histogram_fig_num:
             plt.close(plt.figure(num))
-            print(f"Closed extra figure {num}")
+            logger.debug(f"Closed extra figure {num}")
 
     # Process each axis
     for ax in axes:
         if feature:
-            print(f'Plotting Feature: "{feature}"')
+            logger.info(f'Plotting Feature: "{feature}"')
         if ax.get_legend() is not None:
             if legend_in_figure:
                 sns.move_legend(ax, legend_location)
@@ -230,8 +263,8 @@ def run_from_json(
                 text_to_value(group_by)
             ].dropna().unique()
             if len(axes) != len(unique_groups):
-                print(
-                    "Warning: Number of axes does not match number of "
+                logger.warning(
+                    "Number of axes does not match number of "
                     "groups. Titles may not correspond correctly."
                 )
             for ax, grp in zip(axes, unique_groups):
@@ -244,39 +277,73 @@ def run_from_json(
 
     plt.tight_layout()
 
-    print("Displaying top 10 rows of histogram dataframe:")
+    logger.info("Displaying top 10 rows of histogram dataframe:")
     print(df_counts.head(10))
 
     if show_plot:
         plt.show()
 
-    plt.close('all')
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
 
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "plots.csv")
-        saved_files = save_outputs({output_file: df_counts})
+        # Check for dataframe output
+        if "dataframe" in params["outputs"]:
+            results_dict["dataframe"] = df_counts
 
-        print(f"Histogram completed → {saved_files[output_file]}")
+        # Check for figures output
+        if "figures" in params["outputs"]:
+            results_dict["figures"] = {"histogram": fig}
+
+        # Use centralized save_results function
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+
+        plt.close('all')
+
+        logger.info("Histogram analysis completed successfully.")
         return saved_files
     else:
         # Return the figure and dataframe directly for in-memory workflows
-        print("Returning figure and dataframe (not saving to file)")
+        logger.info("Returning figure and dataframe for in-memory use")
         return fig, df_counts
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python histogram_template.py <params.json>")
+    if len(sys.argv) < 2:
+        print(
+            "Usage: python histogram_template.py <params.json> [output_dir]",
+            file=sys.stderr
+        )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, paths in result.items():
+            if isinstance(paths, list):
+                print(f"  {key}:")
+                for path in paths:
+                    print(f"    - {path}")
+            else:
+                print(f"  {key}: {paths}")
     else:
         print("\nReturned figure and dataframe")

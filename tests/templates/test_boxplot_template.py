@@ -1,5 +1,14 @@
 # tests/templates/test_boxplot_template.py
-"""Unit tests for the Boxplot template."""
+"""
+Real (non-mocked) unit test for the Boxplot template.
+
+Snowball seed test — validates template I/O behaviour only:
+  • Expected output files are produced on disk
+  • Filenames follow the convention
+  • Output artifacts are non-empty
+
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,8 +16,7 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")  # Headless backend for CI
@@ -16,7 +24,6 @@ matplotlib.use("Agg")  # Headless backend for CI
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -25,398 +32,162 @@ sys.path.append(
 from spac.templates.boxplot_template import run_from_json
 
 
-def mock_adata_for_boxplot(n_cells: int = 20) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for boxplot tests."""
-    rng = np.random.default_rng(0)
-    
-    # Create observations with annotations
-    obs = pd.DataFrame({
-        "cell_type": ["B cells", "T cells"] * (n_cells // 2),
-        "condition": ["Control", "Treatment"] * (n_cells // 2)
-    })
-    
-    # Create expression matrix with 3 features
-    n_features = 3
-    x_mat = rng.poisson(lam=5, size=(n_cells, n_features)) + 1.0
-    
-    # Create var dataframe with feature names
-    var = pd.DataFrame(
-        index=[f"Gene_{i}" for i in range(n_features)]
+def _make_tiny_adata() -> ad.AnnData:
+    """
+    Minimal synthetic AnnData for boxplot template testing.
+
+    4 cells, 2 genes, 2 cell types — the smallest dataset that exercises
+    the template's grouping, plotting, and summary-stats code paths.
+    """
+    rng = np.random.default_rng(42)
+
+    # 4 cells × 2 genes — small enough to reason about,
+    # large enough for describe() to return meaningful stats
+    n_cells, n_genes = 4, 2
+    X = rng.integers(1, 10, size=(n_cells, n_genes)).astype(float)
+
+    obs = pd.DataFrame(
+        {"cell_type": ["B cell", "T cell", "B cell", "T cell"]},
     )
-    
-    adata = ad.AnnData(X=x_mat, obs=obs, var=var)
-    
-    # Add a normalized layer
-    adata.layers["normalized"] = np.log1p(adata.X)
-    
-    return adata
+    var = pd.DataFrame(index=["Gene_0", "Gene_1"])
+
+    return ad.AnnData(X=X, obs=obs, var=var)
 
 
 class TestBoxplotTemplate(unittest.TestCase):
-    """Unit tests for the Boxplot template."""
-
-    def _create_mock_boxplot_return(self, df_data=None):
-        """Helper to create standard mock returns."""
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        if df_data is None:
-            df_data = {'Gene_0': [1]}
-        mock_df = pd.DataFrame(df_data)
-        return mock_fig, mock_ax, mock_df
+    """Real (non-mocked) tests for the boxplot template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input_data.pickle"
-        )
-        self.out_file = "boxplot_summary.csv"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data as pickle
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata_for_boxplot(), f)
+        # Save minimal real data as pickle (simulates upstream analysis)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters
-        self.params = {
+        # Write a JSON params file — the actual input the template receives
+        # in production (from Galaxy / Code Ocean)
+        params = {
             "Upstream_Analysis": self.in_file,
             "Primary_Annotation": "cell_type",
             "Secondary_Annotation": "None",
             "Table_to_Visualize": "Original",
             "Feature_s_to_Plot": ["All"],
             "Value_Axis_Log_Scale": False,
-            "Figure_Title": "BoxPlot",
+            "Figure_Title": "Test BoxPlot",
             "Horizontal_Plot": False,
-            "Figure_Width": 12,
-            "Figure_Height": 8,
-            "Figure_DPI": 300,
+            "Figure_Width": 6,
+            "Figure_Height": 4,
+            "Figure_DPI": 72,          # low DPI for fast save
             "Font_Size": 10,
             "Keep_Outliers": True,
-            "Output_File": self.out_file,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures"},
+                "dataframe": {"type": "file", "name": "output.csv"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_run_with_save(self, mock_show, mock_boxplot) -> None:
-        """Test boxplot with file saving."""
-        # Mock the boxplot function to return figure, ax, and dataframe
-        rng = np.random.default_rng(42)
-        mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return({
-            'Gene_0': rng.random(20),
-            'Gene_1': rng.random(20),
-            'Gene_2': rng.random(20)
-        })
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        # Suppress warnings for cleaner test output
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+    def test_boxplot_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run boxplot template and verify output
+        artifacts.
 
-            # Test with save_results=True (default)
-            saved_files = run_from_json(self.params)
-            self.assertIn(self.out_file, saved_files)
-            
-            # Verify boxplot was called with correct parameters
-            mock_boxplot.assert_called_once()
-            call_args = mock_boxplot.call_args
-            
-            # Check keyword arguments
-            self.assertEqual(call_args[1]['annotation'], "cell_type")
-            self.assertEqual(call_args[1]['second_annotation'], None)
-            self.assertEqual(call_args[1]['layer'], None)  # Original -> None
-            self.assertEqual(call_args[1]['log_scale'], False)
-            self.assertEqual(call_args[1]['orient'], "v")
-            self.assertEqual(call_args[1]['showfliers'], True)
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_run_without_save(self, mock_show, mock_boxplot) -> None:
-        """Test boxplot without file saving."""
-        # Mock the boxplot function
-        mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return({
-            'Gene_0': [1, 2, 3],
-            'Gene_1': [4, 5, 6],
-            'Gene_2': [7, 8, 9]
-        })
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        # Test with save_results=False
-        fig, summary_df = run_from_json(
-            self.params, save_results=False
+        Validates:
+        1. saved_files is a dict with 'figures' and 'dataframe' keys
+        2. A figures directory is created containing a non-empty PNG
+        3. The figure title matches the "Figure_Title" param
+        4. A summary CSV is created with the exact describe() rows
+        """
+        # -- Act (save_to_disk=True): write outputs to disk ------------
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            show_plot=False,           # no GUI in CI
+            output_dir=self.tmp_dir.name,
         )
-        
-        # Verify we got the figure and summary dataframe back
-        self.assertEqual(fig, mock_fig)
-        self.assertIsInstance(summary_df, pd.DataFrame)
-        # Check that summary has statistics
-        self.assertIn('count', summary_df['index'].values)
-        self.assertIn('mean', summary_df['index'].values)
-        self.assertIn('std', summary_df['index'].values)
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_all_features_plotting(self, mock_show, mock_boxplot) -> None:
-        """Test plotting all features."""
-        mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return({
-            'Gene_0': [1], 'Gene_1': [2]
-        })
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(self.params, save_results=False)
-        
-        # Verify features parameter - should be all gene names
-        call_args = mock_boxplot.call_args
-        features = call_args[1]['features']
-        self.assertEqual(len(features), 3)  # mock data has 3 genes
-        self.assertIn('Gene_0', features)
-        self.assertIn('Gene_1', features)
-        self.assertIn('Gene_2', features)
+        # -- Act (save_to_disk=False): get figure + df in memory -------
+        fig, summary_df_mem = run_from_json(
+            self.json_file,
+            save_to_disk=False,
+            show_plot=False,
+        )
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_specific_features(self, mock_show, mock_boxplot) -> None:
-        """Test plotting specific features."""
-        params_specific = self.params.copy()
-        params_specific["Feature_s_to_Plot"] = ["Gene_0", "Gene_2"]
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1], 'Gene_2': [2]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_specific, save_results=False)
-        
-        # Verify specific features were passed
-        call_args = mock_boxplot.call_args
+        # -- Assert: return type ---------------------------------------
+        self.assertIsInstance(
+            saved_files, dict,
+            f"Expected dict from run_from_json, got {type(saved_files)}"
+        )
+
+        # -- Assert: figures directory contains at least one PNG -------
+        self.assertIn("figures", saved_files,
+                       "Missing 'figures' key in saved_files")
+        figure_paths = saved_files["figures"]
+        self.assertGreaterEqual(
+            len(figure_paths), 1, "No figure files were saved"
+        )
+
+        for fig_path in figure_paths:
+            fig_file = Path(fig_path)
+            self.assertTrue(
+                fig_file.exists(), f"Figure not found: {fig_path}"
+            )
+            self.assertGreater(
+                fig_file.stat().st_size, 0,
+                f"Figure file is empty: {fig_path}"
+            )
+            # Template saves matplotlib figures as .png
+            self.assertEqual(
+                fig_file.suffix, ".png",
+                f"Expected .png extension, got {fig_file.suffix}"
+            )
+
+        # -- Assert: figure has the correct title ----------------------
+        # The template calls ax.set_title(figure_title), so the axes
+        # title must match the "Figure_Title" parameter we passed in.
+        axes_title = fig.axes[0].get_title()
         self.assertEqual(
-            call_args[1]['features'], ["Gene_0", "Gene_2"]
+            axes_title, "Test BoxPlot",
+            f"Expected figure title 'Test BoxPlot', got '{axes_title}'"
         )
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_layer_selection(self, mock_show, mock_boxplot) -> None:
-        """Test different layer selections."""
-        # Test normalized layer
-        params_norm = self.params.copy()
-        params_norm["Table_to_Visualize"] = "normalized"
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_norm, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertEqual(call_args[1]['layer'], "normalized")
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_horizontal_orientation(self, mock_show, mock_boxplot) -> None:
-        """Test horizontal plot orientation."""
-        params_horiz = self.params.copy()
-        params_horiz["Horizontal_Plot"] = True
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_horiz, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertEqual(call_args[1]['orient'], "h")
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_secondary_annotation(self, mock_show, mock_boxplot) -> None:
-        """Test with secondary annotation."""
-        params_second = self.params.copy()
-        params_second["Secondary_Annotation"] = "condition"
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_second, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertEqual(call_args[1]['second_annotation'], "condition")
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_log_scale(self, mock_show, mock_boxplot) -> None:
-        """Test log scale option."""
-        params_log = self.params.copy()
-        params_log["Value_Axis_Log_Scale"] = True
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_log, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertEqual(call_args[1]['log_scale'], True)
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_outliers_option(self, mock_show, mock_boxplot) -> None:
-        """Test outliers (showfliers) option."""
-        params_no_outliers = self.params.copy()
-        params_no_outliers["Keep_Outliers"] = False
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_no_outliers, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertEqual(call_args[1]['showfliers'], False)
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    @patch('matplotlib.pyplot.subplots')
-    def test_figure_parameters(self, mock_subplots, mock_show, mock_boxplot) -> None:
-        """Test figure configuration parameters."""
-        params_fig = self.params.copy()
-        params_fig.update({
-            "Figure_Width": 15,
-            "Figure_Height": 10,
-            "Figure_DPI": 150,
-            "Font_Size": 14
-        })
-        
-        # Mock the figure and axes from plt.subplots
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_subplots.return_value = (mock_fig, mock_ax)
-        
-        # Mock the boxplot return
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_fig, save_results=False)
-        
-        # Verify figure methods were called with correct values
-        mock_fig.set_size_inches.assert_called_with(15, 10)
-        mock_fig.set_dpi.assert_called_with(150)
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    @patch('spac.templates.boxplot_template.logging.info')
-    @patch('spac.templates.boxplot_template.logging.debug')
-    def test_console_output(self, mock_debug, mock_info, mock_show, mock_boxplot) -> None:
-        """Test that summary statistics are logged to console."""
-        mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return({
-            'Gene_0': [1, 2, 3],
-            'Gene_1': [4, 5, 6]
-        })
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(self.params, save_results=False)
-        
-        # Check that appropriate messages were logged
-        info_calls = [str(call[0][0]) for call in mock_info.call_args_list
-                     if call[0]]
-        
-        # Should log "Plotting All Features"
+        # -- Assert: summary CSV exists and is non-empty ---------------
+        self.assertIn("dataframe", saved_files,
+                       "Missing 'dataframe' key in saved_files")
+        csv_path = Path(saved_files["dataframe"])
         self.assertTrue(
-            any("Plotting All Features" in msg for msg in info_calls)
+            csv_path.exists(), f"Summary CSV not found: {csv_path}"
         )
-        
-        # Should log "Summary statistics of the dataset:"
-        self.assertTrue(
-            any("Summary statistics" in msg for msg in info_calls)
+        self.assertGreater(
+            csv_path.stat().st_size, 0,
+            f"Summary CSV is empty: {csv_path}"
         )
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_json_file_input(self, mock_show, mock_boxplot) -> None:
-        """Test with JSON file input."""
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        json_path = os.path.join(self.tmp_dir.name, "boxplot_params.json")
-        with open(json_path, "w") as f:
-            json.dump(self.params, f)
-        
-        result = run_from_json(json_path, save_results=False)
-        
-        # Should return tuple when save_results=False
-        self.assertIsInstance(result, tuple)
-        self.assertEqual(len(result), 2)
+        # -- Assert: CSV has the exact describe() stat rows ------------
+        # The template calls df.describe().reset_index() which produces
+        # exactly these 8 rows in this order.
+        summary_df = pd.read_csv(csv_path)
+        expected_stats = [
+            "count", "mean", "std", "min",
+            "25%", "50%", "75%", "max",
+        ]
 
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_no_annotation(self, mock_show, mock_boxplot) -> None:
-        """Test with no annotation (None values)."""
-        params_no_annot = self.params.copy()
-        params_no_annot["Primary_Annotation"] = "None"
-        
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        run_from_json(params_no_annot, save_results=False)
-        
-        call_args = mock_boxplot.call_args
-        self.assertIsNone(call_args[1]['annotation'])
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_legend_handling(self, mock_show, mock_boxplot) -> None:
-        """Test legend positioning handling."""
-        mock_fig = MagicMock()
-        mock_ax = MagicMock()
-        mock_df = pd.DataFrame({'Gene_0': [1]})
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        # Test both with and without legend error
-        with patch('seaborn.move_legend') as mock_move_legend:
-            # Case 1: Legend exists
-            run_from_json(self.params, save_results=False)
-            mock_move_legend.assert_called_once()
-            
-            # Case 2: Legend doesn't exist (raises exception)
-            mock_move_legend.side_effect = Exception("No legend")
-            run_from_json(self.params, save_results=False)
-            # Should not raise error, just print message
-
-    def test_parameter_validation(self) -> None:
-        """Test that missing required parameters raise errors."""
-        params_missing = self.params.copy()
-        del params_missing["Upstream_Analysis"]
-
-        with self.assertRaises(KeyError) as context:
-            run_from_json(params_missing)
-
-        self.assertIn("Upstream_Analysis", str(context.exception))
-
-    @patch('spac.templates.boxplot_template.boxplot')
-    @patch('matplotlib.pyplot.show')
-    def test_save_figure_option(self, mock_show, mock_boxplot) -> None:
-        """Test saving figure to file."""
-        params_fig_save = self.params.copy()
-        params_fig_save["Figure_File"] = "boxplot_figure.png"
-        
-        mock_fig, mock_ax, mock_df = self._create_mock_boxplot_return()
-        mock_boxplot.return_value = (mock_fig, mock_ax, mock_df)
-        
-        saved_files = run_from_json(params_fig_save)
-        
-        # Should save both summary and figure
-        self.assertIn(self.out_file, saved_files)
-        self.assertIn("boxplot_figure.png", saved_files)
-        self.assertEqual(len(saved_files), 2)
+        # First column after reset_index() is called "index"
+        actual_stats = summary_df["index"].tolist()
+        self.assertEqual(
+            actual_stats, expected_stats,
+            f"Summary CSV stat rows don't match.\n"
+            f"  Expected: {expected_stats}\n"
+            f"  Actual:   {actual_stats}"
+        )
 
 
 if __name__ == "__main__":

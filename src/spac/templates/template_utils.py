@@ -6,6 +6,8 @@ import pandas as pd
 import anndata as ad
 import re
 import logging
+import matplotlib.pyplot as plt
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +35,6 @@ def load_input(file_path: Union[str, Path]):
     if suffix in ['.h5ad', '.h5']:
         # Load h5ad file
         try:
-            import anndata as ad
             return ad.read_h5ad(path)
         except ImportError:
             raise ImportError(
@@ -51,7 +52,6 @@ def load_input(file_path: Union[str, Path]):
         # Try to detect file type by content
         try:
             # First try h5ad
-            import anndata as ad
             return ad.read_h5ad(path)
         except Exception:
             # Fall back to pickle
@@ -65,77 +65,254 @@ def load_input(file_path: Union[str, Path]):
                 )
 
 
-def save_outputs(
-    outputs: Dict[str, Any],
-    output_dir: Union[str, Path] = "."
-) -> Dict[str, str]:
+def save_results(
+    results: Dict[str, Any],
+    params: Dict[str, Any],
+    output_base_dir: Union[str, Path] = None
+) -> Dict[str, Union[str, List[str]]]:
     """
-    Save multiple outputs to files and return a dict {filename: absolute_path}.
-    (Always a dict, even if just one file.)
-
+    Save results based on output configuration in params.
+    
+    This function reads the output configuration from the params dictionary
+    and saves results accordingly. It applies a standardized schema where:
+    - figures → directory (may contain one or many)
+    - analysis → file  
+    - dataframe → file (or directory for exceptions like "Neighborhood Profile")
+    - html → directory
+    
     Parameters
     ----------
-    outputs : dict
-        Dictionary where:
-        - key: filename (with extension)
-        - value: object to save
-    output_dir : str or Path
-        Directory to save files
-
+    results : dict
+        Dictionary of results to save where:
+        - key: result type ("analysis", "dataframes", "figures", "html")
+        - value: object(s) to save (single object, list, or dict of objects)
+    params : dict
+        Parameters dict containing 'outputs' configuration with structure:
+        {
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+                "html": {"type": "directory", "name": "html_dir"},
+                "dataframe": {"type": "file", "name": "dataframe.csv"},
+                "analysis": {"type": "file", "name": "output.pickle"}
+            }
+        }
+    output_base_dir : str or Path, optional
+        Base directory for outputs. If None, uses params['Output_Directory'] or '.'
+        
     Returns
     -------
     dict
-        Dictionary of saved file paths
-
+        Dictionary mapping output types to saved file paths:
+        - For files: string path
+        - For directories: list of string paths
+        
     Example
     -------
-    >>> outputs = {
-    ...     "adata.pickle": adata,  # Preferred format
-    ...     "results.csv": results_df,
-    ...     "adata.h5ad": adata  # Still supported
+    >>> params = {
+    ...     "outputs": {
+    ...         "figures": {"type": "directory", "name": "figure_outputs"},
+    ...         "dataframe": {"type": "file", "name": "summary.csv"}
+    ...     }
     ... }
-    >>> saved = save_outputs(outputs, "results/")
+    >>> results = {"figures": {"boxplot": fig}, "dataframe": df}
+    >>> saved = save_results(results, params)
     """
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
+    # Get output directory from params if not provided
+    if output_base_dir is None:
+        output_base_dir = params.get("Output_Directory", ".")
+    output_base_dir = Path(output_base_dir)
+    
+    # Get outputs config from params
+    outputs_config = params.get("outputs", {})
+    if not outputs_config:
+        logger.warning("No outputs configuration found in params")
+        return {}
+    
     saved_files = {}
+    
+    # Process each result based on configuration
+    for result_key, data in results.items():
+        # Find matching config (case-insensitive match)
+        config = None
+        config_key = None
+        
+        for key, value in outputs_config.items():
+            if key.lower() == result_key.lower():
+                config = value
+                config_key = key
+                break
+        
+        if not config:
+            logger.warning(f"No output config for '{result_key}', skipping")
+            continue
+        
+        # Determine output type and name
+        output_type = config.get("type")
+        output_name = config.get("name", result_key)
 
-    for filename, obj in outputs.items():
-        filepath = output_dir / filename
+        # Apply standardized schema if type not explicitly specified
+        if not output_type:
+            result_key_lower = result_key.lower()
+            if "figures" in result_key_lower:
+                output_type = "directory"
+            elif "analysis" in result_key_lower:
+                output_type = "file"
+            elif "dataframe" in result_key_lower:
+                # Special case: Neighborhood Profile gets directory treatment
+                if "neighborhood" in output_name.lower() and "profile" in output_name.lower():
+                    output_type = "directory"
+                else:
+                    output_type = "file"
+            elif "html" in result_key_lower:
+                output_type = "directory"
+            else:
+                # Default based on data structure
+                output_type = "directory" if isinstance(data, (dict, list)) else "file"
+            
+            logger.debug(f"Auto-determined type '{output_type}' for '{result_key}'")
 
-        # Save based on file extension
-        if filename.endswith('.csv'):
-            obj.to_csv(filepath, index=False)
-        elif filename.endswith('.h5ad'):
-            # Still support h5ad, but not the default
-            if type(obj) is not ad.AnnData:
-                raise TypeError(
-                    f"Object for '{str(filename)}' must be AnnData, "
-                    f"got {type(obj)}"
-                )
-            logger.info(f"Saving AnnData to {str(filepath)}")
-            logger.debug(f"AnnData object: {obj}")
-            obj.write_h5ad(str(filepath))
-            logger.info(f"Saved AnnData to {str(filepath)}")
-        elif filename.endswith(('.pickle', '.pkl', '.p')):
-            with open(filepath, 'wb') as f:
-                pickle.dump(obj, f)
-        elif hasattr(obj, "savefig"):
-            obj.savefig(filepath.with_suffix('.png'))
-            filepath = filepath.with_suffix('.png')
+        # Save based on determined type
+        if output_type == "directory":
+            # Create directory and save multiple files
+            output_dir = output_base_dir / output_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+            saved_files[config_key or result_key] = []
+                        
+            if isinstance(data, dict):
+                # Dictionary of named items
+                for name, obj in data.items():
+                    filepath = _save_single_object(obj, name, output_dir)
+                    saved_files[config_key or result_key].append(str(filepath))
+                    
+            elif isinstance(data, (list, tuple)):
+                # List of items - auto-name them
+                for idx, obj in enumerate(data):
+                    name = f"{result_key}_{idx}"
+                    filepath = _save_single_object(obj, name, output_dir)
+                    saved_files[config_key or result_key].append(str(filepath))
+                    
+            else:
+                # Single item saved to directory
+                filepath = _save_single_object(data, result_key, output_dir)
+                saved_files[config_key or result_key] = [str(filepath)]
+                
+        elif output_type == "file":
+            # Save as single file
+            output_path = output_base_dir / output_name
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Handle different file types based on extension
+            if output_name.endswith('.pickle'):
+                with open(output_path, 'wb') as f:
+                    pickle.dump(data, f)
+                    
+            elif output_name.endswith('.csv'):
+                if isinstance(data, pd.DataFrame):
+                    data.to_csv(output_path, index=False)
+                else:
+                    # Convert to DataFrame if possible
+                    df = pd.DataFrame(data)
+                    df.to_csv(output_path, index=False)
+                    
+            elif output_name.endswith('.h5ad'):
+                if hasattr(data, 'write_h5ad'):
+                    data.write_h5ad(str(output_path))
+                        
+            elif output_name.endswith('.html'):
+                with open(output_path, 'w') as f:
+                    f.write(str(data))
+                    
+            elif output_name.endswith(('.png', '.pdf', '.svg')):
+                if hasattr(data, 'savefig'):
+                    data.savefig(output_path, dpi=300, bbox_inches='tight')
+                    plt.close(data)  # Close figure to free memory
+                    
+            else:
+                # Default to pickle for unknown types
+                if not output_name.endswith('.pickle'):
+                    output_path = output_path.with_suffix('.pickle')
+                with open(output_path, 'wb') as f:
+                    pickle.dump(data, f)
+            
+            saved_files[config_key or result_key] = str(output_path)
+    
+    # Log summary of saved files
+    logger.info(f"Results saved to {output_base_dir}:")
+    for key, paths in saved_files.items():
+        if isinstance(paths, list):
+            output_name = outputs_config.get(key, {}).get('name', key)
+            logger.info(f"  {key}: {len(paths)} files in {output_base_dir}/{output_name}/")
+            for path in paths[:3]:  # Show first 3 files
+                logger.debug(f"    - {Path(path).name}")
+            if len(paths) > 3:
+                logger.debug(f"    ... and {len(paths) - 3} more files")
         else:
-            # Default to pickle
-            filepath = filepath.with_suffix('.pickle')
-            with open(filepath, 'wb') as f:
-                pickle.dump(obj, f)
-
-        print(type(filepath))
-        print(type(filename))
-        saved_files[str(filename)] = str(filepath)
-        print(f"Saved: {filepath}")
-
+            logger.info(f"  {key}: {Path(paths).name}")
+    
     return saved_files
+
+
+def _save_single_object(obj: Any, name: str, output_dir: Path) -> Path:
+    """
+    Save a single object to file with appropriate format.
+    Internal helper function for save_results.
+    
+    Parameters
+    ----------
+    obj : Any
+        Object to save
+    name : str
+        Base name for the file (extension will be added if needed)
+    output_dir : Path
+        Directory to save to
+        
+    Returns
+    -------
+    Path
+        Path to saved file
+    """
+    # Determine file format based on object type
+    if isinstance(obj, pd.DataFrame):
+        # DataFrames -> CSV
+        if not name.endswith('.csv'):
+            name = f"{name}.csv"
+        filepath = output_dir / name
+        obj.to_csv(filepath, index=False)
+        
+    elif hasattr(obj, 'savefig'):
+        # Matplotlib figures -> PNG only
+        if not name.endswith('.png'):
+            name = f"{name}.png"
+        filepath = output_dir / name
+        obj.savefig(filepath, dpi=300, bbox_inches='tight')
+        plt.close(obj)  # Close figure to free memory
+        
+    elif isinstance(obj, str) and ('<html' in obj.lower() or name.endswith('.html')):
+        # HTML content
+        if not name.endswith('.html'):
+            name = f"{name}.html"
+        filepath = output_dir / name
+        with open(filepath, 'w') as f:
+            f.write(obj)
+            
+    elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'AnnData':
+        # AnnData -> pickle (for consistency, could be h5ad)
+        if not name.endswith('.pickle'):
+            name = f"{name}.pickle"
+        filepath = output_dir / name
+        with open(filepath, 'wb') as f:
+            pickle.dump(obj, f)
+            
+    else:
+        # Everything else -> pickle
+        if '.' not in name:
+            name = f"{name}.pickle"
+        filepath = output_dir / name
+        with open(filepath, 'wb') as f:
+            pickle.dump(obj, f)
+    
+    logger.debug(f"Saved {type(obj).__name__} to {filepath}")
+    return filepath
 
 
 def parse_params(
@@ -446,21 +623,48 @@ def spell_out_special_characters(text: str) -> str:
     return text
 
 
+def clean_column_name(column_name: str) -> str:
+    """
+    Clean a single column name using spell_out_special_characters.
+    
+    Parameters
+    ----------
+    column_name : str
+        Original column name
+        
+    Returns
+    -------
+    str
+        Cleaned column name
+    """
+    original = column_name
+    cleaned = spell_out_special_characters(column_name)
+    # Ensure doesn't start with digit
+    if cleaned and cleaned[0].isdigit():
+        cleaned = f'col_{cleaned}'
+    if original != cleaned:
+        logger.info(f'Column Name Updated: "{original}" -> "{cleaned}"')
+    return cleaned
+
+
 def load_csv_files(
-    csv_dir: Union[str, Path],
+    csv_input: Union[str, Path, List[str]],
     files_config: pd.DataFrame,
     string_columns: Optional[List[str]] = None
 ) -> pd.DataFrame:
     """
     Load and combine CSV files based on configuration.
+    
+    Supports both:
+    - Galaxy input: list of file paths
+    - NIDAP input: directory path
 
     Parameters
     ----------
-    csv_dir : str or Path
-        Directory containing CSV files
+    csv_input : str, Path, or list
+        Either a directory path (NIDAP) or list of file paths (Galaxy)
     files_config : pd.DataFrame
-        Configuration dataframe with 'file_name' column and optional 
-        metadata
+        Configuration dataframe with 'file_name' column and optional metadata
     string_columns : list, optional
         Columns to force as string type
 
@@ -470,11 +674,19 @@ def load_csv_files(
         Combined dataframe with all CSV data
     """
     import pprint
-    from spac.data_utils import combine_dfs
-    from spac.utils import check_list_in_list
 
-    csv_dir = Path(csv_dir)
-    filename = "file_name"
+    filename_col = "file_name"
+
+    # Build file path mapping based on input type
+    if isinstance(csv_input, list):
+        # Galaxy: list of file paths
+        file_path_map = {Path(p).name: Path(p) for p in csv_input}
+        logger.info(f"Galaxy mode: {len(file_path_map)} files provided")
+    else:
+        # NIDAP: directory path
+        csv_dir = Path(csv_input)
+        file_path_map = {p.name: p for p in csv_dir.glob("*.csv")}
+        logger.info(f"NIDAP mode: {len(file_path_map)} CSV files in {csv_dir}")
 
     # Clean configuration
     files_config = files_config.applymap(
@@ -483,8 +695,8 @@ def load_csv_files(
 
     # Get column names
     all_column_names = files_config.columns.tolist()
-    filtered_column_names = [
-        col for col in all_column_names if col not in [filename]
+    metadata_columns = [
+        col for col in all_column_names if col != filename_col
     ]
 
     # Validate string_columns
@@ -504,33 +716,18 @@ def load_csv_files(
     # Extract data types
     dtypes = files_config.dtypes.to_dict()
 
-    # Clean column names
-    def clean_column_name(column_name):
-        original = column_name
-        cleaned = spell_out_special_characters(column_name)
-        # Ensure doesn't start with digit
-        if cleaned and cleaned[0].isdigit():
-            cleaned = f'col_{cleaned}'
-        if original != cleaned:
-            print(f'Column Name Updated: "{original}" -> "{cleaned}"')
-        return cleaned
-
     # Get files to process
     files_config = files_config.astype(str)
     files_to_use = [
-        f.strip() for f in files_config[filename].tolist()
+        f.strip() for f in files_config[filename_col].tolist()
     ]
 
     # Check all files exist
-    missing_files = []
-    for file_name in files_to_use:
-        if not (csv_dir / file_name).exists():
-            missing_files.append(file_name)
-
+    missing_files = [f for f in files_to_use if f not in file_path_map]
     if missing_files:
-        raise TypeError(
-            f"The following files are not found: "
-            f"{', '.join(missing_files)}"
+        raise FileNotFoundError(
+            f"Files not found: {', '.join(missing_files)}\n"
+            f"Available: {', '.join(file_path_map.keys())}"
         )
 
     # Prepare dtype override
@@ -540,60 +737,35 @@ def load_csv_files(
 
     # Process files
     processed_df_list = []
-    first_file = True
 
     for file_name in files_to_use:
-        file_path = csv_dir / file_name
-        file_locations = files_config[
-            files_config[filename] == file_name
-        ].index.tolist()
-
-        # Check for duplicate file names
-        if len(file_locations) > 1:
-            print(
-                f'Multiple entries for file: "{file_name}", exiting...'
-            )
-            return None
+        file_path = file_path_map[file_name]
 
         try:
             current_df = pd.read_csv(file_path, dtype=dtype_override)
-            print(f'\nProcessing file: "{file_name}"')
+            logger.info(f'Processing: "{file_name}"')
             current_df.columns = [
                 clean_column_name(col) for col in current_df.columns
             ]
 
-            # Validate string_columns exist
-            if first_file and string_columns:
-                check_list_in_list(
-                    input=string_columns,
-                    input_name='string_columns',
-                    input_type='column',
-                    target_list=list(current_df.columns),
-                    need_exist=True,
-                    warning=False
-                )
-                first_file = False
-
         except pd.errors.EmptyDataError:
-            raise TypeError(f'The file: "{file_name}" is empty.')
+            raise ValueError(f'File "{file_name}" is empty.')
         except pd.errors.ParserError:
-            raise TypeError(
-                f'The file "{file_name}" could not be parsed. '
-                'Please check that the file is a valid CSV.'
+            raise ValueError(
+                f'File "{file_name}" could not be parsed as CSV.'
             )
 
-        current_df[filename] = file_name
+        current_df[filename_col] = file_name
 
-        # Reorder columns
-        cols = current_df.columns.tolist()
-        cols.insert(0, cols.pop(cols.index(filename)))
+        # Reorder columns: filename first
+        cols = [filename_col] + [c for c in current_df.columns if c != filename_col]
         current_df = current_df[cols]
 
         processed_df_list.append(current_df)
-        print(f'File: "{file_name}" Processed!\n')
+        logger.info(f'File "{file_name}" processed: {current_df.shape}')
 
     # Combine dataframes
-    final_df = combine_dfs(processed_df_list)
+    final_df = pd.concat(processed_df_list, ignore_index=True)
 
     # Ensure string columns remain strings
     for col in string_columns:
@@ -601,22 +773,18 @@ def load_csv_files(
             final_df[col] = final_df[col].astype(str)
 
     # Add metadata columns
-    if filtered_column_names:
-        for column in filtered_column_names:
-            # Map values from config
+    if metadata_columns:
+        for column in metadata_columns:
             file_to_value = (
-                files_config.set_index(filename)[column].to_dict()
+                files_config.set_index(filename_col)[column].to_dict()
             )
-            final_df[column] = final_df[filename].map(file_to_value)
-            # Ensure correct dtype
+            final_df[column] = final_df[filename_col].map(file_to_value)
             final_df[column] = final_df[column].astype(dtypes[column])
 
-            print(f'\n\nColumn "{column}" Mapping: ')
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(file_to_value)
+            logger.info(f'Added metadata column "{column}"')
+            logger.debug(f'Mapping: {file_to_value}')
 
-    print("\n\nFinal Dataframe Info")
-    print(final_df.info())
+    logger.info(f"Combined {len(processed_df_list)} files -> {final_df.shape}")
 
     return final_df
 

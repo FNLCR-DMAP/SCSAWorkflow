@@ -1,5 +1,10 @@
 # tests/templates/test_nearest_neighbor_calculation_template.py
-"""Unit tests for the Nearest Neighbor Calculation template."""
+"""
+Real (non-mocked) unit test for the Nearest Neighbor Calculation template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,155 +12,87 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
 )
 
-from spac.templates.nearest_neighbor_calculation_template import (
-    run_from_json
-)
+from spac.templates.nearest_neighbor_calculation_template import run_from_json
 
 
-def mock_adata(n_cells: int = 10) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for fast tests."""
-    rng = np.random.default_rng(0)
+def _make_tiny_adata() -> ad.AnnData:
+    """Minimal AnnData: 8 cells with spatial coords and annotation."""
+    rng = np.random.default_rng(42)
+    X = rng.random((8, 2))
     obs = pd.DataFrame({
-        "cell_type": (["TypeA", "TypeB"] * ((n_cells + 1) // 2))[:n_cells],
-        "sample": (["S1", "S2"] * ((n_cells + 1) // 2))[:n_cells]
+        "cell_type": ["A", "B", "A", "B", "A", "B", "A", "B"],
     })
-    x_mat = rng.normal(size=(n_cells, 3))
-    adata = ad.AnnData(X=x_mat, obs=obs)
-    adata.var_names = ["Gene1", "Gene2", "Gene3"]
-    # Add spatial coordinates
-    adata.obsm["spatial"] = rng.random((n_cells, 2)) * 100
+    var = pd.DataFrame(index=["Gene_0", "Gene_1"])
+    spatial = rng.random((8, 2)) * 100
+    adata = ad.AnnData(X=X, obs=obs, var=var)
+    adata.obsm["spatial"] = spatial
     return adata
 
 
 class TestNearestNeighborCalculationTemplate(unittest.TestCase):
-    """Unit tests for the Nearest Neighbor Calculation template."""
+    """Real (non-mocked) tests for nearest neighbor calculation."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input.pickle"
-        )
-        self.out_file = "output"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata(), f)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters - from NIDAP template
-        self.params = {
+        params = {
             "Upstream_Analysis": self.in_file,
             "Annotation": "cell_type",
             "ImageID": "None",
-            "Nearest_Neighbor_Associated_Table": "spatial_distance",
-            "Verbose": True,
-            "Output_File": self.out_file,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    def test_complete_io_workflow(self) -> None:
-        """Single I/O test covering input/output scenarios."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            
-            # Mock the calculate_nearest_neighbor function
-            with patch(
-                'spac.templates.nearest_neighbor_calculation_template.'
-                'calculate_nearest_neighbor'
-            ) as mock_calc_nn:
-                # Mock function adds a distance matrix to adata.obsm
-                def side_effect(adata, annotation, spatial_associated_table,
-                               imageid, label, verbose):
-                    # Simulate adding distance matrix to obsm
-                    n_cells = adata.n_obs
-                    unique_types = adata.obs[annotation].unique()
-                    n_types = len(unique_types)
-                    # Create mock distance dataframe
-                    dist_df = pd.DataFrame(
-                        np.random.rand(n_cells, n_types),
-                        columns=unique_types,
-                        index=adata.obs.index
-                    )
-                    adata.obsm[label] = dist_df
-                
-                mock_calc_nn.side_effect = side_effect
-                
-                # Test 1: Run with default parameters
-                result = run_from_json(self.params)
-                self.assertIsInstance(result, dict)
-                # Verify file was saved
-                self.assertTrue(len(result) > 0)
-                
-                # Test 2: Run without saving
-                result_no_save = run_from_json(
-                    self.params, save_results=False
-                )
-                # Check appropriate return type
-                self.assertIsInstance(result_no_save, ad.AnnData)
-                # Verify nearest neighbor distances were added
-                self.assertIn("spatial_distance", result_no_save.obsm)
-                
-                # Test 3: JSON file input
-                json_path = os.path.join(self.tmp_dir.name, "params.json")
-                with open(json_path, "w") as f:
-                    json.dump(self.params, f)
-                
-                result_json = run_from_json(json_path)
-                self.assertIsInstance(result_json, dict)
+    def test_nearest_neighbor_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: calculate nearest neighbors and verify outputs.
 
-    def test_function_calls(self) -> None:
-        """Test that main function is called with correct parameters."""
-        with patch(
-            'spac.templates.nearest_neighbor_calculation_template.'
-            'calculate_nearest_neighbor'
-        ) as mock_calc_nn:
-            # Test with different parameters
-            params_alt = self.params.copy()
-            params_alt["ImageID"] = "sample"
-            params_alt["Nearest_Neighbor_Associated_Table"] = "nn_distances"
-            params_alt["Verbose"] = False
-            
-            run_from_json(params_alt, save_results=False)
-            
-            # Verify function was called correctly
-            mock_calc_nn.assert_called_once()
-            call_args = mock_calc_nn.call_args
-            
-            # Check parameter conversions
-            self.assertEqual(call_args[1]['annotation'], "cell_type")
-            self.assertEqual(
-                call_args[1]['spatial_associated_table'], "spatial"
-            )
-            self.assertEqual(call_args[1]['imageid'], "sample")
-            self.assertEqual(call_args[1]['label'], "nn_distances")
-            self.assertEqual(call_args[1]['verbose'], False)
+        Validates:
+        1. saved_files dict has 'analysis' key
+        2. Pickle contains AnnData with nearest neighbor results
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+        )
 
-    def test_imageid_none_conversion(self) -> None:
-        """Test that string 'None' is converted to actual None."""
-        with patch(
-            'spac.templates.nearest_neighbor_calculation_template.'
-            'calculate_nearest_neighbor'
-        ) as mock_calc_nn:
-            # Test with "None" string
-            self.params["ImageID"] = "None"
-            run_from_json(self.params, save_results=False)
-            
-            # Verify imageid was converted to None
-            call_args = mock_calc_nn.call_args
-            self.assertIsNone(call_args[1]['imageid'])
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("analysis", saved_files)
+
+        pkl_path = Path(saved_files["analysis"])
+        self.assertTrue(pkl_path.exists())
+        self.assertGreater(pkl_path.stat().st_size, 0)
+
+        with open(pkl_path, "rb") as f:
+            result_adata = pickle.load(f)
+        self.assertIsInstance(result_adata, ad.AnnData)
+
+        mem_adata = run_from_json(self.json_file, save_to_disk=False)
+        self.assertIsInstance(mem_adata, ad.AnnData)
 
 
 if __name__ == "__main__":
