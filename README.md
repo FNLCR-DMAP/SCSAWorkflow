@@ -24,7 +24,7 @@ If you use SPAC in your work, please cite the following publications:
 
 **Software paper (JOSS):**
 
-> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. (2026). SPAC: A Python Package for Spatial Single-Cell Analysis of Multiplexed Imaging. *Journal of Open Source Software*, 11(117), 8787. doi: [10.21105/joss.08787](https://doi.org/10.21105/joss.08787)
+> Liu F, He R, Bombin A, Abdallah A, Eldaghar O, Sheeley T, Ying SE, Zaki G. (2026). SPAC: A Python Package for Spatial Single-Cell Analysis of Multiplexed Imaging. *Journal of Open Source Software*, 11(117), 8787. doi: [10.21105/joss.08787](https://doi.org/10.21105/joss.08787)
 
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
