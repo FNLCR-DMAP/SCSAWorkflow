@@ -10,8 +10,10 @@ authors:
     orcid: 0000-0002-4283-8325
     affiliation: 1
   - name: Rui He
+    orcid: 0000-0002-2610-1411
     affiliation: 2
   - name: Andrei Bombin
+    orcid: 0000-0003-2445-304X
     affiliation: 3
   - name: Ahmad B. Abdallah
     affiliation: 4
@@ -27,13 +29,13 @@ authors:
     affiliation: 1
 affiliations:
   - index: 1
-    name: Frederick National Laboratory for Cancer Research, United States
+    name: Frederick National Laboratory for Cancer Research, United States of America
   - index: 2
-    name: Essential Software Inc., United States
+    name: Essential Software Inc., United States of America
   - index: 3
-    name: Axle Informatics, United States
+    name: Axle Informatics, United States of America
   - index: 4
-    name: Purdue University, United States
+    name: Purdue University, United States of America
 date: 15 April 2025
 bibliography: paper.bib
 ---
@@ -52,11 +54,11 @@ Despite this progress, biologists without coding expertise face steep barriers w
 
 SPAC is a Python package for downstream analysis of single-cell multiplexed imaging data following segmentation. It ingests per-cell tables (CSV/H5AD/tabular) with spatial coordinates and marker intensities and exposes a reproducible, AnnData‑compliant Python API; all analysis artifacts and figures are preserved to support sharing, reruns, and downstream reuse. As the core analytical layer of the broader SPAC ecosystem [@Liu:2025], the package connects to interactive pipelines and real‑time dashboards on enterprise platforms through a modular, layered architecture. This design enables large‑scale analyses without requiring users to write code. Its purpose is to lower the barrier for non‑programmers while preserving rigorous, reusable workflows. For example, SPAC uses biologist-friendly terminology (e.g., "cells," "features," "tables," "associated tables," and "annotations") and clear messaging so users can interpret results and diagnostics without a bioinformatics analyst's assistance.
 
-To address real-time scalability for datasets exceeding 10 million cells, SPAC integrates optimized numerical routines from NumPy's compiled, C-based backend. These optimizations make common plotting and summarization tasks (e.g., histograms, box plots) substantially faster—more than 5× faster than comparable Seaborn‑based workflows in our tests—reducing typical runtimes from tens of seconds to a few seconds. This responsiveness supports iterative Exploratory Data Analysis (EDA) and figure generation on very large cohorts without sacrificing reproducibility.
+To address real-time scalability for datasets exceeding 10 million cells, SPAC integrates optimized numerical routines from NumPy's compiled, C-based backend [@Harris:2020]. These optimizations make common plotting and summarization tasks (e.g., histograms, box plots) substantially faster—more than 5× faster than comparable Seaborn‑based workflows [@Waskom:2021] in our tests—reducing typical runtimes from tens of seconds to a few seconds. This responsiveness supports iterative exploratory data analysis and figure generation on very large cohorts without sacrificing reproducibility.
 
-SPAC provides customizable visualization methods. Pinning colors to annotations maintains consistent color mapping across figures and sessions. Interactive spatial plots (Plotly) allow users to toggle features (e.g., biomarkers) on and off and to switch among multiple annotations simultaneously, enabling intuitive exploration of spatial relationships and patterns. Stratified and gridded plotting with optimized statistical summaries makes subgroup comparisons (e.g., across conditions or phenotypes) clear within a single view.
+SPAC provides customizable visualization methods. Pinning colors to annotations maintains consistent color mapping across figures and sessions. Interactive spatial plots (Plotly) [@Plotly:2015] allow users to toggle features (e.g., biomarkers) on and off and to switch among multiple annotations simultaneously, enabling intuitive exploration of spatial relationships and patterns. Stratified and gridded plotting with optimized statistical summaries makes subgroup comparisons (e.g., across conditions or phenotypes) clear within a single view.
 
-SPAC builds directly on community standards and methods but contributes a coherent foundation that enhances key functions for spatial analyses and visualization. To highlight a few examples, SPAC enhances core analyses (e.g., nearest‑neighbor metrics leveraging SCIMAP’s spatial‑distance utilities) with flexible, built‑in plotting and native support for stratification, subsetting, and faceting. Users can fine-tune plot aesthetics and export layouts, making it straightforward to produce consistent, publication‑ready figures. SPAC strengthens the functionality of existing packages: SPAC implements a phenotype‑pair‑specific Ripley’s L that treats one phenotype as “centers” and another as “neighbors,” and applies radius‑dependent guard-zone edge correction by excluding center cells whose r‑neighborhood intersects the ROI boundary. Unlike generalized implementations (e.g., Squidpy), this design reduces edge‑induced inflation at larger radii and yields more reliable, interpretable L(r) curves for concrete cell-cell interactions. SPAC also adds new features; for instance, it implements a neighborhood profile via a KDTree‑based approach, quantifying the distribution of neighboring cell phenotypes within user-defined distance bins. The resulting three-dimensional array encodes, for every cell and every distance bin, the count of neighboring cells of each phenotype. This array captures the local cellular microenvironment within the AnnData object and supports downstream dimensionality-reduction methods such as spatial UMAP [@Giraldo:2021].
+SPAC builds directly on community standards and methods but contributes a coherent foundation that enhances key functions for spatial analyses and visualization. To highlight a few examples, SPAC enhances core analyses (e.g., nearest‑neighbor metrics leveraging SCIMAP’s spatial‑distance utilities) with flexible, built‑in plotting and native support for stratification, subsetting, and faceting. Users can fine-tune plot aesthetics and export layouts, making it straightforward to produce consistent, publication‑ready figures. SPAC strengthens the functionality of existing packages: SPAC implements a phenotype‑pair‑specific Ripley’s L [@Kiskowski:2009] that treats one phenotype as “centers” and another as “neighbors,” and applies radius‑dependent guard-zone edge correction by excluding center cells whose r‑neighborhood intersects the ROI boundary. Unlike generalized implementations (e.g., Squidpy), this design reduces edge‑induced inflation at larger radii and yields more reliable, interpretable L(r) curves for concrete cell-cell interactions. SPAC also adds new features; for instance, it implements a neighborhood profile via a KDTree‑based approach, quantifying the distribution of neighboring cell phenotypes within user-defined distance bins. The resulting three-dimensional array encodes, for every cell and every distance bin, the count of neighboring cells of each phenotype. This array captures the local cellular microenvironment within the AnnData object and supports downstream dimensionality-reduction methods such as spatial UMAP [@Giraldo:2021].
 
 # Structure and Implementation
 
@@ -66,7 +68,7 @@ At the architectural level, the SPAC package serves as a foundation layer that b
 
 SPAC adheres to enterprise-level software engineering standards, featuring extensive unit testing, rigorous edge-case evaluation, comprehensive logging, and clear, context-rich error handling. These practices ensure reliability, adaptability, and ease of use across various deployment environments, including interactive Jupyter notebooks, analytic platforms (e.g., Code Ocean [@CodeOcean], Palantir Foundry [@PalantirTechnologies]), Galaxy [@Jalili:2020], and real-time dashboards. Emphasizing readability and maintainability, SPAC provides a versatile and enhanced analytical solution for spatial single-cell analyses. To date, SPAC has been used in the analysis of more than eight datasets comprising over 30 million cells across diverse studies [@Keretsu:2025].
 
-![Overview of the SPAC workflow. The schematic presents an integrated pipeline for spatial single-cell analysis. Segmented cell data with spatial coordinates from various imaging platforms are ingested, normalized, clustered, phenotyped, and analyzed spatially to assess cell distributions and interactions while maintaining consistent data lineage.\label{fig:workflow}](figure.tif)
+![Overview of the SPAC workflow. The schematic presents an integrated pipeline for spatial single-cell analysis. Segmented cell data with spatial coordinates from various imaging platforms are ingested, normalized, clustered, phenotyped, and analyzed spatially to assess cell distributions and interactions while maintaining consistent data lineage.\label{fig:workflow}](figure.png)
 
 # Acknowledgements
 

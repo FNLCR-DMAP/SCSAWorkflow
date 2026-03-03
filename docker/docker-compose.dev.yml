@@ -1,0 +1,22 @@
+services:
+  spac-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: spac-dev
+    ports:
+      - "8889:8888"  # Different port to avoid conflict with production
+    volumes:
+      # Mount source code for live development
+      - ../src:/home/reviewer/SCSAWorkflow/src
+      - ../tests:/home/reviewer/SCSAWorkflow/tests
+      - ../data:/data
+      - ../results:/results
+      # Optional: mount notebooks if you have any
+      - ../notebooks:/workspace
+    environment:
+      - QT_QPA_PLATFORM=offscreen
+      - MPLBACKEND=Agg
+      - PYTHONPATH=/home/reviewer/SCSAWorkflow/src
+    working_dir: /workspace
+    command: /opt/conda/envs/spac/bin/jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token= --NotebookApp.password=

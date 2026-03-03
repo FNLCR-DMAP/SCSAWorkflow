@@ -14,18 +14,6 @@ If you use SPAC in your research, please cite our publications (see [Citations](
 | **SPAC Python Package** | Core analysis library | This repository |
 | **SPAC Shiny** | Interactive web application | [FNLCR-DMAP/SPAC_Shiny](https://github.com/FNLCR-DMAP/SPAC_Shiny) |
 
-## Citations
-
-If you use SPAC in your work, please cite the following publications:
-
-**Platform paper (BMC Bioinformatics):**
-
-> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. SPAC: a scalable and integrated enterprise platform for single-cell spatial analysis. *BMC Bioinformatics*. 2026 Jan 29;27(1):25. doi: [10.1186/s12859-025-06339-2](https://doi.org/10.1186/s12859-025-06339-2). PMID: 41612174; PMCID: PMC12857135.
-
-**Software paper (JOSS):**
-
-> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. (2026). SPAC: A Python Package for Spatial Single-Cell Analysis of Multiplexed Imaging. *Journal of Open Source Software*, 11(117), 8787. doi: [10.21105/joss.08787](https://doi.org/10.21105/joss.08787)
-
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
 Latest released version is v0.9.0 at 5/23/2025
@@ -137,7 +125,7 @@ This test will:
 - ✅ Run histogram performance benchmarks (up to 10M cells: `histogram_old` vs `histogram`)  
 - ✅ Generate detailed speedup analysis with concrete performance improvements
 - 📊 Generate detailed speedup analysis and performance reports
-- 💾 Save results to your local `performance_results/` directory
+- � Save results to your local `performance_results/` directory
 
 Performance results are saved locally as timestamped files in `performance_results/`:
 - `boxplot_performance_YYYYMMDD_HHMMSS.txt`
