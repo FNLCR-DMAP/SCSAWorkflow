@@ -1,0 +1,89 @@
+FROM continuumio/miniconda3:24.3.0-0
+
+# Build arguments
+ARG ENV_NAME=spac
+
+# Set labels
+LABEL maintainer="FNLCR-DMAP"
+LABEL description="SPAC dev branch - Single Cell Spatial Analysis Container"
+LABEL version="dev-2.0.0"
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libglu1-mesa \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install and configure libmamba solver
+RUN conda install -n base -y conda-libmamba-solver && \
+    conda config --set solver libmamba && \
+    conda config --add channels https://fnlcr-dmap.github.io/scimap && \
+    conda config --add channels conda-forge && \
+    conda config --add channels ohsu-comp-bio && \
+    conda config --add channels leej3 && \
+    conda config --add channels bioconda
+
+# Clone the dev branch
+WORKDIR /opt
+RUN git clone --branch dev --depth 1 https://github.com/FNLCR-DMAP/SCSAWorkflow.git
+WORKDIR /opt/SCSAWorkflow
+
+# Create conda environment from environment.yml
+RUN conda env create -n ${ENV_NAME} -f environment.yml && \
+    conda clean -afy
+
+# Make the environment available
+ENV CONDA_DEFAULT_ENV=${ENV_NAME}
+ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
+
+# Fix umap-learn version
+RUN conda run -n ${ENV_NAME} conda uninstall umap-learn -y 2>/dev/null || true && \
+    conda run -n ${ENV_NAME} pip install --no-cache-dir umap-learn==0.5.9.post2
+
+# Ensure critical packages are properly installed
+RUN conda run -n ${ENV_NAME} conda install -y \
+    -c conda-forge \
+    -c https://fnlcr-dmap.github.io/scimap \
+    scanpy=1.10.3 \
+    scimap=2.1.3_dmap_pandas153 \
+    squidpy=1.2.2
+
+# Install SPAC package in development mode
+RUN conda run -n ${ENV_NAME} pip install --no-deps -e .
+
+# Set environment variables for headless operation
+ENV QT_QPA_PLATFORM=offscreen
+ENV MPLBACKEND=Agg
+
+# Verify critical components are installed
+RUN python -c "import pandas as pd; \
+    import numpy as np; \
+    import scanpy as sc; \
+    import squidpy as sq; \
+    import umap; \
+    import spac; \
+    from spac.templates import *; \
+    print(f'Pandas: {pd.__version__}'); \
+    print(f'NumPy: {np.__version__}'); \
+    print(f'Scanpy: {sc.__version__}'); \
+    print(f'Squidpy: {sq.__version__}'); \
+    print(f'UMAP: {umap.__version__}'); \
+    print(f'SPAC location: {spac.__file__}'); \
+    print('Container ready for deployment')"
+
+# Create working directories
+RUN mkdir -p /work /data /results /notebooks
+WORKDIR /work
+
+# Default command
+CMD ["/bin/bash"]

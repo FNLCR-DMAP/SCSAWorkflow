@@ -1,0 +1,63 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Nearest Neighbor Calculation [SPAC][DMAP]",
+		"instructions": "Computes the shortest distance from each cell to the nearest cell of each phenotype. The distance table is stored with the key name \"Label\". \\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "advanced_analysis_setting_parameters",
+			"name": "Advanced Analysis Setting parameters",
+			"help_text": "Configure advanced analysis setting parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "9b34ba0a5b8049",
+			"category": "general",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "Annotation name specifying phenotypes.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "c92d6463a3fa4d",
+			"category": "general",
+			"name": "ImageID",
+			"param_name": "ImageID",
+			"description": "If multiple images are in the dataset, specify the annotation with image IDs. Otherwise, use \"None\" to treat the dataset as a single image.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "b1d15ac52bb643",
+			"category": "advanced_analysis_setting_parameters",
+			"name": "Nearest Neighbor Associated Table",
+			"param_name": "Nearest_Neighbor_Associated_Table",
+			"description": "Key name to store the calculated distances. Default is \"spatial_distance\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "spatial_distance"
+		},
+		{
+			"id": "57c2b0de3eee47",
+			"category": "general",
+			"name": "Verbose",
+			"param_name": "Verbose",
+			"description": "Indicates whether to print progress messages.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		}
+	]
+}

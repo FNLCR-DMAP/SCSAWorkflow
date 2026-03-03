@@ -1,0 +1,3 @@
+file_name,slide_number,patient_id,timepoint
+sample_data_1.csv,Slide_001,Patient_A,baseline
+sample_data_2.csv,Slide_002,Patient_A,week4

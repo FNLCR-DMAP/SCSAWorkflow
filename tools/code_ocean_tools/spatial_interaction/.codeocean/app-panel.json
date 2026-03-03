@@ -1,0 +1,155 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Spatial Interaction [SPAC] [DMAP]",
+		"instructions": "Performs advanced spatial statistical analyses , instead of visualization of spatial distribution, to  evaluate neighborhood enrichments or cluster interactions.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "advanced_analysis_setting_parameters",
+			"name": "Advanced Analysis Setting parameters",
+			"help_text": "Configure advanced analysis setting parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Configure figure configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "8abbb198876d4e",
+			"category": "general",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "Annotation to be used in calculating spatial interactions between cells.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "659c2a1dc7a14f",
+			"category": "general",
+			"name": "Spatial Analysis Method",
+			"param_name": "Spatial_Analysis_Method",
+			"description": "Spatial analysis method provided by the squidpy package.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Neighborhood Enrichment",
+			"extra_data": [
+				"Neighborhood Enrichment",
+				"Cluster Interaction Matrix"
+			]
+		},
+		{
+			"id": "d31a7ea7307d48",
+			"category": "general",
+			"name": "Stratify By",
+			"param_name": "Stratify_By",
+			"description": "The annotation(s) to stratify the dataset when generating interaction plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. If n (n>=2) annotations are passed, the function will be stratified based on existing combination of labels in the passed annotations. Use \"None\" without quotes to disable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[\"None\"]"
+		},
+		{
+			"id": "6829336a456c46",
+			"category": "advanced_analysis_setting_parameters",
+			"name": "Coordinate Type",
+			"param_name": "Coordinate_Type",
+			"description": "Type of coordinate system used in computing spatial neighbors. Should be 'generic' for general dataset. Default is None, decided by the squidy pacakge.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "None",
+			"extra_data": [
+				"None",
+				"generic"
+			]
+		},
+		{
+			"id": "09fe3d7e8c8c41",
+			"category": "advanced_analysis_setting_parameters",
+			"name": "Seed",
+			"param_name": "Seed",
+			"description": "Random seed for reproducibility, used in Neighborhood Enrichment Analysis.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "a39b98b9a9d545",
+			"category": "general",
+			"name": "Radius",
+			"param_name": "Radius",
+			"description": "The maximum distance in spatial coordinates to create an edge between two cells. Takes priority over KNN. Use \"None\" without quotes to disable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "c5465dd1804342",
+			"category": "general",
+			"name": "K-Nearest Neighbors",
+			"param_name": "K_Nearest_Neighbors",
+			"description": "Default is 6. Number of neighbors for KNN.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 6
+		},
+		{
+			"id": "11bf98e209324c",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "The width of the figure in inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 15
+		},
+		{
+			"id": "676239f4364b41",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "The height of the figure in inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "de1ff75f65e94d",
+			"category": "figure_configuration_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 200
+		},
+		{
+			"id": "478c15b852204a",
+			"category": "figure_configuration_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "49f90e282eca47",
+			"category": "advanced_analysis_setting_parameters",
+			"name": "Color Bar Range",
+			"param_name": "Color_Bar_Range",
+			"description": "The color bar range defines the even lower and upper color bar limit to allow center of the color bar remains 0. For example, enter the single value \"100\" without the quotes to create a color range from -100:100. Default Automatic will allow the color bar to be defined automatically.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Automatic"
+		}
+	]
+}

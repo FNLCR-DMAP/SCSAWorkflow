@@ -1,0 +1,48 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Append Pin Color Rule [DMAP] [SPAC]",
+		"instructions": "Adds pin color rules to the analysis that can be used in downstream visualization. \\ The consistent color representation of the same labels between different visualizations promotes the comprehensiveness of the analysis.  \\ The list of available color is defined in this link. \\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "f577c7380f7043",
+			"category": "general",
+			"name": "Label Color Map",
+			"param_name": "Label_Color_Map",
+			"description": "List of string pairs representing the label and its assigned color. Each pair should have this format: <label>:<color> (without the '<' '>'). Example: b-cells:red. The values must be a single color string from the link provided in the description",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[]"
+		},
+		{
+			"id": "1eb4abe04f664b",
+			"category": "general",
+			"name": "Color Map Name",
+			"param_name": "Color_Map_Name",
+			"description": "Name of the color map to be stored in the analysis. Default is \"_spac_colors\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "_spac_colors"
+		},
+		{
+			"id": "b23605b759c24a",
+			"category": "general",
+			"name": "Overwrite Previous Color Map",
+			"param_name": "Overwrite_Previous_Color_Map",
+			"description": "When True, if a color map with name defined in the \"Color Map Name\" option already exists in the analysis, the current color mapping rule run will replace existing ones.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		}
+	]
+}

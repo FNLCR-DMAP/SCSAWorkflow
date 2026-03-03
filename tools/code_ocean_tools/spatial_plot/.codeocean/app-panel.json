@@ -1,0 +1,177 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Spatial Plot [SPAC] [DMAP]",
+		"instructions": "Generates static spatial visualizations of single-cell data, providing a snapshot of cellular features or annotations across a sample. \\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "color_by_parameters",
+			"name": "Color by parameters",
+			"help_text": "Configure color by parameters"
+		},
+		{
+			"id": "colorbar_range_parameters",
+			"name": "Colorbar Range parameters",
+			"help_text": "Configure colorbar range parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Configure figure configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "a06594c84d9a4c",
+			"category": "general",
+			"name": "Stratify",
+			"param_name": "Stratify",
+			"description": "Set to False if all cells belong to a single slide, and True to define the annotation specified the slide/plot in Stratify By",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "72bd3a5d25ab48",
+			"category": "general",
+			"name": "Stratify By",
+			"param_name": "Stratify_By",
+			"description": "The annotation(s) to stratify the dataset when generating the spatial plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. If n (n>=2) annotations are passed, the function will be stratified based on existing combination of labels in the passed annotations.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[]"
+		},
+		{
+			"id": "9c9747279dcb4c",
+			"category": "color_by_parameters",
+			"name": "Color By",
+			"param_name": "Color_By",
+			"description": "Color the points in the plot by either their corresponding feature or annotation",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Annotation",
+			"extra_data": [
+				"Annotation",
+				"Feature"
+			]
+		},
+		{
+			"id": "332b40bdad1442",
+			"category": "color_by_parameters",
+			"name": "Annotation to Highlight",
+			"param_name": "Annotation_to_Highlight",
+			"description": "Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "0dc75a2cae8f43",
+			"category": "color_by_parameters",
+			"name": "Table",
+			"param_name": "Table",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "197b76d6dfc544",
+			"category": "color_by_parameters",
+			"name": "Feature to Highlight",
+			"param_name": "Feature_to_Highlight",
+			"description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "ddc461bf0b5340",
+			"category": "colorbar_range_parameters",
+			"name": "Upper Colorbar Bound",
+			"param_name": "Upper_Colorbar_Bound",
+			"description": "The upper bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": -999
+		},
+		{
+			"id": "cc3083a4ceed4d",
+			"category": "colorbar_range_parameters",
+			"name": "Lower Colorbar Bound",
+			"param_name": "Lower_Colorbar_Bound",
+			"description": "The lower bound of the colorbar scale. The default 999 will set the lower bound to the minimum of the dataset.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 999
+		},
+		{
+			"id": "63f38558aa6448",
+			"category": "figure_configuration_parameters",
+			"name": "Dot Size",
+			"param_name": "Dot_Size",
+			"description": "Size of the dot of scatter plot.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 25
+		},
+		{
+			"id": "18b507caa1c047",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 6
+		},
+		{
+			"id": "92a2a65773804a",
+			"category": "figure_configuration_parameters",
+			"name": "Dot Transparency",
+			"param_name": "Dot_Transparency",
+			"description": "Transparency of the dot, 0 being transparent and 1 being opaque",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0.5
+		},
+		{
+			"id": "1a1a4f99d84648",
+			"category": "figure_configuration_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "Font size of the figure",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "65f19d3c7c0d45",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "be09e83e660a45",
+			"category": "figure_configuration_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 200
+		}
+	]
+}

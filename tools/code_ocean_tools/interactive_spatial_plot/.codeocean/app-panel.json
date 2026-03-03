@@ -1,0 +1,201 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Interactive Spatial Plot [SPAC] [DMAP]",
+		"instructions": "Creates interactive, real-time visual explorations of single-cell spatial data for in-depth analysis. For color map strings, please refer to Built-in Continuous Color Scales in Python.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "color_by_parameters",
+			"name": "Color by parameters",
+			"help_text": "Configure color by parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Configure figure configuration parameters"
+		},
+		{
+			"id": "colorbar_range_parameters",
+			"name": "Colorbar Range parameters",
+			"help_text": "Configure colorbar range parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "b60e28a5b42848",
+			"category": "general",
+			"name": "Stratify By",
+			"param_name": "Stratify_By",
+			"description": "The annotation to stratify the dataset when generating interaction plots. If single annotation is passed, the dataset will be stratified by the unique labels in the annotation column. Use \"None\" without quotes to disable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "05c300b8ad0a49",
+			"category": "color_by_parameters",
+			"name": "Color By",
+			"param_name": "Color_By",
+			"description": "Color the points in the plot by either their corresponding feature or annotation",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Annotation",
+			"extra_data": [
+				"Annotation",
+				"Feature"
+			]
+		},
+		{
+			"id": "7b534067ca5a4f",
+			"category": "color_by_parameters",
+			"name": "Annotation(s) to Highlight",
+			"param_name": "Annotation_s_to_Highlight",
+			"description": "Annotation(s) to visualize in the analysis. The interactive plot will show all the labels in the annotation(s) passed.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[\"\"]"
+		},
+		{
+			"id": "447ff20372f448",
+			"category": "color_by_parameters",
+			"name": "Feature to Highlight",
+			"param_name": "Feature_to_Highlight",
+			"description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "56cb1ef33ceb4c",
+			"category": "color_by_parameters",
+			"name": "Table",
+			"param_name": "Table",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "3b1a71e0b0d84a",
+			"category": "figure_configuration_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "be9d96dd233844",
+			"category": "figure_configuration_parameters",
+			"name": "Dot Size",
+			"param_name": "Dot_Size",
+			"description": "Size of dot in the plot.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1.5
+		},
+		{
+			"id": "b5774bcfb9e848",
+			"category": "figure_configuration_parameters",
+			"name": "Dot Transparency",
+			"param_name": "Dot_Transparency",
+			"description": "Transparency of the dot in the plot.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0.75
+		},
+		{
+			"id": "73e4bbc83b574a",
+			"category": "figure_configuration_parameters",
+			"name": "Flip Vertical Axis",
+			"param_name": "Flip_Vertical_Axis",
+			"description": "If True, flip the vertical axis.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "ddcfcaeb1eab44",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "Figure width in inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 6
+		},
+		{
+			"id": "dff0405dad0848",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "Figure height in inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 4
+		},
+		{
+			"id": "b10927dc1df84e",
+			"category": "figure_configuration_parameters",
+			"name": "Define Label Color Mapping",
+			"param_name": "Define_Label_Color_Mapping",
+			"description": "Name of the color map to use for labels in the plot. The color map should be appended through the Append Pin Color Rule template prior to the current visualization. The default \"None\" will allow the visualization to determine the color of labels automatically.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "70b31c92133847",
+			"category": "figure_configuration_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "The higher the DPI, the higher the image resolution.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 200
+		},
+		{
+			"id": "c5a86397bb3344",
+			"category": "figure_configuration_parameters",
+			"name": "Feature Color Scale",
+			"param_name": "Feature_Color_Scale",
+			"description": "Color scale to use when dot colors are defined by features. Check the link in the template description.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "balance",
+			"extra_data": [
+				"balance",
+				"Picnic"
+			]
+		},
+		{
+			"id": "8dc6205d1f9b40",
+			"category": "colorbar_range_parameters",
+			"name": "Lower Colorbar Bound",
+			"param_name": "Lower_Colorbar_Bound",
+			"description": "The lower bound of the colorbar scale. The default 999 will set the upper bound to the minimum of the dataset.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 999
+		},
+		{
+			"id": "a775a3645a9742",
+			"category": "colorbar_range_parameters",
+			"name": "Upper Colorbar Bound",
+			"param_name": "Upper_Colorbar_Bound",
+			"description": "The lower bound of the colorbar scale. The default -999 will set the upper bound to the minimum of the dataset.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": -999
+		}
+	]
+}

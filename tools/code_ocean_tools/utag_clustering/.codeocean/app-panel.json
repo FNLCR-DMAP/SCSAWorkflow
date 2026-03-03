@@ -1,0 +1,143 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "UTAG Clustering [SPAC] [DMAP]",
+		"instructions": "Discover spatial tissue domains (tissue micro\u2011environments) by combining phenotypes (feature intensities) and spatial proximity of cells with UTAG (Unsupervised discovery of Tissue Architecture by Graph message passing). Clusters are stored in the analysis as the annotation \u201cUTAG\u201d.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "parellel_jobs_parameters",
+			"name": "Parellel Jobs parameters",
+			"help_text": "Configure parellel jobs parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "0760d971759044",
+			"category": "general",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. The default value \"Original\" will use the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "1fb5ad9b755a41",
+			"category": "general",
+			"name": "Features",
+			"param_name": "Features",
+			"description": "List specific features for clustering. Default \"All\" will use all features",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "All"
+		},
+		{
+			"id": "faf702f87cf240",
+			"category": "general",
+			"name": "Slide Annotation",
+			"param_name": "Slide_Annotation",
+			"description": "Name of the annotation column that identifies each image/slide. Default is \"None\" if not applicable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "116b3a54bb1443",
+			"category": "general",
+			"name": "PCA Components",
+			"param_name": "PCA_Components",
+			"description": "Number of principal components to keep. Default is \"None\" to skip PCA (good for small datasets).",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "ef22de0843974c",
+			"category": "general",
+			"name": "K-Nearest Neighbors",
+			"param_name": "K_Nearest_Neighbors",
+			"description": "Number of nearest neighbors used when building the graph for clustering.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 15
+		},
+		{
+			"id": "696aa3d1f0484c",
+			"category": "general",
+			"name": "Resolution Parameter",
+			"param_name": "Resolution_Parameter",
+			"description": "Higher values give more, smaller clusters; lower values give fewer, larger clusters.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1
+		},
+		{
+			"id": "1af6368758894d",
+			"category": "general",
+			"name": "Distance Threshold",
+			"param_name": "Distance_Threshold",
+			"description": "How far (in micrometres) two cells can be apart and still be considered neighbors.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 20
+		},
+		{
+			"id": "878d6ef1601e4c",
+			"category": "general",
+			"name": "Random Seed",
+			"param_name": "Random_Seed",
+			"description": "Ensures results are reproducible when re\u2011run the template.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 42
+		},
+		{
+			"id": "0be559d79e5441",
+			"category": "general",
+			"name": "Leiden Iterations",
+			"param_name": "Leiden_Iterations",
+			"description": "How many times the Leiden algorithm refines the clusters.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 5
+		},
+		{
+			"id": "fc293c19348e44",
+			"category": "general",
+			"name": "Output Annotation Name",
+			"param_name": "Output_Annotation_Name",
+			"description": "The new column that will store the UTAG domain labels.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "UTAG"
+		},
+		{
+			"id": "03e0da8e72884c",
+			"category": "parellel_jobs_parameters",
+			"name": "Parellel Processes",
+			"param_name": "Parellel_Processes",
+			"description": "For multiple slides (images) and several CPU cores, split the data by Slide and run the message\u2011passing step for each slide in parallel. Default is False.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "5ae9bc13644c4b",
+			"category": "parellel_jobs_parameters",
+			"name": "N-Jobs",
+			"param_name": "N_Jobs",
+			"description": "When Parallel Processes is True,  the number of jobs to run in parallel. Default is 1.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1
+		}
+	]
+}
