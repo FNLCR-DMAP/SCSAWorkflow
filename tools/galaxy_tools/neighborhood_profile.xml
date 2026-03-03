@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<tool id="spac_neighborhood_profile" name="Neighborhood Profile [SPAC][DMAP]" version="2.0.0" profile="24.2">
+    <description>Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\
+Please refer to DUET Documentation, GitHub Documentation for further information.</description>
+    <requirements>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"dataframe": {"type": "directory", "name": "dataframe_dir"}}' > outputs_config.json && python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --list-values Bins Anchor_Neighbor_List --inject-outputs --outputs-config outputs_config.json && python -c "from spac.templates.neighborhood_profile_template import run_from_json; run_from_json('cleaned_params.json')"
+
+]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle" label="Upstream Analysis" help="Link to prior processed dataset in the analysis."/>
+        <param name="Annotation_of_interest" type="text" label="Annotation of interest" value="" help="Annotation of interest to define cell labels."/>
+        <repeat name="Bins_repeat" title="Bins">
+            <param name="value" type="text" label="Value" help="Radii in micro meter that form the bands around the center phenotype to count the neighbor cells"/>
+        </repeat>
+        <param name="Stratify_By" type="text" label="Stratify By" value="" help="The annotation to stratify the dataset when generating the profiles (e.g., slide name). If a value other than &quot;None&quot; is passed, the dataset will be stratified by the unique labels in the annotation column. Use &quot;None&quot; without quotes to disable (e.g., all cells are from one region or slide)"/>
+        <repeat name="Anchor_Neighbor_List_repeat" title="Anchor Neighbor List">
+            <param name="value" type="text" label="Value" help="A list of anchor;neighbor cell labels to generate the results. The two types should be separated with a ';'. For example, if  if the anchor is &quot;T cells&quot; and the neighbor is &quot;B cells&quot;, enter the value: &quot;T cells; B cells&quot; without the quotes.">
+                <sanitizer>
+                    <valid initial="default">
+                        <add value=";"/>
+                        <add value="+"/>
+                        <add value="/"/>
+                        <add value="["/>
+                        <add value="]"/>
+                        <add value="{"/>
+                        <add value="}"/>
+                        <add value="&amp;lt;"/>
+                        <add value="&amp;gt;"/>
+                        <add value="="/>
+                        <add value="'"/>
+                    </valid>
+                </sanitizer>
+            </param>
+        </repeat>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json" label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json" label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <collection name="dataframe" type="list" label="${tool.name} on ${on_string}: Dataframe">
+            <discover_datasets pattern="__name_and_ext__" directory="dataframe_dir"/>
+        </collection>
+    </outputs>
+    <help><![CDATA[
+
+**Neighborhood Profile [SPAC][DMAP]**
+Calculate the neighborhood profile in terms of count of neighbor cells for every cell.\
+Please refer to DUET Documentation, GitHub Documentation for further information.
+**Outputs:**
+- dataframe: directory (dataframe_dir)
+
+]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+        <citation type="doi">10.48550/arXiv.2506.01560</citation>
+    </citations>
+</tool>

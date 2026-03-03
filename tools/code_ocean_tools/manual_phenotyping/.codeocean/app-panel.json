@@ -1,0 +1,78 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Manual Phenotyping [SPAC] [DMAP]",
+		"instructions": "Define and apply manual phenotypes to a dataset.  A new column with the annotation \"Manual Annotation Name\" will be added. \\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "cc8f10a4622c4c",
+			"category": "general",
+			"name": "Upstream Dataset Pattern",
+			"param_name": "Upstream_Dataset_Pattern",
+			"description": "Filename pattern to match the upstream dataset file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*.csv"
+		},
+		{
+			"id": "97204ef5fb8f42",
+			"category": "general",
+			"name": "Phenotypes Code Pattern",
+			"param_name": "Phenotypes_Code_Pattern",
+			"description": "Filename pattern to match the phenotypes code file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*config*.csv"
+		},
+		{
+			"id": "e192e41e6e3a48",
+			"category": "general",
+			"name": "Classification Column Prefix",
+			"param_name": "Classification_Column_Prefix",
+			"description": "The prefix to prepend to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "c984897c9a1243",
+			"category": "general",
+			"name": "Classification Column Suffix",
+			"param_name": "Classification_Column_Suffix",
+			"description": "The suffix to append to a feature (marker) name in \"phenotype_code\". Column names representing features in the phenotype name might have a common prefix and suffix. For example, the column name can be \"marker_CD4_classification\". In this case, the prefix is \"marker_\" and the suffix is \"_classification\", and the code should only mention CD4+ or CD4-.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "e448d985dd2043",
+			"category": "general",
+			"name": "Allow Multiple Phenotypes",
+			"param_name": "Allow_Multiple_Phenotypes",
+			"description": "Allow a given cell to match multiple phenotype_code. The resulting label will join all the \"phenotype_name\" using a ','. If set to False, the resulting cell will be marked as \"no_label\"",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "724868ef073f4f",
+			"category": "general",
+			"name": "Manual Annotation Name",
+			"param_name": "Manual_Annotation_Name",
+			"description": "The name of the new column (annotation) to be added to the dataset with the defined \"phenotype_name\"s as values. Cells that do not match any defined phenotype will be assiged \"no_label\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "manual_phenotype"
+		}
+	]
+}

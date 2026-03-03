@@ -1,0 +1,27 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Append Annotation [SPAC] [DMAP]",
+		"instructions": "Append new annotation columns with single label to the dataset.\\ Please refer to DUET Documentation, GitHub Documentation"
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "1e22cfc9d3324d",
+			"category": "general",
+			"name": "Annotation Pair List",
+			"param_name": "Annotation_Pair_List",
+			"description": "List of string pairs representing the new annotation and its label. Each pair should have this format:         <new annotation column name>:<value of the annotation> without the '<' and '>' characters. The values must be a single string or numeric value",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[\"Example:Example\"]"
+		}
+	]
+}

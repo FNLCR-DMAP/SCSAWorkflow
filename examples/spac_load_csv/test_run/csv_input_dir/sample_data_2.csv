@@ -1,0 +1,6 @@
+CellID,CD45,CD3D,X_centroid,Y_centroid,broad_cell_type
+6,11.5,6.2,350,200,T cell
+7,22.3,7.1,400,220,NK cell
+8,13.7,4.4,450,240,B cell
+9,9.2,11.3,500,260,Macrophage
+10,14.4,5.7,550,280,T cell

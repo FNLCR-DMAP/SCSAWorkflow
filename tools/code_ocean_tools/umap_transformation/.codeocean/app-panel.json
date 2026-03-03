@@ -1,0 +1,190 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "UMAP Transformation [SPAC] [DMAP]",
+		"instructions": "Perform UMAP dimensionality reduction using a specific table.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "random_state_control_parameters",
+			"name": "Random State Control parameters",
+			"help_text": "Configure random state control parameters"
+		},
+		{
+			"id": "hpc_configuration_parameters",
+			"name": "HPC Configuration parameters",
+			"help_text": "Configure hpc configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "c022b0c7357d42",
+			"category": "general",
+			"name": "Run on HPC",
+			"param_name": "Run_on_HPC",
+			"description": "If toggled on, this template will launch a computational task on HPC cluster with resource specified in the \"HPC Configuration\" parameters group. The computational result will be available one the HPC task is completed.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "e2999830d3184f",
+			"category": "general",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. Default \"Original\" refers to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "91dae55f65fd49",
+			"category": "general",
+			"name": "Number of Neighbors",
+			"param_name": "Number_of_Neighbors",
+			"description": "Number of neighbors to consider when constructing the UMAP. This influences the balance between preserving local and global structures in the data.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 75
+		},
+		{
+			"id": "b5a64398fdb24c",
+			"category": "general",
+			"name": "Target Dimension Number",
+			"param_name": "Target_Dimension_Number",
+			"description": "Number of dimensions for embedding to convert to. Default is 2 (plane).",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 2
+		},
+		{
+			"id": "c533114adcd347",
+			"category": "general",
+			"name": "Minimum Distance between Points",
+			"param_name": "Minimum_Distance_between_Points",
+			"description": "Minimum distance between points in the UMAP space. Controls how tightly the embedding is allowed to compress points together.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0.1
+		},
+		{
+			"id": "9575a4dfbddb46",
+			"category": "general",
+			"name": "Computational Metric",
+			"param_name": "Computational_Metric",
+			"description": "Metric to compute distances in high dimensional space.  Check `https://umap-learn.readthedocs.io/en/latest/api.html` for more information. The default is 'euclidean'.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "euclidean",
+			"extra_data": [
+				"euclidean",
+				"manhattan",
+				"chebyshev",
+				"minkowski",
+				"canberra",
+				"braycurtis",
+				"mahalanobis",
+				"wminkowski",
+				"seuclidean",
+				"cosine",
+				"correlation",
+				"haversine",
+				"hamming",
+				"jaccard",
+				"dice",
+				"russelrao",
+				"kulsinski",
+				"ll_dirichlet",
+				"hellinger",
+				"rogerstanimoto",
+				"sokalmichener",
+				"sokalsneath",
+				"yule"
+			]
+		},
+		{
+			"id": "45c9df537cf349",
+			"category": "random_state_control_parameters",
+			"name": "Transform Seed",
+			"param_name": "Transform_Seed",
+			"description": "This parameter sets a deterministic starting point for the UMAP transformation process, ensuring reproducibility of results. When the same dataset and 'Transform Seed' are used, the outcome of the analysis remains consistent. The default value is 42.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 42
+		},
+		{
+			"id": "9ae08986566e4c",
+			"category": "random_state_control_parameters",
+			"name": "Random State",
+			"param_name": "Random_State",
+			"description": "This parameter initializes the random number generator used during the UMAP fitting procedure, functioning as a control for the randomness inherent in the analysis. It guarantees that identical inputs and 'Random State' values will produce identical results, facilitating the verification of the analysis. The default setting is 0.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0
+		},
+		{
+			"id": "2ba9b9e0ccae44",
+			"category": "hpc_configuration_parameters",
+			"name": "Batch Mode",
+			"param_name": "Batch_Mode",
+			"description": "If set to True, this HPC run will launch in batch mode showing the template status as successful once the job is submitted to the HPC cluster. the results will be written after the HPC job completes. Avoid submitting twice before completion to prevent race conditions.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "19b6c667592f44",
+			"category": "hpc_configuration_parameters",
+			"name": "Partition",
+			"param_name": "Partition",
+			"description": "Biowulf nodes are grouped into partitions. A partition can be specified when submitting a job. Please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for more details",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "quick",
+			"extra_data": [
+				"quick",
+				"norm",
+				"gpu",
+				"largemem"
+			]
+		},
+		{
+			"id": "227a364d5f3749",
+			"category": "hpc_configuration_parameters",
+			"name": "Number of CPUs",
+			"param_name": "Number_of_CPUs",
+			"description": "Number of CPUs requested for this HPC submission",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 2
+		},
+		{
+			"id": "f2413461dad743",
+			"category": "hpc_configuration_parameters",
+			"name": "Memory, GB",
+			"param_name": "Memory_GB",
+			"description": "Amount of memory in gigabytes requested for this HPC submission",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 10
+		},
+		{
+			"id": "81d3c7437add48",
+			"category": "hpc_configuration_parameters",
+			"name": "Request Time",
+			"param_name": "Request_Time",
+			"description": "Amount of time requested for this HPC submission. Please provide the time in the format of hh:mm:ss. For example, 2 hour 30 minute job would be 02:30:00. Please remind that different partition has different time limit, please refer to https://hpc.nih.gov/docs/userguide.html#Partitions for further details.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "00:20:00"
+		}
+	]
+}

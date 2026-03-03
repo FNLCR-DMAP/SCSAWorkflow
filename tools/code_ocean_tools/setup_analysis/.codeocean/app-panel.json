@@ -1,0 +1,31 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Setup Analysis [SPAC] [DMAP]",
+		"instructions": "Convert the pre-processed dataset to the analysis object for downstream analysis.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "advanced_parameters",
+			"name": "Advanced Parameters",
+			"help_text": "Configure advanced parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "a11ee43a3e0443",
+			"category": "advanced_parameters",
+			"name": "Feature Regex",
+			"param_name": "Feature_Regex",
+			"description": "A list of regex pattern(s) to search for features for downstream analysis. Regex example, if all features of interest ending with \"Intensity\", use .*Intensity$, The .* means anything before the target pattern, and $ means the end of the string.",
+			"type": "text",
+			"value_type": "string"
+		}
+	]
+}

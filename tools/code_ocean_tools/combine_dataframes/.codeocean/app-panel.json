@@ -1,0 +1,37 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Combine DataFrames [SPAC] [DMAP]",
+		"instructions": "Combine two dataframes into one for downstream processes.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "3f71c57d39704b",
+			"category": "general",
+			"name": "First Dataframe Pattern",
+			"param_name": "First_Dataframe_Pattern",
+			"description": "Filename pattern to match the first dataframe file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*config*.csv"
+		},
+		{
+			"id": "e3982e644fd741",
+			"category": "general",
+			"name": "Second Dataframe Pattern",
+			"param_name": "Second_Dataframe_Pattern",
+			"description": "Filename pattern to match the second dataframe file.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "*config*.csv"
+		}
+	]
+}

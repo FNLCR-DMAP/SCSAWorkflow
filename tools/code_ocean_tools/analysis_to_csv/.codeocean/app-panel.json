@@ -1,0 +1,38 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Analysis to CSV [SPAC] [DMAP]",
+		"instructions": "Export a specified table with all annotations from an upstream analysis to a CSV file.  Please refer to DUET Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "97bfdd5a4faa4e",
+			"category": "general",
+			"name": "Table to Export",
+			"param_name": "Table_to_Export",
+			"description": "Source table to be exported. Default is Original.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "bfe6727beb404e",
+			"category": "general",
+			"name": "Save as CSV File",
+			"param_name": "Save_as_CSV_File",
+			"description": "If True, export the data as a single csv file, otherwise, export the data as a dataset that can be manipulated in NIDAP.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		}
+	]
+}

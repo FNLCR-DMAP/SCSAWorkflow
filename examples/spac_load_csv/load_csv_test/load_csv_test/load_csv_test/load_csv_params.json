@@ -1,0 +1,11 @@
+{
+  "CSV_Files": "/Users/liuf9/Projects/SCSAWorkflow/examples/spac_load_csv/load_csv_test/load_csv_test/load_csv_test/csv_files",
+  "CSV_Files_Configuration": "config_table.csv",
+  "Output_File": "output/combined_data.csv",
+  "String_Columns": [
+    "cell_type",
+    "slide_number",
+    "patient_id",
+    "timepoint"
+  ]
+}
