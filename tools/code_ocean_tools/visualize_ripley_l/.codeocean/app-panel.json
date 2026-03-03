@@ -1,0 +1,68 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Visualize Ripley L [SPAC][DMAP]",
+		"instructions": "Plot the Ripley L function for two phenotypes, multiple radii, regions, and simulations.\\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "33ab5673b9b348",
+			"category": "general",
+			"name": "Center Phenotype",
+			"param_name": "Center_Phenotype",
+			"description": "The phenotype of the anchor cells.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "9b576ce4938843",
+			"category": "general",
+			"name": "Neighbor Phenotype",
+			"param_name": "Neighbor_Phenotype",
+			"description": "The phenotype of the neighbors cells.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "5f0de1b2362b4c",
+			"category": "general",
+			"name": "Plot Specific Regions",
+			"param_name": "Plot_Specific_Regions",
+			"description": "Set to True to plot Ripley L for specific regions of interest. If True, set the two parameters \"Regions Annotation\"  and \"Regions Labels(s)\"",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "e4bf935e43a74a",
+			"category": "general",
+			"name": "Regions Label(s)",
+			"param_name": "Regions_Label_s_",
+			"description": "The label(s) of the region(s) to plot.",
+			"type": "text",
+			"value_type": "string"
+		},
+		{
+			"id": "2028312635de46",
+			"category": "general",
+			"name": "Plot Simulations",
+			"param_name": "Plot_Simulations",
+			"description": "Plot the 95% confidence interval for the poisson point process simulations.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		}
+	]
+}

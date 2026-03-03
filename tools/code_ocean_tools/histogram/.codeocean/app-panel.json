@@ -1,0 +1,266 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Histogram [SPAC] [DMAP]",
+		"instructions": "Plot the histogram of cells based on a specific feature or annotation. \\ Please refer to DUET Documentation, and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "plot_by_parameters",
+			"name": "Plot by parameters",
+			"help_text": "Configure plot by parameters"
+		},
+		{
+			"id": "figure_aesthetics_parameters",
+			"name": "Figure Aesthetics parameters",
+			"help_text": "Configure figure aesthetics parameters"
+		},
+		{
+			"id": "figure_configurations_parameters",
+			"name": "Figure Configurations parameters",
+			"help_text": "Configure figure configurations parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "a73216801d2448",
+			"category": "plot_by_parameters",
+			"name": "Plot By",
+			"param_name": "Plot_By",
+			"description": "Plot the histogram on the feature or annotation",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Annotation",
+			"extra_data": [
+				"Annotation",
+				"Feature"
+			]
+		},
+		{
+			"id": "12ad132d43d64b",
+			"category": "plot_by_parameters",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "Annotation name in the analysis to plot histogram. Can't be used with Feature.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "1327c07f087d4a",
+			"category": "plot_by_parameters",
+			"name": "Table",
+			"param_name": "Table",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "f68e1862e0154c",
+			"category": "plot_by_parameters",
+			"name": "Feature",
+			"param_name": "Feature",
+			"description": "Feature name in the analysis to plot histogram. Can't be used with Annotation.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "0151a5e0303448",
+			"category": "plot_by_parameters",
+			"name": "Group by",
+			"param_name": "Group_by",
+			"description": "Choose either to group the histogram by another annotation. Default is None to disable this option.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "fb400c8c2cfb43",
+			"category": "plot_by_parameters",
+			"name": "Together",
+			"param_name": "Together",
+			"description": "If Together is True, and Group by is not None, create one plot for all groups. Otherwise, divide every histogram by the number of elements.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		},
+		{
+			"id": "cd371d74d7ea46",
+			"category": "figure_aesthetics_parameters",
+			"name": "Multiple",
+			"param_name": "Multiple",
+			"description": "Approach for showing multiple labels when \"Group By\" and \"Together\" are on. Existing methods are: layer, dodge, stack, and fill.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "dodge",
+			"extra_data": [
+				"layer",
+				"dodge",
+				"stack",
+				"fill"
+			]
+		},
+		{
+			"id": "77afb68984d542",
+			"category": "figure_aesthetics_parameters",
+			"name": "Take Y log",
+			"param_name": "Take_Y_log",
+			"description": "Set Y axis scale to log 10.  Default \"False\" will present linear axis scale.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "c6c72674f3944a",
+			"category": "figure_aesthetics_parameters",
+			"name": "Take X Log",
+			"param_name": "Take_X_Log",
+			"description": "Set X axis scale to log 10.  Default \"False\" will present linear axis scale. Only applies to feature.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "f83d569198c940",
+			"category": "figure_aesthetics_parameters",
+			"name": "Bins",
+			"param_name": "Bins",
+			"description": "The number of bins in the histogram. Default \"auto\" will set it automatically. Only applies to feature.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "auto"
+		},
+		{
+			"id": "b022bad10ec84d",
+			"category": "figure_configurations_parameters",
+			"name": "Shrink Number",
+			"param_name": "Shrink_Number",
+			"description": "Scale the width of each bar or a group of bars relative to the bin width.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1
+		},
+		{
+			"id": "e12f912359df4c",
+			"category": "figure_configurations_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "Width of the figure.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 8
+		},
+		{
+			"id": "652a6b3621e844",
+			"category": "figure_configurations_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "Height of the figure.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 6
+		},
+		{
+			"id": "554366cf34614d",
+			"category": "figure_configurations_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "Font size of the figure.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "17f90ff97faa4a",
+			"category": "figure_configurations_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 300
+		},
+		{
+			"id": "e83af7e7acd841",
+			"category": "figure_configurations_parameters",
+			"name": "Legend in Figure",
+			"param_name": "Legend_in_Figure",
+			"description": "Display legend inside the plotting area.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "ca3a787d43a641",
+			"category": "figure_configurations_parameters",
+			"name": "Legend Location",
+			"param_name": "Legend_Location",
+			"description": "Location of legend.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "best",
+			"extra_data": [
+				"best",
+				"upper right",
+				"upper left",
+				"lower right",
+				"lower left",
+				"right",
+				"center left",
+				"center right",
+				"lower center",
+				"upper center",
+				"center"
+			]
+		},
+		{
+			"id": "e4dacf26c50040",
+			"category": "figure_configurations_parameters",
+			"name": "Bin Transparency",
+			"param_name": "Bin_Transparency",
+			"description": "Transparency of bins",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0.75
+		},
+		{
+			"id": "266417a80d924c",
+			"category": "figure_aesthetics_parameters",
+			"name": "Stat",
+			"param_name": "Stat",
+			"description": "Determines the statistical transformation for histogram bins. Default is \"count\". Options: \"count\" displays the count of cells in each bin; \"frequency\" shows the number of cells per bin, normalized by bin width;  \"density\" normalizes the histogram so that the total area equals 1; \"probability\" normalize such that bar heights sum to 1, bar height reflects the probability of observing each bin; \"percent\" normalize such that bar heights sum to 100, each bin's height shows the percentage of total cells it contains.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "count",
+			"extra_data": [
+				"count",
+				"density",
+				"percent",
+				"probability",
+				"frequency"
+			]
+		},
+		{
+			"id": "fe775c08882b48",
+			"category": "figure_configurations_parameters",
+			"name": "X Axis Label Rotation",
+			"param_name": "X_Axis_Label_Rotation",
+			"description": "The degree of rotation of X labels. Default is 0 (horizontal, text starting from left to right)",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 0
+		}
+	]
+}

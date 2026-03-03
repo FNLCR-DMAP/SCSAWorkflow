@@ -1,0 +1,14 @@
+pandas
+anndata
+numpy
+scikit-learn
+squidpy
+matplotlib
+seaborn
+scanpy
+phenograph
+zarr
+numba
+Pillow
+datashader
+plotly

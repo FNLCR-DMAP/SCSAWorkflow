@@ -1,0 +1,108 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Ripley L Calculation [SPAC][DMAP]",
+		"instructions": "Calculates the Ripley L statistic that measures the amount of clustering/dispersion between two cell phenotypes at different radii.  Compares that metric with a baseline where cells are assumed to freely move in a given region of interest.  \\ Please refer to DUET Documentation, GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "f1f790931bb84f",
+			"category": "general",
+			"name": "Radii",
+			"param_name": "Radii",
+			"description": "Radii around the center phenotype to calculate the Ripley L statistic",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "[\"0\",\"5\",\"10\"]"
+		},
+		{
+			"id": "9eb6e0e5cc634f",
+			"category": "general",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "Annotation name to be used in specifying phenotypes",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "3033a16dfa1d4e",
+			"category": "general",
+			"name": "Center Phenotype",
+			"param_name": "Center_Phenotype",
+			"description": "The phenotype of the anchors cells.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "1d70650666ed4d",
+			"category": "general",
+			"name": "Neighbor Phenotype",
+			"param_name": "Neighbor_Phenotype",
+			"description": "The phenotype of the neighbors cells.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": ""
+		},
+		{
+			"id": "3e7ac5647e054c",
+			"category": "general",
+			"name": "Stratify By",
+			"param_name": "Stratify_By",
+			"description": "The annotation(s) to stratify the dataset when generating interaction plots. If a value other than \"None\" is passed, the dataset will be stratified by the unique labels in the annotation column. Use \"None\" without quotes to disable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "4056f6d3e8b843",
+			"category": "general",
+			"name": "Number of Simulations",
+			"param_name": "Number_of_Simulations",
+			"description": "Number of simulation for the poisson point process where the Ripley L measure is estimated by shuffling the positions of the center and neighbor cells in the region of interest. The region of interest is defined as the convex hull that encapsulates all the cells in the region.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1
+		},
+		{
+			"id": "9f77086b020540",
+			"category": "general",
+			"name": "Area",
+			"param_name": "Area",
+			"description": "Area to normalize the Ripley L statistic. If set to \"None\" without the quotes, the area of the convex hull that surrounds the cells would be used instead.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "ced229e0f0644a",
+			"category": "general",
+			"name": "Seed",
+			"param_name": "Seed",
+			"description": "Random seed for reproducibility, used in simulating the poisson point process.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 42
+		},
+		{
+			"id": "c5f497b22b8f46",
+			"category": "general",
+			"name": "Edge Correction",
+			"param_name": "Edge_Correction",
+			"description": "Set to True to identify and remove the cells that belong to the \"Center Phenotype\" that are closer than a given Radius from the edge of the region. These cells are identified for every Radius. Check the returned csv in the plot  to see how many cells contributed to the Ripley L calculation.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		}
+	]
+}

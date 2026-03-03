@@ -3,4 +3,4 @@
 .vscode/launch.json
 test/__pychache__
 build/
-src/spac.egg-info/
+src/spac.egg-info/galaxy_tools/test_data/

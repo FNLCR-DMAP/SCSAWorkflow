@@ -1,0 +1,83 @@
+{
+  "rid": "ri.vector.main.template.8fc99234-9127-42d4-9c83-63bdf934d353",
+  "title": "Load CSV Files [SPAC] [DMAP]",
+  "description": "Load CSV files from NIDAP dataset and combine them into a single pandas dataframe for downstream processing. Please refer to [DUET Documentation](https://nidap.nih.gov/workspace/notepad/view/ri.notepad.main.notepad.2f4756b6-e915-441f-9847-bcda1156d692) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.data_utils.combine_dfs) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-04-30T00:05:14.662357784Z",
+  "commitMessage": "spacv0.8.8 string column is list, error msg incorrect name",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "CSV_Files",
+      "displayName": "CSV Files",
+      "description": "The NIDAP dataset containing the CSV files of interest.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "CSV, Tabular",
+      "isMultiple": true,
+      "tags": []
+    },
+    {
+      "key": "CSV_Files_Configuration",
+      "displayName": "CSV Files Configuration",
+      "description": "The manual table specifying which CSV files to include in the analysis, and any specific labels to add to all cells within a CSV file. Please check the example in the documentation.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYSPARK_DATAFRAME",
+      "isMultiple": false,
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "String_Columns",
+      "displayName": "String Columns",
+      "description": "List specific columns to be read as string/text.",
+      "paramType": "LIST",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "[]",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "CSV_Files",
+    "CSV_Files_Configuration",
+    "String_Columns"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def load_csv_scimap({{{CSV_Files}}}, {{{CSV_Files_Configuration}}}):\n\n    ## --------- ##\n    ## Libraries ##\n    ## --------- ##\n    import pandas as pd\n    import pickle\n    import re\n    import pprint\n    from spac.data_utils import combine_dfs\n    from spac.utils import check_list_in_list\n    from code_workbook_utils.utils import text_to_value\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n    \n    # Basic\n    NIDAP_dataset = {{{CSV_Files}}}.filesystem()\n    files_df = NIDAP_dataset.files()\n    file_paths = files_df.select('path').collect()\n    file_paths_list = [row['path'] for row in file_paths]\n    manual_input = {{{CSV_Files_Configuration}}}.toPandas()\n    manual_input = manual_input.applymap(lambda x: x.strip() if isinstance(x, str) else x)\n\n    # Specify any columns that must be parsed as strings when reading each CSV\n    string_columns = {{{String_Columns}}}  # e.g. [\"object_id\", \"roi_id\"]\n\n    filename = \"file_name\"\n    all_column_names = manual_input.columns.tolist()\n    filtered_column_names = [col for col in all_column_names if col not in [filename]]\n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n    if not isinstance(string_columns, list):\n        raise ValueError(\"String Columns must be a *list* of column names (strings).\")\n\n    # Handle [\"None\"] or [\"\"] \u21d2 empty list\n    if len(string_columns) == 1 and isinstance(string_columns[0], str):\n        if text_to_value(string_columns[0]) is None:\n            string_columns = []\n\n    # Extract the data types from manual_input\n    dtypes = manual_input.dtypes.to_dict()\n\n    # Check on filename column name to avoid using unsupported format\n    for item in all_column_names:\n        if item.find(\" \") != -1:\n            print(f'The column name: \"{item}\" contains a space character.')\n            # return(None)\n        else: \n            if any(symbol in item for symbol in \"!?,.\"):\n                print(f'One of the symbols !, ?, ,, or . is present in \"{item}\".')\n                # return(None)\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n    def clean_column_name(column_name):\n        original_column_name = column_name\n        column_name = spell_out_special_characters(column_name)\n        # Ensure the column name doesn't start with a digit\n        if column_name and column_name[0].isdigit():\n            column_name = f'col_{column_name}'\n        if original_column_name != column_name:\n            print(f'Column Name Updated: \"{original_column_name}\" -> \"{column_name}\"')\n        return column_name\n\n    ## Main Code Block ##\n    ## --------------- ##\n    ################################\n\n    manual_input = manual_input.astype(str)\n    files_to_use_raw = manual_input.file_name.tolist()\n    files_to_use = list(map(lambda s: s.strip(), files_to_use_raw))\n    processed_df_list = []\n\n    # Check if all files in files_to_use are present in file_paths_list\n    missing_files = [file_name for file_name in files_to_use if file_name not in file_paths_list]\n\n    if missing_files:\n        error_message = f\"The following files are not found in the current dataset: {', '.join(missing_files)}\"\n        raise TypeError(error_message)\n\n    # Prepare dtype override for pandas\n    dtype_override = {col: str for col in string_columns} if string_columns else None\n\n    # Validate string_columns exist in the CSV header (will be checked on first file)\n    first_file = True\n\n    # Loop through the list of files to process selected files\n    for file_name in files_to_use:\n        file_location = manual_input.loc[manual_input[filename] == file_name].index.tolist()\n\n    # Loop through the list of files to process selected files\n    for file_name in files_to_use:\n        file_location = manual_input.loc[manual_input[filename] == file_name].index.tolist()\n        if file_name not in file_paths_list:\n            error_message = f'The file: \"{file_name}\" is not found in current dataset.'\n            raise TypeError(error_message)\n\n        # Check for duplciate file name\n        if len(file_location) > 1:\n            print(f'Multiple Files with name: \"{file_location}\"  found, exiting...')\n            return(None)\n\n        with NIDAP_dataset.open(file_name) as selected_file:\n            \n            try:\n                current_df = pd.read_csv(selected_file, dtype=dtype_override)\n                print(f'\\nProcessing file: \"{file_name}\"')\n                current_df.columns = [clean_column_name(col) for col in current_df.columns]\n                # ---- Validation: ensure requested string_columns exist ----\n                if first_file and string_columns:\n                    check_list_in_list(\n                        input=string_columns,\n                        input_name='string_columns',\n                        input_type='column',\n                        target_list=list(current_df.columns),\n                        need_exist=True,\n                        warning=False\n                    )\n                    first_file = False\n\n            except pd.errors.EmptyDataError:\n                error_message = f'The file: \"{file_name}\" is empty.'\n                raise TypeError(error_message)\n\n            except pd.errors.ParserError:\n                error_message = f'The file \"{file_name}\" could not be parsed. ' + \\\n                                \"Please check that the file is a valid CSV.\"\n                raise TypeError(error_message)\n            \n            current_df[filename] = file_name\n        \n            # Reorder columns to make loaded_file_name the first column\n            cols = current_df.columns.tolist()\n            cols.insert(0, cols.pop(cols.index(filename)))\n            current_df = current_df[cols]\n\n            processed_df_list.append(current_df)\n            print(f'File: \"{file_name}\" Processed!\\n')\n\n    # Initialize an empty DataFrame for the final combined data\n    final_df = combine_dfs(processed_df_list)\n\n    # Ensure forced\u2011string columns remain strings after merge\n    for col in string_columns:\n        if col in final_df.columns:\n            final_df[col] = final_df[col].astype(str)\n\n    if len(filtered_column_names) !=0:\n        for column in filtered_column_names:\n            # Create a dictionary mapping 'file_name' to 'manual_col1'\n            file_name_to_manual_col = manual_input.set_index(filename)[column].to_dict()\n            # Create a new column 'manual_col1_mapped' in final_df by mapping 'file_name' values\n            final_df[column] = final_df[filename].map(file_name_to_manual_col)\n            # Ensure the new column in final_df matches the dtype from manual_input\n            final_df[column] = final_df[column].astype(dtypes[column])\n\n            print(f'\\n\\nColumn \"{column}\" Mapping: ')\n            pp = pprint.PrettyPrinter(indent=4)\n            pp.pprint(file_name_to_manual_col)\n    print(\"\\n\\nFinal Dataframe Info\")\n    print(final_df.info())\n\n    return(final_df)\n\n#################################################\n## Global imports and functions included below ##\n#################################################\ndef spell_out_special_characters(text):\n    import re\n    \n    # Replace spaces with underscores\n    text = text.replace(' ', '_')\n\n    # Replace specific substrings for units\n    text = text.replace('\u00b5m\u00b2', 'um2')\n    text = text.replace('\u00b5m', 'um')\n\n    # Replace hyphens between letters with '_'\n    text = re.sub(r'(?<=[A-Za-z])-+(?=[A-Za-z])', '_', text)\n\n    # Replace '+' with '_pos_' and '-' with '_neg_'\n    text = text.replace('+', '_pos_')\n    text = text.replace('-', '_neg_')\n\n    # Mapping for specific characters\n    special_char_map = {\n        '\u00b5': 'u',       # Micro symbol replaced with 'u'\n        '\u00b2': '2',       # Superscript two replaced with '2'\n        '@': 'at',\n        '#': 'hash',\n        '$': 'dollar',\n        '%': 'percent',\n        '&': 'and',\n        '*': 'asterisk',\n        '/': 'slash',\n        '\\\\': 'backslash',\n        '=': 'equals',\n        '^': 'caret',\n        '!': 'exclamation',\n        '?': 'question',\n        '~': 'tilde',\n        # '(': 'open_parenthesis',\n        # ')': 'close_parenthesis',\n        # '{': 'open_brace',\n        # '}': 'close_brace',\n        # '[': 'open_bracket',\n        # ']': 'close_bracket',\n        '|': 'pipe',\n    }\n\n    # Replace special characters using special_char_map\n    for char, replacement in special_char_map.items():\n        text = text.replace(char, replacement)\n\n    # Remove any remaining disallowed characters (non-alphanumeric and non-underscore)\n    text = re.sub(r'[^a-zA-Z0-9_]', '', text)\n                \n    # Remove multiple underscores and strip leading/trailing underscores\n    text = re.sub(r'_+', '_', text)\n    text = text.strip('_')\n\n    return text    ",
+      "shouldPersist": true
+    }
+  },
+  "version": 28,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Load CSV Files [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "load_csv_files",
+  "outputs": {
+    "dataframe": {"type": "file", "name": "dataframe.csv"}
+  }
+}

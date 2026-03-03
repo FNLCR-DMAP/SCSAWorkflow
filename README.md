@@ -5,6 +5,8 @@ This Python-based package leverages the anndata framework for easy integration w
 
 This repository is the official home of the SPAC Python package, part of the broader SPAC ecosystem for single-cell spatial analysis.
 
+If you use SPAC in your research, please cite our publications (see [Citations](#citations)).
+
 ## SPAC Ecosystem
 
 | Component | Description | Repository |
@@ -158,7 +160,7 @@ docker container prune -f
 docker rmi spac
 ```
 
-## Contirbuting to SPAC:
+## Contributing to SPAC
 Review the [developer guide](CONTRIBUTING.md)
 
 ## License
