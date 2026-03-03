@@ -3,7 +3,7 @@
     <description>Generates static spatial visualizations of single-cell data, providing a snapshot of cellular features or annotations across a sample. \
 Please refer to DUET Documentation and GitHub Documentation for</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

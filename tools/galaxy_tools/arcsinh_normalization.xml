@@ -2,7 +2,7 @@
 <tool id="spac_arcsinh_normalization" name="Arcsinh Normalization [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Normalize features either by a user-defined co-factor or a determined percentile, allowing for effective normalization of high-range values in single-cell datasets. This transformation can also be app</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

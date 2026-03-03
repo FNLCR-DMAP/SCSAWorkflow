@@ -3,7 +3,7 @@
     <description>Adds pin color rules to the analysis that can be used in downstream visualization. \
 The consistent color representation of the same labels between different visualizations promotes the comprehensiven</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

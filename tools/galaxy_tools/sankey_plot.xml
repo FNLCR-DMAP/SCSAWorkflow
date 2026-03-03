@@ -2,7 +2,7 @@
 <tool id="spac_sankey_plot" name="Sankey Plot [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Generates an interactive Sankey plot to visualize annotation relationships. A relationship is defined as a unique pair of values, one from the source annotation and one from the target annotation.</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

@@ -3,7 +3,7 @@
     <description>Visualizes precomputed nearest neighbor distances for a specified phenotype through various plot formats to analyze spatial relationships and microenvironment structure.\
 Please refer to DUET Document</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

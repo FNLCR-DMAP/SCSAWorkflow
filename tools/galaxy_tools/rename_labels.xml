@@ -3,7 +3,7 @@
     <description>Rename and group labels in the prior processed analysis dataset based on the provided dictionary, keeping the original annotation column.\
 Please refer to DUET Documentation, GitHub Documentation</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

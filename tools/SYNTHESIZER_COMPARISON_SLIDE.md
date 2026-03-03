@@ -54,7 +54,7 @@
 │  │  2. Restart Galaxy or reload tools      │   │  3. App Panel auto-generates from       │          │
 │  │  3. Tools appear in Galaxy UI           │   │     app-panel.json                      │          │
 │  │                                         │   │  4. Configure Docker environment        │          │
-│  │  Docker: nciccbr/spac:v2-dev            │   │  Docker: nciccbr/spac:v2-dev            │          │
+│  │  Docker: nciccbr/spac:v0.9.1            │   │  Docker: nciccbr/spac:v0.9.1            │          │
 │  └─────────────────────────────────────────┘   └─────────────────────────────────────────┘          │
 │                                                                                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -163,7 +163,7 @@ Both synthesizers share:
 1. **Blueprint JSON** - Same input format for both platforms
 2. **format_values.py** - Same parameter normalization logic
 3. **SPAC Templates** - Same `run_from_json()` entry point
-4. **Docker Image** - Same `nciccbr/spac:v2-dev` container
+4. **Docker Image** - Same `nciccbr/spac:v0.9.1` container
 5. **Parameter Type Mapping** - Similar type conversions
 
 ```

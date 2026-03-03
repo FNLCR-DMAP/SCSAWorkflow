@@ -3,7 +3,7 @@
     <description>Calculates aggregate statistics for each cluster or label from specific annotation against selected features. To view the results, please click on 'Preview.'\
 Please refer to DUET Documentation, and G</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

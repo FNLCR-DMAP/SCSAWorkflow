@@ -11,7 +11,7 @@ Features:
 - Apostrophe removal from tool IDs and filenames
 - Cheetah loop support for multiple file inputs
 - SPAC package-based template invocation (via installed package)
-- Docker container: nciccbr/spac:v2-dev
+- Docker container: nciccbr/spac:v0.9.1
 
 This synthesizer properly handles all parameter types with sanitizer support:
 - Numeric types with min/max bounds â†’ Galaxy numeric types
@@ -64,7 +64,7 @@ class GalaxyXMLSynthesizer:
         }
     """
     
-    def __init__(self, blueprint: Dict[str, Any], docker_image: str = "spac:latest"):
+    def __init__(self, blueprint: Dict[str, Any], docker_image: str = "nciccbr/spac:v0.9.1"):
         self.blueprint = blueprint
         self.docker_image = docker_image
         
@@ -778,7 +778,7 @@ def _sanitize_filename(title: str) -> str:
     return tool_name
 
 
-def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str = "spac:mvp"):
+def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str = "nciccbr/spac:v0.9.1"):
     """Process a single blueprint to generate Galaxy XML."""
     print(f"Processing: {blueprint_path.name}")
     
@@ -817,7 +817,7 @@ def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str 
     return xml_path
 
 
-def batch_process(input_pattern: str, output_dir: str, docker_image: str = "spac:mvp"):
+def batch_process(input_pattern: str, output_dir: str, docker_image: str = "nciccbr/spac:v0.9.1"):
     """Process multiple blueprint files matching a pattern."""
     input_path = Path(input_pattern)
     output_path = Path(output_dir)
@@ -906,8 +906,8 @@ def main():
     )
     parser.add_argument(
         "--docker",
-        default="spac:mvp",
-        help="Docker image name (default: spac:mvp)"
+        default="nciccbr/spac:v0.9.1",
+        help="Docker image name (default: nciccbr/spac:v0.9.1)"
     )
     parser.add_argument(
         "--debug",

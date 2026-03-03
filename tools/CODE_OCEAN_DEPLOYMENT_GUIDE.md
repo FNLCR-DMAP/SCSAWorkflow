@@ -115,7 +115,7 @@ You should see:
 
 1. Go to **Environment** tab
 2. Click **"Add Environment"**
-3. Select **Docker** and enter: `nciccbr/spac:v2-dev`
+3. Select **Docker** and enter: `nciccbr/spac:v0.9.1`
 4. Click **"Save"**
 
 ### 3.5 Attach Data
@@ -296,7 +296,7 @@ Called from `run.sh` as `python ./format_values.py ...`
 |-------------|------------------|
 | Entry point | `run.sh` at capsule root |
 | Output location | All outputs to `/results/` |
-| Environment | Docker image: `nciccbr/spac:v2-dev` |
+| Environment | Docker image: `nciccbr/spac:v0.9.1` |
 | Data location | Input data in `../data/` |
 
 ---
@@ -351,7 +351,7 @@ done
 - Verify file extension is `.pickle`, `.pkl`, or `.h5ad`
 
 ### Template not found
-- Ensure Docker image `nciccbr/spac:v2-dev` contains `spac.templates`
+- Ensure Docker image `nciccbr/spac:v0.9.1` contains `spac.templates`
 - Check template name matches: `{tool_name}_template`
 
 ### Numeric values appearing as strings
@@ -385,7 +385,7 @@ code_ocean_tools/
 
 ### Docker Image
 ```
-nciccbr/spac:v2-dev
+nciccbr/spac:v0.9.1
 ```
 
 ### Key v8.0 Changes

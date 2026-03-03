@@ -1,7 +1,30 @@
-# Analysis of SPAtial Single Cell Datasets (SPAC)
+# SPAC: Analysis of SPAtial Single Cell Datasets 
 
 SPAC is a scalable, automated pipeline, under the Single Cell Spatial Analysis Workflow (SCSAWorkflow) project aiming at analyzing single-cell spatial protein data of multiplexed whole-slide tissue images generated from technologies such as MxIF Codex and Imaging Mass Cytometry (IMC).
-This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. Spac offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc.
+This Python-based package leverages the anndata framework for easy integration with other single-cell toolkits. It includes a multitude of functional and visualization modules, test utilities, and is capable of running in user-friendly web interfaces. SPAC offers insights into cell interactions within various environments, aiding in studies of the cancer microenvironment, stem cell niches, and drug response effects etc.
+
+This repository is the official home of the SPAC Python package, part of the broader SPAC ecosystem for single-cell spatial analysis.
+
+If you use SPAC in your research, please cite our publications (see [Citations](#citations)).
+
+## SPAC Ecosystem
+
+| Component | Description | Repository |
+|-----------|-------------|------------|
+| **SPAC Python Package** | Core analysis library | This repository |
+| **SPAC Shiny** | Interactive web application | [FNLCR-DMAP/SPAC_Shiny](https://github.com/FNLCR-DMAP/SPAC_Shiny) |
+
+## Citations
+
+If you use SPAC in your work, please cite the following publications:
+
+**Platform paper (BMC Bioinformatics):**
+
+> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. SPAC: a scalable and integrated enterprise platform for single-cell spatial analysis. *BMC Bioinformatics*. 2026 Jan 29;27(1):25. doi: [10.1186/s12859-025-06339-2](https://doi.org/10.1186/s12859-025-06339-2). PMID: 41612174; PMCID: PMC12857135.
+
+**Software paper (JOSS):**
+
+> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. (2026). SPAC: A Python Package for Spatial Single-Cell Analysis of Multiplexed Imaging. *Journal of Open Source Software*, 11(117), 8787. doi: [10.21105/joss.08787](https://doi.org/10.21105/joss.08787)
 
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
@@ -114,7 +137,7 @@ This test will:
 - ✅ Run histogram performance benchmarks (up to 10M cells: `histogram_old` vs `histogram`)  
 - ✅ Generate detailed speedup analysis with concrete performance improvements
 - 📊 Generate detailed speedup analysis and performance reports
-- � Save results to your local `performance_results/` directory
+- 💾 Save results to your local `performance_results/` directory
 
 Performance results are saved locally as timestamped files in `performance_results/`:
 - `boxplot_performance_YYYYMMDD_HHMMSS.txt`
@@ -149,7 +172,7 @@ docker container prune -f
 docker rmi spac
 ```
 
-## Contirbuting to SPAC:
+## Contributing to SPAC
 Review the [developer guide](CONTRIBUTING.md)
 
 ## License

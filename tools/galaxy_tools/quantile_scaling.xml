@@ -3,7 +3,7 @@
     <description>Perform quantile scaling on features in the target table using min/max normalization with cutoffs defined by specified quantile value.\
 x' = (x- quantile min)/(quantile max - quantile min), x'=0 if x </description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

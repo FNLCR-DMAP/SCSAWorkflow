@@ -91,7 +91,7 @@ gh repo create fnlcr-dmap/spac-boxplot --public --source=. --push
 ### 3. Configure Environment
 
 - Go to **Environment** tab
-- Select **Docker** and enter: `nciccbr/spac:v2-dev`
+- Select **Docker** and enter: `nciccbr/spac:v0.9.1`
 
 ### 4. Attach Data & Run
 

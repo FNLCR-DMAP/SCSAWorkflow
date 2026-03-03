@@ -2,7 +2,7 @@
 <tool id="spac_hierarchical_heatmap" name="Hierarchical Heatmap [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Generates a hierarchical clustering heatmap with dendrograms, where features are assumed to be columns and annotations are rows, grouping cells by annotation and calculating average expression intensi</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

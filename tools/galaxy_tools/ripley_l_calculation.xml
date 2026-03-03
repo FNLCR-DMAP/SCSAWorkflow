@@ -2,7 +2,7 @@
 <tool id="spac_ripley_l_calculation" name="Ripley L Calculation [SPAC][DMAP]" version="2.0.0" profile="24.2">
     <description>Calculates the Ripley L statistic that measures the amount of clustering/dispersion between two cell phenotypes at different radii.  Compares that metric with a baseline where cells are assumed to fre</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

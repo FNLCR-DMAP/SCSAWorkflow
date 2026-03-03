@@ -205,7 +205,7 @@ positional arguments:
 optional arguments:
   -h, --help            Show help message
   -o, --output OUTPUT   Output directory for XML files (default: MVP_tools)
-  --docker DOCKER       Docker image name (default: spac:mvp)
+  --docker DOCKER       Docker image name (default: nciccbr/spac:v0.9.1)
   --debug               Enable debug output with feature summary
 ```
 

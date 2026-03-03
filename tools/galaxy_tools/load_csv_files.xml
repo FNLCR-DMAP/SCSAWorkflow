@@ -2,7 +2,7 @@
 <tool id="spac_load_csv_files" name="Load CSV Files [SPAC] [DMAP]" version="2.0.0" profile="24.2">
     <description>Load CSV files from NIDAP dataset and combine them into a single pandas dataframe for downstream processing. Please refer to DUET Documentation and GitHub Documentation for further information.</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

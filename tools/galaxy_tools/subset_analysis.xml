@@ -3,7 +3,7 @@
     <description>Chooses cells that either include or exclude specific label(s) within a designated annotation for downstream analysis.\
 Please refer to DUET Documentation, GitHub Documentation</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v2-dev</container>
+        <container type="docker">nciccbr/spac:v0.9.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

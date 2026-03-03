@@ -12,7 +12,7 @@ Features:
 - Correct output directory: passes output_dir='/results' to templates
 - Automatic category creation from paramGroup
 - Shared format_values.py generated once at root output directory
-- Docker container: nciccbr/spac:v2-dev
+- Docker container: nciccbr/spac:v0.9.1
 - **v9.0**: Smart input detection based on inputDatasets from blueprint
   - Detects dataType from blueprint (PYTHON_TRANSFORM_INPUT, PANDAS_DATAFRAME, etc.)
   - Single vs multiple input handling
@@ -72,7 +72,7 @@ class CodeOceanSynthesizer:
     # PYTHON_TRANSFORM_INPUT = .pickle/.pkl/.h5ad files (most common)
     PICKLE_DATA_TYPES = {'PYTHON_TRANSFORM_INPUT'}
     
-    def __init__(self, blueprint: Dict[str, Any], docker_image: str = "nciccbr/spac:v2-dev"):
+    def __init__(self, blueprint: Dict[str, Any], docker_image: str = "nciccbr/spac:v0.9.1"):
         self.blueprint = blueprint
         self.docker_image = docker_image
         self._parameter_order = []  # Track parameter order
@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
 '''
 
 
-def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str = "nciccbr/spac:v2-dev"):
+def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str = "nciccbr/spac:v0.9.1"):
     """Process a single blueprint to generate Code Ocean capsule files."""
     print(f"Processing: {blueprint_path.name}")
     
@@ -1080,7 +1080,7 @@ def process_blueprint(blueprint_path: Path, output_dir: Path, docker_image: str 
     return tool_dir
 
 
-def batch_process(input_pattern: str, output_dir: str, docker_image: str = "nciccbr/spac:v2-dev"):
+def batch_process(input_pattern: str, output_dir: str, docker_image: str = "nciccbr/spac:v0.9.1"):
     """Process multiple blueprint files matching a pattern."""
     input_path = Path(input_pattern)
     output_path = Path(output_dir)
@@ -1162,8 +1162,8 @@ def main():
     )
     parser.add_argument(
         "--docker",
-        default="nciccbr/spac:v2-dev",
-        help="Docker image name (default: nciccbr/spac:v2-dev)"
+        default="nciccbr/spac:v0.9.1",
+        help="Docker image name (default: nciccbr/spac:v0.9.1)"
     )
     parser.add_argument(
         "--debug",
