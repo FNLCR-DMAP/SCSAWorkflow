@@ -153,8 +153,8 @@ def spac_datashader_labeled_heatmap(
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-
-    fmt = matplotlib.ticker.StrMethodFormatter(f"{{x:.{decimals}f}}")
+    from matplotlib import ticker
+    fmt = ticker.StrMethodFormatter(f"{{x:.{decimals}f}}")
 
     threshold = im.norm(data.max()) / 2
 
