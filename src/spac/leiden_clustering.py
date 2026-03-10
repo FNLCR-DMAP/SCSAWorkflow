@@ -27,3 +27,12 @@ def leiden_only_clustering(adata):
 
 def plot(adata):
     sc.pl.umap(adata, color="leiden_clusters")
+
+''' plan:
+        - feature addition
+            - resolution, random_state, n_iterations, key_added
+            - neighbors_key/obsp, use_weights, directed
+            - partition_type, flavor, restrict_to
+        - tune for other ml/clustering/normalization models
+        - write unit tests & justify
+'''
