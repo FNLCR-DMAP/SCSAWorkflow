@@ -22,6 +22,9 @@ from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
+import datashader as ds
+import datashader.transfer_functions as tf
+
 import base64
 import time
 import json
@@ -32,10 +35,267 @@ import matplotlib.patches as mpatch
 from functools import partial
 from collections import OrderedDict
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+plt.rcParams["axes.grid"] = False
+
+def spac_datashader_labeled_heatmap(
+    adata,
+    bins_x=10,
+    bins_y=10,
+    x_labels=None,
+    y_labels=None,
+    log_scale=False,
+    decimals=2,
+    cmap="viridis",
+    title="Spatial Heatmap",
+    show_colorbar=True
+):
+
+    if "spatial" in adata.obsm:
+        coords = adata.obsm["spatial"]
+    elif "X_spatial" in adata.obsm:
+        coords = adata.obsm["X_spatial"]
+    else:
+        raise KeyError("No spatial coordinates found in adata.obsm")
+
+    x = coords[:, 0]
+    y = coords[:, 1]
+
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    mask = np.isfinite(x) & np.isfinite(y)
+    x = x[mask]
+    y = y[mask]
+
+    if len(x) == 0:
+        raise ValueError("No valid points to plot.")
+
+    x_min, x_max = float(x.min()), float(x.max())
+    y_min, y_max = float(y.min()), float(y.max())
+
+    cvs = ds.Canvas(
+        plot_width=bins_x,
+        plot_height=bins_y,
+        x_range=(x_min, x_max),
+        y_range=(y_min, y_max),
+    )
+
+    df = pd.DataFrame({"x": x, "y": y})
+
+    agg = cvs.points(df, "x", "y", agg=ds.count())
+    grid = agg.values.astype(float)
+
+    if log_scale:
+        data = np.log10(grid + 1)
+        cbar_label = "log10(count + 1)"
+    else:
+        data = grid
+        cbar_label = "Count"
+
+
+    if x_labels is None:
+        x_labels = [f"X{i}" for i in range(bins_x)]
+
+    if y_labels is None:
+        y_labels = [f"Y{i}" for i in range(bins_y)]
+
+
+    if len(x_labels) != bins_x:
+        raise ValueError("Length of x_labels must equal bins_x")
+
+    if len(y_labels) != bins_y:
+        raise ValueError("Length of y_labels must equal bins_y")
+
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    im = ax.imshow(
+        data,
+        origin="lower",
+        cmap=cmap,
+        interpolation="none",
+        aspect="equal"
+    )
+
+    ax.grid(False)
+    ax.grid(False, which="minor")
+
+
+    if show_colorbar:
+        cbar = ax.figure.colorbar(im, ax=ax)
+        cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
+        cbar.outline.set_visible(False)
+
+
+    ax.set_xticks(
+        range(bins_x),
+        labels=x_labels,
+        rotation=-30,
+        ha="right",
+        rotation_mode="anchor"
+    )
+
+    ax.set_yticks(range(bins_y), labels=y_labels)
+
+
+    ax.tick_params(
+        top=True,
+        bottom=False,
+        labeltop=True,
+        labelbottom=False
+    )
+
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    from matplotlib import ticker
+    fmt = ticker.StrMethodFormatter(f"{{x:.{decimals}f}}")
+
+    threshold = im.norm(data.max()) / 2
+
+
+    for i in range(bins_y):
+        for j in range(bins_x):
+
+            color = "white" if im.norm(data[i, j]) > threshold else "black"
+
+            ax.text(
+                j,
+                i,
+                fmt(data[i, j], None),
+                ha="center",
+                va="center",
+                color=color,
+                fontsize=11,
+                fontweight="bold"
+            )
+
+
+    ax.set_title(title, pad=20)
+
+    fig.tight_layout()
+    return fig
+
+def heatmap_datashader(x, y, labels=None, theme=None,
+                        x_axis_title="Component 1", y_axis_title="Component 2",
+                        plot_title=None, **kwargs):
+    """
+    Generates a heatmap using Datashader for large-scale scatter data.
+
+    Parameters
+    ----------
+    x : iterable
+        X-axis coordinates.
+    y : iterable
+        Y-axis coordinates.
+    labels : iterable, optional
+        Categorical labels for subgrouping data.
+    theme : str, optional, default='viridis'
+        Colormap theme for visualization.
+    x_axis_title : str, optional, default='Component 1'
+        Label for the x-axis.
+    y_axis_title : str, optional, default='Component 2'
+        Label for the y-axis.
+    plot_title : str, optional
+        Title of the plot.
+    **kwargs : dict, optional
+        Additional keyword arguments (e.g., 'fig_width', 'fig_height').
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A Matplotlib figure containing the heatmap visualization.
+    """
+
+    # Ensure x and y are iterable
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define available color themes
+    themes = {
+        'Elevation': ds.colors.Elevation,
+        'viridis': ds.colors.viridis,
+        'Hot': ds.colors.Hot,
+        'Set1': ds.colors.Set1,
+        'Set2': ds.colors.Set2,
+        'Set3': ds.colors.Set3,
+        'Sets1to3': ds.colors.Sets1to3,
+        'inferno': ds.colors.inferno,
+        'color_lookup': ds.colors.color_lookup,
+    }
+    cmap = themes.get(theme, ds.colors.viridis)  # Default to 'viridis' if theme is not specified
+
+    # Create a DataFrame for processing
+    coords = pd.DataFrame({"x": x, "y": y})
+    if labels is not None:
+        coords["labels"] = labels
+
+    # Determine plot boundaries
+    x_min, x_max = coords["x"].min(), coords["x"].max()
+    y_min, y_max = coords["y"].min(), coords["y"].max()
+
+    # Supply default ranges if not in kwargs
+    canvas_kwargs = {
+        'plot_width': 600,
+        'plot_height': 400,
+        'x_range': (x_min, x_max),
+        'y_range': (y_min, y_max)
+    }
+    canvas_kwargs.update(kwargs)
+
+    create_canvas = partial(ds.Canvas, **canvas_kwargs)
+
+    if labels is not None:
+        categories = pd.Categorical(coords["labels"]).categories
+        num_categories = len(categories)
+
+        rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
+        fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
+        axes = axes.flatten()
+
+        for i, cat in enumerate(categories):
+            subset = coords[coords["labels"] == cat]
+            canvas = create_canvas()
+            agg = canvas.points(subset, x="x", y="y", agg=ds.count())
+            img = tf.shade(agg, cmap=cmap).to_pil()
+
+            ax = axes[i]
+            ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+            ax.set_title(f"{plot_title} - {cat}" if plot_title else str(cat))
+            ax.set_xlabel(x_axis_title)
+            ax.set_ylabel(y_axis_title)
+
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+    else:
+        canvas = create_canvas()
+        agg = canvas.points(coords, x="x", y="y", agg=ds.count())
+        img = tf.shade(agg, cmap=cmap).to_pil()
+
+        fig, ax = plt.subplots(
+            figsize=(
+                canvas_kwargs["plot_width"] / 100,
+                canvas_kwargs["plot_height"] / 100
+            )
+        )
+        ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+        ax.set_title(plot_title if plot_title else "Density Plot")
+        ax.set_xlabel(x_axis_title)
+        ax.set_ylabel(y_axis_title)
+
+    plt.tight_layout()
+    return fig
+
+
 
 
 def visualize_2D_scatter(
@@ -538,6 +798,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Check for negative values and apply log1p transformation if
     # x_log_scale is True
+
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
