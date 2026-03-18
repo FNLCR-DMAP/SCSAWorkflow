@@ -1,7 +1,25 @@
 # CHANGELOG
 
 
+## v0.9.3 (2026-03-18)
+
+### Bug Fixes
+
+- Refactor hierarchical_heatmap_template and align test with template changes
+  ([`459aa95`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/459aa95100922f16d1ebd58205a874882bc3f421))
+
+- Update template to return (clustergrid, mean_intensity) tuple for in-memory mode - Fix param names
+  in test: Feature_s_, Standard_Scale_ - Remove unused params: Method, Metric - Add all template
+  params to test for full coverage - Add in-memory mode test (save_results_flag=False) - Add figure
+  title and CSV output assertions
+
+
 ## v0.9.2 (2026-03-03)
+
+### Continuous Integration
+
+- **version**: Automatic development release
+  ([`97ead81`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/97ead819ef09c101a6cc59af7e98f979548abcb6))
 
 
 ## v0.9.1 (2026-02-27)
