@@ -483,6 +483,16 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
             If not provided, the binning will be determined automatically.
             Note, don't pass a numpy array, only python lists or strs/numbers.
+        When `facet=True`, these optional keys can be passed via `kwargs`
+        to customize the FacetGrid layout:
+        - `facet_ncol`: int or None, number of facet columns.
+            If None, the function uses one column for small group counts and
+            switches to a compact grid for many groups.
+        - `facet_vertical_threshold`: int, max number of groups that should
+            stay in a vertical single-column layout when `facet_ncol` is None.
+            Default is 4.
+        - `facet_height`: float, facet height in inches. Default is 3.2.
+        - `facet_aspect`: float, facet width/height ratio. Default is 1.25.
 
     Returns
     -------
@@ -720,22 +730,70 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                         ylabel = f'log({ylabel})'
                     ax_i.set_ylabel(ylabel)
                     axs.append(ax_i)
-            else:
-                hist = sns.FacetGrid(plot_data, col=group_by)
-                # Map the histogram function to the grid
-                hist.map(sns.histplot, data_column, **kwargs)
 
-                # Set rotation of label
-                hist.set_xticklabels(rotation=20, ha='right')
+            else:   # Facet option
+                # Set default values for facet parameters if not provided in kwargs
+                facet_ncol = kwargs.get('facet_ncol', None)
+                facet_vertical_threshold = kwargs.get(
+                    'facet_vertical_threshold', 4
+                )
+                facet_height = kwargs.get('facet_height', 3.2)
+                facet_aspect = kwargs.get('facet_aspect', 1.25)
+
+                # Default: vertical layout for a few groups, grid for many.
+                if facet_ncol is None:
+                    if n_groups <= facet_vertical_threshold:
+                        facet_ncol = 1
+                    else:
+                        facet_ncol = int(np.ceil(np.sqrt(n_groups)))
+
+                facet_ncol = max(1, min(int(facet_ncol), n_groups))
+
+                # Create the FacetGrid for the histogram
+                hist = sns.FacetGrid(
+                    plot_data,
+                    col=group_by,
+                    col_wrap=facet_ncol,
+                    height=facet_height,
+                    aspect=facet_aspect,
+                    sharex=True,
+                    sharey=True
+                )
+
+                # Remove facet-specific keys from kwargs to avoid passing them to histplot
+                facet_only_keys = {
+                    'facet_ncol',
+                    'facet_vertical_threshold',
+                    'facet_height',
+                    'facet_aspect',
+                }
+                hist_kwargs = {
+                    k: v for k, v in kwargs.items()
+                    if k not in facet_only_keys
+                }
+
+                # Map the histogram function to the grid
+                hist.map_dataframe(sns.histplot, x=data_column, **hist_kwargs)
+
+                # Keep shared scale but show x tick numbers on bottom row and y tick numbers on left column
+                for ax_i in hist.axes.flat:
+                    ax_i.tick_params(axis='x', labelbottom=True)
+                    ax_i.tick_params(axis='y', labelleft=True)
+
+                # Set background color and grid for better readability
+                for ax_i in hist.axes.flat:
+                    ax_i.set_facecolor('#f2f2f2')
+                    ax_i.grid(True, which='major', axis='both')
 
                 # Titles for each facet
                 hist.set_titles("{col_name}")
 
-                # Ajust top margin
+                # Adjust margins for readability across layouts.
                 hist.figure.subplots_adjust(left=.1,
-                                            top=0.85,
-                                            bottom=0.15,
-                                            hspace=0.3)
+                                            top=0.9,
+                                            bottom=0.12,
+                                            hspace=0.35,
+                                            wspace=0.2)
 
                 fig = hist.figure
                 axs.extend(hist.axes.flat)
@@ -772,7 +830,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             xlabel = f'log({data_column})'
         else:
             xlabel = data_column
-        ax.set_xlabel(xlabel)
+        if facet:
+            ax.set_xlabel('')
+        else:
+            ax.set_xlabel(xlabel)
 
         # Adjust y-axis label based on 'stat' parameter
         stat = kwargs.get('stat', 'count')
@@ -785,7 +846,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         ylabel = ylabel_map.get(stat, 'Count')
         if y_log_scale:
             ylabel = f'log({ylabel})'
-        ax.set_ylabel(ylabel)
+        if facet:
+            ax.set_ylabel('')
+        else:
+            ax.set_ylabel(ylabel)
+
+    # Set a common x and y label for the entire figure if facet is True
+    if facet and fig is not None:
+        fig.supxlabel(xlabel)
+        fig.supylabel(ylabel)
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": hist_data}
