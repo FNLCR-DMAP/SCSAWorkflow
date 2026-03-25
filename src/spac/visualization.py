@@ -673,6 +673,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
+            ''' 
+            TODO: Recheck the binning logic.
+            I think we may need to pass the global_bin_edges to seaborn. 
+            I think the current implementation is actually doing a 'double-binning',
+            which may not be desirable. 
+            '''
+
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
@@ -808,6 +815,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                                             hspace=0.35,
                                             wspace=0.2)
 
+                # Pass the figure and axes to the output for further customization
                 fig = hist.figure
                 axs.extend(hist.axes.flat)
                 hist_data = plot_data
