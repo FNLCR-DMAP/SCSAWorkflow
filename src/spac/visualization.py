@@ -779,7 +779,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     k: v for k, v in kwargs.items()
                     if k not in facet_only_keys
                 }
-                hist_kwargs['bins'] = global_bin_edges
+                # For numeric data, pass global bin edges to ensure consistent binning across facets.
+                if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                    hist_kwargs['bins'] = global_bin_edges.tolist()
+                else:
+                    hist_kwargs.pop('bins', None)
 
                 # Map the histogram function to the grid
                 hist.map_dataframe(sns.histplot, x=data_column, **hist_kwargs)
