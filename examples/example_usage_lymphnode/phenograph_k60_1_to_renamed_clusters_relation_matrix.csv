@@ -1,0 +1,11 @@
+,target_ASMA+ cells,target_B cells,target_CD8 T cells,target_Follicular helper T cells (Tfh),target_Myeloid cells,target_NK cells,target_Proliferative B cells,target_Regulatory T cells,total
+source_0,0.0,0.0,0.0,0.0,100.0,0.0,0.0,0.0,100.0
+source_1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,100.0,100.0
+source_2,0.0,0.0,0.0,0.0,0.0,0.0,100.0,0.0,100.0
+source_3,0.0,0.0,0.0,0.0,100.0,0.0,0.0,0.0,100.0
+source_4,0.0,100.0,0.0,0.0,0.0,0.0,0.0,0.0,100.0
+source_5,0.0,0.0,100.0,0.0,0.0,0.0,0.0,0.0,100.0
+source_6,0.0,0.0,0.0,100.0,0.0,0.0,0.0,0.0,100.0
+source_7,100.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,100.0
+source_8,0.0,0.0,0.0,0.0,0.0,100.0,0.0,0.0,100.0
+source_9,0.0,100.0,0.0,0.0,0.0,0.0,0.0,0.0,100.0
