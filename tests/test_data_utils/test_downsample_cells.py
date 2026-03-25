@@ -185,6 +185,62 @@ class TestDownsampleCells(unittest.TestCase):
         )
         self.assertDictEqual(expected_counts, actual_counts)
 
+    def test_anndata_input(self):
+        """
+        Test that downsample_cells accepts anndata objects as input,
+        returns an anndata object and performs downsampling correctly,
+        retaining features in .X and annotations in .obs.
+        """
+    
+        # create anndata object
+        X_data = pd.DataFrame({
+            'feature1': [1, 3, 5, 7, 9, 12, 14, 16],
+            'feature2': [2, 4, 6, 8, 10, 13, 15, 18],
+            'feature3': [3, 5, 7, 9, 11, 14, 16, 19]
+        })
+
+        obs_data = pd.DataFrame({
+            'phenotype': [
+                'phenotype1',
+                'phenotype1',
+                'phenotype2',
+                'phenotype2',
+                'phenotype3',
+                'phenotype3',
+                'phenotype4',
+                'phenotype4'
+            ]
+        })
+
+        anndata_obj = anndata.AnnData(X = X_data, obs = obs_data)
+            
+        # call downsample on the anndata object
+        downsampled_adata = downsample_cells(
+            input_data = anndata_obj,
+            annotations = 'phenotype',
+            n_samples = 1,
+            stratify = False,
+            rand = True,
+            combined_col_name= '_combined_'
+        )
+    
+        # confirm the downsampled_df is an anndata object
+        self.assertTrue(isinstance(downsampled_adata, anndata.AnnData))
+
+        # confirm number of samples after downsampling is correct 
+        # (four groups with one sample each is four rows total)
+        self.assertEqual(downsampled_adata.shape[0], 4)		
+
+        # confirm the number of groups (phenotypes) is still four 
+        self.assertEqual(downsampled_adata.obs['phenotype'].nunique(), 4)
+
+        # confirm original annotation column is present
+        self.assertIn('phenotype', downsampled_adata.obs.columns)
+        
+        # confirm feature columns are present in .var_names
+        expected_features = X_data.columns.tolist()
+        for feature in expected_features:
+            self.assertIn(feature, downsampled_adata.var_names)
 
 if __name__ == '__main__':
     unittest.main()
