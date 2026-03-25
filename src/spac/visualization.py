@@ -749,6 +749,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 facet_ncol = max(1, min(int(facet_ncol), n_groups))
 
+                # Compute global bins so all facets use consistent boundaries.
+                if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                    global_bin_edges = np.histogram_bin_edges(
+                        plot_data[data_column], bins=kwargs['bins']
+                    )
+                else:
+                    global_bin_edges = plot_data[data_column].unique()
+
                 # Create the FacetGrid for the histogram
                 hist = sns.FacetGrid(
                     plot_data,
@@ -771,6 +779,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     k: v for k, v in kwargs.items()
                     if k not in facet_only_keys
                 }
+                hist_kwargs['bins'] = global_bin_edges
 
                 # Map the histogram function to the grid
                 hist.map_dataframe(sns.histplot, x=data_column, **hist_kwargs)
