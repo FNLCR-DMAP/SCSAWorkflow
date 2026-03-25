@@ -824,7 +824,8 @@ def heatmap(adata, column, layer=None, **kwargs):
 def hierarchical_heatmap(adata, annotation, features=None, layer=None,
                          cluster_feature=False, cluster_annotations=False,
                          standard_scale=None, z_score="annotation",
-                         swap_axes=False, rotate_label=False, **kwargs):
+                         swap_axes=False, rotate_label=False, 
+                         show_counts=False, **kwargs):
 
     """
     Generates a hierarchical clustering heatmap and dendrogram.
@@ -865,6 +866,9 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         axis (rows) and features are on the horizontal axis (columns).
         When set to True, features will be on the vertical axis and
         annotations on the horizontal axis. Default is False.
+    show_counts : bool, optional
+        If True, adds the amount of cells to each cluster in the heatmap. 
+        Default is False.
     rotate_label : bool, optional
         If True, rotate x-axis labels by 45 degrees. Default is False.
     **kwargs:
@@ -1029,6 +1033,31 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         'row_linkage': dendro_row_data,
         'col_linkage': dendro_col_data
     }
+
+    if show_counts:
+
+        # Add cell counts to labels
+        # Retrieve the number of cells in each group
+        cell_counts = labels.value_counts()
+        cell_counts = dict(cell_counts)
+
+        # Retrieve the cluster labels from the heatmap
+        cluster_labels = clustergrid.ax_heatmap.get_yticklabels()
+
+        # Append the cell number to each cluster
+        numbered_labels = []
+        for x in cluster_labels:
+            key = int(x.get_text())
+            value = cell_counts[key]
+            numbered_label = f'cluster {key}\n{value} cells'
+            numbered_labels.append(numbered_label)
+
+        # add updated labels with cell counts to the heatmap
+        clustergrid.ax_heatmap.set_yticklabels(numbered_labels)
+        plt.setp(clustergrid.ax_heatmap.get_yticklabels(), rotation=0)
+
+        # adjust so labels don't get cut off
+        clustergrid.ax_heatmap.figure.subplots_adjust(right=0.9, left=0.1)
 
     return mean_intensity, clustergrid, dendrogram_data
 
