@@ -560,10 +560,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         else:
             df[data_column] = np.log1p(df[data_column])
 
+    # If ax is not provided, create a new figure and axes. 
+    # Keep track of whether we created the figure internally
+    created_internal_fig = False
     if ax is not None:
         fig = ax.get_figure()
     else:
         fig, ax = plt.subplots()
+        created_internal_fig = True
 
     axs = []
 
@@ -688,6 +692,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             axs.append(ax)
 
         else:
+            # Only close figures created in this function. If caller provided
+            # an external ax, keep its parent figure open.
+            if created_internal_fig:
+                plt.close(fig)
+
             if not facet:
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)
