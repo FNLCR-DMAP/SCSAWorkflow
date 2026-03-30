@@ -403,6 +403,40 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
+
+def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
+    """
+    Compute consistent bin edges across all data for aligned histograms/facets.
+
+    This helper ensures that when creating multiple histograms (e.g., in
+    together mode or facet plots), all subplots use the same bin boundaries
+    for proper visual comparison.
+
+    Parameters
+    ----------
+    data_series : pd.Series
+        The data to compute bin edges for.
+    bins : int or sequence
+        Number of bins (for numeric data) or bin specification.
+
+    Returns
+    -------
+    array-like
+        Bin edges for numeric data (array of boundary values),
+        or unique categories for categorical data (array of category labels).
+
+    Notes
+    -----
+    For numeric data, uses numpy's histogram_bin_edges to compute consistent
+    boundaries. For categorical data, returns all unique categories present
+    in the data.
+    """
+    if pd.api.types.is_numeric_dtype(data_series):
+        return np.histogram_bin_edges(data_series, bins=bins)
+    else:
+        return data_series.unique()
+
+
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
               x_log_scale=False, y_log_scale=False, facet=False, **kwargs):
@@ -654,12 +688,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         if together:
             # Compute global bin edges based on the entire dataset
-            if pd.api.types.is_numeric_dtype(plot_data[data_column]):
-                global_bin_edges = np.histogram_bin_edges(
-                    plot_data[data_column], bins=kwargs['bins']
-                )
-            else:
-                global_bin_edges = plot_data[data_column].unique()
+            global_bin_edges = _compute_global_bin_edges(
+                plot_data[data_column], kwargs['bins']
+            )
 
             hist_data = []
             # Compute histograms for each group separately and combine them
@@ -766,12 +797,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 facet_ncol = max(1, min(int(facet_ncol), n_groups))
 
                 # Compute global bins so all facets use consistent boundaries.
-                if pd.api.types.is_numeric_dtype(plot_data[data_column]):
-                    global_bin_edges = np.histogram_bin_edges(
-                        plot_data[data_column], bins=kwargs['bins']
-                    )
-                else:
-                    global_bin_edges = plot_data[data_column].unique()
+                global_bin_edges = _compute_global_bin_edges(
+                    plot_data[data_column], kwargs['bins']
+                )
 
                 # Create the FacetGrid for the histogram
                 hist = sns.FacetGrid(
