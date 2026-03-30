@@ -751,7 +751,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     if feature:
                         ax_i.set_title(f'{groups[i]} with Layer: {layer}')
                     else:
-                        ax_array = ax_array.flatten()
+                        ax_i.set_title(f'{groups[i]}')
 
                     # Set axis scales if y_log_scale is True
                     if y_log_scale:
