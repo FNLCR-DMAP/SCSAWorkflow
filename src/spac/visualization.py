@@ -7,6 +7,7 @@ import anndata
 import scanpy as sc
 import math
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
@@ -41,145 +42,124 @@ logging.basicConfig(level=logging.INFO,
 
 plt.rcParams["axes.grid"] = False
 
-def spac_datashader_labeled_heatmap(
-    adata,
-    bins_x=10,
-    bins_y=10,
-    x_labels=None,
-    y_labels=None,
-    log_scale=False,
-    decimals=2,
-    cmap="viridis",
-    title="Spatial Heatmap",
-    show_colorbar=True
+
+def visualize_2D_datashader_heatmap(
+    x,
+    y,
+    bins=100,
+    log_scale=True,
+    theme=None,
+    ax=None,
+    x_axis_title="Component 1",
+    y_axis_title="Component 2",
+    plot_title=None,
+    color_representation=None,
+    show_colorbar=True,
+    **kwargs,
 ):
+    """
+    Visualize 2D data as a datashader-based density heatmap.
 
-    if "spatial" in adata.obsm:
-        coords = adata.obsm["spatial"]
-    elif "X_spatial" in adata.obsm:
-        coords = adata.obsm["X_spatial"]
+    Parameters
+    ----------
+    x : array-like
+        X-coordinates of the data points.
+    y : array-like
+        Y-coordinates of the data points.
+    bins : int, optional (default: 100)
+        Number of bins along each axis for the datashader canvas.
+    log_scale : bool, optional (default: True)
+        Apply log-scale normalization to the colorbar.
+    theme : str, optional
+        Matplotlib colormap name. Defaults to ``'viridis'``.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axes object. If ``None``, a new one is created.
+    x_axis_title : str, optional
+        Label for the x-axis.
+    y_axis_title : str, optional
+        Label for the y-axis.
+    plot_title : str, optional
+        Title for the plot.
+    color_representation : str, optional
+        Description of what the colors represent.
+    show_colorbar : bool, optional (default: True)
+        Whether to display a colorbar.
+    **kwargs
+        Supports ``fig_width`` (default 10) and ``fig_height`` (default 8).
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The figure containing the plot.
+    ax : matplotlib.axes.Axes
+        The axes containing the plot.
+    """
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    # Figure setup
+    fig_width = kwargs.get("fig_width", 10)
+    fig_height = kwargs.get("fig_height", 8)
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     else:
-        raise KeyError("No spatial coordinates found in adata.obsm")
+        fig = ax.figure
 
-    x = coords[:, 0]
-    y = coords[:, 1]
-
-    x = np.asarray(x)
-    y = np.asarray(y)
-
-    mask = np.isfinite(x) & np.isfinite(y)
-    x = x[mask]
-    y = y[mask]
-
-    if len(x) == 0:
-        raise ValueError("No valid points to plot.")
-
+    # Coordinate ranges with small padding
     x_min, x_max = float(x.min()), float(x.max())
     y_min, y_max = float(y.min()), float(y.max())
+    x_pad = (x_max - x_min) * 0.02 or 0.5
+    y_pad = (y_max - y_min) * 0.02 or 0.5
+    x_range = (x_min - x_pad, x_max + x_pad)
+    y_range = (y_min - y_pad, y_max + y_pad)
 
+    # Aggregate points via datashader
     cvs = ds.Canvas(
-        plot_width=bins_x,
-        plot_height=bins_y,
-        x_range=(x_min, x_max),
-        y_range=(y_min, y_max),
+        plot_width=bins,
+        plot_height=bins,
+        x_range=x_range,
+        y_range=y_range,
     )
-
     df = pd.DataFrame({"x": x, "y": y})
-
     agg = cvs.points(df, "x", "y", agg=ds.count())
     grid = agg.values.astype(float)
 
-    if log_scale:
-        data = np.log10(grid + 1)
-        cbar_label = "log10(count + 1)"
-    else:
-        data = grid
-        cbar_label = "Count"
+    # Replace zeros with NaN so background stays white
+    grid[grid == 0] = np.nan
 
+    cmap_name = theme if theme else "viridis"
+    cmap_obj = plt.get_cmap(cmap_name).copy()
+    cmap_obj.set_bad(color="white")
 
-    if x_labels is None:
-        x_labels = [f"X{i}" for i in range(bins_x)]
-
-    if y_labels is None:
-        y_labels = [f"Y{i}" for i in range(bins_y)]
-
-
-    if len(x_labels) != bins_x:
-        raise ValueError("Length of x_labels must equal bins_x")
-
-    if len(y_labels) != bins_y:
-        raise ValueError("Length of y_labels must equal bins_y")
-
-
-    fig, ax = plt.subplots(figsize=(10, 8))
+    norm = LogNorm(vmin=1, vmax=np.nanmax(grid)) if log_scale else None
 
     im = ax.imshow(
-        data,
+        grid,
         origin="lower",
-        cmap=cmap,
+        extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
+        cmap=cmap_obj,
+        norm=norm,
+        aspect="auto",
         interpolation="none",
-        aspect="equal"
     )
-
-    ax.grid(False)
-    ax.grid(False, which="minor")
-
 
     if show_colorbar:
-        cbar = ax.figure.colorbar(im, ax=ax)
+        cbar_label = (
+            color_representation
+            if color_representation
+            else ("Cell Count (Log Scale)" if log_scale else "Cell Count")
+        )
+        cbar = fig.colorbar(im, ax=ax)
         cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
-        cbar.outline.set_visible(False)
 
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+    if plot_title is not None:
+        ax.set_title(plot_title)
 
-    ax.set_xticks(
-        range(bins_x),
-        labels=x_labels,
-        rotation=-30,
-        ha="right",
-        rotation_mode="anchor"
-    )
-
-    ax.set_yticks(range(bins_y), labels=y_labels)
-
-
-    ax.tick_params(
-        top=True,
-        bottom=False,
-        labeltop=True,
-        labelbottom=False
-    )
-
-
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    from matplotlib import ticker
-    fmt = ticker.StrMethodFormatter(f"{{x:.{decimals}f}}")
-
-    threshold = im.norm(data.max()) / 2
-
-
-    for i in range(bins_y):
-        for j in range(bins_x):
-
-            color = "white" if im.norm(data[i, j]) > threshold else "black"
-
-            ax.text(
-                j,
-                i,
-                fmt(data[i, j], None),
-                ha="center",
-                va="center",
-                color=color,
-                fontsize=11,
-                fontweight="bold"
-            )
-
-
-    ax.set_title(title, pad=20)
-
-    fig.tight_layout()
-    return fig
+    return fig, ax
 
 def heatmap_datashader(x, y, labels=None, theme=None, ax=None,
                         x_axis_title="Component 1", y_axis_title="Component 2",
