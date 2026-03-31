@@ -8,6 +8,7 @@ import scanpy as sc
 import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+from matplotlib.patches import Patch
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
@@ -42,10 +43,11 @@ logging.basicConfig(level=logging.INFO,
 
 plt.rcParams["axes.grid"] = False
 
-
+ 
 def visualize_2D_datashader_heatmap(
     x,
     y,
+    labels=None,
     bins=100,
     log_scale=True,
     theme=None,
@@ -58,7 +60,7 @@ def visualize_2D_datashader_heatmap(
     **kwargs,
 ):
     """
-    Visualize 2D data as a datashader-based density heatmap.
+    Visualize 2D data as a datashader-based heatmap.
 
     Parameters
     ----------
@@ -66,12 +68,16 @@ def visualize_2D_datashader_heatmap(
         X-coordinates of the data points.
     y : array-like
         Y-coordinates of the data points.
+    labels : array-like, optional
+        Categorical labels (``pd.Categorical`` or categorical Series).
+        Continuous labels are not supported.
     bins : int, optional (default: 100)
         Number of bins along each axis for the datashader canvas.
     log_scale : bool, optional (default: True)
         Apply log-scale normalization to the colorbar.
     theme : str, optional
         Matplotlib colormap name. Defaults to ``'viridis'``.
+        Ignored when categorical ``labels`` are provided.
     ax : matplotlib.axes.Axes, optional
         Matplotlib axes object. If ``None``, a new one is created.
     x_axis_title : str, optional
@@ -83,10 +89,10 @@ def visualize_2D_datashader_heatmap(
     color_representation : str, optional
         Description of what the colors represent.
     show_colorbar : bool, optional (default: True)
-        Whether to display a colorbar.
+        Whether to display a colorbar or legend.
     **kwargs
         Supports ``fig_width`` (default 10) and ``fig_height`` (default 8).
-
+ 
     Returns
     -------
     fig : matplotlib.figure.Figure
@@ -94,19 +100,19 @@ def visualize_2D_datashader_heatmap(
     ax : matplotlib.axes.Axes
         The axes containing the plot.
     """
-
+ 
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-
+ 
     # Figure setup
     fig_width = kwargs.get("fig_width", 10)
     fig_height = kwargs.get("fig_height", 8)
-
+ 
     if ax is None:
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     else:
         fig = ax.figure
-
+ 
     # Coordinate ranges with small padding
     x_min, x_max = float(x.min()), float(x.max())
     y_min, y_max = float(y.min()), float(y.max())
@@ -114,51 +120,130 @@ def visualize_2D_datashader_heatmap(
     y_pad = (y_max - y_min) * 0.02 or 0.5
     x_range = (x_min - x_pad, x_max + x_pad)
     y_range = (y_min - y_pad, y_max + y_pad)
-
-    # Aggregate points via datashader
+ 
+    # Datashader canvas
     cvs = ds.Canvas(
         plot_width=bins,
         plot_height=bins,
         x_range=x_range,
         y_range=y_range,
     )
-    df = pd.DataFrame({"x": x, "y": y})
-    agg = cvs.points(df, "x", "y", agg=ds.count())
-    grid = agg.values.astype(float)
-
-    # Replace zeros with NaN so background stays white
-    grid[grid == 0] = np.nan
-
-    cmap_name = theme if theme else "viridis"
-    cmap_obj = plt.get_cmap(cmap_name).copy()
-    cmap_obj.set_bad(color="white")
-
-    norm = LogNorm(vmin=1, vmax=np.nanmax(grid)) if log_scale else None
-
-    im = ax.imshow(
-        grid,
-        origin="lower",
-        extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
-        cmap=cmap_obj,
-        norm=norm,
-        aspect="auto",
-        interpolation="none",
-    )
-
-    if show_colorbar:
-        cbar_label = (
-            color_representation
-            if color_representation
-            else ("Cell Count (Log Scale)" if log_scale else "Cell Count")
+ 
+    if labels is not None:
+        labels = np.asarray(labels)
+        unique_cats = pd.Categorical(labels).categories
+ 
+        # Color palette matching visualize_2D_scatter
+        cmap1 = plt.get_cmap("tab20")
+        cmap2 = plt.get_cmap("tab20b")
+        cmap3 = plt.get_cmap("tab20c")
+        all_colors = list(cmap1.colors) + list(cmap2.colors) + list(cmap3.colors)
+        cat_colors = all_colors[: len(unique_cats)]
+ 
+        # Build RGBA composite from per-category aggregations
+        composite = np.zeros((bins, bins, 4), dtype=float)
+ 
+        for idx, cat in enumerate(unique_cats):
+            cat_mask = labels == cat
+            df_cat = pd.DataFrame({"x": x[cat_mask], "y": y[cat_mask]})
+ 
+            if len(df_cat) == 0:
+                continue
+ 
+            agg = cvs.points(df_cat, "x", "y", agg=ds.count())
+            grid = agg.values.astype(float)
+ 
+            # Normalise counts to [0, 1] for alpha
+            max_val = grid.max()
+            if max_val > 0:
+                alpha = (
+                    np.log1p(grid) / np.log1p(max_val) if log_scale
+                    else grid / max_val
+                )
+            else:
+                alpha = np.zeros_like(grid)
+ 
+            r, g, b = cat_colors[idx][:3]
+            layer = np.zeros((bins, bins, 4))
+            layer[..., 0] = r
+            layer[..., 1] = g
+            layer[..., 2] = b
+            layer[..., 3] = alpha
+ 
+            # Additive compositing
+            composite[..., :3] += layer[..., :3] * layer[..., 3:4]
+            composite[..., 3] = np.maximum(composite[..., 3], layer[..., 3])
+ 
+        # Normalise RGB where alpha > 0
+        nonzero = composite[..., 3] > 0
+        composite[..., :3][nonzero] /= composite[..., 3:4][nonzero]
+        composite = np.clip(composite, 0, 1)
+ 
+        ax.imshow(
+            composite,
+            origin="lower",
+            extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
+            aspect="auto",
+            interpolation="none",
         )
-        cbar = fig.colorbar(im, ax=ax)
-        cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
-
+ 
+        # Legend
+        if show_colorbar:
+            legend_handles = [
+                Patch(facecolor=cat_colors[i], label=str(cat))
+                for i, cat in enumerate(unique_cats)
+            ]
+            legend_title = (
+                f"Color: {color_representation}"
+                if color_representation
+                else None
+            )
+            ax.legend(
+                handles=legend_handles,
+                loc="best",
+                bbox_to_anchor=(1.25, 1),
+                title=legend_title,
+            )
+ 
+    else:
+        # Density heatmap (no labels)
+        df = pd.DataFrame({"x": x, "y": y})
+        agg = cvs.points(df, "x", "y", agg=ds.count())
+        grid = agg.values.astype(float)
+ 
+        # Zeros → NaN so background stays white
+        grid[grid == 0] = np.nan
+ 
+        cmap_name = theme if theme else "viridis"
+        cmap_obj = plt.get_cmap(cmap_name).copy()
+        cmap_obj.set_bad(color="white")
+ 
+        norm = LogNorm(vmin=1, vmax=np.nanmax(grid)) if log_scale else None
+ 
+        im = ax.imshow(
+            grid,
+            origin="lower",
+            extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
+            cmap=cmap_obj,
+            norm=norm,
+            aspect="auto",
+            interpolation="none",
+        )
+ 
+        if show_colorbar:
+            cbar_label = (
+                color_representation
+                if color_representation
+                else ("Cell Count (Log Scale)" if log_scale else "Cell Count")
+            )
+            cbar = fig.colorbar(im, ax=ax)
+            cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
+ 
     ax.set_xlabel(x_axis_title)
     ax.set_ylabel(y_axis_title)
     if plot_title is not None:
         ax.set_title(plot_title)
-
+ 
     return fig, ax
 
 def heatmap_datashader(x, y, labels=None, theme=None, ax=None,
