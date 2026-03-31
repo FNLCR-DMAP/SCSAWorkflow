@@ -161,7 +161,7 @@ def visualize_2D_datashader_heatmap(
 
     return fig, ax
 
-def heatmap_datashader(x, y, labels=None, theme=None,
+def heatmap_datashader(x, y, labels=None, theme=None, ax=None,
                         x_axis_title="Component 1", y_axis_title="Component 2",
                         plot_title=None, **kwargs):
     """
@@ -177,6 +177,8 @@ def heatmap_datashader(x, y, labels=None, theme=None,
         Categorical labels for subgrouping data.
     theme : str, optional, default='viridis'
         Colormap theme for visualization.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axis object. If None, a new one is created.
     x_axis_title : str, optional, default='Component 1'
         Label for the x-axis.
     y_axis_title : str, optional, default='Component 2'
@@ -261,12 +263,16 @@ def heatmap_datashader(x, y, labels=None, theme=None,
         agg = canvas.points(coords, x="x", y="y", agg=ds.count())
         img = tf.shade(agg, cmap=cmap).to_pil()
 
-        fig, ax = plt.subplots(
-            figsize=(
-                canvas_kwargs["plot_width"] / 100,
-                canvas_kwargs["plot_height"] / 100
+        if ax is None:
+            fig, ax = plt.subplots(
+                figsize=(
+                    canvas_kwargs["plot_width"] / 100,
+                    canvas_kwargs["plot_height"] / 100
+                )
             )
-        )
+        else:
+            fig = ax.figure
+
         ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
         ax.set_title(plot_title if plot_title else "Density Plot")
         ax.set_xlabel(x_axis_title)
