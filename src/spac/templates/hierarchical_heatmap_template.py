@@ -42,8 +42,9 @@ def run_from_json(
     json_path : str, Path, or dict
         Path to JSON file, JSON string, or parameter dictionary
     save_results_flag : bool, optional
-        Whether to save results to file. If False, returns the figure and
-        dataframe directly for in-memory workflows. Default is True.
+        Whether to save results to file. If False, returns a tuple of
+        (clustergrid_figure, mean_intensity_dataframe) for in-memory
+        workflows (e.g., Shiny server). Default is True.
     show_plot : bool, optional
         Whether to display the plot. Default is True.
     output_dir : str or Path, optional
@@ -51,9 +52,10 @@ def run_from_json(
 
     Returns
     -------
-    dict or DataFrame
+    dict or tuple
         If save_results_flag=True: Dictionary of saved file paths
-        If save_results_flag=False: The mean intensity dataframe
+        If save_results_flag=False: Tuple of (figure, mean_intensity_df)
+            where figure is the matplotlib Figure from the ClusterGrid
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
@@ -185,9 +187,11 @@ def run_from_json(
         print("Hierarchical Heatmap completed successfully.")
         return saved_files
     else:
-        # Return the dataframe directly for in-memory workflows
-        print("Returning mean intensity dataframe (not saving to file)")
-        return mean_intensity
+        # Return the ClusterGrid and dataframe for in-memory workflows
+        # Returns ClusterGrid (not .fig) so consumers can access
+        # .ax_heatmap for post-processing (e.g. label rotation).
+        print("Returning (clustergrid, mean_intensity_df) for in-memory use")
+        return clustergrid, mean_intensity
 
 
 # CLI interface
