@@ -437,6 +437,83 @@ def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
         return data_series.unique()
 
 
+def _parse_histogram_layout_kwargs(kwargs):
+    """Extract histogram-internal layout hints and strip non-histplot keys."""
+    facet_ncol = kwargs.pop('facet_ncol', None)
+    target_fig_width = kwargs.pop('target_fig_width', None)
+    target_fig_height = kwargs.pop('target_fig_height', None)
+
+    return facet_ncol, target_fig_width, target_fig_height
+
+
+def _derive_facet_geometry(
+    n_groups,
+    facet_ncol,
+    target_fig_width,
+    target_fig_height,
+    vertical_threshold=4,
+    default_height=3.2,
+    default_aspect=1.25,
+    min_panel_width=1.8,
+    min_panel_height=1.6,
+    min_aspect=0.6,
+    max_aspect=2.0,
+):
+    """Derive FacetGrid column count and panel geometry."""
+    if facet_ncol is not None:
+        try:
+            facet_ncol = int(facet_ncol)
+        except (TypeError, ValueError):
+            facet_ncol = None
+
+    if facet_ncol is None:
+        if n_groups <= vertical_threshold:
+            facet_ncol = 1
+        else:
+            facet_ncol = int(np.ceil(np.sqrt(n_groups)))
+
+    facet_ncol = max(1, min(int(facet_ncol), n_groups))
+    facet_height = default_height
+    facet_aspect = default_aspect
+
+    if target_fig_width is not None and target_fig_height is not None:
+        try:
+            target_fig_width = float(target_fig_width)
+            target_fig_height = float(target_fig_height)
+        except (TypeError, ValueError):
+            target_fig_width = None
+            target_fig_height = None
+
+    if (
+        target_fig_width is not None and
+        target_fig_height is not None and
+        target_fig_width > 0 and
+        target_fig_height > 0
+    ):
+        nrow = int(np.ceil(n_groups / facet_ncol))
+        panel_width = max(target_fig_width / facet_ncol, min_panel_width)
+        panel_height = max(target_fig_height / nrow, min_panel_height)
+        facet_height = panel_height
+        facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
+
+    return facet_ncol, facet_height, facet_aspect
+
+
+def _resolve_histogram_axis_labels(data_column, x_log_scale, y_log_scale, stat):
+    """Resolve histogram axis labels from scaling and stat settings."""
+    xlabel = f'log({data_column})' if x_log_scale else data_column
+    ylabel_map = {
+        'count': 'Count',
+        'frequency': 'Frequency',
+        'density': 'Density',
+        'probability': 'Probability'
+    }
+    ylabel = ylabel_map.get(stat, 'Count')
+    if y_log_scale:
+        ylabel = f'log({ylabel})'
+    return xlabel, ylabel
+
+
 def histogram(adata, feature=None, annotation=None, layer=None,
               group_by=None, together=False, ax=None,
               x_log_scale=False, y_log_scale=False, facet=False, **kwargs):
@@ -517,16 +594,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
             If not provided, the binning will be determined automatically.
             Note, don't pass a numpy array, only python lists or strs/numbers.
-        When `facet=True`, these optional keys can be passed via `kwargs`
-        to customize the FacetGrid layout:
+        When `facet=True`, this optional key can be passed via `kwargs`
+        to customize FacetGrid layout:
         - `facet_ncol`: int or None, number of facet columns.
             If None, the function uses one column for small group counts and
             switches to a compact grid for many groups.
-        - `facet_vertical_threshold`: int, max number of groups that should
-            stay in a vertical single-column layout when `facet_ncol` is None.
-            Default is 4.
-        - `facet_height`: float, facet height in inches. Default is 3.2.
-        - `facet_aspect`: float, facet width/height ratio. Default is 1.25.
+        Internal-only sizing hints used by template wrappers:
+        - `target_fig_width`: float, intended final figure width in inches.
+        - `target_fig_height`: float, intended final figure height in inches.
 
     Returns
     -------
@@ -627,6 +702,12 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # If not, the in house algorithm will compute the number of bins
     if 'bins' not in kwargs:
         kwargs['bins'] = cal_bin_num(num_rows)
+
+    # Parse histogram-internal layout kwargs and remove them from kwargs
+    # so they never leak to seaborn's histplot calls.
+    facet_ncol, target_fig_width, target_fig_height = (
+        _parse_histogram_layout_kwargs(kwargs)
+    )
 
     # Function to calculate histogram data
     def calculate_histogram(data, bins, bin_edges=None):
@@ -752,49 +833,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                         ax_i.set_title(f'{groups[i]} with Layer: {layer}')
                     else:
                         ax_i.set_title(f'{groups[i]}')
-
-                    # Set axis scales if y_log_scale is True
-                    if y_log_scale:
-                        ax_i.set_yscale('log')
-
-                    # Adjust x-axis label if x_log_scale is True
-                    if x_log_scale:
-                        xlabel = f'log({data_column})'
-                    else:
-                        xlabel = data_column
-                    ax_i.set_xlabel(xlabel)
-
-                    # Adjust y-axis label based on 'stat' parameter
-                    stat = kwargs.get('stat', 'count')
-                    ylabel_map = {
-                        'count': 'Count',
-                        'frequency': 'Frequency',
-                        'density': 'Density',
-                        'probability': 'Probability'
-                    }
-                    ylabel = ylabel_map.get(stat, 'Count')
-                    if y_log_scale:
-                        ylabel = f'log({ylabel})'
-                    ax_i.set_ylabel(ylabel)
                     axs.append(ax_i)
 
             else:   # Facet option
-                # Set default values for facet parameters if not provided in kwargs
-                facet_ncol = kwargs.get('facet_ncol', None)
-                facet_vertical_threshold = kwargs.get(
-                    'facet_vertical_threshold', 4
+                facet_ncol, facet_height, facet_aspect = _derive_facet_geometry(
+                    n_groups=n_groups,
+                    facet_ncol=facet_ncol,
+                    target_fig_width=target_fig_width,
+                    target_fig_height=target_fig_height,
                 )
-                facet_height = kwargs.get('facet_height', 3.2)
-                facet_aspect = kwargs.get('facet_aspect', 1.25)
-
-                # Default: vertical layout for a few groups, grid for many.
-                if facet_ncol is None:
-                    if n_groups <= facet_vertical_threshold:
-                        facet_ncol = 1
-                    else:
-                        facet_ncol = int(np.ceil(np.sqrt(n_groups)))
-
-                facet_ncol = max(1, min(int(facet_ncol), n_groups))
 
                 # Compute global bins so all facets use consistent boundaries.
                 global_bin_edges = _compute_global_bin_edges(
@@ -812,17 +859,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     sharey=True
                 )
 
-                # Remove facet-specific keys from kwargs to avoid passing them to histplot
-                facet_only_keys = {
-                    'facet_ncol',
-                    'facet_vertical_threshold',
-                    'facet_height',
-                    'facet_aspect',
-                }
-                hist_kwargs = {
-                    k: v for k, v in kwargs.items()
-                    if k not in facet_only_keys
-                }
+                hist_kwargs = kwargs.copy()
                 # For numeric data, pass global bin edges to ensure consistent binning across facets.
                 if pd.api.types.is_numeric_dtype(plot_data[data_column]):
                     hist_kwargs['bins'] = global_bin_edges.tolist()
@@ -877,36 +914,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_title(f'Layer: {layer}')
         axs.append(ax)
 
+    stat = kwargs.get('stat', 'count')
+    xlabel, ylabel = _resolve_histogram_axis_labels(
+        data_column=data_column,
+        x_log_scale=x_log_scale,
+        y_log_scale=y_log_scale,
+        stat=stat,
+    )
+
     axes = axs if isinstance(axs, (list, np.ndarray)) else [axs]
     for ax in axes:
         # Set axis scales if y_log_scale is True
         if y_log_scale:
             ax.set_yscale('log')
 
-        # Adjust x-axis label if x_log_scale is True
-        if x_log_scale:
-            xlabel = f'log({data_column})'
-        else:
-            xlabel = data_column
         if facet:
             ax.set_xlabel('')
-        else:
-            ax.set_xlabel(xlabel)
-
-        # Adjust y-axis label based on 'stat' parameter
-        stat = kwargs.get('stat', 'count')
-        ylabel_map = {
-            'count': 'Count',
-            'frequency': 'Frequency',
-            'density': 'Density',
-            'probability': 'Probability'
-        }
-        ylabel = ylabel_map.get(stat, 'Count')
-        if y_log_scale:
-            ylabel = f'log({ylabel})'
-        if facet:
             ax.set_ylabel('')
         else:
+            ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
 
     # Set a common x and y label for the entire figure if facet is True
