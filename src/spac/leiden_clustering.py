@@ -20,13 +20,24 @@ def preprocess(adata):
     sc.tl.umap(ad)
     return ad
 
-def leiden_only_clustering(adata):
+def leiden_only_clustering(adata, resolution=1.0, random_state=0, n_iterations=-1, key_added="leiden_clusters"):
     ad = adata.copy()
-    sc.tl.leiden(ad, key_added="leiden_clusters")
+    sc.tl.leiden(ad, 
+                 resolution=resolution,
+                 random_state=random_state,
+                 n_iterations=n_iterations,
+                 key_added=key_added
+                )
     return ad
 
-def plot(adata):
-    sc.pl.umap(adata, color="leiden_clusters")
+def plot(adata, color="leiden_clusters", title=None, save=None, palette=None, size=None):
+    sc.pl.umap(adata,
+               color=color,
+               title=title,
+               save=save,
+               palette=palette,
+               size=size
+              )
 
 ''' plan:
         - feature addition
