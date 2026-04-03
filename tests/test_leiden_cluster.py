@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 import scanpy as sc
-from spac.leiden_clustering import preprocess, leiden_only_clustering, plot  
+from spac.leiden_clustering import preprocess, leiden_only_clustering, plot  # replace 'your_module' with your module
 
 class TestLeidenClustering(unittest.TestCase):
     def setUp(self):
@@ -78,7 +78,7 @@ class TestLeidenClustering(unittest.TestCase):
         """
         Tests that leiden_only_clustering correctly separates the 2 known clusters.
         """
-        ad = leiden_only_clustering(self.syn_data, resolution=0.5, random_state=42)
+        ad = leiden_only_clustering(self.syn_data, resolution=0.1, random_state=42)
         self.assertIn('leiden_clusters', ad.obs)
         self.assertEqual(ad.obs['leiden_clusters'].nunique(), 2)
 

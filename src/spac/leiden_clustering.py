@@ -22,6 +22,10 @@ def preprocess(adata):
 
 def leiden_only_clustering(adata, resolution=1.0, random_state=0, n_iterations=-1, key_added="leiden_clusters"):
     ad = adata.copy()
+    # Preprocess if neighbors haven't been computed yet
+    if 'neighbors' not in ad.uns:
+        ad = preprocess(ad)
+
     sc.tl.leiden(ad, 
                  resolution=resolution,
                  random_state=random_state,
