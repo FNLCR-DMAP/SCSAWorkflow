@@ -107,6 +107,7 @@ def run_from_json(
     take_X_log = params.get("Take_X_Log", False)
     take_Y_log = params.get("Take_Y_log", False)
     multiple = params.get("Multiple", "dodge")
+    element = params.get("Element", "bars")
     shrink = params.get("Shrink_Number", 1)
     bins = params.get("Bins", "auto")
     alpha = params.get("Bin_Transparency", 0.75)
@@ -182,6 +183,33 @@ def run_from_json(
                 "Setting bin number calculation to auto."
             )
 
+    # Validate enum-like plotting controls after bins validation.
+    allowed_multiple = {"layer", "dodge", "stack", "fill"}
+    allowed_element = {"bars", "step", "poly"}
+    allowed_stat = {
+        "count", "frequency", "density", "probability",
+        "proportion", "percent"
+    }
+    multiple = str(multiple).strip().lower()
+    element = str(element).strip().lower()
+    stat = str(stat).strip().lower()
+    if multiple not in allowed_multiple:
+        raise ValueError(
+            f'Multiple must be one of {sorted(allowed_multiple)}. '
+            f'Received "{multiple}".'
+        )
+    if element not in allowed_element:
+        raise ValueError(
+            f'Element must be one of {sorted(allowed_element)}. '
+            f'Received "{element}".'
+        )
+    if stat not in allowed_stat:
+        raise ValueError(
+            f'Stat must be one of {sorted(allowed_stat)}. '
+            f'Received "{stat}".'
+        )
+
+    # Validate x-axis label rotation
     if (x_rotate < 0) or (x_rotate > 360):
         raise ValueError(
             f'The X label rotation should fall within 0 to 360 degree. '
@@ -224,6 +252,7 @@ def run_from_json(
         y_log_scale=take_Y_log,
         facet=facet,
         multiple=multiple,
+        element=element,
         shrink=shrink,
         bins=bins,
         alpha=alpha,

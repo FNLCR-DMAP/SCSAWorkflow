@@ -601,6 +601,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             * "step": Creates a step line plot without bars.
             * "poly": Creates a polygon where the bottom edge represents
                the x-axis and the top edge the histogram's bins.
+        - `shrink`: Scale bar width relative to each bin's width.
+            Useful for reducing overlap with `multiple="dodge"`.
+        - `alpha`: Transparency for histogram artists.
+            0 is fully transparent and 1 is fully opaque.
         - `log_scale`: Determines if the data should be plotted on
            a logarithmic scale.
         - `stat`: Determines the statistical transformation to use on the data
