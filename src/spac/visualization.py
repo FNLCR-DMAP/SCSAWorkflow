@@ -438,10 +438,34 @@ def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
 
 
 def _parse_histogram_layout_kwargs(kwargs):
-    """Extract histogram-internal layout hints and strip non-histplot keys."""
+    """Extract histogram-internal layout hints and strip non-histplot keys.
+
+    This parser is intentionally permissive for direct API usage: values that
+    cannot be interpreted are normalized to None so downstream auto-layout can
+    take over.
+    """
     facet_ncol = kwargs.pop('facet_ncol', None)
     target_fig_width = kwargs.pop('target_fig_width', None)
     target_fig_height = kwargs.pop('target_fig_height', None)
+
+    # Normalize only; template-level validation handles strict checks.
+    if isinstance(facet_ncol, str):
+        facet_ncol_str = facet_ncol.strip().lower()
+        if facet_ncol_str in {'auto', 'none', ''}:
+            facet_ncol = None
+        else:
+            try:
+                facet_ncol = int(facet_ncol)
+            except ValueError:
+                facet_ncol = None
+
+    if facet_ncol is not None:
+        try:
+            facet_ncol = int(facet_ncol)
+        except (TypeError, ValueError):
+            facet_ncol = None
+        if facet_ncol <= 0:
+            facet_ncol = None
 
     return facet_ncol, target_fig_width, target_fig_height
 
@@ -596,8 +620,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             Note, don't pass a numpy array, only python lists or strs/numbers.
         When `facet=True`, this optional key can be passed via `kwargs`
         to customize FacetGrid layout:
-        - `facet_ncol`: int or None, number of facet columns.
-            If None, the function uses one column for small group counts and
+        - `facet_ncol`: positive int or "auto", number of facet columns.
+            If "auto", the function uses one column for small group counts and
             switches to a compact grid for many groups.
         Internal-only sizing hints used by template wrappers:
         - `target_fig_width`: float, intended final figure width in inches.
@@ -836,6 +860,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     axs.append(ax_i)
 
             else:   # Facet option
+                # Derive facet geometry based on group count and layout hints
                 facet_ncol, facet_height, facet_aspect = _derive_facet_geometry(
                     n_groups=n_groups,
                     facet_ncol=facet_ncol,

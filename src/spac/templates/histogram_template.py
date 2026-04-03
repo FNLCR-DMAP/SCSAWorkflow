@@ -113,6 +113,8 @@ def run_from_json(
     stat = params.get("Stat", "count")
     x_rotate = params.get("X_Axis_Label_Rotation", 0)
     histplot_by = params.get("Plot_By", "Annotation")
+    facet = params.get("Facet", False)
+    facet_ncol = params.get("Facet_Ncol", "auto")
 
     # Close all existing figures to prevent extra plots
     plt.close('all')
@@ -186,6 +188,24 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
+    # Validate facet_ncol, allowing for "auto" or positive integers
+    facet_ncol = text_to_value(
+        facet_ncol,
+        default_none_text="auto",
+        value_to_convert_to="auto"
+    )
+    if facet_ncol != "auto":
+        facet_ncol = text_to_value(
+            facet_ncol,
+            to_int=True,
+            param_name="Facet_Ncol"
+        )
+        if facet_ncol <= 0:
+            raise ValueError(
+                f'Facet_Ncol must be a positive integer or "auto". '
+                f'Received "{facet_ncol}".'
+            )
+
     # Initialize the x-variable before the loop
     if histplot_by == "Annotation":
         x_var = annotation
@@ -202,11 +222,15 @@ def run_from_json(
         ax=None,
         x_log_scale=take_X_log,
         y_log_scale=take_Y_log,
+        facet=facet,
         multiple=multiple,
         shrink=shrink,
         bins=bins,
         alpha=alpha,
-        stat=stat
+        stat=stat,
+        facet_ncol=facet_ncol,
+        target_fig_width=fig_width,
+        target_fig_height=fig_height,
     )
 
     fig = result["fig"]
