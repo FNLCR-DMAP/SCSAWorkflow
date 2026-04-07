@@ -183,6 +183,14 @@ def run_from_json(
                 "Setting bin number calculation to auto."
             )
 
+    # Validate multiple parameter based on together
+    if together is False and multiple:
+        multiple = "dodge"
+        logger.warning(
+            "Multiple should not be used when Together is False. "
+            "Setting Multiple to 'dodge'."
+        )
+
     # Validate enum-like plotting controls after bins validation.
     allowed_multiple = {"layer", "dodge", "stack", "fill"}
     allowed_element = {"bars", "step", "poly"}
@@ -216,6 +224,12 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
+    # Validate that together and facet are not both True
+    if together and facet:
+        raise ValueError(
+            'Together and Facet cannot both be True. Please set one to False.'
+        )
+    
     # Validate facet_ncol, allowing for "auto" or positive integers
     facet_ncol = text_to_value(
         facet_ncol,
@@ -302,8 +316,13 @@ def run_from_json(
 
         # Rotate x labels
         ax.tick_params(axis='x', rotation=x_rotate)
+    
+    # Process x-axis label for faceted plots
+    if facet:
+        x_label = f"log({x_var})" if take_X_log else x_var
+        fig.supxlabel(x_label, rotation=x_rotate)
 
-    # Set titles based on group_by
+    # Set titles based on group_by and facet
     if text_to_value(group_by):
         if together:
             for ax in axes:
@@ -320,9 +339,16 @@ def run_from_json(
                     "Number of axes does not match number of "
                     "groups. Titles may not correspond correctly."
                 )
+            if facet:
+                fig.suptitle(
+                    f'Histogram of "{x_var}" faceted by "{group_by}"'
+                )
+                ax_title_prefix = f'Group'
+            else:
+                ax_title_prefix = f'Histogram of "{x_var}" for group'
             for ax, grp in zip(axes, unique_groups):
                 ax.set_title(
-                    f'Histogram of "{x_var}" for group: "{grp}"'
+                    f'{ax_title_prefix}: "{grp}"'
                 )
     else:
         for ax in axes:

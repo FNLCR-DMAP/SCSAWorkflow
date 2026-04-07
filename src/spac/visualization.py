@@ -530,7 +530,9 @@ def _resolve_histogram_axis_labels(data_column, x_log_scale, y_log_scale, stat):
         'count': 'Count',
         'frequency': 'Frequency',
         'density': 'Density',
-        'probability': 'Probability'
+        'probability': 'Probability',
+        "proportion": "Proportion",
+        "percent": "Percent"
     }
     ylabel = ylabel_map.get(stat, 'Count')
     if y_log_scale:
