@@ -405,8 +405,8 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
 
 def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
-    """
-    Compute consistent bin edges across all data for aligned histograms/facets.
+    """Compute global bin edges for a data series based on its type and the 
+    bins parameter.
 
     This helper ensures that when creating multiple histograms (e.g., in
     together mode or facet plots), all subplots use the same bin boundaries
@@ -414,22 +414,14 @@ def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
 
     Parameters
     ----------
-    data_series : pd.Series
-        The data to compute bin edges for.
-    bins : int or sequence
-        Number of bins (for numeric data) or bin specification.
+    data_series (pd.Series): The data to compute bin edges for.
+    bins (int or sequence): Number of bins (for numeric data) or bin specification.
 
     Returns
     -------
-    array-like
+    array-like: 
         Bin edges for numeric data (array of boundary values),
         or unique categories for categorical data (array of category labels).
-
-    Notes
-    -----
-    For numeric data, uses numpy's histogram_bin_edges to compute consistent
-    boundaries. For categorical data, returns all unique categories present
-    in the data.
     """
     if pd.api.types.is_numeric_dtype(data_series):
         return np.histogram_bin_edges(data_series, bins=bins)
@@ -729,20 +721,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     num_rows = plot_data.shape[0]
 
-    # Check if bins is being passed or set to None or "auto" in kwargs.
-    # If not, the in house algorithm will compute the number of bins
+    # Check if bins is not being passed or set to None or "auto" in kwargs.
+    # If so, the in house algorithm will compute the number of bins
     bins_kwarg = kwargs.get('bins', None)
-    use_default_bins = False
-    if 'bins' not in kwargs:
-        use_default_bins = True
-    elif bins_kwarg is None:
-        use_default_bins = True
-    elif isinstance(bins_kwarg, str):
-        bins_kwarg_norm = bins_kwarg.strip().lower()
-        if bins_kwarg_norm in {'', 'auto', 'none'}:
-            use_default_bins = True
-
-    if use_default_bins:
+    if isinstance(bins_kwarg, str):
+        bins_kwarg = bins_kwarg.strip().lower()
+        if bins_kwarg in {'', 'auto', 'none'}:
+            bins_kwarg = None
+    if bins_kwarg is None:
         kwargs['bins'] = cal_bin_num(num_rows)
 
     # Parse histogram-internal layout kwargs and remove them from kwargs
