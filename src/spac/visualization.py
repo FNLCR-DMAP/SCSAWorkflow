@@ -622,7 +622,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             Can be a number (indicating the number of bins) or a list
             (indicating bin edges). For example, `bins=10` will create 10 bins,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
-            If not provided, the binning will be determined automatically.
+            If not provided, or if passed as `None`/`"auto"`/`"none"`,
+            the binning will be determined automatically using the Rice rule.
             Note, don't pass a numpy array, only python lists or strs/numbers.
         When `facet=True`, this optional key can be passed via `kwargs`
         to customize FacetGrid layout:
@@ -728,9 +729,20 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     num_rows = plot_data.shape[0]
 
-    # Check if bins is being passed
+    # Check if bins is being passed or set to None or "auto" in kwargs.
     # If not, the in house algorithm will compute the number of bins
+    bins_kwarg = kwargs.get('bins', None)
+    use_default_bins = False
     if 'bins' not in kwargs:
+        use_default_bins = True
+    elif bins_kwarg is None:
+        use_default_bins = True
+    elif isinstance(bins_kwarg, str):
+        bins_kwarg_norm = bins_kwarg.strip().lower()
+        if bins_kwarg_norm in {'', 'auto', 'none'}:
+            use_default_bins = True
+
+    if use_default_bins:
         kwargs['bins'] = cal_bin_num(num_rows)
 
     # Parse histogram-internal layout kwargs and remove them from kwargs
@@ -818,13 +830,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
-
-            ''' 
-            TODO: Recheck the binning logic.
-            I think we may need to pass the global_bin_edges to seaborn. 
-            I think the current implementation is actually doing a 'double-binning',
-            which may not be desirable. 
-            '''
 
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
