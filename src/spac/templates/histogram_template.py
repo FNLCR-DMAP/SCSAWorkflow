@@ -224,11 +224,17 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
-    # Validate that together and facet are not both True
-    if together and facet:
-        raise ValueError(
-            'Together and Facet cannot both be True. Please set one to False.'
-        )
+    # Validate facet, group_by, and together parameters for logical consistency
+    if facet: 
+        if group_by is None:
+            raise ValueError(
+                'Facet is True but Group_by is not specified. '
+                'Please specify Group_by when using Facet.'
+            )
+        if together:
+            raise ValueError(
+                'Together and Facet cannot both be True. Please set one to False.'
+            )
     
     # Validate facet_ncol, allowing for "auto" or positive integers
     facet_ncol = text_to_value(
@@ -272,8 +278,8 @@ def run_from_json(
         alpha=alpha,
         stat=stat,
         facet_ncol=facet_ncol,
-        target_fig_width=fig_width,
-        target_fig_height=fig_height,
+        facet_fig_width=fig_width,
+        facet_fig_height=fig_height,
     )
 
     fig = result["fig"]

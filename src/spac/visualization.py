@@ -437,8 +437,8 @@ def _parse_histogram_layout_kwargs(kwargs):
     take over.
     """
     facet_ncol = kwargs.pop('facet_ncol', None)
-    target_fig_width = kwargs.pop('target_fig_width', None)
-    target_fig_height = kwargs.pop('target_fig_height', None)
+    facet_fig_width = kwargs.pop('facet_fig_width', None)
+    facet_fig_height = kwargs.pop('facet_fig_height', None)
 
     # Normalize only; template-level validation handles strict checks.
     if isinstance(facet_ncol, str):
@@ -459,14 +459,14 @@ def _parse_histogram_layout_kwargs(kwargs):
         if facet_ncol <= 0:
             facet_ncol = None
 
-    return facet_ncol, target_fig_width, target_fig_height
+    return facet_ncol, facet_fig_width, facet_fig_height
 
 
 def _derive_facet_geometry(
     n_groups,
     facet_ncol,
-    target_fig_width,
-    target_fig_height,
+    facet_fig_width,
+    facet_fig_height,
     vertical_threshold=4,
     default_height=3.2,
     default_aspect=1.25,
@@ -492,23 +492,23 @@ def _derive_facet_geometry(
     facet_height = default_height
     facet_aspect = default_aspect
 
-    if target_fig_width is not None and target_fig_height is not None:
+    if facet_fig_width is not None and facet_fig_height is not None:
         try:
-            target_fig_width = float(target_fig_width)
-            target_fig_height = float(target_fig_height)
+            facet_fig_width = float(facet_fig_width)
+            facet_fig_height = float(facet_fig_height)
         except (TypeError, ValueError):
-            target_fig_width = None
-            target_fig_height = None
+            facet_fig_width = None
+            facet_fig_height = None
 
     if (
-        target_fig_width is not None and
-        target_fig_height is not None and
-        target_fig_width > 0 and
-        target_fig_height > 0
+        facet_fig_width is not None and
+        facet_fig_height is not None and
+        facet_fig_width > 0 and
+        facet_fig_height > 0
     ):
         nrow = int(np.ceil(n_groups / facet_ncol))
-        panel_width = max(target_fig_width / facet_ncol, min_panel_width)
-        panel_height = max(target_fig_height / nrow, min_panel_height)
+        panel_width = max(facet_fig_width / facet_ncol, min_panel_width)
+        panel_height = max(facet_fig_height / nrow, min_panel_height)
         facet_height = panel_height
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
 
@@ -617,14 +617,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             If not provided, or if passed as `None`/`"auto"`/`"none"`,
             the binning will be determined automatically using the Rice rule.
             Note, don't pass a numpy array, only python lists or strs/numbers.
-        When `facet=True`, this optional key can be passed via `kwargs`
+        When `facet=True`, these optional key can be passed via `kwargs`
         to customize FacetGrid layout:
         - `facet_ncol`: positive int or "auto", number of facet columns.
             If "auto", the function uses one column for small group counts and
             switches to a compact grid for many groups.
-        Internal-only sizing hints used by template wrappers:
-        - `target_fig_width`: float, intended final figure width in inches.
-        - `target_fig_height`: float, intended final figure height in inches.
+        - `facet_fig_width`: float, intended final figure width in inches.
+        - `facet_fig_height`: float, intended final figure height in inches.
 
     Returns
     -------
@@ -731,9 +730,17 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if bins_kwarg is None:
         kwargs['bins'] = cal_bin_num(num_rows)
 
+    # Input validation for facet
+    if facet:
+        if group_by is None:
+            raise ValueError("group_by must be specified when facet=True.")
+        if together:
+            raise ValueError("Cannot use together=True with facet=True,"
+                            " choose one.")
+
     # Parse histogram-internal layout kwargs and remove them from kwargs
     # so they never leak to seaborn's histplot calls.
-    facet_ncol, target_fig_width, target_fig_height = (
+    facet_ncol, facet_fig_width, facet_fig_height = (
         _parse_histogram_layout_kwargs(kwargs)
     )
 
@@ -861,8 +868,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 facet_ncol, facet_height, facet_aspect = _derive_facet_geometry(
                     n_groups=n_groups,
                     facet_ncol=facet_ncol,
-                    target_fig_width=target_fig_width,
-                    target_fig_height=target_fig_height,
+                    facet_fig_width=facet_fig_width,
+                    facet_fig_height=facet_fig_height,
                 )
 
                 # Compute global bins so all facets use consistent boundaries.
@@ -878,7 +885,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     height=facet_height,
                     aspect=facet_aspect,
                     sharex=True,
-                    sharey=True
+                    sharey=True,   
                 )
 
                 hist_kwargs = kwargs.copy()
@@ -913,6 +920,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                 # Pass the figure and axes to the output for further customization
                 fig = hist.figure
+                fig.set_size_inches(facet_fig_width or fig.get_figwidth(),
+                                    facet_fig_height or fig.get_figheight())
                 axs.extend(hist.axes.flat)
                 hist_data = plot_data
 
