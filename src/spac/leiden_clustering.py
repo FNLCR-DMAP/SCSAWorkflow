@@ -8,19 +8,67 @@ import parmap
 import anndata
 from tqdm import tqdm
 
-# leiden docs - https://scanpy.readthedocs.io/en/stable/generated/scanpy.tl.leiden.html
-# anndata docs - https://anndata.readthedocs.io/en/latest/tutorials/notebooks/getting-started.html
-
-# read the docs and make a comment about what sc.tl.leiden is doing
 
 def preprocess(adata):
+    """
+    Prepares an AnnData object for Leiden clustering by computing PCA,
+    nearest neighbor graph, and UMAP embedding.
+
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix with cells as rows and genes/features as columns.
+        Raw or normalized expression data expected.
+
+    Returns
+    -------
+    ad : AnnData
+        Copy of the input with PCA, neighbor graph, and UMAP added.
+        Original adata is not modified.
+    """
     ad = adata.copy()
     sc.tl.pca(ad)
     sc.pp.neighbors(ad)
     sc.tl.umap(ad)
     return ad
 
-def leiden_only_clustering(adata, resolution=1.0, random_state=0, n_iterations=-1, key_added="leiden_clusters"):
+def leiden_only_clustering(
+    adata,
+    resolution=1.0,
+    random_state=0,
+    n_iterations=-1,
+    key_added="leiden_clusters"
+):
+    """
+    Performs Leiden community detection on a preprocessed AnnData object.
+    
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix with cells as rows and genes/features as columns.
+        Must be preprocessed with PCA and nearest neighbor graph computed.
+    resolution : float
+        Controls the coarseness of the clustering. Higher values produce more,
+        smaller clusters (finer granularity); lower values produce fewer, larger
+        clusters (broader cell populations). Default is 1.0.
+    random_state : int
+        Seed for the random number generator. Set to a fixed value for reproducible
+        clustering results across runs. Default is 0.
+    n_iterations : int
+        Number of iterations to run the Leiden algorithm. Set to -1 to run until
+        the algorithm converges to an optimal partition. Higher values may improve
+        cluster stability at the cost of compute time. Default is -1.
+    key_added : str
+        Column name added to `adata.obs` where cluster labels will be stored.
+        Access results via `adata.obs[key_added]` after clustering.
+        Default is "leiden_clusters".
+    
+    Returns
+    -------
+    adata : AnnData
+        Annotated data matrix with Leiden cluster assignments for each cell
+        stored in `adata.obs[key_added]`.
+    """
     ad = adata.copy()
     # Preprocess if neighbors haven't been computed yet
     if 'neighbors' not in ad.uns:
@@ -34,20 +82,50 @@ def leiden_only_clustering(adata, resolution=1.0, random_state=0, n_iterations=-
                 )
     return ad
 
-def plot(adata, color="leiden_clusters", title=None, save=None, palette=None, size=None):
-    sc.pl.umap(adata,
-               color=color,
-               title=title,
-               save=save,
-               palette=palette,
-               size=size
-              )
+def plot(
+    adata,
+    color="leiden_clusters",
+    title=None,
+    save=None,
+    palette=None,
+    size=None
+):
+    """
+    Plots a UMAP embedding of the AnnData object colored by Leiden cluster labels.
 
-''' plan:
-        - feature addition
-            - resolution, random_state, n_iterations, key_added
-            - neighbors_key/obsp, use_weights, directed
-            - partition_type, flavor, restrict_to
-        - tune for other ml/clustering/normalization models
-        - write unit tests & justify
-'''
+    Parameters
+    ----------
+    adata : AnnData
+        Annotated data matrix with cells as rows and genes/features as columns.
+        Must be preprocessed with PCA, nearest neighbor graph, and UMAP computed.
+    color : str, optional
+        Column name in `adata.obs` used to color the UMAP plot.
+        Default is "leiden_clusters".
+    title : str, optional
+        Title displayed above the plot.
+        If None, no title is shown. Default is None.
+    save : str or bool, optional
+        If a string, saves the plot to a file with that name (e.g. "my_plot.png").
+        If True, saves with a default filename. If None, the plot is not saved.
+        Default is None.
+    palette : list or str, optional
+        Color palette for cluster labels. Accepts a list of hex color codes,
+        a matplotlib colormap name, or None to use the default palette.
+        Default is None.
+    size : float, optional
+        Size of each cell dot in the UMAP plot. Increase for sparse plots,
+        decrease for dense plots to reduce overlap. Default is None.
+
+    Returns
+    -------
+    None
+        Displays the UMAP plot. If `save` is provided, also writes the plot to disk.
+    """
+    sc.pl.umap(
+        adata,
+        color=color,
+        title=title,
+        save=save,
+        palette=palette,
+        size=size
+    )
