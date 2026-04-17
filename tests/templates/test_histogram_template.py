@@ -50,6 +50,8 @@ class TestHistogramTemplate(unittest.TestCase):
         params = {
             "Upstream_Analysis": self.in_file,
             "Annotation": "cell_type",
+            "Group_by": "cell_type",
+            "Together": False,
             "Table_to_Visualize": "Original",
             "Feature_s_to_Plot": ["All"],
             "Figure_Title": "Test Histogram",
@@ -59,6 +61,8 @@ class TestHistogramTemplate(unittest.TestCase):
             "Figure_DPI": 72,
             "Font_Size": 10,
             "Number_of_Bins": 20,
+            "Facet": True,
+            "Facet_Ncol": 1,
             "Output_Directory": self.tmp_dir.name,
             "outputs": {
                 "dataframe": {"type": "file", "name": "dataframe.csv"},
