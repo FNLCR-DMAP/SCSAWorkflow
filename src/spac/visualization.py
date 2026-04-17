@@ -568,6 +568,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     ax : matplotlib.axes.Axes, optional
         An existing Axes object to draw the plot onto, optional.
+        Not supported for grouped-separate (`group_by` with `together=False`) 
+        or facet layouts (`group_by` with `facet=True`).
 
     x_log_scale : bool, default False
         If True, the data will be transformed using np.log1p before plotting,
@@ -691,14 +693,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         else:
             df[data_column] = np.log1p(df[data_column])
 
-    # If ax is not provided, create a new figure and axes. 
-    # Keep track of whether we created the figure internally
-    created_internal_fig = False
+    # If ax is provided, validate input and get figure from it. 
+    # If not, the figure will be created in the plotting branch.
     if ax is not None:
+        if group_by and not together:
+            raise ValueError(
+                "External ax is only supported for single-axes histogram "
+                "Please set together=True or remove external ax."
+            )
         fig = ax.get_figure()
-    else:
-        fig, ax = plt.subplots()
-        created_internal_fig = True
 
     axs = []
 
@@ -803,6 +806,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                              " histogram.")
 
         if together:
+            if ax is None:
+                fig, ax = plt.subplots()
+
             # Compute global bin edges based on the entire dataset
             global_bin_edges = _compute_global_bin_edges(
                 plot_data[data_column], kwargs['bins']
@@ -832,11 +838,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             axs.append(ax)
 
         else:
-            # Only close figures created in this function. If caller provided
-            # an external ax, keep its parent figure open.
-            if created_internal_fig:
-                plt.close(fig)
-
             if not facet:
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)
@@ -926,6 +927,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 hist_data = plot_data
 
     else:
+        if ax is None:
+            fig, ax = plt.subplots()
+
         # Precompute histogram data for single plot
         hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
         if pd.api.types.is_numeric_dtype(plot_data[data_column]):

@@ -38,6 +38,10 @@ class TestHistogram(unittest.TestCase):
         # Create default layer
         self.adata.layers['Default'] = X.astype(np.float32)
 
+    def tearDown(self):
+        # Closes all figures to prevent memory issues
+        plt.close('all')
+
     def test_both_feature_and_annotation(self):
         err_msg = ("Cannot pass both feature and annotation,"
                    " choose one.")
@@ -353,6 +357,7 @@ class TestHistogram(unittest.TestCase):
             )
 
     def test_ax_passed_as_argument(self):
+        # Supported mode 1: single-axes histogram with external ax.
         fig, ax = plt.subplots()
         returned_fig, returned_ax, df = histogram(
             self.adata,
@@ -365,8 +370,53 @@ class TestHistogram(unittest.TestCase):
         # Check that the passed fig is the one that is returned
         self.assertIs(fig, returned_fig)
 
-        # Check that returned_ax is an Axes object
+        # Supported mode 2: grouped+together histogram with external ax.
+        fig_grouped, ax_grouped = plt.subplots()
+        returned_grouped_fig, returned_grouped_ax, _ = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            together=True,
+            ax=ax_grouped,
+        ).values()
+
+        self.assertIs(fig_grouped, returned_grouped_fig)
+        self.assertIs(ax_grouped, returned_grouped_ax)
+
+        # Check that returned axes are valid Axes objects.
         self.assertIsInstance(returned_ax, mpl.axes.Axes)
+        self.assertIsInstance(returned_grouped_ax, mpl.axes.Axes)
+
+    def test_external_ax_guardrail_modes(self):
+        # Reject grouped-separate mode with external ax.
+        fig_1, ax_1 = plt.subplots()
+        with self.assertRaisesRegex(
+            ValueError,
+            "External ax is only supported for single-axes histogram"
+        ):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                together=False,
+                ax=ax_1,
+            )
+
+        # Reject facet mode with external ax.
+        fig_2, ax_2 = plt.subplots()
+        with self.assertRaisesRegex(
+            ValueError,
+            "External ax is only supported for single-axes histogram"
+        ):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                facet=True,
+                ax=ax_2,
+            )
+
+        # Positive external-ax modes are covered in test_ax_passed_as_argument.
 
     def test_default_first_feature(self):
         with self.assertWarns(UserWarning) as warning:
