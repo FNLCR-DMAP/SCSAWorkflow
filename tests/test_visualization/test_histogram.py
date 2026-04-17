@@ -492,14 +492,17 @@ class TestHistogram(unittest.TestCase):
                             f"Title '{title}' does not contain"
                             f"any expected group names.")
 
-            # Check X and Y labels
-            self.assertIn('marker1', axis.get_xlabel(),
-                          f"Facet {i} X-axis label"
-                          f" '{axis.get_xlabel()}' is incorrect.")
-            self.assertIn(axis.get_ylabel(),
-                          ['Count', 'Frequency', 'Density', 'Probability'],
-                          f"Facet {i} Y-axis label"
-                          f" '{axis.get_ylabel()}' is not a valid stat.")
+            # In facet mode, labels are figure-level (supxlabel/supylabel).
+            self.assertEqual(axis.get_xlabel(), '',
+                             f"Facet {i} x-label should be empty.")
+            self.assertEqual(axis.get_ylabel(), '',
+                             f"Facet {i} y-label should be empty.")
+
+        # Figure-level labels should be set in facet mode.
+        self.assertIsNotNone(fig._supxlabel)
+        self.assertIsNotNone(fig._supylabel)
+        self.assertEqual(fig._supxlabel.get_text(), 'marker1')
+        self.assertEqual(fig._supylabel.get_text(), 'Count')
 
 
 if __name__ == '__main__':
