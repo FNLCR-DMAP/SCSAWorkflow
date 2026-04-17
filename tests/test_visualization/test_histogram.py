@@ -463,8 +463,8 @@ class TestHistogram(unittest.TestCase):
         expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
         self.assertEqual(n_bins, expected_bins)
 
-    def test_facet_plot(self):
-        """Test that facet plot works."""
+    def test_facet_plot_smoke_and_structure(self):
+        """Facet path returns expected structure and plotted content."""
         fig, ax, df = histogram(
             self.adata,
             feature='marker1',
@@ -472,27 +472,47 @@ class TestHistogram(unittest.TestCase):
             facet=True,
         ).values()
 
-        # Check if axs is a collection (list/array of Axes)
+        # Basic structure checks
+        self.assertIsNotNone(fig)
+        self.assertIsNotNone(df)
         self.assertIsInstance(ax, (list, np.ndarray),
-                              "Output is not a multi-axis grid")
+                              "Facet output should be a multi-axis collection.")
 
-        # Check number of facets equals number of unique groups
+        # Check the number of facet axes matches group count
         unique_groups = self.adata.obs['annotation2'].dropna().unique()
         self.assertEqual(len(ax), len(unique_groups),
                          f"Expected {len(unique_groups)}"
                          f" facet plots, got {len(ax)}.")
 
-        # Validate each axis: title, xlabel, and ylabel
+        # Lightweight bar-level presence checks only.
         for i, axis in enumerate(ax):
-            # Check that title is set and matches the group
+            self.assertGreater(
+                len(axis.patches),
+                0,
+                f"Facet {i} should contain at least one bar patch."
+            )
+
+    def test_facet_plot_titles_and_label_policy(self):
+        """Facet titles map to groups and labels follow figure-level policy."""
+        fig, ax, df = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+        ).values()
+
+        # Ensure ax is iterable for consistent handling
+        ax = ax if isinstance(ax, (list, np.ndarray)) else [ax]
+        unique_groups = self.adata.obs['annotation2'].dropna().unique()
+
+        # Titles must map to expected groups and labels must be per-figure.
+        for i, axis in enumerate(ax):
             title = axis.get_title()
             self.assertTrue(title, f"Facet {i} is missing a title.")
             self.assertTrue(any(str(group) in title
                             for group in unique_groups),
                             f"Title '{title}' does not contain"
                             f"any expected group names.")
-
-            # In facet mode, labels are figure-level (supxlabel/supylabel).
             self.assertEqual(axis.get_xlabel(), '',
                              f"Facet {i} x-label should be empty.")
             self.assertEqual(axis.get_ylabel(), '',
@@ -503,6 +523,20 @@ class TestHistogram(unittest.TestCase):
         self.assertIsNotNone(fig._supylabel)
         self.assertEqual(fig._supxlabel.get_text(), 'marker1')
         self.assertEqual(fig._supylabel.get_text(), 'Count')
+
+    def test_facet_plot_density_stat_label_policy(self):
+        """Facet figure-level y label reflects non-default stat mapping."""
+        fig, ax, df = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+            stat='density',
+        ).values()
+
+        # Check that figure-level y label reflects 'density' stat when specified.
+        self.assertIsNotNone(fig._supylabel)
+        self.assertEqual(fig._supylabel.get_text(), 'Density')
 
 
 if __name__ == '__main__':
