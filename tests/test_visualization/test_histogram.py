@@ -451,17 +451,26 @@ class TestHistogram(unittest.TestCase):
         self.assertIsInstance(ax, mpl.axes.Axes)
 
     def test_default_bins_calculation(self):
+        """No bins argument should use Rice-rule fallback."""
+        expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
+
         # No bins parameter passed
         fig, ax, df = histogram(self.adata, feature='marker1').values()
+        self.assertEqual(len(ax.patches), expected_bins)
 
-        # Count the number of bins
-        bars = ax.patches
-        n_bins = len(bars)
-
-        # Validate the number of bins based on default bin calculation logic
-        # Using 2 * (n ** 1/3) heuristic for default bins
+    def test_default_like_bins_calculation(self):
+        """Default-like bins values should use Rice-rule fallback."""
         expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
-        self.assertEqual(n_bins, expected_bins)
+
+        for bins_value in [None, 'auto', 'none', '']:
+            with self.subTest(bins=bins_value):
+                fig, ax, df = histogram(
+                    self.adata,
+                    feature='marker1',
+                    bins=bins_value,
+                ).values()
+
+                self.assertEqual(len(ax.patches), expected_bins)
 
     def test_facet_requires_group_by(self):
         """Test that facet mode requires group_by parameter"""
@@ -588,6 +597,213 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(fig._supxlabel.get_text(), 'annotation1')
         self.assertEqual(fig._supylabel.get_text(), 'Count')
 
+    def test_facet_ncol_layout_hints(self):
+        """Facet ncol supports positive int and documented auto behavior."""
+        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {
+                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
+            },
+            index=[f'cell_{i}' for i in range(9)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        # Explicit two-column layout should create two facet columns.
+        fig, axs, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol=2,
+        ).values()
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        x_positions = {round(axis.get_position().x0, 4) for axis in axs}
+        self.assertGreaterEqual(len(x_positions), 2)
+
+        # Documented default-like input should use auto layout (one column for 3 groups).
+        fig, axs, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol='auto',
+        ).values()
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        x_positions = {round(axis.get_position().x0, 4) for axis in axs}
+        self.assertEqual(len(x_positions), 1)
+
+        # Keep one lightweight guardrail check for invalid fallback behavior.
+        fig, axs, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol='bad',
+        ).values()
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        x_positions = {round(axis.get_position().x0, 4) for axis in axs}
+        self.assertEqual(len(x_positions), 1)
+
+    def test_facet_figure_size_hints(self):
+        """Facet figure-size hints should accept valid values and sanitize invalid ones."""
+        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {
+                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
+            },
+            index=[f'cell_{i}' for i in range(9)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        # Check that valid figure size hints are applied to the facet figure.
+        fig, _, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='annotation2',
+            facet=True,
+            facet_fig_width=11,
+            facet_fig_height=3.5,
+        ).values()
+        self.assertAlmostEqual(fig.get_figwidth(), 11.0, places=2)
+        self.assertAlmostEqual(fig.get_figheight(), 3.5, places=2)
+
+        # Check that invalid size hints are sanitized
+        for width, height in [('wide', 'tall'), (-1, 0)]:
+            with self.subTest(facet_fig_width=width, facet_fig_height=height):
+                fig, _, _ = histogram(
+                    adata,
+                    feature='marker1',
+                    group_by='annotation2',
+                    facet=True,
+                    facet_fig_width=width,
+                    facet_fig_height=height,
+                ).values()
+                self.assertGreater(fig.get_figwidth(), 0)
+                self.assertGreater(fig.get_figheight(), 0)
+
+    def test_facet_plot_shared_bins_consistency_numeric(self):
+        """Numeric facets keep shared bins for int/default-like bins inputs."""
+        # Unbalanced groups: each group occupies only part of the global range.
+        # If bins are computed per-group (bad path), centers/ticks may diverge.
+        X = np.array([[0.0], [1.0], [2.0], [10.0], [11.0], [12.0]],
+                     dtype=np.float32)
+        obs = pd.DataFrame(
+            {
+                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2'],
+            },
+            index=[f'cell_{i}' for i in range(6)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        # Test one explicit and one default-like bins path.
+        for bins_value in [4, None]:
+            with self.subTest(bins=bins_value):
+                fig, axs, df = histogram(
+                    adata,
+                    feature='marker1',
+                    group_by='annotation2',
+                    facet=True,
+                    bins=bins_value,
+                ).values()
+
+                axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+
+                # Capture the bin centers and ticks from the first facet
+                first_xlim = np.round(np.array(axs[0].get_xlim()), 6)
+                first_xticks = np.round(np.array(axs[0].get_xticks()), 6)
+                first_yticks = np.round(np.array(axs[0].get_yticks()), 6)
+                first_centers = np.round(
+                    np.array([
+                        patch.get_x() + patch.get_width() / 2
+                        for patch in axs[0].patches
+                    ]),
+                    6
+                )
+
+                # Check that all facets have the same bin centers and ticks
+                for axis in axs[1:]:
+                    centers = np.round(
+                        np.array([
+                            patch.get_x() + patch.get_width() / 2
+                            for patch in axis.patches
+                        ]),
+                        6
+                    )
+                    self.assertTrue(
+                        np.array_equal(centers, first_centers),
+                        "Facet numeric bin centers should remain shared across panels."
+                    )
+                    self.assertTrue(
+                        np.array_equal(np.round(np.array(axis.get_xlim()), 6), first_xlim),
+                        "Facet numeric x-limits should remain shared across panels."
+                    )
+                    self.assertTrue(
+                        np.array_equal(np.round(np.array(axis.get_xticks()), 6), first_xticks),
+                        "Facet numeric x-ticks should remain shared across panels."
+                    )
+                    self.assertTrue(
+                        np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
+                        "Facet numeric y-ticks should remain shared across panels."
+                    )
+
+    def test_facet_plot_shared_bins_consistency_categorical(self):
+        """Facet categorical bins stay aligned even with missing labels."""
+        # Build unbalanced facet groups where some labels are missing per group.
+        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {
+                'annotation1': pd.Categorical(
+                    ['A', 'A', 'B', 'A', 'C', 'C', 'B', 'C', 'A'],
+                    categories=['A', 'B', 'C'],
+                ),
+                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
+            },
+            index=[f'cell_{i}' for i in range(9)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        fig, axs, df = histogram(
+            adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+        ).values()
+
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+
+        # Guardrail: this fixture must include missing labels per group.
+        group_uniques = adata.obs.groupby('annotation2')['annotation1'].nunique()
+        self.assertTrue(any(group_uniques < 3))
+
+        # Check that bin centers are shared across facets
+        global_centers = set()
+        for axis in axs:
+            global_centers.update(
+                np.round(
+                    [patch.get_x() + patch.get_width() / 2
+                     for patch in axis.patches],
+                    6,
+                )
+            )
+        self.assertEqual(
+            len(global_centers),
+            3,
+            "Expected 3 categorical slots (A/B/C) to be preserved globally."
+        )
+
+        # Check that ticks are shared across facets
+        first_xticks = np.round(axs[0].get_xticks(), 6)
+        first_yticks = np.round(np.array(axs[0].get_yticks()), 6)
+        for axis in axs[1:]:
+            self.assertTrue(np.array_equal(np.round(axis.get_xticks(), 6), first_xticks))
+            self.assertTrue(
+                np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
+                "Facet categorical y-ticks should remain shared across panels."
+            )
 
 if __name__ == '__main__':
     unittest.main()
