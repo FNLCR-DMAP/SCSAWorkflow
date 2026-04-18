@@ -404,32 +404,7 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     return fig, ax
 
 
-def _compute_global_bin_edges(data_series, bins) -> Union[np.ndarray, pd.Index]:
-    """Compute global bin edges for a data series based on its type and the 
-    bins parameter.
-
-    This helper ensures that when creating multiple histograms (e.g., in
-    together mode or facet plots), all subplots use the same bin boundaries
-    for proper visual comparison.
-
-    Parameters
-    ----------
-    data_series (pd.Series): The data to compute bin edges for.
-    bins (int or sequence): Number of bins (for numeric data) or bin specification.
-
-    Returns
-    -------
-    array-like: 
-        Bin edges for numeric data (array of boundary values),
-        or unique categories for categorical data (array of category labels).
-    """
-    if pd.api.types.is_numeric_dtype(data_series):
-        return np.histogram_bin_edges(data_series, bins=bins)
-    else:
-        return data_series.unique()
-
-
-def _parse_histogram_layout_kwargs(kwargs):
+def _parse_facet_layout_hints(kwargs):
     """Extract histogram-internal layout hints and strip non-histplot keys.
 
     This parser is intentionally permissive for direct API usage: values that
@@ -513,23 +488,6 @@ def _derive_facet_geometry(
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
 
     return facet_ncol, facet_height, facet_aspect
-
-
-def _resolve_histogram_axis_labels(data_column, x_log_scale, y_log_scale, stat):
-    """Resolve histogram axis labels from scaling and stat settings."""
-    xlabel = f'log({data_column})' if x_log_scale else data_column
-    ylabel_map = {
-        'count': 'Count',
-        'frequency': 'Frequency',
-        'density': 'Density',
-        'probability': 'Probability',
-        "proportion": "Proportion",
-        "percent": "Percent"
-    }
-    ylabel = ylabel_map.get(stat, 'Count')
-    if y_log_scale:
-        ylabel = f'log({ylabel})'
-    return xlabel, ylabel
 
 
 def histogram(adata, feature=None, annotation=None, layer=None,
@@ -744,7 +702,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Parse histogram-internal layout kwargs and remove them from kwargs
     # so they never leak to seaborn's histplot calls.
     facet_ncol, facet_fig_width, facet_fig_height = (
-        _parse_histogram_layout_kwargs(kwargs)
+        _parse_facet_layout_hints(kwargs)
     )
 
     # Function to calculate histogram data
@@ -796,6 +754,60 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 'count': counts.values
             })
 
+    # Function to compute shared bin edges for grouped histograms
+    def compute_global_bin_edges(data_series, bins):
+        """Compute shared bin boundaries for grouped histogram paths.
+
+        Parameters
+        ----------
+        data_series : pandas.Series
+            Data column used to derive shared bins.
+        bins : int or sequence
+            Bin specification forwarded to numpy/seaborn logic.
+
+        Returns
+        -------
+        numpy.ndarray or pandas.Index
+            Numeric bin edges, or categorical labels for non-numeric data.
+        """
+        if pd.api.types.is_numeric_dtype(data_series):
+            return np.histogram_bin_edges(data_series, bins=bins)
+        return data_series.unique()
+
+    # Function to get axis labels based on log scale and stat parameters
+    def resolve_hist_axis_labels(data_column, x_log_scale, y_log_scale, stat):
+        """Resolve x/y axis labels for histogram rendering.
+
+        Parameters
+        ----------
+        data_column : str
+            Source column used on the x axis.
+        x_log_scale : bool
+            Whether x data has log transform semantics.
+        y_log_scale : bool
+            Whether y axis is displayed on log scale.
+        stat : str
+            Histogram statistic mode (for example, count, density).
+
+        Returns
+        -------
+        tuple[str, str]
+            Resolved x-axis and y-axis labels.
+        """
+        xlabel = f'log({data_column})' if x_log_scale else data_column
+        ylabel_map = {
+            'count': 'Count',
+            'frequency': 'Frequency',
+            'density': 'Density',
+            'probability': 'Probability',
+            "proportion": "Proportion",
+            "percent": "Percent"
+        }
+        ylabel = ylabel_map.get(stat, 'Count')
+        if y_log_scale:
+            ylabel = f'log({ylabel})'
+        return xlabel, ylabel
+
     # Plotting with or without grouping
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
@@ -810,7 +822,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 fig, ax = plt.subplots()
 
             # Compute global bin edges based on the entire dataset
-            global_bin_edges = _compute_global_bin_edges(
+            global_bin_edges = compute_global_bin_edges(
                 plot_data[data_column], kwargs['bins']
             )
 
@@ -874,7 +886,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 )
 
                 # Compute global bins so all facets use consistent boundaries.
-                global_bin_edges = _compute_global_bin_edges(
+                global_bin_edges = compute_global_bin_edges(
                     plot_data[data_column], kwargs['bins']
                 )
 
@@ -950,7 +962,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         axs.append(ax)
 
     stat = kwargs.get('stat', 'count')
-    xlabel, ylabel = _resolve_histogram_axis_labels(
+    xlabel, ylabel = resolve_hist_axis_labels(
         data_column=data_column,
         x_log_scale=x_log_scale,
         y_log_scale=y_log_scale,
