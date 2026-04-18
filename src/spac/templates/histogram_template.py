@@ -260,6 +260,9 @@ def run_from_json(
     else:
         x_var = feature
 
+    # In facet mode, Figure_Width/Height are passed as layout hints so
+    # visualization can derive panel geometry from total figure size:
+    # panel_width = Figure_Width / ncol, panel_height = Figure_Height / nrow.
     result = histogram(
         adata=adata,
         feature=feature,
