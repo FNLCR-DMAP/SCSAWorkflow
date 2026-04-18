@@ -404,16 +404,39 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
     return fig, ax
 
 
-def _parse_facet_layout_hints(kwargs):
-    """Extract histogram-internal layout hints and strip non-histplot keys.
+def _derive_facet_geometry(
+    n_groups,
+    facet_ncol,
+    facet_fig_width,
+    facet_fig_height,
+    vertical_threshold=4,
+    default_height=3.2,
+    default_aspect=1.25,
+    min_panel_width=1.8,
+    min_panel_height=1.6,
+    min_aspect=0.6,
+    max_aspect=2.0,
+):
+    """Normalize facet hints and derive FacetGrid layout geometry.
 
-    This parser is intentionally permissive for direct API usage: values that
-    cannot be interpreted are normalized to None so downstream auto-layout can
-    take over.
+    Returns
+    -------
+    tuple
+        (facet_ncol, facet_height, facet_aspect,
+         facet_fig_width, facet_fig_height)
+        where facet_fig_width/height are normalized positive floats or None.
     """
-    facet_ncol = kwargs.pop('facet_ncol', None)
-    facet_fig_width = kwargs.pop('facet_fig_width', None)
-    facet_fig_height = kwargs.pop('facet_fig_height', None)
+    def _normalize_positive_float(value):
+        """Normalize numeric layout hints to positive floats or None."""
+        if isinstance(value, str):
+            value_str = value.strip().lower()
+            if value_str in {'auto', 'none', ''}:
+                return None
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return None
+        return value if value > 0 else None
 
     # Normalize only; template-level validation handles strict checks.
     if isinstance(facet_ncol, str):
@@ -434,28 +457,8 @@ def _parse_facet_layout_hints(kwargs):
         if facet_ncol <= 0:
             facet_ncol = None
 
-    return facet_ncol, facet_fig_width, facet_fig_height
-
-
-def _derive_facet_geometry(
-    n_groups,
-    facet_ncol,
-    facet_fig_width,
-    facet_fig_height,
-    vertical_threshold=4,
-    default_height=3.2,
-    default_aspect=1.25,
-    min_panel_width=1.8,
-    min_panel_height=1.6,
-    min_aspect=0.6,
-    max_aspect=2.0,
-):
-    """Derive FacetGrid column count and panel geometry."""
-    if facet_ncol is not None:
-        try:
-            facet_ncol = int(facet_ncol)
-        except (TypeError, ValueError):
-            facet_ncol = None
+    facet_fig_width = _normalize_positive_float(facet_fig_width)
+    facet_fig_height = _normalize_positive_float(facet_fig_height)
 
     if facet_ncol is None:
         if n_groups <= vertical_threshold:
@@ -466,14 +469,6 @@ def _derive_facet_geometry(
     facet_ncol = max(1, min(int(facet_ncol), n_groups))
     facet_height = default_height
     facet_aspect = default_aspect
-
-    if facet_fig_width is not None and facet_fig_height is not None:
-        try:
-            facet_fig_width = float(facet_fig_width)
-            facet_fig_height = float(facet_fig_height)
-        except (TypeError, ValueError):
-            facet_fig_width = None
-            facet_fig_height = None
 
     if (
         facet_fig_width is not None and
@@ -487,7 +482,13 @@ def _derive_facet_geometry(
         facet_height = panel_height
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
 
-    return facet_ncol, facet_height, facet_aspect
+    return (
+        facet_ncol,
+        facet_height,
+        facet_aspect,
+        facet_fig_width,
+        facet_fig_height,
+    )
 
 
 def histogram(adata, feature=None, annotation=None, layer=None,
@@ -699,11 +700,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             raise ValueError("Cannot use together=True with facet=True,"
                             " choose one.")
 
-    # Parse histogram-internal layout kwargs and remove them from kwargs
-    # so they never leak to seaborn's histplot calls.
-    facet_ncol, facet_fig_width, facet_fig_height = (
-        _parse_facet_layout_hints(kwargs)
-    )
+    # Remove histogram-internal layout hints so they never leak to seaborn.
+    facet_ncol = kwargs.pop('facet_ncol', None)
+    facet_fig_width = kwargs.pop('facet_fig_width', None)
+    facet_fig_height = kwargs.pop('facet_fig_height', None)
 
     # Function to calculate histogram data
     def calculate_histogram(data, bins, bin_edges=None):
@@ -878,7 +878,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
             else:   # Facet option
                 # Derive facet geometry based on group count and layout hints
-                facet_ncol, facet_height, facet_aspect = _derive_facet_geometry(
+                (
+                    facet_ncol,
+                    facet_height,
+                    facet_aspect,
+                    facet_fig_width,
+                    facet_fig_height,
+                ) = _derive_facet_geometry(
                     n_groups=n_groups,
                     facet_ncol=facet_ncol,
                     facet_fig_width=facet_fig_width,
