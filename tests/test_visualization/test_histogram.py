@@ -463,6 +463,32 @@ class TestHistogram(unittest.TestCase):
         expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
         self.assertEqual(n_bins, expected_bins)
 
+    def test_facet_requires_group_by(self):
+        """Test that facet mode requires group_by parameter"""
+        with self.assertRaisesRegex(
+            ValueError,
+            "group_by must be specified when facet=True."
+        ):
+            histogram(
+                self.adata,
+                feature='marker1',
+                facet=True,
+            )
+
+    def test_facet_conflicts_with_together_true(self):
+        """Test that facet mode conflicts with together=True"""
+        with self.assertRaisesRegex(
+            ValueError,
+            "Cannot use together=True with facet=True"
+        ):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                together=True,
+                facet=True,
+            )
+
     def test_facet_plot_smoke_and_structure(self):
         """Facet path returns expected structure and plotted content."""
         fig, ax, df = histogram(
@@ -537,6 +563,30 @@ class TestHistogram(unittest.TestCase):
         # Check that figure-level y label reflects 'density' stat when specified.
         self.assertIsNotNone(fig._supylabel)
         self.assertEqual(fig._supylabel.get_text(), 'Density')
+
+    def test_facet_plot_categorical_annotation(self):
+        """Test facet mode with categorical annotations"""
+        fig, axs, df = histogram(
+            self.adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+        ).values()
+
+        # Ensure axs is iterable for consistent handling
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        expected_groups = self.adata.obs['annotation2'].dropna().nunique()
+        self.assertEqual(len(axs), expected_groups)
+
+        # Check that data is plotted in each facet
+        for axis in axs:
+            self.assertGreater(len(axis.patches), 0)
+
+        # Check figure-level labels are set appropriately
+        self.assertIsNotNone(fig._supxlabel)
+        self.assertIsNotNone(fig._supylabel)
+        self.assertEqual(fig._supxlabel.get_text(), 'annotation1')
+        self.assertEqual(fig._supylabel.get_text(), 'Count')
 
 
 if __name__ == '__main__':
