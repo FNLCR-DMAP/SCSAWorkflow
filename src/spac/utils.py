@@ -8,11 +8,12 @@ import logging
 import warnings
 import numbers
 from scipy.stats import median_abs_deviation
-from typing import List, Optional
+from typing import Any, List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def regex_search_list(
@@ -467,6 +468,88 @@ def text_to_others(
 
         if to_Float:
             parameter = float(parameter)
+
+    return parameter
+
+
+def normalize_positive_number(
+    parameter: Any,
+    var_name: str = "parameter",
+    convert_to: str = "float",
+    default_like_values=("auto", "none", ""),
+):
+    """Normalize a value to a positive float/int or None.
+
+    Parameters
+    ----------
+    parameter : any
+        Value to normalize. Strings are matched against default-like tokens
+        before numeric conversion.
+    var_name : str, optional
+        Name used in log messages.
+    convert_to : str, optional
+        Target numeric type. Supported values are ``"float"`` and ``"int"``.
+    default_like_values : tuple of str, optional
+        Lowercased text tokens that should be treated as missing values.
+
+    Returns
+    -------
+    float or int or None
+        Positive converted value, or ``None`` when the input is default-like,
+        invalid, or non-positive.
+    """
+    if parameter is None or isinstance(parameter, bool):
+        logger.info(
+            "%s=%r is treated as missing input. Falling back to automatic "
+            "behavior.",
+            var_name,
+            parameter,
+        )
+        return None
+
+    if isinstance(parameter, str):
+        parameter_str = parameter.strip().lower()
+        if parameter_str in default_like_values:
+            logger.info(
+                "%s=%r is treated as default-like input. Falling back to "
+                "automatic behavior.",
+                var_name,
+                parameter,
+            )
+            return None
+
+    try:
+        if convert_to == "float":
+            parameter = float(parameter)
+        elif convert_to == "int":
+            parameter = int(parameter)
+        else:
+            logger.warning(
+                "%s uses unsupported conversion '%s'. Falling back to "
+                "automatic behavior.",
+                var_name,
+                convert_to,
+            )
+            return None
+    except (TypeError, ValueError):
+        logger.warning(
+            "Could not convert %s=%r to %s. Falling back to automatic "
+            "behavior.",
+            var_name,
+            parameter,
+            convert_to,
+        )
+        return None
+
+    if parameter <= 0:
+        logger.warning(
+            "%s=%r is not a positive %s. Falling back to automatic "
+            "behavior.",
+            var_name,
+            parameter,
+            convert_to,
+        )
+        return None
 
     return parameter
 
