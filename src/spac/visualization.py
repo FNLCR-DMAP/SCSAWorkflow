@@ -17,6 +17,7 @@ from spac.utils import check_feature, annotation_category_relations
 from spac.utils import check_label
 from spac.utils import get_defined_color_map
 from spac.utils import compute_boxplot_metrics
+from spac.utils import normalize_positive_number
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
@@ -406,10 +407,10 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
 def _derive_facet_geometry(
     n_groups,
-    facet_ncol,
-    facet_fig_width,
-    facet_fig_height,
-    vertical_threshold=4,
+    facet_ncol="auto",
+    facet_fig_width=None,
+    facet_fig_height=None,
+    vertical_threshold=3,
     default_height=3.2,
     default_aspect=1.25,
     min_panel_width=1.8,
@@ -417,78 +418,106 @@ def _derive_facet_geometry(
     min_aspect=0.6,
     max_aspect=2.0,
 ):
-    """Normalize facet hints and derive FacetGrid layout geometry.
+    """Normalize facet layout hints and derive FacetGrid geometry.
+
+    Parameters
+    ----------
+    n_groups : int
+        Number of facet panels. Expected to be a positive integer supplied by
+        the grouped histogram path.
+    facet_ncol : int or "auto", optional
+        Requested facet column count. Positive integers are used directly.
+        Default-like string inputs (`"auto"`, `"none"`, `""`) and invalid
+        values fall back to automatic column selection.
+    facet_fig_width, facet_fig_height : float, optional
+        Optional total figure-size hints. Positive numeric values are kept.
+        Default-like or invalid values are sanitized to ``None``. Geometry is
+        derived from these hints only when both normalized values are present.
+    vertical_threshold : int, optional
+        Maximum group count that still prefers a single-column automatic
+        layout.
+    default_height : float, optional
+        Per-facet panel height used when explicit figure-size hints are not
+        available.
+    default_aspect : float, optional
+        Per-facet panel aspect ratio used when explicit figure-size hints are
+        not available.
+    min_panel_width, min_panel_height : float, optional
+        Lower bounds applied to per-panel dimensions when figure-size hints are
+        converted into FacetGrid geometry.
+    min_aspect, max_aspect : float, optional
+        Bounds applied to the derived panel aspect ratio.
 
     Returns
     -------
-    tuple
-        (facet_ncol, facet_height, facet_aspect,
-         facet_fig_width, facet_fig_height)
-        where facet_fig_width/height are normalized positive floats or None.
+    dict
+        Dictionary with keys:
+        - ``facet_ncol``: normalized column count clamped to ``n_groups``;
+        - ``facet_height`` / ``facet_aspect``: FacetGrid-ready per-panel
+          geometry values;
+        - ``facet_fig_width`` / ``facet_fig_height``: normalized positive
+          floats or ``None``.
+
+        Automatic layout uses one column when ``n_groups <= vertical_threshold``
+        and otherwise uses ``ceil(sqrt(n_groups))`` columns. When both
+        normalized figure-size hints are present, the helper converts total
+        figure size into per-panel geometry using the derived grid shape,
+        applies the minimum panel-size guardrails, and clips aspect into the
+        configured range.
     """
-    def _normalize_positive_float(value):
-        """Normalize numeric layout hints to positive floats or None."""
-        if isinstance(value, str):
-            value_str = value.strip().lower()
-            if value_str in {'auto', 'none', ''}:
-                return None
-        try:
-            value = float(value)
-        except (TypeError, ValueError):
-            return None
-        return value if value > 0 else None
 
-    # Normalize only; template-level validation handles strict checks.
-    if isinstance(facet_ncol, str):
-        facet_ncol_str = facet_ncol.strip().lower()
-        if facet_ncol_str in {'auto', 'none', ''}:
-            facet_ncol = None
-        else:
-            try:
-                facet_ncol = int(facet_ncol)
-            except ValueError:
-                facet_ncol = None
-
-    if facet_ncol is not None:
-        try:
-            facet_ncol = int(facet_ncol)
-        except (TypeError, ValueError):
-            facet_ncol = None
-        if facet_ncol <= 0:
-            facet_ncol = None
-
-    facet_fig_width = _normalize_positive_float(facet_fig_width)
-    facet_fig_height = _normalize_positive_float(facet_fig_height)
-
+    # Normalize facet_ncol and apply automatic logic if needed
+    facet_ncol = normalize_positive_number(
+        facet_ncol,
+        var_name="facet_ncol",
+        convert_to="int",
+        default_like_values=("auto", "none", ""),
+    )
     if facet_ncol is None:
         if n_groups <= vertical_threshold:
             facet_ncol = 1
         else:
             facet_ncol = int(np.ceil(np.sqrt(n_groups)))
-
+        logging.info(
+            "Automatic facet_ncol selection: %s columns for %s groups "
+            "(vertical_threshold=%s).",
+            facet_ncol,
+            n_groups,
+            vertical_threshold,
+        )
     facet_ncol = max(1, min(int(facet_ncol), n_groups))
+
+    # Use defaults if figure-size hints are not provided
     facet_height = default_height
     facet_aspect = default_aspect
 
-    if (
-        facet_fig_width is not None and
-        facet_fig_height is not None and
-        facet_fig_width > 0 and
-        facet_fig_height > 0
-    ):
+    # Normalize figure-size hints
+    facet_fig_width = normalize_positive_number(
+        facet_fig_width,
+        var_name="facet_fig_width",
+        convert_to="float",
+    )
+    facet_fig_height = normalize_positive_number(
+        facet_fig_height,
+        var_name="facet_fig_height",
+        convert_to="float",
+    )
+
+    # Derive facet geometry from figure-size hints when both are provided
+    if facet_fig_width is not None and facet_fig_height is not None:
         nrow = int(np.ceil(n_groups / facet_ncol))
         panel_width = max(facet_fig_width / facet_ncol, min_panel_width)
         panel_height = max(facet_fig_height / nrow, min_panel_height)
         facet_height = panel_height
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
 
-    return (
-        facet_ncol,
-        facet_height,
-        facet_aspect,
-        facet_fig_width,
-        facet_fig_height,
-    )
+    return {
+        "facet_ncol": facet_ncol,
+        "facet_height": facet_height,
+        "facet_aspect": facet_aspect,
+        "facet_fig_width": facet_fig_width,
+        "facet_fig_height": facet_fig_height,
+    }
 
 
 def histogram(adata, feature=None, annotation=None, layer=None,
@@ -878,18 +907,17 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
             else:   # Facet option
                 # Derive facet geometry based on group count and layout hints
-                (
-                    facet_ncol,
-                    facet_height,
-                    facet_aspect,
-                    facet_fig_width,
-                    facet_fig_height,
-                ) = _derive_facet_geometry(
+                facet_layout = _derive_facet_geometry(
                     n_groups=n_groups,
                     facet_ncol=facet_ncol,
                     facet_fig_width=facet_fig_width,
                     facet_fig_height=facet_fig_height,
                 )
+                facet_ncol = facet_layout["facet_ncol"]
+                facet_height = facet_layout["facet_height"]
+                facet_aspect = facet_layout["facet_aspect"]
+                facet_fig_width = facet_layout["facet_fig_width"]
+                facet_fig_height = facet_layout["facet_fig_height"]
 
                 # Compute global bins so all facets use consistent boundaries.
                 global_bin_edges = compute_global_bin_edges(
