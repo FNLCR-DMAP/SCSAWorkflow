@@ -599,19 +599,9 @@ class TestHistogram(unittest.TestCase):
 
     def test_facet_ncol_layout_hints(self):
         """Facet ncol supports positive int and documented auto behavior."""
-        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
-        obs = pd.DataFrame(
-            {
-                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
-            },
-            index=[f'cell_{i}' for i in range(9)],
-        )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
-
         # Explicit two-column layout should create two facet columns.
         fig, axs, _ = histogram(
-            adata,
+            self.adata,
             feature='marker1',
             group_by='annotation2',
             facet=True,
@@ -623,7 +613,7 @@ class TestHistogram(unittest.TestCase):
 
         # Documented default-like input should use auto layout (one column for 3 groups).
         fig, axs, _ = histogram(
-            adata,
+            self.adata,
             feature='marker1',
             group_by='annotation2',
             facet=True,
@@ -633,33 +623,29 @@ class TestHistogram(unittest.TestCase):
         x_positions = {round(axis.get_position().x0, 4) for axis in axs}
         self.assertEqual(len(x_positions), 1)
 
-        # Keep one lightweight guardrail check for invalid fallback behavior.
-        fig, axs, _ = histogram(
-            adata,
+        # Invalid values should fail fast.
+        with self.assertRaises(ValueError):
+            histogram(
+                self.adata,
             feature='marker1',
             group_by='annotation2',
             facet=True,
             facet_ncol='bad',
-        ).values()
-        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
-        x_positions = {round(axis.get_position().x0, 4) for axis in axs}
-        self.assertEqual(len(x_positions), 1)
+            )
+        with self.assertRaises(ValueError):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                facet=True,
+                facet_ncol=0,
+            )
 
     def test_facet_figure_size_hints(self):
         """Facet figure-size hints should accept valid values and sanitize invalid ones."""
-        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
-        obs = pd.DataFrame(
-            {
-                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
-            },
-            index=[f'cell_{i}' for i in range(9)],
-        )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
-
         # Check that valid figure size hints are applied to the facet figure.
         fig, _, _ = histogram(
-            adata,
+            self.adata,
             feature='marker1',
             group_by='annotation2',
             facet=True,
@@ -669,19 +655,37 @@ class TestHistogram(unittest.TestCase):
         self.assertAlmostEqual(fig.get_figwidth(), 11.0, places=2)
         self.assertAlmostEqual(fig.get_figheight(), 3.5, places=2)
 
-        # Check that invalid size hints are sanitized
+        # Invalid hints should fail fast.
         for width, height in [('wide', 'tall'), (-1, 0)]:
             with self.subTest(facet_fig_width=width, facet_fig_height=height):
-                fig, _, _ = histogram(
-                    adata,
+                with self.assertRaises(ValueError):
+                    histogram(
+                        self.adata,
                     feature='marker1',
                     group_by='annotation2',
                     facet=True,
                     facet_fig_width=width,
                     facet_fig_height=height,
-                ).values()
-                self.assertGreater(fig.get_figwidth(), 0)
-                self.assertGreater(fig.get_figheight(), 0)
+                    )
+
+    def test_facet_figure_size_hints_require_pair(self):
+        """One-sided facet figure-size hints should raise a ValueError."""
+        with self.assertRaises(ValueError):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                facet=True,
+                facet_fig_width=11,
+            )
+        with self.assertRaises(ValueError):
+            histogram(
+                self.adata,
+                feature='marker1',
+                group_by='annotation2',
+                facet=True,
+                facet_fig_height=3.5,
+            )
 
     def test_facet_plot_shared_bins_consistency_numeric(self):
         """Numeric facets keep shared bins for int/default-like bins inputs."""

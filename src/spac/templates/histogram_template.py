@@ -217,6 +217,23 @@ def run_from_json(
             f'Received "{stat}".'
         )
 
+    # validate figure size parameters
+    fig_width = text_to_value(
+        fig_width,
+        to_float=True,
+        param_name="Figure_Width"
+    )
+    fig_height = text_to_value(
+        fig_height,
+        to_float=True,
+        param_name="Figure_Height"
+    )
+    if fig_width <= 0 or fig_height <= 0:
+        raise ValueError(
+            f'Figure_Width/Height should be a positive number.'
+            f'Received "{fig_width}"/"{fig_height}".'
+        )
+
     # Validate x-axis label rotation
     if (x_rotate < 0) or (x_rotate > 360):
         raise ValueError(
@@ -236,13 +253,13 @@ def run_from_json(
                 'Together and Facet cannot both be True. Please set one to False.'
             )
     
-    # Validate facet_ncol, allowing for "auto" or positive integers
+    # Validate and canonicalize facet_ncol, allowing for "auto" or positive integers
     facet_ncol = text_to_value(
         facet_ncol,
         default_none_text="auto",
-        value_to_convert_to="auto"
+        value_to_convert_to=None
     )
-    if facet_ncol != "auto":
+    if facet_ncol is not None:
         facet_ncol = text_to_value(
             facet_ncol,
             to_int=True,
