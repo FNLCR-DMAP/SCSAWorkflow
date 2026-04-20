@@ -98,8 +98,8 @@ def run_from_json(
     layer = params.get("Table_", "Original")
     group_by = params.get("Group_by", "None")
     together = params.get("Together", True)
-    fig_width = params.get("Figure_Width", 8)
-    fig_height = params.get("Figure_Height", 6)
+    fig_width = params.get("Figure_Width", "auto")
+    fig_height = params.get("Figure_Height", "auto")
     font_size = params.get("Font_Size", 12)
     fig_dpi = params.get("Figure_DPI", 300)
     legend_location = params.get("Legend_Location", "best")
@@ -218,21 +218,29 @@ def run_from_json(
         )
 
     # validate figure size parameters
+    # If "auto" is specified, in facet mode it will be passed as None,
+    # allowing it to be computed based on facet layout hints automatically. 
+    # In non-facet mode, it will default to 8x6 inches.
     fig_width = text_to_value(
         fig_width,
+        default_none_text="auto",
+        value_to_convert_to=None if facet else 8,
         to_float=True,
         param_name="Figure_Width"
     )
     fig_height = text_to_value(
         fig_height,
+        default_none_text="auto",
+        value_to_convert_to=None if facet else 6,
         to_float=True,
         param_name="Figure_Height"
     )
-    if fig_width <= 0 or fig_height <= 0:
-        raise ValueError(
-            f'Figure_Width/Height should be a positive number.'
-            f'Received "{fig_width}"/"{fig_height}".'
-        )
+    if fig_width and fig_height:
+        if fig_width <= 0 or fig_height <= 0:
+            raise ValueError(
+                f'Figure_Width/Height should be a positive number.'
+                f'Received "{fig_width}"/"{fig_height}".'
+            )
 
     # Validate x-axis label rotation
     if (x_rotate < 0) or (x_rotate > 360):
@@ -307,7 +315,8 @@ def run_from_json(
     df_counts = result["df"]
 
     # Set figure size and dpi
-    fig.set_size_inches(fig_width, fig_height)
+    if fig_width and fig_height:
+        fig.set_size_inches(fig_width, fig_height)
     fig.set_dpi(fig_dpi)
 
     # Ensure axes is a list
