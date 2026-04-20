@@ -17,7 +17,6 @@ from spac.utils import check_feature, annotation_category_relations
 from spac.utils import check_label
 from spac.utils import get_defined_color_map
 from spac.utils import compute_boxplot_metrics
-from spac.utils import normalize_positive_number
 from functools import partial
 from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
