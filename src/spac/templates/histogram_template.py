@@ -325,17 +325,10 @@ def run_from_json(
 
         # Rotate x labels
         ax.tick_params(axis='x', rotation=x_rotate)
-    
-    # Process figure-level xlabel for faceted plots
-    if facet:
-        facet_xlabel = getattr(fig, '_supxlabel', None)
-        if facet_xlabel is None:
-            logger.warning(
-                "Facet xlabel not found. X label rotation will "
-                "not be applied."
-            )
-        else:
-            facet_xlabel.set_rotation(x_rotate)
+        if x_rotate:
+            for label in ax.get_xticklabels():
+                label.set_rotation_mode('anchor')
+                label.set_horizontalalignment('right')
 
     # Set titles based on group_by and facet
     if text_to_value(group_by):
