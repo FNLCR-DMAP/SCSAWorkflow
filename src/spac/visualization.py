@@ -409,6 +409,8 @@ def _derive_facet_geometry(
     facet_ncol=None,
     facet_fig_width=None,
     facet_fig_height=None,
+    facet_tick_max_chars=0,
+    facet_tick_rotation=0.0,
     vertical_threshold=3,
     default_height=3.2,
     default_aspect=1.25,
@@ -430,6 +432,14 @@ def _derive_facet_geometry(
     facet_fig_width, facet_fig_height : float, optional
         Optional total figure-size hints. Geometry is derived from these hints only
         when both values are present.
+    facet_tick_max_chars : int, optional
+        Maximum observed x tick-label length. Expected positive integer.
+        Used for adjusting default geometry heuristics when explicit figure-size
+        hints are absent.
+        ``0`` falls back to the original default geometry without long-label adjustments.
+    facet_tick_rotation : float, optional
+        Rotation angle in degrees for x tick labels. Used together with
+        ``facet_tick_max_chars`` to estimate label burden for default geometry.
     vertical_threshold : int, optional
         Maximum group count that still prefers a single-column automatic
         layout.
@@ -458,7 +468,9 @@ def _derive_facet_geometry(
         normalized figure-size hints are present, the helper converts total
         figure size into per-panel geometry using the derived grid shape,
         applies the minimum panel-size guardrails, and clips aspect into the
-        configured range.
+        configured range. When figure-size hints are absent, the helper may
+        increase default facet height/aspect for long rotated categorical
+        labels to preserve usable bar area.
     """
 
     # Derive facet_ncol when not explicitly provided, and clamp to n_groups
@@ -487,6 +499,35 @@ def _derive_facet_geometry(
         panel_height = max(facet_fig_height / nrow, min_panel_height)
         facet_height = panel_height
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
+
+    elif facet_tick_max_chars and facet_tick_max_chars > 0:
+        # For default geometry only, expand panel ratio when long rotated
+        # labels would otherwise dominate the available plotting area.
+        rotation = float(facet_tick_rotation or 0.0) % 360.0
+        rad = np.deg2rad(min(rotation, 180.0))
+        rotation_factor = 1.0 + 0.8 * np.sin(rad)
+        burden = float(facet_tick_max_chars) * rotation_factor
+        long_label_threshold = 12.0
+
+        if burden > long_label_threshold:
+            pressure = min((burden - long_label_threshold) / long_label_threshold, 2.0)
+            facet_height = default_height * (1.0 + 0.35 * pressure)
+            facet_aspect = float(
+                np.clip(
+                    # default_aspect * (1.0 + 0.75 * pressure),
+                    default_aspect * (1.0 - 0.05 * pressure),
+                    min_aspect,
+                    max_aspect,
+                )
+            )
+            logging.info(
+                "Automatic facet geometry adjustment for long x tick labels: "
+                "max_chars=%s, rotation=%s, facet_height=%.2f, facet_aspect=%.2f.",
+                facet_tick_max_chars,
+                facet_tick_rotation,
+                facet_height,
+                facet_aspect,
+            )
 
     return {
         "facet_ncol": facet_ncol,
@@ -589,6 +630,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             switches to a compact grid for many groups.
         - `facet_fig_width`: float, intended final figure width in inches.
         - `facet_fig_height`: float, intended final figure height in inches.
+        - `facet_tick_rotation`: float, rotation angle in degrees for x tick labels.
 
     Returns
     -------
@@ -769,6 +811,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             "Both facet_fig_width and facet_fig_height must be provided together, "
             "or both must be left as None."
         )
+    facet_tick_rotation = _parse_optional_number(
+        "facet_tick_rotation",
+        kwargs.pop('facet_tick_rotation', None),
+        to_default_value=0.0,
+    ) % 360.0
 
     # Function to calculate histogram data
     def calculate_histogram(data, bins, bin_edges=None):
@@ -838,6 +885,31 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if pd.api.types.is_numeric_dtype(data_series):
             return np.histogram_bin_edges(data_series, bins=bins)
         return data_series.unique()
+
+    # Function to compute maximum tick label length for categorical data
+    def compute_max_tick_label_length(data_series):
+        """Compute maximum tick label length for a categorical data series.
+
+        Parameters
+        ----------
+        data_series : pandas.Series
+            Categorical data column used to compute maximum tick label length.
+
+        Returns
+        -------
+        int
+            Maximum number of characters in the tick labels derived from the
+            unique categories of the input series.
+        """
+        if isinstance(data_series.dtype, pd.CategoricalDtype):
+            tick_labels = [
+                str(label) for label in data_series.cat.categories
+            ]
+        else:
+            tick_labels = [
+                str(label) for label in data_series.dropna().unique().tolist()
+            ]
+        return max((len(label) for label in tick_labels), default=0)
 
     # Function to get axis labels based on log scale and stat parameters
     def resolve_hist_axis_labels(data_column, x_log_scale, y_log_scale, stat):
@@ -942,6 +1014,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     axs.append(ax_i)
 
             else:   # Facet option
+                # Compute max label length only when not explicitly provided.
+                facet_tick_max_chars = 0
+                if not pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                    facet_tick_max_chars = compute_max_tick_label_length(plot_data[data_column])
+
                 # Derive facet geometry based on group count and layout hints
                 # Keys include: facet_ncol, facet_height, facet_aspect
                 facet_layout = _derive_facet_geometry(
@@ -949,6 +1026,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     facet_ncol=facet_ncol,
                     facet_fig_width=facet_fig_width,
                     facet_fig_height=facet_fig_height,
+                    facet_tick_max_chars=facet_tick_max_chars,
+                    facet_tick_rotation=facet_tick_rotation,
                 )
 
                 # Compute global bins so all facets use consistent boundaries.

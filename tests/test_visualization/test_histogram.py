@@ -627,10 +627,10 @@ class TestHistogram(unittest.TestCase):
         with self.assertRaises(ValueError):
             histogram(
                 self.adata,
-            feature='marker1',
-            group_by='annotation2',
-            facet=True,
-            facet_ncol='bad',
+                feature='marker1',
+                group_by='annotation2',
+                facet=True,
+                facet_ncol='bad',
             )
         with self.assertRaises(ValueError):
             histogram(
@@ -661,11 +661,11 @@ class TestHistogram(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     histogram(
                         self.adata,
-                    feature='marker1',
-                    group_by='annotation2',
-                    facet=True,
-                    facet_fig_width=width,
-                    facet_fig_height=height,
+                        feature='marker1',
+                        group_by='annotation2',
+                        facet=True,
+                        facet_fig_width=width,
+                        facet_fig_height=height,
                     )
 
     def test_facet_figure_size_hints_require_pair(self):
@@ -686,6 +686,117 @@ class TestHistogram(unittest.TestCase):
                 facet=True,
                 facet_fig_height=3.5,
             )
+
+    def test_facet_tick_rotation_zero_matches_default_behavior(self):
+        """Explicit zero rotation should match omitted rotation behavior."""
+        fig_default, _, _ = histogram(
+            self.adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+        ).values()
+        fig_zero, _, _ = histogram(
+            self.adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+            facet_tick_rotation=0,
+        ).values()
+
+        self.assertAlmostEqual(fig_default.get_figwidth(), fig_zero.get_figwidth(), places=6)
+        self.assertAlmostEqual(fig_default.get_figheight(), fig_zero.get_figheight(), places=6)
+
+    def test_facet_long_label_geometry_adjustment_without_size_hints(self):
+        """Long rotated categorical labels should increase default facet geometry."""
+        X = np.arange(1, 13, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {
+                'annotation_short': pd.Categorical(
+                    ['A', 'B', 'C', 'D'] * 3,
+                    categories=['A', 'B', 'C', 'D'],
+                ),
+                'annotation_long': pd.Categorical(
+                    [
+                        'Activated T/B Cell',
+                        'Cytotoxic T Cell',
+                        'Follicular Dendritic Cell',
+                        'Regulatory T Cell',
+                    ] * 3,
+                    categories=[
+                        'Activated T/B Cell',
+                        'Cytotoxic T Cell',
+                        'Follicular Dendritic Cell',
+                        'Regulatory T Cell',
+                    ],
+                ),
+                'annotation2': ['g1', 'g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g2',
+                                'g3', 'g3', 'g3', 'g3'],
+            },
+            index=[f'cell_{i}' for i in range(12)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        fig_short, _, _ = histogram(
+            adata,
+            annotation='annotation_short',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol=2,
+            facet_tick_rotation=45,
+        ).values()
+        fig_long, _, _ = histogram(
+            adata,
+            annotation='annotation_long',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol=2,
+            facet_tick_rotation=45,
+        ).values()
+
+        self.assertGreater(fig_long.get_figwidth(), fig_short.get_figwidth())
+        self.assertGreater(fig_long.get_figheight(), fig_short.get_figheight())
+
+    def test_facet_long_label_geometry_respects_explicit_size_hints(self):
+        """Explicit facet figure-size hints should remain authoritative."""
+        X = np.arange(1, 13, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {
+                'annotation_long': pd.Categorical(
+                    [
+                        'Activated T/B Cell',
+                        'Cytotoxic T Cell',
+                        'Follicular Dendritic Cell',
+                        'Regulatory T Cell',
+                    ] * 3,
+                    categories=[
+                        'Activated T/B Cell',
+                        'Cytotoxic T Cell',
+                        'Follicular Dendritic Cell',
+                        'Regulatory T Cell',
+                    ],
+                ),
+                'annotation2': ['g1', 'g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g2',
+                                'g3', 'g3', 'g3', 'g3'],
+            },
+            index=[f'cell_{i}' for i in range(12)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        adata = anndata.AnnData(X, obs=obs, var=var)
+
+        fig, _, _ = histogram(
+            adata,
+            annotation='annotation_long',
+            group_by='annotation2',
+            facet=True,
+            facet_ncol=2,
+            facet_tick_rotation=60,
+            facet_fig_width=10,
+            facet_fig_height=4,
+        ).values()
+
+        self.assertAlmostEqual(fig.get_figwidth(), 10.0, places=2)
+        self.assertAlmostEqual(fig.get_figheight(), 4.0, places=2)
 
     def test_facet_plot_shared_bins_consistency_numeric(self):
         """Numeric facets keep shared bins for int/default-like bins inputs."""
@@ -808,6 +919,45 @@ class TestHistogram(unittest.TestCase):
                 np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
                 "Facet categorical y-ticks should remain shared across panels."
             )
+
+    def test_facet_plot_categorical_annotation_ignores_bins(self):
+        """Facet categorical annotations should ignore custom bins values."""
+        fig_small, axs_small, _ = histogram(
+            self.adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+            bins=2,
+        ).values()
+        fig_large, axs_large, _ = histogram(
+            self.adata,
+            annotation='annotation1',
+            group_by='annotation2',
+            facet=True,
+            bins=99,
+        ).values()
+
+        axs_small = axs_small if isinstance(axs_small, (list, np.ndarray)) else [axs_small]
+        axs_large = axs_large if isinstance(axs_large, (list, np.ndarray)) else [axs_large]
+
+        self.assertEqual(len(axs_small), len(axs_large))
+
+        axis_small = axs_small[0]
+        axis_large = axs_large[0]
+        small_centers = [
+            patch.get_x() + patch.get_width() / 2
+            for patch in axis_small.patches
+        ]
+        large_centers = [
+            patch.get_x() + patch.get_width() / 2
+            for patch in axis_large.patches
+        ]
+        self.assertEqual(small_centers, large_centers)
+        self.assertEqual(
+            [tick.get_text() for tick in axis_small.get_xticklabels()],
+            [tick.get_text() for tick in axis_large.get_xticklabels()],
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

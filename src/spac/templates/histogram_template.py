@@ -308,6 +308,7 @@ def run_from_json(
         facet_ncol=facet_ncol,
         facet_fig_width=fig_width,
         facet_fig_height=fig_height,
+        facet_tick_rotation=x_rotate,
     )
 
     fig = result["fig"]
