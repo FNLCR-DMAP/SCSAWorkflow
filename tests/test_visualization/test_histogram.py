@@ -52,6 +52,38 @@ class TestHistogram(unittest.TestCase):
         var = pd.DataFrame(index=['marker1'])
         return anndata.AnnData(X, obs=obs, var=var)
 
+    def _make_long_label_facet_adata(self, include_short=False):
+        """Create small categorical facet fixtures for long-label geometry tests."""
+        obs = {
+            'annotation2': ['g1', 'g1', 'g1', 'g1',
+                            'g2', 'g2', 'g2', 'g2',
+                            'g3', 'g3', 'g3', 'g3'],
+        }
+        if include_short:
+            obs['annotation_short'] = pd.Categorical(
+                ['A', 'B', 'C', 'D'] * 3,
+                categories=['A', 'B', 'C', 'D'],
+            )
+        obs['annotation_long'] = pd.Categorical(
+            [
+                'Activated T/B Cell',
+                'Cytotoxic T Cell',
+                'Follicular Dendritic Cell',
+                'Regulatory T Cell',
+            ] * 3,
+            categories=[
+                'Activated T/B Cell',
+                'Cytotoxic T Cell',
+                'Follicular Dendritic Cell',
+                'Regulatory T Cell',
+            ],
+        )
+        return anndata.AnnData(
+            np.arange(1, 13, dtype=np.float32).reshape(-1, 1),
+            obs=pd.DataFrame(obs, index=[f'cell_{i}' for i in range(12)]),
+            var=pd.DataFrame(index=['marker1']),
+        )
+
     def test_both_feature_and_annotation(self):
         err_msg = ("Cannot pass both feature and annotation,"
                    " choose one.")
@@ -688,6 +720,34 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(fig._supxlabel.get_text(), 'annotation1')
         self.assertEqual(fig._supylabel.get_text(), 'Count')
 
+    def test_facet_plot_numeric_annotation(self):
+        """Facet mode should support numeric annotations sourced from obs."""
+        adata = self.adata.copy()
+        adata.obs['annotation_numeric'] = np.arange(
+            adata.n_obs,
+            dtype=np.float32,
+        )
+
+        fig, axs, _ = histogram(
+            adata,
+            annotation='annotation_numeric',
+            group_by='annotation2',
+            facet=True,
+        ).values()
+
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        expected_groups = adata.obs['annotation2'].dropna().nunique()
+        self.assertIsNotNone(fig)
+        self.assertEqual(len(axs), expected_groups)
+
+        for axis in axs:
+            self.assertGreater(len(axis.patches), 0)
+
+        self.assertIsNotNone(fig._supxlabel)
+        self.assertIsNotNone(fig._supylabel)
+        self.assertEqual(fig._supxlabel.get_text(), 'annotation_numeric')
+        self.assertEqual(fig._supylabel.get_text(), 'Count')
+
     def test_facet_ncol_layout_hints(self):
         """Facet ncol supports positive int and documented auto behavior."""
         # Explicit two-column layout should create two facet columns.
@@ -799,34 +859,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_facet_long_label_geometry_adjustment_without_size_hints(self):
         """Long rotated categorical labels should increase default facet geometry."""
-        X = np.arange(1, 13, dtype=np.float32).reshape(-1, 1)
-        obs = pd.DataFrame(
-            {
-                'annotation_short': pd.Categorical(
-                    ['A', 'B', 'C', 'D'] * 3,
-                    categories=['A', 'B', 'C', 'D'],
-                ),
-                'annotation_long': pd.Categorical(
-                    [
-                        'Activated T/B Cell',
-                        'Cytotoxic T Cell',
-                        'Follicular Dendritic Cell',
-                        'Regulatory T Cell',
-                    ] * 3,
-                    categories=[
-                        'Activated T/B Cell',
-                        'Cytotoxic T Cell',
-                        'Follicular Dendritic Cell',
-                        'Regulatory T Cell',
-                    ],
-                ),
-                'annotation2': ['g1', 'g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g2',
-                                'g3', 'g3', 'g3', 'g3'],
-            },
-            index=[f'cell_{i}' for i in range(12)],
-        )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
+        adata = self._make_long_label_facet_adata(include_short=True)
 
         fig_short, _, _ = histogram(
             adata,
@@ -850,30 +883,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_facet_long_label_geometry_respects_explicit_size_hints(self):
         """Explicit facet figure-size hints should remain authoritative."""
-        X = np.arange(1, 13, dtype=np.float32).reshape(-1, 1)
-        obs = pd.DataFrame(
-            {
-                'annotation_long': pd.Categorical(
-                    [
-                        'Activated T/B Cell',
-                        'Cytotoxic T Cell',
-                        'Follicular Dendritic Cell',
-                        'Regulatory T Cell',
-                    ] * 3,
-                    categories=[
-                        'Activated T/B Cell',
-                        'Cytotoxic T Cell',
-                        'Follicular Dendritic Cell',
-                        'Regulatory T Cell',
-                    ],
-                ),
-                'annotation2': ['g1', 'g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g2',
-                                'g3', 'g3', 'g3', 'g3'],
-            },
-            index=[f'cell_{i}' for i in range(12)],
-        )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
+        adata = self._make_long_label_facet_adata()
 
         fig, _, _ = histogram(
             adata,
@@ -893,16 +903,15 @@ class TestHistogram(unittest.TestCase):
         """Numeric facets keep shared bins for int/default-like bins inputs."""
         # Unbalanced groups: each group occupies only part of the global range.
         # If bins are computed per-group (bad path), centers/ticks may diverge.
-        X = np.array([[0.0], [1.0], [2.0], [10.0], [11.0], [12.0]],
-                     dtype=np.float32)
-        obs = pd.DataFrame(
-            {
-                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2'],
-            },
+        adata = anndata.AnnData(
+            np.array([[0.0], [1.0], [2.0], [10.0], [11.0], [12.0]],
+                     dtype=np.float32),
+            obs=pd.DataFrame(
+                {'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2']},
             index=[f'cell_{i}' for i in range(6)],
+            ),
+            var=pd.DataFrame(index=['marker1']),
         )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
 
         # Test one explicit and one default-like bins path.
         for bins_value in [4, None]:
@@ -958,19 +967,22 @@ class TestHistogram(unittest.TestCase):
     def test_facet_plot_shared_bins_consistency_categorical(self):
         """Facet categorical bins stay aligned even with missing labels."""
         # Build unbalanced facet groups where some labels are missing per group.
-        X = np.arange(1, 10, dtype=np.float32).reshape(-1, 1)
-        obs = pd.DataFrame(
+        adata = anndata.AnnData(
+            np.arange(1, 10, dtype=np.float32).reshape(-1, 1),
+            obs=pd.DataFrame(
             {
                 'annotation1': pd.Categorical(
                     ['A', 'A', 'B', 'A', 'C', 'C', 'B', 'C', 'A'],
                     categories=['A', 'B', 'C'],
                 ),
-                'annotation2': ['g1', 'g1', 'g1', 'g2', 'g2', 'g2', 'g3', 'g3', 'g3'],
+                    'annotation2': ['g1', 'g1', 'g1',
+                                    'g2', 'g2', 'g2',
+                                    'g3', 'g3', 'g3'],
             },
             index=[f'cell_{i}' for i in range(9)],
+            ),
+            var=pd.DataFrame(index=['marker1']),
         )
-        var = pd.DataFrame(index=['marker1'])
-        adata = anndata.AnnData(X, obs=obs, var=var)
 
         fig, axs, df = histogram(
             adata,
