@@ -1,18 +1,18 @@
-# Reference copy of the Dockerfile used to build nciccbr/spac Docker image
-# for Galaxy and Code Ocean tools.
-# The canonical build is triggered via PR to: https://github.com/CCBR/Dockers2
-# Docker Hub: https://hub.docker.com/r/nciccbr/spac
 FROM continuumio/miniconda3:24.3.0-0
+
 # Build arguments
 ARG ENV_NAME=spac
-ARG GITHUB_BRANCH=main
-ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
+# Branch/commit info baked in at build time for traceability when testing
+# an unreleased feature branch on AWS.
+ARG GIT_BRANCH=feature/phenograph-gpu-refactor
+ARG GIT_COMMIT=4bd1aafe9540f219982e468a43808b8bda837c00
 
 # Set labels
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC - Single Cell Spatial Analysis Container"
-LABEL version="0.9.1"
-LABEL github.branch="${GITHUB_BRANCH}"
+LABEL version="0.9.2"
+LABEL git.branch="${GIT_BRANCH}"
+LABEL git.commit="${GIT_COMMIT}"
 
 # Install system dependencies including Chromium for Kaleido (ARM64 compatible)
 RUN apt-get update && \
@@ -28,7 +28,6 @@ RUN apt-get update && \
     libgomp1 \
     libglu1-mesa \
     xvfb \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Chromium for Kaleido visualization support (ARM64 compatible)
@@ -44,12 +43,14 @@ RUN conda install -n base -y conda-libmamba-solver && \
     conda config --set solver libmamba
 
 # Simulate exactly what a reviewer would do following README.md instructions
-WORKDIR /opt/SCSAWorkflow
+WORKDIR /home/reviewer/SCSAWorkflow
 
-# Step 1: Fetch environment.yml from GitHub branch
-# (Replaces local COPY since we're installing from GitHub)
-RUN curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/environment.yml" \
-    -o environment.yml
+# Step 1: Copy the repository files (simulating a reviewer's local setup)
+# This means the image contains WHATEVER BRANCH is checked out at build time.
+# For feature-branch testing on AWS before a release is tagged, simply
+# check out the branch locally and run `docker build` — the image is
+# automatically pinned to that working tree.
+COPY . .
 
 # Step 2: Follow README.md instructions exactly
 # "If conda is not activate" - conda activate (already active in base)
@@ -75,11 +76,8 @@ ENV CONDA_PREFIX=/opt/conda/envs/${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
 ENV PYTHONPATH=/opt/conda/envs/${ENV_NAME}/lib/python3.9/site-packages:${PYTHONPATH}
 
-# Step 6: "Install the SPAC package" from GitHub branch
-# (Replaces: pip install -e . with direct GitHub install)
-# Using --no-deps to preserve conda-installed package versions (pandas 1.5.3, scimap 2.1.3_dmap_pandas153)
-RUN /opt/conda/envs/${ENV_NAME}/bin/pip install --no-deps \
-    "git+https://github.com/${GITHUB_REPO}.git@${GITHUB_BRANCH}"
+# Step 6: "Install the SPAC package in development mode"
+RUN /opt/conda/envs/${ENV_NAME}/bin/pip install -e .
 
 # Make conda activate spac environment automatically in bash shells
 RUN echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
@@ -106,7 +104,16 @@ RUN mkdir -p /workspace /data /results
 # Install jupyter and nbconvert for notebook testing
 RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
 
-# Verify SPAC installation works correctly in multiple ways
+# -----------------------------------------------------------------------------
+# Verify SPAC installation works correctly in multiple ways.
+#
+# The new CPU tool (phenograph_clustering_cpu.xml) relies on:
+#   - spac.transform.clustering.phenograph (new module tree)
+#   - spac.templates.phenograph_clustering_cpu_template (new template)
+#
+# Fail the build if either fails to import, so we catch packaging/structure
+# errors at build time rather than Galaxy runtime.
+# -----------------------------------------------------------------------------
 RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     echo "Test 1: Direct python call" && \
     python -c "import spac; print(f'SPAC version: {spac.__version__}')" && \
@@ -116,12 +123,15 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     python -c "import sys; print(sys.executable)" && \
     echo "Test 4: Import scimap" && \
     python -c "import scimap; print('scimap imported successfully')" && \
-    echo "Test 5: Check templates location" && \
-    python -c "import spac; import os; templates_dir = os.path.join(os.path.dirname(spac.__file__), 'templates'); print(f'Templates dir: {templates_dir}'); print('Templates exist:', os.path.exists(templates_dir))" && \
-    echo "Test 6: Verify UMAP compatibility with scikit-learn" && \
-    python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
-    echo "=== ALL TESTS PASSED ===" || \
-    echo "Some import issues detected but proceeding"
+    echo "Test 5: Legacy CPU path (unchanged)" && \
+    python -c "from spac.transformations import phenograph_clustering; \
+               from spac.templates.phenograph_clustering_template import run_from_json; \
+               print('legacy CPU path OK')" && \
+    echo "Test 6: New CPU path (transform/clustering/phenograph)" && \
+    python -c "from spac.transform.clustering.phenograph import phenograph_cpu, prepare_features; \
+               from spac.templates.phenograph_clustering_cpu_template import run_from_json; \
+               print('new CPU path OK')" && \
+    echo "=== ALL TESTS PASSED ==="
 
 # Set working directory for Jupyter (will be mounted via volume)
 WORKDIR /workspace

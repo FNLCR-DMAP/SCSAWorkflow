@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<tool id="spac_phenograph_clustering_gpu"
+      name="Phenograph Clustering GPU [SPAC] [DMAP]"
+      version="1.0.0"
+      profile="24.2">
+    <description>GPU-accelerated PhenoGraph clustering using RAPIDS (grapheno backend). For large datasets (>~500K cells) where CPU is too slow.</description>
+    <requirements>
+        <container type="docker">nciccbr/spac-gpu:v1.0.0</container>
+    </requirements>
+    <configfiles>
+        <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
+    </configfiles>
+    <command detect_errors="exit_code"><![CDATA[
+
+echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json &&
+python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json'
+    --bool-values Profiling
+    --list-values Resolution_List
+    --inject-outputs --outputs-config outputs_config.json &&
+python -c "from spac.templates.phenograph_clustering_gpu_template import run_from_json; run_from_json('cleaned_params.json')"
+
+    ]]></command>
+    <inputs>
+        <param name="Upstream_Analysis" type="data" format="h5ad,binary,pickle"
+               label="Upstream Analysis"
+               help="Link to prior processed dataset in the analysis."/>
+        <param name="Table_to_Process" type="text" label="Table to Process" value="Original"
+               help="Source table. The default 'Original' uses the raw dataset."/>
+        <param name="K_Nearest_Neighbors" type="integer" label="K-Nearest Neighbors" min="1" value="30"
+               help="Number of nearest neighbors."/>
+        <param name="Seed" type="integer" label="Seed" min="1" value="42"
+               help="Random seed forwarded to cugraph.leiden (RAPIDS 24.x only)."/>
+        <param name="Resolution_Parameter" type="float" label="Resolution Parameter" min="0" value="1.0"
+               help="Leiden resolution. Higher values produce more clusters."/>
+        <param name="Output_Annotation_Name" type="text" label="Output Annotation Name" value="phenograph"
+               help="Annotation column name added to adata.obs. In profiling mode, per-resolution columns are named '{name}-{k}-{resolution}'."/>
+        <param name="Number_of_Iterations" type="integer" label="Number of Iterations" min="-1" value="100"
+               help="Leiden iterations (passed as max_iter on cugraph 24.x; ignored with a warning on 22.08)."/>
+        <section name="profiling_parameters" title="Profiling (multi-resolution sweep)" expanded="false">
+            <param name="Profiling" type="boolean" label="Profiling"
+                   truevalue="True" falsevalue="False" checked="false"
+                   help="If enabled, run Leiden at each resolution in the list. KNN and Jaccard are computed once and reused."/>
+            <repeat name="Resolution_List_repeat" title="Resolution List">
+                <param name="value" type="text" label="Value"
+                       help="A resolution value (e.g., 0.3). Add one entry per resolution to sweep."/>
+            </repeat>
+        </section>
+    </inputs>
+    <outputs>
+        <data name="params_json_debug" format="json" from_work_dir="galaxy_params.json"
+              label="${tool.name} on ${on_string}: Raw Parameters"/>
+        <data name="cleaned_params_debug" format="json" from_work_dir="cleaned_params.json"
+              label="${tool.name} on ${on_string}: Cleaned Parameters"/>
+        <data name="analysis" format="binary" from_work_dir="output.pickle"
+              label="${tool.name} on ${on_string}: Analysis"/>
+    </outputs>
+    <help><![CDATA[
+
+**Phenograph Clustering GPU [SPAC] [DMAP]**
+
+GPU-accelerated PhenoGraph using the grapheno algorithm (NVIDIA RAPIDS cuml +
+cugraph). Three-step GPU pipeline: Dask KNN -> Jaccard similarity ->
+Leiden community detection, plus sort_by_size relabeling.
+
+**When to use GPU vs CPU**
+
+- < 500K cells: CPU is fine
+- 500K - 5M cells: GPU recommended
+- > 5M cells: GPU required
+
+**Profiling mode**
+
+When enabled, runs Leiden at each resolution in the Resolution List,
+reusing the expensive KNN and Jaccard computations across resolutions.
+For N resolutions this saves (N-1) times the KNN+Jaccard cost.
+
+**GPU instance sizing**
+
+- A10G (24 GB): up to ~2M cells
+- A100 (80 GB): up to ~15M cells
+
+**Outputs**
+
+- analysis: pickle file containing the AnnData object with cluster labels
+  in ``adata.obs`` and provenance in ``adata.uns['phenograph_clustering_gpu']``.
+
+    ]]></help>
+    <citations>
+        <citation type="bibtex">@misc{spac_toolkit,
+    author = {FNLCR DMAP Team},
+    title = {SPAC: SPAtial single-Cell analysis},
+    year = {2022},
+    url = {https://github.com/FNLCR-DMAP/SCSAWorkflow}
+}</citation>
+        <citation type="doi">10.1101/2025.04.02.646782</citation>
+    </citations>
+</tool>
