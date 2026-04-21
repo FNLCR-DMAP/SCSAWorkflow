@@ -564,6 +564,11 @@ class TestHistogram(unittest.TestCase):
         # No bins parameter passed
         fig, ax, df = histogram(self.adata, feature='marker1').values()
         self.assertEqual(len(ax.patches), expected_bins)
+        self.assertEqual(len(df), expected_bins)
+        self.assertEqual(
+            set(df.columns),
+            {'count', 'bin_left', 'bin_right', 'bin_center'},
+        )
 
     def test_default_like_bins_calculation(self):
         """Default-like bins values should use Rice-rule fallback."""
@@ -578,6 +583,11 @@ class TestHistogram(unittest.TestCase):
                 ).values()
 
                 self.assertEqual(len(ax.patches), expected_bins)
+                self.assertEqual(len(df), expected_bins)
+                self.assertEqual(
+                    set(df.columns),
+                    {'count', 'bin_left', 'bin_right', 'bin_center'},
+                )
 
     def test_grouped_separate_ignores_multiple(self):
         """Grouped separate mode should ignore irrelevant multiple settings."""
@@ -963,6 +973,25 @@ class TestHistogram(unittest.TestCase):
                         np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
                         "Facet numeric y-ticks should remain shared across panels."
                     )
+                
+                # Check that the returned DataFrame has expected structure and content
+                self.assertEqual(
+                    set(df.columns),
+                    {'count', 'bin_left', 'bin_right', 'bin_center', 'annotation2'},
+                )
+                self.assertNotIn('marker1', df.columns)
+                self.assertEqual(set(df['annotation2']), {'g1', 'g2'})
+                self.assertEqual(df['count'].sum(), adata.n_obs)
+                grouped_edges = [
+                    (
+                        np.round(group_df['bin_left'].to_numpy(), 6),
+                        np.round(group_df['bin_right'].to_numpy(), 6),
+                    )
+                    for _, group_df in df.groupby('annotation2')
+                ]
+                self.assertEqual(len(grouped_edges), 2)
+                self.assertTrue(np.array_equal(grouped_edges[0][0], grouped_edges[1][0]))
+                self.assertTrue(np.array_equal(grouped_edges[0][1], grouped_edges[1][1]))
 
     def test_facet_plot_shared_bins_consistency_categorical(self):
         """Facet categorical bins stay aligned even with missing labels."""
@@ -1021,6 +1050,24 @@ class TestHistogram(unittest.TestCase):
             self.assertTrue(
                 np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
                 "Facet categorical y-ticks should remain shared across panels."
+            )
+        
+        # Check that the returned DataFrame has expected structure and content
+        self.assertEqual(
+            set(df.columns),
+            {'count', 'bin_left', 'bin_right', 'bin_center', 'annotation2'},
+        )
+        self.assertNotIn('annotation1', df.columns)
+        self.assertEqual(set(df['annotation2']), {'g1', 'g2', 'g3'})
+        self.assertEqual(df['count'].sum(), adata.n_obs)
+        self.assertEqual(
+            {str(value) for value in df['bin_center'].unique()},
+            {'A', 'B', 'C'},
+        )
+        for _, group_df in df.groupby('annotation2'):
+            self.assertEqual(
+                {str(value) for value in group_df['bin_center']},
+                {'A', 'B', 'C'},
             )
 
     def test_facet_plot_categorical_annotation_ignores_bins(self):

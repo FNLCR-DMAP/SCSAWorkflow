@@ -886,25 +886,49 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 'count': counts.values
             })
 
-    # Function to compute shared bin edges for grouped histograms
-    def compute_global_bin_edges(data_series, bins):
-        """Compute shared bin boundaries for grouped histogram paths.
-
-        Parameters
-        ----------
-        data_series : pandas.Series
-            Data column used to derive shared bins.
-        bins : int or sequence
-            Bin specification forwarded to numpy/seaborn logic.
-
-        Returns
-        -------
-        numpy.ndarray or pandas.Index
-            Numeric bin edges, or categorical labels for non-numeric data.
-        """
+    def build_grouped_histogram_table(
+        plot_data, data_column, group_by, groups, bins
+    ):
+        """Build per-group histogram-bin tables for grouped histogram paths."""
+        # Determine shared bins across groups for consistent plotting.
+        data_series = plot_data[data_column]
         if pd.api.types.is_numeric_dtype(data_series):
-            return np.histogram_bin_edges(data_series, bins=bins)
-        return data_series.unique()
+            shared_bins = np.histogram_bin_edges(data_series, bins=bins)
+        elif isinstance(data_series.dtype, pd.CategoricalDtype):
+            shared_bins = data_series.cat.categories
+        else:
+            shared_bins = pd.Index(pd.unique(data_series.dropna()))
+
+        # Compute histograms for each group using the shared bins.
+        histograms = []
+        for group in groups:
+            group_data = plot_data.loc[
+                plot_data[group_by] == group, data_column
+            ]
+            if pd.api.types.is_numeric_dtype(data_series):
+                group_hist = calculate_histogram(
+                    group_data, bins, bin_edges=shared_bins
+                )
+            else:
+                # For categorical data, pad missing categories with zero counts
+                # to ensure consistent plotting.
+                group_hist = calculate_histogram(group_data, bins)
+                group_hist = (
+                    group_hist
+                    .set_index('bin_center')
+                    .reindex(shared_bins)
+                    .rename_axis('bin_center')
+                    .reset_index()
+                )
+                group_hist['count'] = group_hist['count'].fillna(0)
+                group_hist['bin_left'] = group_hist['bin_center']
+                group_hist['bin_right'] = group_hist['bin_center']
+            group_hist[group_by] = group
+            histograms.append(group_hist)
+
+        # Concatenate all group histograms into a single DataFrame for plotting.
+        hist_data = pd.concat(histograms, ignore_index=True)
+        return hist_data, shared_bins
 
     # Function to compute maximum tick label length for categorical data
     def compute_max_tick_label_length(data_series):
@@ -986,29 +1010,28 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             if ax is None:
                 fig, ax = plt.subplots()
 
-            # Compute global bin edges based on the entire dataset
-            global_bin_edges = compute_global_bin_edges(
-                plot_data[data_column], kwargs['bins']
+            hist_data, shared_bins = build_grouped_histogram_table(
+                plot_data,
+                data_column,
+                group_by,
+                groups,
+                bins=kwargs.pop('bins'),
             )
-
-            hist_data = []
-            # Compute histograms for each group separately and combine them
-            for group in groups:
-                group_data = plot_data[
-                    plot_data[group_by] == group
-                ][data_column]
-                group_hist = calculate_histogram(group_data, kwargs['bins'],
-                                                 bin_edges=global_bin_edges)
-                group_hist[group_by] = group
-                hist_data.append(group_hist)
-            hist_data = pd.concat(hist_data, ignore_index=True)
+            if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                kwargs['bins'] = shared_bins.tolist()
 
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
 
-            sns.histplot(data=hist_data, x='bin_center', weights='count',
-                         hue=group_by, ax=ax, **kwargs)
+            sns.histplot(
+                data=hist_data,
+                x='bin_center',
+                weights='count',
+                hue=group_by,
+                ax=ax,
+                **kwargs,
+            )
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
@@ -1051,7 +1074,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     facet_tick_max_chars = compute_max_tick_label_length(plot_data[data_column])
 
                 # Derive facet geometry based on group count and layout hints
-                # Keys include: facet_ncol, facet_height, facet_aspect
+                # Returned layout keys: facet_ncol, facet_height, facet_aspect
                 facet_layout = _derive_facet_geometry(
                     n_groups=n_groups,
                     facet_ncol=facet_ncol,
@@ -1061,14 +1084,21 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     facet_tick_rotation=facet_tick_rotation,
                 )
 
-                # Compute global bins so all facets use consistent boundaries.
-                global_bin_edges = compute_global_bin_edges(
-                    plot_data[data_column], kwargs['bins']
+                # Compute histogram data and shared bins for consistent plotting.
+                # For non-numeric data, shared_bins will be dropped intentionally.
+                hist_data, shared_bins = build_grouped_histogram_table(
+                    plot_data,
+                    data_column,
+                    group_by,
+                    groups,
+                    bins=kwargs.pop('bins'),
                 )
+                if pd.api.types.is_numeric_dtype(plot_data[data_column]):
+                    kwargs['bins'] = shared_bins.tolist()
 
                 # Create the FacetGrid for the histogram
                 hist = sns.FacetGrid(
-                    plot_data,
+                    hist_data,
                     col=group_by,
                     col_wrap=facet_layout['facet_ncol'],
                     height=facet_layout['facet_height'],
@@ -1077,15 +1107,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     sharey=True,   
                 )
 
-                hist_kwargs = kwargs.copy()
-                # For numeric data, pass global bin edges to ensure consistent binning across facets.
-                if pd.api.types.is_numeric_dtype(plot_data[data_column]):
-                    hist_kwargs['bins'] = global_bin_edges.tolist()
-                else:
-                    hist_kwargs.pop('bins', None)
-
                 # Map the histogram function to the grid
-                hist.map_dataframe(sns.histplot, x=data_column, **hist_kwargs)
+                hist.map_dataframe(
+                    sns.histplot,
+                    x='bin_center',
+                    weights='count',
+                    **kwargs,
+                )
 
                 # Keep shared scale but show x tick numbers on bottom row and y tick numbers on left column
                 for ax_i in hist.axes.flat:
@@ -1114,7 +1142,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     facet_fig_height or fig.get_figheight(),
                 )
                 axs.extend(hist.axes.flat)
-                hist_data = plot_data
 
     else:
         if ax is None:
