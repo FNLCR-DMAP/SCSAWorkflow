@@ -756,80 +756,73 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     def _parse_optional_number(
         name,
         value,
-        default_like_values=None,
-        to_type="float",
-        to_range=None,
-        to_default_value=None,
-        parse_rules : Optional[Dict[str, Union[int, float]]] = None,
+        *,
+        kind=float,
+        default=None,
+        positive=False,
+        tokens=None,
     ):
-        """Parse an optional numeric value with default-like string handling."""
-        def _is_default_like(value, default_like_values=None):
-            if isinstance(value, str) and default_like_values is not None:
-                return value.strip().lower() in default_like_values
-            return False
+        """Parse an optional numeric hint.
 
-        if value is None or _is_default_like(value, default_like_values):
-            return to_default_value
-        if parse_rules and isinstance(value, str):
-            parse_rules = {k.lower(): v for k, v in parse_rules.items()}
-            value_lower = value.strip().lower()
-            if value_lower in parse_rules:
-                logging.info(
-                    f'Parsed {name}="{value}" as {parse_rules[value_lower]} '
-                )
-                return parse_rules[value_lower]
+        Returns ``default`` for ``None``, resolves recognized string tokens
+        before numeric coercion, and optionally enforces finite and positive
+        values on the parsed result.
+        """
+        if value is None:
+            return default
+        if isinstance(value, str):
+            value = value.strip()
+            if tokens and value.lower() in tokens:
+                return tokens[value.lower()]
+        expected = (
+            f'{"positive " if positive else ""}{kind.__name__}'
+            f'{" or a supported keyword" if tokens else ""}'
+        )
+        if isinstance(value, bool):
+            raise ValueError(f'{name} must be a {expected}. Received "{value}".')
         try:
-            if to_type == "float":
-                parsed = float(value)
-            elif to_type == "int":
-                parsed = int(value)
+            parsed = kind(value)
         except (TypeError, ValueError):
-            raise ValueError(
-                f'{name} must be a number of type {to_type}'
-                f'{" or one of default values. " if default_like_values else ". "}'
-                f'Received "{value}".'
-            )
+            raise ValueError(f'{name} must be a {expected}. Received "{value}".')
         if not math.isfinite(parsed):
             raise ValueError(
-                f'{name} must be a finite {to_type}. Received "{value}".'
+                f'{name} must be a finite {kind.__name__}. '
+                f'Received "{value}".'
             )
-        if to_range == "positive":
-            to_range = [float('1e-10'), float('inf')]
-        if isinstance(to_range, list):
-            min_val, max_val = to_range
-            if parsed < min_val or parsed > max_val:
-                raise ValueError(
-                    f'{name} must be a {to_type} in the range [{min_val}, {max_val}].'
-                    f' Received "{value}".'
-                )
+        if positive and parsed <= 0:
+            raise ValueError(
+                f'{name} must be a positive {kind.__name__}. '
+                f'Received "{value}".'
+            )
         return parsed
 
     # Parse max_groups with "unlimited" handling and validation.
     max_groups = _parse_optional_number(
         "max_groups",
-        kwargs.pop('max_groups', 20),
-        to_type="int",
-        to_default_value=20,
-        parse_rules={"unlimited": float('inf')},
+        kwargs.pop('max_groups', None),
+        kind=int,
+        default=20,
+        positive=True,
+        tokens={"unlimited": float('inf')},
     )
 
     # Parse facet layout hints so they never leak to seaborn.
     facet_ncol = _parse_optional_number(
         "facet_ncol",
         kwargs.pop('facet_ncol', None),
-        default_like_values={"", "auto", "none"},
-        to_type="int",
-        to_range="positive",
+        kind=int,
+        positive=True,
+        tokens={"": None, "auto": None, "none": None},
     )
     facet_fig_width = _parse_optional_number(
         "facet_fig_width",
         kwargs.pop('facet_fig_width', None),
-        to_range="positive",
+        positive=True,
     )
     facet_fig_height = _parse_optional_number(
         "facet_fig_height",
         kwargs.pop('facet_fig_height', None),
-        to_range="positive",
+        positive=True,
     )
     if (facet_fig_width is None) != (facet_fig_height is None):
         raise ValueError(
@@ -839,7 +832,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     facet_tick_rotation = _parse_optional_number(
         "facet_tick_rotation",
         kwargs.pop('facet_tick_rotation', None),
-        to_default_value=0.0,
+        default=0.0,
     ) % 360.0
 
     # Function to calculate histogram data
