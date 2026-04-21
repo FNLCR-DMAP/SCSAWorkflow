@@ -564,7 +564,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         If True, and if group_by != None, create one plot combining all groups.
         If False, create separate histograms for each group.
         The appearance of combined histograms can be controlled using the
-        `multiple` and `element` parameters in **kwargs.
+        `multiple` and `element` parameters in **kwargs. Separate grouped or
+        faceted histograms ignore `multiple`.
         To control how the histograms are normalized (e.g., to divide the
         histogram by the number of elements in every group), use the `stat`
         parameter in **kwargs. For example, set `stat="probability"` to show
@@ -589,7 +590,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         Additional keyword arguments passed to seaborn histplot function.
         Key arguments include:
         - `multiple`: Determines how the subsets of data are displayed
-           on the same axes. Options include:
+           on the same axes. Ignored when `group_by` is used with
+           `together=False`. Options include:
             * "layer": Draws each subset on top of the other
                without adjustments.
             * "dodge": Dodges bars for each subset side by side.
@@ -1013,6 +1015,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             axs.append(ax)
 
         else:
+            # 'multiple' parameter is not applicable
+            kwargs.pop('multiple', None)
+            
             if not facet:
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)

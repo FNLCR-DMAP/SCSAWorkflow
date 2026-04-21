@@ -547,6 +547,22 @@ class TestHistogram(unittest.TestCase):
 
                 self.assertEqual(len(ax.patches), expected_bins)
 
+    def test_grouped_separate_ignores_multiple(self):
+        """Grouped separate mode should ignore irrelevant multiple settings."""
+        fig, axs, _ = histogram(
+            self.adata,
+            feature='marker1',
+            group_by='annotation2',
+            together=False,
+            multiple="fill",
+        ).values()
+        self.assertIsInstance(fig, mpl.figure.Figure)
+        self.assertIsInstance(axs, list)
+        self.assertEqual(
+            len(axs),
+            self.adata.obs["annotation2"].dropna().nunique(),
+        )
+
     def test_facet_requires_group_by(self):
         """Test that facet mode requires group_by parameter"""
         with self.assertRaisesRegex(

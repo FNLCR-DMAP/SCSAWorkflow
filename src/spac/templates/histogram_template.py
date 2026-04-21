@@ -155,7 +155,9 @@ def run_from_json(
                     'No features available in adata.var_names to plot.'
                 )
 
-    # Validate and set bins
+    # Bins use a strict template contract in feature mode:
+    # "auto" or a positive integer. Loose null-like values are intentionally
+    # not treated as aliases here.
     if feature is not None:
         bins = text_to_value(
             bins,
@@ -184,44 +186,13 @@ def run_from_json(
                 "Setting bin number calculation to auto."
             )
 
-    # Validate multiple parameter based on together
-    if together is False and multiple:
-        multiple = "dodge"
-        logger.warning(
-            "Multiple should not be used when Together is False. "
-            "Setting Multiple to 'dodge'."
-        )
-
-    # Validate enum-like plotting controls after bins validation.
-    allowed_multiple = {"layer", "dodge", "stack", "fill"}
-    allowed_element = {"bars", "step", "poly"}
-    allowed_stat = {
-        "count", "frequency", "density", "probability",
-        "proportion", "percent"
-    }
     multiple = str(multiple).strip().lower()
     element = str(element).strip().lower()
     stat = str(stat).strip().lower()
-    if multiple not in allowed_multiple:
-        raise ValueError(
-            f'Multiple must be one of {sorted(allowed_multiple)}. '
-            f'Received "{multiple}".'
-        )
-    if element not in allowed_element:
-        raise ValueError(
-            f'Element must be one of {sorted(allowed_element)}. '
-            f'Received "{element}".'
-        )
-    if stat not in allowed_stat:
-        raise ValueError(
-            f'Stat must be one of {sorted(allowed_stat)}. '
-            f'Received "{stat}".'
-        )
 
-    # validate figure size parameters
-    # If "auto" is specified, in facet mode it will be passed as None,
-    # allowing it to be computed based on facet layout hints automatically. 
-    # In non-facet mode, it will default to 8x6 inches.
+    # Figure size hints use the explicit template token "auto". In facet mode
+    # it is forwarded as None so core geometry can derive the final figure
+    # size; in non-facet mode it falls back to 8x6 inches.
     fig_width = text_to_value(
         fig_width,
         default_none_text="auto",
@@ -250,9 +221,8 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
-    # Validate max_groups parameter if group_by is specified
-    # max_groups can be a positive integer or "unlimited" (case-insensitive).
-    # If missing or None, it defaults to 20.
+    # max_groups uses a strict template token contract: positive integer or
+    # the exact keyword "unlimited". Missing values keep the default of 20.
     if group_by:
         if max_groups != "unlimited":
             max_groups = text_to_value(
@@ -274,7 +244,7 @@ def run_from_json(
                 'Together and Facet cannot both be True. Please set one to False.'
             )
     
-    # Validate and canonicalize facet_ncol, allowing for "auto" or positive integers
+    # facet_ncol uses the explicit template token "auto", or a positive int.
     facet_ncol = text_to_value(
         facet_ncol,
         default_none_text="auto",
@@ -301,6 +271,22 @@ def run_from_json(
     # In facet mode, Figure_Width/Height are passed as layout hints so
     # visualization can derive panel geometry from total figure size:
     # panel_width = Figure_Width / ncol, panel_height = Figure_Height / nrow.
+    hist_kwargs = dict(
+        element=element,
+        shrink=shrink,
+        bins=bins,
+        alpha=alpha,
+        stat=stat,
+        max_groups=max_groups,
+        facet_ncol=facet_ncol,
+        facet_fig_width=fig_width,
+        facet_fig_height=fig_height,
+        facet_tick_rotation=x_rotate,
+    )
+    # 'multiple' is only applicable when plotting multiple groups together
+    if group_by and together:
+        hist_kwargs["multiple"] = multiple
+
     result = histogram(
         adata=adata,
         feature=feature,
@@ -312,17 +298,7 @@ def run_from_json(
         x_log_scale=take_X_log,
         y_log_scale=take_Y_log,
         facet=facet,
-        multiple=multiple,
-        element=element,
-        shrink=shrink,
-        bins=bins,
-        alpha=alpha,
-        stat=stat,
-        max_groups=max_groups,
-        facet_ncol=facet_ncol,
-        facet_fig_width=fig_width,
-        facet_fig_height=fig_height,
-        facet_tick_rotation=x_rotate,
+        **hist_kwargs,
     )
 
     fig = result["fig"]
