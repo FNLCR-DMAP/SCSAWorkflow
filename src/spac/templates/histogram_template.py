@@ -403,7 +403,22 @@ def run_from_json(
         for ax in axes:
             ax.set_title(f'Count plot of "{x_var}"')
 
-    plt.tight_layout()
+    # Adjust layout to prevent title overlap
+    if facet:
+        rows = len({round(ax.get_position().y0, 3) for ax in axes})
+        fig.tight_layout(
+            rect=[
+                max(0.02, 0.038 - 0.004 * rows),
+                max(0.022, 0.036 - 0.003 * rows),
+                min(0.992, 0.98 + 0.0025 * rows),
+                max(0.974, 0.98 - 0.001 * rows),
+            ],
+            pad=max(0.35, 0.6 - 0.05 * rows),
+            h_pad=max(0.2, 0.43 - 0.04 * rows),
+            w_pad=max(0.2, 0.43 - 0.04 * rows),
+        )
+    else:
+        fig.tight_layout()
 
     logger.info("Displaying top 10 rows of histogram dataframe:")
     print(df_counts.head(10))
