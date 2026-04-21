@@ -26,7 +26,7 @@ import base64
 import time
 import json
 import re
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional 
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatch
 from functools import partial
@@ -623,6 +623,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             If not provided, or if passed as `None`/`"auto"`/`"none"`,
             the binning will be determined automatically using the Rice rule.
             Note, don't pass a numpy array, only python lists or strs/numbers.
+        
+        When `group_by` is provided, this optional key can be passed via `kwargs`:
+        - `max_groups`: positive int or "unlimited", maximum number of groups to plot.
+            Default is 20 when omitted. 
+            Caution: `"unlimited"` disables this guardrail, but may lead to
+            performance issues or unreadable plots with many groups.
+        
         When `facet=True`, these optional key can be passed via `kwargs`
         to customize FacetGrid layout:
         - `facet_ncol`: positive int or "auto", number of facet columns.
@@ -752,7 +759,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         default_like_values=None,
         to_type="float",
         to_range=None,
-        to_default_value=None
+        to_default_value=None,
+        parse_rules : Optional[Dict[str, Union[int, float]]] = None,
     ):
         """Parse an optional numeric value with default-like string handling."""
         def _is_default_like(value, default_like_values=None):
@@ -762,6 +770,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         if value is None or _is_default_like(value, default_like_values):
             return to_default_value
+        if parse_rules and isinstance(value, str):
+            parse_rules = {k.lower(): v for k, v in parse_rules.items()}
+            value_lower = value.strip().lower()
+            if value_lower in parse_rules:
+                logging.info(
+                    f'Parsed {name}="{value}" as {parse_rules[value_lower]} '
+                )
+                return parse_rules[value_lower]
         try:
             if to_type == "float":
                 parsed = float(value)
@@ -769,7 +785,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 parsed = int(value)
         except (TypeError, ValueError):
             raise ValueError(
-                f'{name} must be a positive {to_type}'
+                f'{name} must be a number of type {to_type}'
                 f'{" or one of default values. " if default_like_values else ". "}'
                 f'Received "{value}".'
             )
@@ -787,6 +803,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     f' Received "{value}".'
                 )
         return parsed
+
+    # Parse max_groups with "unlimited" handling and validation.
+    max_groups = _parse_optional_number(
+        "max_groups",
+        kwargs.pop('max_groups', 20),
+        to_type="int",
+        to_default_value=20,
+        parse_rules={"unlimited": float('inf')},
+    )
 
     # Parse facet layout hints so they never leak to seaborn.
     facet_ncol = _parse_optional_number(
@@ -953,6 +978,14 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
+        elif n_groups > max_groups:
+            raise ValueError(
+                "The number of groups in `group_by` exceeds `max_groups`: "
+                f"found {n_groups}, threshold {max_groups}.\n"
+                "Please reduce/bucket groups or use another grouping column, or "
+                "pass a larger `max_groups`.\n"
+                "See `kwargs` documentation for more details."
+            )
 
         if together:
             if ax is None:

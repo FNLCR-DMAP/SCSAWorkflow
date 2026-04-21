@@ -96,7 +96,8 @@ def run_from_json(
     feature = text_to_value(params.get("Feature", "None"))
     annotation = text_to_value(params.get("Annotation", "None"))
     layer = params.get("Table_", "Original")
-    group_by = params.get("Group_by", "None")
+    group_by = text_to_value(params.get("Group_by", "None"))
+    max_groups = params.get("Max_Groups", 20)
     together = params.get("Together", True)
     fig_width = params.get("Figure_Width", "auto")
     fig_height = params.get("Figure_Height", "auto")
@@ -249,6 +250,18 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
+    # Validate max_groups parameter if group_by is specified
+    # max_groups can be a positive integer or "unlimited" (case-insensitive).
+    # If missing or None, it defaults to 20.
+    if group_by:
+        if max_groups != "unlimited":
+            max_groups = text_to_value(
+                max_groups,
+                value_to_convert_to=20,
+                to_int=True,
+                param_name="Max_Groups",
+            )
+
     # Validate facet, group_by, and together parameters for logical consistency
     if facet: 
         if group_by is None:
@@ -293,7 +306,7 @@ def run_from_json(
         feature=feature,
         annotation=annotation,
         layer=text_to_value(layer, "Original"),
-        group_by=text_to_value(group_by),
+        group_by=group_by,
         together=together,
         ax=None,
         x_log_scale=take_X_log,
@@ -305,6 +318,7 @@ def run_from_json(
         bins=bins,
         alpha=alpha,
         stat=stat,
+        max_groups=max_groups,
         facet_ncol=facet_ncol,
         facet_fig_width=fig_width,
         facet_fig_height=fig_height,

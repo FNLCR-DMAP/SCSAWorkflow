@@ -42,6 +42,16 @@ class TestHistogram(unittest.TestCase):
         # Closes all figures to prevent memory issues
         plt.close('all')
 
+    def _make_many_groups_adata(self, n_groups=25):
+        """Create a compact AnnData fixture with one row per unique group."""
+        X = np.arange(1, n_groups + 1, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {'many_groups': [f'g{i}' for i in range(n_groups)]},
+            index=[f'cell_{i}' for i in range(n_groups)],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        return anndata.AnnData(X, obs=obs, var=var)
+
     def test_both_feature_and_annotation(self):
         err_msg = ("Cannot pass both feature and annotation,"
                    " choose one.")
@@ -301,6 +311,71 @@ class TestHistogram(unittest.TestCase):
         for ax in axs:
             self.assertEqual(ax.get_yscale(), 'log')
             self.assertEqual(ax.get_ylabel(), 'log(Count)')
+
+    def test_group_by_max_groups_default_guardrail_rejects_excess_groups(self):
+        """Default threshold should reject excessive grouped facet plotting."""
+        adata = self._make_many_groups_adata(n_groups=25)
+        with self.assertRaisesRegex(ValueError, "exceeds `max_groups`"):
+            histogram(
+                adata,
+                feature='marker1',
+                group_by='many_groups',
+                facet=True,
+            )
+
+    def test_group_by_max_groups_override_allows_grouped_plot(self):
+        """Custom positive max_groups should allow larger grouped plots."""
+        n_groups = 25
+        adata = self._make_many_groups_adata(n_groups=n_groups)
+
+        fig, axs, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='many_groups',
+            facet=True,
+            max_groups=30,
+        ).values()
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        self.assertEqual(len(axs), n_groups)
+
+    def test_group_by_max_groups_unlimited_disables_guardrail(self):
+        """max_groups='unlimited' should disable grouped guardrail validation."""
+        adata = self._make_many_groups_adata(n_groups=25)
+
+        fig, ax, _ = histogram(
+            adata,
+            feature='marker1',
+            group_by='many_groups',
+            together=True,
+            max_groups='unlimited',
+        ).values()
+        self.assertIsNotNone(fig)
+        self.assertIsInstance(ax, mpl.axes.Axes)
+
+    def test_group_by_max_groups_none_uses_default_threshold(self):
+        """Explicit None should resolve to default threshold behavior."""
+        adata = self._make_many_groups_adata(n_groups=25)
+        with self.assertRaisesRegex(ValueError, "exceeds `max_groups`"):
+            histogram(
+                adata,
+                feature='marker1',
+                group_by='many_groups',
+                together=True,
+                max_groups=None,
+            )
+
+    def test_group_by_invalid_max_groups_raises_value_error(self):
+        """Invalid max_groups values should fail fast."""
+        for value in [0, "bad", True]:
+            with self.subTest(max_groups=value):
+                with self.assertRaises(ValueError):
+                    histogram(
+                        self.adata,
+                        feature='marker1',
+                        group_by='annotation2',
+                        together=True,
+                        max_groups=value,
+                    )
 
     def test_overlay_options(self):
         fig, ax, df = histogram(
