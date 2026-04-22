@@ -848,6 +848,39 @@ class TestHistogram(unittest.TestCase):
                 facet_fig_height=3.5,
             )
 
+    def test_non_facet_figure_size_hints_are_ignored(self):
+        """Non-facet calls should ignore facet-only figure-size hints."""
+        baseline_fig, baseline_ax, _ = histogram(
+            self.adata,
+            feature='marker1',
+            facet=False,
+        ).values()
+
+        for hint_kwargs in (
+            {'facet_fig_width': 8},
+            {'facet_fig_height': 5},
+            {'facet_fig_width': 8, 'facet_fig_height': 5},
+        ):
+            with self.subTest(hints=hint_kwargs):
+                fig, ax, _ = histogram(
+                    self.adata,
+                    feature='marker1',
+                    facet=False,
+                    **hint_kwargs,
+                ).values()
+                self.assertAlmostEqual(
+                    fig.get_figwidth(),
+                    baseline_fig.get_figwidth(),
+                    places=6,
+                )
+                self.assertAlmostEqual(
+                    fig.get_figheight(),
+                    baseline_fig.get_figheight(),
+                    places=6,
+                )
+                self.assertGreater(len(ax.patches), 0)
+                self.assertEqual(len(ax.patches), len(baseline_ax.patches))
+
     def test_facet_tick_rotation_zero_matches_default_behavior(self):
         """Explicit zero rotation should match omitted rotation behavior."""
         fig_default, _, _ = histogram(

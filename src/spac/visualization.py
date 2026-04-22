@@ -627,16 +627,18 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             Note, don't pass a numpy array, only python lists or strs/numbers.
         
         When `group_by` is provided, this optional key can be passed via `kwargs`:
-        - `max_groups`: positive int or "unlimited", maximum number of groups to plot.
-            Default is 20 when omitted. 
-            Caution: `"unlimited"` disables this guardrail, but may lead to
-            performance issues or unreadable plots with many groups.
+        - `max_groups`: Controls the group-count guardrail for grouped plots.
+            Default is 20 when omitted. Pass `"unlimited"` to disable this
+            guardrail, which may lead to performance issues or unreadable plots
+            with many groups.
         
         When `facet=True`, these optional key can be passed via `kwargs`
         to customize FacetGrid layout:
-        - `facet_ncol`: positive int or "auto", number of facet columns.
-            If "auto", the function uses one column for small group counts and
-            switches to a compact grid for many groups.
+        - `facet_ncol`: Controls facet column wrapping.
+            If omitted or passed as `"auto"`, the function uses one column for
+            small group counts and switches to a compact grid for many groups.
+            Otherwise, the provided value is used to request the facet column
+            count.
         - `facet_fig_width`: float, intended final figure width in inches.
         - `facet_fig_height`: float, intended final figure height in inches.
         - `facet_tick_rotation`: float, rotation angle in degrees for x tick labels.
@@ -816,21 +818,28 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         positive=True,
         tokens={"": None, "auto": None, "none": None},
     )
-    facet_fig_width = _parse_optional_number(
-        "facet_fig_width",
-        kwargs.pop('facet_fig_width', None),
-        positive=True,
-    )
-    facet_fig_height = _parse_optional_number(
-        "facet_fig_height",
-        kwargs.pop('facet_fig_height', None),
-        positive=True,
-    )
-    if (facet_fig_width is None) != (facet_fig_height is None):
-        raise ValueError(
-            "Both facet_fig_width and facet_fig_height must be provided together, "
-            "or both must be left as None."
+    facet_fig_width = kwargs.pop('facet_fig_width', None)
+    facet_fig_height = kwargs.pop('facet_fig_height', None)
+    if facet:
+        facet_fig_width = _parse_optional_number(
+            "facet_fig_width",
+            facet_fig_width,
+            positive=True,
         )
+        facet_fig_height = _parse_optional_number(
+            "facet_fig_height",
+            facet_fig_height,
+            positive=True,
+        )
+        if (facet_fig_width is None) != (facet_fig_height is None):
+            raise ValueError(
+                "Both facet_fig_width and facet_fig_height must be provided together, "
+                "or both must be left as None."
+            )
+    else:
+        # If not faceting, ignore any provided figure size hints.
+        facet_fig_width = None
+        facet_fig_height = None
     facet_tick_rotation = _parse_optional_number(
         "facet_tick_rotation",
         kwargs.pop('facet_tick_rotation', None),
