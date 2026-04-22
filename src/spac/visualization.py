@@ -26,7 +26,7 @@ import base64
 import time
 import json
 import re
-from typing import Dict, List, Union, Optional 
+from typing import Dict, List, Union, Optional
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatch
 from functools import partial
@@ -573,7 +573,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     ax : matplotlib.axes.Axes, optional
         An existing Axes object to draw the plot onto, optional.
-        Not supported for grouped-separate (`group_by` with `together=False`) 
+        Not supported for grouped-separate (`group_by` with `together=False`)
         or facet layouts (`group_by` with `facet=True`).
 
     x_log_scale : bool, default False
@@ -625,13 +625,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             If not provided, or if passed as `None`/`"auto"`/`"none"`,
             the binning will be determined automatically using the Rice rule.
             Note, don't pass a numpy array, only python lists or strs/numbers.
-        
+
         When `group_by` is provided, this optional key can be passed via `kwargs`:
         - `max_groups`: Controls the group-count guardrail for grouped plots.
             Default is 20 when omitted. Pass `"unlimited"` to disable this
             guardrail, which may lead to performance issues or unreadable plots
             with many groups.
-        
+
         When `facet=True`, these optional key can be passed via `kwargs`
         to customize FacetGrid layout:
         - `facet_ncol`: Controls facet column wrapping.
@@ -709,7 +709,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         else:
             df[data_column] = np.log1p(df[data_column])
 
-    # If ax is provided, validate input and get figure from it. 
+    # If ax is provided, validate input and get figure from it.
     # If not, the figure will be created in the plotting branch.
     if ax is not None:
         if group_by and not together:
@@ -756,7 +756,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         if together:
             raise ValueError("Cannot use together=True with facet=True,"
                             " choose one.")
-    
+
     def _parse_optional_number(
         name,
         value,
@@ -1049,7 +1049,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         else:
             # 'multiple' parameter is not applicable
             kwargs.pop('multiple', None)
-            
+
             if not facet:
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)
@@ -1113,7 +1113,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     height=facet_layout['facet_height'],
                     aspect=facet_layout['facet_aspect'],
                     sharex=True,
-                    sharey=True,   
+                    sharey=True,
                 )
 
                 # Map the histogram function to the grid

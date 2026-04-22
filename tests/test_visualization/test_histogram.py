@@ -1006,7 +1006,7 @@ class TestHistogram(unittest.TestCase):
                         np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
                         "Facet numeric y-ticks should remain shared across panels."
                     )
-                
+
                 # Check that the returned DataFrame has expected structure and content
                 self.assertEqual(
                     set(df.columns),
@@ -1084,7 +1084,7 @@ class TestHistogram(unittest.TestCase):
                 np.array_equal(np.round(np.array(axis.get_yticks()), 6), first_yticks),
                 "Facet categorical y-ticks should remain shared across panels."
             )
-        
+
         # Check that the returned DataFrame has expected structure and content
         self.assertEqual(
             set(df.columns),

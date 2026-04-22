@@ -233,7 +233,7 @@ def run_from_json(
             )
 
     # Validate facet, group_by, and together parameters for logical consistency
-    if facet: 
+    if facet:
         if group_by is None:
             raise ValueError(
                 'Facet is True but Group_by is not specified. '
@@ -243,7 +243,7 @@ def run_from_json(
             raise ValueError(
                 'Together and Facet cannot both be True. Please set one to False.'
             )
-    
+
     # facet_ncol uses the explicit template token "auto", or a positive int.
     facet_ncol = text_to_value(
         facet_ncol,
