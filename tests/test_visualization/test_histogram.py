@@ -99,8 +99,8 @@ class TestHistogram(unittest.TestCase):
         bin_edges = list(np.linspace(0.5, 100.5, 101))
 
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             bins=bin_edges
         ).values()
 
@@ -125,7 +125,7 @@ class TestHistogram(unittest.TestCase):
 
     def test_histogram_annotation(self):
         fig, ax, df = histogram(
-            self.adata, 
+            self.adata,
             annotation='annotation1'
         ).values()
         total_annotation = len(self.adata.obs['annotation1'])
@@ -193,8 +193,8 @@ class TestHistogram(unittest.TestCase):
         ].flatten()
 
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             x_log_scale=True
         ).values()
 
@@ -220,8 +220,8 @@ class TestHistogram(unittest.TestCase):
         self.adata.X[0, self.adata.var_names.get_loc('marker1')] = -1
 
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             x_log_scale=True
         ).values()
 
@@ -238,21 +238,21 @@ class TestHistogram(unittest.TestCase):
     def test_title(self):
         """Test that title changes based on 'layer' information"""
         fig, ax, df = histogram(
-            self.adata, 
+            self.adata,
             feature='marker1'
         ).values()
         self.assertEqual(ax.get_title(), 'Layer: Original')
 
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             layer='Default'
         ).values()
         self.assertEqual(ax.get_title(), f'Layer: Default')
 
         fig, ax, df =  histogram(
-            self.adata, 
-            annotation='annotation1', 
+            self.adata,
+            annotation='annotation1',
             layer='Default'
         ).values()
         self.assertEqual(ax.get_title(), '')
@@ -260,8 +260,8 @@ class TestHistogram(unittest.TestCase):
     def test_y_log_scale_axis(self):
         """Test that y_log_scale sets y-axis to log scale."""
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             y_log_scale=True
         ).values()
         self.assertEqual(ax.get_yscale(), 'log')
@@ -269,8 +269,8 @@ class TestHistogram(unittest.TestCase):
     def test_y_log_scale_label(self):
         """Test that y-axis label is updated when y_log_scale is True."""
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             y_log_scale=True
         ).values()
         self.assertEqual(ax.get_ylabel(), 'log(Count)')
@@ -279,31 +279,31 @@ class TestHistogram(unittest.TestCase):
         """Test that y-axis label changes based on the 'stat' parameter."""
         # Test default stat ('count')
         fig, ax, df = histogram(
-            self.adata, 
+            self.adata,
             feature='marker1'
         ).values()
         self.assertEqual(ax.get_ylabel(), 'Count')
 
         # Test 'frequency' stat
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             stat='frequency'
         ).values()
         self.assertEqual(ax.get_ylabel(), 'Frequency')
 
         # Test 'density' stat
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             stat='density'
         ).values()
         self.assertEqual(ax.get_ylabel(), 'Density')
 
         # Test 'probability' stat
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             stat='probability'
         ).values()
         self.assertEqual(ax.get_ylabel(), 'Probability')
@@ -545,8 +545,8 @@ class TestHistogram(unittest.TestCase):
         custom_bins = 10  # Specify number of bins as an integer
 
         fig, ax, df = histogram(
-            self.adata, 
-            feature='marker1', 
+            self.adata,
+            feature='marker1',
             bins=custom_bins
         ).values()
 
