@@ -224,16 +224,23 @@ def run_from_json(
             f'Received "{x_rotate}".'
         )
 
-    # max_groups uses a strict template token contract: positive integer or
-    # the exact keyword "unlimited". Missing values keep the default of 20.
+    # Max_Groups applies only when Group_by is set.
+    # It accepts a positive integer or "unlimited".
+    # Missing values default to 20.
     if group_by:
-        if max_groups != "unlimited":
-            max_groups = text_to_value(
-                max_groups,
+        parsed_max_groups = max_groups
+        if parsed_max_groups != "unlimited":
+            parsed_max_groups = text_to_value(
+                parsed_max_groups,
                 value_to_convert_to=20,
                 to_int=True,
                 param_name="Max_Groups",
             )
+            if parsed_max_groups <= 0:
+                raise ValueError(
+                    f'Max_Groups should be a positive integer or "unlimited". '
+                    f'Received "{parsed_max_groups}".'
+                )
 
     # Facet requires Group_by and forbids Together=True.
     # Facet_Ncol accepts "auto" or a positive integer.
@@ -266,20 +273,18 @@ def run_from_json(
     else:
         x_var = feature
 
-    # In facet mode, Figure_Width/Height are passed as layout hints so
-    # visualization can derive panel geometry from total figure size:
-    # panel_width = Figure_Width / ncol, panel_height = Figure_Height / nrow.
+    # Assemble validated histogram kwargs right before the plotting call.
     hist_kwargs = dict(
         element=element,
         shrink=shrink,
         bins=bins,
         alpha=alpha,
         stat=stat,
-        max_groups=max_groups,
     )
-    # 'multiple' is only applicable when plotting multiple groups together
     if group_by and together:
         hist_kwargs["multiple"] = multiple
+    if group_by:
+        hist_kwargs["max_groups"] = parsed_max_groups
     if facet:
         hist_kwargs["facet_ncol"] = facet_ncol
         hist_kwargs["facet_fig_width"] = fig_width

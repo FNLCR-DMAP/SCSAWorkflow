@@ -626,7 +626,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             the binning will be determined automatically using the Rice rule.
             Note, don't pass a numpy array, only python lists or strs/numbers.
 
-        When `group_by` is provided, this optional key can be passed via `kwargs`:
+        When `group_by` is provided, this optional key can be passed via
+        `kwargs` (it is ignored otherwise):
         - `max_groups`: Controls the group-count guardrail for grouped plots.
             Default is 20 when omitted. Pass `"unlimited"` to disable this
             guardrail, which may lead to performance issues or unreadable plots
@@ -800,21 +801,25 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             )
         return parsed
 
-    # Parse max_groups with "unlimited" handling and validation.
-    max_groups = _parse_optional_number(
-        "max_groups",
-        kwargs.pop('max_groups', None),
-        kind=int,
-        default=20,
-        positive=True,
-        tokens={"unlimited": float('inf')},
-    )
-
-    # Pop facet-only hints early so they never leak to seaborn.
+    # Pop grouped/facet-only hints early so they never leak to seaborn.
+    max_groups_raw = kwargs.pop('max_groups', None)
     facet_ncol_raw = kwargs.pop('facet_ncol', None)
     facet_fig_width_raw = kwargs.pop('facet_fig_width', None)
     facet_fig_height_raw = kwargs.pop('facet_fig_height', None)
     facet_tick_rotation_raw = kwargs.pop('facet_tick_rotation', None)
+
+    # Parse max_groups only for grouped plots; otherwise ignore it entirely.
+    if group_by:
+        max_groups = _parse_optional_number(
+            "max_groups",
+            max_groups_raw,
+            kind=int,
+            default=20,
+            positive=True,
+            tokens={"unlimited": float('inf')},
+        )
+    else:
+        max_groups = None
 
     # Parse facet layout hints only in facet mode.
     if facet:

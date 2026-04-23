@@ -409,6 +409,31 @@ class TestHistogram(unittest.TestCase):
                         max_groups=value,
                     )
 
+    def test_non_grouped_max_groups_is_ignored(self):
+        """Non-grouped calls should ignore grouped-only max_groups hints."""
+        baseline_fig, baseline_ax, _ = histogram(
+            self.adata,
+            feature='marker1',
+        ).values()
+
+        fig, ax, _ = histogram(
+            self.adata,
+            feature='marker1',
+            max_groups=0,
+        ).values()
+        self.assertAlmostEqual(
+            fig.get_figwidth(),
+            baseline_fig.get_figwidth(),
+            places=6,
+        )
+        self.assertAlmostEqual(
+            fig.get_figheight(),
+            baseline_fig.get_figheight(),
+            places=6,
+        )
+        self.assertGreater(len(ax.patches), 0)
+        self.assertEqual(len(ax.patches), len(baseline_ax.patches))
+
     def test_overlay_options(self):
         fig, ax, df = histogram(
             self.adata,
