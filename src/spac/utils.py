@@ -8,12 +8,11 @@ import logging
 import warnings
 import numbers
 from scipy.stats import median_abs_deviation
-from typing import Any, List, Optional
+from typing import List, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 
 def regex_search_list(

@@ -26,7 +26,7 @@ import base64
 import time
 import json
 import re
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatch
 from functools import partial
