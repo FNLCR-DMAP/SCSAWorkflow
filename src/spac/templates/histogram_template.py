@@ -186,9 +186,12 @@ def run_from_json(
                 "Setting bin number calculation to auto."
             )
 
-    multiple = str(multiple).strip().lower()
+
+    if group_by and together:
+        multiple = str(multiple).strip().lower()
     element = str(element).strip().lower()
     stat = str(stat).strip().lower()
+
     # Figure_Width and Figure_Height use "auto" for template defaults.
     # In facet mode, it is forwarded as None to derive layout geometry.
     # In non-facet mode, it falls back to 8x6 inches.
