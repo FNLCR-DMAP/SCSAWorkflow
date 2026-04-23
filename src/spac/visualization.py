@@ -632,8 +632,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             guardrail, which may lead to performance issues or unreadable plots
             with many groups.
 
-        When `facet=True`, these optional key can be passed via `kwargs`
-        to customize FacetGrid layout:
+        When `facet=True`, these optional keys can be passed via `kwargs`
+        to customize FacetGrid layout (they are ignored otherwise):
         - `facet_ncol`: Controls facet column wrapping.
             If omitted or passed as `"auto"`, the function uses one column for
             small group counts and switches to a compact grid for many groups.
@@ -810,25 +810,29 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         tokens={"unlimited": float('inf')},
     )
 
-    # Parse facet layout hints so they never leak to seaborn.
-    facet_ncol = _parse_optional_number(
-        "facet_ncol",
-        kwargs.pop('facet_ncol', None),
-        kind=int,
-        positive=True,
-        tokens={"": None, "auto": None, "none": None},
-    )
-    facet_fig_width = kwargs.pop('facet_fig_width', None)
-    facet_fig_height = kwargs.pop('facet_fig_height', None)
+    # Pop facet-only hints early so they never leak to seaborn.
+    facet_ncol_raw = kwargs.pop('facet_ncol', None)
+    facet_fig_width_raw = kwargs.pop('facet_fig_width', None)
+    facet_fig_height_raw = kwargs.pop('facet_fig_height', None)
+    facet_tick_rotation_raw = kwargs.pop('facet_tick_rotation', None)
+
+    # Parse facet layout hints only in facet mode.
     if facet:
+        facet_ncol = _parse_optional_number(
+            "facet_ncol",
+            facet_ncol_raw,
+            kind=int,
+            positive=True,
+            tokens={"": None, "auto": None, "none": None},
+        )
         facet_fig_width = _parse_optional_number(
             "facet_fig_width",
-            facet_fig_width,
+            facet_fig_width_raw,
             positive=True,
         )
         facet_fig_height = _parse_optional_number(
             "facet_fig_height",
-            facet_fig_height,
+            facet_fig_height_raw,
             positive=True,
         )
         if (facet_fig_width is None) != (facet_fig_height is None):
@@ -836,15 +840,17 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 "Both facet_fig_width and facet_fig_height must be provided together, "
                 "or both must be left as None."
             )
+        facet_tick_rotation = _parse_optional_number(
+            "facet_tick_rotation",
+            facet_tick_rotation_raw,
+            default=0.0,
+        ) % 360.0
     else:
-        # If not faceting, ignore any provided figure size hints.
+        # If not faceting, ignore all facet-only hints.
+        facet_ncol = None
         facet_fig_width = None
         facet_fig_height = None
-    facet_tick_rotation = _parse_optional_number(
-        "facet_tick_rotation",
-        kwargs.pop('facet_tick_rotation', None),
-        default=0.0,
-    ) % 360.0
+        facet_tick_rotation = None
 
     # Function to calculate histogram data
     def calculate_histogram(data, bins, bin_edges=None):

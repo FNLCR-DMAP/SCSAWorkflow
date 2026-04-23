@@ -189,10 +189,9 @@ def run_from_json(
     multiple = str(multiple).strip().lower()
     element = str(element).strip().lower()
     stat = str(stat).strip().lower()
-
-    # Figure size hints use the explicit template token "auto". In facet mode
-    # it is forwarded as None so core geometry can derive the final figure
-    # size; in non-facet mode it falls back to 8x6 inches.
+    # Figure_Width and Figure_Height use "auto" for template defaults.
+    # In facet mode, it is forwarded as None to derive layout geometry.
+    # In non-facet mode, it falls back to 8x6 inches.
     fig_width = text_to_value(
         fig_width,
         default_none_text="auto",
@@ -207,12 +206,16 @@ def run_from_json(
         to_float=True,
         param_name="Figure_Height"
     )
-    if fig_width and fig_height:
+    if fig_width is not None and fig_height is not None:
         if fig_width <= 0 or fig_height <= 0:
             raise ValueError(
                 f'Figure_Width/Height should be a positive number.'
                 f'Received "{fig_width}"/"{fig_height}".'
             )
+    if fig_dpi <= 0:
+        raise ValueError(
+            f'Figure_DPI should be a positive number. Received "{fig_dpi}".'
+        )
 
     # Validate x-axis label rotation
     if (x_rotate < 0) or (x_rotate > 360):
@@ -232,7 +235,8 @@ def run_from_json(
                 param_name="Max_Groups",
             )
 
-    # Validate facet, group_by, and together parameters for logical consistency
+    # Facet requires Group_by and forbids Together=True.
+    # Facet_Ncol accepts "auto" or a positive integer.
     if facet:
         if group_by is None:
             raise ValueError(
@@ -243,24 +247,18 @@ def run_from_json(
             raise ValueError(
                 'Together and Facet cannot both be True. Please set one to False.'
             )
-
-    # facet_ncol uses the explicit template token "auto", or a positive int.
-    facet_ncol = text_to_value(
-        facet_ncol,
-        default_none_text="auto",
-        value_to_convert_to=None
-    )
-    if facet_ncol is not None:
         facet_ncol = text_to_value(
             facet_ncol,
+            default_none_text="auto",
             to_int=True,
             param_name="Facet_Ncol"
         )
-        if facet_ncol <= 0:
-            raise ValueError(
-                f'Facet_Ncol must be a positive integer or "auto". '
-                f'Received "{facet_ncol}".'
-            )
+        if facet_ncol is not None:
+            if facet_ncol <= 0:
+                raise ValueError(
+                    f'Facet_Ncol must be a positive integer or "auto". '
+                    f'Received "{facet_ncol}".'
+                )
 
     # Initialize the x-variable before the loop
     if histplot_by == "Annotation":
@@ -278,14 +276,15 @@ def run_from_json(
         alpha=alpha,
         stat=stat,
         max_groups=max_groups,
-        facet_ncol=facet_ncol,
-        facet_fig_width=fig_width,
-        facet_fig_height=fig_height,
-        facet_tick_rotation=x_rotate,
     )
     # 'multiple' is only applicable when plotting multiple groups together
     if group_by and together:
         hist_kwargs["multiple"] = multiple
+    if facet:
+        hist_kwargs["facet_ncol"] = facet_ncol
+        hist_kwargs["facet_fig_width"] = fig_width
+        hist_kwargs["facet_fig_height"] = fig_height
+        hist_kwargs["facet_tick_rotation"] = x_rotate
 
     result = histogram(
         adata=adata,
@@ -306,9 +305,11 @@ def run_from_json(
     df_counts = result["df"]
 
     # Set figure size and dpi
-    if fig_width and fig_height:
+    if fig_width is not None and fig_height is not None:
         fig.set_size_inches(fig_width, fig_height)
+        logger.info(f"Set figure size to {fig_width}x{fig_height} inches.")
     fig.set_dpi(fig_dpi)
+    logger.info(f"Set figure DPI to {fig_dpi}.")
 
     # Ensure axes is a list
     if isinstance(axs, list):

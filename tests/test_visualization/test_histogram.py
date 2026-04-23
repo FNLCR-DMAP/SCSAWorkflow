@@ -848,39 +848,6 @@ class TestHistogram(unittest.TestCase):
                 facet_fig_height=3.5,
             )
 
-    def test_non_facet_figure_size_hints_are_ignored(self):
-        """Non-facet calls should ignore facet-only figure-size hints."""
-        baseline_fig, baseline_ax, _ = histogram(
-            self.adata,
-            feature='marker1',
-            facet=False,
-        ).values()
-
-        for hint_kwargs in (
-            {'facet_fig_width': 8},
-            {'facet_fig_height': 5},
-            {'facet_fig_width': 8, 'facet_fig_height': 5},
-        ):
-            with self.subTest(hints=hint_kwargs):
-                fig, ax, _ = histogram(
-                    self.adata,
-                    feature='marker1',
-                    facet=False,
-                    **hint_kwargs,
-                ).values()
-                self.assertAlmostEqual(
-                    fig.get_figwidth(),
-                    baseline_fig.get_figwidth(),
-                    places=6,
-                )
-                self.assertAlmostEqual(
-                    fig.get_figheight(),
-                    baseline_fig.get_figheight(),
-                    places=6,
-                )
-                self.assertGreater(len(ax.patches), 0)
-                self.assertEqual(len(ax.patches), len(baseline_ax.patches))
-
     def test_facet_tick_rotation_zero_matches_default_behavior(self):
         """Explicit zero rotation should match omitted rotation behavior."""
         fig_default, _, _ = histogram(
@@ -941,6 +908,43 @@ class TestHistogram(unittest.TestCase):
 
         self.assertAlmostEqual(fig.get_figwidth(), 10.0, places=2)
         self.assertAlmostEqual(fig.get_figheight(), 4.0, places=2)
+
+    def test_non_facet_layout_hints_are_ignored(self):
+        """Non-facet calls should ignore all facet-only layout hints."""
+        baseline_fig, baseline_ax, _ = histogram(
+            self.adata,
+            feature='marker1',
+            facet=False,
+        ).values()
+
+        for hint_kwargs in (
+            {'facet_fig_width': 8, 'facet_fig_height': 5},
+            {
+                'facet_ncol': 0,
+                'facet_tick_rotation': 'bad',
+                'facet_fig_width': 'wide',
+                'facet_fig_height': 'tall',
+            },
+        ):
+            with self.subTest(hints=hint_kwargs):
+                fig, ax, _ = histogram(
+                    self.adata,
+                    feature='marker1',
+                    facet=False,
+                    **hint_kwargs,
+                ).values()
+                self.assertAlmostEqual(
+                    fig.get_figwidth(),
+                    baseline_fig.get_figwidth(),
+                    places=6,
+                )
+                self.assertAlmostEqual(
+                    fig.get_figheight(),
+                    baseline_fig.get_figheight(),
+                    places=6,
+                )
+                self.assertGreater(len(ax.patches), 0)
+                self.assertEqual(len(ax.patches), len(baseline_ax.patches))
 
     def test_facet_plot_shared_bins_consistency_numeric(self):
         """Numeric facets keep shared bins for int/default-like bins inputs."""
