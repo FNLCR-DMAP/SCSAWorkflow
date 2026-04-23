@@ -430,16 +430,17 @@ def _derive_facet_geometry(
         Requested facet column count. Positive integers are used directly.
         ``None`` falls back to automatic column selection.
     facet_fig_width, facet_fig_height : float, optional
-        Optional total figure-size hints. Geometry is derived from these hints only
-        when both values are present.
+        Optional total figure-size hints. Geometry is derived from these
+        hints only when both values are present.
     facet_tick_max_chars : int, optional
         Maximum observed x tick-label length. Expected positive integer.
-        Used for adjusting default geometry heuristics when explicit figure-size
-        hints are absent.
-        ``0`` falls back to the original default geometry without long-label adjustments.
+        Used for adjusting default geometry heuristics when explicit
+        figure-size hints are absent. ``0`` falls back to the original
+        default geometry without long-label adjustments.
     facet_tick_rotation : float, optional
         Rotation angle in degrees for x tick labels. Used together with
-        ``facet_tick_max_chars`` to estimate label burden for default geometry.
+        ``facet_tick_max_chars`` to estimate label burden for default
+        geometry.
     vertical_threshold : int, optional
         Maximum group count that still prefers a single-column automatic
         layout.
@@ -458,19 +459,18 @@ def _derive_facet_geometry(
     Returns
     -------
     dict
-        Dictionary with keys:
-        - ``facet_ncol``: positive int, normalized column count clamped to ``n_groups``;
-        - ``facet_height``: float, FacetGrid-ready per-panel height in inches;
-        - ``facet_aspect``: float, FacetGrid-ready per-panel aspect ratio.
+        Dictionary containing ``facet_ncol``, ``facet_height``, and
+        ``facet_aspect`` for FacetGrid construction.
 
-        Automatic layout uses one column when ``n_groups <= vertical_threshold``
-        and otherwise uses ``ceil(sqrt(n_groups))`` columns. When both
-        normalized figure-size hints are present, the helper converts total
-        figure size into per-panel geometry using the derived grid shape,
-        applies the minimum panel-size guardrails, and clips aspect into the
-        configured range. When figure-size hints are absent, the helper may
-        increase default facet height/aspect for long rotated categorical
-        labels to preserve usable bar area.
+        Automatic layout uses one column when
+        ``n_groups <= vertical_threshold`` and otherwise uses
+        ``ceil(sqrt(n_groups))`` columns. When both normalized
+        figure-size hints are present, the helper converts total figure
+        size into per-panel geometry, applies minimum panel-size
+        guardrails, and clips aspect into the configured range. When
+        figure-size hints are absent, the helper may increase default
+        facet height/aspect for long rotated categorical labels to
+        preserve usable bar area.
     """
 
     # Derive facet_ncol when not explicitly provided, and clamp to n_groups
@@ -501,8 +501,9 @@ def _derive_facet_geometry(
         facet_aspect = float(np.clip(panel_width / panel_height, min_aspect, max_aspect))
 
     elif facet_tick_max_chars and facet_tick_max_chars > 0:
-        # For default geometry only, expand panel ratio when long rotated
-        # labels would otherwise dominate the available plotting area.
+        # For default geometry only, allocate more vertical space and a
+        # slightly tighter aspect when long rotated labels would otherwise
+        # dominate the available plotting area.
         rotation = float(facet_tick_rotation or 0.0) % 360.0
         rad = np.deg2rad(min(rotation, 180.0))
         rotation_factor = 1.0 + 0.8 * np.sin(rad)
@@ -514,7 +515,6 @@ def _derive_facet_geometry(
             facet_height = default_height * (1.0 + 0.35 * pressure)
             facet_aspect = float(
                 np.clip(
-                    # default_aspect * (1.0 + 0.75 * pressure),
                     default_aspect * (1.0 - 0.05 * pressure),
                     min_aspect,
                     max_aspect,
@@ -584,7 +584,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         If True, the y-axis will be set to log scale.
 
     facet : bool, default False
-        If True, group by function outputs facet plots
+        If True, draw grouped histograms as a faceted layout instead of
+        separate stacked axes. Requires `group_by` and is not supported
+        together with `together=True`.
 
     **kwargs
         Additional keyword arguments passed to seaborn histplot function.
@@ -733,6 +735,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     def cal_bin_num(
         num_rows
     ):
+        """Return the Rice-rule default number of histogram bins."""
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
 
@@ -767,12 +770,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         positive=False,
         tokens=None,
     ):
-        """Parse an optional numeric hint.
-
-        Returns ``default`` for ``None``, resolves recognized string tokens
-        before numeric coercion, and optionally enforces finite and positive
-        values on the parsed result.
-        """
+        """Parse an optional numeric hint with token/default handling."""
         if value is None:
             return default
         if isinstance(value, str):
@@ -857,30 +855,27 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         facet_fig_height = None
         facet_tick_rotation = None
 
-    # Function to calculate histogram data
     def calculate_histogram(data, bins, bin_edges=None):
-        """
-        Compute histogram data for numeric or categorical input.
+        """Compute a histogram-bin table for numeric or categorical input.
 
-        Parameters:
-        - data (pd.Series): The input data to be binned.
-        - bins (int or sequence): Number of bins (if numeric) or unique categories
-            (if categorical).
-        - bin_edges (array-like, optional): Predefined bin edges for numeric data.
-        If None, automatic binning is used.
+        Parameters
+        ----------
+        data : pandas.Series
+            Values to summarize into histogram bins or categorical slots.
+        bins : int or sequence
+            Number of bins for numeric data, or categorical slots to
+            preserve when building grouped categorical histograms.
+        bin_edges : array-like, optional
+            Explicit numeric bin edges to reuse. If ``None``, numeric
+            data uses ``bins`` directly and categorical data ignores this
+            argument.
 
-        Returns:
-        - pd.DataFrame: A DataFrame containing the following columns:
-            - `count`:
-                Frequency of values in each bin.
-            - `bin_left`:
-                Left edge of each bin (for numeric data).
-            - `bin_right`:
-                Right edge of each bin (for numeric data).
-            - `bin_center`:
-                Center of each bin (for numeric data) or category labels
-                (for categorical data).
-
+        Returns
+        -------
+        pandas.DataFrame
+            Histogram summary table with ``count``, ``bin_left``,
+            ``bin_right``, and ``bin_center`` columns. For categorical
+            input, the bin edge columns repeat the category labels.
         """
 
         # Check if the data is numeric or categorical
@@ -909,7 +904,29 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     def build_grouped_histogram_table(
         plot_data, data_column, group_by, groups, bins
     ):
-        """Build per-group histogram-bin tables for grouped histogram paths."""
+        """Build grouped histogram-bin data with shared bin definitions.
+
+        Parameters
+        ----------
+        plot_data : pandas.DataFrame
+            Table containing the histogram source values and grouping
+            annotation.
+        data_column : str
+            Column name to summarize on the x axis.
+        group_by : str
+            Annotation column defining the grouping.
+        groups : list
+            Group labels to render in plotting order.
+        bins : int or sequence
+            Histogram bin specification forwarded to the per-group
+            histogram builder.
+
+        Returns
+        -------
+        tuple[pandas.DataFrame, array-like]
+            Combined histogram table for all groups, plus the shared bin
+            definition used to keep grouped plots aligned.
+        """
         # Determine shared bins across groups for consistent plotting.
         data_series = plot_data[data_column]
         if pd.api.types.is_numeric_dtype(data_series):
@@ -950,21 +967,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         hist_data = pd.concat(histograms, ignore_index=True)
         return hist_data, shared_bins
 
-    # Function to compute maximum tick label length for categorical data
     def compute_max_tick_label_length(data_series):
-        """Compute maximum tick label length for a categorical data series.
-
-        Parameters
-        ----------
-        data_series : pandas.Series
-            Categorical data column used to compute maximum tick label length.
-
-        Returns
-        -------
-        int
-            Maximum number of characters in the tick labels derived from the
-            unique categories of the input series.
-        """
+        """Return the maximum character length across candidate tick labels."""
         if isinstance(data_series.dtype, pd.CategoricalDtype):
             tick_labels = [
                 str(label) for label in data_series.cat.categories
@@ -975,26 +979,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ]
         return max((len(label) for label in tick_labels), default=0)
 
-    # Function to get axis labels based on log scale and stat parameters
     def resolve_hist_axis_labels(data_column, x_log_scale, y_log_scale, stat):
-        """Resolve x/y axis labels for histogram rendering.
-
-        Parameters
-        ----------
-        data_column : str
-            Source column used on the x axis.
-        x_log_scale : bool
-            Whether x data has log transform semantics.
-        y_log_scale : bool
-            Whether y axis is displayed on log scale.
-        stat : str
-            Histogram statistic mode (for example, count, density).
-
-        Returns
-        -------
-        tuple[str, str]
-            Resolved x-axis and y-axis labels.
-        """
+        """Return histogram axis labels for the current scale/stat settings."""
         xlabel = f'log({data_column})' if x_log_scale else data_column
         ylabel_map = {
             'count': 'Count',
@@ -1009,7 +995,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ylabel = f'log({ylabel})'
         return xlabel, ylabel
 
-    # Plotting with or without grouping
+    # Dispatch to grouped-together, grouped-separate, faceted, or
+    # ungrouped plotting.
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
         n_groups = len(groups)
@@ -1027,9 +1014,12 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             )
 
         if together:
+            # 1) Grouped together on the same axes
             if ax is None:
                 fig, ax = plt.subplots()
 
+            # Compute histogram data and shared bins for consistent plotting.
+            # For non-numeric data, shared_bins will be dropped intentionally.
             hist_data, shared_bins = build_grouped_histogram_table(
                 plot_data,
                 data_column,
@@ -1052,6 +1042,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 ax=ax,
                 **kwargs,
             )
+
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
@@ -1062,6 +1053,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             kwargs.pop('multiple', None)
 
             if not facet:
+                # 2) Grouped separately on different axes
                 fig, ax_array = plt.subplots(
                     n_groups, 1, figsize=(5, 5 * n_groups)
                 )
@@ -1080,6 +1072,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
                     sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
                                  weights='count', **kwargs)
+
                     # If plotting feature specify which layer
                     if feature:
                         ax_i.set_title(f'{groups[i]} with Layer: {layer}')
@@ -1087,7 +1080,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                         ax_i.set_title(f'{groups[i]}')
                     axs.append(ax_i)
 
-            else:   # Facet option
+            else:
+                # 3) Faceted by group on different axes using seaborn's FacetGrid.
                 # Compute max label length only when not explicitly provided.
                 facet_tick_max_chars = 0
                 if not pd.api.types.is_numeric_dtype(plot_data[data_column]):
@@ -1135,7 +1129,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     **kwargs,
                 )
 
-                # Keep shared scale but show x tick numbers on bottom row and y tick numbers on left column
+                # Show tick labels on every facet while keeping shared axes.
                 for ax_i in hist.axes.flat:
                     ax_i.tick_params(axis='x', labelbottom=True)
                     ax_i.tick_params(axis='y', labelleft=True)
@@ -1164,6 +1158,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 axs.extend(hist.axes.flat)
 
     else:
+        # 4) Ungrouped histogram (group_by=None)
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -1186,6 +1181,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_title(f'Layer: {layer}')
         axs.append(ax)
 
+    # Determine axis labels based on scale and stat settings.
     stat = kwargs.get('stat', 'count')
     xlabel, ylabel = resolve_hist_axis_labels(
         data_column=data_column,
@@ -1199,7 +1195,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         # Set axis scales if y_log_scale is True
         if y_log_scale:
             ax.set_yscale('log')
-
+        # For faceted plots, we set axis labels at the figure level only.
         if facet:
             ax.set_xlabel('')
             ax.set_ylabel('')
