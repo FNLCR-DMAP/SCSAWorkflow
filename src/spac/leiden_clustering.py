@@ -88,7 +88,8 @@ def plot(
     title=None,
     save=None,
     palette=None,
-    size=None
+    size=None,
+    ax=None
 ):
     """
     Plots a UMAP embedding of the AnnData object colored by Leiden cluster labels.
@@ -115,6 +116,10 @@ def plot(
     size : float, optional
         Size of each cell dot in the UMAP plot. Increase for sparse plots,
         decrease for dense plots to reduce overlap. Default is None.
+    ax : matplotlib.axes.Axes, optional
+        Existing axes object to draw the plot onto. Useful for embedding this
+        plot inside a multi-panel figure. If None, a new figure is created.
+        Default is None.
 
     Returns
     -------
@@ -127,5 +132,6 @@ def plot(
         title=title,
         save=save,
         palette=palette,
-        size=size
+        size=size,
+        ax=ax
     )
