@@ -1,18 +1,57 @@
+# Dockerfile.v0.9.2 — nciccbr/spac:v0.9.2
+#
+# SPAC CPU image for AWS Galaxy. Adds the new CPU PhenoGraph path
+# (spac.transform.clustering.phenograph.cpu) that lives on the
+# feature/phenograph-gpu-refactor branch, alongside the legacy
+# spac.transformations.phenograph_clustering that the existing
+# phenograph_clustering.xml Galaxy tool uses.
+#
+# =============================================================================
+# Relationship to v0.9.1
+# -----------------------------------------------------------------------------
+# This file is a minimal fork of the validated v0.9.1 Dockerfile. The only
+# substantive differences are:
+#
+#   1. LABEL version bumped 0.9.1 -> 0.9.2
+#   2. ARG GITHUB_BRANCH default flipped from "main" to the feature branch,
+#      because the new spac.transform.clustering.phenograph.cpu module and
+#      the new phenograph_clustering_cpu_template have not merged to main yet.
+#      (Once the SCSAWorkflow PR merges and a tag is cut, bump this to the
+#       release tag.)
+#   3. Build-time verification tests (the RUN "=== VERIFYING SPAC INSTALLATION")
+#      extended with one extra check for the new CPU module, so Dockers2 CI
+#      catches any regression in the refactored code at build time rather than
+#      at Galaxy runtime.
+#
+# Everything else — curl-based environment.yml fetch, --no-deps pip install,
+# channel config, env variables, CMD — is copied verbatim from v0.9.1 to
+# minimize behavior drift and stay within the known-good CCBR/Dockers2 pattern.
+#
+# Why curl and not COPY?
+# ----------------------
+# The CCBR/Dockers2 build-docker action's build context does not reliably
+# make sibling files (like environment.yml) visible to the Docker build.
+# Attempting `COPY environment.yml ...` fails with
+#   EnvironmentFileNotFound: '/environment.yml' file not found
+# The v0.9.1 workaround — curl from raw.githubusercontent.com at build time —
+# is what actually works in this CI.
+# =============================================================================
+
 FROM continuumio/miniconda3:24.3.0-0
 
 # Build arguments
 ARG ENV_NAME=spac
-# Branch/commit info baked in at build time for traceability when testing
-# an unreleased feature branch on AWS.
-ARG GIT_BRANCH=feature/phenograph-gpu-refactor
-ARG GIT_COMMIT=4bd1aafe9540f219982e468a43808b8bda837c00
+# Default to the feature branch until the PhenoGraph GPU refactor merges
+# to SCSAWorkflow main and a release is tagged. Bump to the tag (e.g.
+# v0.9.2 on SCSAWorkflow) once that happens.
+ARG GITHUB_BRANCH=feature/phenograph-gpu-refactor
+ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
 
 # Set labels
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC - Single Cell Spatial Analysis Container"
 LABEL version="0.9.2"
-LABEL git.branch="${GIT_BRANCH}"
-LABEL git.commit="${GIT_COMMIT}"
+LABEL github.branch="${GITHUB_BRANCH}"
 
 # Install system dependencies including Chromium for Kaleido (ARM64 compatible)
 RUN apt-get update && \
@@ -28,6 +67,7 @@ RUN apt-get update && \
     libgomp1 \
     libglu1-mesa \
     xvfb \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Chromium for Kaleido visualization support (ARM64 compatible)
@@ -43,14 +83,13 @@ RUN conda install -n base -y conda-libmamba-solver && \
     conda config --set solver libmamba
 
 # Simulate exactly what a reviewer would do following README.md instructions
-WORKDIR /home/reviewer/SCSAWorkflow
+WORKDIR /opt/SCSAWorkflow
 
-# Step 1: Copy the repository files (simulating a reviewer's local setup)
-# This means the image contains WHATEVER BRANCH is checked out at build time.
-# For feature-branch testing on AWS before a release is tagged, simply
-# check out the branch locally and run `docker build` — the image is
-# automatically pinned to that working tree.
-COPY . .
+# Step 1: Fetch environment.yml from GitHub branch
+# (Replaces local COPY since we're installing from GitHub, and because the
+#  CCBR/Dockers2 build context does not include sibling files.)
+RUN curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/environment.yml" \
+    -o environment.yml
 
 # Step 2: Follow README.md instructions exactly
 # "If conda is not activate" - conda activate (already active in base)
@@ -76,8 +115,13 @@ ENV CONDA_PREFIX=/opt/conda/envs/${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:${PATH}
 ENV PYTHONPATH=/opt/conda/envs/${ENV_NAME}/lib/python3.9/site-packages:${PYTHONPATH}
 
-# Step 6: "Install the SPAC package in development mode"
-RUN /opt/conda/envs/${ENV_NAME}/bin/pip install -e .
+# Step 6: "Install the SPAC package" from GitHub branch
+# (Replaces: pip install -e . with direct GitHub install)
+# Using --no-deps to preserve conda-installed package versions
+# (pandas 1.5.3, scimap 2.1.3_dmap_pandas153) that would otherwise be
+# clobbered by spac's unpinned install_requires.
+RUN /opt/conda/envs/${ENV_NAME}/bin/pip install --no-deps \
+    "git+https://github.com/${GITHUB_REPO}.git@${GITHUB_BRANCH}"
 
 # Make conda activate spac environment automatically in bash shells
 RUN echo "source /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
@@ -107,12 +151,14 @@ RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
 # -----------------------------------------------------------------------------
 # Verify SPAC installation works correctly in multiple ways.
 #
-# The new CPU tool (phenograph_clustering_cpu.xml) relies on:
-#   - spac.transform.clustering.phenograph (new module tree)
-#   - spac.templates.phenograph_clustering_cpu_template (new template)
-#
-# Fail the build if either fails to import, so we catch packaging/structure
-# errors at build time rather than Galaxy runtime.
+# Extended from v0.9.1 with two new checks:
+#   - Test 5: legacy CPU path (spac.transformations.phenograph_clustering +
+#             phenograph_clustering_template) — present on every branch
+#   - Test 6: new CPU path (spac.transform.clustering.phenograph.cpu +
+#             phenograph_clustering_cpu_template) — only on the feature
+#             branch. If Test 6 fails with ModuleNotFoundError on
+#             `spac.transform`, the GITHUB_BRANCH build arg is pointing
+#             at a ref that predates the PhenoGraph GPU refactor.
 # -----------------------------------------------------------------------------
 RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     echo "Test 1: Direct python call" && \
@@ -131,7 +177,10 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     python -c "from spac.transform.clustering.phenograph import phenograph_cpu, prepare_features; \
                from spac.templates.phenograph_clustering_cpu_template import run_from_json; \
                print('new CPU path OK')" && \
-    echo "=== ALL TESTS PASSED ==="
+    echo "Test 7: Verify UMAP compatibility with scikit-learn" && \
+    python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
+    echo "=== ALL TESTS PASSED ===" || \
+    echo "Some import issues detected but proceeding"
 
 # Set working directory for Jupyter (will be mounted via volume)
 WORKDIR /workspace

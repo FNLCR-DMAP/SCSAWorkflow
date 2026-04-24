@@ -14,7 +14,7 @@
 #   Stage 1 (preprocess): pickle -> adata.pickle + features metadata
 #                         (uses the Python template end-to-end minus clustering)
 #   Stage 2 (rapids):     call grapheno via run_grapheno.py
-#                         (writes cluster_result_<res>.csv per resolution)
+#                         (writes cluster_result_<res>.npy per resolution)
 #   Stage 3 (preprocess): merge labels back into adata, save output.pickle
 #
 # NOTE: When migrating to RAPIDS 24.12, delete this script and have the

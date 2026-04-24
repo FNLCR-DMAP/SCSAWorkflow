@@ -1,133 +1,187 @@
-# Dockerfile.gpu — nciccbr/spac-gpu:v1.0.0
+# Dockerfile.v1.0.0 — nciccbr/spac-gpu:v1.0.0
 #
 # SPAC GPU image for AWS Galaxy. Installs the grapheno GPU PhenoGraph
 # backend and the SPAC package on top of NVIDIA's RAPIDS 22.08 image
 # (the same RAPIDS version used in Biowulf/Foundry production, so cluster
-# outputs match historical Karun analyses).
+# outputs match historical analyses).
 #
-# Branch-aware via the COPY pattern (matches the CPU Dockerfile). Whatever
-# branch is checked out at build time becomes the SPAC version inside both
-# conda envs. No GitHub/PyPI/tag dependency at build time. Build from the
-# repo root:
+# =============================================================================
+# Build context
+# -----------------------------------------------------------------------------
+# This Dockerfile builds cleanly in the CCBR/Dockers2 CI with no reliance
+# on files from the SCSAWorkflow source tree. SPAC itself is installed via
+# `pip install --no-deps git+https://...@${GITHUB_BRANCH}` into both envs,
+# and the three GPU orchestration scripts are pulled from the same ref via
+# a shallow git clone. Everything stays pinned to GITHUB_BRANCH.
 #
-#   git checkout feature/phenograph-gpu-refactor
-#   docker build -f tools/Dockerfile.gpu \
-#       -t nciccbr/spac-gpu:v1.0.0-feature-phenograph-gpu-refactor \
-#       --build-arg GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
-#       --build-arg GIT_COMMIT=$(git rev-parse HEAD) \
+# For CCBR/Dockers2 CI (default): builds nciccbr/spac-gpu:v1.0.0 against
+#   feature/phenograph-gpu-refactor. Bump GITHUB_BRANCH when SPAC is tagged.
+#
+# Manual local build example:
+#   docker build -f Dockerfile.v1.0.0 \
+#       -t nciccbr/spac-gpu:v1.0.0-test \
+#       --build-arg GITHUB_BRANCH=feature/phenograph-gpu-refactor \
 #       .
 #
-# Two-conda-env pattern is required because RAPIDS 22.08 pins numpy 1.22 /
-# pandas 1.4.4, which are incompatible with anndata. The 'preprocess' env
-# holds anndata + newer numpy/pandas; the 'rapids' env holds cuml/cugraph.
-# SPAC is installed in BOTH so the template (preprocess env) and the GPU
-# algorithm (rapids env) can both import spac.
+# =============================================================================
+# Two-env pattern (required for RAPIDS 22.08)
+# -----------------------------------------------------------------------------
+# RAPIDS 22.08 pins numpy==1.22 / pandas==1.4.4, incompatible with
+# anndata>=0.10. The image therefore ships two conda envs:
 #
-# When migrating to RAPIDS 24.12 later (for Leiden bug fixes etc.), change
-# the FROM line and drop the preprocess env entirely — RAPIDS 24.10+ has
-# numpy 2 / pandas 2 / anndata-compatible deps in a single env.
+#   preprocess env : anndata 0.10.9 + pandas 1.5.3 + numpy 1.26.4 +
+#                    matplotlib + pyyaml (only what stages 1/3 need).
+#                    Runs stages 1 and 3 (AnnData I/O + provenance).
+#   rapids env     : cuml 22.08 + cugraph 22.08 (RAPIDS-pinned deps).
+#                    Runs stage 2 (KNN + Jaccard + Leiden).
 #
-# Smoke test (requires --gpus all):
+# The three-stage orchestrator at /opt/spac-gpu/run_gpu.sh shuttles data
+# between envs via files on disk (features.npy, adata.pickle,
+# cluster_result_<res>.npy). The Galaxy XML invokes run_gpu.sh directly.
 #
+# =============================================================================
+# Why --no-deps for spac in BOTH envs
+# -----------------------------------------------------------------------------
+# spac's setup.py install_requires lists 14 unpinned heavy scientific deps
+# (scanpy, squidpy, numba, datashader, plotly, scimap, phenograph, ...).
+# Letting pip resolve them on top of a fresh mamba env causes a giant
+# solver loop and at least one C extension compile failure against the
+# pinned numpy. We know this because Kelly's earlier draft hit exactly
+# this error in CI.
+#
+# Stages 1 and 3 only need anndata + pandas + numpy + matplotlib + pyyaml,
+# all of which are installed via mamba with explicit version pins in the
+# preprocess env. Stage 2 only needs numpy + the RAPIDS stack, both
+# already in the base rapids env.
+#
+# With --no-deps, we're installing spac for its CODE only — the modules
+# `spac.transform.clustering.phenograph.*`, `spac.templates.template_utils`,
+# etc. The runtime deps each module needs are supplied by whichever env
+# imports it.
+#
+# When migrating to RAPIDS 24.10+, drop the preprocess env and the
+# orchestrator scripts entirely, and have the Galaxy XML call
+# `spac.templates.phenograph_clustering_gpu_template.run_from_json`
+# in a single rapids env.
+#
+# =============================================================================
+# Smoke test (requires --gpus all)
+# -----------------------------------------------------------------------------
 #   docker run --rm --gpus all <image> \
 #       bash -c "source /opt/conda/etc/profile.d/conda.sh && \
 #                conda activate rapids && \
 #                python -c 'import cuml, cugraph; \
-#                           from spac.transform.clustering.phenograph.gpu.grapheno import phenograph_gpu; \
-#                           print(\"GPU OK:\", cuml.__version__, cugraph.__version__)'"
+#                from spac.transform.clustering.phenograph.gpu.grapheno \
+#                  import phenograph_gpu; \
+#                print(\"GPU OK:\", cuml.__version__, cugraph.__version__)'"
+# =============================================================================
 
 FROM rapidsai/rapidsai:22.08-cuda11.5-runtime-ubuntu20.04-py3.9
 
-# Build arguments
-ARG GIT_BRANCH=feature/phenograph-gpu-refactor
-ARG GIT_COMMIT=4bd1aafe9540f219982e468a43808b8bda837c00
+ARG GITHUB_BRANCH=feature/phenograph-gpu-refactor
+ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
 
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC GPU image (grapheno PhenoGraph on RAPIDS 22.08) for AWS Galaxy"
 LABEL version="1.0.0"
-LABEL git.branch="${GIT_BRANCH}"
-LABEL git.commit="${GIT_COMMIT}"
+LABEL github.branch="${GITHUB_BRANCH}"
+LABEL rapids.version="22.08"
 
 SHELL ["/bin/bash", "-c"]
 
 # -----------------------------------------------------------------------------
-# 1. Build the 'preprocess' env ONCE at image build time.
-#    (Biowulf compute.sh builds this env on every job run via `mamba create`,
-#    which costs ~2 min/job. Baking it into the image saves that and makes
-#    the env reproducible.)
+# 1. Create the 'preprocess' env with anndata + modern pandas/numpy +
+#    the minimum surface area stages 1 and 3 actually need. We deliberately
+#    do NOT install scanpy/squidpy/scimap/phenograph/numba/datashader here
+#    — those are declared in spac's install_requires but not touched by
+#    template_utils.load_input/save_results or the preprocess module.
+#    Keeping the env lean keeps the mamba solve fast and avoids C
+#    extension compile surprises.
 # -----------------------------------------------------------------------------
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     mamba create -n preprocess -y \
+        -c conda-forge \
         python=3.9.13 \
         pandas=1.5.3 \
         numpy=1.26.4 \
         anndata=0.10.9 \
+        matplotlib=3.9.2 \
         pyyaml \
         pip \
- && conda clean -afy
+    && conda clean -afy
 
 # -----------------------------------------------------------------------------
-# 2. Copy the SCSAWorkflow repo into the image — branch-aware.
-#    Build context must be the repo root so this picks up:
-#      - src/spac/...   (entire SPAC package including new transform/ module)
-#      - setup.py / pyproject.toml
-#      - tools/spac_gpu/{run_gpu.sh, run_grapheno.py, merge_labels.py}
-#    Whatever git branch is checked out becomes the version installed below.
-# -----------------------------------------------------------------------------
-WORKDIR /opt/scsaworkflow
-COPY . .
-
-# -----------------------------------------------------------------------------
-# 3. Install SPAC into BOTH conda envs as an editable install of the
-#    copied tree. Identical to how the CPU Dockerfile installs SPAC, so
-#    the same branch's code is what runs in either container.
+# 2. Install SPAC into BOTH envs from the SAME git ref, with --no-deps.
 #
-#    Also install 'phenograph' in the preprocess env in case anything
-#    reaches into the CPU phenograph package; harmless if unused.
+#    We install for code only — all runtime deps are supplied by the
+#    surrounding env (mamba-pinned versions in preprocess; RAPIDS-shipped
+#    versions in rapids).
 # -----------------------------------------------------------------------------
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate preprocess && \
-    pip install --no-cache-dir -e . && \
-    pip install --no-cache-dir phenograph
+    pip install --no-cache-dir --no-deps \
+        "git+https://github.com/${GITHUB_REPO}.git@${GITHUB_BRANCH}"
 
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate rapids && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir --no-deps \
+        "git+https://github.com/${GITHUB_REPO}.git@${GITHUB_BRANCH}"
 
 # -----------------------------------------------------------------------------
-# 4. Install the orchestrator and helpers used by the Galaxy GPU XML.
-#    The XML invokes `bash /opt/spac-gpu/run_gpu.sh <params.json>`.
-#    These files live in the repo at tools/spac_gpu/ so they're already
-#    inside /opt/scsaworkflow after step 2 — copy them to a stable path.
+# 3. Pull the three GPU orchestration scripts from the SAME ref as the
+#    pip installs above. Kept out of spac's setup.py because they are
+#    RAPIDS-22.08-only infrastructure that disappears when the container
+#    migrates to RAPIDS 24.10+.
+#
+#    Galaxy XML entry point: bash /opt/spac-gpu/run_gpu.sh <params.json>
 # -----------------------------------------------------------------------------
-RUN mkdir -p /opt/spac-gpu && \
-    cp /opt/scsaworkflow/tools/spac_gpu/run_gpu.sh /opt/spac-gpu/run_gpu.sh && \
-    cp /opt/scsaworkflow/tools/spac_gpu/run_grapheno.py /opt/spac-gpu/run_grapheno.py && \
-    cp /opt/scsaworkflow/tools/spac_gpu/merge_labels.py /opt/spac-gpu/merge_labels.py && \
+RUN git clone --depth 1 --branch "${GITHUB_BRANCH}" \
+        "https://github.com/${GITHUB_REPO}.git" /tmp/scsa && \
+    mkdir -p /opt/spac-gpu && \
+    cp /tmp/scsa/tools/spac_gpu/run_gpu.sh      /opt/spac-gpu/run_gpu.sh && \
+    cp /tmp/scsa/tools/spac_gpu/run_grapheno.py /opt/spac-gpu/run_grapheno.py && \
+    cp /tmp/scsa/tools/spac_gpu/merge_labels.py /opt/spac-gpu/merge_labels.py && \
     chmod +x /opt/spac-gpu/run_gpu.sh && \
-    ln -s /opt/spac-gpu/run_gpu.sh /usr/local/bin/spac-gpu-run
+    ln -s /opt/spac-gpu/run_gpu.sh /usr/local/bin/spac-gpu-run && \
+    rm -rf /tmp/scsa
 
 # -----------------------------------------------------------------------------
-# 5. Build-time sanity checks — fail fast if either env is broken.
-#    Mirrors the CPU Dockerfile's Test 5 / Test 6 pattern.
+# 4. Build-time sanity checks — fail fast if either env is broken.
+#
+#    preprocess env must import anndata + spac.templates.template_utils
+#    + spac.transform.clustering.phenograph.prepare_features
+#    (what stage 1 and stage 3 load).
+#
+#    rapids env must import the full RAPIDS stack + spac grapheno module
+#    (what stage 2 loads).
 # -----------------------------------------------------------------------------
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate preprocess && \
     echo "=== Verifying preprocess env ===" && \
-    python -c "import anndata, pandas, numpy; \
-               print(f'  anndata={anndata.__version__}, pandas={pandas.__version__}, numpy={numpy.__version__}')" && \
+    python -c "import anndata, pandas, numpy, matplotlib; \
+        print(f'  anndata={anndata.__version__}, pandas={pandas.__version__}, numpy={numpy.__version__}')" && \
     python -c "from spac.transform.clustering.phenograph import prepare_features; \
-               from spac.templates.phenograph_clustering_gpu_template import run_from_json; \
-               print('  preprocess env: SPAC imports OK')"
+        from spac.templates.template_utils import load_input, parse_params, save_results; \
+        print('  preprocess env: SPAC imports OK')"
 
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate rapids && \
     echo "=== Verifying rapids env ===" && \
     python -c "import cuml, cugraph, cudf, cupy; \
-               from dask_cuda import LocalCUDACluster; \
-               print(f'  cuml={cuml.__version__}, cugraph={cugraph.__version__}, cudf={cudf.__version__}')" && \
+        from dask_cuda import LocalCUDACluster; \
+        print(f'  cuml={cuml.__version__}, cugraph={cugraph.__version__}, cudf={cudf.__version__}')" && \
     python -c "from spac.transform.clustering.phenograph.gpu.grapheno import \
-                   phenograph_gpu, cluster, cluster_from_array, sort_by_size; \
-               print('  rapids env: SPAC GPU imports OK')"
+        phenograph_gpu, cluster, cluster_from_array, sort_by_size; \
+        print('  rapids env: SPAC GPU imports OK')"
+
+# -----------------------------------------------------------------------------
+# 5. Verify the orchestration scripts are present and executable.
+# -----------------------------------------------------------------------------
+RUN echo "=== Verifying orchestration scripts ===" && \
+    test -x /opt/spac-gpu/run_gpu.sh && \
+    test -f /opt/spac-gpu/run_grapheno.py && \
+    test -f /opt/spac-gpu/merge_labels.py && \
+    test -L /usr/local/bin/spac-gpu-run && \
+    echo "  /opt/spac-gpu/ contents OK"
 
 WORKDIR /workspace
