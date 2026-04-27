@@ -146,14 +146,13 @@ RUN git clone --depth 1 --branch "${GITHUB_BRANCH}" \
     rm -rf /tmp/scsa
 
 # -----------------------------------------------------------------------------
-# 4. Build-time sanity checks — fail fast if either env is broken.
+# 4. Build-time sanity checks for the preprocess env.
 #
 #    preprocess env must import anndata + spac.templates.template_utils
 #    + spac.transform.clustering.phenograph.prepare_features
 #    (what stage 1 and stage 3 load).
 #
-#    rapids env must import the full RAPIDS stack + spac grapheno module
-#    (what stage 2 loads).
+#    The rapids env is NOT exercised via Python here — see section 5.
 # -----------------------------------------------------------------------------
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate preprocess && \
@@ -164,18 +163,50 @@ RUN source /opt/conda/etc/profile.d/conda.sh && \
         from spac.templates.template_utils import load_input, parse_params, save_results; \
         print('  preprocess env: SPAC imports OK')"
 
-RUN source /opt/conda/etc/profile.d/conda.sh && \
-    conda activate rapids && \
-    echo "=== Verifying rapids env ===" && \
-    python -c "import cuml, cugraph, cudf, cupy; \
-        from dask_cuda import LocalCUDACluster; \
-        print(f'  cuml={cuml.__version__}, cugraph={cugraph.__version__}, cudf={cudf.__version__}')" && \
-    python -c "from spac.transform.clustering.phenograph.gpu.grapheno import \
-        phenograph_gpu, cluster, cluster_from_array, sort_by_size; \
-        print('  rapids env: SPAC GPU imports OK')"
+# -----------------------------------------------------------------------------
+# 5. STRUCTURE / PRESENCE CHECK for the rapids env (NOT a runtime
+#    validation of RAPIDS itself).
+#
+#    What this step does:
+#      - Confirms the rapids env prefix resolves to exactly one
+#        python*/site-packages directory (catches env creation failures).
+#      - Confirms each required package directory exists on disk and that
+#        the spac grapheno module is physically installed where expected.
+#
+#    What this step deliberately does NOT do:
+#      - It does NOT import cuml/cugraph/cudf/cupy/dask_cuda in Python.
+#      - It does NOT prove the packages are importable at runtime.
+#      - It does NOT detect ABI mismatches, missing shared libraries,
+#        or broken entry points.
+#
+#    Why: RAPIDS 22.08 has transitive cuda-python init hooks that
+#    segfault on Python shutdown (exit code 139) when libcuda.so.1 is
+#    absent — as on any CPU-only CI builder. Even `importlib.util.find_spec`
+#    triggers this because unrelated rapids-env imports register atexit
+#    handlers that run when the interpreter shuts down.
+#
+#    Real RAPIDS runtime validation lives separately in
+#    SCSAWorkflow/tools/spac_gpu/smoke_test.sh, which must be run on a
+#    GPU host (Biowulf or AWS A10G/A100) against the published Docker
+#    image before the image is promoted to production.
+# -----------------------------------------------------------------------------
+RUN echo "=== Rapids env presence check (structure only, not runtime) ===" && \
+    RAPIDS_SITE_MATCHES=(/opt/conda/envs/rapids/lib/python*/site-packages) && \
+    if [ ${#RAPIDS_SITE_MATCHES[@]} -ne 1 ] || [ ! -d "${RAPIDS_SITE_MATCHES[0]}" ]; then \
+        echo "ERROR: expected exactly one rapids python*/site-packages dir, found: ${RAPIDS_SITE_MATCHES[*]}" >&2; \
+        exit 1; \
+    fi && \
+    RAPIDS_SITE="${RAPIDS_SITE_MATCHES[0]}" && \
+    echo "  rapids site-packages: $RAPIDS_SITE" && \
+    for pkg in cuml cugraph cudf cupy dask_cuda; do \
+        test -d "$RAPIDS_SITE/$pkg" || { echo "ERROR: missing package dir: $pkg" >&2; exit 1; }; \
+    done && \
+    test -d "$RAPIDS_SITE/spac/transform/clustering/phenograph/gpu" && \
+    test -f "$RAPIDS_SITE/spac/transform/clustering/phenograph/gpu/grapheno.py" && \
+    echo "  presence check OK (run smoke_test.sh on a GPU host to validate runtime)"
 
 # -----------------------------------------------------------------------------
-# 5. Verify the orchestration scripts are present and executable.
+# 6. Verify the orchestration scripts are present and executable.
 # -----------------------------------------------------------------------------
 RUN echo "=== Verifying orchestration scripts ===" && \
     test -x /opt/spac-gpu/run_gpu.sh && \

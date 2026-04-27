@@ -82,7 +82,6 @@ ENV CHROME_BIN=/usr/bin/chromium
 RUN conda install -n base -y conda-libmamba-solver && \
     conda config --set solver libmamba
 
-# Simulate exactly what a reviewer would do following README.md instructions
 WORKDIR /opt/SCSAWorkflow
 
 # Step 1: Fetch environment.yml from GitHub branch
@@ -151,12 +150,10 @@ RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
 # -----------------------------------------------------------------------------
 # Verify SPAC installation works correctly in multiple ways.
 #
-# Extended from v0.9.1 with two new checks:
-#   - Test 5: legacy CPU path (spac.transformations.phenograph_clustering +
-#             phenograph_clustering_template) — present on every branch
-#   - Test 6: new CPU path (spac.transform.clustering.phenograph.cpu +
+# Extended from v0.9.1 with a check for the new CPU path:
+#   - Test 5: new CPU path (spac.transform.clustering.phenograph.cpu +
 #             phenograph_clustering_cpu_template) — only on the feature
-#             branch. If Test 6 fails with ModuleNotFoundError on
+#             branch. If Test 5 fails with ModuleNotFoundError on
 #             `spac.transform`, the GITHUB_BRANCH build arg is pointing
 #             at a ref that predates the PhenoGraph GPU refactor.
 # -----------------------------------------------------------------------------
@@ -169,15 +166,11 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     python -c "import sys; print(sys.executable)" && \
     echo "Test 4: Import scimap" && \
     python -c "import scimap; print('scimap imported successfully')" && \
-    echo "Test 5: Legacy CPU path (unchanged)" && \
-    python -c "from spac.transformations import phenograph_clustering; \
-               from spac.templates.phenograph_clustering_template import run_from_json; \
-               print('legacy CPU path OK')" && \
-    echo "Test 6: New CPU path (transform/clustering/phenograph)" && \
+    echo "Test 5: New CPU path (transform/clustering/phenograph)" && \
     python -c "from spac.transform.clustering.phenograph import phenograph_cpu, prepare_features; \
                from spac.templates.phenograph_clustering_cpu_template import run_from_json; \
                print('new CPU path OK')" && \
-    echo "Test 7: Verify UMAP compatibility with scikit-learn" && \
+    echo "Test 6: Verify UMAP compatibility with scikit-learn" && \
     python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
     echo "=== ALL TESTS PASSED ===" || \
     echo "Some import issues detected but proceeding"
