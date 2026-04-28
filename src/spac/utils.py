@@ -1196,20 +1196,20 @@ def compute_boxplot_metrics(
 
 # compute summary statistics for the specified columns
 def compute_summary_qc_stats(
-        df: pd.DataFrame, 
+        df: pd.DataFrame,
         n_mad: int = 5,
         upper_quantile: float = 0.95,
         lower_quantile: float = 0.05,
         stat_columns_list: List[str] = ['nFeature', 'nCount', 'percent.mt']
         ) -> pd.DataFrame:
-    
+
     """
     Compute summary quality control statistics for specified columns in a dataset.
 
     For each column in stat_columns_list, this function calculates:
         - Mean
         - Median
-        - Upper and lower thresholds based on median ± n_mad * MAD 
+        - Upper and lower thresholds based on median ± n_mad * MAD
         (median absolute deviation)
         - Upper and lower quantiles
 
@@ -1230,7 +1230,7 @@ def compute_summary_qc_stats(
     -------
     pd.DataFrame
         DataFrame with summary statistics for each specified column.
-        Columns: ["metric_name", "mean", "median", "upper_mad", "lower_mad", 
+        Columns: ["metric_name", "mean", "median", "upper_mad", "lower_mad",
         "upper_quantile", "lower_quantile"]
 
     Raises
@@ -1269,8 +1269,8 @@ def compute_summary_qc_stats(
     return pd.DataFrame(
         stat_vals,
         columns=[
-            "metric_name", "mean", "median", 
-            "upper_mad", "lower_mad", 
+            "metric_name", "mean", "median",
+            "upper_mad", "lower_mad",
             "upper_quantile", "lower_quantile"
         ]
     )

@@ -96,10 +96,11 @@ def run_from_json(
     feature = text_to_value(params.get("Feature", "None"))
     annotation = text_to_value(params.get("Annotation", "None"))
     layer = params.get("Table_", "Original")
-    group_by = params.get("Group_by", "None")
+    group_by = text_to_value(params.get("Group_by", "None"))
+    max_groups = params.get("Max_Groups", 20)
     together = params.get("Together", True)
-    fig_width = params.get("Figure_Width", 8)
-    fig_height = params.get("Figure_Height", 6)
+    fig_width = params.get("Figure_Width", "auto")
+    fig_height = params.get("Figure_Height", "auto")
     font_size = params.get("Font_Size", 12)
     fig_dpi = params.get("Figure_DPI", 300)
     legend_location = params.get("Legend_Location", "best")
@@ -107,12 +108,15 @@ def run_from_json(
     take_X_log = params.get("Take_X_Log", False)
     take_Y_log = params.get("Take_Y_log", False)
     multiple = params.get("Multiple", "dodge")
+    element = params.get("Element", "bars")
     shrink = params.get("Shrink_Number", 1)
     bins = params.get("Bins", "auto")
     alpha = params.get("Bin_Transparency", 0.75)
     stat = params.get("Stat", "count")
     x_rotate = params.get("X_Axis_Label_Rotation", 0)
     histplot_by = params.get("Plot_By", "Annotation")
+    facet = params.get("Facet", False)
+    facet_ncol = params.get("Facet_Ncol", "auto")
 
     # Close all existing figures to prevent extra plots
     plt.close('all')
@@ -151,7 +155,9 @@ def run_from_json(
                     'No features available in adata.var_names to plot.'
                 )
 
-    # Validate and set bins
+    # Bins use a strict template contract in feature mode:
+    # "auto" or a positive integer. Loose null-like values are intentionally
+    # not treated as aliases here.
     if feature is not None:
         bins = text_to_value(
             bins,
@@ -180,11 +186,89 @@ def run_from_json(
                 "Setting bin number calculation to auto."
             )
 
+
+    if group_by and together:
+        multiple = str(multiple).strip().lower()
+    element = str(element).strip().lower()
+    stat = str(stat).strip().lower()
+
+    # Figure_Width and Figure_Height use "auto" for template defaults.
+    # In facet mode, it is forwarded as None to derive layout geometry.
+    # In non-facet mode, it falls back to 8x6 inches.
+    fig_width = text_to_value(
+        fig_width,
+        default_none_text="auto",
+        value_to_convert_to=None if facet else 8,
+        to_float=True,
+        param_name="Figure_Width"
+    )
+    fig_height = text_to_value(
+        fig_height,
+        default_none_text="auto",
+        value_to_convert_to=None if facet else 6,
+        to_float=True,
+        param_name="Figure_Height"
+    )
+    if fig_width is not None and fig_height is not None:
+        if fig_width <= 0 or fig_height <= 0:
+            raise ValueError(
+                f'Figure_Width/Height should be a positive number.'
+                f'Received "{fig_width}"/"{fig_height}".'
+            )
+    if fig_dpi <= 0:
+        raise ValueError(
+            f'Figure_DPI should be a positive number. Received "{fig_dpi}".'
+        )
+
+    # Validate x-axis label rotation
     if (x_rotate < 0) or (x_rotate > 360):
         raise ValueError(
             f'The X label rotation should fall within 0 to 360 degree. '
             f'Received "{x_rotate}".'
         )
+
+    # Max_Groups applies only when Group_by is set.
+    # It accepts a positive integer or "unlimited".
+    # Missing values default to 20.
+    if group_by:
+        parsed_max_groups = max_groups
+        if parsed_max_groups != "unlimited":
+            parsed_max_groups = text_to_value(
+                parsed_max_groups,
+                value_to_convert_to=20,
+                to_int=True,
+                param_name="Max_Groups",
+            )
+            if parsed_max_groups <= 0:
+                raise ValueError(
+                    f'Max_Groups should be a positive integer or "unlimited". '
+                    f'Received "{parsed_max_groups}".'
+                )
+
+    # Facet requires Group_by and forbids Together=True.
+    # Facet_Ncol accepts "auto" or a positive integer.
+    if facet:
+        if group_by is None:
+            raise ValueError(
+                'Facet is True but Group_by is not specified. '
+                'Please specify Group_by when using Facet.'
+            )
+        if together:
+            raise ValueError(
+                'Together and Facet cannot both be True. Please set one to False.'
+            )
+        facet_ncol = text_to_value(
+            facet_ncol,
+            default_none_text="auto",
+            to_int=True,
+            param_name="Facet_Ncol"
+        )
+        if facet_ncol is not None:
+            if facet_ncol <= 0:
+                raise ValueError(
+                    f'Facet_Ncol must be a positive integer or "auto". '
+                    f'Received "{facet_ncol}".'
+                )
 
     # Initialize the x-variable before the loop
     if histplot_by == "Annotation":
@@ -192,21 +276,36 @@ def run_from_json(
     else:
         x_var = feature
 
+    # Assemble validated histogram kwargs right before the plotting call.
+    hist_kwargs = dict(
+        element=element,
+        shrink=shrink,
+        bins=bins,
+        alpha=alpha,
+        stat=stat,
+    )
+    if group_by and together:
+        hist_kwargs["multiple"] = multiple
+    if group_by:
+        hist_kwargs["max_groups"] = parsed_max_groups
+    if facet:
+        hist_kwargs["facet_ncol"] = facet_ncol
+        hist_kwargs["facet_fig_width"] = fig_width
+        hist_kwargs["facet_fig_height"] = fig_height
+        hist_kwargs["facet_tick_rotation"] = x_rotate
+
     result = histogram(
         adata=adata,
         feature=feature,
         annotation=annotation,
         layer=text_to_value(layer, "Original"),
-        group_by=text_to_value(group_by),
+        group_by=group_by,
         together=together,
         ax=None,
         x_log_scale=take_X_log,
         y_log_scale=take_Y_log,
-        multiple=multiple,
-        shrink=shrink,
-        bins=bins,
-        alpha=alpha,
-        stat=stat
+        facet=facet,
+        **hist_kwargs,
     )
 
     fig = result["fig"]
@@ -214,8 +313,11 @@ def run_from_json(
     df_counts = result["df"]
 
     # Set figure size and dpi
-    fig.set_size_inches(fig_width, fig_height)
+    if fig_width is not None and fig_height is not None:
+        fig.set_size_inches(fig_width, fig_height)
+        logger.info(f"Set figure size to {fig_width}x{fig_height} inches.")
     fig.set_dpi(fig_dpi)
+    logger.info(f"Set figure DPI to {fig_dpi}.")
 
     # Ensure axes is a list
     if isinstance(axs, list):
@@ -249,8 +351,12 @@ def run_from_json(
 
         # Rotate x labels
         ax.tick_params(axis='x', rotation=x_rotate)
+        if x_rotate:
+            for label in ax.get_xticklabels():
+                label.set_rotation_mode('anchor')
+                label.set_horizontalalignment('right')
 
-    # Set titles based on group_by
+    # Set titles based on group_by and facet
     if text_to_value(group_by):
         if together:
             for ax in axes:
@@ -267,15 +373,37 @@ def run_from_json(
                     "Number of axes does not match number of "
                     "groups. Titles may not correspond correctly."
                 )
+            if facet:
+                fig.suptitle(
+                    f'Histogram of "{x_var}" faceted by "{group_by}"'
+                )
+                ax_title_prefix = f'Group'
+            else:
+                ax_title_prefix = f'Histogram of "{x_var}" for group'
             for ax, grp in zip(axes, unique_groups):
                 ax.set_title(
-                    f'Histogram of "{x_var}" for group: "{grp}"'
+                    f'{ax_title_prefix}: "{grp}"'
                 )
     else:
         for ax in axes:
             ax.set_title(f'Count plot of "{x_var}"')
 
-    plt.tight_layout()
+    # Adjust layout to prevent title overlap
+    if facet:
+        rows = len({round(ax.get_position().y0, 3) for ax in axes})
+        fig.tight_layout(
+            rect=[
+                min(0.030, 0.02 + 0.0025 * rows),
+                max(0.022, 0.036 - 0.003 * rows),
+                min(0.992, 0.98 + 0.0025 * rows),
+                max(0.969, 0.975 - 0.001 * rows),
+            ],
+            pad=max(0.35, 0.6 - 0.05 * rows),
+            h_pad=max(0.2, 0.43 - 0.04 * rows) * 6,
+            w_pad=max(0.2, 0.43 - 0.04 * rows) * 6,
+        )
+    else:
+        fig.tight_layout()
 
     logger.info("Displaying top 10 rows of histogram dataframe:")
     print(df_counts.head(10))
