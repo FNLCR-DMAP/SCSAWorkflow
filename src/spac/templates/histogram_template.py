@@ -393,14 +393,14 @@ def run_from_json(
         rows = len({round(ax.get_position().y0, 3) for ax in axes})
         fig.tight_layout(
             rect=[
-                max(0.02, 0.038 - 0.004 * rows),
+                min(0.030, 0.02 + 0.0025 * rows),
                 max(0.022, 0.036 - 0.003 * rows),
                 min(0.992, 0.98 + 0.0025 * rows),
-                max(0.974, 0.98 - 0.001 * rows),
+                max(0.969, 0.975 - 0.001 * rows),
             ],
             pad=max(0.35, 0.6 - 0.05 * rows),
-            h_pad=max(0.2, 0.43 - 0.04 * rows),
-            w_pad=max(0.2, 0.43 - 0.04 * rows),
+            h_pad=max(0.2, 0.43 - 0.04 * rows) * 6,
+            w_pad=max(0.2, 0.43 - 0.04 * rows) * 6,
         )
     else:
         fig.tight_layout()
