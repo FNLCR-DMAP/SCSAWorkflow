@@ -3,4 +3,9 @@
 .vscode/launch.json
 test/__pychache__
 build/
+src/spac.egg-info/
+**/*.py
+**/*.ipynb
+**/.ipynb_checkpoints/
+../../.ipynb_checkpoints/CHANGELOG-checkpoint.md
 *.egg-info/
