@@ -24,7 +24,9 @@
 #   bash /opt/spac-gpu/run_gpu.sh <cleaned_params.json>
 # -----------------------------------------------------------------------------
 
-set -euo pipefail
+# Conda activation hooks in the RAPIDS image read GDAL/PROJ variables before
+# assigning them, so keep -u disabled while preserving exit and pipe failures.
+set -eo pipefail
 
 if [[ $# -ne 1 ]]; then
     echo "Usage: $0 <cleaned_params.json>" >&2

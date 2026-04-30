@@ -3,7 +3,6 @@ import pickle
 from typing import Any, Dict, Union, Optional, List
 import json
 import pandas as pd
-import anndata as ad
 import re
 import logging
 import matplotlib.pyplot as plt
@@ -33,8 +32,10 @@ def load_input(file_path: Union[str, Path]):
     suffix = path.suffix.lower()
 
     if suffix in ['.h5ad', '.h5']:
-        # Load h5ad file
+        # Lazy import so pickle-only workflows can import this module in
+        # environments that do not ship anndata, such as the RAPIDS env.
         try:
+            import anndata as ad
             return ad.read_h5ad(path)
         except ImportError:
             raise ImportError(
@@ -45,24 +46,42 @@ def load_input(file_path: Union[str, Path]):
 
     elif suffix in ['.pickle', '.pkl', '.p']:
         # Load pickle file
-        with path.open('rb') as fh:
-            return pickle.load(fh)
+        return _load_pickle(path)
 
     else:
         # Try to detect file type by content
         try:
             # First try h5ad
+            import anndata as ad
             return ad.read_h5ad(path)
         except Exception:
             # Fall back to pickle
             try:
-                with path.open('rb') as fh:
-                    return pickle.load(fh)
+                return _load_pickle(path)
             except Exception as e:
                 raise ValueError(
                     f"Unable to load file '{file_path}'. "
                     f"Supported formats: h5ad, pickle. Error: {e}"
                 )
+
+
+def _load_pickle(path: Path):
+    """Load pickle data, with a clear error for AnnData pickles."""
+    try:
+        with path.open('rb') as fh:
+            return pickle.load(fh)
+    except ModuleNotFoundError as e:
+        missing_module = getattr(e, "name", None) or ""
+        is_anndata_missing = (
+            missing_module == "anndata" or
+            missing_module.startswith("anndata.") or
+            "No module named 'anndata'" in str(e)
+        )
+        if is_anndata_missing:
+            raise ImportError(
+                "anndata package required to read AnnData pickle files"
+            ) from e
+        raise
 
 
 def save_results(

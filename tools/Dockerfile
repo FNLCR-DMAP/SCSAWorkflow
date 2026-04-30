@@ -1,4 +1,4 @@
-# Dockerfile.v0.9.2 — nciccbr/spac:v0.9.2
+# Dockerfile.v0.9.3 — nciccbr/spac:v0.9.3
 #
 # SPAC CPU image for AWS Galaxy. Adds the new CPU PhenoGraph path
 # (spac.transform.clustering.phenograph.cpu) that lives on the
@@ -7,24 +7,17 @@
 # phenograph_clustering.xml Galaxy tool uses.
 #
 # =============================================================================
-# Relationship to v0.9.1
+# Relationship to v0.9.2
 # -----------------------------------------------------------------------------
-# This file is a minimal fork of the validated v0.9.1 Dockerfile. The only
+# This file is a minimal patch fork of the validated v0.9.2 Dockerfile. The only
 # substantive differences are:
 #
-#   1. LABEL version bumped 0.9.1 -> 0.9.2
-#   2. ARG GITHUB_BRANCH default flipped from "main" to the feature branch,
-#      because the new spac.transform.clustering.phenograph.cpu module and
-#      the new phenograph_clustering_cpu_template have not merged to main yet.
-#      (Once the SCSAWorkflow PR merges and a tag is cut, bump this to the
-#       release tag.)
-#   3. Build-time verification tests (the RUN "=== VERIFYING SPAC INSTALLATION")
-#      extended with one extra check for the new CPU module, so Dockers2 CI
-#      catches any regression in the refactored code at build time rather than
-#      at Galaxy runtime.
+#   1. LABEL version bumped 0.9.2 -> 0.9.3
+#   2. GITHUB_BRANCH remains on feature/phenograph-gpu-refactor so the image
+#      picks up the PhenoGraph CPU wrapper fix for NumPy community labels.
 #
 # Everything else — curl-based environment.yml fetch, --no-deps pip install,
-# channel config, env variables, CMD — is copied verbatim from v0.9.1 to
+# channel config, env variables, CMD — is copied verbatim from v0.9.2 to
 # minimize behavior drift and stay within the known-good CCBR/Dockers2 pattern.
 #
 # Why curl and not COPY?
@@ -43,14 +36,14 @@ FROM continuumio/miniconda3:24.3.0-0
 ARG ENV_NAME=spac
 # Default to the feature branch until the PhenoGraph GPU refactor merges
 # to SCSAWorkflow main and a release is tagged. Bump to the tag (e.g.
-# v0.9.2 on SCSAWorkflow) once that happens.
+# v0.9.3 on SCSAWorkflow) once that happens.
 ARG GITHUB_BRANCH=feature/phenograph-gpu-refactor
 ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
 
 # Set labels
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC - Single Cell Spatial Analysis Container"
-LABEL version="0.9.2"
+LABEL version="0.9.3"
 LABEL github.branch="${GITHUB_BRANCH}"
 
 # Install system dependencies including Chromium for Kaleido (ARM64 compatible)
@@ -172,8 +165,7 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
                print('new CPU path OK')" && \
     echo "Test 6: Verify UMAP compatibility with scikit-learn" && \
     python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
-    echo "=== ALL TESTS PASSED ===" || \
-    echo "Some import issues detected but proceeding"
+    echo "=== ALL TESTS PASSED ==="
 
 # Set working directory for Jupyter (will be mounted via volume)
 WORKDIR /workspace
