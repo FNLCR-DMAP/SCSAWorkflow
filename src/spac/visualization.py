@@ -14,7 +14,7 @@ import plotly.io as pio
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from spac.utils import check_table, check_annotation
 from spac.utils import check_feature, annotation_category_relations
-from spac.utils import check_label
+from spac.utils import check_label, check_list_in_list
 from spac.utils import get_defined_color_map
 from spac.utils import compute_boxplot_metrics
 from functools import partial
@@ -22,6 +22,9 @@ from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
+import datashader as ds
+import datashader.transfer_functions as tf
+
 import base64
 import time
 import json
@@ -32,17 +35,132 @@ import matplotlib.patches as mpatch
 from functools import partial
 from collections import OrderedDict
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+def heatmap_datashader(x, y, labels=None, theme=None,
+                        x_axis_title="Component 1", y_axis_title="Component 2",
+                        plot_title=None, **kwargs):
+    """
+    Generates a heatmap using Datashader for large-scale scatter data.
+
+    Parameters
+    ----------
+    x : iterable
+        X-axis coordinates.
+    y : iterable
+        Y-axis coordinates.
+    labels : iterable, optional
+        Categorical labels for subgrouping data.
+    theme : str, optional, default='viridis'
+        Colormap theme for visualization.
+    x_axis_title : str, optional, default='Component 1'
+        Label for the x-axis.
+    y_axis_title : str, optional, default='Component 2'
+        Label for the y-axis.
+    plot_title : str, optional
+        Title of the plot.
+    **kwargs : dict, optional
+        Additional keyword arguments (e.g., 'fig_width', 'fig_height').
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A Matplotlib figure containing the heatmap visualization.
+    """
+
+    # Ensure x and y are iterable
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define available color themes
+    themes = {
+        'Elevation': ds.colors.Elevation,
+        'viridis': ds.colors.viridis,
+        'Hot': ds.colors.Hot,
+        'Set1': ds.colors.Set1,
+        'Set2': ds.colors.Set2,
+        'Set3': ds.colors.Set3,
+        'Sets1to3': ds.colors.Sets1to3,
+        'inferno': ds.colors.inferno,
+        'color_lookup': ds.colors.color_lookup,
+    }
+    cmap = themes.get(theme, ds.colors.viridis)  # Default to 'viridis' if theme is not specified
+
+    # Create a DataFrame for processing
+    coords = pd.DataFrame({"x": x, "y": y})
+    if labels is not None:
+        coords["labels"] = labels
+
+    # Determine plot boundaries
+    x_min, x_max = coords["x"].min(), coords["x"].max()
+    y_min, y_max = coords["y"].min(), coords["y"].max()
+
+    # Supply default ranges if not in kwargs
+    canvas_kwargs = {
+        'plot_width': 600,
+        'plot_height': 400,
+        'x_range': (x_min, x_max),
+        'y_range': (y_min, y_max)
+    }
+    canvas_kwargs.update(kwargs)
+
+    create_canvas = partial(ds.Canvas, **canvas_kwargs)
+
+    if labels is not None:
+        categories = pd.Categorical(coords["labels"]).categories
+        num_categories = len(categories)
+
+        rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
+        fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
+        axes = axes.flatten()
+
+        for i, cat in enumerate(categories):
+            subset = coords[coords["labels"] == cat]
+            canvas = create_canvas()
+            agg = canvas.points(subset, x="x", y="y", agg=ds.count())
+            img = tf.shade(agg, cmap=cmap).to_pil()
+
+            ax = axes[i]
+            ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+            ax.set_title(f"{plot_title} - {cat}" if plot_title else str(cat))
+            ax.set_xlabel(x_axis_title)
+            ax.set_ylabel(y_axis_title)
+
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+    else:
+        canvas = create_canvas()
+        agg = canvas.points(coords, x="x", y="y", agg=ds.count())
+        img = tf.shade(agg, cmap=cmap).to_pil()
+
+        fig, ax = plt.subplots(
+            figsize=(
+                canvas_kwargs["plot_width"] / 100,
+                canvas_kwargs["plot_height"] / 100
+            )
+        )
+        ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+        ax.set_title(plot_title if plot_title else "Density Plot")
+        ax.set_xlabel(x_axis_title)
+        ax.set_ylabel(y_axis_title)
+
+    plt.tight_layout()
+    return fig
+
+
 
 
 def visualize_2D_scatter(
     x, y, labels=None, point_size=None, theme=None,
     ax=None, annotate_centers=False,
     x_axis_title='Component 1', y_axis_title='Component 2', plot_title=None,
-    color_representation=None, **kwargs
+    color_representation=None, color_map=None, **kwargs
 ):
     """
     Visualize 2D data using plt.scatter.
@@ -72,6 +190,8 @@ def visualize_2D_scatter(
         Title for the plot.
     color_representation : str, optional
         Description of what the colors represent.
+    color_map : dictionary, optional
+        Dictionary containing colors for label annotations.
     **kwargs
         Additional keyword arguments passed to plt.scatter.
 
@@ -90,6 +210,8 @@ def visualize_2D_scatter(
         raise ValueError("x and y must have the same length.")
     if labels is not None and len(labels) != len(x):
         raise ValueError("Labels length should match x and y length.")
+    if color_map is not None and not isinstance(color_map, dict):
+        raise ValueError("`color_map` must be a dict mapping label→color.")
 
     # Define color themes
     themes = {
@@ -143,20 +265,21 @@ def visualize_2D_scatter(
                     "Categorical."
                 )
 
-            # Combine colors from multiple colormaps
             cmap1 = plt.get_cmap('tab20')
             cmap2 = plt.get_cmap('tab20b')
             cmap3 = plt.get_cmap('tab20c')
             colors = cmap1.colors + cmap2.colors + cmap3.colors
-
-            # Use the number of unique clusters to set the colormap length
-            cmap = ListedColormap(colors[:len(unique_clusters)])
+            cluster_to_color = color_map if color_map is not None else {
+                str(cluster): colors[i % len(colors)]
+                for i, cluster in enumerate(unique_clusters)
+            }
 
             for idx, cluster in enumerate(unique_clusters):
                 mask = np.array(labels) == cluster
+                color = cluster_to_color.get(str(cluster), 'gray')
                 ax.scatter(
                     x[mask], y[mask],
-                    color=cmap(idx),
+                    color=color,
                     label=cluster,
                     s=point_size
                 )
@@ -203,6 +326,240 @@ def visualize_2D_scatter(
     return fig, ax
 
 
+def embedded_scatter_plot(
+        adata,
+        method=None,
+        annotation=None,
+        feature=None,
+        layer=None,
+        ax=None,
+        associated_table=None,
+        spot_size=20,
+        alpha=0.5,
+        vmin=-999,
+        vmax=-999,
+        color_map=None,
+        **kwargs):
+    """
+    Visualize scatter plot in PCA, t-SNE, UMAP, spatial or associated table.
+
+    Parameters
+    ----------
+    adata : anndata.AnnData
+        The AnnData object with coordinates precomputed by the 'tsne' or 'UMAP'
+        function and stored in 'adata.obsm["X_tsne"]' or 'adata.obsm["X_umap"]'
+    method : str, optional (default: None)
+        Visualization method specifying the coordinate system to plot.
+        Choose from {'tsne', 'umap', 'pca', 'spatial'}.
+    annotation : str, optional
+        The name of the column in `adata.obs` to use for coloring
+        the scatter plot points based on cell annotations.
+    feature : str, optional
+        The name of the gene or feature in `adata.var_names` to use
+        for coloring the scatter plot points based on feature expression.
+    layer : str, optional
+        The name of the data layer in `adata.layers` to use for visualization.
+        If None, the main data matrix `adata.X` is used.
+    ax : matplotlib.axes.Axes, optional (default: None)
+        A matplotlib axes object to plot on.
+        If not provided, a new figure and axes will be created.
+    associated_table : str, optional (default: None)
+        Name of the key in `obsm` that contains the numpy array. Takes
+        precedence over `method`
+    color_map : str, optional (default: None)
+        Name of the key in adata.uns that contains color-mapping for
+        the plot
+    **kwargs
+        Parameters passed to visualize_2D_scatter function,
+        including point_size.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The created figure for the plot.
+    ax : matplotlib.axes.Axes
+        The axes of the plot.
+    """
+
+    # Check if both annotation and feature are specified, raise error if so
+    if annotation and feature:
+        raise ValueError(
+            "Please specify either an annotation or a feature for coloring, "
+            "not both.")
+
+    # Use utility functions for input validation
+    if layer:
+        check_table(adata, tables=layer)
+    if annotation:
+        check_annotation(adata, annotations=annotation)
+    if feature:
+        check_feature(adata, features=[feature])
+    color_mapping = None
+    if color_map is not None:
+        color_mapping = get_defined_color_map(
+            adata,
+            defined_color_map=color_map,
+            annotations=annotation
+        )
+
+    # Validate the method and check if the necessary data exists in adata.obsm
+    if associated_table is None:
+        valid_methods = ['tsne', 'umap', 'pca', 'spatial']
+        check_list_in_list(input=method, input_name="method",
+                           input_type="method",
+                           target_list=valid_methods,
+                           need_exist=True
+                           )
+        if method == "spatial":
+            key = "spatial"
+        else:
+            key = f'X_{method}'
+            if key not in adata.obsm.keys():
+                raise ValueError(
+                    f"{key} coordinates not found in adata.obsm. "
+                    f"Please run {method.upper()} before calling this function."
+                )
+
+    else:
+        check_table(
+            adata=adata,
+            tables=associated_table,
+            should_exist=True,
+            associated_table=True
+        )
+
+        associated_table_shape = adata.obsm[associated_table].shape
+        if associated_table_shape[1] != 2:
+            raise ValueError(
+                f'The associated table:"{associated_table}" does not have'
+                f' two dimensions. It shape is:"{associated_table_shape}"'
+            )
+        key = associated_table
+
+    err_msg_feat_annotation_non = "Both annotation and feature are None, " + \
+        "please provide single input."
+    err_msg_spot_size = "The 'spot_size' parameter must be an integer, " + \
+        f"got {str(type(spot_size))}"
+    err_msg_alpha_type = "The 'alpha' parameter must be a float," + \
+        f"got {str(type(alpha))}"
+    err_msg_alpha_value = "The 'alpha' parameter must be between " + \
+        f"0 and 1 (inclusive), got {str(alpha)}"
+    err_msg_vmin = "The 'vmin' parameter must be a float or an int, " + \
+        f"got {str(type(vmin))}"
+    err_msg_vmax = "The 'vmax' parameter must be a float or an int, " + \
+        f"got {str(type(vmax))}"
+    err_msg_ax = "The 'ax' parameter must be an instance " + \
+        f"of matplotlib.axes.Axes, got {str(type(ax))}"
+
+    if adata is None:
+        raise ValueError("The input dataset must not be None.")
+
+    if not isinstance(adata, anndata.AnnData):
+        err_msg_adata = "The 'adata' parameter must be an " + \
+            f"instance of anndata.AnnData, got {str(type(adata))}."
+        raise ValueError(err_msg_adata)
+
+    if key == "spatial":
+        if annotation is None and feature is None:
+            raise ValueError(err_msg_feat_annotation_non)
+        
+        if 'spatial' not in adata.obsm_keys():
+            err_msg = "Spatial coordinates not found in the 'obsm' attribute."
+            raise ValueError(err_msg)
+
+# Extract feature name
+    if not isinstance(spot_size, int):
+        raise ValueError(err_msg_spot_size)
+
+    if not isinstance(alpha, float):
+        raise ValueError(err_msg_alpha_type)
+
+    if not (0 <= alpha <= 1):
+        raise ValueError(err_msg_alpha_value)
+
+    if vmin != -999 and not (
+        isinstance(vmin, float) or isinstance(vmin, int)
+    ):
+        raise ValueError(err_msg_vmin)
+
+    if vmax != -999 and not (
+        isinstance(vmax, float) or isinstance(vmax, int)
+    ):
+        raise ValueError(err_msg_vmax)
+
+    if ax is not None and not isinstance(ax, plt.Axes):
+        raise ValueError(err_msg_ax)
+
+    print(f'Running visualization using the coordinates: "{key}"')
+
+    # Extract the 2D coordinates
+    x, y = adata.obsm[key].T
+
+    # Determine coloring scheme
+    if color_mapping is None:
+        if annotation:
+            color_values = adata.obs[annotation].astype('category').values
+            color_representation = annotation
+        elif feature:
+            data_src = adata.layers[layer] if layer else adata.X
+            color_values = data_src[:, adata.var_names == feature].squeeze()
+            color_representation = feature
+        else:
+            color_values = None
+            color_representation = None
+    else:
+        color_values = adata.obs[annotation].astype('category').values
+        color_representation = annotation
+
+    # Set axis titles based on method and color representation
+    if method == 'tsne':
+        x_axis_title = 't-SNE 1'
+        y_axis_title = 't-SNE 2'
+        plot_title = f'TSNE-{color_representation}'
+    elif method == 'pca':
+        x_axis_title = 'PCA 1'
+        y_axis_title = 'PCA 2'
+        plot_title = f'PCA-{color_representation}'
+    elif method == 'umap':
+        x_axis_title = 'UMAP 1'
+        y_axis_title = 'UMAP 2'
+        plot_title = f'UMAP-{color_representation}'
+    elif method == 'spatial':
+        x_axis_title = 'SPATIAL 1'
+        y_axis_title = 'SPATIAL 2'
+        plot_title = f'SPATIAL-{color_representation}'
+
+    else:
+        x_axis_title = f'{associated_table} 1'
+        y_axis_title = f'{associated_table} 2'
+        plot_title = f'{associated_table}-{color_representation}'
+
+    # Remove conflicting keys from kwargs
+    kwargs.pop('x_axis_title', None)
+    kwargs.pop('y_axis_title', None)
+    kwargs.pop('plot_title', None)
+    kwargs.pop('color_representation', None)
+
+    # Set Min and Max in kwargs
+    kwargs['vmin'] = vmin
+    kwargs['vmax'] = vmax
+
+    fig, ax = visualize_2D_scatter(
+        x=x,
+        y=y,
+        ax=ax,
+        labels=color_values,
+        x_axis_title=x_axis_title,
+        y_axis_title=y_axis_title,
+        plot_title=plot_title,
+        color_representation=color_representation,
+        color_map=color_mapping,
+        **kwargs
+    )
+
+    return fig, ax
+
+
 def dimensionality_reduction_plot(
         adata,
         method=None,
@@ -211,6 +568,7 @@ def dimensionality_reduction_plot(
         layer=None,
         ax=None,
         associated_table=None,
+        color_map = None,
         **kwargs):
     """
     Visualize scatter plot in PCA, t-SNE, UMAP, or associated table.
@@ -239,6 +597,9 @@ def dimensionality_reduction_plot(
     associated_table : str, optional (default: None)
         Name of the key in `obsm` that contains the numpy array. Takes
         precedence over `method`
+    color_map : str, optional (default: None)
+        Name of the key in adata.uns that contains color-mapping for
+        the plot
     **kwargs
         Parameters passed to visualize_2D_scatter function,
         including point_size.
@@ -264,6 +625,14 @@ def dimensionality_reduction_plot(
         check_annotation(adata, annotations=annotation)
     if feature:
         check_feature(adata, features=[feature])
+
+    color_mapping = None
+    if color_map is not None:
+        color_mapping = get_defined_color_map(
+            adata,
+            defined_color_map=color_map,
+            annotations=annotation
+        )
 
     # Validate the method and check if the necessary data exists in adata.obsm
     if associated_table is None:
@@ -301,16 +670,20 @@ def dimensionality_reduction_plot(
     x, y = adata.obsm[key].T
 
     # Determine coloring scheme
-    if annotation:
+    if color_mapping is None:
+        if annotation:
+            color_values = adata.obs[annotation].astype('category').values
+            color_representation = annotation
+        elif feature:
+            data_src = adata.layers[layer] if layer else adata.X
+            color_values = data_src[:, adata.var_names == feature].squeeze()
+            color_representation = feature
+        else:
+            color_values = None
+            color_representation = None
+    else:
         color_values = adata.obs[annotation].astype('category').values
         color_representation = annotation
-    elif feature:
-        data_source = adata.layers[layer] if layer else adata.X
-        color_values = data_source[:, adata.var_names == feature].squeeze()
-        color_representation = feature
-    else:
-        color_values = None
-        color_representation = None
 
     # Set axis titles based on method and color representation
     if method == 'tsne':
@@ -345,6 +718,7 @@ def dimensionality_reduction_plot(
         y_axis_title=y_axis_title,
         plot_title=plot_title,
         color_representation=color_representation,
+        color_map=color_mapping,
         **kwargs
     )
 
@@ -403,9 +777,10 @@ def tsne_plot(adata, color_column=None, ax=None, **kwargs):
 
     return fig, ax
 
+
 def histogram(adata, feature=None, annotation=None, layer=None,
-              group_by=None, together=False, ax=None,
-              x_log_scale=False, y_log_scale=False, **kwargs):
+              group_by=None, together=False, ax=None, x_log_scale=False,
+              y_log_scale=False, facet=False, defined_color_map=None, **kwargs):
     """
     Plot the histogram of cells based on a specific feature from adata.X
     or annotation from adata.obs.
@@ -446,6 +821,12 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     y_log_scale : bool, default False
         If True, the y-axis will be set to log scale.
+
+    facet : bool, default False
+        If True, group by function outputs facet plots
+    defined_color_map : str, optional, default=None
+        Key in adata.uns used to retrieve a color mapping dictionary to
+        color code the histogram.
 
     **kwargs
         Additional keyword arguments passed to seaborn histplot function.
@@ -495,7 +876,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             DataFrame containing the data used for plotting the histogram.
 
     """
-
     # If no feature or annotation is specified, apply default behavior
     if feature is None and annotation is None:
         # Default to the first feature in adata.var_names
@@ -530,6 +910,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     df = pd.concat([df, adata.obs], axis=1)
 
+    if defined_color_map:
+        color_dict = get_defined_color_map(adata, defined_color_map)
+        kwargs.setdefault("palette", color_dict)
+
     if feature and annotation:
         raise ValueError("Cannot pass both feature and annotation,"
                          " choose one.")
@@ -538,6 +922,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Check for negative values and apply log1p transformation if
     # x_log_scale is True
+
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
@@ -567,7 +952,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     ):
         bins = max(int(2*(num_rows ** (1/3))), 1)
         print(f'Automatically calculated number of bins is: {bins}')
-        return(bins)
+
+        return (bins)
 
     num_rows = plot_data.shape[0]
 
@@ -629,10 +1015,13 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if group_by:
         groups = df[group_by].dropna().unique().tolist()
         n_groups = len(groups)
+
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
-
+        # Define hist_data variable to store histogram dataframes
+        hist_data = []
+        
         if together:
             # Compute global bin edges based on the entire dataset
             if pd.api.types.is_numeric_dtype(plot_data[data_column]):
@@ -642,7 +1031,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             else:
                 global_bin_edges = plot_data[data_column].unique()
 
-            hist_data = []
             # Compute histograms for each group separately and combine them
             for group in groups:
                 group_data = plot_data[
@@ -657,70 +1045,117 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             # Set default values if not provided in kwargs
             kwargs.setdefault("multiple", "stack")
             kwargs.setdefault("element", "bars")
-
-
+            
             sns.histplot(data=hist_data, x='bin_center', weights='count',
                          hue=group_by, ax=ax, **kwargs)
             # If plotting feature specify which layer
             if feature:
                 ax.set_title(f'Layer: {layer}')
             axs.append(ax)
+
         else:
-            fig, ax_array = plt.subplots(
-                n_groups, 1, figsize=(5, 5 * n_groups)
-            )
+            if facet:
+                # Use seaborn's FacetGrid to automatically create histogram subplots for each group
+                hist = sns.FacetGrid(plot_data, col=group_by)
+                
+                # Map the histogram function to the grid
+                hist.map(sns.histplot, data_column, **kwargs)
 
-            # Convert a single Axes object to a list
-            # Ensure ax_array is always iterable
-            if n_groups == 1:
-                ax_array = [ax_array]
+                # Set rotation of label
+                hist.set_xticklabels(rotation=20, ha='right')
+
+                # Titles for each facet
+                hist.set_titles("{col_name}")
+                
+                # The following code has been commented out because the variables ax_i and group are not defined
+                # They are also not necessary when using FacetGrid to create histograms
+                
+                # # If defined_color_map provided, retrieves color map
+                # group_color = None
+                # if defined_color_map:
+                #     group_color = color_dict.get(group, None)
+
+                # sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                #              weights='count', color=group_color, **kwargs)
+
+                # # If plotting feature specify which layer
+                # if feature:
+                #     ax_i.set_title(f'{groups[i]} with Layer: {layer}')
+                # else:
+                #     ax_i.set_title(f'{groups[i]}')
+
+                # Ajust top margin
+                hist.figure.subplots_adjust(left=.1,
+                                            top=0.85,
+                                            bottom=0.15,
+                                            hspace=0.3)
+
+                fig = hist.figure
+                axs.extend(hist.axes.flat)
+                hist_data = plot_data
             else:
-                ax_array = ax_array.flatten()
+                fig, ax_array = plt.subplots(
+                    n_groups, 1, figsize=(5, 5 * n_groups)
+                )
 
-            for i, ax_i in enumerate(ax_array):
-                group_data = plot_data[plot_data[group_by] ==
-                             groups[i]][data_column]
-                hist_data = calculate_histogram(group_data, kwargs['bins'])
+                # Convert a single Axes object to a list
+                # Ensure ax_array is always iterable
+                if n_groups == 1:
+                    ax_array = [ax_array]
 
-                sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
-                    weights='count', **kwargs)
-                # If plotting feature specify which layer
-                if feature:
-                    ax_i.set_title(f'{groups[i]} with Layer: {layer}')
                 else:
-                    ax_i.set_title(f'{groups[i]}')
+                    ax_array = ax_array.flatten()
 
-                # Set axis scales if y_log_scale is True
-                if y_log_scale:
-                    ax_i.set_yscale('log')
+                for i, ax_i in enumerate(ax_array):
+                    group_data = plot_data[plot_data[group_by] ==
+                                           groups[i]][data_column]
+                    hist_data = calculate_histogram(group_data, kwargs['bins'])
 
-                # Adjust x-axis label if x_log_scale is True
-                if x_log_scale:
-                    xlabel = f'log({data_column})'
-                else:
-                    xlabel = data_column
-                ax_i.set_xlabel(xlabel)
+                    sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
+                                 weights='count', **kwargs)
+                    # If plotting feature specify which layer
+                    if feature:
+                        ax_i.set_title(f'{groups[i]} with Layer: {layer}')
+                    else:
+                        ax_array = ax_array.flatten()
 
-                # Adjust y-axis label based on 'stat' parameter
-                stat = kwargs.get('stat', 'count')
-                ylabel_map = {
-                    'count': 'Count',
-                    'frequency': 'Frequency',
-                    'density': 'Density',
-                    'probability': 'Probability'
-                }
-                ylabel = ylabel_map.get(stat, 'Count')
-                if y_log_scale:
-                    ylabel = f'log({ylabel})'
-                ax_i.set_ylabel(ylabel)
+                    # Set axis scales if y_log_scale is True
+                    if y_log_scale:
+                        ax_i.set_yscale('log')
 
-                axs.append(ax_i)
+                    # Adjust x-axis label if x_log_scale is True
+                    if x_log_scale:
+                        xlabel = f'log({data_column})'
+                    else:
+                        xlabel = data_column
+                    ax_i.set_xlabel(xlabel)
+
+                    # Adjust y-axis label based on 'stat' parameter
+                    stat = kwargs.get('stat', 'count')
+                    ylabel_map = {
+                        'count': 'Count',
+                        'frequency': 'Frequency',
+                        'density': 'Density',
+                        'probability': 'Probability'
+                    }
+                    ylabel = ylabel_map.get(stat, 'Count')
+                    if y_log_scale:
+                        ylabel = f'log({ylabel})'
+                    ax_i.set_ylabel(ylabel)
+                    axs.append(ax_i)
+
     else:
         # Precompute histogram data for single plot
         hist_data = calculate_histogram(plot_data[data_column], kwargs['bins'])
         if pd.api.types.is_numeric_dtype(plot_data[data_column]):
             ax.set_xlim(hist_data['bin_left'].min(),
-            hist_data['bin_right'].max())
+                        hist_data['bin_right'].max())
+
+        # Set default color from custom color map if available
+        if defined_color_map:
+            color_dict = get_defined_color_map(adata,defined_color_map)
+            default_color = list(color_dict.values())[0]
+            kwargs['color'] = default_color
 
         sns.histplot(
             data=hist_data,
@@ -735,34 +1170,37 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             ax.set_title(f'Layer: {layer}')
         axs.append(ax)
 
-    # Set axis scales if y_log_scale is True
-    if y_log_scale:
-        ax.set_yscale('log')
+    axes = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+    for ax in axes:
+        # Set axis scales if y_log_scale is True
+        if y_log_scale:
+            ax.set_yscale('log')
 
-    # Adjust x-axis label if x_log_scale is True
-    if x_log_scale:
-        xlabel = f'log({data_column})'
-    else:
-        xlabel = data_column
-    ax.set_xlabel(xlabel)
+        # Adjust x-axis label if x_log_scale is True
+        if x_log_scale:
+            xlabel = f'log({data_column})'
+        else:
+            xlabel = data_column
+        ax.set_xlabel(xlabel)
 
-    # Adjust y-axis label based on 'stat' parameter
-    stat = kwargs.get('stat', 'count')
-    ylabel_map = {
-        'count': 'Count',
-        'frequency': 'Frequency',
-        'density': 'Density',
-        'probability': 'Probability'
-    }
-    ylabel = ylabel_map.get(stat, 'Count')
-    if y_log_scale:
-        ylabel = f'log({ylabel})'
-    ax.set_ylabel(ylabel)
+        # Adjust y-axis label based on 'stat' parameter
+        stat = kwargs.get('stat', 'count')
+        ylabel_map = {
+            'count': 'Count',
+            'frequency': 'Frequency',
+            'density': 'Density',
+            'probability': 'Probability'
+        }
+        ylabel = ylabel_map.get(stat, 'Count')
+        if y_log_scale:
+            ylabel = f'log({ylabel})'
+        ax.set_ylabel(ylabel)
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": hist_data}
     else:
         return {"fig": fig, "axs": axs, "df": hist_data}
+
 
 def heatmap(adata, column, layer=None, **kwargs):
     """
@@ -824,7 +1262,8 @@ def heatmap(adata, column, layer=None, **kwargs):
 def hierarchical_heatmap(adata, annotation, features=None, layer=None,
                          cluster_feature=False, cluster_annotations=False,
                          standard_scale=None, z_score="annotation",
-                         swap_axes=False, rotate_label=False, **kwargs):
+                         swap_axes=False, rotate_label=False, 
+                         show_counts=False, **kwargs):
 
     """
     Generates a hierarchical clustering heatmap and dendrogram.
@@ -865,6 +1304,9 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         axis (rows) and features are on the horizontal axis (columns).
         When set to True, features will be on the vertical axis and
         annotations on the horizontal axis. Default is False.
+    show_counts : bool, optional
+        If True, adds the amount of cells to each cluster in the heatmap. 
+        Default is False.
     rotate_label : bool, optional
         If True, rotate x-axis labels by 45 degrees. Default is False.
     **kwargs:
@@ -1029,6 +1471,31 @@ def hierarchical_heatmap(adata, annotation, features=None, layer=None,
         'row_linkage': dendro_row_data,
         'col_linkage': dendro_col_data
     }
+
+    if show_counts:
+
+        # Add cell counts to labels
+        # Retrieve the number of cells in each group
+        cell_counts = labels.value_counts()
+        cell_counts = dict(cell_counts)
+
+        # Retrieve the cluster labels from the heatmap
+        cluster_labels = clustergrid.ax_heatmap.get_yticklabels()
+
+        # Append the cell number to each cluster
+        numbered_labels = []
+        for x in cluster_labels:
+            key = int(x.get_text())
+            value = cell_counts[key]
+            numbered_label = f'cluster {key}\n{value} cells'
+            numbered_labels.append(numbered_label)
+
+        # add updated labels with cell counts to the heatmap
+        clustergrid.ax_heatmap.set_yticklabels(numbered_labels)
+        plt.setp(clustergrid.ax_heatmap.get_yticklabels(), rotation=0)
+
+        # adjust so labels don't get cut off
+        clustergrid.ax_heatmap.figure.subplots_adjust(right=0.9, left=0.1)
 
     return mean_intensity, clustergrid, dendrogram_data
 
