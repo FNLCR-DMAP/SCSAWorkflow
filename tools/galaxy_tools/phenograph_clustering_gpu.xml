@@ -5,7 +5,7 @@
       profile="24.2">
     <description>GPU-accelerated PhenoGraph clustering using RAPIDS (grapheno backend). For large datasets (&gt;~500K cells) where CPU is too slow.</description>
     <requirements>
-        <container type="docker">nciccbr/spac-gpu:v1.0.1</container>
+        <container type="docker">nciccbr/spac-gpu:v1.0.1-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>

@@ -5,7 +5,7 @@
       profile="24.2">
     <description>Calculate automatic phenotypes using PhenoGraph on CPU. For datasets larger than ~500K cells, use the GPU tool instead.</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v0.9.3</container>
+        <container type="docker">nciccbr/spac:v0.9.3-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
