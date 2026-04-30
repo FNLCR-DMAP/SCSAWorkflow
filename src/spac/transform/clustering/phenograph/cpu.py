@@ -14,6 +14,8 @@ from __future__ import annotations
 import time
 from typing import List, Optional
 
+import pandas as pd
+
 from .preprocess import prepare_features
 
 
@@ -81,7 +83,11 @@ def phenograph_cpu(
     )
     elapsed = time.time() - t0
 
-    adata.obs[output_annotation] = communities.astype("category")
+    adata.obs[output_annotation] = pd.Series(
+        communities,
+        index=adata.obs.index,
+        name=output_annotation,
+    ).astype("category")
 
     # Provenance — makes it easy to distinguish old vs. new CPU path downstream.
     adata.uns.setdefault("phenograph_clustering_cpu", {}).update(

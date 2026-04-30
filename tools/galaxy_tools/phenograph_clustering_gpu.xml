@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <tool id="spac_phenograph_clustering_gpu"
       name="Phenograph Clustering GPU [SPAC] [DMAP]"
-      version="1.0.0"
+      version="1.0.1"
       profile="24.2">
     <description>GPU-accelerated PhenoGraph clustering using RAPIDS (grapheno backend). For large datasets (&gt;~500K cells) where CPU is too slow.</description>
     <requirements>
-        <container type="docker">nciccbr/spac-gpu:v1.0.0</container>
+        <container type="docker">nciccbr/spac-gpu:v1.0.1</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
@@ -14,7 +14,7 @@
 
 ## NOTE ON CONTAINER ARCHITECTURE
 ## ==============================================================
-## nciccbr/spac-gpu:v1.0.0 ships two conda envs because RAPIDS 22.08
+## nciccbr/spac-gpu:v1.0.1 ships two conda envs because RAPIDS 22.08
 ## pins numpy/pandas versions incompatible with anndata:
 ##
 ##   preprocess env  : anndata + pandas 1.5 + numpy 1.26
@@ -28,10 +28,7 @@
 ## ==============================================================
 
 echo '{"analysis": {"type": "file", "name": "output.pickle"}}' > outputs_config.json &&
-python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json'
-    --bool-values Profiling
-    --list-values Resolution_List
-    --inject-outputs --outputs-config outputs_config.json &&
+python '$__tool_directory__/format_values.py' 'galaxy_params.json' 'cleaned_params.json' --bool-values Profiling --list-values Resolution_List --inject-outputs --outputs-config outputs_config.json &&
 bash /opt/spac-gpu/run_gpu.sh 'cleaned_params.json'
 
     ]]></command>

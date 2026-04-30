@@ -1,4 +1,4 @@
-# Dockerfile.v1.0.0 — nciccbr/spac-gpu:v1.0.0
+# Dockerfile.v1.0.1 — nciccbr/spac-gpu:v1.0.1
 #
 # SPAC GPU image for AWS Galaxy. Installs the grapheno GPU PhenoGraph
 # backend and the SPAC package on top of NVIDIA's RAPIDS 22.08 image
@@ -14,12 +14,12 @@
 # and the three GPU orchestration scripts are pulled from the same ref via
 # a shallow git clone. Everything stays pinned to GITHUB_BRANCH.
 #
-# For CCBR/Dockers2 CI (default): builds nciccbr/spac-gpu:v1.0.0 against
+# For CCBR/Dockers2 CI (default): builds nciccbr/spac-gpu:v1.0.1 against
 #   feature/phenograph-gpu-refactor. Bump GITHUB_BRANCH when SPAC is tagged.
 #
 # Manual local build example:
-#   docker build -f Dockerfile.v1.0.0 \
-#       -t nciccbr/spac-gpu:v1.0.0-test \
+#   docker build -f Dockerfile.v1.0.1 \
+#       -t nciccbr/spac-gpu:v1.0.1-test \
 #       --build-arg GITHUB_BRANCH=feature/phenograph-gpu-refactor \
 #       .
 #
@@ -83,7 +83,7 @@ ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
 
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC GPU image (grapheno PhenoGraph on RAPIDS 22.08) for AWS Galaxy"
-LABEL version="1.0.0"
+LABEL version="1.0.1"
 LABEL github.branch="${GITHUB_BRANCH}"
 LABEL rapids.version="22.08"
 
