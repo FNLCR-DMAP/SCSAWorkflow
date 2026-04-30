@@ -89,7 +89,8 @@ def plot(
     save=None,
     palette=None,
     size=None,
-    ax=None
+    ax=None,
+    legend_loc=None
 ):
     """
     Plots a UMAP embedding of the AnnData object colored by Leiden cluster labels.
@@ -120,6 +121,10 @@ def plot(
         Existing axes object to draw the plot onto. Useful for embedding this
         plot inside a multi-panel figure. If None, a new figure is created.
         Default is None.
+    legend_loc : str, optional
+        Location of the legend on the plot. Accepts standard matplotlib legend
+        position strings such as "right margin", "on data", or "best".
+        If None, the default location is used. Default is None.
 
     Returns
     -------
@@ -133,5 +138,6 @@ def plot(
         save=save,
         palette=palette,
         size=size,
-        ax=ax
+        ax=ax,
+        legend_loc=legend_loc
     )
