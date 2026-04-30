@@ -1,5 +1,10 @@
 # tests/templates/test_relational_heatmap_template.py
-"""Unit tests for the Relational Heatmap template."""
+"""
+Real (non-mocked) unit test for the Relational Heatmap template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,17 +12,14 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock, Mock
+from pathlib import Path
 
 import matplotlib
-import matplotlib.pyplot as plt
-matplotlib.use("Agg")  # Headless backend for CI
+matplotlib.use("Agg")
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -26,200 +28,111 @@ sys.path.append(
 from spac.templates.relational_heatmap_template import run_from_json
 
 
-def mock_adata(n_cells: int = 10) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for fast tests."""
-    rng = np.random.default_rng(0)
+def _make_tiny_adata() -> ad.AnnData:
+    """Minimal AnnData: 8 cells, 3 genes, 2 groups for heatmap."""
+    rng = np.random.default_rng(42)
+    X = rng.integers(1, 20, size=(8, 3)).astype(float)
     obs = pd.DataFrame({
-        "phenograph_k60_r1": (["cluster1", "cluster2", "cluster3"] * 
-                             ((n_cells + 2) // 3))[:n_cells],
-        "renamed_phenotypes": (["phenotype_A", "phenotype_B"] * 
-                              ((n_cells + 1) // 2))[:n_cells]
+        "cell_type": ["A", "A", "B", "B", "A", "A", "B", "B"],
     })
-    x_mat = rng.normal(size=(n_cells, 3))
-    adata = ad.AnnData(X=x_mat, obs=obs)
-    adata.var_names = ["Gene1", "Gene2", "Gene3"]
-    return adata
+    var = pd.DataFrame(index=["Gene_0", "Gene_1", "Gene_2"])
+    return ad.AnnData(X=X, obs=obs, var=var)
 
 
 class TestRelationalHeatmapTemplate(unittest.TestCase):
-    """Unit tests for the Relational Heatmap template."""
+    """Real (non-mocked) tests for the relational heatmap template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input.pickle"
-        )
-        self.out_file = "relational_heatmap"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata(), f)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters from NIDAP template
-        self.params = {
+        params = {
             "Upstream_Analysis": self.in_file,
-            "Source_Annotation_Name": "phenograph_k60_r1",
-            "Target_Annotation_Name": "renamed_phenotypes",
-            "Colormap": "darkmint",
-            "Figure_Width_inch": 8,
-            "Figure_Height_inch": 10,
-            "Figure_DPI": 300,
+            "Source_Annotation_Name": "cell_type",
+            "Target_Annotation_Name": "cell_type",
+            "Figure_Width_inch": 6,
+            "Figure_Height_inch": 4,
+            "Figure_DPI": 72,
             "Font_Size": 8,
-            "Output_File": self.out_file,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "figures": {"type": "directory", "name": "figures_dir"},
+                "html": {"type": "directory", "name": "html_dir"},
+                "dataframe": {"type": "file", "name": "dataframe.csv"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    @patch('spac.templates.relational_heatmap_template.relational_heatmap')
-    @patch('plotly.io.write_image')
-    @patch('matplotlib.pyplot.show')  # Mock plt.show()
-    def test_complete_io_workflow(
-        self, mock_plt_show, mock_write_image, mock_relational
-    ) -> None:
-        """Single I/O test covering input/output scenarios."""
-        # Mock the relational_heatmap function
-        mock_fig = Mock()
-        mock_fig.show = Mock()  # Mock the fig.show() method
-        
-        mock_df = pd.DataFrame({
-            'source': ['cluster1', 'cluster2'],
-            'target': ['phenotype_A', 'phenotype_B'],
-            'value': [5, 3]
-        })
-        
-        mock_relational.return_value = {
-            'file_name': 'relational_heatmap.csv',
-            'data': mock_df,
-            'figure': mock_fig
-        }
-        
-        # Mock the plotly write_image to create a dummy image
-        def create_dummy_image(fig, path, **kwargs):
-            # Create a minimal PNG file
-            # Ensure file path exists (for NamedTemporaryFile)
-            if not os.path.exists(path):
-                # Create parent directory if needed
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-            fig_dummy, ax = plt.subplots(figsize=(1, 1))
-            ax.text(0.5, 0.5, 'test', ha='center', va='center')
-            plt.savefig(path, dpi=72)
-            plt.close(fig_dummy)
-        
-        mock_write_image.side_effect = create_dummy_image
-        
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            
-            # Test 1: Run with default parameters
-            result = run_from_json(self.params)
-            self.assertIsInstance(result, dict)
-            # Should have both CSV and PNG files
-            self.assertEqual(len(result), 2)
-            csv_files = [f for f in result.keys() if f.endswith('.csv')]
-            png_files = [f for f in result.keys() if f.endswith('.png')]
-            self.assertEqual(len(csv_files), 1)
-            self.assertEqual(len(png_files), 1)
-            
-            # Test 2: Run without saving
-            result_no_save = run_from_json(
-                self.params, save_results=False
-            )
-            # Check appropriate return type - should be (figure, dataframe)
-            self.assertIsInstance(result_no_save, tuple)
-            self.assertEqual(len(result_no_save), 2)
-            fig, df = result_no_save
-            self.assertIsInstance(df, pd.DataFrame)
-            
-            # Test 3: JSON file input
-            json_path = os.path.join(self.tmp_dir.name, "params.json")
-            with open(json_path, "w") as f:
-                json.dump(self.params, f)
-            
-            result_json = run_from_json(json_path)
-            self.assertIsInstance(result_json, dict)
+    def test_relational_heatmap_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run relational heatmap with show_static_image=False
+        (default).
 
-    @patch('matplotlib.pyplot.show')  # Mock plt.show()
-    def test_error_validation(self, mock_plt_show) -> None:
-        """Test exact error message for invalid parameters."""
-        # Test with None annotations (should be handled by text_to_value)
-        params_none = self.params.copy()
-        params_none["Source_Annotation_Name"] = "None"
-        params_none["Target_Annotation_Name"] = "None"
-        
-        with patch('spac.templates.relational_heatmap_template.'
-                   'relational_heatmap') as mock_rel:
-            # The template should pass None values to the function
-            mock_rel.return_value = {
-                'file_name': 'test.csv',
-                'data': pd.DataFrame(),
-                'figure': Mock(show=Mock())  # Mock fig.show()
-            }
-            
-            # Mock write_image to create a dummy file
-            def create_dummy_image(fig, path, **kwargs):
-                # Create a minimal PNG file
-                # Ensure file path exists (for NamedTemporaryFile)
-                if not os.path.exists(path):
-                    # Create parent directory if needed
-                    os.makedirs(os.path.dirname(path), exist_ok=True)
-                fig_dummy, ax = plt.subplots(figsize=(1, 1))
-                ax.text(0.5, 0.5, 'test', ha='center', va='center')
-                plt.savefig(path, dpi=72)
-                plt.close(fig_dummy)
-            
-            with patch('plotly.io.write_image', 
-                      side_effect=create_dummy_image):
-                run_from_json(params_none)
-            
-            # Verify None was passed
-            call_args = mock_rel.call_args
-            self.assertIsNone(call_args[1]['source_annotation'])
-            self.assertIsNone(call_args[1]['target_annotation'])
+        Validates:
+        1. saved_files dict has 'html' key (interactive HTML is default output)
+        2. HTML file exists and is non-empty
+        3. No 'figures' key when show_static_image=False
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+        )
 
-    @patch('spac.templates.relational_heatmap_template.relational_heatmap')
-    @patch('plotly.io.write_image')
-    @patch('matplotlib.pyplot.show')  # Mock plt.show()
-    def test_function_calls(
-        self, mock_plt_show, mock_write_image, mock_relational
-    ) -> None:
-        """Test that main function is called with correct parameters."""
-        # Mock the main function
-        mock_relational.return_value = {
-            'file_name': 'test.csv',
-            'data': pd.DataFrame({'a': [1, 2]}),
-            'figure': Mock(show=Mock())  # Mock fig.show()
-        }
-        
-        # Mock write_image to create a dummy file
-        def create_dummy_image(fig, path, **kwargs):
-            # Create a minimal PNG file
-            # Ensure file path exists (for NamedTemporaryFile)
-            if not os.path.exists(path):
-                # Create parent directory if needed
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-            fig_dummy, ax = plt.subplots(figsize=(1, 1))
-            ax.text(0.5, 0.5, 'test', ha='center', va='center')
-            plt.savefig(path, dpi=72)
-            plt.close(fig_dummy)
-        
-        mock_write_image.side_effect = create_dummy_image
-        
-        run_from_json(self.params, save_results=False)
-        
-        # Verify function was called correctly
-        mock_relational.assert_called_once()
-        call_args = mock_relational.call_args
-        
-        # Check specific parameters
-        self.assertEqual(
-            call_args[1]['source_annotation'], 'phenograph_k60_r1'
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("html", saved_files)
+
+        html_paths = saved_files["html"]
+        self.assertGreaterEqual(len(html_paths), 1)
+        for html_path in html_paths:
+            html_file = Path(html_path)
+            self.assertTrue(html_file.exists())
+            self.assertGreater(html_file.stat().st_size, 0)
+
+        # When show_static_image defaults to False, no figures produced
+        self.assertNotIn("figures", saved_files)
+
+    def test_relational_heatmap_with_static_image(self) -> None:
+        """
+        End-to-end I/O test: run relational heatmap with show_static_image=True.
+
+        Validates:
+        1. saved_files dict has both 'figures' and 'html' keys
+        2. Figure PNG and HTML files exist and are non-empty
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+            show_static_image=True,
         )
-        self.assertEqual(
-            call_args[1]['target_annotation'], 'renamed_phenotypes'
-        )
-        self.assertEqual(call_args[1]['color_map'], 'darkmint')
-        self.assertEqual(call_args[1]['font_size'], 8)
+
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("figures", saved_files)
+        self.assertIn("html", saved_files)
+
+        figure_paths = saved_files["figures"]
+        self.assertGreaterEqual(len(figure_paths), 1)
+        for fig_path in figure_paths:
+            fig_file = Path(fig_path)
+            self.assertTrue(fig_file.exists())
+            self.assertGreater(fig_file.stat().st_size, 0)
+
+        html_paths = saved_files["html"]
+        self.assertGreaterEqual(len(html_paths), 1)
+        for html_path in html_paths:
+            html_file = Path(html_path)
+            self.assertTrue(html_file.exists())
+            self.assertGreater(html_file.stat().st_size, 0)
 
 
 if __name__ == "__main__":

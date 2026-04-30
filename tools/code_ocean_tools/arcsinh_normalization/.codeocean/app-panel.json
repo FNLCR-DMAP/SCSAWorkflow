@@ -1,0 +1,78 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Arcsinh Normalization [SPAC] [DMAP]",
+		"instructions": "Normalize features either by a user-defined co-factor or a determined percentile, allowing for effective normalization of high-range values in single-cell datasets. This transformation can also be applied per batch if specified.\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "a395833dc3474b",
+			"category": "general",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. Original refers to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "a41f7159fa9442",
+			"category": "general",
+			"name": "Co-Factor",
+			"param_name": "Co_Factor",
+			"description": "A fixed positive number to use as a co-factor for the transformation.  If provided, it takes precedence over the percentile argument. If \"None\", the Percentile method will be used. Default is \"5.0\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "5.0"
+		},
+		{
+			"id": "cff162994e5844",
+			"category": "general",
+			"name": "Percentile",
+			"param_name": "Percentile",
+			"description": "The percentile to determine the co-factor if the co-factor is not provided. The percentile is computed for each feature (column) individually. Default is \"None\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "07022054631140",
+			"category": "general",
+			"name": "Output Table Name",
+			"param_name": "Output_Table_Name",
+			"description": "Name of the table to be added to the analysis.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "arcsinh"
+		},
+		{
+			"id": "a420c335bf6a40",
+			"category": "general",
+			"name": "Per Batch",
+			"param_name": "Per_Batch",
+			"description": "Whether to apply the transformation per batch. If \"True\", the transformation is applied per batch.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "e7070349edc74c",
+			"category": "general",
+			"name": "Annotation",
+			"param_name": "Annotation",
+			"description": "The name of the annotation to define batches. Required if Per Batch is \"True\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		}
+	]
+}

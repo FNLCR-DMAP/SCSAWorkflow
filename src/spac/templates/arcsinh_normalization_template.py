@@ -2,6 +2,9 @@
 Platform-agnostic Arcsinh Normalization template converted from NIDAP.
 Maintains the exact logic from the NIDAP template.
 
+Refactored to use centralized save_results from template_utils.
+Follows standardized output schema where analysis is saved as a file.
+
 Usage
 -----
 >>> from spac.templates.arcsinh_normalization_template import run_from_json
@@ -12,6 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Union
 import pandas as pd
+import logging
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -19,7 +23,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from spac.transformations import arcsinh_transformation
 from spac.templates.template_utils import (
     load_input,
-    save_outputs,
+    save_results,
     parse_params,
     text_to_value,
 )
@@ -27,7 +31,8 @@ from spac.templates.template_utils import (
 
 def run_from_json(
     json_path: Union[str, Path, Dict[str, Any]],
-    save_results: bool = True
+    save_to_disk: bool = True,
+    output_dir: str = None,
 ) -> Union[Dict[str, str], Any]:
     """
     Execute Arcsinh Normalization analysis with parameters from JSON.
@@ -36,19 +41,68 @@ def run_from_json(
     Parameters
     ----------
     json_path : str, Path, or dict
-        Path to JSON file, JSON string, or parameter dictionary
-    save_results : bool, optional
-        Whether to save results to file. If False, returns the adata object
-        directly for in-memory workflows. Default is True.
+        Path to JSON file, JSON string, or parameter dictionary.
+        Expected JSON structure:
+        {
+            "Upstream_Analysis": "path/to/data.pickle",
+            "Table_to_Process": "Original",
+            "Co_Factor": "5.0",
+            "Percentile": "None",
+            "Output_Table_Name": "arcsinh",
+            "Per_Batch": "False",
+            "Annotation": "None",
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"}
+            }
+        }
+    save_to_disk : bool, optional
+        Whether to save results to disk. If True, saves the AnnData object
+        to a pickle file. If False, returns the AnnData object directly 
+        for in-memory workflows. Default is True.
+    output_dir : str, optional
+        Base directory for outputs. If None, uses params['Output_Directory']
+        or current directory. All outputs will be saved relative to this directory.
 
     Returns
     -------
     dict or AnnData
-        If save_results=True: Dictionary of saved file paths
-        If save_results=False: The processed AnnData object
+        If save_to_disk=True: Dictionary of saved file paths with structure:
+            {"analysis": "path/to/output.pickle"}
+        If save_to_disk=False: The processed AnnData object for in-memory use
+
+    Notes
+    -----
+    Output Structure:
+    - Analysis output is saved as a single pickle file (standardized for analysis outputs)
+    - When save_to_disk=False, the AnnData object is returned for programmatic use
+        
+    Examples
+    --------
+    >>> # Save results to disk
+    >>> saved_files = run_from_json("params.json")
+    >>> print(saved_files["analysis"])  # Path to saved pickle file
+    >>> # './output.pickle'
+    
+    >>> # Get results in memory for further processing
+    >>> adata = run_from_json("params.json", save_to_disk=False)
+    >>> # Can now work with adata object directly
+    
+    >>> # Custom output directory
+    >>> saved = run_from_json("params.json", output_dir="/custom/path")
     """
     # Parse parameters from JSON
     params = parse_params(json_path)
+
+    # Set output directory
+    if output_dir is None:
+        output_dir = params.get("Output_Directory", ".")
+
+    # Ensure outputs configuration exists with standardized defaults
+    # Analysis uses file type per standardized schema
+    if "outputs" not in params:
+        params["outputs"] = {
+            "analysis": {"type": "file", "name": "output.pickle"}
+        }
 
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
@@ -98,44 +152,67 @@ def run_from_json(
         output_layer=output_layer,
         per_batch=per_batch,
         annotation=annotation
-        )
+    )
     
-    print(f"Transformed data stored in layer: {output_layer}")
+    logging.info(f"Transformed data stored in layer: {output_layer}")
     dataframe = pd.DataFrame(transformed_data.layers[output_layer])
-    print(dataframe.describe())
+    logging.info(f"Arcsinh transformation summary:\n{dataframe.describe()}")
     
-    # Handle results based on save_results flag
-    if save_results:
-        # Save outputs
-        output_file = params.get("Output_File", "transform_output.pickle")
-        # Default to pickle format if no recognized extension
-        if not output_file.endswith(('.pickle', '.pkl', '.h5ad')):
-            output_file = output_file + '.pickle'
+    # Handle results based on save_to_disk flag
+    if save_to_disk:
+        # Prepare results dictionary based on outputs config
+        results_dict = {}
         
-        saved_files = save_outputs({output_file: transformed_data})
+        if "analysis" in params["outputs"]:
+            results_dict["analysis"] = transformed_data
         
-        print(f"Arcsinh Normalization completed → {saved_files[output_file]}")
+        # Use centralized save_results function
+        # All file handling and logging is now done by save_results
+        saved_files = save_results(
+            results=results_dict,
+            params=params,
+            output_base_dir=output_dir
+        )
+        
+        logging.info(
+            f"Arcsinh Normalization completed → {saved_files['analysis']}"
+        )
         return saved_files
     else:
         # Return the adata object directly for in-memory workflows
-        print("Returning AnnData object (not saving to file)")
+        logging.info("Returning AnnData object (not saving to file)")
         return transformed_data
 
 
 # CLI interface
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(
-            "Usage: python arcsinh_normalization_template.py <params.json>",
+            "Usage: python arcsinh_normalization_template.py <params.json> [output_dir]",
             file=sys.stderr
         )
         sys.exit(1)
 
-    result = run_from_json(sys.argv[1])
+    # Set up logging for CLI usage
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Get output directory if provided
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    
+    # Run analysis
+    result = run_from_json(
+        json_path=sys.argv[1],
+        output_dir=output_dir
+    )
 
+    # Display results based on return type
     if isinstance(result, dict):
         print("\nOutput files:")
-        for filename, filepath in result.items():
-            print(f"  {filename}: {filepath}")
+        for key, path in result.items():
+            print(f"  {key}: {path}")
     else:
-        print("\nReturned AnnData object")
+        print("\nReturned AnnData object for in-memory use")
+        print(f"AnnData: {result}")

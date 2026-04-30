@@ -1,0 +1,141 @@
+{
+  "rid": "ri.vector.main.template.1fbea677-d98a-4f0d-9c59-b154493a8dd6",
+  "title": "Normalize Batch [SPAC] [DMAP]",
+  "description": " Adjust the intensity of every feature by correcting for batch effect using a normalization method.\\\nPlease refer to [DUET Documentation](https://nidap.nih.gov/shares/links/fn4437nyy6ywy) and [GitHub Documentation](https://fnlcr-dmap.github.io/SCSAWorkflow/spac.html#spac.transformations.batch_normalize) for further information.",
+  "createdBy": "391048e4-979e-4237-a0f4-9f34b125a427",
+  "createdAt": "2025-02-14T15:33:19.501685784Z",
+  "commitMessage": "",
+  "status": "RELEASED",
+  "inputDatasets": [
+    {
+      "key": "Upstream_Analysis",
+      "displayName": "Upstream Analysis",
+      "description": "Link to prior processed dataset in the analysis.",
+      "paramGroup": null,
+      "anchorDataset": null,
+      "dataType": "PYTHON_TRANSFORM_INPUT",
+      "tags": []
+    }
+  ],
+  "parameters": [
+    {
+      "key": "Need_Normalization",
+      "displayName": "Need Normalization",
+      "description": "If the data is already corrected for,  or does not need to correct for batch effect, please toggle it to False to skip normalization.\nOtherwise, toggle this to True please find normalization options under the \"Normalization Settings\" category.",
+      "paramType": "BOOLEAN",
+      "paramGroup": null,
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Input_Table_Name",
+      "displayName": "Input Table Name",
+      "description": "Name of the table to be imported and used for batch nomalization. Default is Original, referring to the raw dataset.",
+      "paramType": "STRING",
+      "paramGroup": "Normalization Settings parameters",
+      "paramValues": null,
+      "defaultValue": "Original",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Output_Table_Name",
+      "displayName": "Output Table Name",
+      "description": "Name of the table to be added to the analysis. Default is batch_normalized_table.",
+      "paramType": "STRING",
+      "paramGroup": "Normalization Settings parameters",
+      "paramValues": null,
+      "defaultValue": "batch_normalized_table",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Annotation",
+      "displayName": "Annotation",
+      "description": "The annotation name that define batches. Every set of cells who have the same labels for that annotation will be considered in one batch.",
+      "paramType": "STRING",
+      "paramGroup": "Normalization Settings parameters",
+      "paramValues": null,
+      "defaultValue": "",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Normalization_Method",
+      "displayName": "Normalization Method",
+      "description": "The normlalization method to use.",
+      "paramType": "SELECT",
+      "paramGroup": "Normalization Settings parameters",
+      "paramValues": [
+        "median",
+        "Q50",
+        "Q75",
+        "z-score"
+      ],
+      "defaultValue": "median",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    },
+    {
+      "key": "Take_Log",
+      "displayName": "Take Log",
+      "description": "If True, take the log2 of intensities before normalization.",
+      "paramType": "BOOLEAN",
+      "paramGroup": "Normalization Settings parameters",
+      "paramValues": null,
+      "defaultValue": "False",
+      "condition": null,
+      "content": null,
+      "objectPropertyReference": null
+    }
+  ],
+  "columns": [],
+  "orderedMustacheKeys": [
+    "Upstream_Analysis",
+    "Need_Normalization",
+    "Input_Table_Name",
+    "Output_Table_Name",
+    "Annotation",
+    "Normalization_Method",
+    "Take_Log"
+  ],
+  "contents": {
+    "type": "code",
+    "code": {
+      "codeLanguage": "PYTHON",
+      "codeTemplate": "def unnamed_45({{{Upstream_Analysis}}}):\n\n    ## --------- ##\n    ## Libraries ##\n\n    ## --------- ##\n    from spac.transformations import batch_normalize\n    import pickle\n\n    ## -------------------------------- ##\n    ## User-Defined Template Parameters ##\n    ## -------------------------------- ##\n\n    NIDAP_dataset = {{{Upstream_Analysis}}}.filesystem()\n    with NIDAP_dataset.open(\"transform_output.pickle\", \"rb\") as input_file:\n        all_data = pickle.load(input_file)\n\n    annotation = '{{{Annotation}}}'\n    input_layer = '{{{Input_Table_Name}}}'\n\n    if input_layer == 'Original':\n        input_layer = None\n\n    output_layer = '{{{Output_Table_Name}}}'\n    method = '{{{Normalization_Method}}}'\n    take_log = {{{Take_Log}}}    \n    \n    ##--------------- ##\n    ## Error Messages ##\n    ## -------------- ##\n\n\n\n    ## --------- ##\n    ## Functions ##\n    ## --------- ##\n\n\n\n    ## --------------- ##\n    ## Main Code Block ##\n    ## --------------- ##\n\n    \n    need_normalization = {{{Need_Normalization}}}\n    if need_normalization:\n        batch_normalize(adata = all_data, \n                            annotation = annotation,\n                            input_layer = input_layer, \n                            output_layer = output_layer, \n                            method = method, \n                            log = take_log)\n\n        print(\"Statistics of original data:\\n\", all_data.to_df().describe())\n        print(\"Statistics of layer data:\\n\", all_data.to_df(layer=output_layer).describe())\n    else:\n        print(\"Statistics of original data:\\n\", all_data.to_df().describe())\n    \n    print(\"Current Analysis contains:\\n\",all_data)\n        \n    # Transfer data through pickle method and filesystem on NIDAP\n\n    output = Transforms.get_output()\n    output_fs = output.filesystem()\n    with output_fs.open('transform_output.pickle', 'wb') as f:\n        pickle.dump(all_data, f)\n\n    return(None)\n    ",
+      "shouldPersist": true
+    }
+  },
+  "version": 15,
+  "externalId": null,
+  "canEditTemplate": true,
+  "path": "/NIDAP/NCI-Wide Analysis & Visualization Resources/SPAC/SPAC Templates/Normalize Batch [SPAC] [DMAP]",
+  "tags": [
+    {
+      "rid": "ri.compass.main.tag.02094a7d-d869-4dff-bc31-78ad8676d1ad",
+      "name": "Code Templates:DMAP"
+    },
+    {
+      "rid": "ri.compass.main.tag.ebb2ab0f-e354-4bd4-9f3a-e78dc8452986",
+      "name": "Code Templates:SPAC"
+    }
+  ],
+  "favorite": false,
+  "namedCollections": [],
+  "isDefault": true,
+  "condaDependencies": [
+    "python=3.6"
+  ],
+  "outputDatasetName": "New Dataset",
+  "outputs": {
+    "analysis": {"type": "file", "name": "output.pickle"}
+  }
+}

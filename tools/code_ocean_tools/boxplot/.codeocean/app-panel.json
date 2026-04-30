@@ -1,0 +1,150 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Boxplot [SPAC] [DMAP]",
+		"instructions": "Create a boxplot visualization of the features in the analysis dataset.\\ Please refer to DUET Documentation,  GitHub Documentation"
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "value_axis_configuration_parameters",
+			"name": "Value Axis Configuration parameters",
+			"help_text": "Configure value axis configuration parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Configure figure configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "42196cee00294b",
+			"category": "general",
+			"name": "Table to Visualize",
+			"param_name": "Table_to_Visualize",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "d5cb477d76014d",
+			"category": "general",
+			"name": "Feature(s) to Plot",
+			"param_name": "Feature_s_to_Plot",
+			"description": "The feature(s) to plot in the box plot. Default \"All\" will plot all features.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "All"
+		},
+		{
+			"id": "e519f34321b846",
+			"category": "general",
+			"name": "Primary Annotation",
+			"param_name": "Primary_Annotation",
+			"description": "The annotation to group the visualizations. Use \"None\" to disable.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "72d8315aa7f049",
+			"category": "general",
+			"name": "Secondary Annotation",
+			"param_name": "Secondary_Annotation",
+			"description": "Secondary annotation to create subdivisions within each category defined by the primary annotation, offering a deeper level of analysis, such as comparing time points within each treatment condition. Default is \"None\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "5fe6bc1238364b",
+			"category": "value_axis_configuration_parameters",
+			"name": "Value Axis Log Scale",
+			"param_name": "Value_Axis_Log_Scale",
+			"description": "Make the Y-axis (or X-axis if the plot is horizontal) in log scale. Negative values in the data disable the log scale.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "04392e91acd747",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Title",
+			"param_name": "Figure_Title",
+			"description": "Title of the figure",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "BoxPlot"
+		},
+		{
+			"id": "920428328be346",
+			"category": "figure_configuration_parameters",
+			"name": "Horizontal Plot",
+			"param_name": "Horizontal_Plot",
+			"description": "To plot the boxplot in horizontal orientation. Default is vertical.",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "50fb0ba8329f45",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "Width of the figure, inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "8d69461c017344",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "Height of the figure, inch.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 8
+		},
+		{
+			"id": "4224e6e427af4d",
+			"category": "figure_configuration_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 300
+		},
+		{
+			"id": "e9fadce3001d44",
+			"category": "figure_configuration_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "Figure font size.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 10
+		},
+		{
+			"id": "e82188cdea1848",
+			"category": "value_axis_configuration_parameters",
+			"name": "Keep Outliers",
+			"param_name": "Keep_Outliers",
+			"description": "True to keep the outliers for every feature, False to remove them",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "True",
+			"extra_data": []
+		}
+	]
+}

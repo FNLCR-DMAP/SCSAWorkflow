@@ -1,0 +1,190 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "UMAP\\tSNE\\PCA Visualization [SPAC] [DMAP]",
+		"instructions": "Generate scatter plot for PCA, t-SNE and UMAP.\\ Please refer to DUET Documentation, GitHub Documentation"
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		},
+		{
+			"id": "color_by_parameters",
+			"name": "Color by parameters",
+			"help_text": "Configure color by parameters"
+		},
+		{
+			"id": "figure_configuration_parameters",
+			"name": "Figure Configuration parameters",
+			"help_text": "Configure figure configuration parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "67f63f77284044",
+			"category": "color_by_parameters",
+			"name": "Color By",
+			"param_name": "Color_By",
+			"description": "Color the points in the plot by either their corresponding feature or annotation.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Annotation",
+			"extra_data": [
+				"Annotation",
+				"Feature"
+			]
+		},
+		{
+			"id": "dbb5163c282744",
+			"category": "color_by_parameters",
+			"name": "Annotation to Highlight",
+			"param_name": "Annotation_to_Highlight",
+			"description": "Annotation name in the analysis to use for coloring the cells in the scatter plot based on the cell label. Can't be used with Feature.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "43ed6687878948",
+			"category": "color_by_parameters",
+			"name": "Table",
+			"param_name": "Table",
+			"description": "Source table to perform the visualization. Default is Original, referring to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "7a9f08c4262244",
+			"category": "color_by_parameters",
+			"name": "Feature to Highlight",
+			"param_name": "Feature_to_Highlight",
+			"description": "Feature name in the analysis to use for coloring the cells in the scatter plot based on the feature value. Can't be used with Annotation.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "bc4f40cc0acd44",
+			"category": "general",
+			"name": "Dimension Reduction Method",
+			"param_name": "Dimension_Reduction_Method",
+			"description": "Dimensionality reduction method to visualize. Choose from 'tsne' or 'umap'.",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "umap",
+			"extra_data": [
+				"tsne",
+				"umap"
+			]
+		},
+		{
+			"id": "a234df1970a741",
+			"category": "figure_configuration_parameters",
+			"name": "Dot Size",
+			"param_name": "Dot_Size",
+			"description": "Size of the dot of scatter plot.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 1
+		},
+		{
+			"id": "fcbd3e3525ba46",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Width",
+			"param_name": "Figure_Width",
+			"description": "Figure width, inch",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "b38b4a158e644d",
+			"category": "figure_configuration_parameters",
+			"name": "Figure Height",
+			"param_name": "Figure_Height",
+			"description": "Figure height, inch",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "3851f77f1fcb47",
+			"category": "figure_configuration_parameters",
+			"name": "Font Size",
+			"param_name": "Font_Size",
+			"description": "Global font size in figure.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 12
+		},
+		{
+			"id": "e5eaf3f9b6294c",
+			"category": "figure_configuration_parameters",
+			"name": "Figure DPI",
+			"param_name": "Figure_DPI",
+			"description": "Higher the DPI, clearer the image.",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 300
+		},
+		{
+			"id": "7ab2f7bbe6eb4f",
+			"category": "figure_configuration_parameters",
+			"name": "Legend Location",
+			"param_name": "Legend_Location",
+			"description": "Location of the Legend",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "best",
+			"extra_data": [
+				"best",
+				"upper left",
+				"center left"
+			]
+		},
+		{
+			"id": "f5eb7a96b75443",
+			"category": "figure_configuration_parameters",
+			"name": "Legend Font Size",
+			"param_name": "Legend_Font_Size",
+			"description": "Font size of the legend labels",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 16
+		},
+		{
+			"id": "de0eec49e8bf47",
+			"category": "figure_configuration_parameters",
+			"name": "Legend Marker Size",
+			"param_name": "Legend_Marker_Size",
+			"description": "Dot size of the legend markers",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 5
+		},
+		{
+			"id": "a49f7cb1c3784d",
+			"category": "figure_configuration_parameters",
+			"name": "Value Min",
+			"param_name": "Value_Min",
+			"description": "The minimum value of the color bar",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		},
+		{
+			"id": "0214c1109d774b",
+			"category": "figure_configuration_parameters",
+			"name": "Value Max",
+			"param_name": "Value_Max",
+			"description": "The maximum value of the color bar",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "None"
+		}
+	]
+}

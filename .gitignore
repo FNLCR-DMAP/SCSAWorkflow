@@ -8,3 +8,4 @@ src/spac.egg-info/
 **/*.ipynb
 **/.ipynb_checkpoints/
 ../../.ipynb_checkpoints/CHANGELOG-checkpoint.md
+*.egg-info/

@@ -1,15 +1,661 @@
 # CHANGELOG
 
 
+## v0.9.3 (2026-03-18)
+
+### Bug Fixes
+
+- Refactor hierarchical_heatmap_template and align test with template changes
+  ([`459aa95`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/459aa95100922f16d1ebd58205a874882bc3f421))
+
+- Update template to return (clustergrid, mean_intensity) tuple for in-memory mode - Fix param names
+  in test: Feature_s_, Standard_Scale_ - Remove unused params: Method, Metric - Add all template
+  params to test for full coverage - Add in-memory mode test (save_results_flag=False) - Add figure
+  title and CSV output assertions
+
+
+## v0.9.2 (2026-03-03)
+
+### Continuous Integration
+
+- **version**: Automatic development release
+  ([`97ead81`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/97ead819ef09c101a6cc59af7e98f979548abcb6))
+
+
+## v0.9.1 (2026-02-27)
+
+### Bug Fixes
+
+- Add missing 'import os' in performance tests
+  ([`7a5ec6d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7a5ec6d57ca7934d7d1003d417b3907f6d692308))
+
+- test_boxplot_performance.py - test_histogram_performance.py
+
+- Add missing __init__.py in tests/templates
+  ([`7b7e6cb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7b7e6cbbe3bf9ea591de2075cb40861c2136a879))
+
+- Remove 6 deprecated templates (sync with tools_refactor)
+  ([`d0bbc5e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d0bbc5ea8a7151bbf5f389549612b01862d6f382))
+
+- Some blueprint json and corresponding xmls:neighborhood_profile, select_values, setup_analysis
+  ([`a34f869`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a34f8690b2f410a0ed56845d7e7a4fc419e3ad5f))
+
+- Spac_boxplot outputs in json and validated ha5d
+  ([`c87e782`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c87e782ff03c3ec52a2ae4c4353f5b426a6fc9d0))
+
+- **boxplot**: Replace deprecated append call with concat
+  ([`4906439`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4906439dfdbec132ba675e4d13b9c48cd33d8c38))
+
+- **boxplot_template**: Address minor comments from copilot
+  ([`cd5abd0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cd5abd005d35678351867ae14020ca9d57317e02))
+
+- **check_layer**: Use check_table spac function to evaluate if adata.layer is present
+  ([`0cf530b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0cf530bb603c0d74beeaa797df5f8ad222512921))
+
+- **combine_annotations_template**: Address comments from copilot CR for
+  combine_annotations_template function
+  ([`9d8582a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d8582a88b1d61cd1912aa146153178d8287d82a))
+
+- **histogram_performance**: Add clarifying comment for old hist implementation
+  ([`179482e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/179482eb16bbfaa7566bfcc8aae0adb29c0d2429))
+
+- **histogram_template**: Fix odd number of cells in test
+  ([`51ba1c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/51ba1c4609e5d4435e612faf6b632bd8f1f76927))
+
+- **interactive_spatial_plot_template**: Remove nidap comments
+  ([`64ff302`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/64ff3023155345b86ad9b72838bae0b53db21930))
+
+- **nearest_neighbor_template**: Break the title in two lines
+  ([`4e083fb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e083fbe77a1aaa1dac1d5b3d7841ed172721132))
+
+- **normalize_batch_template**: Fix typo and unused import
+  ([`9edf8ce`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9edf8cee2972ecfd34244d7f3482a7ca5be94b2e))
+
+- **performance_test**: Fix the speedup calculation logic
+  ([`c31c3ff`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c31c3ffec708bf2d2cf0a9ce487f54ccd04fe874))
+
+- **posit_it_python_template**: Fixed typo
+  ([`e70f547`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e70f547aae17a011ce52162c0bf6fd42a74902ed))
+
+- **quantile_scaling_template**: Fix typo in both function and unit tests
+  ([`de6ee91`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/de6ee910c5a36eb7fa2c6429f36695317ceebb03))
+
+- **relational_heatmap_template**: Address the issue of insecure temporary file and comments from
+  copilot
+  ([`5662bdb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5662bdbf77980af891bd55e45c02a20ed7af7546))
+
+- **ripley_template**: Address review comments - merge dev into the branch and fix unit test
+  ([`415df89`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/415df89b0d3d368fa126b6167d2fb68028a8b512))
+
+- **ripley_template**: Address review comments - replace debug prints with logging
+  ([`9914716`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9914716db356d8ca217963a0d95c85bb37e2ff19))
+
+- **sankey_plot_template**: Address the comments from copilot
+  ([`07baeb9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07baeb9037fd6bc3cefee2b71abb1b2d777223d9))
+
+- **scripts**: Remove old performance testing script
+  ([`c0762c3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c0762c34c453e35bbe07e9a57180686cde1de7e8))
+
+- **select_values_template**: Fix pandas/numpy version compatibility issue
+  ([`cedb6d1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cedb6d163d1ffc7383961c0291a20a474f35843f))
+
+- **setup_analysis_template**: Fix setup_analysis_template function
+  ([`dddc33a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/dddc33a78a0d6af0262eefd4b9250c0cfc19b77e))
+
+- **spatial_interaction_template**: Fix typo
+  ([`1a3d03d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1a3d03daa6e0630132c2596e149a74cdba0520a0))
+
+- **spatial_plot_temp**: Addrss copilot comments spatial_plot_template.py
+  ([`028a049`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/028a049bf5857cdb51eff4a76a4940dc50100872))
+
+- **subset_analysis_template**: Fix typo and enhance function
+  ([`aefcb29`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/aefcb294f3d3ab5059e76232c667b5c3a37963a1))
+
+- **summarize_dataframe_template**: Address comments from copilot
+  ([`30118f9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/30118f9813cc8768401b2206ca1ba867a79175aa))
+
+- **template_utils**: Address review comments
+  ([`e9f0883`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e9f088335c76c093aa75edc81b3bab33b53a30c8))
+
+- **template_utils**: Address review comments again
+  ([`c94b219`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c94b219f30b551caeffa5074dda6173cf3a9ab8f))
+
+- **template_utils**: Use applymap instead of map for pandas compatibility
+  ([`bbfa2f6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bbfa2f6cc82aadaf67b904642ec3f0ff61b3a816))
+
+- **test_arcsinh_normalization_template**: Handle odd numbers with better list slicing
+  ([`afca7ff`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/afca7ff1eb153e3545a805a04be2df4acd283d15))
+
+- **test_manual_phenotyping_temp**: Address comments of copilot review for unit tests
+  ([`e4d61cf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e4d61cf3748e6eb9f3aca7cad9faf2b41b6ea652))
+
+- **test_performance**: Set the path to include spac
+  ([`9c4d606`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9c4d606b9baf125dd5084125eb29e439b1930ab4))
+
+- **tsne_analysis_template**: Fixed typo
+  ([`7ae8e57`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7ae8e5725326e68e9f2ce440be62089c06ad5f36))
+
+- **umap_transformation_template**: Return adata in place and fix comments of copilot
+  ([`9d24638`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d24638e5a235f3e128e72fc1e11f28f52bb1822))
+
+- **umap_tsne_pca_template**: Address the comments from copilot
+  ([`7fb9b2c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7fb9b2cd291e3aa3651e5b3d01240772330609ff))
+
+- **visualize_nearest_neighbor_template**: Fix typo
+  ([`52a4ee6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/52a4ee6ef66f9ffaed59391bbe6d0fd4f003a816))
+
+- **visualize_ripley**: Add missing __init__.py for templates module
+  ([`ff9238c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ff9238c126ab5e524608b24c28a47bebc3ed487d))
+
+- **visualize_ripley**: Make plt.show() conditional based on show_plot parameter
+  ([`0e2747e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e2747e8d05547c2e2dca4ad9e2b8ec730e24260))
+
+### Code Style
+
+- **qc-metrics**: Fix spelling typo in nFeature metric
+  ([`59675ca`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/59675cad6540787be3a8a8a300dcc6c7e398dec9))
+
+### Continuous Integration
+
+- **version**: Automatic development release
+  ([`8c7badc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8c7badc053f845896e306d09658aa0d1b215baf9))
+
+### Features
+
+- Add 21 xmls, update format_values, galaxy_xml_synthesizer, blueprint_json
+  ([`d5be7c3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d5be7c306ac62d02784f417d59edd243944aca59))
+
+- Add README to MVP_tools directory
+  ([`8145438`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8145438eaa49722a500604eaff580113027ece29))
+
+- Add refactored galaxy tools
+  ([`4d2e3d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4d2e3d722472e4a1808e936bd6267cc59e709a55))
+
+- Add setup_analysis.xml optimize boxplot.xml with help and default, update format_values
+  ([`e7bc509`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e7bc5098cbde9c163e039f77239725acd17750af))
+
+- Add show_static_image toggle to relational_heatmap_template
+  ([`7c65060`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7c6506094d2773a0c230e5ce42522630f107d66c))
+
+- Add show_static_image parameter (default False) to disable static PNG - When False: only
+  interactive HTML output produced, no PNG - When True: matplotlib static figure generated (for Code
+  Ocean) - Static PNG code commented out, not deleted - Update test to verify HTML-only default +
+  static image toggle
+
+- Add show_static_image toggle to sankey_plot_template
+  ([`64fd78b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/64fd78bd11e84e41a00793e14d18b1f09ac27e8d))
+
+- Add show_static_image parameter (default False) to disable static PNG - When False: only
+  interactive HTML output produced, no PNG - When True: matplotlib placeholder figure generated (for
+  Code Ocean) - Static PNG code commented out, not deleted - Update test to verify HTML-only default
+  + static image toggle
+
+- Add spac arcsinh_norm interactive_spatial_plot galaxy tools
+  ([`67e3ec4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/67e3ec45822572f147f785999dfa0c4121d01635))
+
+- Add SPAC boxplot Galaxy tool for Docker deployment
+  ([`9e3bea0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9e3bea0de6400b3a1031f831f8ced81f410b9007))
+
+- Add spac_load_csv_files galaxy tools
+  ([`d2526a7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d2526a79965acb886c0100a04385f5325ec1923b))
+
+- Add spac_setup_analysis galaxy tools
+  ([`bb6834b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bb6834bc2d292604f7499e09e9245384a3b0f694))
+
+- Add spac_zscore_normalization galaxy tools
+  ([`cbbcd9e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cbbcd9e47930cf9b258a8668af6ec81238ad09d9))
+
+- Added galaxy_xml_synthesizer and updated format_values.py
+  ([`b5dc73b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b5dc73bf6bcb82caac52f7dc39a92c579177c2da))
+
+- Added modified blueprint jsons with type and names
+  ([`83935c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83935c4bbeb75c4f574d9e702e923dafbfb992c2))
+
+- Mvp_boxplot galaxy tool and refact templates
+  ([`315b3bf`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/315b3bfd848739774eb7597b2d09288736d696b2))
+
+- Refactor all templates and unit tests
+  ([`8005111`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/800511118ab5970754b4e09bf7017b423328da92))
+
+- Refactored all template run_from_json() functions to use centralized save_results from
+  template_utils - Added show_static_image toggle (default False) to relational_heatmap_template and
+  sankey_plot_template to prevent Plotly-to-PNG hang on Galaxy - Refactored all unit tests in
+  tests/templates/ using snowball approach: real data, real filesystem, no mocking - One test file
+  per template validating output file existence, naming conventions, and non-empty artifacts -
+  Updated posit_it_python_template to use centralized save_results
+
+Templates changed: 43 files in src/spac/templates/ Tests changed: 37 files in tests/templates/
+
+- **add_pin_color_rule_template**: Add add_pin_color_rule_template fnction and unit tests
+  ([`2477266`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2477266b7de03e603b1dc9d48b9a53bed0af61ad))
+
+- **analysis_to_csv_template**: Add analysis_to_csv_template function and unit tests
+  ([`448a980`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/448a980c496dfa5295a33e4432649947da6e6af7))
+
+- **append_annotation_template**: Add append_annotation_template function and unit tests
+  ([`5e68e02`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5e68e02faaa423f381d3d7321c1378f51e7f3c7f))
+
+- **arcsinh_normalization_template**: Add arcsinh_normalization_template function and unit tests
+  ([`ff6cce4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ff6cce42b602642a4bd2f211d1dbd1fe6c6fd65e))
+
+- **binary_to_categorical_annotation_template**: Add binary_to_categorical_annotation_template
+  function and unit tests
+  ([`8e500ec`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8e500ecfe264b6125b6ace828003684e4b1b5cad))
+
+- **boxplot_template**: Add boxplot_template function and unit tests
+  ([`eb810ab`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/eb810ab4a532901817a5652ad59733af38b083fd))
+
+- **calculate_centroid_template**: Add calculate_centroid_template function and unit tests
+  ([`4fea9c3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4fea9c336dabc207d6fa66de8553d3fe89c9dd62))
+
+- **combine_annotations_template**: Add combine_annotations_template function and unit tests
+  ([`829a4bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/829a4bdbc95575079d9e24492f0e6bc2ea57475e))
+
+- **combine_dataframes_template**: Add combine_dataframes_template function and unit tests
+  ([`3e24237`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e24237c5a4e3f57e09c0396532200dcdf471990))
+
+- **downsample_cells_template**: Add downsample_cells_template function and unit tests
+  ([`47adf3e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/47adf3e881f28d05b4627b1ec3d0954b403f634e))
+
+- **hierarchical_heatmap_template**: Add hierarchical_heatmap_template and unit tests
+  ([`67e5a80`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/67e5a802500459e01a918c7fe96d20ab45c373c2))
+
+- **hierarchical_heatmap_template**: Add hierarchical_heatmap_template function and unit tests
+  ([`6466e2f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6466e2f8daa4c95c49e0b6d0b0e5ec1460064d09))
+
+- **histogram_template**: Add histogram_template and unit tests
+  ([`3380427`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3380427ecbd6d743aaedfb954d612905153079e4))
+
+- **interactive_spatial_plot_template**: Add interactive_spatial_plot_template function and unit
+  tests
+  ([`3f4336b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3f4336bc75f04ef1f4f8ca740a8b9b678a288da2))
+
+- **load_csv**: Add load_csv template function with configuration support
+  ([`5456658`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5456658e8d7b0ab0475ead65bbe982ccefbacf47))
+
+- Add load_csv_files() to template_utils.py for loading and combining CSV files - Add
+  spell_out_special_characters() to handle biological marker names - Add
+  load_csv_files_with_config.py template wrapper for NIDAP compatibility - Add comprehensive unit
+  tests for both functions - Support column name cleaning, metadata mapping, and string column
+  enforcement
+
+- **manual_phenotyping_template**: Add manual_phenotyping_template function and unit tests
+  ([`941d641`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/941d641352c6eaee1c293b5ef98f1a9d92646c0c))
+
+- **nearest_neighbor_calculation_template**: Add nearest_neighbor_calculation_template function and
+  unit tests
+  ([`19cd477`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/19cd477fbb3af575ae2b90615b34e801fb4dc66c))
+
+- **neighborhood_profile_template**: Add neighborhood_profile_template function and unit tests
+  ([`824d131`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/824d131fed2216a5a291f61fc53d53e5e2c98c11))
+
+- **normalize_batch_template**: Add normalize_batch_template functionand unit tests
+  ([`a71e865`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a71e8656033f79736330a1f902200a6c81c4b37e))
+
+- **phenograph_clustering_template**: Add phenograph_clustering_template function and unit tests
+  ([`ca29330`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/ca2933068c63c0a877970a496d4d9e2afe34d447))
+
+- **posit_it_python_template**: Add posit_it_python_template functionand unit tests
+  ([`bbb53f7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bbb53f712285a19f738aa117205e907c1aa0404d))
+
+- **qc-metrics**: Add common single cell quality control metrics
+  ([`994bac4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/994bac4896650ecaeee7c81e2084872509a4b815))
+
+- **qc_summary_statistics**: Add summary statistics table for sc/spatial transcriptomics quality
+  control metrics
+  ([`a228e5e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a228e5eb33777d03bec96af826568545e44157fd))
+
+- **quantile_scaling_template**: Refactor nidap code, add quantile_scaling_template function and
+  unit tests
+  ([`542f985`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/542f985f4d1a2811f010b68da8dadffe8ac64220))
+
+- **relational_heatmap_template**: Add relational_heatmap_template function and unit tests
+  ([`c57075d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c57075d87995b7f35b0c9065a354363f7cceb623))
+
+- **rename_labels_template**: Add rename_labels_template function and unit tests
+  ([`96446d7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/96446d70e392aa00e1ba77b2abddaa040d6aea7a))
+
+- **ripley_l_template**: Add ripley_l_template and unit tests
+  ([`c889259`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c88925913faf4c99c906e9b55a073759395faa78))
+
+- **sankey_plot_template**: Add sankey_plot_template function and unit tests
+  ([`34b4eee`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/34b4eee45ae98fd0ce7c5f184611f4993125949f))
+
+- **select_values_template**: Add select_values_template function and unit tests
+  ([`e59c994`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e59c994352f09ee1398f9cea6cc02041daa0cd03))
+
+- **setup_analysis_template**: Add setup_analysis_template function and unit tests
+  ([`1cfb39e`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1cfb39ed56e30e805bf7bcf29399e8ce0f20333c))
+
+- **spatial_interaction_template**: Add spatial_interaction_template and unit tests
+  ([`a7b1349`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a7b13494e86b14555aba6a6fbcc0c7c12c1441f1))
+
+- **spatial_plot_temp**: Add spatial_plot_template.py and unit tests
+  ([`0f26c08`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0f26c08744f5611f0aa92a9a60b0ad20815e8d6e))
+
+- **subset_analysis_template**: Add subset_analysis_template function and unit tests
+  ([`1db00a8`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1db00a88dfdfbbc68862b3aac99aea5332e2255c))
+
+- **summarize_annotation_statistics**: Add summarize_annotation_statistics template function and
+  unit tests
+  ([`34961bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/34961bde03bfc47211047ec58cbacc0814712e3c))
+
+- **summarize_dataframe_template**: Add summarize_dataframe_template function and unit tests
+  ([`06d8feb`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/06d8feb4d72d132efb6c4db04f6254a8bd69ca04))
+
+- **template_utils**: Add string_list_to_dictionary to template utils
+  ([`6ab7a9d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6ab7a9d91111c6fd1aa4a771bf85f8d07bd01b28))
+
+- **template_utils**: Add template_utils and unit tests
+  ([`b960684`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b960684f3e1887330f91ad307cc36b467d68bea3))
+
+- **test_performance**: Add performance tests for boxplot/histogram
+  ([`862e523`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/862e523d08f40bb1e0aee53437fa06bdb533ac45))
+
+- **tsne_analysis_template**: Add tsne_analysis_template function and unit tests
+  ([`abda610`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/abda61091b2a94251eccbe2535efc300d79a7e73))
+
+- **umap_transformation_template**: Add umap_transformation_template function and unit tests
+  ([`e79fd78`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e79fd7814a8728c9f9a529e90256ac44726d1571))
+
+- **umap_tsne_pca_template**: Add umap_tsne_pca_template function and unit tests
+  ([`d67f6c7`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d67f6c7278e7c8622ca43832acf8b74ae4a4363e))
+
+- **utag_clustering_template**: Add utag_clustering_template and unit tests
+  ([`6da3985`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6da39852b1d2ee8b3a1b4fda5c040055d6ae3cd4))
+
+- **utag_clustering_template**: Add utag_clustering_template and unit tests
+  ([`743fb10`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/743fb10f71dc015b8892a4b291d3a2a9069e89a2))
+
+- **visualize_nearest_neighbor_template**: Add visualize_nearest_neighbor_template function and unit
+  tests
+  ([`07ecdfa`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/07ecdfa15c3b5c4c7f65288811306bf68cef4962))
+
+- **visualize_ripley_template**: Add visualize_ripley_template and unit tests
+  ([`48608e2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48608e26ca16c1e89a573286553b370f2a3f508b))
+
+- **zscore_normalization_template**: Add zscore_normalization_template and unit tests
+  ([`b2d68c5`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b2d68c5fb6cd1dfba38684d855f38aea98d56296))
+
+### Refactoring
+
+- Boxplot mvp tool with format_values script
+  ([`3ba042d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ba042d5301b73ce6d0c8c040205f708b1627c14))
+
+- Boxplot_template outputs: call save_results from template_utils
+  ([`d703f55`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d703f55668f52a2fc8725eec853a43f8309ec00f))
+
+- Dockerfile.v2 to build nciccbr/spac:v2-dev docker image from refactor_template_outputs branch
+  ([`25b27dc`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/25b27dc2db54f8906ab82e4242a474ccacd0fe7c))
+
+- Fix umap-learn/scikit-learn compatibility in Dockerfile.v2 and environment.yml
+  ([`6a65dad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6a65dadd84ad0ebebb8f243f093c3d829a602211))
+
+Issue: TypeError: check_array() got an unexpected keyword argument 'ensure_all_finite' - UMAP calls
+  scikit-learn's check_array() with 'ensure_all_finite' parameter - scikit-learn 1.5+ deprecated
+  this parameter in favor of 'force_all_finite' - The conda-installed umap-learn version was
+  incompatible with scikit-learn 1.5.2
+
+Solution 1 (Dockerfile workaround - used in v1, not chosen): - Uninstall conda umap-learn and
+  reinstall via pip: umap-learn==0.5.9.post2 - As implemented in Dockerfile.v1 - Hacky workaround,
+  not ideal for maintainability
+
+Solution 2 (environment.yml - implemented): - Added explicit umap-learn=0.5.7 pin in conda
+  dependencies (not use umap-learn==0.5.9.post2 via pip) - Cleaner approach: single source of truth
+  for environment - Benefits all users (Docker and non-Docker) - Faster builds without extra
+  uninstall/reinstall step
+
+Also added UMAP verification test in Dockerfile.v2 build process to catch similar compatibility
+  issues early during image build.
+
+- Merge paper.bib and paper.md updates from address-reviewer-comments branch
+  ([`9ae3ef3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9ae3ef331290197d3fcc305fb88f9b2baac3bccc))
+
+- Modified test_boxplot_template
+  ([`cdf0102`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/cdf010212e60113c3e3538b96b4af7534a26ba80))
+
+- Posit_it_python_template - use centralized save_results, update test
+  ([`730272c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/730272cd9313479555dd4877c3c5d34720657a12))
+
+- Streamline galaxy tools implementation
+  ([`009d010`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/009d01000c6a80dad9f6dc4a508b334a19796b3b))
+
+- Synthesizer with new docker image nciccbr/spac:v2-dev, blueprints, xmls in galaxy_tools, as well
+  as optimization of template functions on refactor_template_outputs branch
+  ([`74efbb2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/74efbb2562db11618f881f05922c4bf08e645e53))
+
+- Synthesizer with ordering and grouping param, and output xmls accordingly
+  ([`08bef3b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/08bef3b52695910de183b57c6eb1ea4ee1bd4ef2))
+
+- Template outputs: integrate save_results into template_utils
+  ([`79335a0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/79335a0bb5a53a4e80eb667c85a11a8b4e750723))
+
+- Template_utils and setup_analysis_template for save_results
+  ([`80f7e3a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/80f7e3af8661635adfb769251f6f92abefd4f84a))
+
+- Update configs and fix template packaging for pip install
+  ([`e5b817b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e5b817b65b5dbffdc767f1a13a2ecb2b883481cc))
+
+- Updated paper_edit.md according to the gpt grammar check for JOSS proof
+  ([`2b4c119`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b4c1197e5429cb47034323ef079f84fab503533))
+
+- Updated the rest 16 templates and all 38 templates are the latest except posit-it-python
+  ([`8cb77f3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8cb77f3a4797a0a5f024d41b74ba88c15fa2e1fd))
+
+- **boxplot_template**: Use centralized save_results from template_utils
+  ([`a8b6e13`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/a8b6e1360af82dc4d0a6b70b949b3898d4054708))
+
+- **get_qc_summary_table**: Adjust code style to adhere to spac guidlines closer
+  ([`5e03dc2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5e03dc23b5deaadb853fd26f327f643d7e19ad12))
+
+- **get_qc_summary_table**: Refactor quality control summary statistics function and tests based on
+  the PR review
+  ([`d5061c4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d5061c43d31c20338576c58d207619f9ae789143))
+
+- **relational_heatmap.xml**: Add Show_Static_Image toggle, remove Cheetah conditionals
+  ([`9ce73d6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9ce73d6870f32b66b3eaedd8cc4c40dd73161d9e))
+
+- Add Show_Static_Image boolean param (default: unchecked) - Read param from cleaned JSON at runtime
+  instead of Cheetah #if/#else - Conditionally show figures output collection via <filter> - Update
+  description and help text for interactive-only default
+
+- **sankey_plot.xml**: Add Show_Static_Image toggle, remove Cheetah conditionals
+  ([`89d61f2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/89d61f21a98ff21b533f75fafc401aecda6a921f))
+
+- Add Show_Static_Image boolean param (default: unchecked) - Read param from cleaned JSON at runtime
+  instead of Cheetah #if/#else - Conditionally show figures output collection via <filter> - Update
+  description and help text for interactive-only default
+
+- **template**: Refactor save resutls for 22 templates.
+  ([`3ccc650`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3ccc6504c109b67dee8d82d2defbfad512e3413a))
+
+### Testing
+
+- Fix performance tests - add missing import os
+  ([`6ed037a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6ed037a6f5ffb96beb148d14cd721f4f20505e3a))
+
+- Fix test_analysis_to_csv_template - add spatial coords to AnnData
+  ([`55e7bbd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/55e7bbd90a17ddd55471dbc3777e944a7881635f))
+
+- Fix test_arcsinh_normalization_template - set Percentile to None
+  ([`bab7e8b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bab7e8ba8b34cface8c65bb24401e7f7178476b4))
+
+- Fix test_interactive_spatial_plot_template - remove show_plot, fix param keys
+  ([`7f17d1f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7f17d1fb07d4822f2ad38338d8eb936e43e4e05a))
+
+- Fix test_load_csv_files_with_config - restructure CSV dir and config format
+  ([`3cb3ef0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3cb3ef0d05fb47360cb915b98da17c78d9183755))
+
+- Fix test_normalize_batch_template - change Batch_Column to Annotation
+  ([`0e1e0d0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e1e0d0abde5aec0c8001d955ce696c8dfe7a778))
+
+- Fix test_relational_heatmap_template - remove show_plot, fix param keys
+  ([`83a91bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/83a91bdceaa4abbd9540380222b89e90e43f935b))
+
+- Fix test_rename_labels_template - fix param keys and CSV columns
+  ([`68d82b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/68d82b28a587a9df4d4fcd273e6d9532ab0f514d))
+
+- Fix test_sankey_plot_template - remove show_plot, fix param keys
+  ([`d3171b3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/d3171b3ffb395d407c43a8f347b6e6083fcbf05f))
+
+- Fix test_setup_analysis_template - fix param keys
+  ([`e6ff23a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e6ff23a0ebb32a0945817b9c67df638cf8734f8a))
+
+- Fix test_spatial_plot_template - set Stratify=False, fix Stratify_By
+  ([`0078340`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0078340901514f3e39357afd01294ca0cbacb2aa))
+
+- Fix test_summarize_dataframe_template - add missing Columns param
+  ([`8115c04`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8115c04783d0adba7e9b466c2c72e960e63e428a))
+
+- Fix test_tsne_analysis_template - increase cells to 50 for perplexity
+  ([`162e127`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/162e127e5d1b008ccf53b0e92e8702fa7a152352))
+
+- Fix test_visualize_nearest_neighbor_template - add Source_Anchor_Cell_Label
+  ([`c52c15a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c52c15a044b0c2ada74729fc74c7a432b9f8b7bc))
+
+- Fix test_zscore_normalization_template - add Table_to_Process and Output_Table_Name
+  ([`5b2da74`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5b2da7410012c7e11539b0cb338b2b46cdc45aa8))
+
+- Remove policy citation from test docstring
+  ([`90f71f9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/90f71f9026375398cab3c733c70e7be75df59343))
+
+- Replace mocked boxplot template test with real seed test (snowball)
+  ([`3c50a28`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3c50a28d4a116d016520b0ce56aa355ec4170b53))
+
+Rewrite test_boxplot_template.py as the gold-standard seed test per Sprint 9 JIRA ticket (Write Real
+  Template Unit Tests Using Snowball Approach):
+
+- Remove all mocking (unittest.mock patches, MagicMock objects) - Use real AnnData data, real
+  filesystem I/O, real template execution - Input is a JSON params file (production-like invocation)
+  - Minimal synthetic dataset: 4 cells, 2 genes, 2 cell types - Single I/O test with multiple
+  assertions (per team unit test rules): * saved_files dict has 'figures' and 'dataframe' keys *
+  Figures directory contains a non-empty PNG file * Figure title matches the Figure_Title parameter
+  * Summary CSV contains exact describe() stat rows - Follows team conventions: unittest.TestCase,
+  tempfile.TemporaryDirectory, setUp/tearDown, sys.path.append, unittest.main() - Low DPI (72) and
+  small figure size for fast CI execution
+
+- Update test_add_pin_color_rule snowball test
+  ([`c86daff`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c86daff3574b60c107010b5c5df186f410dfcbd3))
+
+- Update test_analysis_to_csv_template
+  ([`6e5f745`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6e5f7458b1606c3f279037e0f6cdcd0b057d1948))
+
+- Update test_append_annotation_template
+  ([`4dc4aa3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4dc4aa3178054a87de3859c56200827e52297390))
+
+- Update test_arcsinh_normalization_template
+  ([`62c2ef3`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/62c2ef37ac378b64d217912ede1b7be81c904887))
+
+- Update test_binary_to_categorical_annotation_template
+  ([`c947d0f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c947d0f2bc3f0a9ffb434831a53e59aa4a3602fc))
+
+- Update test_calculate_centroid_template
+  ([`2bf56b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2bf56b122c83b9aff43cbd1f691ef2540d71a75c))
+
+- Update test_combine_annotations_template
+  ([`3200852`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/32008522ba4c3cfdafb186ee237e5f4d5406cb53))
+
+- Update test_combine_dataframes_template
+  ([`9619036`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/961903619e2e546a88341999a71820be90834b92))
+
+- Update test_downsample_cells_template
+  ([`bc73dd9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/bc73dd9e1eded5213d5ec1b57a8bba18ac137f1c))
+
+- Update test_hierarchical_heatmap_template
+  ([`8f74c04`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/8f74c043cadcafcf980eb5cd0f86936b0ea62795))
+
+- Update test_histogram_template
+  ([`527ae77`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/527ae772e102941351a0effd551f9bc0f98faa55))
+
+- Update test_interactive_spatial_plot_template
+  ([`321eb29`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/321eb29bbc7c61af99dc6ea2e772b84804c477ff))
+
+- Update test_load_csv_files_with_config
+  ([`831c6c9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/831c6c94cb8d9530c9a274abc9bcd0647644322c))
+
+- Update test_manual_phenotyping_template
+  ([`abda697`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/abda6972ec43fdd364e74df39d6b5098a18e8c06))
+
+- Update test_nearest_neighbor_calculation_template
+  ([`27e1b3f`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/27e1b3f3a3b00022a05176302c03417c81c7c27a))
+
+- Update test_neighborhood_profile_template
+  ([`1d19489`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/1d194897310708819bf0e4cba1d045b7869df5de))
+
+- Update test_normalize_batch_template
+  ([`e1c1e4b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e1c1e4b45a8946e8176994109aec5ca2239b3686))
+
+- Update test_phenograph_clustering_template
+  ([`c047ea4`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c047ea42d0b178b31a063f160d3ad8efed7c707a))
+
+- Update test_posit_it_python_template
+  ([`7845d64`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/7845d6462e225a1d9bc02253c0ebc0672cc39e50))
+
+- Update test_quantile_scaling_template
+  ([`610de00`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/610de00af4ebb0430996517e00b7cd24efa4a119))
+
+- Update test_relational_heatmap_template
+  ([`6b68c0a`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/6b68c0a4333dd972e0719e0aa67271cccd1f9581))
+
+- Update test_rename_labels_template
+  ([`46f76a6`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/46f76a6b6e05b3fc0495bfcc3ebda63cec2bb0c0))
+
+- Update test_ripley_l_template
+  ([`880e396`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/880e396e71f68e3833251f4ffcb59d0f2cf4a880))
+
+- Update test_sankey_plot_template
+  ([`b9ade06`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/b9ade067973692fc7b55297ada25b577c857ebe0))
+
+- Update test_select_values_template
+  ([`5d778b2`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/5d778b22e2d483b639a11289536d31243cab7019))
+
+- Update test_setup_analysis_template
+  ([`41e1c9b`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/41e1c9b99e74b12c30beb66c3afb7424da74a9c6))
+
+- Update test_spatial_interaction_template
+  ([`fbd7f96`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fbd7f96e4bc00eb98ad4ad19746991ba03b48945))
+
+- Update test_spatial_plot_template
+  ([`48ec539`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/48ec5393e01c5b831099e4be45669b8af9d16812))
+
+- Update test_subset_analysis_template
+  ([`be1c229`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/be1c2293a3f75ba853baa431878d7ad289b58f3d))
+
+- Update test_summarize_annotation_statistics_template
+  ([`4e1ce71`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4e1ce71e43842c99690d22c46f449632795a0104))
+
+- Update test_summarize_dataframe_template
+  ([`c23d550`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/c23d5502c819d773051241c9824b37943fba58c8))
+
+- Update test_template_utils
+  ([`4d3e4e0`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/4d3e4e028efdfa04db76363425e19d13cd24ee3a))
+
+- Update test_tsne_analysis_template
+  ([`0637c6c`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0637c6cd92e710ae4387e91d6fb10dccb369a4fe))
+
+- Update test_umap_transformation_template
+  ([`9258346`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/92583464e751c2d239232844dd5672cf8a8ef920))
+
+- Update test_umap_tsne_pca_template
+  ([`35e08a1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/35e08a14e1898dab221884cda11c68387000fbd3))
+
+- Update test_utag_clustering_template
+  ([`53c79ec`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/53c79ec3bdd5f6d90001d2e8bc41e7a734b4a125))
+
+- Update test_visualize_nearest_neighbor_template
+  ([`9983459`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/998345982e37747fa5fdd7bf87e57b009500dcff))
+
+- Update test_visualize_ripley_template
+  ([`0e256b1`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/0e256b16adde8b574dcf3f212717301ef00eeaef))
+
+- Update test_zscore_normalization_template
+  ([`9d05751`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/9d05751d219a4f91cc071732f2b491743e2e7935))
+
+- **perforamnce**: Skip performance tests by default
+  ([`fc664ad`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/fc664ad96b3375a3255f9bb36e51d0e4a505daba))
+
+
 ## v0.9.0 (2025-05-23)
-
-### Step
-
-- Bumping minor version
-  ([`e333641`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e3336417a09b4ef26e71bde1b54da840f0980ab9))
-
-
-## v0.8.11 (2025-05-23)
 
 ### Bug Fixes
 
@@ -81,6 +727,9 @@
   ([`2b02538`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/2b02538d4d15a748ce399eb3837dc51eb99108f6))
 
 ### Continuous Integration
+
+- **version**: Automatic development release
+  ([`3e126e9`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/3e126e9711be5d485010ced7460f99a180c8089e))
 
 - **version**: Automatic development release
   ([`195761d`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/195761de5563e80a60a7ea43ecb73e6105dc7d1d))
@@ -172,6 +821,11 @@
 
 - **interactive_spatial_plot**: Used partial for better readability
   ([`60283bd`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/60283bd7671d2f2a65b52d77f4792b7461a8e407))
+
+### Step
+
+- Bumping minor version
+  ([`e333641`](https://github.com/FNLCR-DMAP/SCSAWorkflow/commit/e3336417a09b4ef26e71bde1b54da840f0980ab9))
 
 ### Testing
 

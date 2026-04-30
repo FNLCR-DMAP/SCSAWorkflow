@@ -1,0 +1,28 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Summarize DataFrame [SPAC][DMAP]",
+		"instructions": "Creates a statistical summary of selected columns in the input dataframe, and generates an interactive report flagging the missing values (optionally listing their row indices).\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "ab31793bcf0a44",
+			"category": "general",
+			"name": "Print Missing Location",
+			"param_name": "Print_Missing_Location",
+			"description": "Print the indices of missing values for a specific column",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		}
+	]
+}

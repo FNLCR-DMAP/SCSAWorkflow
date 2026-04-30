@@ -1,0 +1,207 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Post-It-Python [SPAC] [DMAP]",
+		"instructions": "Adapted from Aleksandra's R post it"
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "ff44728b571744",
+			"category": "general",
+			"name": "Label",
+			"param_name": "Label",
+			"description": "",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Post-It"
+		},
+		{
+			"id": "173113fced724e",
+			"category": "general",
+			"name": "Label font size",
+			"param_name": "Label_font_size",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 80
+		},
+		{
+			"id": "499139cb7dc246",
+			"category": "general",
+			"name": "Label font type",
+			"param_name": "Label_font_type",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "normal",
+			"extra_data": [
+				"normal",
+				"italic"
+			]
+		},
+		{
+			"id": "7bede5a9b3b44d",
+			"category": "general",
+			"name": "Label Bold",
+			"param_name": "Label_Bold",
+			"description": "",
+			"type": "list",
+			"value_type": "boolean",
+			"default_value": "False",
+			"extra_data": []
+		},
+		{
+			"id": "8b440cb236e644",
+			"category": "general",
+			"name": "Label font color",
+			"param_name": "Label_font_color",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Black",
+			"extra_data": [
+				"White",
+				"LightGrey",
+				"Grey",
+				"Black",
+				"Red1",
+				"Red2",
+				"Red3",
+				"Orange1",
+				"Orange2",
+				"Orange3",
+				"Yellow1",
+				"Yellow2",
+				"Yellow3",
+				"YellowGreen1",
+				"YellowGreen2",
+				"Yellowgreen3",
+				"Green1",
+				"Green2",
+				"Green3",
+				"Teal1",
+				"Teal2",
+				"Teal3",
+				"Blue1",
+				"Blue2",
+				"Blue3",
+				"Purple1",
+				"Purple2",
+				"Purple3",
+				"Magenta1",
+				"Magenta2",
+				"Magenta3"
+			]
+		},
+		{
+			"id": "563a3083acd24a",
+			"category": "general",
+			"name": "Label font family",
+			"param_name": "Label_font_family",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Arial",
+			"extra_data": [
+				"Arial",
+				"Keyboard",
+				"Adobe Arabic",
+				"Times New Roman",
+				"Impact",
+				"Kailasa",
+				"Serif"
+			]
+		},
+		{
+			"id": "d1c649c0b1ec4d",
+			"category": "general",
+			"name": "Background fill color",
+			"param_name": "Background_fill_color",
+			"description": "",
+			"type": "list",
+			"value_type": "string",
+			"default_value": "Yellow1",
+			"extra_data": [
+				"White",
+				"LightGrey",
+				"Grey",
+				"Black",
+				"Red1",
+				"Red2",
+				"Red3",
+				"Orange1",
+				"Orange2",
+				"Orange3",
+				"Yellow1",
+				"Yellow2",
+				"Yellow3",
+				"YellowGreen1",
+				"YellowGreen2",
+				"Yellowgreen3",
+				"Green1",
+				"Green2",
+				"Green3",
+				"Teal1",
+				"Teal2",
+				"Teal3",
+				"Blue1",
+				"Blue2",
+				"Blue3",
+				"Purple1",
+				"Purple2",
+				"Purple3",
+				"Magenta1",
+				"Magenta2",
+				"Magenta3"
+			]
+		},
+		{
+			"id": "9ba9cb9b48f742",
+			"category": "general",
+			"name": "Background fill opacity",
+			"param_name": "Background_fill_opacity",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 10
+		},
+		{
+			"id": "0e3c8c536c694e",
+			"category": "general",
+			"name": "Page width",
+			"param_name": "Page_width",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 18
+		},
+		{
+			"id": "d36ed8bf2e1a48",
+			"category": "general",
+			"name": "Page height",
+			"param_name": "Page_height",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 6
+		},
+		{
+			"id": "a6b983d1a76b4a",
+			"category": "general",
+			"name": "Page DPI",
+			"param_name": "Page_DPI",
+			"description": "",
+			"type": "text",
+			"value_type": "number",
+			"default_value": 300
+		}
+	]
+}

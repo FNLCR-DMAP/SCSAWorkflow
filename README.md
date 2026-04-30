@@ -5,12 +5,26 @@ This Python-based package leverages the anndata framework for easy integration w
 
 This repository is the official home of the SPAC Python package, part of the broader SPAC ecosystem for single-cell spatial analysis.
 
+If you use SPAC in your research, please cite our publications (see [Citations](#citations)).
+
 ## SPAC Ecosystem
 
 | Component | Description | Repository |
 |-----------|-------------|------------|
 | **SPAC Python Package** | Core analysis library | This repository |
 | **SPAC Shiny** | Interactive web application | [FNLCR-DMAP/SPAC_Shiny](https://github.com/FNLCR-DMAP/SPAC_Shiny) |
+
+## Citations
+
+If you use SPAC in your work, please cite the following publications:
+
+**Platform paper (BMC Bioinformatics):**
+
+> Liu F, He R, Sheeley T, Scheiblin DA, Lockett SJ, Ridnour LA, Wink DA, Jensen M, Cortner J, Zaki G. SPAC: a scalable and integrated enterprise platform for single-cell spatial analysis. *BMC Bioinformatics*. 2026 Jan 29;27(1):25. doi: [10.1186/s12859-025-06339-2](https://doi.org/10.1186/s12859-025-06339-2). PMID: 41612174; PMCID: PMC12857135.
+
+**Software paper (JOSS):**
+
+> Liu F, He R, Bombin A, Abdallah A, Eldaghar O, Sheeley T, Ying SE, Zaki G. (2026). SPAC: A Python Package for Spatial Single-Cell Analysis of Multiplexed Imaging. *Journal of Open Source Software*, 11(117), 8787. doi: [10.21105/joss.08787](https://doi.org/10.21105/joss.08787)
 
 ## Installing SPAC with Conda
 Run the following command to establish the Conda environment supporting usage and contribution to spac package:
@@ -158,7 +172,7 @@ docker container prune -f
 docker rmi spac
 ```
 
-## Contirbuting to SPAC:
+## Contributing to SPAC
 Review the [developer guide](CONTRIBUTING.md)
 
 ## License

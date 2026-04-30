@@ -1,0 +1,37 @@
+{
+	"version": 1,
+	"named_parameters": true,
+	"general": {
+		"title": "Z-Score Normalization [DMAP] [SPAC]",
+		"instructions": "Perform z-scores normalization for the selected data table in the analysis. Normalized data table is stored under name \"z_scores\".\\ Please refer to DUET Documentation and GitHub Documentation for further information."
+	},
+	"categories": [
+		{
+			"id": "general",
+			"name": "General Parameters",
+			"help_text": "Basic tool parameters"
+		}
+	],
+	"parameters": [
+		{
+			"id": "a61d08ea22f54f",
+			"category": "general",
+			"name": "Table to Process",
+			"param_name": "Table_to_Process",
+			"description": "Source table to perform the computation. Original refers to the raw dataset.",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "Original"
+		},
+		{
+			"id": "95d061fe34bb49",
+			"category": "general",
+			"name": "Output Table Name",
+			"param_name": "Output_Table_Name",
+			"description": "Name of the table to be added to the analysis. Default is \"z_scores\".",
+			"type": "text",
+			"value_type": "string",
+			"default_value": "z_scores"
+		}
+	]
+}

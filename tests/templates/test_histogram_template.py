@@ -1,5 +1,10 @@
 # tests/templates/test_histogram_template.py
-"""Unit tests for the Histogram template."""
+"""
+Real (non-mocked) unit test for the Histogram template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,16 +12,14 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # Headless backend for CI
+matplotlib.use("Agg")
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -25,198 +28,83 @@ sys.path.append(
 from spac.templates.histogram_template import run_from_json
 
 
-def mock_adata_with_features(n_cells: int = 10) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for fast tests."""
-    rng = np.random.default_rng(0)
-    
-    # Simple expression data
-    x_mat = rng.normal(size=(n_cells, 3))
-    
-    # Simple observations- fixed to handle odd n_cells
-    obs = pd.DataFrame({
-        "cell_type": (["TypeA", "TypeB"] * (n_cells // 2) + 
-                     ["TypeA"] * (n_cells % 2))[:n_cells]
-    })
-    
-    # Simple var names
-    var = pd.DataFrame(index=["Gene1", "Gene2", "Gene3"])
-    
-    return ad.AnnData(X=x_mat, obs=obs, var=var)
+def _make_tiny_adata() -> ad.AnnData:
+    """Minimal AnnData: 4 cells, 2 genes for histogram plotting."""
+    rng = np.random.default_rng(42)
+    X = rng.integers(1, 10, size=(4, 2)).astype(float)
+    obs = pd.DataFrame({"cell_type": ["A", "B", "A", "B"]})
+    var = pd.DataFrame(index=["Gene_0", "Gene_1"])
+    return ad.AnnData(X=X, obs=obs, var=var)
 
 
 class TestHistogramTemplate(unittest.TestCase):
-    """Unit tests for the Histogram template."""
+    """Real (non-mocked) tests for the histogram template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input.pickle"
-        )
-        self.out_file = "plots.csv"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data as pickle
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata_with_features(), f)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters
-        self.params = {
+        params = {
             "Upstream_Analysis": self.in_file,
-            "Plot_By": "Annotation",
             "Annotation": "cell_type",
-            "Feature": "None",
-            "Table_": "Original",
-            "Group_by": "None",
-            "Together": True,
-            "Output_File": self.out_file,
+            "Table_to_Visualize": "Original",
+            "Feature_s_to_Plot": ["All"],
+            "Figure_Title": "Test Histogram",
+            "Legend_Title": "Cell Type",
+            "Figure_Width": 6,
+            "Figure_Height": 4,
+            "Figure_DPI": 72,
+            "Font_Size": 10,
+            "Number_of_Bins": 20,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "dataframe": {"type": "file", "name": "dataframe.csv"},
+                "figures": {"type": "directory", "name": "figures_dir"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    @patch('spac.templates.histogram_template.histogram')
-    @patch('seaborn.move_legend')  # Mock seaborn to avoid legend issues
-    def test_run_with_save(self, mock_move_legend, mock_histogram) -> None:
-        """Test basic run with file saving."""
-        # Mock the histogram function
-        mock_fig = MagicMock()
-        mock_fig.number = 1
-        mock_fig.set_size_inches = MagicMock()
-        mock_fig.set_dpi = MagicMock()
-        
-        mock_ax = MagicMock()
-        mock_ax.get_legend.return_value = None
-        mock_ax.tick_params = MagicMock()
-        mock_ax.set_title = MagicMock()
-        
-        mock_df = pd.DataFrame({
-            'category': ['TypeA', 'TypeB'],
-            'count': [5, 5]
-        })
-        
-        mock_histogram.return_value = {
-            "fig": mock_fig,
-            "axs": mock_ax,
-            "df": mock_df
-        }
-        
-        # Run with save_results=True (default)
-        saved_files = run_from_json(self.params)
-        
-        # Check that file was saved
-        self.assertIn(self.out_file, saved_files)
-        self.assertTrue(os.path.exists(saved_files[self.out_file]))
-        
-        # Verify histogram was called
-        mock_histogram.assert_called_once()
+    def test_histogram_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run histogram and verify outputs.
 
-    @patch('spac.templates.histogram_template.histogram')
-    @patch('seaborn.move_legend')
-    def test_run_without_save(self, mock_move_legend, mock_histogram) -> None:
-        """Test run without file saving."""
-        # Mock the histogram function
-        mock_fig = MagicMock()
-        mock_fig.number = 1
-        mock_fig.set_size_inches = MagicMock()
-        mock_fig.set_dpi = MagicMock()
-        
-        mock_ax = MagicMock()
-        mock_ax.get_legend.return_value = None
-        mock_ax.tick_params = MagicMock()
-        mock_ax.set_title = MagicMock()
-        
-        mock_df = pd.DataFrame({'category': ['A'], 'count': [10]})
-        
-        mock_histogram.return_value = {
-            "fig": mock_fig,
-            "axs": mock_ax,
-            "df": mock_df
-        }
-        
-        # Run with save_results=False
-        fig, df = run_from_json(self.params, save_results=False)
-        
-        # Check that we got figure and dataframe
-        self.assertEqual(fig, mock_fig)
-        self.assertIsInstance(df, pd.DataFrame)
-
-    def test_json_file_input(self) -> None:
-        """Test that JSON file input works."""
-        json_path = os.path.join(self.tmp_dir.name, "params.json")
-        with open(json_path, "w") as f:
-            json.dump(self.params, f)
-        
-        with patch('spac.templates.histogram_template.histogram') as mock_hist:
-            with patch('seaborn.move_legend'):
-                mock_hist.return_value = {
-                    "fig": MagicMock(number=1),
-                    "axs": MagicMock(),
-                    "df": pd.DataFrame()
-                }
-                
-                result = run_from_json(json_path, save_results=False)
-                self.assertIsInstance(result, tuple)
-
-    def test_error_messages(self) -> None:
-        """Test exact error messages for key validations."""
-        # Test 1: No annotations available
-        adata_no_obs = ad.AnnData(X=np.random.rand(5, 3))
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(adata_no_obs, f)
-        
-        params_bad = self.params.copy()
-        params_bad["Annotation"] = "None"
-        
-        with self.assertRaises(ValueError) as context:
-            run_from_json(params_bad)
-        
-        expected_msg = 'No annotations available in adata.obs to plot.'
-        self.assertEqual(str(context.exception), expected_msg)
-        
-        # Test 2: Invalid rotation angle
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata_with_features(), f)
-            
-        params_bad_rotate = self.params.copy()
-        params_bad_rotate["X_Axis_Label_Rotation"] = 400
-        
-        with self.assertRaises(ValueError) as context:
-            run_from_json(params_bad_rotate)
-        
-        expected_msg = (
-            'The X label rotation should fall within 0 to 360 degree. '
-            'Received "400".'
+        Validates:
+        1. saved_files dict has 'figures' and 'dataframe' keys
+        2. Figures directory contains non-empty PNG(s)
+        3. Summary CSV exists and is non-empty
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            show_plot=False,
+            output_dir=self.tmp_dir.name,
         )
-        self.assertEqual(str(context.exception), expected_msg)
 
-    @patch('spac.templates.histogram_template.histogram')
-    @patch('seaborn.move_legend')
-    @patch('builtins.print')
-    def test_console_output(
-        self, mock_print, mock_move_legend, mock_histogram
-    ) -> None:
-        """Test that dataframe is printed to console."""
-        # Mock the histogram function
-        mock_df = pd.DataFrame({
-            'category': ['TypeA', 'TypeB'],
-            'count': [5, 5]
-        })
-        
-        mock_histogram.return_value = {
-            "fig": MagicMock(number=1),
-            "axs": MagicMock(),
-            "df": mock_df
-        }
-        
-        run_from_json(self.params, save_results=False)
-        
-        # Check that dataframe info was printed
-        print_calls = [str(call[0][0]) for call in mock_print.call_args_list
-                      if call[0]]
-        
-        # Should print "Displaying top 10 rows"
-        self.assertTrue(
-            any("Displaying top 10 rows" in msg for msg in print_calls)
-        )
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("figures", saved_files)
+        self.assertIn("dataframe", saved_files)
+
+        # Figures
+        figure_paths = saved_files["figures"]
+        self.assertGreaterEqual(len(figure_paths), 1)
+        for fig_path in figure_paths:
+            fig_file = Path(fig_path)
+            self.assertTrue(fig_file.exists())
+            self.assertGreater(fig_file.stat().st_size, 0)
+
+        # CSV
+        csv_path = Path(saved_files["dataframe"])
+        self.assertTrue(csv_path.exists())
+        self.assertGreater(csv_path.stat().st_size, 0)
 
 
 if __name__ == "__main__":

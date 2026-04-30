@@ -1,5 +1,10 @@
 # tests/templates/test_umap_transformation_template.py
-"""Unit tests for the UMAP transformation template."""
+"""
+Real (non-mocked) unit test for the UMAP Transformation template.
+
+Validates template I/O behaviour only.
+No mocking. Uses real data, real filesystem, and tempfile.
+"""
 
 import json
 import os
@@ -7,13 +12,11 @@ import pickle
 import sys
 import tempfile
 import unittest
-import warnings
-from unittest.mock import patch, MagicMock
+from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 sys.path.append(
     os.path.dirname(os.path.realpath(__file__)) + "/../../src"
@@ -22,164 +25,76 @@ sys.path.append(
 from spac.templates.umap_transformation_template import run_from_json
 
 
-def mock_adata(n_cells: int = 10) -> ad.AnnData:
-    """Return a minimal synthetic AnnData for fast tests."""
-    rng = np.random.default_rng(0)
-    obs = pd.DataFrame({
-        "cell_type": (["TypeA", "TypeB"] * ((n_cells + 1) // 2))[:n_cells],
-        "sample": (["S1", "S2"] * ((n_cells + 1) // 2))[:n_cells]
-    })
-    x_mat = rng.normal(size=(n_cells, 5))
-    adata = ad.AnnData(X=x_mat, obs=obs)
-    adata.var_names = [f"Gene{i}" for i in range(5)]
-    # Add a layer to test layer processing
-    adata.layers["arcsinh_z_scores"] = rng.normal(size=(n_cells, 5))
-    return adata
+def _make_tiny_adata() -> ad.AnnData:
+    """Minimal AnnData: 20 cells, 5 genes for UMAP."""
+    rng = np.random.default_rng(42)
+    X = rng.random((20, 5))
+    obs = pd.DataFrame({"cell_type": ["A", "B"] * 10})
+    var = pd.DataFrame(index=[f"Gene_{i}" for i in range(5)])
+    return ad.AnnData(X=X, obs=obs, var=var)
 
 
 class TestUmapTransformationTemplate(unittest.TestCase):
-    """Unit tests for the UMAP transformation template."""
+    """Real (non-mocked) tests for the UMAP transformation template."""
 
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
-        self.in_file = os.path.join(
-            self.tmp_dir.name, "input.pickle"
-        )
-        self.out_file = "output"
+        self.in_file = os.path.join(self.tmp_dir.name, "input.pickle")
 
-        # Save minimal mock data
-        with open(self.in_file, 'wb') as f:
-            pickle.dump(mock_adata(), f)
+        with open(self.in_file, "wb") as f:
+            pickle.dump(_make_tiny_adata(), f)
 
-        # Minimal parameters from NIDAP template
-        self.params = {
+        params = {
             "Upstream_Analysis": self.in_file,
-            "Number_of_Neighbors": 5,  # Small for fast test
+            "Table_to_Process": "Original",
+            "Number_of_Neighbors": 5,
             "Minimum_Distance_between_Points": 0.1,
             "Target_Dimension_Number": 2,
             "Computational_Metric": "euclidean",
             "Random_State": 0,
             "Transform_Seed": 42,
-            "Table_to_Process": "Original",
-            "Output_File": self.out_file,
+            "Output_Directory": self.tmp_dir.name,
+            "outputs": {
+                "analysis": {"type": "file", "name": "output.pickle"},
+            },
         }
+
+        self.json_file = os.path.join(self.tmp_dir.name, "params.json")
+        with open(self.json_file, "w") as f:
+            json.dump(params, f)
 
     def tearDown(self) -> None:
         self.tmp_dir.cleanup()
 
-    def test_complete_io_workflow(self) -> None:
-        """Single I/O test covering input/output scenarios."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            
-            # Test 1: Run with default parameters
-            with patch('spac.templates.umap_transformation_template.'
-                      'run_umap') as mock_umap:
-                # Mock run_umap to modify in-place and return the same object
-                def mock_run_umap_inplace(adata, **kwargs):
-                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
-                    return adata
-                
-                mock_umap.side_effect = mock_run_umap_inplace
-                
-                result = run_from_json(self.params)
-                self.assertIsInstance(result, dict)
-                # Verify file was saved
-                self.assertTrue(len(result) > 0)
-                
-                # Verify run_umap was called with correct parameters
-                mock_umap.assert_called_once()
-                call_kwargs = mock_umap.call_args[1]
-                self.assertEqual(call_kwargs['n_neighbors'], 5)
-                self.assertEqual(call_kwargs['min_dist'], 0.1)
-                self.assertEqual(call_kwargs['n_components'], 2)
-                self.assertEqual(call_kwargs['metric'], 'euclidean')
-                self.assertEqual(call_kwargs['random_state'], 0)
-                self.assertEqual(call_kwargs['transform_seed'], 42)
-                self.assertIsNone(call_kwargs['layer'])  # "Original" → None
-                self.assertTrue(call_kwargs['verbose'])
-            
-            # Test 2: Run without saving
-            with patch('spac.templates.umap_transformation_template.'
-                      'run_umap') as mock_umap:
-                # Mock run_umap to modify in-place and return the same object
-                def mock_run_umap_inplace(adata, **kwargs):
-                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
-                    return adata
-                
-                mock_umap.side_effect = mock_run_umap_inplace
-                
-                result_no_save = run_from_json(
-                    self.params, save_results=False
-                )
-                # Check appropriate return type based on template
-                self.assertIsInstance(result_no_save, ad.AnnData)
-                self.assertIn("X_umap", result_no_save.obsm)
-            
-            # Test 3: JSON file input
-            json_path = os.path.join(self.tmp_dir.name, "params.json")
-            with open(json_path, "w") as f:
-                json.dump(self.params, f)
-            
-            with patch('spac.templates.umap_transformation_template.'
-                      'run_umap') as mock_umap:
-                # Mock run_umap to modify in-place
-                def mock_run_umap_inplace(adata, **kwargs):
-                    adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
-                    return adata
-                
-                mock_umap.side_effect = mock_run_umap_inplace
-                
-                result_json = run_from_json(json_path)
-                self.assertIsInstance(result_json, dict)
+    def test_umap_produces_expected_outputs(self) -> None:
+        """
+        End-to-end I/O test: run UMAP and verify outputs.
 
-    def test_layer_parameter_handling(self) -> None:
-        """Test that layer parameter is handled correctly."""
-        # Test with specific layer
-        params_with_layer = self.params.copy()
-        params_with_layer["Table_to_Process"] = "arcsinh_z_scores"
-        
-        with patch('spac.templates.umap_transformation_template.'
-                  'run_umap') as mock_umap:
-            # Mock run_umap to modify in-place
-            def mock_run_umap_inplace(adata, **kwargs):
-                adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
-                return adata
-            
-            mock_umap.side_effect = mock_run_umap_inplace
-            
-            run_from_json(params_with_layer, save_results=False)
-            
-            # Verify layer parameter was passed correctly
-            call_kwargs = mock_umap.call_args[1]
-            self.assertEqual(call_kwargs['layer'], "arcsinh_z_scores")
+        Validates:
+        1. saved_files dict has 'analysis' key
+        2. Pickle contains AnnData with 'X_umap' in .obsm
+        """
+        saved_files = run_from_json(
+            self.json_file,
+            save_to_disk=True,
+            output_dir=self.tmp_dir.name,
+        )
 
-    def test_default_parameters(self) -> None:
-        """Test that default parameters from JSON template are used."""
-        # Minimal params - only required fields
-        minimal_params = {
-            "Upstream_Analysis": self.in_file,
-        }
-        
-        with patch('spac.templates.umap_transformation_template.'
-                  'run_umap') as mock_umap:
-            # Mock run_umap to modify in-place
-            def mock_run_umap_inplace(adata, **kwargs):
-                adata.obsm["X_umap"] = np.random.rand(adata.n_obs, 2)
-                return adata
-            
-            mock_umap.side_effect = mock_run_umap_inplace
-            
-            run_from_json(minimal_params, save_results=False)
-            
-            # Verify defaults from JSON template were used
-            call_kwargs = mock_umap.call_args[1]
-            self.assertEqual(call_kwargs['n_neighbors'], 75)
-            self.assertEqual(call_kwargs['min_dist'], 0.1)
-            self.assertEqual(call_kwargs['n_components'], 2)
-            self.assertEqual(call_kwargs['metric'], 'euclidean')
-            self.assertEqual(call_kwargs['random_state'], 0)
-            self.assertEqual(call_kwargs['transform_seed'], 42)
+        self.assertIsInstance(saved_files, dict)
+        self.assertIn("analysis", saved_files)
+
+        pkl_path = Path(saved_files["analysis"])
+        self.assertTrue(pkl_path.exists())
+        self.assertGreater(pkl_path.stat().st_size, 0)
+
+        with open(pkl_path, "rb") as f:
+            result_adata = pickle.load(f)
+        self.assertIsInstance(result_adata, ad.AnnData)
+        self.assertIn("X_umap", result_adata.obsm)
+
+        mem_adata = run_from_json(self.json_file, save_to_disk=False)
+        self.assertIsInstance(mem_adata, ad.AnnData)
+        self.assertIn("X_umap", mem_adata.obsm)
 
 
 if __name__ == "__main__":
