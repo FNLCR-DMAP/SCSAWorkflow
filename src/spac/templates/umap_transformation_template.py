@@ -100,7 +100,10 @@ def run_from_json(
     # Load the upstream analysis data
     adata = load_input(params["Upstream_Analysis"])
 
-    # Extract parameters - Note: HPC parameters are ignored in SPAC version
+    # Extract parameters. HPC parameters (Run_on_HPC, Batch_Mode, Partition,
+    # Number_of_CPUs, Memory_GB, Request_Time) were removed from the Galaxy
+    # tool in v2.1.0 and are no longer sent. params.get() is kept for safety
+    # so older JSON blueprints containing those keys still load cleanly.
     n_neighbors = params.get("Number_of_Neighbors", 75)
     min_dist = params.get("Minimum_Distance_between_Points", 0.1)
     n_components = params.get("Target_Dimension_Number", 2)
