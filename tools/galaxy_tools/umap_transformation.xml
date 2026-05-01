@@ -3,7 +3,7 @@
     <description>Perform UMAP dimensionality reduction using a specific table.\
 Please refer to GitHub Documentation for further information.</description>
     <requirements>
-        <container type="docker">nciccbr/spac:v0.9.2</container>
+        <container type="docker">nciccbr/spac:v0.9.3-dev</container>
     </requirements>
     <configfiles>
         <inputs name="params_json" filename="galaxy_params.json" data_style="paths"/>
