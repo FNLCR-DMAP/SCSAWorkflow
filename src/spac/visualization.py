@@ -7,6 +7,8 @@ import anndata
 import scanpy as sc
 import math
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from matplotlib.patches import Patch
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
@@ -22,6 +24,9 @@ from spac.utils import color_mapping, spell_out_special_characters
 from spac.data_utils import select_values
 import logging
 import warnings
+import datashader as ds
+import datashader.transfer_functions as tf
+
 import base64
 import time
 import json
@@ -32,10 +37,336 @@ import matplotlib.patches as mpatch
 from functools import partial
 from collections import OrderedDict
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+plt.rcParams["axes.grid"] = False
+
+ 
+def visualize_2D_datashader_heatmap(
+    x,
+    y,
+    labels=None,
+    bins=100,
+    log_scale=True,
+    theme=None,
+    ax=None,
+    x_axis_title="Component 1",
+    y_axis_title="Component 2",
+    plot_title=None,
+    color_representation=None,
+    show_colorbar=True,
+    **kwargs,
+):
+    """
+    Visualize 2D data as a datashader-based heatmap.
+
+    Parameters
+    ----------
+    x : array-like
+        X-coordinates of the data points.
+    y : array-like
+        Y-coordinates of the data points.
+    labels : array-like, optional
+        Categorical labels (``pd.Categorical`` or categorical Series).
+        Continuous labels are not supported.
+    bins : int, optional (default: 100)
+        Number of bins along each axis for the datashader canvas.
+    log_scale : bool, optional (default: True)
+        Apply log-scale normalization to the colorbar.
+    theme : str, optional
+        Matplotlib colormap name. Defaults to ``'viridis'``.
+        Ignored when categorical ``labels`` are provided.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axes object. If ``None``, a new one is created.
+    x_axis_title : str, optional
+        Label for the x-axis.
+    y_axis_title : str, optional
+        Label for the y-axis.
+    plot_title : str, optional
+        Title for the plot.
+    color_representation : str, optional
+        Description of what the colors represent.
+    show_colorbar : bool, optional (default: True)
+        Whether to display a colorbar or legend.
+    **kwargs
+        Supports ``fig_width`` (default 10) and ``fig_height`` (default 8).
+ 
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The figure containing the plot.
+    ax : matplotlib.axes.Axes
+        The axes containing the plot.
+    """
+ 
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+ 
+    # Figure setup
+    fig_width = kwargs.get("fig_width", 10)
+    fig_height = kwargs.get("fig_height", 8)
+ 
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    else:
+        fig = ax.figure
+ 
+    # Coordinate ranges with small padding
+    x_min, x_max = float(x.min()), float(x.max())
+    y_min, y_max = float(y.min()), float(y.max())
+    x_pad = (x_max - x_min) * 0.02 or 0.5
+    y_pad = (y_max - y_min) * 0.02 or 0.5
+    x_range = (x_min - x_pad, x_max + x_pad)
+    y_range = (y_min - y_pad, y_max + y_pad)
+ 
+    # Datashader canvas
+    cvs = ds.Canvas(
+        plot_width=bins,
+        plot_height=bins,
+        x_range=x_range,
+        y_range=y_range,
+    )
+ 
+    if labels is not None:
+        labels = np.asarray(labels)
+        unique_cats = pd.Categorical(labels).categories
+ 
+        # Color palette matching visualize_2D_scatter
+        cmap1 = plt.get_cmap("tab20")
+        cmap2 = plt.get_cmap("tab20b")
+        cmap3 = plt.get_cmap("tab20c")
+        all_colors = list(cmap1.colors) + list(cmap2.colors) + list(cmap3.colors)
+        cat_colors = all_colors[: len(unique_cats)]
+ 
+        # Build RGBA composite from per-category aggregations
+        composite = np.zeros((bins, bins, 4), dtype=float)
+ 
+        for idx, cat in enumerate(unique_cats):
+            cat_mask = labels == cat
+            df_cat = pd.DataFrame({"x": x[cat_mask], "y": y[cat_mask]})
+ 
+            if len(df_cat) == 0:
+                continue
+ 
+            agg = cvs.points(df_cat, "x", "y", agg=ds.count())
+            grid = agg.values.astype(float)
+ 
+            # Normalise counts to [0, 1] for alpha
+            max_val = grid.max()
+            if max_val > 0:
+                alpha = (
+                    np.log1p(grid) / np.log1p(max_val) if log_scale
+                    else grid / max_val
+                )
+            else:
+                alpha = np.zeros_like(grid)
+ 
+            r, g, b = cat_colors[idx][:3]
+            layer = np.zeros((bins, bins, 4))
+            layer[..., 0] = r
+            layer[..., 1] = g
+            layer[..., 2] = b
+            layer[..., 3] = alpha
+ 
+            # Additive compositing
+            composite[..., :3] += layer[..., :3] * layer[..., 3:4]
+            composite[..., 3] = np.maximum(composite[..., 3], layer[..., 3])
+ 
+        # Normalise RGB where alpha > 0
+        nonzero = composite[..., 3] > 0
+        composite[..., :3][nonzero] /= composite[..., 3:4][nonzero]
+        composite = np.clip(composite, 0, 1)
+ 
+        ax.imshow(
+            composite,
+            origin="lower",
+            extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
+            aspect="auto",
+            interpolation="none",
+        )
+ 
+        # Legend
+        if show_colorbar:
+            legend_handles = [
+                Patch(facecolor=cat_colors[i], label=str(cat))
+                for i, cat in enumerate(unique_cats)
+            ]
+            legend_title = (
+                f"Color: {color_representation}"
+                if color_representation
+                else None
+            )
+            ax.legend(
+                handles=legend_handles,
+                loc="best",
+                bbox_to_anchor=(1.25, 1),
+                title=legend_title,
+            )
+ 
+    else:
+        # Density heatmap (no labels)
+        df = pd.DataFrame({"x": x, "y": y})
+        agg = cvs.points(df, "x", "y", agg=ds.count())
+        grid = agg.values.astype(float)
+ 
+        # Zeros → NaN so background stays white
+        grid[grid == 0] = np.nan
+ 
+        cmap_name = theme if theme else "viridis"
+        cmap_obj = plt.get_cmap(cmap_name).copy()
+        cmap_obj.set_bad(color="white")
+ 
+        norm = LogNorm(vmin=1, vmax=np.nanmax(grid)) if log_scale else None
+ 
+        im = ax.imshow(
+            grid,
+            origin="lower",
+            extent=[x_range[0], x_range[1], y_range[0], y_range[1]],
+            cmap=cmap_obj,
+            norm=norm,
+            aspect="auto",
+            interpolation="none",
+        )
+ 
+        if show_colorbar:
+            cbar_label = (
+                color_representation
+                if color_representation
+                else ("Cell Count (Log Scale)" if log_scale else "Cell Count")
+            )
+            cbar = fig.colorbar(im, ax=ax)
+            cbar.ax.set_ylabel(cbar_label, rotation=-90, va="bottom")
+ 
+    ax.set_xlabel(x_axis_title)
+    ax.set_ylabel(y_axis_title)
+    if plot_title is not None:
+        ax.set_title(plot_title)
+ 
+    return fig, ax
+
+def heatmap_datashader(x, y, labels=None, theme=None, ax=None,
+                        x_axis_title="Component 1", y_axis_title="Component 2",
+                        plot_title=None, **kwargs):
+    """
+    Generates a heatmap using Datashader for large-scale scatter data.
+
+    Parameters
+    ----------
+    x : iterable
+        X-axis coordinates.
+    y : iterable
+        Y-axis coordinates.
+    labels : iterable, optional
+        Categorical labels for subgrouping data.
+    theme : str, optional, default='viridis'
+        Colormap theme for visualization.
+    ax : matplotlib.axes.Axes, optional
+        Matplotlib axis object. If None, a new one is created.
+    x_axis_title : str, optional, default='Component 1'
+        Label for the x-axis.
+    y_axis_title : str, optional, default='Component 2'
+        Label for the y-axis.
+    plot_title : str, optional
+        Title of the plot.
+    **kwargs : dict, optional
+        Additional keyword arguments (e.g., 'fig_width', 'fig_height').
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A Matplotlib figure containing the heatmap visualization.
+    """
+
+    # Ensure x and y are iterable
+    if not hasattr(x, "__iter__") or not hasattr(y, "__iter__"):
+        raise ValueError("x and y must be array-like.")
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length.")
+    if labels is not None and len(labels) != len(x):
+        raise ValueError("Labels length should match x and y length.")
+
+    # Define available color themes
+    themes = {
+        'Elevation': ds.colors.Elevation,
+        'viridis': ds.colors.viridis,
+        'Hot': ds.colors.Hot,
+        'Set1': ds.colors.Set1,
+        'Set2': ds.colors.Set2,
+        'Set3': ds.colors.Set3,
+        'Sets1to3': ds.colors.Sets1to3,
+        'inferno': ds.colors.inferno,
+        'color_lookup': ds.colors.color_lookup,
+    }
+    cmap = themes.get(theme, ds.colors.viridis)  # Default to 'viridis' if theme is not specified
+
+    # Create a DataFrame for processing
+    coords = pd.DataFrame({"x": x, "y": y})
+    if labels is not None:
+        coords["labels"] = labels
+
+    # Determine plot boundaries
+    x_min, x_max = coords["x"].min(), coords["x"].max()
+    y_min, y_max = coords["y"].min(), coords["y"].max()
+
+    # Supply default ranges if not in kwargs
+    canvas_kwargs = {
+        'plot_width': 600,
+        'plot_height': 400,
+        'x_range': (x_min, x_max),
+        'y_range': (y_min, y_max)
+    }
+    canvas_kwargs.update(kwargs)
+
+    create_canvas = partial(ds.Canvas, **canvas_kwargs)
+
+    if labels is not None:
+        categories = pd.Categorical(coords["labels"]).categories
+        num_categories = len(categories)
+
+        rows = (num_categories // 3) + (1 if num_categories % 3 != 0 else 0)
+        fig, axes = plt.subplots(rows, 3, figsize=(12, 4 * rows))
+        axes = axes.flatten()
+
+        for i, cat in enumerate(categories):
+            subset = coords[coords["labels"] == cat]
+            canvas = create_canvas()
+            agg = canvas.points(subset, x="x", y="y", agg=ds.count())
+            img = tf.shade(agg, cmap=cmap).to_pil()
+
+            ax = axes[i]
+            ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+            ax.set_title(f"{plot_title} - {cat}" if plot_title else str(cat))
+            ax.set_xlabel(x_axis_title)
+            ax.set_ylabel(y_axis_title)
+
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+    else:
+        canvas = create_canvas()
+        agg = canvas.points(coords, x="x", y="y", agg=ds.count())
+        img = tf.shade(agg, cmap=cmap).to_pil()
+
+        if ax is None:
+            fig, ax = plt.subplots(
+                figsize=(
+                    canvas_kwargs["plot_width"] / 100,
+                    canvas_kwargs["plot_height"] / 100
+                )
+            )
+        else:
+            fig = ax.figure
+
+        ax.imshow(img, origin='lower', extent=(x_min, x_max, y_min, y_max))
+        ax.set_title(plot_title if plot_title else "Density Plot")
+        ax.set_xlabel(x_axis_title)
+        ax.set_ylabel(y_axis_title)
+
+    plt.tight_layout()
+    return fig
+
+
 
 
 def visualize_2D_scatter(
@@ -538,6 +869,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Check for negative values and apply log1p transformation if
     # x_log_scale is True
+
     if x_log_scale:
         if (df[data_column] < 0).any():
             print(
