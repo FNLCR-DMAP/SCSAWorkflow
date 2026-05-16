@@ -15,6 +15,126 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
+def derive_facet_geometry(
+    n_groups,
+    facet_ncol=None,
+    facet_fig_width=None,
+    facet_fig_height=None,
+    facet_tick_max_chars=0,
+    facet_tick_rotation=0.0,
+    vertical_threshold=3,
+    default_height=3.2,
+    default_aspect=1.25,
+    min_panel_width=1.8,
+    min_panel_height=1.6,
+    min_aspect=0.6,
+    max_aspect=2.0,
+):
+    """Derive FacetGrid geometry from pre-normalized facet layout hints.
+
+    Parameters
+    ----------
+    n_groups : int
+        Number of facet panels. Expected to be a positive integer supplied by
+        the grouped plotting path.
+    facet_ncol : int or None, optional
+        Requested facet column count. Positive integers are used directly.
+        ``None`` falls back to automatic column selection.
+    facet_fig_width, facet_fig_height : float, optional
+        Optional total figure-size hints. Geometry is derived from these
+        hints only when both values are present.
+    facet_tick_max_chars : int, optional
+        Maximum observed x tick-label length. Expected positive integer.
+        Used for adjusting default geometry heuristics when explicit
+        figure-size hints are absent. ``0`` falls back to the original
+        default geometry without long-label adjustments.
+    facet_tick_rotation : float, optional
+        Rotation angle in degrees for x tick labels. Used together with
+        ``facet_tick_max_chars`` to estimate label burden for default
+        geometry.
+    vertical_threshold : int, optional
+        Maximum group count that still prefers a single-column automatic
+        layout.
+    default_height : float, optional
+        Per-facet panel height used when explicit figure-size hints are not
+        available.
+    default_aspect : float, optional
+        Per-facet panel aspect ratio used when explicit figure-size hints are
+        not available.
+    min_panel_width, min_panel_height : float, optional
+        Lower bounds applied to per-panel dimensions when figure-size hints are
+        converted into FacetGrid geometry.
+    min_aspect, max_aspect : float, optional
+        Bounds applied to the derived panel aspect ratio.
+
+    Returns
+    -------
+    dict
+        Dictionary containing ``facet_ncol``, ``facet_height``, and
+        ``facet_aspect`` for FacetGrid construction.
+    """
+
+    if facet_ncol is None:
+        if n_groups <= vertical_threshold:
+            facet_ncol = 1
+        else:
+            facet_ncol = int(np.ceil(np.sqrt(n_groups)))
+        logging.info(
+            "Automatic facet_ncol selection: %s columns for %s groups "
+            "(vertical_threshold=%s).",
+            facet_ncol,
+            n_groups,
+            vertical_threshold,
+        )
+    facet_ncol = max(1, min(int(facet_ncol), n_groups))
+
+    facet_height = default_height
+    facet_aspect = default_aspect
+
+    if facet_fig_width is not None and facet_fig_height is not None:
+        nrow = int(np.ceil(n_groups / facet_ncol))
+        panel_width = max(facet_fig_width / facet_ncol, min_panel_width)
+        panel_height = max(facet_fig_height / nrow, min_panel_height)
+        facet_height = panel_height
+        facet_aspect = float(
+            np.clip(panel_width / panel_height, min_aspect, max_aspect)
+        )
+
+    elif facet_tick_max_chars and facet_tick_max_chars > 0:
+        rotation = float(facet_tick_rotation or 0.0) % 360.0
+        rad = np.deg2rad(min(rotation, 180.0))
+        rotation_factor = 1.0 + 0.8 * np.sin(rad)
+        burden = float(facet_tick_max_chars) * rotation_factor
+        long_label_threshold = 12.0
+
+        if burden > long_label_threshold:
+            pressure = min(
+                (burden - long_label_threshold) / long_label_threshold, 2.0
+            )
+            facet_height = default_height * (1.0 + 0.35 * pressure)
+            facet_aspect = float(
+                np.clip(
+                    default_aspect * (1.0 - 0.05 * pressure),
+                    min_aspect,
+                    max_aspect,
+                )
+            )
+            logging.info(
+                "Automatic facet geometry adjustment for long x tick labels: "
+                "max_chars=%s, rotation=%s, facet_height=%.2f, facet_aspect=%.2f.",
+                facet_tick_max_chars,
+                facet_tick_rotation,
+                facet_height,
+                facet_aspect,
+            )
+
+    return {
+        "facet_ncol": facet_ncol,
+        "facet_height": facet_height,
+        "facet_aspect": facet_aspect,
+    }
+
+
 def regex_search_list(
         regex_patterns,
         list_to_search):
