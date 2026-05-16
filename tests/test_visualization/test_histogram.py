@@ -584,7 +584,8 @@ class TestHistogram(unittest.TestCase):
 
     def test_default_bins_calculation(self):
         """No bins argument should use Rice-rule fallback."""
-        expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
+        # Fixture has 100 cells; Rice-rule fallback is int(2 * 100 ** (1 / 3)).
+        expected_bins = 9
 
         # No bins parameter passed
         fig, ax, df = histogram(self.adata, feature='marker1').values()
@@ -597,7 +598,8 @@ class TestHistogram(unittest.TestCase):
 
     def test_default_like_bins_calculation(self):
         """Default-like bins values should use Rice-rule fallback."""
-        expected_bins = max(int(2 * (self.adata.shape[0] ** (1 / 3))), 1)
+        # Fixture has 100 cells; Rice-rule fallback is int(2 * 100 ** (1 / 3)).
+        expected_bins = 9
 
         for bins_value in [None, 'auto', 'none', '']:
             with self.subTest(bins=bins_value):
