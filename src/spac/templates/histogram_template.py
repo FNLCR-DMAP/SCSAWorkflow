@@ -168,6 +168,10 @@ def run_from_json(
         if bins is None:
             num_rows = adata.X.shape[0]
             bins = max(int(2 * (num_rows ** (1/3))), 1)
+            logger.info(
+                f'Bins not specified. Setting bins to {bins} using the '
+                f'2 * n^(1/3) rule of thumb with n={num_rows} rows.'
+            )
         elif bins <= 0:
             raise ValueError(
                 f'Bins should be a positive integer. Received "{bins}"'
@@ -221,6 +225,12 @@ def run_from_json(
         )
 
     # Validate x-axis label rotation
+    x_rotate = text_to_value(
+        x_rotate,
+        value_to_convert_to=0,
+        to_float=True,
+        param_name="X_Axis_Label_Rotation"
+    )
     if (x_rotate < 0) or (x_rotate > 360):
         raise ValueError(
             f'The X label rotation should fall within 0 to 360 degree. '
@@ -228,22 +238,23 @@ def run_from_json(
         )
 
     # Max_Groups applies only when Group_by is set.
-    # It accepts a positive integer or "unlimited".
-    # Missing values default to 20.
+    # It accepts a positive integer. Missing or null-like values default to 20.
     if group_by:
-        parsed_max_groups = max_groups
-        if parsed_max_groups != "unlimited":
-            parsed_max_groups = text_to_value(
-                parsed_max_groups,
-                value_to_convert_to=20,
-                to_int=True,
-                param_name="Max_Groups",
+        max_groups = text_to_value(
+            max_groups,
+            to_int=True,
+            param_name="Max_Groups",
+        )
+        if max_groups is None:
+            max_groups = 20
+            logger.info(
+                "Max_Groups not specified. Setting Max_Groups to 20."
             )
-            if parsed_max_groups <= 0:
-                raise ValueError(
-                    f'Max_Groups should be a positive integer or "unlimited". '
-                    f'Received "{parsed_max_groups}".'
-                )
+        elif max_groups <= 0:
+            raise ValueError(
+                f'Max_Groups should be a positive integer. '
+                f'Received "{max_groups}".'
+            )
 
     # Facet requires Group_by and forbids Together=True.
     # Facet_Ncol accepts "auto" or a positive integer.
@@ -287,7 +298,7 @@ def run_from_json(
     if group_by and together:
         hist_kwargs["multiple"] = multiple
     if group_by:
-        hist_kwargs["max_groups"] = parsed_max_groups
+        hist_kwargs["max_groups"] = max_groups
     if facet:
         hist_kwargs["facet_ncol"] = facet_ncol
         hist_kwargs["facet_fig_width"] = fig_width
