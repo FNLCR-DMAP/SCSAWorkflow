@@ -493,24 +493,21 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             Can be a number (indicating the number of bins) or a list
             (indicating bin edges). For example, `bins=10` will create 10 bins,
             while `bins=[0, 1, 2, 3]` will create bins [0,1), [1,2), [2,3].
-            If not provided, or if passed as `None`/`"auto"`/`"none"`,
-            the binning will be determined automatically using the Rice rule.
+            If not provided, or if passed as "auto", the binning will be
+            determined automatically.
             Note, don't pass a numpy array, only python lists or strs/numbers.
 
         When `group_by` is provided, this optional key can be passed via
         `kwargs` (it is ignored otherwise):
         - `max_groups`: Controls the group-count guardrail for grouped plots.
-            Default is 20 when omitted. Pass `"unlimited"` to disable this
-            guardrail, which may lead to performance issues or unreadable plots
-            with many groups.
+            Pass a positive integer, or omit it to use the default threshold
+            of 20 groups.
 
         When `facet=True`, these optional keys can be passed via `kwargs`
         to customize FacetGrid layout (they are ignored otherwise):
-        - `facet_ncol`: Controls facet column wrapping.
-            If omitted or passed as `"auto"`, the function uses one column for
-            small group counts and switches to a compact grid for many groups.
-            Otherwise, the provided value is used to request the facet column
-            count.
+        - `facet_ncol`: int, controls facet column wrapping.
+            If omitted, the function uses one column for small group counts
+            and switches to a compact grid for many groups.
         - `facet_fig_width`: float, intended final figure width in inches.
         - `facet_fig_height`: float, intended final figure height in inches.
         - `facet_tick_rotation`: float, rotation angle in degrees for x tick labels.
@@ -615,10 +612,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Check if bins is not being passed or set to None or "auto" in kwargs.
     # If so, the in house algorithm will compute the number of bins
     bins_kwarg = kwargs.get('bins', None)
-    if isinstance(bins_kwarg, str):
-        bins_kwarg = bins_kwarg.strip().lower()
-        if bins_kwarg in {'', 'auto', 'none'}:
-            bins_kwarg = None
+    if bins_kwarg == 'auto':
+        bins_kwarg = None
     if bins_kwarg is None:
         kwargs['bins'] = cal_bin_num(num_rows)
 
@@ -630,44 +625,6 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             raise ValueError("Cannot use together=True with facet=True,"
                             " choose one.")
 
-    def _parse_optional_number(
-        name,
-        value,
-        *,
-        kind=float,
-        default=None,
-        positive=False,
-        tokens=None,
-    ):
-        """Parse an optional numeric hint with token/default handling."""
-        if value is None:
-            return default
-        if isinstance(value, str):
-            value = value.strip()
-            if tokens and value.lower() in tokens:
-                return tokens[value.lower()]
-        expected = (
-            f'{"positive " if positive else ""}{kind.__name__}'
-            f'{" or a supported keyword" if tokens else ""}'
-        )
-        if isinstance(value, bool):
-            raise ValueError(f'{name} must be a {expected}. Received "{value}".')
-        try:
-            parsed = kind(value)
-        except (TypeError, ValueError):
-            raise ValueError(f'{name} must be a {expected}. Received "{value}".')
-        if not math.isfinite(parsed):
-            raise ValueError(
-                f'{name} must be a finite {kind.__name__}. '
-                f'Received "{value}".'
-            )
-        if positive and parsed <= 0:
-            raise ValueError(
-                f'{name} must be a positive {kind.__name__}. '
-                f'Received "{value}".'
-            )
-        return parsed
-
     # Pop grouped/facet-only hints early so they never leak to seaborn.
     max_groups_raw = kwargs.pop('max_groups', None)
     facet_ncol_raw = kwargs.pop('facet_ncol', None)
@@ -677,46 +634,21 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Parse max_groups only for grouped plots; otherwise ignore it entirely.
     if group_by:
-        max_groups = _parse_optional_number(
-            "max_groups",
-            max_groups_raw,
-            kind=int,
-            default=20,
-            positive=True,
-            tokens={"unlimited": float('inf')},
-        )
+        max_groups = 20 if max_groups_raw is None else max_groups_raw
     else:
         max_groups = None
 
-    # Parse facet layout hints only in facet mode.
+    # Prepare facet layout hints only in facet mode.
     if facet:
-        facet_ncol = _parse_optional_number(
-            "facet_ncol",
-            facet_ncol_raw,
-            kind=int,
-            positive=True,
-            tokens={"": None, "auto": None, "none": None},
-        )
-        facet_fig_width = _parse_optional_number(
-            "facet_fig_width",
-            facet_fig_width_raw,
-            positive=True,
-        )
-        facet_fig_height = _parse_optional_number(
-            "facet_fig_height",
-            facet_fig_height_raw,
-            positive=True,
-        )
+        facet_ncol = facet_ncol_raw
+        facet_fig_width = facet_fig_width_raw
+        facet_fig_height = facet_fig_height_raw
         if (facet_fig_width is None) != (facet_fig_height is None):
             raise ValueError(
                 "Both facet_fig_width and facet_fig_height must be provided together, "
                 "or both must be left as None."
             )
-        facet_tick_rotation = _parse_optional_number(
-            "facet_tick_rotation",
-            facet_tick_rotation_raw,
-            default=0.0,
-        ) % 360.0
+        facet_tick_rotation = float(facet_tick_rotation_raw or 0.0) % 360.0
     else:
         # If not faceting, ignore all facet-only hints.
         facet_ncol = None

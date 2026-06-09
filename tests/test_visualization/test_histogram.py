@@ -370,20 +370,6 @@ class TestHistogram(unittest.TestCase):
         axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
         self.assertEqual(len(axs), n_groups)
 
-    def test_group_by_max_groups_unlimited_disables_guardrail(self):
-        """max_groups='unlimited' should disable grouped guardrail validation."""
-        adata = self._make_many_groups_adata(n_groups=25)
-
-        fig, ax, _ = histogram(
-            adata,
-            feature='marker1',
-            group_by='many_groups',
-            together=True,
-            max_groups='unlimited',
-        ).values()
-        self.assertIsNotNone(fig)
-        self.assertIsInstance(ax, mpl.axes.Axes)
-
     def test_group_by_max_groups_none_uses_default_threshold(self):
         """Explicit None should resolve to default threshold behavior."""
         adata = self._make_many_groups_adata(n_groups=25)
@@ -395,19 +381,6 @@ class TestHistogram(unittest.TestCase):
                 together=True,
                 max_groups=None,
             )
-
-    def test_group_by_invalid_max_groups_raises_value_error(self):
-        """Invalid max_groups values should fail fast."""
-        for value in [0, "bad", True]:
-            with self.subTest(max_groups=value):
-                with self.assertRaises(ValueError):
-                    histogram(
-                        self.adata,
-                        feature='marker1',
-                        group_by='annotation2',
-                        together=True,
-                        max_groups=value,
-                    )
 
     def test_non_grouped_max_groups_is_ignored(self):
         """Non-grouped calls should ignore grouped-only max_groups hints."""
@@ -601,7 +574,7 @@ class TestHistogram(unittest.TestCase):
         # Fixture has 100 cells; Rice-rule fallback is int(2 * 100 ** (1 / 3)).
         expected_bins = 9
 
-        for bins_value in [None, 'auto', 'none', '']:
+        for bins_value in [None, 'auto']:
             with self.subTest(bins=bins_value):
                 fig, ax, df = histogram(
                     self.adata,
@@ -786,7 +759,7 @@ class TestHistogram(unittest.TestCase):
         self.assertEqual(fig._supylabel.get_text(), 'Count')
 
     def test_facet_ncol_layout_hints(self):
-        """Facet ncol supports positive int and documented auto behavior."""
+        """Facet ncol supports positive int and omitted automatic layout."""
         # Explicit two-column layout should create two facet columns.
         fig, axs, _ = histogram(
             self.adata,
@@ -799,38 +772,19 @@ class TestHistogram(unittest.TestCase):
         x_positions = {round(axis.get_position().x0, 4) for axis in axs}
         self.assertGreaterEqual(len(x_positions), 2)
 
-        # Documented default-like input should use auto layout (one column for 3 groups).
+        # Omitted facet_ncol should use auto layout (one column for 3 groups).
         fig, axs, _ = histogram(
             self.adata,
             feature='marker1',
             group_by='annotation2',
             facet=True,
-            facet_ncol='auto',
         ).values()
         axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
         x_positions = {round(axis.get_position().x0, 4) for axis in axs}
         self.assertEqual(len(x_positions), 1)
 
-        # Invalid values should fail fast.
-        with self.assertRaises(ValueError):
-            histogram(
-                self.adata,
-                feature='marker1',
-                group_by='annotation2',
-                facet=True,
-                facet_ncol='bad',
-            )
-        with self.assertRaises(ValueError):
-            histogram(
-                self.adata,
-                feature='marker1',
-                group_by='annotation2',
-                facet=True,
-                facet_ncol=0,
-            )
-
     def test_facet_figure_size_hints(self):
-        """Facet figure-size hints should accept valid values and sanitize invalid ones."""
+        """Facet figure-size hints should apply valid explicit values."""
         # Check that valid figure size hints are applied to the facet figure.
         fig, _, _ = histogram(
             self.adata,
@@ -842,19 +796,6 @@ class TestHistogram(unittest.TestCase):
         ).values()
         self.assertAlmostEqual(fig.get_figwidth(), 11.0, places=2)
         self.assertAlmostEqual(fig.get_figheight(), 3.5, places=2)
-
-        # Invalid hints should fail fast.
-        for width, height in [('wide', 'tall'), (-1, 0)]:
-            with self.subTest(facet_fig_width=width, facet_fig_height=height):
-                with self.assertRaises(ValueError):
-                    histogram(
-                        self.adata,
-                        feature='marker1',
-                        group_by='annotation2',
-                        facet=True,
-                        facet_fig_width=width,
-                        facet_fig_height=height,
-                    )
 
     def test_facet_figure_size_hints_require_pair(self):
         """One-sided facet figure-size hints should raise a ValueError."""
