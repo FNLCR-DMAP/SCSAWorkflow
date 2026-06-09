@@ -499,9 +499,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         When `group_by` is provided, this optional key can be passed via
         `kwargs` (it is ignored otherwise):
-        - `max_groups`: Controls the group-count guardrail for grouped plots.
+        - `max_groups`: Controls the group-count filter for grouped plots.
             Pass a positive integer, or omit it to use the default threshold
             of 20 groups.
+            If the number of groups exceeds this threshold, only the most
+            frequent groups are plotted and a warning is emitted.
 
         When `facet=True`, these optional keys can be passed via `kwargs`
         to customize FacetGrid layout (they are ignored otherwise):
@@ -635,6 +637,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Parse max_groups only for grouped plots; otherwise ignore it entirely.
     if group_by:
         max_groups = 20 if max_groups_raw is None else max_groups_raw
+        if max_groups <= 0:
+            raise ValueError(
+                f'`max_groups` should be a positive integer. Received "{max_groups}".'
+            )
     else:
         max_groups = None
 
@@ -799,20 +805,32 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Dispatch to grouped-together, grouped-separate, faceted, or
     # ungrouped plotting.
     if group_by:
-        groups = df[group_by].dropna().unique().tolist()
+        groups = plot_data[group_by].dropna().unique().tolist()
         n_groups = len(groups)
 
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
         elif n_groups > max_groups:
-            raise ValueError(
-                "The number of groups in `group_by` exceeds `max_groups`: "
-                f"found {n_groups}, threshold {max_groups}.\n"
-                "Please reduce/bucket groups or use another grouping column, or "
-                "pass a larger `max_groups`.\n"
-                "See `kwargs` documentation for more details."
+            # Filter plot_data to the `max_groups` most frequent groups
+            group_counts = plot_data[group_by].value_counts(
+                sort=False
+            ).reindex(groups)
+            groups = group_counts.sort_values(
+                ascending=False,
+                kind='mergesort',
+            ).head(max_groups).index.tolist()
+            omitted_count = n_groups - max_groups
+            omitted_label = "group" if omitted_count == 1 else "groups"
+            warning_message = (
+                f'The number of groups in "{group_by}" exceeds "max_groups": '
+                f'found "{n_groups}", threshold "{max_groups}". '
+                f'Plotting the {max_groups} most frequent groups and '
+                f'omitting {omitted_count} {omitted_label}.'
             )
+            warnings.warn(warning_message, UserWarning)
+            n_groups = len(groups)
+            plot_data = plot_data[plot_data[group_by].isin(groups)]
 
         if together:
             # 1) Grouped together on the same axes

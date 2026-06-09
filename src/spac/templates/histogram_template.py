@@ -12,6 +12,7 @@ Usage
 """
 import json
 import sys
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Union, Optional, Tuple, List
 import pandas as pd
@@ -305,19 +306,24 @@ def run_from_json(
         hist_kwargs["facet_fig_height"] = fig_height
         hist_kwargs["facet_tick_rotation"] = x_rotate
 
-    result = histogram(
-        adata=adata,
-        feature=feature,
-        annotation=annotation,
-        layer=text_to_value(layer, "Original"),
-        group_by=group_by,
-        together=together,
-        ax=None,
-        x_log_scale=take_X_log,
-        y_log_scale=take_Y_log,
-        facet=facet,
-        **hist_kwargs,
-    )
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        result = histogram(
+            adata=adata,
+            feature=feature,
+            annotation=annotation,
+            layer=text_to_value(layer, "Original"),
+            group_by=group_by,
+            together=together,
+            ax=None,
+            x_log_scale=take_X_log,
+            y_log_scale=take_Y_log,
+            facet=facet,
+            **hist_kwargs,
+        )
+    for warning in caught_warnings:
+        if issubclass(warning.category, UserWarning):
+            logger.warning(str(warning.message))
 
     fig = result["fig"]
     axs = result["axs"]

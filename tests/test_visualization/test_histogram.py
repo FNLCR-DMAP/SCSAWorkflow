@@ -52,6 +52,23 @@ class TestHistogram(unittest.TestCase):
         var = pd.DataFrame(index=['marker1'])
         return anndata.AnnData(X, obs=obs, var=var)
 
+    def _make_ranked_many_groups_adata(self):
+        """Create uneven group sizes for max_groups filtering tests."""
+        groups = (
+            ['g2'] * 3
+            + ['g0'] * 5
+            + ['g3'] * 2
+            + ['g1'] * 4
+            + ['g4']
+        )
+        X = np.arange(1, len(groups) + 1, dtype=np.float32).reshape(-1, 1)
+        obs = pd.DataFrame(
+            {'many_groups': groups},
+            index=[f'cell_{i}' for i in range(len(groups))],
+        )
+        var = pd.DataFrame(index=['marker1'])
+        return anndata.AnnData(X, obs=obs, var=var)
+
     def _make_long_label_facet_adata(self, include_short=False):
         """Create small categorical facet fixtures for long-label geometry tests."""
         obs = {
@@ -344,16 +361,28 @@ class TestHistogram(unittest.TestCase):
             self.assertEqual(ax.get_yscale(), 'log')
             self.assertEqual(ax.get_ylabel(), 'log(Count)')
 
-    def test_group_by_max_groups_default_guardrail_rejects_excess_groups(self):
-        """Default threshold should reject excessive grouped facet plotting."""
-        adata = self._make_many_groups_adata(n_groups=25)
-        with self.assertRaisesRegex(ValueError, "exceeds `max_groups`"):
-            histogram(
+    def test_group_by_max_groups_filters_to_most_frequent_groups(self):
+        """Excessive grouped plots should keep the most frequent groups."""
+        adata = self._make_ranked_many_groups_adata()
+
+        with self.assertWarnsRegex(
+            UserWarning,
+            'Plotting the 3 most frequent groups and omitting 2 groups.',
+        ):
+            fig, axs, df = histogram(
                 adata,
                 feature='marker1',
                 group_by='many_groups',
                 facet=True,
-            )
+                max_groups=3,
+            ).values()
+
+        axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
+        self.assertEqual(len(axs), 3)
+        self.assertEqual(
+            sorted(df['many_groups'].dropna().unique().tolist()),
+            ['g0', 'g1', 'g2'],
+        )
 
     def test_group_by_max_groups_override_allows_grouped_plot(self):
         """Custom positive max_groups should allow larger grouped plots."""
@@ -370,17 +399,24 @@ class TestHistogram(unittest.TestCase):
         axs = axs if isinstance(axs, (list, np.ndarray)) else [axs]
         self.assertEqual(len(axs), n_groups)
 
-    def test_group_by_max_groups_none_uses_default_threshold(self):
-        """Explicit None should resolve to default threshold behavior."""
+    def test_group_by_max_groups_none_uses_default_filter_threshold(self):
+        """Explicit None should resolve to default filtering behavior."""
         adata = self._make_many_groups_adata(n_groups=25)
-        with self.assertRaisesRegex(ValueError, "exceeds `max_groups`"):
-            histogram(
+
+        with self.assertWarnsRegex(
+            UserWarning,
+            'Plotting the 20 most frequent groups and omitting 5 groups.',
+        ):
+            fig, ax, df = histogram(
                 adata,
                 feature='marker1',
                 group_by='many_groups',
                 together=True,
                 max_groups=None,
-            )
+            ).values()
+
+        self.assertIsInstance(ax, mpl.axes.Axes)
+        self.assertEqual(df['many_groups'].dropna().nunique(), 20)
 
     def test_non_grouped_max_groups_is_ignored(self):
         """Non-grouped calls should ignore grouped-only max_groups hints."""
