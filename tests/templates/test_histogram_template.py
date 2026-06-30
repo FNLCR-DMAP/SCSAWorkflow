@@ -110,6 +110,18 @@ class TestHistogramTemplate(unittest.TestCase):
         self.assertTrue(csv_path.exists())
         self.assertGreater(csv_path.stat().st_size, 0)
 
+    def test_histogram_returns_figure_title(self) -> None:
+        """Verify in-memory template output includes a figure title."""
+        fig, _ = run_from_json(
+            self.json_file,
+            save_to_disk=False,
+            show_plot=False,
+            output_dir=self.tmp_dir.name,
+        )
+
+        self.assertIsNotNone(fig._suptitle)
+        self.assertTrue(fig._suptitle.get_text())
+
 
 if __name__ == "__main__":
     unittest.main()

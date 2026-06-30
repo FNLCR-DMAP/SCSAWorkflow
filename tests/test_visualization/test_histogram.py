@@ -258,21 +258,30 @@ class TestHistogram(unittest.TestCase):
             self.adata,
             feature='marker1'
         ).values()
-        self.assertEqual(ax.get_title(), 'Layer: Original')
+        self.assertEqual(
+            ax.get_title(),
+            'Histogram of "marker1" (table: "Original")'
+        )
 
         fig, ax, df = histogram(
             self.adata,
             feature='marker1',
             layer='Default'
         ).values()
-        self.assertEqual(ax.get_title(), f'Layer: Default')
+        self.assertEqual(
+            ax.get_title(),
+            'Histogram of "marker1" (table: "Default")'
+        )
 
         fig, ax, df =  histogram(
             self.adata,
             annotation='annotation1',
             layer='Default'
         ).values()
-        self.assertEqual(ax.get_title(), '')
+        self.assertEqual(
+            ax.get_title(),
+            'Histogram of "annotation1"'
+        )
 
     def test_y_log_scale_axis(self):
         """Test that y_log_scale sets y-axis to log scale."""

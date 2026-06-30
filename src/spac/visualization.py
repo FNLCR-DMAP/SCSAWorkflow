@@ -862,9 +862,16 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 **kwargs,
             )
 
-            # If plotting feature specify which layer
             if feature:
-                ax.set_title(f'Layer: {layer}')
+                ax.set_title(
+                    f'Histogram of "{data_column}" (table: "{layer}") '
+                    f'grouped by "{group_by}"'
+                )
+            else:
+                ax.set_title(
+                    f'Histogram of annotation "{data_column}" grouped by '
+                    f'"{group_by}"'
+                )
             axs.append(ax)
 
         else:
@@ -892,11 +899,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
                                  weights='count', **kwargs)
 
-                    # If plotting feature specify which layer
-                    if feature:
-                        ax_i.set_title(f'{groups[i]} with Layer: {layer}')
-                    else:
-                        ax_i.set_title(f'{groups[i]}')
+                    ax_i.set_title(f'{groups[i]}')
                     axs.append(ax_i)
 
             else:
@@ -995,9 +998,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             **kwargs
         )
 
-        # If plotting feature specify which layer
+        ax_title = f'Histogram of "{data_column}"'
         if feature:
-            ax.set_title(f'Layer: {layer}')
+            ax_title += f' (table: "{layer}")'
+        ax.set_title(ax_title)
         axs.append(ax)
 
     # Determine axis labels based on scale and stat settings.
