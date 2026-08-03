@@ -526,6 +526,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         df : pandas.DataFrame
             DataFrame containing the data used for plotting the histogram.
+            When groups are filtered, ``df.attrs['spac_histogram_filter']``
+            contains the displayed and original group counts.
 
     """
 
@@ -804,6 +806,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Dispatch to grouped-together, grouped-separate, faceted, or
     # ungrouped plotting.
+    filter_metadata = None
     if group_by:
         groups = plot_data[group_by].dropna().unique().tolist()
         n_groups = len(groups)
@@ -820,6 +823,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 ascending=False,
                 kind='mergesort',
             ).head(max_groups).index.tolist()
+            plot_data = plot_data[plot_data[group_by].isin(groups)]
+
+            # Emit a warning about the group filtering
             omitted_count = n_groups - max_groups
             omitted_label = "group" if omitted_count == 1 else "groups"
             warning_message = (
@@ -829,8 +835,15 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 f'omitting {omitted_count} {omitted_label}.'
             )
             warnings.warn(warning_message, UserWarning)
+
+            # Store metadata about the filtering for downstream use
+            filter_metadata = {
+                "filtered": True,
+                "shown": max_groups,
+                "total": n_groups,
+                "group_by": group_by,
+            }
             n_groups = len(groups)
-            plot_data = plot_data[plot_data[group_by].isin(groups)]
 
         if together:
             # 1) Grouped together on the same axes
@@ -1030,6 +1043,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if facet and fig is not None:
         fig.supxlabel(xlabel)
         fig.supylabel(ylabel)
+
+    # Add metadata to the histogram DataFrame if groups were filtered
+    if filter_metadata is not None:
+        hist_data.attrs["spac_histogram_filter"] = filter_metadata
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": hist_data}

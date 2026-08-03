@@ -392,6 +392,15 @@ class TestHistogram(unittest.TestCase):
             sorted(df['many_groups'].dropna().unique().tolist()),
             ['g0', 'g1', 'g2'],
         )
+        self.assertEqual(
+            df.attrs['spac_histogram_filter'],
+            {
+                'filtered': True,
+                'shown': 3,
+                'total': 5,
+                'group_by': 'many_groups',
+            },
+        )
 
     def test_group_by_max_groups_override_allows_grouped_plot(self):
         """Custom positive max_groups should allow larger grouped plots."""
@@ -426,6 +435,8 @@ class TestHistogram(unittest.TestCase):
 
         self.assertIsInstance(ax, mpl.axes.Axes)
         self.assertEqual(df['many_groups'].dropna().nunique(), 20)
+        self.assertEqual(df.attrs['spac_histogram_filter']['shown'], 20)
+        self.assertEqual(df.attrs['spac_histogram_filter']['total'], 25)
 
     def test_non_grouped_max_groups_is_ignored(self):
         """Non-grouped calls should ignore grouped-only max_groups hints."""
