@@ -12,6 +12,7 @@ Usage
 """
 import json
 import sys
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Union, Optional, Tuple, List
 import pandas as pd
@@ -305,19 +306,24 @@ def run_from_json(
         hist_kwargs["facet_fig_height"] = fig_height
         hist_kwargs["facet_tick_rotation"] = x_rotate
 
-    result = histogram(
-        adata=adata,
-        feature=feature,
-        annotation=annotation,
-        layer=text_to_value(layer, "Original"),
-        group_by=group_by,
-        together=together,
-        ax=None,
-        x_log_scale=take_X_log,
-        y_log_scale=take_Y_log,
-        facet=facet,
-        **hist_kwargs,
-    )
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        result = histogram(
+            adata=adata,
+            feature=feature,
+            annotation=annotation,
+            layer=text_to_value(layer, "Original"),
+            group_by=group_by,
+            together=together,
+            ax=None,
+            x_log_scale=take_X_log,
+            y_log_scale=take_Y_log,
+            facet=facet,
+            **hist_kwargs,
+        )
+    for warning in caught_warnings:
+        if issubclass(warning.category, UserWarning):
+            logger.warning(str(warning.message))
 
     fig = result["fig"]
     axs = result["axs"]
@@ -367,37 +373,27 @@ def run_from_json(
                 label.set_rotation_mode('anchor')
                 label.set_horizontalalignment('right')
 
-    # Set titles based on group_by and facet
-    if text_to_value(group_by):
-        if together:
-            for ax in axes:
-                ax.set_title(
-                    f'Histogram of "{x_var}" grouped by "{group_by}"'
-                )
-        else:
-            # compute unique groups directly from adata.obs.
-            unique_groups = adata.obs[
-                text_to_value(group_by)
-            ].dropna().unique()
-            if len(axes) != len(unique_groups):
-                logger.warning(
-                    "Number of axes does not match number of "
-                    "groups. Titles may not correspond correctly."
-                )
-            if facet:
-                fig.suptitle(
-                    f'Histogram of "{x_var}" faceted by "{group_by}"'
-                )
-                ax_title_prefix = f'Group'
-            else:
-                ax_title_prefix = f'Histogram of "{x_var}" for group'
-            for ax, grp in zip(axes, unique_groups):
-                ax.set_title(
-                    f'{ax_title_prefix}: "{grp}"'
-                )
+    # Set figure-level titles base on data type, table and group_by.
+    # Multi-axis panel titles are handled by core as it may filter groups.
+    histogram_title = f'Histogram of "{x_var}"'
+    if feature:
+        layer = text_to_value(layer, "Original")
+        if layer:
+            histogram_title += f' (table: "{layer}")'
+    if group_by:
+        organizing_label = "faceted by" if facet else "grouped by"
+        histogram_title += f' {organizing_label} "{group_by}"'
+    filter_metadata = df_counts.attrs.get("spac_histogram_filter", {})
+    if filter_metadata.get("filtered"):
+        filter_label = "facets" if facet else "groups"
+        histogram_title += (
+            f' (top {filter_metadata["shown"]} of '
+            f'{filter_metadata["total"]} {filter_label})'
+        )
+    if len(axes) == 1:
+        axes[0].set_title(histogram_title)
     else:
-        for ax in axes:
-            ax.set_title(f'Count plot of "{x_var}"')
+        fig.suptitle(histogram_title)
 
     # Adjust layout to prevent title overlap
     if facet:

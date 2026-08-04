@@ -499,9 +499,11 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         When `group_by` is provided, this optional key can be passed via
         `kwargs` (it is ignored otherwise):
-        - `max_groups`: Controls the group-count guardrail for grouped plots.
+        - `max_groups`: Controls the group-count filter for grouped plots.
             Pass a positive integer, or omit it to use the default threshold
             of 20 groups.
+            If the number of groups exceeds this threshold, only the most
+            frequent groups are plotted and a warning is emitted.
 
         When `facet=True`, these optional keys can be passed via `kwargs`
         to customize FacetGrid layout (they are ignored otherwise):
@@ -524,6 +526,8 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
         df : pandas.DataFrame
             DataFrame containing the data used for plotting the histogram.
+            When groups are filtered, ``df.attrs['spac_histogram_filter']``
+            contains the displayed and original group counts.
 
     """
 
@@ -635,6 +639,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     # Parse max_groups only for grouped plots; otherwise ignore it entirely.
     if group_by:
         max_groups = 20 if max_groups_raw is None else max_groups_raw
+        if max_groups <= 0:
+            raise ValueError(
+                f'`max_groups` should be a positive integer. Received "{max_groups}".'
+            )
     else:
         max_groups = None
 
@@ -798,21 +806,44 @@ def histogram(adata, feature=None, annotation=None, layer=None,
 
     # Dispatch to grouped-together, grouped-separate, faceted, or
     # ungrouped plotting.
+    filter_metadata = None
     if group_by:
-        groups = df[group_by].dropna().unique().tolist()
+        groups = plot_data[group_by].dropna().unique().tolist()
         n_groups = len(groups)
 
         if n_groups == 0:
             raise ValueError("There must be at least one group to create a"
                              " histogram.")
         elif n_groups > max_groups:
-            raise ValueError(
-                "The number of groups in `group_by` exceeds `max_groups`: "
-                f"found {n_groups}, threshold {max_groups}.\n"
-                "Please reduce/bucket groups or use another grouping column, or "
-                "pass a larger `max_groups`.\n"
-                "See `kwargs` documentation for more details."
+            # Filter plot_data to the `max_groups` most frequent groups
+            group_counts = plot_data[group_by].value_counts(
+                sort=False
+            ).reindex(groups)
+            groups = group_counts.sort_values(
+                ascending=False,
+                kind='mergesort',
+            ).head(max_groups).index.tolist()
+            plot_data = plot_data[plot_data[group_by].isin(groups)]
+
+            # Emit a warning about the group filtering
+            omitted_count = n_groups - max_groups
+            omitted_label = "group" if omitted_count == 1 else "groups"
+            warning_message = (
+                f'The number of groups in "{group_by}" exceeds "max_groups": '
+                f'found "{n_groups}", threshold "{max_groups}". '
+                f'Plotting the {max_groups} most frequent groups and '
+                f'omitting {omitted_count} {omitted_label}.'
             )
+            warnings.warn(warning_message, UserWarning)
+
+            # Store metadata about the filtering for downstream use
+            filter_metadata = {
+                "filtered": True,
+                "shown": max_groups,
+                "total": n_groups,
+                "group_by": group_by,
+            }
+            n_groups = len(groups)
 
         if together:
             # 1) Grouped together on the same axes
@@ -844,9 +875,16 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                 **kwargs,
             )
 
-            # If plotting feature specify which layer
             if feature:
-                ax.set_title(f'Layer: {layer}')
+                ax.set_title(
+                    f'Histogram of "{data_column}" (table: "{layer}") '
+                    f'grouped by "{group_by}"'
+                )
+            else:
+                ax.set_title(
+                    f'Histogram of annotation "{data_column}" grouped by '
+                    f'"{group_by}"'
+                )
             axs.append(ax)
 
         else:
@@ -874,11 +912,7 @@ def histogram(adata, feature=None, annotation=None, layer=None,
                     sns.histplot(data=hist_data, x="bin_center", ax=ax_i,
                                  weights='count', **kwargs)
 
-                    # If plotting feature specify which layer
-                    if feature:
-                        ax_i.set_title(f'{groups[i]} with Layer: {layer}')
-                    else:
-                        ax_i.set_title(f'{groups[i]}')
+                    ax_i.set_title(f'{groups[i]}')
                     axs.append(ax_i)
 
             else:
@@ -977,9 +1011,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
             **kwargs
         )
 
-        # If plotting feature specify which layer
+        ax_title = f'Histogram of "{data_column}"'
         if feature:
-            ax.set_title(f'Layer: {layer}')
+            ax_title += f' (table: "{layer}")'
+        ax.set_title(ax_title)
         axs.append(ax)
 
     # Determine axis labels based on scale and stat settings.
@@ -1008,6 +1043,10 @@ def histogram(adata, feature=None, annotation=None, layer=None,
     if facet and fig is not None:
         fig.supxlabel(xlabel)
         fig.supylabel(ylabel)
+
+    # Add metadata to the histogram DataFrame if groups were filtered
+    if filter_metadata is not None:
+        hist_data.attrs["spac_histogram_filter"] = filter_metadata
 
     if len(axs) == 1:
         return {"fig": fig, "axs": axs[0], "df": hist_data}
