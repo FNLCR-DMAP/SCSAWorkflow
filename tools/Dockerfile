@@ -1,17 +1,49 @@
-# Reference copy of the Dockerfile used to build nciccbr/spac Docker image
-# for Galaxy and Code Ocean tools.
-# The canonical build is triggered via PR to: https://github.com/CCBR/Dockers2
-# Docker Hub: https://hub.docker.com/r/nciccbr/spac
+# Dockerfile.v0.9.3 — nciccbr/spac:v0.9.3
+#
+# SPAC CPU image for AWS Galaxy. Adds the new CPU PhenoGraph path
+# (spac.transform.clustering.phenograph.cpu) that lives on the
+# feature/phenograph-gpu-refactor branch, alongside the legacy
+# spac.transformations.phenograph_clustering that the existing
+# phenograph_clustering.xml Galaxy tool uses.
+#
+# =============================================================================
+# Relationship to v0.9.2
+# -----------------------------------------------------------------------------
+# This file is a minimal patch fork of the validated v0.9.2 Dockerfile. The only
+# substantive differences are:
+#
+#   1. LABEL version bumped 0.9.2 -> 0.9.3
+#   2. GITHUB_BRANCH remains on feature/phenograph-gpu-refactor so the image
+#      picks up the PhenoGraph CPU wrapper fix for NumPy community labels.
+#
+# Everything else — curl-based environment.yml fetch, --no-deps pip install,
+# channel config, env variables, CMD — is copied verbatim from v0.9.2 to
+# minimize behavior drift and stay within the known-good CCBR/Dockers2 pattern.
+#
+# Why curl and not COPY?
+# ----------------------
+# The CCBR/Dockers2 build-docker action's build context does not reliably
+# make sibling files (like environment.yml) visible to the Docker build.
+# Attempting `COPY environment.yml ...` fails with
+#   EnvironmentFileNotFound: '/environment.yml' file not found
+# The v0.9.1 workaround — curl from raw.githubusercontent.com at build time —
+# is what actually works in this CI.
+# =============================================================================
+
 FROM continuumio/miniconda3:24.3.0-0
+
 # Build arguments
 ARG ENV_NAME=spac
-ARG GITHUB_BRANCH=main
+# Default to the feature branch until the PhenoGraph GPU refactor merges
+# to SCSAWorkflow main and a release is tagged. Bump to the tag (e.g.
+# v0.9.3 on SCSAWorkflow) once that happens.
+ARG GITHUB_BRANCH=feature/phenograph-gpu-refactor
 ARG GITHUB_REPO=FNLCR-DMAP/SCSAWorkflow
 
 # Set labels
 LABEL maintainer="FNLCR-DMAP"
 LABEL description="SPAC - Single Cell Spatial Analysis Container"
-LABEL version="0.9.1"
+LABEL version="0.9.3"
 LABEL github.branch="${GITHUB_BRANCH}"
 
 # Install system dependencies including Chromium for Kaleido (ARM64 compatible)
@@ -43,11 +75,11 @@ ENV CHROME_BIN=/usr/bin/chromium
 RUN conda install -n base -y conda-libmamba-solver && \
     conda config --set solver libmamba
 
-# Simulate exactly what a reviewer would do following README.md instructions
 WORKDIR /opt/SCSAWorkflow
 
 # Step 1: Fetch environment.yml from GitHub branch
-# (Replaces local COPY since we're installing from GitHub)
+# (Replaces local COPY since we're installing from GitHub, and because the
+#  CCBR/Dockers2 build context does not include sibling files.)
 RUN curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/environment.yml" \
     -o environment.yml
 
@@ -77,7 +109,9 @@ ENV PYTHONPATH=/opt/conda/envs/${ENV_NAME}/lib/python3.9/site-packages:${PYTHONP
 
 # Step 6: "Install the SPAC package" from GitHub branch
 # (Replaces: pip install -e . with direct GitHub install)
-# Using --no-deps to preserve conda-installed package versions (pandas 1.5.3, scimap 2.1.3_dmap_pandas153)
+# Using --no-deps to preserve conda-installed package versions
+# (pandas 1.5.3, scimap 2.1.3_dmap_pandas153) that would otherwise be
+# clobbered by spac's unpinned install_requires.
 RUN /opt/conda/envs/${ENV_NAME}/bin/pip install --no-deps \
     "git+https://github.com/${GITHUB_REPO}.git@${GITHUB_BRANCH}"
 
@@ -106,7 +140,16 @@ RUN mkdir -p /workspace /data /results
 # Install jupyter and nbconvert for notebook testing
 RUN /opt/conda/envs/${ENV_NAME}/bin/pip install jupyter nbconvert
 
-# Verify SPAC installation works correctly in multiple ways
+# -----------------------------------------------------------------------------
+# Verify SPAC installation works correctly in multiple ways.
+#
+# Extended from v0.9.1 with a check for the new CPU path:
+#   - Test 5: new CPU path (spac.transform.clustering.phenograph.cpu +
+#             phenograph_clustering_cpu_template) — only on the feature
+#             branch. If Test 5 fails with ModuleNotFoundError on
+#             `spac.transform`, the GITHUB_BRANCH build arg is pointing
+#             at a ref that predates the PhenoGraph GPU refactor.
+# -----------------------------------------------------------------------------
 RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     echo "Test 1: Direct python call" && \
     python -c "import spac; print(f'SPAC version: {spac.__version__}')" && \
@@ -116,12 +159,13 @@ RUN echo "=== VERIFYING SPAC INSTALLATION ===" && \
     python -c "import sys; print(sys.executable)" && \
     echo "Test 4: Import scimap" && \
     python -c "import scimap; print('scimap imported successfully')" && \
-    echo "Test 5: Check templates location" && \
-    python -c "import spac; import os; templates_dir = os.path.join(os.path.dirname(spac.__file__), 'templates'); print(f'Templates dir: {templates_dir}'); print('Templates exist:', os.path.exists(templates_dir))" && \
+    echo "Test 5: New CPU path (transform/clustering/phenograph)" && \
+    python -c "from spac.transform.clustering.phenograph import phenograph_cpu, prepare_features; \
+               from spac.templates.phenograph_clustering_cpu_template import run_from_json; \
+               print('new CPU path OK')" && \
     echo "Test 6: Verify UMAP compatibility with scikit-learn" && \
     python -c "import umap; import numpy as np; data = np.random.rand(100, 10); reducer = umap.UMAP(n_neighbors=5, min_dist=0.1); reducer.fit_transform(data); print(f'UMAP version: {umap.__version__} - OK')" && \
-    echo "=== ALL TESTS PASSED ===" || \
-    echo "Some import issues detected but proceeding"
+    echo "=== ALL TESTS PASSED ==="
 
 # Set working directory for Jupyter (will be mounted via volume)
 WORKDIR /workspace
