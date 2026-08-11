@@ -118,6 +118,26 @@ class TestHierarchicalHeatmap(unittest.TestCase):
             mean_intensity_swapped.shape
         )
 
+    def test_cell_count_labels(self):
+        '''This test confirms the cell count labels are correct'''
+        # Set up AnnData object with known cell counts (3 cells in 1 cluster)
+        X_data = pd.DataFrame(
+            {'gene1': [1, 2, 3], 'gene2': [1, 2, 3], 'gene3': [1, 2, 3]}
+        )
+        obs_data = pd.DataFrame({'cluster': [1, 1, 1]})
+        self.adata = anndata.AnnData(X=X_data, obs=obs_data)
+
+        # Use hierarchical_heatmap function on AnnData object and get y-axis labels
+        _, clustergrid, _ = hierarchical_heatmap(self.adata, annotation='cluster', show_counts=True)
+        actual_labels = []
+        for label in clustergrid.ax_heatmap.get_yticklabels():
+            actual_labels.append(label.get_text())
+
+        # Confirm actual labels are in the expected labels
+        # dendrogram order varies if multiple clusters
+        expected_labels = ['cluster 1\n3 cells']
+        self.assertIn(expected_labels[0], actual_labels)
+
 
 if __name__ == "__main__":
     unittest.main()
