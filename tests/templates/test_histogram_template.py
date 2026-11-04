@@ -133,7 +133,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig._suptitle.get_text(),
-            'Histogram of "cell_type" faceted by "batch"',
+            'Histogram of "cell_type"\n'
+            'faceted by "batch"',
         )
 
         fig, _ = self._run_with_params(
@@ -147,7 +148,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "Gene_0" grouped by "cell_type"',
+            'Histogram of "Gene_0"\n'
+            'grouped by "cell_type"',
         )
 
         fig, _ = self._run_with_params(
@@ -160,7 +162,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
         )
 
         fig, _ = self._run_with_params(
@@ -173,7 +176,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig._suptitle.get_text(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
         )
 
     def test_filtered_histogram_titles_include_suffixes(self) -> None:
@@ -189,8 +193,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch" '
-            '(top 1 of 2 groups)',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch" (top 1 of 2 groups)',
         )
 
         fig, _ = self._run_with_params(
@@ -203,8 +207,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" faceted by "batch" '
-            '(top 1 of 2 facets)',
+            'Histogram of "cell_type"\n'
+            'faceted by "batch" (top 1 of 2 facets)',
         )
 
     def test_unfiltered_histogram_titles_omit_suffix(self) -> None:
@@ -221,7 +225,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
         )
 
 

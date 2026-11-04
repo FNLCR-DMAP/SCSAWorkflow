@@ -382,7 +382,7 @@ def run_from_json(
             histogram_title += f' (table: "{layer}")'
     if group_by:
         organizing_label = "faceted by" if facet else "grouped by"
-        histogram_title += f' {organizing_label} "{group_by}"'
+        histogram_title += f'\n{organizing_label} "{group_by}"'
     filter_metadata = df_counts.attrs.get("spac_histogram_filter", {})
     if filter_metadata.get("filtered"):
         filter_label = "facets" if facet else "groups"
