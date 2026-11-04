@@ -37,7 +37,9 @@ def _make_tiny_adata() -> ad.AnnData:
         "batch": ["X", "X", "Y", "Y"],
     }, index=["cell_0", "cell_1", "cell_2", "cell_3"])
     var = pd.DataFrame(index=["Gene_0", "Gene_1"])
-    return ad.AnnData(X=X, obs=obs, var=var)
+    adata = ad.AnnData(X=X, obs=obs, var=var)
+    adata.layers["transformed"] = X.copy()
+    return adata
 
 
 class TestHistogramTemplate(unittest.TestCase):
@@ -178,6 +180,21 @@ class TestHistogramTemplate(unittest.TestCase):
             fig._suptitle.get_text(),
             'Histogram of "cell_type"\n'
             'grouped by "batch"',
+        )
+
+    def test_grouped_feature_title_includes_named_table(self) -> None:
+        """Keep the named table and grouping on separate title lines."""
+        fig, _ = self._run_with_params(
+            Plot_By="Feature",
+            Feature="Gene_0",
+            Table_="transformed",
+            Group_by="cell_type",
+            Together=True,
+        )
+        self.assertEqual(
+            fig.axes[0].get_title(),
+            'Histogram of "Gene_0" (table: "transformed")\n'
+            'grouped by "cell_type"',
         )
 
     def test_filtered_histogram_titles_include_suffixes(self) -> None:
