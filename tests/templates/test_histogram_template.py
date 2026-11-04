@@ -35,7 +35,7 @@ def _make_tiny_adata() -> ad.AnnData:
     obs = pd.DataFrame({
         "cell_type": ["A", "B", "A", "B"],
         "batch": ["X", "X", "Y", "Y"],
-    })
+    }, index=["cell_0", "cell_1", "cell_2", "cell_3"])
     var = pd.DataFrame(index=["Gene_0", "Gene_1"])
     return ad.AnnData(X=X, obs=obs, var=var)
 
