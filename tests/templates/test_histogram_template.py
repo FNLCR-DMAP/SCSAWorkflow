@@ -57,7 +57,6 @@ class TestHistogramTemplate(unittest.TestCase):
             "Annotation": "cell_type",
             "Table_to_Visualize": "Original",
             "Feature_s_to_Plot": ["All"],
-            "Figure_Title": "Test Histogram",
             "Legend_Title": "Cell Type",
             "Figure_Width": 6,
             "Figure_Height": 4,
@@ -245,6 +244,41 @@ class TestHistogramTemplate(unittest.TestCase):
             'Histogram of "cell_type"\n'
             'grouped by "batch"',
         )
+
+    def test_custom_title_replaces_grouped_title(self) -> None:
+        """A custom title is used for a grouped figure."""
+        fig, _ = self._run_with_params(
+            Plot_By="Feature",
+            Feature="Gene_0",
+            Group_by="cell_type",
+            Together=True,
+            Max_Groups=1,
+            Figure_Title="My histogram",
+        )
+        self.assertEqual(fig.axes[0].get_title(), "My histogram")
+
+    def test_custom_title_replaces_faceted_figure_title(self) -> None:
+        """A custom title is used for a figure with multiple facets."""
+        fig, _ = self._run_with_params(
+            Plot_By="Annotation",
+            Annotation="cell_type",
+            Group_by="batch",
+            Together=False,
+            Facet=True,
+            Figure_Title="My faceted histogram",
+        )
+        self.assertEqual(fig._suptitle.get_text(), "My faceted histogram")
+
+    def test_none_like_custom_title_uses_generated_title(self) -> None:
+        """None-like figure titles fall back to the default title."""
+        for title in (None, "None", "", "   "):
+            with self.subTest(title=title):
+                fig, _ = self._run_with_params(
+                    Plot_By="Feature",
+                    Feature="Gene_0",
+                    Figure_Title=title,
+                )
+                self.assertEqual(fig.axes[0].get_title(), 'Histogram of "Gene_0"')
 
 
 if __name__ == "__main__":
