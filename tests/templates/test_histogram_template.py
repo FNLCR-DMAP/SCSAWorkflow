@@ -35,9 +35,11 @@ def _make_tiny_adata() -> ad.AnnData:
     obs = pd.DataFrame({
         "cell_type": ["A", "B", "A", "B"],
         "batch": ["X", "X", "Y", "Y"],
-    })
+    }, index=["cell_0", "cell_1", "cell_2", "cell_3"])
     var = pd.DataFrame(index=["Gene_0", "Gene_1"])
-    return ad.AnnData(X=X, obs=obs, var=var)
+    adata = ad.AnnData(X=X, obs=obs, var=var)
+    adata.layers["transformed"] = X.copy()
+    return adata
 
 
 class TestHistogramTemplate(unittest.TestCase):
@@ -55,7 +57,6 @@ class TestHistogramTemplate(unittest.TestCase):
             "Annotation": "cell_type",
             "Table_to_Visualize": "Original",
             "Feature_s_to_Plot": ["All"],
-            "Figure_Title": "Test Histogram",
             "Legend_Title": "Cell Type",
             "Figure_Width": 6,
             "Figure_Height": 4,
@@ -133,7 +134,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig._suptitle.get_text(),
-            'Histogram of "cell_type" faceted by "batch"',
+            'Histogram of "cell_type"\n'
+            'faceted by "batch"',
         )
 
         fig, _ = self._run_with_params(
@@ -147,7 +149,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "Gene_0" grouped by "cell_type"',
+            'Histogram of "Gene_0"\n'
+            'grouped by "cell_type"',
         )
 
         fig, _ = self._run_with_params(
@@ -160,7 +163,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
         )
 
         fig, _ = self._run_with_params(
@@ -173,7 +177,23 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig._suptitle.get_text(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
+        )
+
+    def test_grouped_feature_title_includes_named_table(self) -> None:
+        """Keep the named table and grouping on separate title lines."""
+        fig, _ = self._run_with_params(
+            Plot_By="Feature",
+            Feature="Gene_0",
+            Table_="transformed",
+            Group_by="cell_type",
+            Together=True,
+        )
+        self.assertEqual(
+            fig.axes[0].get_title(),
+            'Histogram of "Gene_0" (table: "transformed")\n'
+            'grouped by "cell_type"',
         )
 
     def test_filtered_histogram_titles_include_suffixes(self) -> None:
@@ -189,8 +209,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch" '
-            '(top 1 of 2 groups)',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch" (top 1 of 2 groups)',
         )
 
         fig, _ = self._run_with_params(
@@ -203,8 +223,8 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" faceted by "batch" '
-            '(top 1 of 2 facets)',
+            'Histogram of "cell_type"\n'
+            'faceted by "batch" (top 1 of 2 facets)',
         )
 
     def test_unfiltered_histogram_titles_omit_suffix(self) -> None:
@@ -221,8 +241,46 @@ class TestHistogramTemplate(unittest.TestCase):
         )
         self.assertEqual(
             fig.axes[0].get_title(),
-            'Histogram of "cell_type" grouped by "batch"',
+            'Histogram of "cell_type"\n'
+            'grouped by "batch"',
         )
+
+    def test_custom_title_replaces_grouped_title(self) -> None:
+        """A custom title is used for a grouped figure."""
+        fig, _ = self._run_with_params(
+            Plot_By="Feature",
+            Feature="Gene_0",
+            Group_by="cell_type",
+            Together=True,
+            Max_Groups=1,
+            Figure_Title="My histogram",
+        )
+        self.assertEqual(fig.axes[0].get_title(), "My histogram")
+
+    def test_custom_title_replaces_faceted_figure_title(self) -> None:
+        """A custom title is used for a figure with multiple facets."""
+        fig, _ = self._run_with_params(
+            Plot_By="Annotation",
+            Annotation="cell_type",
+            Group_by="batch",
+            Together=False,
+            Facet=True,
+            Figure_Title="My faceted histogram",
+        )
+        self.assertEqual(fig._suptitle.get_text(), "My faceted histogram")
+
+    def test_none_like_custom_title_uses_generated_title(self) -> None:
+        """None-like figure titles fall back to the default title."""
+        for title in (None, "None", "", "   "):
+            with self.subTest(title=title):
+                fig, _ = self._run_with_params(
+                    Plot_By="Feature",
+                    Feature="Gene_0",
+                    Figure_Title=title,
+                )
+                self.assertEqual(
+                    fig.axes[0].get_title(), 'Histogram of "Gene_0"'
+                )
 
 
 if __name__ == "__main__":

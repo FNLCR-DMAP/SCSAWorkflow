@@ -71,6 +71,12 @@ def run_from_json(
     dict or tuple
         If save_to_disk=True: Dictionary of saved file paths
         If save_to_disk=False: Tuple of (figure, dataframe)
+
+    Notes
+    -----
+    If ``Group_by`` has more than ``Max_Groups`` groups (default 20), only
+    the ``Max_Groups`` most frequent groups are plotted. This filtering is
+    indicated in the default title.
     """
     # Set up logging
     logging.basicConfig(level=logging.INFO)
@@ -100,6 +106,7 @@ def run_from_json(
     group_by = text_to_value(params.get("Group_by", "None"))
     max_groups = params.get("Max_Groups", 20)
     together = params.get("Together", True)
+    fig_title = text_to_value(params.get("Figure_Title"))
     fig_width = params.get("Figure_Width", "auto")
     fig_height = params.get("Figure_Height", "auto")
     font_size = params.get("Font_Size", 12)
@@ -373,23 +380,26 @@ def run_from_json(
                 label.set_rotation_mode('anchor')
                 label.set_horizontalalignment('right')
 
-    # Set figure-level titles base on data type, table and group_by.
+    # Set the overall Histogram title.
     # Multi-axis panel titles are handled by core as it may filter groups.
-    histogram_title = f'Histogram of "{x_var}"'
-    if feature:
-        layer = text_to_value(layer, "Original")
-        if layer:
-            histogram_title += f' (table: "{layer}")'
-    if group_by:
-        organizing_label = "faceted by" if facet else "grouped by"
-        histogram_title += f' {organizing_label} "{group_by}"'
-    filter_metadata = df_counts.attrs.get("spac_histogram_filter", {})
-    if filter_metadata.get("filtered"):
-        filter_label = "facets" if facet else "groups"
-        histogram_title += (
-            f' (top {filter_metadata["shown"]} of '
-            f'{filter_metadata["total"]} {filter_label})'
-        )
+    histogram_title = fig_title
+    if histogram_title is None:
+        # Generate the default title from the plot and filtering settings.
+        histogram_title = f'Histogram of "{x_var}"'
+        if feature:
+            layer = text_to_value(layer, "Original")
+            if layer:
+                histogram_title += f' (table: "{layer}")'
+        if group_by:
+            organizing_label = "faceted by" if facet else "grouped by"
+            histogram_title += f'\n{organizing_label} "{group_by}"'
+        filter_metadata = df_counts.attrs.get("spac_histogram_filter", {})
+        if filter_metadata.get("filtered"):
+            filter_label = "facets" if facet else "groups"
+            histogram_title += (
+                f' (top {filter_metadata["shown"]} of '
+                f'{filter_metadata["total"]} {filter_label})'
+            )
     if len(axes) == 1:
         axes[0].set_title(histogram_title)
     else:

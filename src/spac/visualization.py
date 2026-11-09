@@ -502,8 +502,9 @@ def histogram(adata, feature=None, annotation=None, layer=None,
         - `max_groups`: Controls the group-count filter for grouped plots.
             Pass a positive integer, or omit it to use the default threshold
             of 20 groups.
-            If the number of groups exceeds this threshold, only the most
-            frequent groups are plotted and a warning is emitted.
+            If the number of groups exceeds this threshold, only the
+            `max_groups` most frequent groups are plotted and a warning
+            is emitted.
 
         When `facet=True`, these optional keys can be passed via `kwargs`
         to customize FacetGrid layout (they are ignored otherwise):
