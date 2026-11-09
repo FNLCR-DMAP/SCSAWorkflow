@@ -278,7 +278,9 @@ class TestHistogramTemplate(unittest.TestCase):
                     Feature="Gene_0",
                     Figure_Title=title,
                 )
-                self.assertEqual(fig.axes[0].get_title(), 'Histogram of "Gene_0"')
+                self.assertEqual(
+                    fig.axes[0].get_title(), 'Histogram of "Gene_0"'
+                )
 
 
 if __name__ == "__main__":
