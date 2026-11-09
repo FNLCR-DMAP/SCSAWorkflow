@@ -71,6 +71,12 @@ def run_from_json(
     dict or tuple
         If save_to_disk=True: Dictionary of saved file paths
         If save_to_disk=False: Tuple of (figure, dataframe)
+
+    Notes
+    -----
+    If ``Group_by`` has more than ``Max_Groups`` groups (default 20), only
+    the ``Max_Groups`` most frequent groups are plotted. This filtering is
+    indicated in the default title.
     """
     # Set up logging
     logging.basicConfig(level=logging.INFO)
